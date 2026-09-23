@@ -26,17 +26,23 @@ public class OccupantRenderer extends HumanoidMobRenderer<OccupantEntity, Occupa
 	static final Identifier HOLLOW = Occupant.id("textures/entity/occupant_hollow.png");
 	private static final Identifier FACE = Occupant.id("textures/entity/occupant_face.png");
 	private static final Identifier EYES = Occupant.id("textures/entity/occupant_eyes.png");
+	private static final Identifier HOLLOW_EYES = Occupant.id("textures/entity/occupant_hollow_eyes.png");
+	/** The Hollow is ~2.7 blocks tall as built; this brings it to just over 2, so it fits where a player does. */
+	private static final float HOLLOW_SCALE = 0.76f;
 	private static final float PLAYER_SCALE = 0.9375f;
 
 	private final OccupantModel wide;
 	private final OccupantModel slim;
+	private final OccupantModel hollow;
 
 	public OccupantRenderer(EntityRendererProvider.Context ctx) {
-		super(ctx, new OccupantModel(ctx.bakeLayer(ModelLayers.PLAYER)), 0.5f);
+		super(ctx, new OccupantModel(ctx.bakeLayer(ModelLayers.PLAYER), false), 0.5f);
 		this.wide = this.model;
-		this.slim = new OccupantModel(ctx.bakeLayer(ModelLayers.PLAYER_SLIM));
+		this.slim = new OccupantModel(ctx.bakeLayer(ModelLayers.PLAYER_SLIM), false);
+		this.hollow = new OccupantModel(OccupantModel.createHollowLayer().bakeRoot(), true);
 		this.addLayer(new HollowFace(this));
-		this.addLayer(new GlowingEyes(this));
+		this.addLayer(new GlowingEyes(this, OccupantEntity.Form.MIRROR, EYES));
+		this.addLayer(new GlowingEyes(this, OccupantEntity.Form.HOLLOW, HOLLOW_EYES));
 	}
 
 	@Override
@@ -68,14 +74,14 @@ public class OccupantRenderer extends HumanoidMobRenderer<OccupantEntity, Occupa
 	@Override
 	public void submit(OccupantRenderState state, PoseStack poseStack, SubmitNodeCollector collector,
 					   CameraRenderState camera) {
-		this.model = state.slimArms ? slim : wide;
+		this.model = state.form == OccupantEntity.Form.HOLLOW ? hollow : state.slimArms ? slim : wide;
 		super.submit(state, poseStack, collector, camera);
 	}
 
 	@Override
 	protected void scale(OccupantRenderState state, PoseStack poseStack) {
 		if (state.form == OccupantEntity.Form.HOLLOW) {
-			poseStack.scale(PLAYER_SCALE * 0.86f, PLAYER_SCALE * 1.07f, PLAYER_SCALE * 0.86f);
+			poseStack.scale(HOLLOW_SCALE, HOLLOW_SCALE, HOLLOW_SCALE);
 		} else {
 			poseStack.scale(PLAYER_SCALE * 0.95f, PLAYER_SCALE, PLAYER_SCALE * 0.95f);
 		}
@@ -106,17 +112,26 @@ public class OccupantRenderer extends HumanoidMobRenderer<OccupantEntity, Occupa
 		}
 	}
 
-	/** Two pinprick eyes that glow in the dark. */
+	/** Pinprick eyes that glow in the dark. Each body has its own eye texture. */
 	private static final class GlowingEyes extends EyesLayer<OccupantRenderState, OccupantModel> {
-		private static final RenderType TYPE = RenderTypes.eyes(EYES);
+		private final OccupantEntity.Form form;
+		private final RenderType type;
 
-		GlowingEyes(RenderLayerParent<OccupantRenderState, OccupantModel> parent) {
+		GlowingEyes(RenderLayerParent<OccupantRenderState, OccupantModel> parent, OccupantEntity.Form form, Identifier texture) {
 			super(parent);
+			this.form = form;
+			this.type = RenderTypes.eyes(texture);
 		}
 
 		@Override
 		public RenderType renderType() {
-			return TYPE;
+			return type;
+		}
+
+		@Override
+		public void submit(PoseStack poseStack, SubmitNodeCollector collector, int light, OccupantRenderState state,
+						   float yRot, float xRot) {
+			if (state.form == form) super.submit(poseStack, collector, light, state, yRot, xRot);
 		}
 	}
 }
