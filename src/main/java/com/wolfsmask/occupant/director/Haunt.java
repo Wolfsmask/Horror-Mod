@@ -84,14 +84,14 @@ public final class Haunt {
 				light, idleSeconds);
 	}
 
-	/** Early on it wears your face. Later, less and less. */
+	/** Early on it keeps its face hidden. Later, less and less. */
 	public OccupantEntity.Form pickForm(RandomSource random) {
-		float mirrorChance = switch (data.act) {
+		float veiledChance = switch (data.act) {
 			case 0, 1, 2 -> 0.85f;
 			case 3 -> 0.5f;
 			default -> 0.25f;
 		};
-		return random.nextFloat() < mirrorChance ? OccupantEntity.Form.MIRROR : OccupantEntity.Form.HOLLOW;
+		return random.nextFloat() < veiledChance ? OccupantEntity.Form.VEILED : OccupantEntity.Form.REVEALED;
 	}
 
 	/**

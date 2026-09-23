@@ -63,7 +63,7 @@ public final class HuntEvent extends HorrorEvent {
 		});
 		if (spot == null) return null;
 
-		OccupantEntity.Form form = ctx.random.nextFloat() < 0.8f ? OccupantEntity.Form.HOLLOW : OccupantEntity.Form.MIRROR;
+		OccupantEntity.Form form = ctx.random.nextFloat() < 0.8f ? OccupantEntity.Form.REVEALED : OccupantEntity.Form.VEILED;
 		OccupantEntity e = ctx.haunt.spawnOccupant(p, spot, OccupantEntity.Mode.STARE, form);
 		if (e == null) return null;
 		return new Hunt(ctx.haunt, e, 50 + ctx.random.nextInt(30));

@@ -45,8 +45,8 @@ public class OccupantEntity extends PathfinderMob {
 	/** How it is behaving. The client uses this for posture and screen static. */
 	public enum Mode { IDLE, STARE, STALK, CHASE, AMBUSH }
 
-	/** What it looks like. MIRROR wears the viewer's own skin; HOLLOW is what is underneath. */
-	public enum Form { MIRROR, HOLLOW }
+	/** How much it lets you see. VEILED hides its face under the brim; REVEALED looks at you. */
+	public enum Form { VEILED, REVEALED }
 
 	private static final EntityDataAccessor<Byte> MODE = SynchedEntityData.defineId(OccupantEntity.class, EntityDataSerializers.BYTE);
 	private static final EntityDataAccessor<Byte> FORM = SynchedEntityData.defineId(OccupantEntity.class, EntityDataSerializers.BYTE);
@@ -90,7 +90,7 @@ public class OccupantEntity extends PathfinderMob {
 	protected void defineSynchedData(SynchedEntityData.Builder builder) {
 		super.defineSynchedData(builder);
 		builder.define(MODE, (byte) Mode.IDLE.ordinal());
-		builder.define(FORM, (byte) Form.MIRROR.ordinal());
+		builder.define(FORM, (byte) Form.VEILED.ordinal());
 	}
 
 	// ------------------------------------------------------------------ state
@@ -108,7 +108,7 @@ public class OccupantEntity extends PathfinderMob {
 	public Form getForm() {
 		byte b = this.entityData.get(FORM);
 		Form[] values = Form.values();
-		return b >= 0 && b < values.length ? values[b] : Form.MIRROR;
+		return b >= 0 && b < values.length ? values[b] : Form.VEILED;
 	}
 
 	public void setForm(Form form) {

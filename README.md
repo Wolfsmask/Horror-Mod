@@ -51,8 +51,13 @@ things. Tension and release is what makes it scary instead of exhausting.
 
 - **Only the haunted player can see or hear it.** Your friend standing next to you sees nothing,
   hears nothing, and did not get that "joined the game" message.
-- Early on it **wears your own skin**. In the dark, at a distance, it looks like *you*, just
-  slightly too thin, with its face gone and two pinprick eyes that glow. Later it stops pretending.
+- It looks like a **parson far too tall to be a man**: a wide-brimmed hat, a long ragged black
+  cassock with nothing underneath it (it doesn't walk, it glides), grey skin stretched over a long
+  skull, a smile sewn shut, and fingers that hang down to its knees.
+- Early on it keeps its **head bowed and its hands folded**, face hidden under the brim; all you
+  see are two pinprick eyes that glow. Every few seconds it lifts its head, just slightly, to check
+  you are still there. Later it looks straight at you, head tilted much too far, and its jaw hangs
+  loose over a red mouth full of teeth. When it chases you its arms reach out and the jaw drops open.
 - It cannot be killed, farmed, trapped or pushed. Hit it and it is simply gone.
 - It is **never saved to disk**, and it removes itself if nothing is controlling it. You will
   never find it standing around in an old save.

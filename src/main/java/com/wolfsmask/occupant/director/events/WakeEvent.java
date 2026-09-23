@@ -69,7 +69,7 @@ public final class WakeEvent extends HorrorEvent {
 					return Math.abs(pos.getY() - p.getBlockY()) <= 1 && Sight.hasLineOfSight(p, base.add(0, 1.6, 0));
 				});
 				if (spot == null) return false;
-				entity = haunt.spawnOccupant(p, spot, OccupantEntity.Mode.STARE, OccupantEntity.Form.HOLLOW);
+				entity = haunt.spawnOccupant(p, spot, OccupantEntity.Mode.STARE, OccupantEntity.Form.REVEALED);
 				if (entity == null) return false;
 				entity.setFootsteps(false);
 				return true;

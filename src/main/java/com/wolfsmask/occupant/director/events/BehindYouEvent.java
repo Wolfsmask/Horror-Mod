@@ -54,7 +54,7 @@ public final class BehindYouEvent extends HorrorEvent {
 			Vec3 head = Vec3.atBottomCenterOf(feet).add(0, 1.7, 0);
 			if (Sight.angleTo(p, head) < 110.0 || !Sight.hasLineOfSight(p, head)) continue;
 
-			OccupantEntity e = ctx.haunt.spawnOccupant(p, feet, OccupantEntity.Mode.AMBUSH, OccupantEntity.Form.HOLLOW);
+			OccupantEntity e = ctx.haunt.spawnOccupant(p, feet, OccupantEntity.Mode.AMBUSH, OccupantEntity.Form.REVEALED);
 			if (e == null) continue;
 			return new Ambush(ctx.haunt, e);
 		}

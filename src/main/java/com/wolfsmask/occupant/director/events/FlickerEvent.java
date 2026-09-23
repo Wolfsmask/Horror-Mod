@@ -44,7 +44,7 @@ public final class FlickerEvent extends HorrorEvent {
 						&& Sight.hasLineOfSight(p, base.add(0, 0.9, 0));
 			});
 			if (spot != null) {
-				OccupantEntity e = ctx.haunt.spawnOccupant(p, spot, OccupantEntity.Mode.STARE, OccupantEntity.Form.HOLLOW);
+				OccupantEntity e = ctx.haunt.spawnOccupant(p, spot, OccupantEntity.Mode.STARE, OccupantEntity.Form.REVEALED);
 				if (e != null) return new BetweenFlickers(ctx.haunt, e);
 			}
 		}

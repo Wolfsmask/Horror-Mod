@@ -21,19 +21,6 @@ rng = np.random.default_rng(1337)
 
 # --------------------------------------------------------------------------- textures
 
-# Regions of a 64x64 player skin that belong to the OUTER layer (hat, jacket, sleeves, pants).
-OVERLAY_REGIONS = [
-    (32, 0, 64, 16),   # hat
-    (16, 32, 40, 48),  # jacket
-    (40, 32, 56, 48),  # right sleeve
-    (0, 32, 16, 48),   # right pants
-    (0, 48, 16, 64),   # left pants
-    (48, 48, 64, 64),  # left sleeve
-]
-HEAD_FRONT = (8, 8, 16, 16)
-HAT_FRONT = (40, 8, 48, 16)
-
-
 def _box_faces(u, v, w, h, d):
     """Texture regions of a Minecraft model cube: name -> (x0, y0, x1, y1)."""
     return {
@@ -46,87 +33,127 @@ def _box_faces(u, v, w, h, d):
     }
 
 
-# The Hollow's cubes (must match OccupantModel.createHollowLayer): name -> (u, v, w, h, d)
-HOLLOW_BOXES = {
-    "head": (0, 0, 6, 7, 6),
-    "jaw": (24, 0, 4, 3, 1),
-    "neck": (24, 8, 2, 4, 2),
-    "body": (0, 16, 6, 14, 3),
-    "right_arm": (40, 0, 2, 24, 2),
-    "left_arm": (48, 0, 2, 24, 2),
-    "right_leg": (40, 28, 2, 18, 2),
-    "left_leg": (48, 28, 2, 18, 2),
-    "claws": (56, 0, 1, 5, 1),
+# The Occupant's cubes (must match OccupantModel.createLayer): name -> (u, v, w, h, d)
+TEX_W, TEX_H = 128, 64
+BOXES = {
+    "skull": (0, 0, 6, 6, 6),
+    "jaw": (24, 0, 6, 3, 6),
+    "maw": (48, 0, 5, 6, 5),
+    "robe": (72, 0, 10, 19, 6),
+    "brim": (0, 13, 12, 1, 12),
+    "torso": (0, 27, 8, 12, 4),
+    "collar": (24, 27, 5, 2, 5),
+    "crown": (48, 26, 7, 4, 7),
+    "right_sleeve": (80, 26, 3, 18, 3),
+    "left_sleeve": (92, 26, 3, 18, 3),
 }
-BONE = (201, 196, 184)
+FINGERS = (104, 26, 120, 42)  # a plain pale patch; the fingers are thinner than a pixel
+
+CLOTH = (13, 12, 15)
+SKIN = (150, 150, 142)
+COLLAR = (196, 190, 172)
 
 
-def hollow_skin():
-    """What is underneath: charcoal skin over ribs, a bone-white face with slits for eyes."""
-    img = np.zeros((64, 64, 4), dtype=np.uint8)
+def occupant_skin():
+    """A tall parson in a black cassock and a wide hat. Grey skin, sunken eyes, a stitched smile."""
+    r = np.random.default_rng(66)
+    img = np.zeros((TEX_H, TEX_W, 4), dtype=np.uint8)
 
     def paint(region, rgb, jitter=5):
         x0, y0, x1, y1 = region
-        n = rng.integers(-jitter, jitter + 1, size=(y1 - y0, x1 - x0, 1))
+        n = r.integers(-jitter, jitter + 1, size=(y1 - y0, x1 - x0, 1))
         img[y0:y1, x0:x1, :3] = np.clip(np.array(rgb) + n, 0, 255)
         img[y0:y1, x0:x1, 3] = 255
 
-    for name, (u, v, w, h, d) in HOLLOW_BOXES.items():
-        for face in _box_faces(u, v, w, h, d).values():
-            paint(face, (14, 13, 16))
+    def box(name, rgb, jitter=5):
+        for face in _box_faces(*BOXES[name]).values():
+            paint(face, rgb, jitter)
 
-    # Ribs on the chest, a spine down the back.
-    fx0, fy0, fx1, _ = _box_faces(*HOLLOW_BOXES["body"])["front"]
-    for row in range(fy0 + 1, fy0 + 9, 2):
-        img[row, fx0 + 1:fx1 - 1, :3] = (38, 36, 40)
-    bx0, by0, bx1, by1 = _box_faces(*HOLLOW_BOXES["body"])["back"]
-    img[by0:by1, (bx0 + bx1) // 2, :3] = (40, 38, 42)
+    def face(name, side):
+        return _box_faces(*BOXES[name])[side]
 
-    # Fingers darker at the tips.
-    cx0, cy0, cx1, cy1 = _box_faces(*HOLLOW_BOXES["claws"])["front"]
-    img[cy1 - 2:cy1, :, :3] = np.minimum(img[cy1 - 2:cy1, :, :3], 6)
+    for name in ("robe", "torso", "brim", "crown", "right_sleeve", "left_sleeve"):
+        box(name, CLOTH, jitter=4)
+    box("skull", SKIN, jitter=9)
+    box("jaw", SKIN, jitter=9)
+    box("collar", COLLAR, jitter=10)
+    paint(FINGERS, (168, 166, 156), jitter=6)
 
-    # The face: a bone mask, two vertical slits, a crack where a mouth should be.
-    x0, y0, x1, y1 = _box_faces(*HOLLOW_BOXES["head"])["front"]
-    paint((x0, y0, x1, y1), BONE, jitter=8)
+    # Hat band.
+    for side in ("front", "back", "left", "right"):
+        x0, y0, x1, y1 = face("crown", side)
+        img[y1 - 1, x0:x1, :3] = (34, 30, 30)
+
+    # A row of dull buttons down the front of the cassock.
+    for part, step in (("torso", 3), ("robe", 3)):
+        x0, y0, x1, y1 = face(part, "front")
+        cx = (x0 + x1) // 2
+        for y in range(y0 + 1, y1 - 3, step):
+            img[y, cx, :3] = (58, 54, 50)
+
+    # A ragged hem: some pixels on the bottom row are simply missing.
+    for side in ("front", "back", "left", "right"):
+        x0, y0, x1, y1 = face("robe", side)
+        for x in range(x0, x1):
+            cut = r.integers(0, 3)
+            if cut:
+                img[y1 - cut:y1, x, 3] = 0
+    for sleeve in ("right_sleeve", "left_sleeve"):
+        for side in ("front", "back", "left", "right"):
+            x0, y0, x1, y1 = face(sleeve, side)
+            for x in range(x0, x1):
+                if r.random() < 0.5:
+                    img[y1 - 1, x, 3] = 0
+
+    # The collar: stained, with a thin dark band at the top.
+    for side in ("front", "back", "left", "right"):
+        x0, y0, x1, y1 = face("collar", side)
+        img[y0, x0:x1, :3] = (70, 66, 60)
+
+    # The face. Skin stretched thin, two deep sockets, shadows under the cheekbones.
+    x0, y0, x1, y1 = face("skull", "front")
+    img[y0:y0 + 1, x0:x1, :3] = (112, 112, 106)          # brow in the hat's shadow
     for col in (x0 + 1, x0 + 4):
-        img[y0 + 2:y0 + 4, col, :3] = (2, 2, 2)
-    img[y0 + 5:y0 + 7, x0 + 2, :3] = (30, 6, 6)
-    img[y0 + 6, x0 + 3, :3] = (30, 6, 6)
+        img[y0 + 2:y0 + 5, col, :3] = (3, 3, 4)           # sockets
+    img[y0 + 5, x0 + 1:x0 + 2, :3] = (92, 92, 88)
+    img[y0 + 5, x0 + 4:x0 + 5, :3] = (92, 92, 88)
+    img[y0 + 3:y0 + 5, x0 + 2:x0 + 4, :3] = (128, 128, 120)  # thin nose
 
-    # The jaw: pale, with a dark red gap at the top.
-    jx0, jy0, jx1, jy1 = _box_faces(*HOLLOW_BOXES["jaw"])["front"]
-    paint((jx0, jy0, jx1, jy1), BONE, jitter=8)
-    img[jy0, jx0:jx1, :3] = (40, 4, 4)
+    # The smile: far too wide, sewn shut, turning up at both ends.
+    x0, y0, x1, y1 = face("jaw", "front")
+    img[y0, x0, :3] = (24, 6, 6)
+    img[y0, x1 - 1, :3] = (24, 6, 6)
+    img[y0 + 1, x0 + 1:x1 - 1, :3] = (24, 6, 6)
+    for x in range(x0 + 1, x1 - 1, 2):
+        img[y0 + 1, x, :3] = (176, 170, 150)              # stitches
+    img[y1 - 1, x0:x1, :3] = (118, 118, 110)              # chin
+
+    # Behind the jaw: a red mouth with too many teeth, then a stretched grey throat.
+    for side in ("front", "left", "right", "back"):
+        x0, y0, x1, y1 = face("maw", side)
+        paint((x0, y0, x1, y0 + 3), (46, 4, 6), jitter=6)
+        for x in range(x0, x1):
+            if (x - x0) % 2 == 0 or side == "front":
+                img[y0, x, :3] = (214, 206, 180)          # upper teeth
+            if (x - x0) % 2 == 1:
+                img[y0 + 2, x, :3] = (200, 192, 168)      # lower teeth
+        paint((x0, y0 + 3, x1, y1), (118, 118, 110), jitter=8)
+        img[y0 + 4, x0:x1, :3] = (84, 84, 80)             # a fold of skin
+    x0, y0, x1, y1 = face("maw", "front")
+    img[y0 + 1, x0 + 1:x1 - 1, :3] = (8, 0, 0)            # the dark inside
+
+    # Fingertips darken.
+    x0, y0, x1, y1 = FINGERS
+    img[y1 - 4:y1, x0:x1, :3] = (70, 66, 60)
     return Image.fromarray(img, "RGBA")
 
 
-def hollow_eyes():
-    """A point of light at the bottom of each slit."""
-    img = np.zeros((64, 64, 4), dtype=np.uint8)
-    x0, y0, _, _ = _box_faces(*HOLLOW_BOXES["head"])["front"]
+def occupant_eyes():
+    """A pinprick of light at the bottom of each socket. Rendered full-bright, so it glows."""
+    img = np.zeros((TEX_H, TEX_W, 4), dtype=np.uint8)
+    x0, y0, _, _ = _box_faces(*BOXES["skull"])["front"]
     for col in (x0 + 1, x0 + 4):
-        img[y0 + 3, col] = (236, 238, 242, 255)
-    return Image.fromarray(img, "RGBA")
-
-
-def face_shadow():
-    """Laid over the viewer's own skin: the face is blotted out."""
-    img = np.zeros((64, 64, 4), dtype=np.uint8)
-    for x0, y0, x1, y1 in (HEAD_FRONT, HAT_FRONT):
-        for y in range(y0, y1):
-            row = y - y0
-            alpha = 170 if row == 0 else 238  # hairline shows through a little
-            img[y, x0:x1] = (4, 4, 5, alpha)
-    return Image.fromarray(img, "RGBA")
-
-
-def eyes():
-    """Two pinpricks. Rendered full-bright, so they glow in the dark."""
-    img = np.zeros((64, 64, 4), dtype=np.uint8)
-    for fx, fy in (HEAD_FRONT[:2], HAT_FRONT[:2]):
-        for ex in (2, 5):
-            img[fy + 4, fx + ex] = (236, 238, 242, 255)
+        img[y0 + 4, col] = (236, 238, 242, 255)
     return Image.fromarray(img, "RGBA")
 
 
@@ -291,10 +318,8 @@ def main():
     tex = ROOT / "textures"
     (tex / "entity").mkdir(parents=True, exist_ok=True)
     (tex / "misc").mkdir(parents=True, exist_ok=True)
-    hollow_skin().save(tex / "entity" / "occupant_hollow.png")
-    face_shadow().save(tex / "entity" / "occupant_face.png")
-    eyes().save(tex / "entity" / "occupant_eyes.png")
-    hollow_eyes().save(tex / "entity" / "occupant_hollow_eyes.png")
+    occupant_skin().save(tex / "entity" / "occupant.png")
+    occupant_eyes().save(tex / "entity" / "occupant_eyes.png")
     static_noise().save(tex / "misc" / "static.png")
     icon().save(ROOT / "icon.png")
 
