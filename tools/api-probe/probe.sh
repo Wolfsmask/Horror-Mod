@@ -5,11 +5,13 @@ set -u
 CP="$1"
 while IFS= read -r line; do
 	[[ -z "${line// }" || "$line" == \#* ]] && continue
+	vis="-public"
+	if [[ "$line" == @protected* ]]; then vis="-protected"; line="${line#@protected }"; fi
 	cls="${line%% *}"
 	filter=""
 	[[ "$line" == *" "* ]] && filter="${line#* }"
-	echo "=== $cls"
-	out=$(javap -public -cp "$CP" "$cls" 2>&1)
+	echo "=== $cls ($vis)"
+	out=$(javap $vis -cp "$CP" "$cls" 2>&1)
 	if [[ -n "$filter" ]]; then
 		out=$(printf '%s\n' "$out" | grep -E "$filter|(class|interface|enum|record) " || true)
 	fi
