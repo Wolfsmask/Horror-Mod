@@ -65,8 +65,11 @@ things. Tension and release is what makes it scary instead of exhausting.
   water or lava, never removes torches near your bed or outside caves, and never places anything
   over existing blocks.
 - It backs off when you are in a fight, in a menu, riding, flying, in water, AFK, or low on health.
-- CI builds the mod and runs **game tests on a real headless server** on every push, including
-  one that forces every event on a player and fails if anything throws or is left behind.
+- CI builds the mod and runs **game tests on a real headless server** on every push:
+  - every event is forced on a player, and the test fails if anything throws or an Occupant is left behind;
+  - an "arena" test builds an open field at night, a cave and a house, and fails unless each event
+    designed for that setting actually finds its place there;
+  - it cannot be hurt, removes itself when nothing controls it, and story progress survives a save and load.
 
 ---
 
