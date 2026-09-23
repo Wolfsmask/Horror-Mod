@@ -5,6 +5,8 @@ import com.wolfsmask.occupant.OccupantConfig;
 import com.wolfsmask.occupant.director.Director;
 import com.wolfsmask.occupant.director.HauntData;
 import com.wolfsmask.occupant.entity.OccupantEntity;
+import com.wolfsmask.occupant.util.Sight;
+import com.wolfsmask.occupant.util.Spots;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -19,6 +21,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.Heightmap;
 import net.minecraft.world.LightType;
 
 import java.util.ArrayList;
@@ -156,6 +160,7 @@ public final class ArenaGameTests implements FabricGameTest {
 
 			// Cave, facing east (+X) down the corridor.
 			place(cave, -90.0f);
+			diagnoseCave();
 			expect("cave", "cave_noise", "distant_mining", "watcher", "marker_torch", "tunnel");
 			world.setBlockState(cave.add(-11, 0, 0), Blocks.TORCH.getDefaultState(), Block.NOTIFY_ALL);
 			world.setBlockState(cave.add(-14, 0, 1), Blocks.TORCH.getDefaultState(), Block.NOTIFY_ALL);
@@ -163,7 +168,29 @@ public final class ArenaGameTests implements FabricGameTest {
 
 			// House, facing away from the door.
 			place(house, 0.0f);
-			expect("house", "door", "chest", "knock");
+			expect("house", "knock", "chest", "door");
+		}
+
+		/** Logs what the cave looks like to the spot checks, so a failure here is easy to understand. */
+		private void diagnoseCave() {
+			BlockPos feet = player.getBlockPos();
+			int stand = 0;
+			int dark = 0;
+			int seen = 0;
+			for (int x = 8; x <= 18; x++) {
+				for (int z = -2; z <= 2; z++) {
+					BlockPos p = cave.add(x, 0, z);
+					if (!Spots.canStand(world, p)) continue;
+					stand++;
+					if (Spots.light(world, p.up()) <= 7) dark++;
+					Vec3d base = Vec3d.ofBottomCenter(p);
+					if (Sight.hasLineOfSight(player, base.add(0, 1.6, 0)) && Sight.hasLineOfSight(player, base.add(0, 0.9, 0))) seen++;
+				}
+			}
+			Occupant.LOGGER.info("[gametest] cave: feet={} underground={} skyVisible={} skyLight={} topY={} light={} look={} | ahead: standable={} dark={} visible={}",
+					feet, Spots.isUnderground(world, feet), world.isSkyVisible(feet), world.getLightLevel(LightType.SKY, feet),
+					world.getTopY(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, feet.getX(), feet.getZ()), Spots.light(world, feet.up()),
+					Sight.flatLook(player), stand, dark, seen);
 		}
 
 		private void place(BlockPos pos, float yaw) {
