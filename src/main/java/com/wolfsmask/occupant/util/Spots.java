@@ -8,6 +8,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -74,6 +75,17 @@ public final class Spots {
 	/** Combined sky + block light, including night-time darkness. */
 	public static int light(ServerLevel world, BlockPos pos) {
 		return world.getMaxLocalRawBrightness(pos);
+	}
+
+	/**
+	 * Somewhere the Occupant can hide: no torch or lamp nearby, and either sheltered from the sky
+	 * or outside at night. This asks about the causes of darkness instead of a fixed light number,
+	 * so it keeps working however the game tunes its night sky.
+	 */
+	public static boolean isDark(ServerLevel world, BlockPos pos) {
+		if (world.getBrightness(LightLayer.BLOCK, pos) > 6) return false;
+		if (world.getBrightness(LightLayer.SKY, pos) <= 6) return true;
+		return world.isDarkOutside();
 	}
 
 	/** No other player (besides {@code player}) within {@code radius} blocks of {@code pos}. */

@@ -107,7 +107,7 @@ public final class KnockEvent extends HorrorEvent {
 				BlockPos spot = Spots.groundNear(world, Mth.floor(target.x), door.getY(), Mth.floor(target.z), 4);
 				if (spot == null) continue;
 				Vec3 base = Vec3.atBottomCenterOf(spot);
-				if (Spots.light(world, spot.above()) > 7) continue;
+				if (!Spots.isDark(world, spot.above())) continue;
 				if (!Sight.hasLineOfSight(p, base.add(0, 1.6, 0))) continue;
 				OccupantEntity e = haunt.spawnOccupant(p, spot, OccupantEntity.Mode.STARE, haunt.pickForm(p.getRandom()));
 				if (e == null) continue;

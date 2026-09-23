@@ -32,8 +32,10 @@ final class WorldBlocks {
 
 	/** Ground nobody built: dirt, stone, sand, gravel, snow. */
 	static boolean isNaturalFloor(BlockState s) {
-		return s.is(BlockTags.DIRT) || s.is(BlockTags.BASE_STONE_OVERWORLD) || s.is(BlockTags.SAND)
-				|| s.is(Blocks.GRAVEL) || s.is(Blocks.SNOW_BLOCK) || s.is(Blocks.PODZOL) || s.is(Blocks.COARSE_DIRT);
+		return s.is(Blocks.GRASS_BLOCK) || s.is(Blocks.DIRT) || s.is(Blocks.COARSE_DIRT) || s.is(Blocks.PODZOL)
+				|| s.is(Blocks.MYCELIUM) || s.is(Blocks.ROOTED_DIRT) || s.is(Blocks.MUD) || s.is(Blocks.MOSS_BLOCK)
+				|| s.is(Blocks.GRAVEL) || s.is(Blocks.SNOW_BLOCK) || s.is(Blocks.SAND) || s.is(Blocks.RED_SAND)
+				|| s.is(BlockTags.DIRT) || s.is(BlockTags.BASE_STONE_OVERWORLD) || s.is(BlockTags.SAND);
 	}
 
 	static boolean touchesFluid(ServerLevel world, BlockPos pos) {

@@ -71,7 +71,7 @@ public final class WatcherEvent extends HorrorEvent {
 		ServerPlayer p = ctx.player;
 		Vec3 base = Vec3.atBottomCenterOf(pos);
 		if (base.distanceTo(p.position()) < minDist * 0.8) return false;
-		if (Spots.light(ctx.world, pos.above()) > 7) return false;
+		if (!Spots.isDark(ctx.world, pos.above())) return false;
 		if (!Spots.awayFromOthers(p, base, 24)) return false;
 		return Sight.hasLineOfSight(p, base.add(0, 1.6, 0)) && Sight.hasLineOfSight(p, base.add(0, 0.9, 0));
 	}

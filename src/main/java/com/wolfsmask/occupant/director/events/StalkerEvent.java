@@ -41,7 +41,7 @@ public final class StalkerEvent extends HorrorEvent {
 		BlockPos spot = Spots.aroundPlayer(p, ctx.random, 16, 26, 120, 180, !underground, 40, pos -> {
 			Vec3 base = Vec3.atBottomCenterOf(pos);
 			return Math.abs(pos.getY() - p.getBlockY()) <= 5
-					&& Spots.light(ctx.world, pos.above()) <= 8
+					&& Spots.isDark(ctx.world, pos.above())
 					&& Spots.awayFromOthers(p, base, 24)
 					&& Sight.angleTo(p, base.add(0, 1.0, 0)) >= 100;
 		});

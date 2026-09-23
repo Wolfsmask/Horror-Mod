@@ -14,6 +14,7 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -153,6 +154,10 @@ public final class ArenaGameTests {
 		private void runChecks() {
 			// Field, facing south (+Z), at night.
 			place(field, 0.0f);
+			Occupant.LOGGER.info("[gametest] field: darkOutside={} skyDarken={} light={} skyLight={} blockLight={} isDark={} grassInDirtTag={}",
+					world.isDarkOutside(), world.getSkyDarken(), Spots.light(world, field.above()),
+					world.getBrightness(LightLayer.SKY, field.above()), world.getBrightness(LightLayer.BLOCK, field.above()),
+					Spots.isDark(world, field.above()), Blocks.GRASS_BLOCK.defaultBlockState().is(BlockTags.DIRT));
 			player.setRespawnPosition(new ServerPlayer.RespawnConfig(
 					LevelData.RespawnData.of(world.dimension(), field.offset(0, 0, -22), 0.0f, 0.0f), true), false);
 			expect("field", "watcher", "stalker", "hunt", "behind_you", "footsteps", "sign", "intruder");

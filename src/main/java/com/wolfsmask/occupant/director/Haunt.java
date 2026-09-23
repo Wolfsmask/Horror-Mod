@@ -79,7 +79,7 @@ public final class Haunt {
 		boolean busy = player.containerMenu != player.inventoryMenu
 				|| player.isSleeping() || player.isPassenger() || player.isFallFlying();
 
-		return new Situation(world.isDarkOutside(), light <= 5, underground, sheltered, alone,
+		return new Situation(world.isDarkOutside(), light <= 5 || Spots.isDark(world, head), underground, sheltered, alone,
 				lastSpeed < 0.04, player.isSprinting(), inCombat, player.isInWater(), busy,
 				light, idleSeconds);
 	}

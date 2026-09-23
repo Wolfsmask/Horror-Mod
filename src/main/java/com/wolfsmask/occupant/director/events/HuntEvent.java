@@ -56,7 +56,7 @@ public final class HuntEvent extends HorrorEvent {
 		BlockPos spot = Spots.aroundPlayer(p, ctx.random, min, max, 0, 35, !underground, 40, pos -> {
 			Vec3 base = Vec3.atBottomCenterOf(pos);
 			return Math.abs(pos.getY() - p.getBlockY()) <= 6
-					&& Spots.light(ctx.world, pos.above()) <= 8
+					&& Spots.isDark(ctx.world, pos.above())
 					&& Spots.awayFromOthers(p, base, 24)
 					&& Sight.hasLineOfSight(p, base.add(0, 1.6, 0))
 					&& Sight.hasLineOfSight(p, base.add(0, 0.9, 0));
