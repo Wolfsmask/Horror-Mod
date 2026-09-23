@@ -1,7 +1,4 @@
 # Round 3: what the model classes really do at runtime. "@code" = bytecode of matching methods.
-@code net.minecraft.client.model.HumanoidModel HumanoidModel\(|setupAnim
-@code net.minecraft.client.model.Model Model\(|setupAnim|resetPose
-@code net.minecraft.client.model.EntityModel EntityModel\(|setupAnim
-@protected net.minecraft.client.model.geom.ModelPart
-net.minecraft.client.renderer.entity.state.EntityRenderState
-net.minecraft.client.renderer.entity.state.LivingEntityRenderState
+@code net.minecraft.client.model.HumanoidModel HumanoidModel[(]|setupAnim
+@code net.minecraft.client.model.Model Model[(]|setupAnim|resetPose
+@code net.minecraft.client.model.EntityModel EntityModel[(]|setupAnim
