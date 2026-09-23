@@ -51,13 +51,19 @@ things. Tension and release is what makes it scary instead of exhausting.
 
 - **Only the haunted player can see or hear it.** Your friend standing next to you sees nothing,
   hears nothing, and did not get that "joined the game" message.
-- It looks like a **parson far too tall to be a man**: a wide-brimmed hat, a long ragged black
-  cassock with nothing underneath it (it doesn't walk, it glides), grey skin stretched over a long
-  skull, a smile sewn shut, and fingers that hang down to its knees.
+- It looks like a **parson far too tall to be a man**: a wide-brimmed hat, a ragged black cassock
+  with nothing underneath it (it doesn't walk, it glides), grey skin, a smile sewn shut, a split in
+  its chest where ribs show through, bare bone-thin forearms, and fingers that hang almost to the ground.
+- It is built from ~50 jointed parts (elbows, wrists, two-jointed fingers, a neck, a loose jaw, a
+  two-piece robe) and it **moves like stop-motion footage**: poses hold, then snap. It breathes.
+  Its fingers flex one at a time. Every appearance twitches differently.
 - Early on it keeps its **head bowed and its hands folded**, face hidden under the brim; all you
-  see are two pinprick eyes that glow. Every few seconds it lifts its head, just slightly, to check
-  you are still there. Later it looks straight at you, head tilted much too far, and its jaw hangs
-  loose over a red mouth full of teeth. When it chases you its arms reach out and the jaw drops open.
+  see are two glowing pinprick eyes, not quite level. Every few seconds it lifts its head slightly
+  to check you are still there, and sometimes its head jerks.
+- Later it looks straight at you. Its **neck slowly stretches** and shrinks, its head lolls over
+  sideways, its elbows bend the wrong way, and its jaw hangs loose and sometimes chatters.
+- When it's right behind you it leans in with its neck out and its jaw unhinged. When it chases you
+  it hunches over and lurches forward, grasping.
 - It cannot be killed, farmed, trapped or pushed. Hit it and it is simply gone.
 - It is **never saved to disk**, and it removes itself if nothing is controlling it. You will
   never find it standing around in an old save.

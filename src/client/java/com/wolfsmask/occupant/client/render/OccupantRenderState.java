@@ -7,4 +7,6 @@ import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 public class OccupantRenderState extends HumanoidRenderState {
 	public OccupantEntity.Mode mode = OccupantEntity.Mode.IDLE;
 	public OccupantEntity.Form form = OccupantEntity.Form.VEILED;
+	/** Different for each appearance, so no two of its twitches are the same. */
+	public int seed;
 }

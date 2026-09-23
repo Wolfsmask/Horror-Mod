@@ -15,8 +15,8 @@ import net.minecraft.resources.Identifier;
 public class OccupantRenderer extends HumanoidMobRenderer<OccupantEntity, OccupantRenderState, OccupantModel> {
 	private static final Identifier TEXTURE = Occupant.id("textures/entity/occupant.png");
 	private static final Identifier EYES = Occupant.id("textures/entity/occupant_eyes.png");
-	/** The model is ~2.9 blocks tall as built; this brings it to just over 2, so it fits where a player does. */
-	private static final float SCALE = 0.72f;
+	/** The model is ~3 blocks tall as built; this brings it to just over 2, so it fits where a player does. */
+	private static final float SCALE = 0.7f;
 
 	public OccupantRenderer(EntityRendererProvider.Context ctx) {
 		super(ctx, new OccupantModel(OccupantModel.createLayer().bakeRoot()), 0.4f);
@@ -33,6 +33,7 @@ public class OccupantRenderer extends HumanoidMobRenderer<OccupantEntity, Occupa
 		super.extractRenderState(entity, state, partialTick);
 		state.mode = entity.getMode();
 		state.form = entity.getForm();
+		state.seed = entity.getId();
 	}
 
 	@Override
