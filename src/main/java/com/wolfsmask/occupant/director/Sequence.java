@@ -1,6 +1,6 @@
 package com.wolfsmask.occupant.director;
 
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 
 /**
  * Something that is happening to a player over time. Only one runs per player at once.
@@ -14,7 +14,7 @@ public interface Sequence {
 	 *
 	 * @return false once finished
 	 */
-	boolean tick(ServerPlayerEntity player);
+	boolean tick(ServerPlayer player);
 
 	/** Called exactly once when the sequence ends, however it ends. Remove anything temporary here. */
 	default void end() {

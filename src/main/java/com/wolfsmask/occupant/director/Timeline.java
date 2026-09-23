@@ -1,6 +1,6 @@
 package com.wolfsmask.occupant.director;
 
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -10,25 +10,25 @@ import java.util.function.Predicate;
 
 /** A simple scripted list of actions at fixed tick offsets. */
 public final class Timeline implements Sequence {
-	private record Step(int tick, Consumer<ServerPlayerEntity> action) {
+	private record Step(int tick, Consumer<ServerPlayer> action) {
 	}
 
 	private final List<Step> steps = new ArrayList<>();
-	private Predicate<ServerPlayerEntity> abortIf = p -> false;
+	private Predicate<ServerPlayer> abortIf = p -> false;
 	private Runnable onEnd = () -> {
 	};
 	private int tick;
 	private int next;
 	private boolean sorted;
 
-	public Timeline at(int tick, Consumer<ServerPlayerEntity> action) {
+	public Timeline at(int tick, Consumer<ServerPlayer> action) {
 		steps.add(new Step(Math.max(0, tick), action));
 		sorted = false;
 		return this;
 	}
 
 	/** Stop early (skipping remaining steps) as soon as this becomes true. */
-	public Timeline abortIf(Predicate<ServerPlayerEntity> condition) {
+	public Timeline abortIf(Predicate<ServerPlayer> condition) {
 		this.abortIf = condition;
 		return this;
 	}
@@ -39,7 +39,7 @@ public final class Timeline implements Sequence {
 	}
 
 	@Override
-	public boolean tick(ServerPlayerEntity player) {
+	public boolean tick(ServerPlayer player) {
 		if (!sorted) {
 			steps.sort(Comparator.comparingInt(Step::tick));
 			sorted = true;

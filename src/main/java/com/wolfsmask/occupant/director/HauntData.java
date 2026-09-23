@@ -1,13 +1,13 @@
 package com.wolfsmask.occupant.director;
 
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,6 +21,25 @@ public final class HauntData {
 	public static final int MAX_ACT = 4;
 	private static final int HISTORY_SIZE = 6;
 	private static final int CHAT_MEMORY = 8;
+
+	/** Every field is optional with a default, so old or partial saves always load. */
+	public static final Codec<HauntData> CODEC = RecordCodecBuilder.create(i -> i.group(
+			Codec.INT.optionalFieldOf("act", 0).forGetter(d -> d.act),
+			Codec.FLOAT.optionalFieldOf("dread", 0f).forGetter(d -> d.dread),
+			Codec.LONG.optionalFieldOf("playTicks", 0L).forGetter(d -> d.playTicks),
+			Codec.LONG.optionalFieldOf("actStartedAt", 0L).forGetter(d -> d.actStartedAt),
+			Codec.INT.optionalFieldOf("eventCount", 0).forGetter(d -> d.eventCount),
+			Codec.INT.optionalFieldOf("actEventCount", 0).forGetter(d -> d.actEventCount),
+			Codec.INT.optionalFieldOf("sightings", 0).forGetter(d -> d.sightings),
+			Codec.INT.optionalFieldOf("encounters", 0).forGetter(d -> d.encounters),
+			Codec.LONG.optionalFieldOf("calmUntil", 0L).forGetter(d -> d.calmUntil),
+			Codec.LONG.optionalFieldOf("lastPeakAt", -1L).forGetter(d -> d.lastPeakAt),
+			Codec.LONG.optionalFieldOf("sleepDenyDay", -1L).forGetter(d -> d.sleepDenyDay),
+			Codec.BOOL.optionalFieldOf("paused", false).forGetter(d -> d.paused),
+			Codec.unboundedMap(Codec.STRING, Codec.LONG).optionalFieldOf("cooldowns", Map.of()).forGetter(HauntData::activeCooldowns),
+			Codec.STRING.listOf().optionalFieldOf("history", List.of()).forGetter(d -> new ArrayList<>(d.history)),
+			Codec.STRING.listOf().optionalFieldOf("heardChat", List.of()).forGetter(d -> new ArrayList<>(d.heardChat))
+	).apply(i, HauntData::fromCodec));
 
 	/** 0 = nothing yet, 1 = signs, 2 = presence, 3 = closer, 4 = hunt. */
 	public int act = 0;
@@ -55,6 +74,37 @@ public final class HauntData {
 	public final Deque<String> history = new ArrayDeque<>();
 	/** A few things the player has said in chat. The Occupant likes to repeat them. */
 	public final Deque<String> heardChat = new ArrayDeque<>();
+
+	private static HauntData fromCodec(int act, float dread, long playTicks, long actStartedAt, int eventCount,
+									   int actEventCount, int sightings, int encounters, long calmUntil, long lastPeakAt,
+									   long sleepDenyDay, boolean paused, Map<String, Long> cooldowns,
+									   List<String> history, List<String> heardChat) {
+		HauntData d = new HauntData();
+		d.act = Math.max(0, Math.min(MAX_ACT, act));
+		d.dread = Float.isNaN(dread) ? 0f : Math.max(0f, Math.min(100f, dread));
+		d.playTicks = Math.max(0, playTicks);
+		d.actStartedAt = Math.min(d.playTicks, Math.max(0, actStartedAt));
+		d.eventCount = eventCount;
+		d.actEventCount = actEventCount;
+		d.sightings = sightings;
+		d.encounters = encounters;
+		d.calmUntil = calmUntil;
+		d.lastPeakAt = lastPeakAt;
+		d.sleepDenyDay = sleepDenyDay;
+		d.paused = paused;
+		d.cooldowns.putAll(cooldowns);
+		history.stream().limit(HISTORY_SIZE).forEach(d.history::addLast);
+		heardChat.stream().limit(CHAT_MEMORY).forEach(d.heardChat::addLast);
+		return d;
+	}
+
+	private Map<String, Long> activeCooldowns() {
+		Map<String, Long> out = new HashMap<>();
+		cooldowns.forEach((id, ready) -> {
+			if (ready > playTicks) out.put(id, ready);
+		});
+		return out;
+	}
 
 	public void recordEvent(String id, long cooldownTicks) {
 		eventCount++;
@@ -95,62 +145,5 @@ public final class HauntData {
 	public void rememberChat(String message) {
 		heardChat.addFirst(message);
 		while (heardChat.size() > CHAT_MEMORY) heardChat.removeLast();
-	}
-
-	public NbtCompound toNbt() {
-		NbtCompound nbt = new NbtCompound();
-		nbt.putInt("act", act);
-		nbt.putFloat("dread", dread);
-		nbt.putLong("playTicks", playTicks);
-		nbt.putLong("actStartedAt", actStartedAt);
-		nbt.putInt("eventCount", eventCount);
-		nbt.putInt("actEventCount", actEventCount);
-		nbt.putInt("sightings", sightings);
-		nbt.putInt("encounters", encounters);
-		nbt.putLong("calmUntil", calmUntil);
-		nbt.putLong("lastPeakAt", lastPeakAt);
-		nbt.putLong("sleepDenyDay", sleepDenyDay);
-		nbt.putBoolean("paused", paused);
-
-		NbtCompound cd = new NbtCompound();
-		cooldowns.forEach((id, ready) -> {
-			if (ready > playTicks) cd.putLong(id, ready);
-		});
-		nbt.put("cooldowns", cd);
-
-		NbtList hist = new NbtList();
-		history.forEach(id -> hist.add(NbtString.of(id)));
-		nbt.put("history", hist);
-
-		NbtList chat = new NbtList();
-		heardChat.forEach(line -> chat.add(NbtString.of(line)));
-		nbt.put("heardChat", chat);
-		return nbt;
-	}
-
-	public static HauntData fromNbt(NbtCompound nbt) {
-		HauntData d = new HauntData();
-		d.act = Math.max(0, Math.min(MAX_ACT, nbt.getInt("act")));
-		d.dread = Math.max(0f, Math.min(100f, nbt.getFloat("dread")));
-		d.playTicks = Math.max(0, nbt.getLong("playTicks"));
-		d.actStartedAt = Math.min(d.playTicks, Math.max(0, nbt.getLong("actStartedAt")));
-		d.eventCount = nbt.getInt("eventCount");
-		d.actEventCount = nbt.getInt("actEventCount");
-		d.sightings = nbt.getInt("sightings");
-		d.encounters = nbt.getInt("encounters");
-		d.calmUntil = nbt.getLong("calmUntil");
-		d.lastPeakAt = nbt.contains("lastPeakAt") ? nbt.getLong("lastPeakAt") : -1;
-		d.sleepDenyDay = nbt.contains("sleepDenyDay") ? nbt.getLong("sleepDenyDay") : -1;
-		d.paused = nbt.getBoolean("paused");
-
-		NbtCompound cd = nbt.getCompound("cooldowns");
-		for (String key : cd.getKeys()) d.cooldowns.put(key, cd.getLong(key));
-
-		NbtList hist = nbt.getList("history", NbtElement.STRING_TYPE);
-		for (int i = 0; i < hist.size() && i < HISTORY_SIZE; i++) d.history.addLast(hist.getString(i));
-
-		NbtList chat = nbt.getList("heardChat", NbtElement.STRING_TYPE);
-		for (int i = 0; i < chat.size() && i < CHAT_MEMORY; i++) d.heardChat.addLast(chat.getString(i));
-		return d;
 	}
 }
