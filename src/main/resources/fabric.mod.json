@@ -20,7 +20,8 @@
       "com.wolfsmask.occupant.client.OccupantClient"
     ],
     "fabric-gametest": [
-      "com.wolfsmask.occupant.test.OccupantGameTests"
+      "com.wolfsmask.occupant.test.OccupantGameTests",
+      "com.wolfsmask.occupant.test.ArenaGameTests"
     ]
   },
   "depends": {

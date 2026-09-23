@@ -69,7 +69,7 @@ public final class OccupantGameTests implements FabricGameTest {
 	 * The big one: a player at the very end of the story, at night, and every single event
 	 * forced one after another. Nothing may throw, and nothing may be left behind.
 	 */
-	@GameTest(templateName = EMPTY_STRUCTURE, tickLimit = 40 + TICKS_PER_EVENT * 30)
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "every_event", tickLimit = 40 + TICKS_PER_EVENT * 30)
 	public void everyEventRunsCleanly(TestContext ctx) {
 		Director director = Director.get();
 		ctx.assertTrue(director != null, "Director should be running");
