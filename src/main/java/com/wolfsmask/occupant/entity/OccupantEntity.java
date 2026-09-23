@@ -15,11 +15,15 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.PathType;
@@ -71,6 +75,12 @@ public class OccupantEntity extends PathfinderMob {
 	private boolean vanished;
 	/** True when nothing is driving this one: summoned by a command or a spawn egg. */
 	private boolean summoned;
+	/**
+	 * Set when a person put it into the world by hand rather than the Director doing it. Only
+	 * those look for someone to haunt; anything else with no target still removes itself, so
+	 * the promise that one is never left standing around in a world holds.
+	 */
+	private boolean placedByHand;
 
 	public OccupantEntity(EntityType<? extends OccupantEntity> type, Level level) {
 		super(type, level);
@@ -82,6 +92,15 @@ public class OccupantEntity extends PathfinderMob {
 		this.setPathfindingMalus(PathType.FIRE, -1.0f);
 		this.setPathfindingMalus(PathType.FIRE_IN_NEIGHBOR, -1.0f);
 		this.setPathfindingMalus(PathType.DAMAGING, -1.0f);
+	}
+
+	@Override
+	public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty,
+										EntitySpawnReason reason, @Nullable SpawnGroupData data) {
+		placedByHand = reason == EntitySpawnReason.COMMAND
+				|| reason == EntitySpawnReason.SPAWN_ITEM_USE
+				|| reason == EntitySpawnReason.DISPENSER;
+		return super.finalizeSpawn(level, difficulty, reason, data);
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
@@ -137,6 +156,7 @@ public class OccupantEntity extends PathfinderMob {
 	public void standAlone(ServerPlayer target) {
 		bindTo(target);
 		summoned = true;
+		placedByHand = true;
 	}
 
 	/** True for one spawned by /summon or a spawn egg, which drives itself. */
@@ -218,9 +238,9 @@ public class OccupantEntity extends PathfinderMob {
 		super.tick();
 		if (this.level().isClientSide() || this.isRemoved()) return;
 
-		// Summoned by a command or a spawn egg: nothing is driving it, so it adopts whoever is
-		// closest and haunts them by itself. Without this it would delete itself on its first tick.
-		if (targetUuid == null && !adoptNearestPlayer()) {
+		// Put here by hand, with nothing driving it: it adopts whoever is closest and haunts them
+		// by itself. Without this it would delete itself on its first tick and never be seen.
+		if (targetUuid == null && !(placedByHand && adoptNearestPlayer())) {
 			vanish();
 			return;
 		}

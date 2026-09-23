@@ -45,20 +45,30 @@ public final class OccupantGameTests {
 	}
 
 	/**
-	 * One summoned by a command has nobody to haunt, so it used to delete itself on its first
-	 * tick and nothing appeared at all. It must adopt a nearby player and stay.
+	 * The real /summon path. It used to spawn an entity with nobody to haunt, which orphan
+	 * protection removed on its first tick, so absolutely nothing appeared. This runs the
+	 * actual command rather than building the entity by hand, because the bug was in the
+	 * difference between the two.
 	 */
 	@GameTest
 	public void summonedOccupantAdoptsAPlayer(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
 		BlockPos at = helper.absolutePos(new BlockPos(1, 2, 1));
-		player.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 2.5, 0.0f, 0.0f);
+		player.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 3.0, 0.0f, 0.0f);
 
-		OccupantEntity e = helper.spawn(ModEntities.OCCUPANT, 1, 2, 1);
+		MinecraftServer server = level.getServer();
+		server.getCommands().performPrefixedCommand(server.createCommandSourceStack(),
+				String.format("execute in %s run summon occupant:occupant %d %d %d",
+						level.dimension().location(), at.getX(), at.getY(), at.getZ()));
+
 		helper.runAtTickTime(5, () -> {
-			helper.assertTrue(!e.isRemoved(), "A summoned Occupant should adopt the nearest player");
+			List<OccupantEntity> found = level.getEntitiesOfClass(OccupantEntity.class,
+					new AABB(at).inflate(6.0), e -> !e.isRemoved());
+			helper.assertTrue(!found.isEmpty(), "/summon should leave an Occupant standing there");
+			OccupantEntity e = found.get(0);
 			helper.assertTrue(e.isSummoned(), "It should know it is driving itself");
-			helper.assertTrue(e.isHaunting(player), "It should be haunting the player it adopted");
+			helper.assertTrue(e.isHaunting(player), "It should have adopted the nearest player");
 			helper.assertTrue(e.broadcastToPlayer(player), "Its target must be sent the entity");
 			e.vanish();
 			helper.succeed();
