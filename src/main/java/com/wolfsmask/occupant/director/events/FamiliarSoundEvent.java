@@ -37,19 +37,19 @@ public final class FamiliarSoundEvent extends HorrorEvent {
 
 	private static final Cue[] CUES = {
 			// The fuse. Nothing is more likely to make someone spin around.
-			new Cue(SoundEvents.CREEPER_PRIMED.value(), 0.7f, 1.0f, true),
-			new Cue(SoundEvents.CREEPER_PRIMED.value(), 0.5f, 1.05f, false),
+			new Cue(SoundEvents.CREEPER_PRIMED, 0.7f, 1.0f, true),
+			new Cue(SoundEvents.CREEPER_PRIMED, 0.5f, 1.05f, false),
 			// Things that live in caves, at the surface, where they should not be.
-			new Cue(SoundEvents.ZOMBIE_AMBIENT.value(), 0.5f, 0.85f, false),
-			new Cue(SoundEvents.SKELETON_AMBIENT.value(), 0.45f, 0.9f, false),
-			new Cue(SoundEvents.SPIDER_AMBIENT.value(), 0.5f, 0.95f, false),
+			new Cue(SoundEvents.ZOMBIE_AMBIENT, 0.5f, 0.85f, false),
+			new Cue(SoundEvents.SKELETON_AMBIENT, 0.45f, 0.9f, false),
+			new Cue(SoundEvents.SPIDER_AMBIENT, 0.5f, 0.95f, false),
 			// A door in your base, when you are the only one in it.
-			new Cue(SoundEvents.WOODEN_DOOR_OPEN.value(), 0.8f, 1.0f, true),
-			new Cue(SoundEvents.WOODEN_DOOR_CLOSE.value(), 0.8f, 1.0f, false),
-			new Cue(SoundEvents.CHEST_OPEN.value(), 0.6f, 1.0f, true),
+			new Cue(SoundEvents.WOODEN_DOOR_OPEN, 0.8f, 1.0f, true),
+			new Cue(SoundEvents.WOODEN_DOOR_CLOSE, 0.8f, 1.0f, false),
+			new Cue(SoundEvents.CHEST_OPEN, 0.6f, 1.0f, true),
 			// Someone else working, somewhere behind you.
-			new Cue(SoundEvents.STONE_BREAK.value(), 0.7f, 0.9f, false),
-			new Cue(SoundEvents.ITEM_PICKUP.value(), 0.5f, 1.0f, true),
+			new Cue(SoundEvents.STONE_BREAK, 0.7f, 0.9f, false),
+			new Cue(SoundEvents.ITEM_PICKUP, 0.5f, 1.0f, true),
 	};
 
 	public FamiliarSoundEvent() {
