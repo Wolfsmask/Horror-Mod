@@ -29,7 +29,18 @@ jobs:
       - name: Build
         run: |
           chmod +x gradlew
-          ./gradlew build
+          set -o pipefail
+          ./gradlew build --console=plain 2>&1 | tee build.log
+
+      # Compile errors are what matters and they are buried in the middle of the log, so
+      # they are repeated here at the very end where they are easy to find.
+      - name: Compile errors
+        if: failure()
+        run: |
+          echo "::group::javac errors"
+          grep -E "^(e: |.*\.java:[0-9]+: error:)" build.log | head -n 60 || true
+          grep -E "error: |symbol:|location:|required:|found:" build.log | head -n 80 || true
+          echo "::endgroup::"
 
       - name: Run game tests (headless server)
         run: |
