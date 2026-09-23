@@ -10,6 +10,8 @@ on:
 jobs:
   probe:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -24,4 +26,12 @@ jobs:
           ./gradlew --quiet --init-script tools/api-probe/classpath.init.gradle printProbeClasspath | grep '^PROBE_CP=' | head -1 | cut -d= -f2- > cp.txt
           tr ':' '\n' < cp.txt | grep -iE 'minecraft|fabric-api|gametest|rendering|networking' | head -40
       - name: Probe
-        run: tools/api-probe/probe.sh "$(cat cp.txt)"
+        run: tools/api-probe/probe.sh "$(cat cp.txt)" | tee tools/api-probe/out.txt
+      # Committed rather than only logged: the log tail is unreliable to read back.
+      - name: Commit the output
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f tools/api-probe/out.txt
+          git diff --cached --quiet || git commit -m "API probe output [skip ci]"
+          git push origin HEAD:${GITHUB_REF_NAME}
