@@ -14,8 +14,9 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,12 +24,16 @@ public final class Occupant implements ModInitializer {
 	public static final String MOD_ID = "occupant";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
+	public static Identifier id(String path) {
+		return Identifier.fromNamespaceAndPath(MOD_ID, path);
+	}
+
 	@Override
 	public void onInitialize() {
 		OccupantConfig.load();
 		ModSounds.init();
 		ModEntities.init();
-		PayloadTypeRegistry.playS2C().register(ScreenEffectPayload.ID, ScreenEffectPayload.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(ScreenEffectPayload.TYPE, ScreenEffectPayload.CODEC);
 
 		ServerLifecycleEvents.SERVER_STARTED.register(Director::start);
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> Director.stop());
@@ -40,17 +45,17 @@ public final class Occupant implements ModInitializer {
 		// It listens.
 		ServerMessageEvents.CHAT_MESSAGE.register((message, sender, params) -> {
 			Director director = Director.get();
-			if (director != null) director.onChat(sender, message.getSignedContent());
+			if (director != null) director.onChat(sender, message.signedContent());
 		});
 
 		// "You may not rest now, there are monsters nearby." There are none you can see.
 		EntitySleepEvents.ALLOW_SLEEPING.register((player, sleepingPos) -> shouldDenySleep(player)
-				? PlayerEntity.SleepFailureReason.NOT_SAFE : null);
+				? Player.BedSleepingProblem.NOT_SAFE : null);
 
 		// Waking up is not always a relief.
 		EntitySleepEvents.STOP_SLEEPING.register((entity, sleepingPos) -> {
 			Director director = Director.get();
-			if (director == null || !(entity instanceof ServerPlayerEntity player)) return;
+			if (director == null || !(entity instanceof ServerPlayer player)) return;
 			if (player.getRandom().nextFloat() < 0.3f && !director.haunt(player).isBusy()) {
 				director.trigger(player, WakeEvent.ID, false);
 			}
@@ -62,15 +67,15 @@ public final class Occupant implements ModInitializer {
 		LOGGER.info("The Occupant has moved in.");
 	}
 
-	private static boolean shouldDenySleep(PlayerEntity player) {
+	private static boolean shouldDenySleep(Player player) {
 		OccupantConfig cfg = OccupantConfig.get();
 		Director director = Director.get();
 		if (!cfg.enabled || !cfg.interruptSleep || director == null) return false;
-		if (!(player instanceof ServerPlayerEntity sp) || sp.isCreative() && !cfg.hauntCreative) return false;
+		if (!(player instanceof ServerPlayer sp) || sp.isCreative() && !cfg.hauntCreative) return false;
 
 		HauntData data = director.data(sp);
 		if (data.paused || data.act < 2) return false;
-		long day = sp.getServerWorld().getTimeOfDay() / 24000L;
+		long day = sp.level().getOverworldClockTime() / 24000L;
 		if (data.sleepDenyDay == day) return false;
 		if (sp.getRandom().nextFloat() >= 0.35f) return false;
 

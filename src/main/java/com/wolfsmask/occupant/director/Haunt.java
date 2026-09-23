@@ -5,12 +5,13 @@ import com.wolfsmask.occupant.entity.OccupantEntity;
 import com.wolfsmask.occupant.registry.ModEntities;
 import com.wolfsmask.occupant.util.Sight;
 import com.wolfsmask.occupant.util.Spots;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
@@ -31,13 +32,13 @@ public final class Haunt {
 
 	// Motion tracking for Situation.
 	@Nullable
-	private Vec3d lastPos;
+	private Vec3 lastPos;
 	private float lastYaw;
 	private float lastPitch;
 	private int idleSeconds;
 	private double lastSpeed;
 
-	Haunt(UUID uuid, HauntData data, Random random) {
+	Haunt(UUID uuid, HauntData data, RandomSource random) {
 		this.uuid = uuid;
 		this.data = data;
 		// After logging in, let the player settle before anything happens.
@@ -53,38 +54,38 @@ public final class Haunt {
 		return activeId;
 	}
 
-	Situation capture(ServerPlayerEntity player) {
-		ServerWorld world = player.getServerWorld();
-		Vec3d pos = player.getPos();
+	Situation capture(ServerPlayer player) {
+		ServerLevel world = player.level();
+		Vec3 pos = player.position();
 		if (lastPos != null) {
 			lastSpeed = pos.distanceTo(lastPos) / 20.0;
-			boolean turned = Math.abs(player.getYaw() - lastYaw) > 2.0f || Math.abs(player.getPitch() - lastPitch) > 2.0f;
+			boolean turned = Math.abs(player.getYRot() - lastYaw) > 2.0f || Math.abs(player.getXRot() - lastPitch) > 2.0f;
 			idleSeconds = (lastSpeed < 0.005 && !turned) ? idleSeconds + 1 : 0;
 		}
 		lastPos = pos;
-		lastYaw = player.getYaw();
-		lastPitch = player.getPitch();
+		lastYaw = player.getYRot();
+		lastPitch = player.getXRot();
 
-		BlockPos feet = player.getBlockPos();
-		BlockPos head = feet.up();
+		BlockPos feet = player.blockPosition();
+		BlockPos head = feet.above();
 		int light = Spots.light(world, head);
 		boolean underground = Spots.isUnderground(world, feet);
-		boolean sheltered = !underground && !world.isSkyVisible(head);
+		boolean sheltered = !underground && !world.canSeeSky(head);
 
 		OccupantConfig cfg = OccupantConfig.get();
 		boolean alone = Spots.awayFromOthers(player, pos, cfg.aloneRadius);
 
-		boolean inCombat = player.age - player.getLastAttackedTime() < 200 || player.age - player.getLastAttackTime() < 200;
-		boolean busy = player.currentScreenHandler != player.playerScreenHandler
-				|| player.isSleeping() || player.hasVehicle() || player.isFallFlying();
+		boolean inCombat = player.tickCount - player.getLastHurtByMobTimestamp() < 200 || player.tickCount - player.getLastHurtMobTimestamp() < 200;
+		boolean busy = player.containerMenu != player.inventoryMenu
+				|| player.isSleeping() || player.isPassenger() || player.isFallFlying();
 
-		return new Situation(world.isNight(), light <= 5, underground, sheltered, alone,
-				lastSpeed < 0.04, player.isSprinting(), inCombat, player.isTouchingWater(), busy,
+		return new Situation(world.isDarkOutside(), light <= 5, underground, sheltered, alone,
+				lastSpeed < 0.04, player.isSprinting(), inCombat, player.isInWater(), busy,
 				light, idleSeconds);
 	}
 
 	/** Early on it wears your face. Later, less and less. */
-	public OccupantEntity.Form pickForm(Random random) {
+	public OccupantEntity.Form pickForm(RandomSource random) {
 		float mirrorChance = switch (data.act) {
 			case 0, 1, 2 -> 0.85f;
 			case 3 -> 0.5f;
@@ -98,26 +99,26 @@ public final class Haunt {
 	 * Returns null (and leaves no trace) if anything about it would be wrong.
 	 */
 	@Nullable
-	public OccupantEntity spawnOccupant(ServerPlayerEntity player, BlockPos feet, OccupantEntity.Mode mode,
+	public OccupantEntity spawnOccupant(ServerPlayer player, BlockPos feet, OccupantEntity.Mode mode,
 										OccupantEntity.Form form) {
-		ServerWorld world = player.getServerWorld();
+		ServerLevel world = player.level();
 		if (!Spots.canStand(world, feet)) return null;
-		OccupantEntity e = ModEntities.OCCUPANT.create(world);
+		OccupantEntity e = ModEntities.OCCUPANT.create(world, EntitySpawnReason.EVENT);
 		if (e == null) return null;
 		e.bindTo(player);
-		Vec3d at = Vec3d.ofBottomCenter(feet);
-		float yaw = Sight.yawBetween(at, player.getPos());
-		e.refreshPositionAndAngles(at.x, at.y, at.z, yaw, 0.0f);
-		e.setHeadYaw(yaw);
-		e.setBodyYaw(yaw);
+		Vec3 at = Vec3.atBottomCenterOf(feet);
+		float yaw = Sight.yawBetween(at, player.position());
+		e.snapTo(at.x, at.y, at.z, yaw, 0.0f);
+		e.setYHeadRot(yaw);
+		e.setYBodyRot(yaw);
 		e.setMode(mode);
 		e.setForm(form);
-		if (!world.spawnEntity(e)) return null;
+		if (!world.addFreshEntity(e)) return null;
 		return e;
 	}
 
 	/** True if this player is somewhere the Occupant is allowed to be. */
-	static boolean worldAllowed(ServerPlayerEntity player) {
-		return !OccupantConfig.get().overworldOnly || player.getWorld().getRegistryKey() == World.OVERWORLD;
+	static boolean worldAllowed(ServerPlayer player) {
+		return !OccupantConfig.get().overworldOnly || player.level().dimension() == Level.OVERWORLD;
 	}
 }

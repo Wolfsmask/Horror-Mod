@@ -11,15 +11,16 @@ import com.wolfsmask.occupant.director.Director;
 import com.wolfsmask.occupant.director.Haunt;
 import com.wolfsmask.occupant.director.HauntData;
 import com.wolfsmask.occupant.director.events.Events;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
 
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 
 /**
  * Operator tools for testing and for recording videos.
@@ -38,72 +39,72 @@ public final class OccupantCommand {
 	private OccupantCommand() {
 	}
 
-	public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
+	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		dispatcher.register(literal("occupant")
-				.requires(src -> src.hasPermissionLevel(2))
+				.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 				.then(literal("status")
-						.executes(ctx -> status(ctx.getSource(), ctx.getSource().getPlayerOrThrow()))
-						.then(argument("player", EntityArgumentType.player())
-								.executes(ctx -> status(ctx.getSource(), EntityArgumentType.getPlayer(ctx, "player")))))
+						.executes(ctx -> status(ctx.getSource(), ctx.getSource().getPlayerOrException()))
+						.then(argument("player", EntityArgument.player())
+								.executes(ctx -> status(ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))))
 				.then(literal("trigger")
-						.then(argument("player", EntityArgumentType.player())
+						.then(argument("player", EntityArgument.player())
 								.then(argument("event", StringArgumentType.word())
-										.suggests((ctx, builder) -> CommandSource.suggestMatching(Events.ids(), builder))
+										.suggests((ctx, builder) -> SharedSuggestionProvider.suggest(Events.ids(), builder))
 										.executes(OccupantCommand::trigger))))
 				.then(literal("act")
-						.then(argument("player", EntityArgumentType.player())
+						.then(argument("player", EntityArgument.player())
 								.then(argument("act", IntegerArgumentType.integer(0, HauntData.MAX_ACT))
 										.executes(ctx -> modify(ctx, "act set to " + IntegerArgumentType.getInteger(ctx, "act"),
 												d -> d.setAct(IntegerArgumentType.getInteger(ctx, "act")))))))
 				.then(literal("dread")
-						.then(argument("player", EntityArgumentType.player())
+						.then(argument("player", EntityArgument.player())
 								.then(argument("value", FloatArgumentType.floatArg(0, 100))
 										.executes(ctx -> modify(ctx, "dread set",
 												d -> d.dread = FloatArgumentType.getFloat(ctx, "value"))))))
 				.then(literal("pause")
-						.then(argument("player", EntityArgumentType.player())
+						.then(argument("player", EntityArgument.player())
 								.executes(ctx -> {
 									Director dir = director(ctx.getSource());
-									if (dir != null) dir.stopCurrent(EntityArgumentType.getPlayer(ctx, "player"));
+									if (dir != null) dir.stopCurrent(EntityArgument.getPlayer(ctx, "player"));
 									return modify(ctx, "paused", d -> d.paused = true);
 								})))
 				.then(literal("resume")
-						.then(argument("player", EntityArgumentType.player())
+						.then(argument("player", EntityArgument.player())
 								.executes(ctx -> modify(ctx, "resumed", d -> d.paused = false))))
 				.then(literal("stop")
-						.then(argument("player", EntityArgumentType.player())
+						.then(argument("player", EntityArgument.player())
 								.executes(ctx -> {
 									Director dir = director(ctx.getSource());
 									if (dir == null) return 0;
-									dir.stopCurrent(EntityArgumentType.getPlayer(ctx, "player"));
-									ctx.getSource().sendFeedback(() -> Text.literal("Stopped."), false);
+									dir.stopCurrent(EntityArgument.getPlayer(ctx, "player"));
+									ctx.getSource().sendSuccess(() -> Component.literal("Stopped."), false);
 									return 1;
 								})))
 				.then(literal("reset")
-						.then(argument("player", EntityArgumentType.player())
+						.then(argument("player", EntityArgument.player())
 								.executes(ctx -> {
 									Director dir = director(ctx.getSource());
 									if (dir == null) return 0;
-									ServerPlayerEntity p = EntityArgumentType.getPlayer(ctx, "player");
+									ServerPlayer p = EntityArgument.getPlayer(ctx, "player");
 									dir.reset(p);
-									ctx.getSource().sendFeedback(() -> Text.literal("The story starts over for " + p.getName().getString() + "."), true);
+									ctx.getSource().sendSuccess(() -> Component.literal("The story starts over for " + p.getName().getString() + "."), true);
 									return 1;
 								})))
 				.then(literal("reload")
 						.executes(ctx -> {
 							OccupantConfig.load();
-							ctx.getSource().sendFeedback(() -> Text.literal("Reloaded config/occupant.json."), true);
+							ctx.getSource().sendSuccess(() -> Component.literal("Reloaded config/occupant.json."), true);
 							return 1;
 						})));
 	}
 
-	private static Director director(ServerCommandSource src) {
+	private static Director director(CommandSourceStack src) {
 		Director dir = Director.get();
-		if (dir == null) src.sendError(Text.literal("The Occupant is not running."));
+		if (dir == null) src.sendFailure(Component.literal("The Occupant is not running."));
 		return dir;
 	}
 
-	private static int status(ServerCommandSource src, ServerPlayerEntity p) {
+	private static int status(CommandSourceStack src, ServerPlayer p) {
 		Director dir = director(src);
 		if (dir == null) return 0;
 		Haunt h = dir.haunt(p);
@@ -115,21 +116,21 @@ public final class OccupantCommand {
 				d.eventCount, d.sightings, d.encounters,
 				active != null ? ", now: " + active : "",
 				d.paused ? " [paused]" : "");
-		src.sendFeedback(() -> Text.literal(text).formatted(Formatting.GRAY), false);
+		src.sendSuccess(() -> Component.literal(text).withStyle(ChatFormatting.GRAY), false);
 		return 1;
 	}
 
-	private static int trigger(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+	private static int trigger(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
 		Director dir = director(ctx.getSource());
 		if (dir == null) return 0;
-		ServerPlayerEntity p = EntityArgumentType.getPlayer(ctx, "player");
+		ServerPlayer p = EntityArgument.getPlayer(ctx, "player");
 		String event = StringArgumentType.getString(ctx, "event");
 		Director.TriggerResult result = dir.trigger(p, event, true);
 		switch (result) {
-			case STARTED -> ctx.getSource().sendFeedback(() -> Text.literal("Started " + event + "."), false);
-			case UNKNOWN -> ctx.getSource().sendError(Text.literal("No such event: " + event));
-			case BUSY -> ctx.getSource().sendError(Text.literal("Something else is already happening."));
-			case NO_SPOT -> ctx.getSource().sendError(Text.literal(
+			case STARTED -> ctx.getSource().sendSuccess(() -> Component.literal("Started " + event + "."), false);
+			case UNKNOWN -> ctx.getSource().sendFailure(Component.literal("No such event: " + event));
+			case BUSY -> ctx.getSource().sendFailure(Component.literal("Something else is already happening."));
+			case NO_SPOT -> ctx.getSource().sendFailure(Component.literal(
 					"Couldn't find a convincing place for " + event + " here. Try somewhere darker, a cave, or near a door."));
 		}
 		return result == Director.TriggerResult.STARTED ? 1 : 0;
@@ -140,13 +141,13 @@ public final class OccupantCommand {
 		void apply(HauntData data) throws CommandSyntaxException;
 	}
 
-	private static int modify(CommandContext<ServerCommandSource> ctx, String what, DataChange change) throws CommandSyntaxException {
+	private static int modify(CommandContext<CommandSourceStack> ctx, String what, DataChange change) throws CommandSyntaxException {
 		Director dir = director(ctx.getSource());
 		if (dir == null) return 0;
-		ServerPlayerEntity p = EntityArgumentType.getPlayer(ctx, "player");
+		ServerPlayer p = EntityArgument.getPlayer(ctx, "player");
 		change.apply(dir.data(p));
 		dir.markDirty();
-		ctx.getSource().sendFeedback(() -> Text.literal(p.getName().getString() + ": " + what + "."), true);
+		ctx.getSource().sendSuccess(() -> Component.literal(p.getName().getString() + ": " + what + "."), true);
 		return 1;
 	}
 }

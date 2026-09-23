@@ -6,11 +6,11 @@ import com.wolfsmask.occupant.director.HorrorEvent;
 import com.wolfsmask.occupant.director.Sequence;
 import com.wolfsmask.occupant.director.Timeline;
 import com.wolfsmask.occupant.util.Sight;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.DoorBlock;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.core.BlockPos;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -43,15 +43,15 @@ public final class DoorEvent extends HorrorEvent {
 	@Override
 	@Nullable
 	public Sequence begin(EventContext ctx) {
-		ServerPlayerEntity p = ctx.player;
-		ServerWorld world = ctx.world;
+		ServerPlayer p = ctx.player;
+		ServerLevel world = ctx.world;
 		List<BlockPos> doors = new ArrayList<>();
-		for (BlockPos pos : BlockPos.iterateOutwards(p.getBlockPos(), 14, 4, 14)) {
+		for (BlockPos pos : BlockPos.withinManhattan(p.blockPosition(), 14, 4, 14)) {
 			if (doors.size() >= 6) break;
-			if (pos.getSquaredDistance(p.getPos()) < 16) continue;
+			if (pos.distToCenterSqr(p.position()) < 16) continue;
 			if (!WorldBlocks.isClosedWoodenDoor(world, pos)) continue;
-			if (!Sight.isHidden(p, pos) || !Sight.isHidden(p, pos.up())) continue;
-			doors.add(pos.toImmutable());
+			if (!Sight.isHidden(p, pos) || !Sight.isHidden(p, pos.above())) continue;
+			doors.add(pos.immutable());
 		}
 		if (doors.isEmpty()) return null;
 
@@ -63,7 +63,7 @@ public final class DoorEvent extends HorrorEvent {
 		if (ctx.random.nextBoolean()) {
 			int closeAt = 50 + ctx.random.nextInt(60);
 			t.at(closeAt, pl -> {
-				if (WorldBlocks.isOpenDoor(world, door) && Sight.isHidden(pl, door) && Sight.isHidden(pl, door.up())) {
+				if (WorldBlocks.isOpenDoor(world, door) && Sight.isHidden(pl, door) && Sight.isHidden(pl, door.above())) {
 					setOpen(world, door, false);
 				}
 			});
@@ -71,7 +71,7 @@ public final class DoorEvent extends HorrorEvent {
 		return t;
 	}
 
-	private static void setOpen(ServerWorld world, BlockPos pos, boolean open) {
+	private static void setOpen(ServerLevel world, BlockPos pos, boolean open) {
 		BlockState state = world.getBlockState(pos);
 		if (state.getBlock() instanceof DoorBlock door) {
 			door.setOpen(null, world, state, pos, open);

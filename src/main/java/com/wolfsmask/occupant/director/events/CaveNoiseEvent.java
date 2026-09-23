@@ -6,9 +6,9 @@ import com.wolfsmask.occupant.director.Sequence;
 import com.wolfsmask.occupant.director.Timeline;
 import com.wolfsmask.occupant.util.Cues;
 import com.wolfsmask.occupant.util.Sight;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.phys.Vec3;
 
 /** One of the game's own cave sounds. Completely deniable. That is the point. */
 public final class CaveNoiseEvent extends HorrorEvent {
@@ -23,9 +23,9 @@ public final class CaveNoiseEvent extends HorrorEvent {
 
 	@Override
 	public Sequence begin(EventContext ctx) {
-		Vec3d dir = Sight.rotateY(Sight.flatLook(ctx.player), ctx.random.nextDouble() * 360.0);
-		Vec3d pos = ctx.player.getEyePos().add(dir.multiply(10 + ctx.random.nextDouble() * 6)).add(0, ctx.random.nextDouble() * 8 - 4, 0);
+		Vec3 dir = Sight.rotateY(Sight.flatLook(ctx.player), ctx.random.nextDouble() * 360.0);
+		Vec3 pos = ctx.player.getEyePosition().add(dir.scale(10 + ctx.random.nextDouble() * 6)).add(0, ctx.random.nextDouble() * 8 - 4, 0);
 		float pitch = 0.75f + ctx.random.nextFloat() * 0.25f;
-		return new Timeline().at(0, p -> Cues.sound(p, SoundEvents.AMBIENT_CAVE, SoundCategory.AMBIENT, pos, 0.9f, pitch));
+		return new Timeline().at(0, p -> Cues.sound(p, SoundEvents.AMBIENT_CAVE, SoundSource.AMBIENT, pos, 0.9f, pitch));
 	}
 }

@@ -11,10 +11,10 @@ import com.wolfsmask.occupant.registry.ModSounds;
 import com.wolfsmask.occupant.util.Cues;
 import com.wolfsmask.occupant.util.Sight;
 import com.wolfsmask.occupant.util.Spots;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -36,12 +36,12 @@ public final class StalkerEvent extends HorrorEvent {
 	@Override
 	@Nullable
 	public Sequence begin(EventContext ctx) {
-		ServerPlayerEntity p = ctx.player;
+		ServerPlayer p = ctx.player;
 		boolean underground = ctx.situation.underground();
 		BlockPos spot = Spots.aroundPlayer(p, ctx.random, 16, 26, 120, 180, !underground, 40, pos -> {
-			Vec3d base = Vec3d.ofBottomCenter(pos);
+			Vec3 base = Vec3.atBottomCenterOf(pos);
 			return Math.abs(pos.getY() - p.getBlockY()) <= 5
-					&& Spots.light(ctx.world, pos.up()) <= 8
+					&& Spots.light(ctx.world, pos.above()) <= 8
 					&& Spots.awayFromOthers(p, base, 24)
 					&& Sight.angleTo(p, base.add(0, 1.0, 0)) >= 100;
 		});
@@ -63,12 +63,12 @@ public final class StalkerEvent extends HorrorEvent {
 		}
 
 		@Override
-		protected boolean update(ServerPlayerEntity p, boolean looking) {
+		protected boolean update(ServerPlayer p, boolean looking) {
 			double dist = entity.distanceTo(p);
 			boolean onScreen = Sight.isOnScreen(p, entity);
 
 			if (dist < 5.0) {
-				if (!onScreen) Cues.sound(p, ModSounds.BREATH, SoundCategory.HOSTILE, entity.getEyePos(), 0.6f, 1.0f);
+				if (!onScreen) Cues.sound(p, ModSounds.BREATH, SoundSource.HOSTILE, entity.getEyePosition(), 0.6f, 1.0f);
 				return false;
 			}
 			if (dist > 56) return false;

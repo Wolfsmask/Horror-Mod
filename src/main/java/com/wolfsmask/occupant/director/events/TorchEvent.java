@@ -7,12 +7,12 @@ import com.wolfsmask.occupant.director.Sequence;
 import com.wolfsmask.occupant.director.Timeline;
 import com.wolfsmask.occupant.util.Sight;
 import com.wolfsmask.occupant.util.Spots;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.LightType;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.LightLayer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -40,26 +40,26 @@ public final class TorchEvent extends HorrorEvent {
 	@Override
 	@Nullable
 	public Sequence begin(EventContext ctx) {
-		ServerPlayerEntity p = ctx.player;
-		ServerWorld world = ctx.world;
-		BlockPos bed = p.getSpawnPointPosition();
+		ServerPlayer p = ctx.player;
+		ServerLevel world = ctx.world;
+		BlockPos bed = Spots.respawnPos(p);
 
 		List<BlockPos> torches = new ArrayList<>();
-		for (BlockPos pos : BlockPos.iterateOutwards(p.getBlockPos(), 20, 8, 20)) {
+		for (BlockPos pos : BlockPos.withinManhattan(p.blockPosition(), 20, 8, 20)) {
 			if (torches.size() >= 8) break;
-			if (pos.getSquaredDistance(p.getPos()) < 64) continue;
+			if (pos.distToCenterSqr(p.position()) < 64) continue;
 			if (!WorldBlocks.isTorch(world.getBlockState(pos))) continue;
-			if (world.getLightLevel(LightType.SKY, pos) > 0 || !Spots.isUnderground(world, pos)) continue;
-			if (bed != null && bed.getSquaredDistance(pos) < 24 * 24) continue;
+			if (world.getBrightness(LightLayer.SKY, pos) > 0 || !Spots.isUnderground(world, pos)) continue;
+			if (bed != null && bed.distSqr(pos) < 24 * 24) continue;
 			if (!Sight.isHidden(p, pos)) continue;
-			torches.add(pos.toImmutable());
+			torches.add(pos.immutable());
 		}
 		if (torches.isEmpty()) return null;
 
 		int count = Math.min(torches.size(), 1 + ctx.random.nextInt(2));
 		for (int i = 0; i < count; i++) {
 			BlockPos pos = torches.remove(ctx.random.nextInt(torches.size()));
-			world.setBlockState(pos, Blocks.AIR.getDefaultState(), Block.NOTIFY_ALL);
+			world.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
 		}
 		return new Timeline().at(0, pl -> {
 		});

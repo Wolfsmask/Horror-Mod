@@ -6,7 +6,7 @@ import com.wolfsmask.occupant.director.HorrorEvent;
 import com.wolfsmask.occupant.director.Sequence;
 import com.wolfsmask.occupant.director.Timeline;
 import com.wolfsmask.occupant.util.Cues;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +47,7 @@ public final class DoppelChatEvent extends HorrorEvent {
 	}
 
 	/** Formatted exactly like a normal chat message: {@code <name> message}. */
-	static Text chat(String name, String message) {
-		return Text.translatable("chat.type.text", Text.literal(name), Text.literal(message));
+	static Component chat(String name, String message) {
+		return Component.translatable("chat.type.text", Component.literal(name), Component.literal(message));
 	}
 }

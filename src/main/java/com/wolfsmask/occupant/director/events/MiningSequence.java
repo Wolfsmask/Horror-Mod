@@ -2,13 +2,13 @@ package com.wolfsmask.occupant.director.events;
 
 import com.wolfsmask.occupant.director.Sequence;
 import com.wolfsmask.occupant.util.Cues;
-import net.minecraft.sound.BlockSoundGroup;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 
@@ -27,23 +27,23 @@ final class MiningSequence implements Sequence {
 	}
 
 	@Override
-	public boolean tick(ServerPlayerEntity player) {
+	public boolean tick(ServerPlayer player) {
 		if (index >= blocks.size()) return false;
 		BlockPos pos = blocks.get(index);
-		Vec3d center = Vec3d.ofCenter(pos);
-		if (player.getPos().squaredDistanceTo(center) < stopDistance * stopDistance) return false;
+		Vec3 center = Vec3.atCenterOf(pos);
+		if (player.position().distanceToSqr(center) < stopDistance * stopDistance) return false;
 		if (--timer > 0) return true;
 
-		BlockState state = player.getWorld().getBlockState(pos);
-		if (state.isAir()) state = Blocks.STONE.getDefaultState();
-		BlockSoundGroup group = state.getSoundGroup();
+		BlockState state = player.level().getBlockState(pos);
+		if (state.isAir()) state = Blocks.STONE.defaultBlockState();
+		SoundType group = state.getSoundType();
 
 		if (hits < hitsNeeded) {
 			hits++;
 			timer = 4 + player.getRandom().nextInt(2);
-			Cues.sound(player, group.getHitSound(), SoundCategory.BLOCKS, center, 0.5f, group.getPitch() * 0.5f);
+			Cues.sound(player, group.getHitSound(), SoundSource.BLOCKS, center, 0.5f, group.getXRot() * 0.5f);
 		} else {
-			Cues.sound(player, group.getBreakSound(), SoundCategory.BLOCKS, center, 1.0f, group.getPitch() * 0.8f);
+			Cues.sound(player, group.getBreakSound(), SoundSource.BLOCKS, center, 1.0f, group.getXRot() * 0.8f);
 			index++;
 			hits = 0;
 			hitsNeeded = 4 + player.getRandom().nextInt(4);

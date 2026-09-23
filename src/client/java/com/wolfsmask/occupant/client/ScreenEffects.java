@@ -1,14 +1,14 @@
 package com.wolfsmask.occupant.client;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.wolfsmask.occupant.Occupant;
 import com.wolfsmask.occupant.entity.OccupantEntity;
 import com.wolfsmask.occupant.network.ScreenEffectPayload;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -18,7 +18,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * lights, and analog static that creeps in when the Occupant is close.
  */
 public final class ScreenEffects {
-	private static final Identifier STATIC_TEXTURE = Identifier.of(Occupant.MOD_ID, "textures/misc/static.png");
+	private static final Identifier STATIC_TEXTURE = Occupant.id("textures/misc/static.png");
 	private static final int STATIC_SIZE = 128;
 	private static final int FADE_OUT_TICKS = 8;
 
@@ -35,7 +35,7 @@ public final class ScreenEffects {
 	private ScreenEffects() {
 	}
 
-	public static void trigger(ScreenEffectPayload payload, MinecraftClient client) {
+	public static void trigger(ScreenEffectPayload payload, Minecraft client) {
 		switch (payload.effect()) {
 			case ScreenEffectPayload.BLACKOUT -> {
 				blackoutLength = Math.max(1, payload.duration());
@@ -48,9 +48,9 @@ public final class ScreenEffects {
 			case ScreenEffectPayload.STATIC -> {
 				staticLength = Math.max(1, payload.duration());
 				staticAge = 0;
-				staticStrength = MathHelper.clamp(payload.intensity(), 0f, 1f);
+				staticStrength = Mth.clamp(payload.intensity(), 0f, 1f);
 			}
-			case ScreenEffectPayload.SILENCE -> client.getMusicTracker().stop();
+			case ScreenEffectPayload.SILENCE -> client.getMusicManager().stopPlaying();
 			default -> {
 			}
 		}
@@ -63,20 +63,20 @@ public final class ScreenEffects {
 		proximityStatic = 0f;
 	}
 
-	public static void tick(MinecraftClient client) {
+	public static void tick(Minecraft client) {
 		if (blackoutAge < blackoutLength) blackoutAge++;
 		if (flickerAge >= 0 && ++flickerAge >= flickerLength) flickerAge = -1;
 		if (staticAge < staticLength) staticAge++;
 
 		float target = 0f;
-		ClientPlayerEntity player = client.player;
-		if (player != null && client.world != null) {
-			List<OccupantEntity> near = client.world.getEntitiesByClass(OccupantEntity.class,
-					player.getBoundingBox().expand(24.0), e -> !e.isRemoved());
+		LocalPlayer player = client.player;
+		if (player != null && client.level != null) {
+			List<OccupantEntity> near = client.level.getEntitiesOfClass(OccupantEntity.class,
+					player.getBoundingBox().inflate(24.0), e -> !e.isRemoved());
 			for (OccupantEntity e : near) {
 				double d = e.distanceTo(player);
 				float t = switch (e.getMode()) {
-					case CHASE -> (float) MathHelper.clamp(1.0 - d / 24.0, 0.05, 1.0) * 0.45f;
+					case CHASE -> (float) Mth.clamp(1.0 - d / 24.0, 0.05, 1.0) * 0.45f;
 					case STARE, STALK -> d < 14 ? (float) (1.0 - d / 14.0) * 0.22f : 0f;
 					default -> 0f; // an ambush must give nothing away
 				};
@@ -86,10 +86,10 @@ public final class ScreenEffects {
 		proximityStatic += (target - proximityStatic) * 0.2f;
 	}
 
-	public static void render(DrawContext ctx, float tickDelta) {
+	public static void render(GuiGraphicsExtractor ctx, float tickDelta) {
 		ClientConfig cfg = ClientConfig.get();
-		int w = ctx.getScaledWindowWidth();
-		int h = ctx.getScaledWindowHeight();
+		int w = ctx.guiWidth();
+		int h = ctx.guiHeight();
 
 		float burst = staticAge < staticLength ? staticStrength * (1f - (staticAge + tickDelta) / staticLength) : 0f;
 		float noise = Math.max(proximityStatic, burst);
@@ -98,7 +98,7 @@ public final class ScreenEffects {
 
 		float dark = Math.max(flickerDarkness(cfg), blackoutDarkness(tickDelta, cfg));
 		if (dark > 0.001f) {
-			int alpha = (int) (MathHelper.clamp(dark, 0f, 1f) * 255f);
+			int alpha = (int) (Mth.clamp(dark, 0f, 1f) * 255f);
 			ctx.fill(0, 0, w, h, alpha << 24);
 		}
 	}
@@ -117,26 +117,23 @@ public final class ScreenEffects {
 		if (flickerAge < 0) return 0f;
 		if (cfg.reduceFlashing) {
 			float p = flickerAge / (float) flickerLength;
-			return 0.7f * MathHelper.sin(p * MathHelper.PI);
+			return 0.7f * Mth.sin(p * Mth.PI);
 		}
 		int t = flickerAge;
 		boolean dark = t <= 3 || (t >= 8 && t <= 10) || (t >= 14 && t <= 20) || t >= 24;
 		return dark ? 0.94f : 0f;
 	}
 
-	private static void drawStatic(DrawContext ctx, int w, int h, float alpha) {
+	private static void drawStatic(GuiGraphicsExtractor ctx, int w, int h, float alpha) {
 		ThreadLocalRandom random = ThreadLocalRandom.current();
 		int ox = random.nextInt(STATIC_SIZE);
 		int oy = random.nextInt(STATIC_SIZE);
-		RenderSystem.enableBlend();
-		RenderSystem.defaultBlendFunc();
-		ctx.setShaderColor(1f, 1f, 1f, alpha);
+		int color = ((int) (alpha * 255f) << 24) | 0xFFFFFF;
 		for (int x = -ox; x < w; x += STATIC_SIZE) {
 			for (int y = -oy; y < h; y += STATIC_SIZE) {
-				ctx.drawTexture(STATIC_TEXTURE, x, y, 0f, 0f, STATIC_SIZE, STATIC_SIZE, STATIC_SIZE, STATIC_SIZE);
+				ctx.blit(RenderPipelines.GUI_TEXTURED, STATIC_TEXTURE, x, y, 0f, 0f,
+						STATIC_SIZE, STATIC_SIZE, STATIC_SIZE, STATIC_SIZE, color);
 			}
 		}
-		ctx.setShaderColor(1f, 1f, 1f, 1f);
-		RenderSystem.disableBlend();
 	}
 }

@@ -4,7 +4,7 @@ import com.wolfsmask.occupant.director.Haunt;
 import com.wolfsmask.occupant.director.Sequence;
 import com.wolfsmask.occupant.entity.OccupantEntity;
 import com.wolfsmask.occupant.util.Sight;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 
 /** Base for every sequence that puts the Occupant in the world. Always removes it at the end. */
 public abstract class ApparitionSequence implements Sequence {
@@ -22,8 +22,8 @@ public abstract class ApparitionSequence implements Sequence {
 	}
 
 	@Override
-	public final boolean tick(ServerPlayerEntity player) {
-		if (entity.hasVanished() || player.getWorld() != entity.getWorld()) return false;
+	public final boolean tick(ServerPlayer player) {
+		if (entity.hasVanished() || player.level() != entity.level()) return false;
 		entity.keepAlive();
 		age++;
 
@@ -42,9 +42,9 @@ public abstract class ApparitionSequence implements Sequence {
 	}
 
 	/** @return false to end (the entity then vanishes) */
-	protected abstract boolean update(ServerPlayerEntity player, boolean looking);
+	protected abstract boolean update(ServerPlayer player, boolean looking);
 
-	protected void onSeen(ServerPlayerEntity player) {
+	protected void onSeen(ServerPlayer player) {
 	}
 
 	@Override

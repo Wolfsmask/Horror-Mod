@@ -8,13 +8,15 @@ import com.wolfsmask.occupant.director.HorrorEvent;
 import com.wolfsmask.occupant.director.events.Events;
 import com.wolfsmask.occupant.entity.OccupantEntity;
 import com.wolfsmask.occupant.registry.ModEntities;
-import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.test.GameTest;
-import net.minecraft.test.TestContext;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
+import net.fabricmc.fabric.api.gametest.v1.GameTest;
+import net.minecraft.core.BlockPos;
+import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.phys.AABB;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,32 +25,39 @@ import java.util.List;
  * Run on a real headless server by CI ({@code ./gradlew runGametest}).
  * These exist so the mod can be trusted not to break a world or a server.
  */
-public final class OccupantGameTests implements FabricGameTest {
+public final class OccupantGameTests {
 	private static final int TICKS_PER_EVENT = 120;
 
+	/** Makes it night using the game's own command, so the tests do not depend on clock internals. */
+	static void makeNight(ServerLevel level) {
+		MinecraftServer server = level.getServer();
+		server.getCommands().performPrefixedCommand(server.createCommandSourceStack(), "time set night");
+	}
+
 	/** An Occupant that nothing controls must remove itself immediately. */
-	@GameTest(templateName = EMPTY_STRUCTURE)
-	public void uncontrolledOccupantVanishes(TestContext ctx) {
-		OccupantEntity e = ctx.spawnEntity(ModEntities.OCCUPANT, 1, 2, 1);
-		ctx.runAtTick(5, () -> {
-			ctx.assertTrue(e.isRemoved(), "An uncontrolled Occupant should vanish on its own");
-			ctx.complete();
+	@GameTest
+	public void uncontrolledOccupantVanishes(GameTestHelper helper) {
+		OccupantEntity e = helper.spawn(ModEntities.OCCUPANT, 1, 2, 1);
+		helper.runAtTickTime(5, () -> {
+			helper.assertTrue(e.isRemoved(), "An uncontrolled Occupant should vanish on its own");
+			helper.succeed();
 		});
 	}
 
 	/** It cannot be hurt, killed or farmed: any damage just makes it vanish. */
-	@GameTest(templateName = EMPTY_STRUCTURE)
-	public void damageMakesItVanish(TestContext ctx) {
-		OccupantEntity e = ctx.spawnEntity(ModEntities.OCCUPANT, 1, 2, 1);
-		boolean hurt = e.damage(ctx.getWorld().getDamageSources().generic(), 5.0f);
-		ctx.assertTrue(!hurt, "Damage should never land");
-		ctx.assertTrue(e.isRemoved(), "Damage should make it vanish");
-		ctx.complete();
+	@GameTest
+	public void damageMakesItVanish(GameTestHelper helper) {
+		OccupantEntity e = helper.spawn(ModEntities.OCCUPANT, 1, 2, 1);
+		ServerLevel level = helper.getLevel();
+		boolean hurt = e.hurtServer(level, level.damageSources().generic(), 5.0f);
+		helper.assertTrue(!hurt, "Damage should never land");
+		helper.assertTrue(e.isRemoved(), "Damage should make it vanish");
+		helper.succeed();
 	}
 
 	/** Story progress survives a save and load exactly. */
-	@GameTest(templateName = EMPTY_STRUCTURE)
-	public void storyDataRoundTrips(TestContext ctx) {
+	@GameTest
+	public void storyDataRoundTrips(GameTestHelper helper) {
 		HauntData d = new HauntData();
 		d.setAct(3);
 		d.dread = 42.5f;
@@ -57,31 +66,30 @@ public final class OccupantGameTests implements FabricGameTest {
 		d.encounters = 2;
 		d.recordEvent("watcher", 2400);
 		d.rememberChat("hello there");
-		HauntData copy = HauntData.fromNbt(d.toNbt());
-		ctx.assertTrue(copy.act == 3 && copy.dread == 42.5f && copy.playTicks == 123456, "Core values should round-trip");
-		ctx.assertTrue(copy.sightings == 7 && copy.encounters == 2, "Counters should round-trip");
-		ctx.assertTrue(copy.isOnCooldown("watcher") && copy.recency("watcher") == 0, "Cooldowns and history should round-trip");
-		ctx.assertTrue("hello there".equals(copy.heardChat.peekFirst()), "Remembered chat should round-trip");
-		ctx.complete();
+		Tag saved = HauntData.CODEC.encodeStart(NbtOps.INSTANCE, d).getOrThrow();
+		HauntData copy = HauntData.CODEC.parse(NbtOps.INSTANCE, saved).getOrThrow();
+		helper.assertTrue(copy.act == 3 && copy.dread == 42.5f && copy.playTicks == 123456, "Core values should round-trip");
+		helper.assertTrue(copy.sightings == 7 && copy.encounters == 2, "Counters should round-trip");
+		helper.assertTrue(copy.isOnCooldown("watcher") && copy.recency("watcher") == 0, "Cooldowns and history should round-trip");
+		helper.assertTrue("hello there".equals(copy.heardChat.peekFirst()), "Remembered chat should round-trip");
+		helper.succeed();
 	}
 
 	/**
-	 * The big one: a player at the very end of the story, at night, and every single event
-	 * forced one after another. Nothing may throw, and nothing may be left behind.
+	 * A player at the very end of the story, at night, and every single event forced one after
+	 * another. Nothing may throw, and nothing may be left behind.
 	 */
-	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "every_event", tickLimit = 40 + TICKS_PER_EVENT * 30)
-	public void everyEventRunsCleanly(TestContext ctx) {
+	@GameTest(maxTicks = 40 + TICKS_PER_EVENT * 30)
+	public void everyEventRunsCleanly(GameTestHelper helper) {
 		Director director = Director.get();
-		ctx.assertTrue(director != null, "Director should be running");
-		ServerWorld world = ctx.getWorld();
-		OccupantConfig cfg = OccupantConfig.get();
-		boolean previousCreative = cfg.hauntCreative;
-		cfg.hauntCreative = true;
-		world.setTimeOfDay(18000);
+		helper.assertTrue(director != null, "Director should be running");
+		ServerLevel level = helper.getLevel();
+		OccupantConfig.get().hauntCreative = true;
+		makeNight(level);
 
-		ServerPlayerEntity player = ctx.createMockCreativeServerPlayerInWorld();
-		BlockPos start = ctx.getAbsolutePos(new BlockPos(4, 2, 4));
-		player.refreshPositionAndAngles(start.getX() + 0.5, start.getY(), start.getZ() + 0.5, 0.0f, 0.0f);
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		BlockPos start = helper.absolutePos(new BlockPos(4, 2, 4));
+		player.snapTo(start.getX() + 0.5, start.getY(), start.getZ() + 0.5, 0.0f, 0.0f);
 
 		HauntData data = director.data(player);
 		data.setAct(HauntData.MAX_ACT);
@@ -92,8 +100,7 @@ public final class OccupantGameTests implements FabricGameTest {
 		List<String> started = new ArrayList<>();
 		for (int i = 0; i < events.size(); i++) {
 			String id = events.get(i).id();
-			int at = 40 + i * TICKS_PER_EVENT;
-			ctx.runAtTick(at, () -> {
+			helper.runAtTickTime(40 + (long) i * TICKS_PER_EVENT, () -> {
 				data.dread = 100f;
 				data.lastPeakAt = -1;
 				data.calmUntil = 0;
@@ -101,16 +108,15 @@ public final class OccupantGameTests implements FabricGameTest {
 			});
 		}
 
-		ctx.runAtTick(40 + events.size() * TICKS_PER_EVENT, () -> {
+		helper.runAtTickTime(40 + (long) events.size() * TICKS_PER_EVENT, () -> {
 			director.stopCurrent(player);
-			cfg.hauntCreative = previousCreative;
 			Occupant.LOGGER.info("[gametest] events that found a place to happen: {}", started);
-			ctx.assertTrue(director.totalErrors() == errorsBefore,
+			helper.assertTrue(director.totalErrors() == errorsBefore,
 					"No event may throw (errors: " + (director.totalErrors() - errorsBefore) + ", see log)");
-			List<OccupantEntity> leftovers = world.getEntitiesByClass(OccupantEntity.class,
-					new Box(player.getBlockPos()).expand(128), e -> !e.isRemoved());
-			ctx.assertTrue(leftovers.isEmpty(), "No Occupant may be left in the world after a sequence ends");
-			ctx.complete();
+			List<OccupantEntity> leftovers = level.getEntitiesOfClass(OccupantEntity.class,
+					new AABB(player.blockPosition()).inflate(128), e -> !e.isRemoved());
+			helper.assertTrue(leftovers.isEmpty(), "No Occupant may be left in the world after a sequence ends");
+			helper.succeed();
 		});
 	}
 }

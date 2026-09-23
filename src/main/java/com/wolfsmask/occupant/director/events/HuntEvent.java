@@ -12,13 +12,13 @@ import com.wolfsmask.occupant.registry.ModSounds;
 import com.wolfsmask.occupant.util.Cues;
 import com.wolfsmask.occupant.util.Sight;
 import com.wolfsmask.occupant.util.Spots;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -49,14 +49,14 @@ public final class HuntEvent extends HorrorEvent {
 	@Override
 	@Nullable
 	public Sequence begin(EventContext ctx) {
-		ServerPlayerEntity p = ctx.player;
+		ServerPlayer p = ctx.player;
 		boolean underground = ctx.situation.underground();
 		double min = underground ? 14 : 22;
 		double max = underground ? 22 : 32;
 		BlockPos spot = Spots.aroundPlayer(p, ctx.random, min, max, 0, 35, !underground, 40, pos -> {
-			Vec3d base = Vec3d.ofBottomCenter(pos);
+			Vec3 base = Vec3.atBottomCenterOf(pos);
 			return Math.abs(pos.getY() - p.getBlockY()) <= 6
-					&& Spots.light(ctx.world, pos.up()) <= 8
+					&& Spots.light(ctx.world, pos.above()) <= 8
 					&& Spots.awayFromOthers(p, base, 24)
 					&& Sight.hasLineOfSight(p, base.add(0, 1.6, 0))
 					&& Sight.hasLineOfSight(p, base.add(0, 0.9, 0));
@@ -85,19 +85,19 @@ public final class HuntEvent extends HorrorEvent {
 		}
 
 		@Override
-		protected boolean update(ServerPlayerEntity p, boolean looking) {
+		protected boolean update(ServerPlayer p, boolean looking) {
 			if (caughtAt >= 0) return age < caughtAt + 3;
 			double dist = entity.distanceTo(p);
 
 			if (!chasing) {
 				if (age == 1) {
 					Cues.effect(p, ScreenEffectPayload.SILENCE, 0, 1f);
-					Cues.soundAtEars(p, ModSounds.DRONE, SoundCategory.AMBIENT, 0.8f, 0.9f);
+					Cues.soundAtEars(p, ModSounds.DRONE, SoundSource.AMBIENT, 0.8f, 0.9f);
 				}
 				if (age >= stareTicks || (seen && lookTicks > 15) || dist < 6) {
 					chasing = true;
 					entity.setMode(OccupantEntity.Mode.CHASE);
-					Cues.sound(p, ModSounds.STATIC, SoundCategory.HOSTILE, entity.getEyePos(), 1.0f, 0.8f);
+					Cues.sound(p, ModSounds.STATIC, SoundSource.HOSTILE, entity.getEyePosition(), 1.0f, 0.8f);
 					Cues.effect(p, ScreenEffectPayload.STATIC, 10, 0.5f);
 				}
 				return age < 400;
@@ -106,7 +106,7 @@ public final class HuntEvent extends HorrorEvent {
 			chaseTicks++;
 			if (chaseTicks % 5 == 1) entity.chase(p, CHASE_SPEED);
 			if (chaseTicks % 18 == 0) {
-				Cues.sound(p, SoundEvents.ENTITY_WARDEN_HEARTBEAT, SoundCategory.HOSTILE, p.getEyePos(), 1.0f, 1.1f);
+				Cues.sound(p, SoundEvents.WARDEN_HEARTBEAT, SoundSource.HOSTILE, p.getEyePosition(), 1.0f, 1.1f);
 			}
 
 			if (dist < 1.7) {
@@ -122,15 +122,15 @@ public final class HuntEvent extends HorrorEvent {
 			return chaseTicks < 400;
 		}
 
-		private void caught(ServerPlayerEntity p) {
+		private void caught(ServerPlayer p) {
 			caughtAt = age;
 			entity.halt();
 			haunt.data.encounters++;
-			Cues.sound(p, ModSounds.STINGER, SoundCategory.HOSTILE, entity.getEyePos(), 1.0f, 0.9f);
+			Cues.sound(p, ModSounds.STINGER, SoundSource.HOSTILE, entity.getEyePosition(), 1.0f, 0.9f);
 			Cues.effect(p, ScreenEffectPayload.BLACKOUT, 30, 1f);
-			p.addStatusEffect(new StatusEffectInstance(StatusEffects.DARKNESS, 140, 0, false, false));
+			p.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 140, 0, false, false));
 			float damage = OccupantConfig.get().chaseDamage;
-			if (damage > 0) p.damage(p.getDamageSources().generic(), damage);
+			if (damage > 0) p.hurtServer(p.level(), p.damageSources().generic(), damage);
 		}
 	}
 }

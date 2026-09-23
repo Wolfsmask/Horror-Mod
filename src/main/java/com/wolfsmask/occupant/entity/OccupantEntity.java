@@ -3,26 +3,27 @@ package com.wolfsmask.occupant.entity;
 import com.wolfsmask.occupant.registry.ModSounds;
 import com.wolfsmask.occupant.util.Cues;
 import com.wolfsmask.occupant.util.Sight;
-import net.minecraft.block.BlockState;
-import net.minecraft.sound.BlockSoundGroup;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.ai.pathing.PathNodeType;
-import net.minecraft.entity.attribute.DefaultAttributeContainer;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.data.DataTracker;
-import net.minecraft.entity.data.TrackedData;
-import net.minecraft.entity.data.TrackedDataHandlerRegistry;
-import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.mob.PathAwareEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.pathfinder.PathType;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
@@ -34,21 +35,21 @@ import java.util.UUID;
  * {@link #keepAlive()} every tick. The entity itself only enforces the rules that keep it
  * from ever "breaking":
  * <ul>
- *     <li>Only the player it is haunting can see it ({@link #canBeSpectated}).</li>
+ *     <li>Only the player it is haunting can see it ({@link #broadcastToPlayer}).</li>
  *     <li>It is never saved to disk (see ModEntities) and removes itself if nothing controls it.</li>
  *     <li>Any damage makes it vanish instantly: it cannot be killed, farmed, trapped or pushed.</li>
  *     <li>It makes no sound of its own; footsteps are sent to its target only.</li>
  * </ul>
  */
-public class OccupantEntity extends PathAwareEntity {
+public class OccupantEntity extends PathfinderMob {
 	/** How it is behaving. The client uses this for posture and screen static. */
 	public enum Mode { IDLE, STARE, STALK, CHASE, AMBUSH }
 
 	/** What it looks like. MIRROR wears the viewer's own skin; HOLLOW is what is underneath. */
 	public enum Form { MIRROR, HOLLOW }
 
-	private static final TrackedData<Byte> MODE = DataTracker.registerData(OccupantEntity.class, TrackedDataHandlerRegistry.BYTE);
-	private static final TrackedData<Byte> FORM = DataTracker.registerData(OccupantEntity.class, TrackedDataHandlerRegistry.BYTE);
+	private static final EntityDataAccessor<Byte> MODE = SynchedEntityData.defineId(OccupantEntity.class, EntityDataSerializers.BYTE);
+	private static final EntityDataAccessor<Byte> FORM = SynchedEntityData.defineId(OccupantEntity.class, EntityDataSerializers.BYTE);
 
 	/** Removed if no sequence has touched it for this long (orphan protection). */
 	private static final int ORPHAN_TICKS = 40;
@@ -65,61 +66,62 @@ public class OccupantEntity extends PathAwareEntity {
 	private double stepAccumulator;
 	private boolean vanished;
 
-	public OccupantEntity(EntityType<? extends OccupantEntity> type, World world) {
-		super(type, world);
+	public OccupantEntity(EntityType<? extends OccupantEntity> type, Level level) {
+		super(type, level);
 		this.setSilent(true);
-		this.setPersistent();
-		this.experiencePoints = 0;
-		this.setPathfindingPenalty(PathNodeType.WATER, -1.0f);
-		this.setPathfindingPenalty(PathNodeType.LAVA, -1.0f);
-		this.setPathfindingPenalty(PathNodeType.DANGER_FIRE, -1.0f);
-		this.setPathfindingPenalty(PathNodeType.DAMAGE_FIRE, -1.0f);
+		this.setPersistenceRequired();
+		this.xpReward = 0;
+		this.setPathfindingMalus(PathType.WATER, -1.0f);
+		this.setPathfindingMalus(PathType.LAVA, -1.0f);
+		this.setPathfindingMalus(PathType.FIRE, -1.0f);
+		this.setPathfindingMalus(PathType.FIRE_IN_NEIGHBOR, -1.0f);
+		this.setPathfindingMalus(PathType.DAMAGING, -1.0f);
 	}
 
-	public static DefaultAttributeContainer.Builder createAttributes() {
-		return MobEntity.createMobAttributes()
-				.add(EntityAttributes.GENERIC_MAX_HEALTH, 20.0)
-				.add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.25)
-				.add(EntityAttributes.GENERIC_FOLLOW_RANGE, 96.0)
-				.add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 1.0);
+	public static AttributeSupplier.Builder createAttributes() {
+		return Mob.createMobAttributes()
+				.add(Attributes.MAX_HEALTH, 20.0)
+				.add(Attributes.MOVEMENT_SPEED, 0.25)
+				.add(Attributes.FOLLOW_RANGE, 96.0)
+				.add(Attributes.KNOCKBACK_RESISTANCE, 1.0);
 	}
 
 	@Override
-	protected void initDataTracker(DataTracker.Builder builder) {
-		super.initDataTracker(builder);
-		builder.add(MODE, (byte) Mode.IDLE.ordinal());
-		builder.add(FORM, (byte) Form.MIRROR.ordinal());
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(MODE, (byte) Mode.IDLE.ordinal());
+		builder.define(FORM, (byte) Form.MIRROR.ordinal());
 	}
 
 	// ------------------------------------------------------------------ state
 
 	public Mode getMode() {
-		byte b = this.dataTracker.get(MODE);
+		byte b = this.entityData.get(MODE);
 		Mode[] values = Mode.values();
 		return b >= 0 && b < values.length ? values[b] : Mode.IDLE;
 	}
 
 	public void setMode(Mode mode) {
-		this.dataTracker.set(MODE, (byte) mode.ordinal());
+		this.entityData.set(MODE, (byte) mode.ordinal());
 	}
 
 	public Form getForm() {
-		byte b = this.dataTracker.get(FORM);
+		byte b = this.entityData.get(FORM);
 		Form[] values = Form.values();
 		return b >= 0 && b < values.length ? values[b] : Form.MIRROR;
 	}
 
 	public void setForm(Form form) {
-		this.dataTracker.set(FORM, (byte) form.ordinal());
+		this.entityData.set(FORM, (byte) form.ordinal());
 	}
 
 	/** Must be called before the entity is added to the world. */
-	public void bindTo(ServerPlayerEntity target) {
-		this.targetUuid = target.getUuid();
+	public void bindTo(ServerPlayer target) {
+		this.targetUuid = target.getUUID();
 	}
 
-	public boolean isHaunting(PlayerEntity player) {
-		return targetUuid != null && targetUuid.equals(player.getUuid());
+	public boolean isHaunting(Player player) {
+		return targetUuid != null && targetUuid.equals(player.getUUID());
 	}
 
 	/** Called every tick by whichever sequence is controlling it. */
@@ -149,45 +151,44 @@ public class OccupantEntity extends PathAwareEntity {
 	}
 
 	@Nullable
-	public ServerPlayerEntity findHauntedPlayer(boolean requireSameWorld) {
-		if (targetUuid == null || this.getWorld().isClient) return null;
-		if (this.getServer() == null) return null;
-		ServerPlayerEntity p = this.getServer().getPlayerManager().getPlayer(targetUuid);
+	public ServerPlayer findHauntedPlayer(boolean requireSameWorld) {
+		if (targetUuid == null || !(this.level() instanceof ServerLevel serverLevel)) return null;
+		ServerPlayer p = serverLevel.getServer().getPlayerList().getPlayer(targetUuid);
 		if (p == null || p.isRemoved()) return null;
-		if (requireSameWorld && p.getWorld() != this.getWorld()) return null;
+		if (requireSameWorld && p.level() != this.level()) return null;
 		return p;
 	}
 
 	// ------------------------------------------------------------------ movement helpers for sequences
 
-	public void faceTowards(Vec3d point) {
-		float yaw = Sight.yawBetween(this.getPos(), point);
+	public void faceTowards(Vec3 point) {
+		float yaw = Sight.yawBetween(this.position(), point);
 		double dx = point.x - this.getX();
 		double dz = point.z - this.getZ();
 		double dy = point.y - this.getEyeY();
-		float pitch = (float) -(MathHelper.atan2(dy, Math.sqrt(dx * dx + dz * dz)) * MathHelper.DEGREES_PER_RADIAN);
-		this.setYaw(yaw);
-		this.setBodyYaw(yaw);
-		this.setHeadYaw(yaw);
-		this.setPitch(MathHelper.clamp(pitch, -60.0f, 60.0f));
+		float pitch = (float) -(Mth.atan2(dy, Math.sqrt(dx * dx + dz * dz)) * Mth.RAD_TO_DEG);
+		this.setYRot(yaw);
+		this.setYBodyRot(yaw);
+		this.setYHeadRot(yaw);
+		this.setXRot(Mth.clamp(pitch, -60.0f, 60.0f));
 	}
 
-	public void walkTo(Vec3d pos, double speed) {
-		this.getNavigation().startMovingTo(pos.x, pos.y, pos.z, speed);
+	public void walkTo(Vec3 pos, double speed) {
+		this.getNavigation().moveTo(pos.x, pos.y, pos.z, speed);
 	}
 
 	public void chase(Entity entity, double speed) {
-		this.getNavigation().startMovingTo(entity, speed);
+		this.getNavigation().moveTo(entity, speed);
 	}
 
 	public void halt() {
 		this.getNavigation().stop();
-		Vec3d v = this.getVelocity();
-		this.setVelocity(0, Math.min(0, v.y), 0);
+		Vec3 v = this.getDeltaMovement();
+		this.setDeltaMovement(0, Math.min(0, v.y), 0);
 	}
 
 	public boolean isPathing() {
-		return !this.getNavigation().isIdle();
+		return this.getNavigation().isInProgress();
 	}
 
 	// ------------------------------------------------------------------ ticking
@@ -195,52 +196,52 @@ public class OccupantEntity extends PathAwareEntity {
 	@Override
 	public void tick() {
 		super.tick();
-		if (this.getWorld().isClient || this.isRemoved()) return;
+		if (this.level().isClientSide() || this.isRemoved()) return;
 
-		ServerPlayerEntity target = findHauntedPlayer(true);
-		if (target == null || !target.isAlive() || ++ticksUncontrolled > ORPHAN_TICKS || this.age > MAX_LIFETIME
-				|| this.squaredDistanceTo(target) > 160 * 160) {
+		ServerPlayer target = findHauntedPlayer(true);
+		if (target == null || !target.isAlive() || ++ticksUncontrolled > ORPHAN_TICKS || this.tickCount > MAX_LIFETIME
+				|| this.distanceToSqr(target) > 160 * 160) {
 			vanish();
 			return;
 		}
 
 		if (gazeLocked && !isPathing()) {
-			faceTowards(target.getEyePos());
+			faceTowards(target.getEyePosition());
 		} else if (gazeLocked) {
-			this.getLookControl().lookAt(target, 60.0f, 60.0f);
+			this.getLookControl().setLookAt(target, 60.0f, 60.0f);
 		}
 
 		if (footsteps) tickFootsteps(target);
 	}
 
-	private void tickFootsteps(ServerPlayerEntity target) {
-		if (!this.isOnGround()) return;
-		Vec3d v = this.getVelocity();
+	private void tickFootsteps(ServerPlayer target) {
+		if (!this.onGround()) return;
+		Vec3 v = this.getDeltaMovement();
 		stepAccumulator += Math.sqrt(v.x * v.x + v.z * v.z);
 		if (stepAccumulator < STEP_DISTANCE) return;
 		stepAccumulator = 0;
 
-		BlockPos below = this.getBlockPos().down();
-		BlockState floor = this.getWorld().getBlockState(below);
+		BlockPos below = this.blockPosition().below();
+		BlockState floor = this.level().getBlockState(below);
 		if (floor.isAir()) return;
-		BlockSoundGroup group = floor.getSoundGroup();
+		SoundType group = floor.getSoundType();
 		float volume = getMode() == Mode.CHASE ? group.getVolume() * 0.35f : group.getVolume() * 0.18f;
-		Cues.sound(target, group.getStepSound(), SoundCategory.PLAYERS, this.getPos(), volume, group.getPitch());
+		Cues.sound(target, group.getStepSound(), SoundSource.PLAYERS, this.position(), volume, group.getPitch());
 	}
 
 	// ------------------------------------------------------------------ rules that keep it unbreakable
 
 	/** Only the haunted player's client is ever told this entity exists. */
 	@Override
-	public boolean canBeSpectated(ServerPlayerEntity spectator) {
-		return isHaunting(spectator);
+	public boolean broadcastToPlayer(ServerPlayer player) {
+		return isHaunting(player);
 	}
 
 	@Override
-	public boolean damage(DamageSource source, float amount) {
-		if (!this.getWorld().isClient && !this.isRemoved()) {
-			if (source.getAttacker() instanceof ServerPlayerEntity player && isHaunting(player)) {
-				Cues.sound(player, ModSounds.STATIC, SoundCategory.HOSTILE, this.getEyePos(), 0.8f, 1.0f);
+	public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
+		if (!this.isRemoved()) {
+			if (source.getEntity() instanceof ServerPlayer player && isHaunting(player)) {
+				Cues.sound(player, ModSounds.STATIC, SoundSource.HOSTILE, this.getEyePosition(), 0.8f, 1.0f);
 			}
 			vanish();
 		}
@@ -248,7 +249,7 @@ public class OccupantEntity extends PathAwareEntity {
 	}
 
 	@Override
-	public boolean handleFallDamage(float fallDistance, float damageMultiplier, DamageSource damageSource) {
+	public boolean causeFallDamage(double fallDistance, float damageMultiplier, DamageSource damageSource) {
 		return false;
 	}
 
@@ -258,20 +259,20 @@ public class OccupantEntity extends PathAwareEntity {
 	}
 
 	@Override
-	protected void pushAway(Entity entity) {
+	protected void doPush(Entity entity) {
 	}
 
 	@Override
-	public void pushAwayFrom(Entity entity) {
+	public void push(Entity entity) {
 	}
 
 	@Override
-	public boolean canAvoidTraps() {
+	public boolean isIgnoringBlockTriggers() {
 		return true;
 	}
 
 	@Override
-	public boolean isCollidable() {
+	public boolean canBeCollidedWith(@Nullable Entity entity) {
 		return false;
 	}
 
@@ -281,22 +282,22 @@ public class OccupantEntity extends PathAwareEntity {
 	}
 
 	@Override
-	public boolean canImmediatelyDespawn(double distanceSquared) {
+	public boolean removeWhenFarAway(double distanceSquared) {
 		return false;
 	}
 
 	@Override
-	public boolean shouldRenderName() {
+	public boolean shouldShowName() {
 		return false;
 	}
 
 	@Override
-	public boolean isFireImmune() {
+	public boolean fireImmune() {
 		return true;
 	}
 
 	@Override
-	protected boolean canStartRiding(Entity entity) {
+	protected boolean canRide(Entity entity) {
 		return false;
 	}
 }

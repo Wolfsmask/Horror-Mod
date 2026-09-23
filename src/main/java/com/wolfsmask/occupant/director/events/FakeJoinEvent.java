@@ -6,9 +6,9 @@ import com.wolfsmask.occupant.director.HorrorEvent;
 import com.wolfsmask.occupant.director.Sequence;
 import com.wolfsmask.occupant.director.Timeline;
 import com.wolfsmask.occupant.util.Cues;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
+import net.minecraft.util.RandomSource;
 
 /**
  * "... joined the game." Nobody did. Early on the name is almost yours.
@@ -36,8 +36,8 @@ public final class FakeJoinEvent extends HorrorEvent {
 		int leaveAt = 20 * (30 + ctx.random.nextInt(60));
 
 		Timeline t = new Timeline()
-				.at(0, p -> Cues.message(p, Text.translatable("multiplayer.player.joined", name).formatted(Formatting.YELLOW)))
-				.at(leaveAt, p -> Cues.message(p, Text.translatable("multiplayer.player.left", name).formatted(Formatting.YELLOW)));
+				.at(0, p -> Cues.message(p, Component.translatable("multiplayer.player.joined", name).withStyle(ChatFormatting.YELLOW)))
+				.at(leaveAt, p -> Cues.message(p, Component.translatable("multiplayer.player.left", name).withStyle(ChatFormatting.YELLOW)));
 		if (ctx.act() >= 3 && ctx.random.nextFloat() < 0.4f) {
 			String line = DoppelChatEvent.pickLine(ctx);
 			t.at(leaveAt / 2, p -> Cues.message(p, DoppelChatEvent.chat(name, line)));
@@ -46,7 +46,7 @@ public final class FakeJoinEvent extends HorrorEvent {
 	}
 
 	/** The player's name, very slightly wrong. */
-	static String almost(String name, Random random) {
+	static String almost(String name, RandomSource random) {
 		if (name.length() < 3) return name + name.charAt(name.length() - 1);
 		int i = 1 + random.nextInt(name.length() - 2);
 		if (random.nextBoolean()) {

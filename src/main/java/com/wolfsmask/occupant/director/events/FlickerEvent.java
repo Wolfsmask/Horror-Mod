@@ -11,9 +11,9 @@ import com.wolfsmask.occupant.network.ScreenEffectPayload;
 import com.wolfsmask.occupant.util.Cues;
 import com.wolfsmask.occupant.util.Sight;
 import com.wolfsmask.occupant.util.Spots;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * The lights stutter. Later in the story, in the split seconds between the flickers,
@@ -35,10 +35,10 @@ public final class FlickerEvent extends HorrorEvent {
 
 	@Override
 	public Sequence begin(EventContext ctx) {
-		ServerPlayerEntity p = ctx.player;
+		ServerPlayer p = ctx.player;
 		if (ctx.aloneEnough() && ctx.random.nextFloat() < 0.45f) {
 			BlockPos spot = Spots.aroundPlayer(p, ctx.random, 5, 9, 0, 22, false, 20, pos -> {
-				Vec3d base = Vec3d.ofBottomCenter(pos);
+				Vec3 base = Vec3.atBottomCenterOf(pos);
 				return Math.abs(pos.getY() - p.getBlockY()) <= 2
 						&& Sight.hasLineOfSight(p, base.add(0, 1.6, 0))
 						&& Sight.hasLineOfSight(p, base.add(0, 0.9, 0));
@@ -58,7 +58,7 @@ public final class FlickerEvent extends HorrorEvent {
 		}
 
 		@Override
-		protected boolean update(ServerPlayerEntity p, boolean looking) {
+		protected boolean update(ServerPlayer p, boolean looking) {
 			if (age == 1) Cues.effect(p, ScreenEffectPayload.FLICKER, 30, 1f);
 			return age < FINAL_DARK_TICK;
 		}

@@ -12,10 +12,10 @@ import com.wolfsmask.occupant.registry.ModSounds;
 import com.wolfsmask.occupant.util.Cues;
 import com.wolfsmask.occupant.util.Sight;
 import com.wolfsmask.occupant.util.Spots;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 /** You wake up. It is standing at the foot of your bed. Only started by the wake-up hook. */
@@ -59,13 +59,13 @@ public final class WakeEvent extends HorrorEvent {
 		}
 
 		@Override
-		public boolean tick(ServerPlayerEntity p) {
+		public boolean tick(ServerPlayer p) {
 			age++;
 			if (entity == null) {
 				// Give the player a moment to get up and for their view to settle.
 				if (age < SETTLE_TICKS) return true;
 				BlockPos spot = Spots.aroundPlayer(p, p.getRandom(), 2.5, 4.5, 0, 35, false, 20, pos -> {
-					Vec3d base = Vec3d.ofBottomCenter(pos);
+					Vec3 base = Vec3.atBottomCenterOf(pos);
 					return Math.abs(pos.getY() - p.getBlockY()) <= 1 && Sight.hasLineOfSight(p, base.add(0, 1.6, 0));
 				});
 				if (spot == null) return false;
@@ -75,12 +75,12 @@ public final class WakeEvent extends HorrorEvent {
 				return true;
 			}
 
-			if (entity.hasVanished() || p.getWorld() != entity.getWorld()) return false;
+			if (entity.hasVanished() || p.level() != entity.level()) return false;
 			entity.keepAlive();
 			lookTicks = Sight.isLookingAt(p, entity) ? lookTicks + 1 : 0;
 			if (lookTicks >= 8) {
 				haunt.data.encounters++;
-				Cues.soundAtEars(p, ModSounds.DRONE, SoundCategory.AMBIENT, 0.7f, 1.2f);
+				Cues.soundAtEars(p, ModSounds.DRONE, SoundSource.AMBIENT, 0.7f, 1.2f);
 				Cues.effect(p, ScreenEffectPayload.STATIC, 8, 0.4f);
 				return false;
 			}

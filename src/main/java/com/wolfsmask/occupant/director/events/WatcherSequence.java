@@ -6,8 +6,8 @@ import com.wolfsmask.occupant.network.ScreenEffectPayload;
 import com.wolfsmask.occupant.registry.ModSounds;
 import com.wolfsmask.occupant.util.Cues;
 import com.wolfsmask.occupant.util.Sight;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
 
 /**
  * It stands and watches. When you notice it, it is gone a moment later: or, sometimes, it waits
@@ -33,16 +33,16 @@ public class WatcherSequence extends ApparitionSequence {
 	}
 
 	@Override
-	protected void onSeen(ServerPlayerEntity player) {
+	protected void onSeen(ServerPlayer player) {
 		haunt.data.addDread(6f);
 		Cues.effect(player, ScreenEffectPayload.SILENCE, 0, 1f);
 		if (haunt.data.act >= 3) {
-			Cues.soundAtEars(player, ModSounds.DRONE, SoundCategory.AMBIENT, 0.45f, 1.0f);
+			Cues.soundAtEars(player, ModSounds.DRONE, SoundSource.AMBIENT, 0.45f, 1.0f);
 		}
 	}
 
 	@Override
-	protected boolean update(ServerPlayerEntity player, boolean looking) {
+	protected boolean update(ServerPlayer player, boolean looking) {
 		if (entity.distanceTo(player) < vanishDistance) return false;
 
 		if (seen) {
@@ -60,7 +60,7 @@ public class WatcherSequence extends ApparitionSequence {
 		return age <= maxLife + 600;
 	}
 
-	private boolean staticVanish(ServerPlayerEntity player) {
+	private boolean staticVanish(ServerPlayer player) {
 		Cues.effect(player, ScreenEffectPayload.STATIC, 6, 0.3f);
 		return false;
 	}

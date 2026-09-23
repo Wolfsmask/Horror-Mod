@@ -7,9 +7,9 @@ import com.wolfsmask.occupant.director.Situation;
 import com.wolfsmask.occupant.entity.OccupantEntity;
 import com.wolfsmask.occupant.util.Sight;
 import com.wolfsmask.occupant.util.Spots;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -31,7 +31,7 @@ public final class WatcherEvent extends HorrorEvent {
 	@Override
 	@Nullable
 	public Sequence begin(EventContext ctx) {
-		ServerPlayerEntity p = ctx.player;
+		ServerPlayer p = ctx.player;
 		boolean underground = ctx.situation.underground();
 		int act = ctx.act();
 
@@ -68,10 +68,10 @@ public final class WatcherEvent extends HorrorEvent {
 	}
 
 	static boolean goodSpot(EventContext ctx, BlockPos pos, double minDist) {
-		ServerPlayerEntity p = ctx.player;
-		Vec3d base = Vec3d.ofBottomCenter(pos);
-		if (base.distanceTo(p.getPos()) < minDist * 0.8) return false;
-		if (Spots.light(ctx.world, pos.up()) > 7) return false;
+		ServerPlayer p = ctx.player;
+		Vec3 base = Vec3.atBottomCenterOf(pos);
+		if (base.distanceTo(p.position()) < minDist * 0.8) return false;
+		if (Spots.light(ctx.world, pos.above()) > 7) return false;
 		if (!Spots.awayFromOthers(p, base, 24)) return false;
 		return Sight.hasLineOfSight(p, base.add(0, 1.6, 0)) && Sight.hasLineOfSight(p, base.add(0, 0.9, 0));
 	}

@@ -7,23 +7,23 @@ import com.wolfsmask.occupant.director.HauntData;
 import com.wolfsmask.occupant.entity.OccupantEntity;
 import com.wolfsmask.occupant.util.Sight;
 import com.wolfsmask.occupant.util.Spots;
-import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.DoorBlock;
-import net.minecraft.block.enums.DoubleBlockHalf;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.test.GameTest;
-import net.minecraft.test.TestContext;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.Heightmap;
-import net.minecraft.world.LightType;
+import net.fabricmc.fabric.api.gametest.v1.GameTest;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.SectionPos;
+import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.storage.LevelData;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,50 +33,49 @@ import java.util.List;
  * house) and checks that each event really finds its place there. Events are allowed to do
  * nothing when a place is wrong; this proves they DO happen when the place is right.
  */
-public final class ArenaGameTests implements FabricGameTest {
+public final class ArenaGameTests {
 	private static final int LIMIT = 12000;
 	private static final int TRIES = 3;
 
-	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "arena", tickLimit = LIMIT)
-	public void eventsFindTheirPlace(TestContext ctx) {
-		Arena arena = new Arena(ctx);
-		for (int t = 1; t < LIMIT - 10; t++) {
-			int tick = t;
-			ctx.runAtTick(t, () -> arena.step(tick));
-		}
+	@GameTest(maxTicks = LIMIT)
+	public void eventsFindTheirPlace(GameTestHelper helper) {
+		Arena arena = new Arena(helper);
+		helper.onEachTick(arena::step);
 	}
 
 	private static final class Arena {
-		private final TestContext ctx;
-		private final ServerWorld world;
+		private final GameTestHelper helper;
+		private final ServerLevel world;
 		private final BlockPos field;
 		private final BlockPos cave;
 		private final BlockPos house;
-		private final List<ChunkPos> chunks = new ArrayList<>();
+		/** Forced chunks, as {x, z} pairs. */
+		private final List<int[]> chunks = new ArrayList<>();
 		private final List<String> failures = new ArrayList<>();
 
+		private int tick;
 		private int phase;
 		private int builtAt;
-		private boolean previousCreative;
 		private int errorsBefore;
 		private Director director;
-		private ServerPlayerEntity player;
+		private ServerPlayer player;
 
-		Arena(TestContext ctx) {
-			this.ctx = ctx;
-			this.world = ctx.getWorld();
-			BlockPos base = ctx.getAbsolutePos(BlockPos.ORIGIN);
+		Arena(GameTestHelper helper) {
+			this.helper = helper;
+			this.world = helper.getLevel();
+			BlockPos base = helper.absolutePos(BlockPos.ZERO);
 			this.field = new BlockPos(base.getX() + 400, 120, base.getZ());
 			this.cave = new BlockPos(base.getX() + 400, 60, base.getZ() + 120);
 			this.house = new BlockPos(base.getX() + 400, 120, base.getZ() + 240);
 		}
 
-		void step(int tick) {
+		void step() {
+			tick++;
 			if (phase == 0) {
 				setUp();
 				phase = 1;
 			} else if (phase == 1) {
-				if (chunks.stream().allMatch(c -> world.getChunkManager().isChunkLoaded(c.x, c.z))) {
+				if (chunks.stream().allMatch(c -> world.getChunkSource().hasChunk(c[0], c[1]))) {
 					build();
 					builtAt = tick;
 					phase = 2;
@@ -84,10 +83,11 @@ public final class ArenaGameTests implements FabricGameTest {
 					finish("chunks never loaded");
 				}
 			} else if (phase == 2) {
-				boolean caveDark = world.getLightLevel(LightType.SKY, cave) == 0;
-				boolean fieldLit = world.getLightLevel(LightType.SKY, field.up()) == 15;
+				boolean caveDark = world.getBrightness(LightLayer.SKY, cave) == 0;
+				boolean fieldLit = world.getBrightness(LightLayer.SKY, field.above()) == 15;
 				if ((caveDark && fieldLit && tick - builtAt > 100) || tick - builtAt > 3000) {
 					if (!caveDark) failures.add("cave light never settled");
+					if (!world.isDarkOutside()) failures.add("it never became night");
 					runChecks();
 					finish(null);
 				}
@@ -96,13 +96,11 @@ public final class ArenaGameTests implements FabricGameTest {
 
 		private void setUp() {
 			director = Director.get();
-			ctx.assertTrue(director != null, "Director should be running");
-			OccupantConfig cfg = OccupantConfig.get();
-			previousCreative = cfg.hauntCreative;
-			cfg.hauntCreative = true;
-			world.setTimeOfDay(18000);
+			helper.assertTrue(director != null, "Director should be running");
+			OccupantConfig.get().hauntCreative = true;
+			OccupantGameTests.makeNight(world);
 
-			player = ctx.createMockCreativeServerPlayerInWorld();
+			player = helper.makeMockServerPlayerInLevel();
 			HauntData data = director.data(player);
 			data.setAct(HauntData.MAX_ACT);
 			errorsBefore = director.totalErrors();
@@ -113,12 +111,12 @@ public final class ArenaGameTests implements FabricGameTest {
 		}
 
 		private void forceChunks(BlockPos center, int radius) {
-			ChunkPos c = new ChunkPos(center);
+			int cx = SectionPos.blockToSectionCoord(center.getX());
+			int cz = SectionPos.blockToSectionCoord(center.getZ());
 			for (int x = -radius; x <= radius; x++) {
 				for (int z = -radius; z <= radius; z++) {
-					ChunkPos p = new ChunkPos(c.x + x, c.z + z);
-					world.setChunkForced(p.x, p.z, true);
-					chunks.add(p);
+					world.setChunkForced(cx + x, cz + z, true);
+					chunks.add(new int[]{cx + x, cz + z});
 				}
 			}
 		}
@@ -127,26 +125,26 @@ public final class ArenaGameTests implements FabricGameTest {
 
 		private void build() {
 			// Open field: a big grass platform high in the air, nothing around it.
-			fill(field.add(-30, -1, -30), field.add(30, -1, 30), Blocks.GRASS_BLOCK.getDefaultState());
+			fill(field.offset(-30, -1, -30), field.offset(30, -1, 30), Blocks.GRASS_BLOCK.defaultBlockState());
 
 			// Cave: a solid stone mass with a long, dark, 5-wide corridor through the middle.
-			fill(cave.add(-20, -6, -20), cave.add(20, 8, 20), Blocks.STONE.getDefaultState());
-			fill(cave.add(-18, 0, -2), cave.add(18, 2, 2), Blocks.AIR.getDefaultState());
+			fill(cave.offset(-20, -6, -20), cave.offset(20, 8, 20), Blocks.STONE.defaultBlockState());
+			fill(cave.offset(-18, 0, -2), cave.offset(18, 2, 2), Blocks.AIR.defaultBlockState());
 
 			// House: a plank box with a door behind the player and a chest in the corner.
-			fill(house.add(-5, -1, -5), house.add(5, 4, 5), Blocks.OAK_PLANKS.getDefaultState());
-			fill(house.add(-4, 0, -4), house.add(4, 3, 4), Blocks.AIR.getDefaultState());
-			BlockPos door = house.add(0, 0, -5);
-			BlockState lower = Blocks.OAK_DOOR.getDefaultState()
-					.with(DoorBlock.FACING, Direction.SOUTH).with(DoorBlock.HALF, DoubleBlockHalf.LOWER);
-			world.setBlockState(door, lower, Block.NOTIFY_ALL);
-			world.setBlockState(door.up(), lower.with(DoorBlock.HALF, DoubleBlockHalf.UPPER), Block.NOTIFY_ALL);
-			world.setBlockState(house.add(3, 0, -3), Blocks.CHEST.getDefaultState(), Block.NOTIFY_ALL);
+			fill(house.offset(-5, -1, -5), house.offset(5, 4, 5), Blocks.OAK_PLANKS.defaultBlockState());
+			fill(house.offset(-4, 0, -4), house.offset(4, 3, 4), Blocks.AIR.defaultBlockState());
+			BlockPos door = house.offset(0, 0, -5);
+			BlockState lower = Blocks.OAK_DOOR.defaultBlockState()
+					.setValue(DoorBlock.FACING, Direction.SOUTH).setValue(DoorBlock.HALF, DoubleBlockHalf.LOWER);
+			world.setBlock(door, lower, Block.UPDATE_ALL);
+			world.setBlock(door.above(), lower.setValue(DoorBlock.HALF, DoubleBlockHalf.UPPER), Block.UPDATE_ALL);
+			world.setBlock(house.offset(3, 0, -3), Blocks.CHEST.defaultBlockState(), Block.UPDATE_ALL);
 		}
 
 		private void fill(BlockPos from, BlockPos to, BlockState state) {
-			for (BlockPos p : BlockPos.iterate(from, to)) {
-				world.setBlockState(p, state, Block.NOTIFY_LISTENERS);
+			for (BlockPos p : BlockPos.betweenClosed(from, to)) {
+				world.setBlock(p, state, Block.UPDATE_CLIENTS);
 			}
 		}
 
@@ -155,15 +153,16 @@ public final class ArenaGameTests implements FabricGameTest {
 		private void runChecks() {
 			// Field, facing south (+Z), at night.
 			place(field, 0.0f);
-			player.setSpawnPoint(world.getRegistryKey(), field.add(0, 0, -22), 0.0f, true, false);
+			player.setRespawnPosition(new ServerPlayer.RespawnConfig(
+					LevelData.RespawnData.of(world.dimension(), field.offset(0, 0, -22), 0.0f, 0.0f), true), false);
 			expect("field", "watcher", "stalker", "hunt", "behind_you", "footsteps", "sign", "intruder");
 
 			// Cave, facing east (+X) down the corridor.
 			place(cave, -90.0f);
 			diagnoseCave();
 			expect("cave", "cave_noise", "distant_mining", "watcher", "marker_torch", "tunnel");
-			world.setBlockState(cave.add(-11, 0, 0), Blocks.TORCH.getDefaultState(), Block.NOTIFY_ALL);
-			world.setBlockState(cave.add(-14, 0, 1), Blocks.TORCH.getDefaultState(), Block.NOTIFY_ALL);
+			world.setBlock(cave.offset(-11, 0, 0), Blocks.TORCH.defaultBlockState(), Block.UPDATE_ALL);
+			world.setBlock(cave.offset(-14, 0, 1), Blocks.TORCH.defaultBlockState(), Block.UPDATE_ALL);
 			expect("cave", "torch_gone");
 
 			// House, facing away from the door.
@@ -173,36 +172,36 @@ public final class ArenaGameTests implements FabricGameTest {
 
 		/** Logs what the cave looks like to the spot checks, so a failure here is easy to understand. */
 		private void diagnoseCave() {
-			BlockPos feet = player.getBlockPos();
+			BlockPos feet = player.blockPosition();
 			int stand = 0;
 			int dark = 0;
 			int seen = 0;
 			for (int x = 8; x <= 18; x++) {
 				for (int z = -2; z <= 2; z++) {
-					BlockPos p = cave.add(x, 0, z);
+					BlockPos p = cave.offset(x, 0, z);
 					if (!Spots.canStand(world, p)) continue;
 					stand++;
-					if (Spots.light(world, p.up()) <= 7) dark++;
-					Vec3d base = Vec3d.ofBottomCenter(p);
+					if (Spots.light(world, p.above()) <= 7) dark++;
+					Vec3 base = Vec3.atBottomCenterOf(p);
 					if (Sight.hasLineOfSight(player, base.add(0, 1.6, 0)) && Sight.hasLineOfSight(player, base.add(0, 0.9, 0))) seen++;
 				}
 			}
 			Occupant.LOGGER.info("[gametest] cave: yaw={} feet={} underground={} skyVisible={} skyLight={} topY={} light={} look={} | ahead: standable={} dark={} visible={}",
-					player.getYaw(), feet, Spots.isUnderground(world, feet), world.isSkyVisible(feet), world.getLightLevel(LightType.SKY, feet),
-					world.getTopY(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, feet.getX(), feet.getZ()), Spots.light(world, feet.up()),
+					player.getYRot(), feet, Spots.isUnderground(world, feet), world.canSeeSky(feet), world.getBrightness(LightLayer.SKY, feet),
+					world.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, feet.getX(), feet.getZ()), Spots.light(world, feet.above()),
 					Sight.flatLook(player), stand, dark, seen);
 		}
 
 		private void place(BlockPos pos, float yaw) {
 			director.stopCurrent(player);
-			player.refreshPositionAndAngles(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, yaw, 0.0f);
-			// Set every rotation field directly; the mock player does not take it from the call above.
-			player.setYaw(yaw);
-			player.setPitch(0.0f);
-			player.setHeadYaw(yaw);
-			player.setBodyYaw(yaw);
-			player.prevYaw = yaw;
-			player.prevPitch = 0.0f;
+			player.snapTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, yaw, 0.0f);
+			// Set every rotation field directly; mock players do not always take it from the call above.
+			player.setYRot(yaw);
+			player.setXRot(0.0f);
+			player.setYHeadRot(yaw);
+			player.setYBodyRot(yaw);
+			player.yRotO = yaw;
+			player.xRotO = 0.0f;
 		}
 
 		private void expect(String where, String... events) {
@@ -219,20 +218,19 @@ public final class ArenaGameTests implements FabricGameTest {
 		private void finish(String fatal) {
 			phase = 3;
 			director.stopCurrent(player);
-			OccupantConfig.get().hauntCreative = previousCreative;
-			for (ChunkPos c : chunks) world.setChunkForced(c.x, c.z, false);
+			for (int[] c : chunks) world.setChunkForced(c[0], c[1], false);
 
 			if (fatal != null) failures.add(fatal);
 			Occupant.LOGGER.info("[gametest] arena failures: {}", failures);
-			ctx.assertTrue(director.totalErrors() == errorsBefore, "No event may throw in the arena (see log)");
-			ctx.assertTrue(failures.isEmpty(), "Events that could not find their place: " + failures);
+			helper.assertTrue(director.totalErrors() == errorsBefore, "No event may throw in the arena (see log)");
+			helper.assertTrue(failures.isEmpty(), "Events that could not find their place: " + failures);
 
 			List<OccupantEntity> leftovers = new ArrayList<>();
 			for (BlockPos p : List.of(field, cave, house)) {
-				leftovers.addAll(world.getEntitiesByClass(OccupantEntity.class, new Box(p).expand(64), e -> !e.isRemoved()));
+				leftovers.addAll(world.getEntitiesOfClass(OccupantEntity.class, new AABB(p).inflate(64), e -> !e.isRemoved()));
 			}
-			ctx.assertTrue(leftovers.isEmpty(), "No Occupant may be left behind");
-			ctx.complete();
+			helper.assertTrue(leftovers.isEmpty(), "No Occupant may be left behind");
+			helper.succeed();
 		}
 	}
 }

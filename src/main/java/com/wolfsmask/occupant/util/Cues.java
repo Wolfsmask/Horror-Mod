@@ -2,14 +2,14 @@ package com.wolfsmask.occupant.util;
 
 import com.wolfsmask.occupant.network.ScreenEffectPayload;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundSoundPacket;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * Sounds, messages and screen effects that only ONE player receives.
@@ -20,30 +20,30 @@ public final class Cues {
 	private Cues() {
 	}
 
-	public static void sound(ServerPlayerEntity player, RegistryEntry<SoundEvent> sound, SoundCategory category,
-							 Vec3d pos, float volume, float pitch) {
-		player.networkHandler.sendPacket(new PlaySoundS2CPacket(
+	public static void sound(ServerPlayer player, Holder<SoundEvent> sound, SoundSource category,
+							 Vec3 pos, float volume, float pitch) {
+		player.connection.send(new ClientboundSoundPacket(
 				sound, category, pos.x, pos.y, pos.z, volume, pitch, player.getRandom().nextLong()));
 	}
 
-	public static void sound(ServerPlayerEntity player, SoundEvent sound, SoundCategory category,
-							 Vec3d pos, float volume, float pitch) {
-		sound(player, Registries.SOUND_EVENT.getEntry(sound), category, pos, volume, pitch);
+	public static void sound(ServerPlayer player, SoundEvent sound, SoundSource category,
+							 Vec3 pos, float volume, float pitch) {
+		sound(player, BuiltInRegistries.SOUND_EVENT.wrapAsHolder(sound), category, pos, volume, pitch);
 	}
 
 	/** A sound right at the player's head (not positional in practice). */
-	public static void soundAtEars(ServerPlayerEntity player, RegistryEntry<SoundEvent> sound, SoundCategory category,
+	public static void soundAtEars(ServerPlayer player, Holder<SoundEvent> sound, SoundSource category,
 								   float volume, float pitch) {
-		sound(player, sound, category, player.getEyePos(), volume, pitch);
+		sound(player, sound, category, player.getEyePosition(), volume, pitch);
 	}
 
-	public static void effect(ServerPlayerEntity player, int effect, int durationTicks, float intensity) {
-		if (ServerPlayNetworking.canSend(player, ScreenEffectPayload.ID)) {
+	public static void effect(ServerPlayer player, int effect, int durationTicks, float intensity) {
+		if (ServerPlayNetworking.canSend(player, ScreenEffectPayload.TYPE)) {
 			ServerPlayNetworking.send(player, new ScreenEffectPayload(effect, durationTicks, intensity));
 		}
 	}
 
-	public static void message(ServerPlayerEntity player, Text text) {
-		player.sendMessage(text, false);
+	public static void message(ServerPlayer player, Component text) {
+		player.sendSystemMessage(text);
 	}
 }

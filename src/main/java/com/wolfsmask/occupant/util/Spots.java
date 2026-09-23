@@ -1,17 +1,17 @@
 package com.wolfsmask.occupant.util;
 
 import com.wolfsmask.occupant.registry.ModEntities;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkSectionPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.Heightmap;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.SectionPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Predicate;
@@ -26,63 +26,61 @@ public final class Spots {
 	}
 
 	/** Never touches chunks that are not already loaded (that would stall the server). */
-	public static boolean isLoaded(ServerWorld world, BlockPos pos) {
-		return world.isInBuildLimit(pos)
-				&& world.isChunkLoaded(ChunkSectionPos.getSectionCoord(pos.getX()), ChunkSectionPos.getSectionCoord(pos.getZ()));
+	public static boolean isLoaded(ServerLevel world, BlockPos pos) {
+		return world.isInWorldBounds(pos)
+				&& world.hasChunk(SectionPos.blockToSectionCoord(pos.getX()), SectionPos.blockToSectionCoord(pos.getZ()));
 	}
 
 	/** Could the Occupant stand with its feet in this block? */
-	public static boolean canStand(ServerWorld world, BlockPos feet) {
-		if (!isLoaded(world, feet) || !world.isInBuildLimit(feet.up(2))) return false;
+	public static boolean canStand(ServerLevel world, BlockPos feet) {
+		if (!isLoaded(world, feet) || !world.isInWorldBounds(feet.above(2))) return false;
 
-		BlockPos below = feet.down();
+		BlockPos below = feet.below();
 		BlockState floor = world.getBlockState(below);
-		if (!floor.isSideSolidFullSquare(world, below, Direction.UP)) return false;
-		if (floor.isIn(BlockTags.LEAVES) || floor.isOf(Blocks.MAGMA_BLOCK) || floor.isOf(Blocks.CACTUS)) return false;
+		if (!floor.isFaceSturdy(world, below, Direction.UP)) return false;
+		if (floor.is(BlockTags.LEAVES) || floor.is(Blocks.MAGMA_BLOCK) || floor.is(Blocks.CACTUS)) return false;
 
 		for (int i = 0; i < 2; i++) {
-			BlockPos p = feet.up(i);
+			BlockPos p = feet.above(i);
 			BlockState s = world.getBlockState(p);
 			if (!s.getCollisionShape(world, p).isEmpty()) return false;
 			if (!s.getFluidState().isEmpty()) return false;
-			if (s.isIn(BlockTags.FIRE) || s.isOf(Blocks.POWDER_SNOW) || s.isOf(Blocks.SWEET_BERRY_BUSH)) return false;
+			if (s.is(BlockTags.FIRE) || s.is(Blocks.POWDER_SNOW) || s.is(Blocks.SWEET_BERRY_BUSH)) return false;
 		}
 
-		Vec3d bottom = Vec3d.ofBottomCenter(feet);
-		return world.isSpaceEmpty(ModEntities.OCCUPANT.getDimensions().getBoxAt(bottom));
+		return world.noCollision(ModEntities.OCCUPANT.getDimensions().makeBoundingBox(Vec3.atBottomCenterOf(feet)));
 	}
 
 	/** Search a column for standable ground, preferring heights closest to {@code y}. */
 	@Nullable
-	public static BlockPos groundNear(ServerWorld world, int x, int y, int z, int range) {
-		BlockPos.Mutable m = new BlockPos.Mutable();
+	public static BlockPos groundNear(ServerLevel world, int x, int y, int z, int range) {
+		BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
 		for (int i = 0; i <= range * 2; i++) {
 			int dy = (i % 2 == 0) ? i / 2 : -(i / 2 + 1);
 			m.set(x, y + dy, z);
-			if (canStand(world, m)) return m.toImmutable();
+			if (canStand(world, m)) return m.immutable();
 		}
 		return null;
 	}
 
 	/** Standable ground on the surface (ignores tree canopies), or null. */
 	@Nullable
-	public static BlockPos surfaceAt(ServerWorld world, int x, int z) {
-		BlockPos probe = new BlockPos(x, world.getBottomY(), z);
-		if (!isLoaded(world, probe)) return null;
-		int top = world.getTopY(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, x, z);
+	public static BlockPos surfaceAt(ServerLevel world, int x, int z) {
+		if (!isLoaded(world, new BlockPos(x, world.getMinY(), z))) return null;
+		int top = world.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
 		return groundNear(world, x, top, z, 2);
 	}
 
 	/** Combined sky + block light, including night-time darkness. */
-	public static int light(ServerWorld world, BlockPos pos) {
-		return world.getLightLevel(pos);
+	public static int light(ServerLevel world, BlockPos pos) {
+		return world.getMaxLocalRawBrightness(pos);
 	}
 
 	/** No other player (besides {@code player}) within {@code radius} blocks of {@code pos}. */
-	public static boolean awayFromOthers(ServerPlayerEntity player, Vec3d pos, double radius) {
-		for (ServerPlayerEntity other : player.getServerWorld().getPlayers()) {
+	public static boolean awayFromOthers(ServerPlayer player, Vec3 pos, double radius) {
+		for (ServerPlayer other : player.level().players()) {
 			if (other == player || other.isSpectator()) continue;
-			if (other.getPos().squaredDistanceTo(pos) < radius * radius) return false;
+			if (other.position().distanceToSqr(pos) < radius * radius) return false;
 		}
 		return true;
 	}
@@ -93,17 +91,17 @@ public final class Spots {
 	 * straight ahead (0 = dead ahead, 180 = directly behind).
 	 */
 	@Nullable
-	public static BlockPos aroundPlayer(ServerPlayerEntity player, Random random, double minDist, double maxDist,
+	public static BlockPos aroundPlayer(ServerPlayer player, RandomSource random, double minDist, double maxDist,
 										double minAngle, double maxAngle, boolean surface, int attempts,
 										Predicate<BlockPos> accept) {
-		ServerWorld world = player.getServerWorld();
-		Vec3d origin = player.getPos();
-		Vec3d look = Sight.flatLook(player);
+		ServerLevel world = player.level();
+		Vec3 origin = player.position();
+		Vec3 look = Sight.flatLook(player);
 		for (int i = 0; i < attempts; i++) {
 			double angle = minAngle + random.nextDouble() * (maxAngle - minAngle);
 			if (random.nextBoolean()) angle = -angle;
 			double dist = minDist + random.nextDouble() * (maxDist - minDist);
-			Vec3d dir = Sight.rotateY(look, angle);
+			Vec3 dir = Sight.rotateY(look, angle);
 			int x = (int) Math.floor(origin.x + dir.x * dist);
 			int z = (int) Math.floor(origin.z + dir.z * dist);
 
@@ -118,24 +116,32 @@ public final class Spots {
 
 	/** Nearest block matching the predicate, searching outward from {@code center}. */
 	@Nullable
-	public static BlockPos nearestBlock(ServerWorld world, BlockPos center, int rangeXZ, int rangeY,
+	public static BlockPos nearestBlock(ServerLevel world, BlockPos center, int rangeXZ, int rangeY,
 										Predicate<BlockPos> accept) {
-		for (BlockPos p : BlockPos.iterateOutwards(center, rangeXZ, rangeY, rangeXZ)) {
+		for (BlockPos p : BlockPos.withinManhattan(center, rangeXZ, rangeY, rangeXZ)) {
 			if (!isLoaded(world, p)) continue;
-			if (accept.test(p)) return p.toImmutable();
+			if (accept.test(p)) return p.immutable();
 		}
 		return null;
 	}
 
 	/** Is this position underground (no sky above it and well below the surface)? */
-	public static boolean isUnderground(ServerWorld world, BlockPos pos) {
-		if (world.isSkyVisible(pos)) return false;
-		int surface = world.getTopY(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, pos.getX(), pos.getZ());
+	public static boolean isUnderground(ServerLevel world, BlockPos pos) {
+		if (world.canSeeSky(pos)) return false;
+		int surface = world.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, pos.getX(), pos.getZ());
 		return pos.getY() < surface - 6;
+	}
+
+	/** The player's bed or respawn anchor, if it is in the world they are standing in. */
+	@Nullable
+	public static BlockPos respawnPos(ServerPlayer player) {
+		ServerPlayer.RespawnConfig config = player.getRespawnConfig();
+		if (config == null || config.respawnData() == null) return null;
+		return config.respawnData().dimension() == player.level().dimension() ? config.respawnData().pos() : null;
 	}
 
 	/** Natural stone that may be carved without ever damaging a build. */
 	public static boolean isNaturalStone(BlockState state) {
-		return state.isIn(BlockTags.BASE_STONE_OVERWORLD);
+		return state.is(BlockTags.BASE_STONE_OVERWORLD);
 	}
 }

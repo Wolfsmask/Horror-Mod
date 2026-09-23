@@ -4,8 +4,8 @@ import com.wolfsmask.occupant.Occupant;
 import com.wolfsmask.occupant.OccupantConfig;
 import com.wolfsmask.occupant.director.events.Events;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -72,23 +72,23 @@ public final class Director {
 		return totalErrors;
 	}
 
-	public HauntData data(ServerPlayerEntity player) {
+	public HauntData data(ServerPlayer player) {
 		return haunt(player).data;
 	}
 
-	public Haunt haunt(ServerPlayerEntity player) {
-		return haunts.computeIfAbsent(player.getUuid(), u -> new Haunt(u, save.forPlayer(u), player.getRandom()));
+	public Haunt haunt(ServerPlayer player) {
+		return haunts.computeIfAbsent(player.getUUID(), u -> new Haunt(u, save.forPlayer(u), player.getRandom()));
 	}
 
 	public void markDirty() {
-		save.markDirty();
+		save.setDirty();
 	}
 
 	// ------------------------------------------------------------------ main loop
 
 	public void tick() {
 		OccupantConfig cfg = OccupantConfig.get();
-		for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			Haunt h = haunt(player);
 			try {
 				tickPlayer(h, player, cfg);
@@ -101,16 +101,16 @@ public final class Director {
 		Iterator<Haunt> it = haunts.values().iterator();
 		while (it.hasNext()) {
 			Haunt h = it.next();
-			if (server.getPlayerManager().getPlayer(h.uuid) == null) {
+			if (server.getPlayerList().getPlayer(h.uuid) == null) {
 				endSequence(h);
 				it.remove();
 			}
 		}
 
-		if (server.getTicks() % 100 == 0) save.markDirty();
+		if (server.getTickCount() % 100 == 0) save.setDirty();
 	}
 
-	private void tickPlayer(Haunt h, ServerPlayerEntity player, OccupantConfig cfg) {
+	private void tickPlayer(Haunt h, ServerPlayer player, OccupantConfig cfg) {
 		boolean eligible = isEligible(player, h, cfg);
 
 		if (h.active != null) {
@@ -147,9 +147,9 @@ public final class Director {
 		scheduleNext(h, player, s, cfg);
 	}
 
-	private boolean isEligible(ServerPlayerEntity player, Haunt h, OccupantConfig cfg) {
+	private boolean isEligible(ServerPlayer player, Haunt h, OccupantConfig cfg) {
 		if (!cfg.enabled || h.data.paused) return false;
-		if (player.isSpectator() || player.isDead()) return false;
+		if (player.isSpectator() || player.isDeadOrDying()) return false;
 		if (player.isCreative() && !cfg.hauntCreative) return false;
 		return Haunt.worldAllowed(player);
 	}
@@ -172,7 +172,7 @@ public final class Director {
 	 * The story has acts. Each one needs time AND enough to have happened, so a player who spends
 	 * hours in a lit base does not skip straight to the ending, but nobody gets stuck forever either.
 	 */
-	private void updateAct(HauntData d, OccupantConfig cfg, ServerPlayerEntity player) {
+	private void updateAct(HauntData d, OccupantConfig cfg, ServerPlayer player) {
 		double pace = cfg.storyPace;
 		long inAct = d.playTicks - d.actStartedAt;
 		int before = d.act;
@@ -198,7 +198,7 @@ public final class Director {
 
 		if (d.act != before) {
 			debug("{} entered act {}", player.getName().getString(), d.act);
-			save.markDirty();
+			save.setDirty();
 		}
 	}
 
@@ -241,9 +241,9 @@ public final class Director {
 		return w;
 	}
 
-	private void scheduleNext(Haunt h, ServerPlayerEntity player, Situation s, OccupantConfig cfg) {
+	private void scheduleNext(Haunt h, ServerPlayer player, Situation s, OccupantConfig cfg) {
 		HauntData d = h.data;
-		Random random = player.getRandom();
+		RandomSource random = player.getRandom();
 		EventContext ctx = new EventContext(player, h, s, false);
 		boolean calm = d.playTicks < d.calmUntil;
 
@@ -287,7 +287,7 @@ public final class Director {
 	}
 
 	private static HorrorEvent.Tier[] pickTierOrder(Map<HorrorEvent.Tier, Double> weights,
-													Set<HorrorEvent.Tier> available, Random random) {
+													Set<HorrorEvent.Tier> available, RandomSource random) {
 		List<HorrorEvent.Tier> remaining = new ArrayList<>();
 		for (HorrorEvent.Tier t : HorrorEvent.Tier.values()) {
 			if (available.contains(t) && weights.getOrDefault(t, 0.0) > 0) remaining.add(t);
@@ -311,7 +311,7 @@ public final class Director {
 		return order;
 	}
 
-	private static HorrorEvent pickWeighted(List<HorrorEvent> pool, EventContext ctx, Random random) {
+	private static HorrorEvent pickWeighted(List<HorrorEvent> pool, EventContext ctx, RandomSource random) {
 		double[] w = new double[pool.size()];
 		double total = 0;
 		for (int i = 0; i < pool.size(); i++) {
@@ -357,12 +357,12 @@ public final class Director {
 				d.calmUntil = Math.max(d.calmUntil, d.playTicks + (long) ((3 + ctx.random.nextInt(3)) * MINUTE / ctx.config.eventFrequency));
 			}
 		}
-		save.markDirty();
+		save.setDirty();
 		debug("{}: started {} (act {}, dread {})", ctx.player.getName().getString(), e.id(), d.act, (int) d.dread);
 		return true;
 	}
 
-	private void scheduleAfter(Haunt h, HorrorEvent e, Random random, OccupantConfig cfg) {
+	private void scheduleAfter(Haunt h, HorrorEvent e, RandomSource random, OccupantConfig cfg) {
 		double[] range = intervalMinutes(h.data.act);
 		double minutes = range[0] + random.nextDouble() * (range[1] - range[0]);
 		minutes *= 1.0 - Math.min(0.4, h.data.dread / 250.0); // more dread, faster pace
@@ -410,14 +410,14 @@ public final class Director {
 	// ------------------------------------------------------------------ hooks and commands
 
 	/** A player said something in chat. It remembers. */
-	public void onChat(ServerPlayerEntity player, String message) {
+	public void onChat(ServerPlayer player, String message) {
 		String m = message.strip();
 		if (m.length() < 2 || m.length() > 60 || m.startsWith("/") || m.contains("://")) return;
 		haunt(player).data.rememberChat(m);
 	}
 
 	/** Start an event right now (used by hooks and /occupant trigger). */
-	public TriggerResult trigger(ServerPlayerEntity player, String eventId, boolean forced) {
+	public TriggerResult trigger(ServerPlayer player, String eventId, boolean forced) {
 		HorrorEvent e = Events.byId(eventId);
 		if (e == null) return TriggerResult.UNKNOWN;
 		Haunt h = haunt(player);
@@ -433,14 +433,14 @@ public final class Director {
 		return tryBegin(h, e, ctx) ? TriggerResult.STARTED : TriggerResult.NO_SPOT;
 	}
 
-	public void stopCurrent(ServerPlayerEntity player) {
+	public void stopCurrent(ServerPlayer player) {
 		endSequence(haunt(player));
 	}
 
-	public void reset(ServerPlayerEntity player) {
-		Haunt old = haunts.remove(player.getUuid());
+	public void reset(ServerPlayer player) {
+		Haunt old = haunts.remove(player.getUUID());
 		if (old != null) endSequence(old);
-		save.reset(player.getUuid());
+		save.reset(player.getUUID());
 	}
 
 	public enum TriggerResult { STARTED, UNKNOWN, BUSY, NO_SPOT }

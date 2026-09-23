@@ -6,12 +6,12 @@ import com.wolfsmask.occupant.director.HorrorEvent;
 import com.wolfsmask.occupant.director.Sequence;
 import com.wolfsmask.occupant.util.Sight;
 import com.wolfsmask.occupant.util.Spots;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -39,15 +39,15 @@ public final class TunnelEvent extends HorrorEvent {
 	@Override
 	@Nullable
 	public Sequence begin(EventContext ctx) {
-		ServerPlayerEntity p = ctx.player;
-		ServerWorld world = ctx.world;
+		ServerPlayer p = ctx.player;
+		ServerLevel world = ctx.world;
 
 		for (int attempt = 0; attempt < 12; attempt++) {
 			BlockPos stand = Spots.aroundPlayer(p, ctx.random, 8, 18, 70, 180, false, 3, pos ->
-					Sight.isHidden(p, pos) && Sight.isHidden(p, pos.up()));
+					Sight.isHidden(p, pos) && Sight.isHidden(p, pos.above()));
 			if (stand == null) continue;
 
-			List<Direction> dirs = new ArrayList<>(Direction.Type.HORIZONTAL.stream().toList());
+			List<Direction> dirs = new ArrayList<>(Direction.Plane.HORIZONTAL.stream().toList());
 			for (int i = dirs.size() - 1; i > 0; i--) {
 				int j = ctx.random.nextInt(i + 1);
 				Direction tmp = dirs.get(i);
@@ -56,18 +56,18 @@ public final class TunnelEvent extends HorrorEvent {
 			}
 
 			for (Direction dir : dirs) {
-				BlockPos mouth = stand.offset(dir);
-				if (!Sight.isHidden(p, mouth) || !Sight.isHidden(p, mouth.up())) continue;
+				BlockPos mouth = stand.relative(dir);
+				if (!Sight.isHidden(p, mouth) || !Sight.isHidden(p, mouth.above())) continue;
 				List<BlockPos> plan = plan(world, stand, dir, 5 + ctx.random.nextInt(5));
 				if (plan.size() < 8) continue;
 
-				for (BlockPos b : plan) world.setBlockState(b, Blocks.AIR.getDefaultState(), Block.NOTIFY_ALL);
+				for (BlockPos b : plan) world.setBlock(b, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
 
 				BlockPos end = plan.get(plan.size() - 2);
 				List<BlockPos> sounds = new ArrayList<>();
-				sounds.add(end.offset(dir));
-				sounds.add(end.offset(dir).up());
-				sounds.add(end.offset(dir, 2));
+				sounds.add(end.relative(dir));
+				sounds.add(end.relative(dir).above());
+				sounds.add(end.relative(dir, 2));
 				return new MiningSequence(sounds, 5.0);
 			}
 		}
@@ -75,11 +75,11 @@ public final class TunnelEvent extends HorrorEvent {
 	}
 
 	/** Blocks to remove (feet and head, alternating), stopping at anything that is not plain stone. */
-	private static List<BlockPos> plan(ServerWorld world, BlockPos stand, Direction dir, int length) {
+	private static List<BlockPos> plan(ServerLevel world, BlockPos stand, Direction dir, int length) {
 		List<BlockPos> out = new ArrayList<>();
 		for (int i = 1; i <= length; i++) {
-			BlockPos feet = stand.offset(dir, i);
-			BlockPos head = feet.up();
+			BlockPos feet = stand.relative(dir, i);
+			BlockPos head = feet.above();
 			if (!Spots.isLoaded(world, feet)) break;
 			if (!Spots.isNaturalStone(world.getBlockState(feet)) || !Spots.isNaturalStone(world.getBlockState(head))) break;
 			if (WorldBlocks.touchesFluid(world, feet) || WorldBlocks.touchesFluid(world, head)) break;
