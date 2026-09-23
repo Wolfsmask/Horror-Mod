@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
@@ -32,15 +34,22 @@ jobs:
           set -o pipefail
           ./gradlew build --console=plain 2>&1 | tee build.log
 
-      # Compile errors are what matters and they are buried in the middle of the log, so
-      # they are repeated here at the very end where they are easy to find.
-      - name: Compile errors
+      # Compile errors are buried in the middle of a very long log, so they are written to a
+      # file and committed: reading them back out of the workflow log is unreliable.
+      - name: Commit compile errors
         if: failure()
         run: |
-          echo "::group::javac errors"
-          grep -E "^(e: |.*\.java:[0-9]+: error:)" build.log | head -n 60 || true
-          grep -E "error: |symbol:|location:|required:|found:" build.log | head -n 80 || true
-          echo "::endgroup::"
+          {
+            echo "# Build failed at $(date -u +%FT%TZ) on $GITHUB_SHA"
+            grep -E "\.java:[0-9]+: (error|warning):|^e: |^error: |symbol:|location:|required:|found:|reason:" build.log | head -n 120
+            echo "--- tail ---"
+            tail -n 40 build.log
+          } > tools/api-probe/build-errors.txt
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f tools/api-probe/build-errors.txt
+          git commit -m "Build errors [skip ci]" || true
+          git push origin HEAD:${GITHUB_REF_NAME} || true
 
       - name: Run game tests (headless server)
         run: |
