@@ -9,6 +9,7 @@ import com.wolfsmask.occupant.director.events.Events;
 import com.wolfsmask.occupant.entity.OccupantEntity;
 import com.wolfsmask.occupant.registry.ModEntities;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.NbtOps;
@@ -58,9 +59,9 @@ public final class OccupantGameTests {
 		player.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 3.0, 0.0f, 0.0f);
 
 		MinecraftServer server = level.getServer();
-		server.getCommands().performPrefixedCommand(server.createCommandSourceStack(),
-				String.format("execute in %s run summon occupant:occupant %d %d %d",
-						level.dimension().location(), at.getX(), at.getY(), at.getZ()));
+		CommandSourceStack source = server.createCommandSourceStack().withLevel(level);
+		server.getCommands().performPrefixedCommand(source,
+				String.format("summon occupant:occupant %d %d %d", at.getX(), at.getY(), at.getZ()));
 
 		helper.runAtTickTime(5, () -> {
 			List<OccupantEntity> found = level.getEntitiesOfClass(OccupantEntity.class,
