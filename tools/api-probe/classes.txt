@@ -1,4 +1,3 @@
-# Round 3: what the model classes really do at runtime. "@code" = bytecode of matching methods.
-@code net.minecraft.client.model.HumanoidModel HumanoidModel[(]|setupAnim
-@code net.minecraft.client.model.Model Model[(]|setupAnim|resetPose
-@code net.minecraft.client.model.EntityModel EntityModel[(]|setupAnim
+# Round 4: drawing text on the HUD.
+net.minecraft.client.gui.GuiGraphicsExtractor drawString|drawCentered|Text|text\(|font|Font
+net.minecraft.client.gui.Font width\(|lineHeight
