@@ -1,21 +1,43 @@
-=== net.minecraft.client.gui.GuiGraphicsExtractor (-public)
-public class client.gui.GuiGraphicsExtractor {
-=== net.minecraft.client.gui.ActiveTextCollector (-public)
-public interface client.gui.ActiveTextCollector {
-  public static final double PERIOD_PER_SCROLLED_PIXEL;
-  public static final double MIN_SCROLL_PERIOD;
-  public abstract client.gui.ActiveTextCollector$Parameters defaultParameters();
-  public abstract void defaultParameters(client.gui.ActiveTextCollector$Parameters);
-  public default void accept(int, int, util.FormattedCharSequence);
-  public default void accept(int, int, network.chat.Component);
-  public default void accept(client.gui.TextAlignment, int, int, client.gui.ActiveTextCollector$Parameters, network.chat.Component);
-  public abstract void accept(client.gui.TextAlignment, int, int, client.gui.ActiveTextCollector$Parameters, util.FormattedCharSequence);
-  public default void accept(client.gui.TextAlignment, int, int, network.chat.Component);
-  public default void accept(client.gui.TextAlignment, int, int, util.FormattedCharSequence);
-  public abstract void acceptScrolling(network.chat.Component, int, int, int, int, int, client.gui.ActiveTextCollector$Parameters);
-  public default void acceptScrolling(network.chat.Component, int, int, int, int, int);
-  public default void acceptScrollingWithDefaultCenter(network.chat.Component, int, int, int, int);
-  public default void defaultScrollingHelper(network.chat.Component, int, int, int, int, int, int, int, client.gui.ActiveTextCollector$Parameters);
-  public static void findElementUnderCursor(client.renderer.state.gui.GuiTextRenderState, float, float, Consumer<network.chat.Style>);
-  public static boolean isPointInRectangle(float, float, float, float, float, float);
+=== net.minecraft.world.entity.EntitySpawnReason (-public)
+public final class world.entity.EntitySpawnReason extends Enum<world.entity.EntitySpawnReason> {
+  public static final world.entity.EntitySpawnReason NATURAL;
+  public static final world.entity.EntitySpawnReason CHUNK_GENERATION;
+  public static final world.entity.EntitySpawnReason SPAWNER;
+  public static final world.entity.EntitySpawnReason STRUCTURE;
+  public static final world.entity.EntitySpawnReason BREEDING;
+  public static final world.entity.EntitySpawnReason MOB_SUMMONED;
+  public static final world.entity.EntitySpawnReason JOCKEY;
+  public static final world.entity.EntitySpawnReason EVENT;
+  public static final world.entity.EntitySpawnReason CONVERSION;
+  public static final world.entity.EntitySpawnReason REINFORCEMENT;
+  public static final world.entity.EntitySpawnReason TRIGGERED;
+  public static final world.entity.EntitySpawnReason BUCKET;
+  public static final world.entity.EntitySpawnReason SPAWN_ITEM_USE;
+  public static final world.entity.EntitySpawnReason COMMAND;
+  public static final world.entity.EntitySpawnReason DISPENSER;
+  public static final world.entity.EntitySpawnReason PATROL;
+  public static final world.entity.EntitySpawnReason TRIAL_SPAWNER;
+  public static final world.entity.EntitySpawnReason LOAD;
+  public static final world.entity.EntitySpawnReason DIMENSION_TRAVEL;
+  public static world.entity.EntitySpawnReason[] values();
+  public static world.entity.EntitySpawnReason valueOf(String);
+  public static boolean isSpawner(world.entity.EntitySpawnReason);
+  public static boolean ignoresLightRequirements(world.entity.EntitySpawnReason);
 }
+=== net.minecraft.world.entity.Mob (-protected)
+public abstract class world.entity.Mob extends world.entity.LivingEntity implements world.entity.Targeting,world.entity.EquipmentUser,world.entity.Leashable {
+  public world.entity.SpawnGroupData finalizeSpawn(world.level.ServerLevelAccessor, world.DifficultyInstance, world.entity.EntitySpawnReason, world.entity.SpawnGroupData);
+=== net.minecraft.gametest.framework.GameTestHelper (-public)
+public class gametest.framework.GameTestHelper {
+  public <E extends world.entity.Entity> E spawn(world.entity.EntityType<E>, core.BlockPos);
+  public <E extends world.entity.Entity> List<E> spawn(world.entity.EntityType<E>, core.BlockPos, int);
+  public <E extends world.entity.Entity> List<E> spawn(world.entity.EntityType<E>, world.phys.Vec3, int);
+  public <E extends world.entity.Entity> E spawn(world.entity.EntityType<E>, world.phys.Vec3);
+  public <E extends world.entity.Mob> E spawn(world.entity.EntityType<E>, double, double, double, world.entity.EntitySpawnReason);
+  public <E extends world.entity.Entity> E spawn(world.entity.EntityType<E>, core.BlockPos, world.entity.EntitySpawnReason);
+  public <E extends world.entity.Entity> E spawn(world.entity.EntityType<E>, world.phys.Vec3, world.entity.EntitySpawnReason);
+  public <E extends world.entity.Entity> E spawn(world.entity.EntityType<E>, int, int, int);
+  public <E extends world.entity.Entity> E spawn(world.entity.EntityType<E>, float, float, float);
+  public world.entity.player.Player makeMockPlayer(world.level.GameType);
+  public world.entity.player.Player makeMockServerPlayer(world.level.GameType);
+  public server.level.ServerPlayer makeMockServerPlayerInLevel();
