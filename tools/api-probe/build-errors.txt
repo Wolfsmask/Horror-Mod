@@ -1,106 +1,54 @@
-# Build failed at 2026-09-23T22:30:23Z on 04fd2e579ce4c18a9b38aa5f7cc3bc58c91a5cdf
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:90: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+# Build failed at 2026-09-23T22:36:56Z on 2b2c86486528ec83b5db0a22f9e5885fcb325180
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:56: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:63: error: cannot find symbol
+  symbol:   method location()
+  location: class ResourceKey<Level>
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:121: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
 /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/ArenaGameTests.java:104: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/FamiliarSoundEvent.java:40: error: cannot find symbol
-  symbol:   method value()
-  location: variable CREEPER_PRIMED of type SoundEvent
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/FamiliarSoundEvent.java:41: error: cannot find symbol
-  symbol:   method value()
-  location: variable CREEPER_PRIMED of type SoundEvent
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/FamiliarSoundEvent.java:43: error: cannot find symbol
-  symbol:   method value()
-  location: variable ZOMBIE_AMBIENT of type SoundEvent
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/FamiliarSoundEvent.java:44: error: cannot find symbol
-  symbol:   method value()
-  location: variable SKELETON_AMBIENT of type SoundEvent
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/FamiliarSoundEvent.java:45: error: cannot find symbol
-  symbol:   method value()
-  location: variable SPIDER_AMBIENT of type SoundEvent
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/FamiliarSoundEvent.java:47: error: cannot find symbol
-  symbol:   method value()
-  location: variable WOODEN_DOOR_OPEN of type SoundEvent
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/FamiliarSoundEvent.java:48: error: cannot find symbol
-  symbol:   method value()
-  location: variable WOODEN_DOOR_CLOSE of type SoundEvent
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/FamiliarSoundEvent.java:49: error: cannot find symbol
-  symbol:   method value()
-  location: variable CHEST_OPEN of type SoundEvent
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/FamiliarSoundEvent.java:51: error: cannot find symbol
-  symbol:   method value()
-  location: variable STONE_BREAK of type SoundEvent
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/FamiliarSoundEvent.java:52: error: cannot find symbol
-  symbol:   method value()
-  location: variable ITEM_PICKUP of type SoundEvent
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:90: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:56: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:121: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
   /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/ArenaGameTests.java:104: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/FamiliarSoundEvent.java:40: error: cannot find symbol
-    symbol:   method value()
-    location: variable CREEPER_PRIMED of type SoundEvent
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/FamiliarSoundEvent.java:41: error: cannot find symbol
-    symbol:   method value()
-    location: variable CREEPER_PRIMED of type SoundEvent
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/FamiliarSoundEvent.java:43: error: cannot find symbol
-    symbol:   method value()
-    location: variable ZOMBIE_AMBIENT of type SoundEvent
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/FamiliarSoundEvent.java:44: error: cannot find symbol
-    symbol:   method value()
-    location: variable SKELETON_AMBIENT of type SoundEvent
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/FamiliarSoundEvent.java:45: error: cannot find symbol
-    symbol:   method value()
-    location: variable SPIDER_AMBIENT of type SoundEvent
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/FamiliarSoundEvent.java:47: error: cannot find symbol
-    symbol:   method value()
-    location: variable WOODEN_DOOR_OPEN of type SoundEvent
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/FamiliarSoundEvent.java:48: error: cannot find symbol
-    symbol:   method value()
-    location: variable WOODEN_DOOR_CLOSE of type SoundEvent
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/FamiliarSoundEvent.java:49: error: cannot find symbol
-    symbol:   method value()
-    location: variable CHEST_OPEN of type SoundEvent
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/FamiliarSoundEvent.java:51: error: cannot find symbol
-    symbol:   method value()
-    location: variable STONE_BREAK of type SoundEvent
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/FamiliarSoundEvent.java:52: error: cannot find symbol
-    symbol:   method value()
-    location: variable ITEM_PICKUP of type SoundEvent
+  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:63: error: cannot find symbol
+    symbol:   method location()
+    location: class ResourceKey<Level>
 --- tail ---
-    location: variable SKELETON_AMBIENT of type SoundEvent
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/FamiliarSoundEvent.java:45: error: cannot find symbol
-  			new Cue(SoundEvents.SPIDER_AMBIENT.value(), 0.5f, 0.95f, false),
-  			                                  ^
-    symbol:   method value()
-    location: variable SPIDER_AMBIENT of type SoundEvent
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/FamiliarSoundEvent.java:47: error: cannot find symbol
-  			new Cue(SoundEvents.WOODEN_DOOR_OPEN.value(), 0.8f, 1.0f, true),
-  			                                    ^
-    symbol:   method value()
-    location: variable WOODEN_DOOR_OPEN of type SoundEvent
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/FamiliarSoundEvent.java:48: error: cannot find symbol
-  			new Cue(SoundEvents.WOODEN_DOOR_CLOSE.value(), 0.8f, 1.0f, false),
-  			                                     ^
-    symbol:   method value()
-    location: variable WOODEN_DOOR_CLOSE of type SoundEvent
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/FamiliarSoundEvent.java:49: error: cannot find symbol
-  			new Cue(SoundEvents.CHEST_OPEN.value(), 0.6f, 1.0f, true),
-  			                              ^
-    symbol:   method value()
-    location: variable CHEST_OPEN of type SoundEvent
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/FamiliarSoundEvent.java:51: error: cannot find symbol
-  			new Cue(SoundEvents.STONE_BREAK.value(), 0.7f, 0.9f, false),
-  			                               ^
-    symbol:   method value()
-    location: variable STONE_BREAK of type SoundEvent
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/FamiliarSoundEvent.java:52: error: cannot find symbol
-  			new Cue(SoundEvents.ITEM_PICKUP.value(), 0.5f, 1.0f, true),
-  			                               ^
-    symbol:   method value()
-    location: variable ITEM_PICKUP of type SoundEvent
-  10 errors
-  2 warnings
+		                            ^
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/ArenaGameTests.java:104: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+			player = helper.makeMockServerPlayerInLevel();
+			               ^
+1 error
+3 warnings
+
+> Task :compileJava FAILED
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1790203008899.json
+
+[Incubating] Problems report is available at: file:///home/runner/work/Horror-Mod/Horror-Mod/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':compileJava' (registered by plugin class 'org.gradle.api.plugins.JavaBasePlugin').
+> Compilation failed; see the compiler output below.
+  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:56: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+  		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+  		                            ^
+  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:121: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+  		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+  		                            ^
+  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/ArenaGameTests.java:104: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+  			player = helper.makeMockServerPlayerInLevel();
+  			               ^
+  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:63: error: cannot find symbol
+  						level.dimension().location(), at.getX(), at.getY(), at.getZ()));
+  						                 ^
+    symbol:   method location()
+    location: class ResourceKey<Level>
+  1 error
+  3 warnings
 
 * Try:
 > Check your code and dependencies to fix the compilation error(s)
 > Run with --scan to get full insights from a Build Scan (powered by Develocity).
 
-BUILD FAILED in 15s
+BUILD FAILED in 10s
 1 actionable task: 1 executed
