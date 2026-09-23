@@ -15,16 +15,16 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 21
+          java-version: 25
 
       - uses: gradle/actions/setup-gradle@v4
 
-      - name: Show latest Fabric versions for 1.21.1 (informational)
+      - name: Show latest Fabric versions for 26.2 (informational)
         continue-on-error: true
         run: |
-          echo "Loader:"; curl -fsS "https://meta.fabricmc.net/v2/versions/loader/1.21.1" | grep -o '"version": *"[^"]*"' | head -3 || true
-          echo "Yarn:"; curl -fsS "https://meta.fabricmc.net/v2/versions/yarn/1.21.1" | grep -o '"version": *"[^"]*"' | head -3 || true
-          echo "Fabric API:"; curl -fsS "https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/maven-metadata.xml" | grep -o '<version>[^<]*+1\.21\.1</version>' | tail -3 || true
+          echo "Loader:"; curl -fsS "https://meta.fabricmc.net/v2/versions/loader/26.2" | grep -o '"version": *"[^"]*"' | head -3 || true
+          echo "Game:"; curl -fsS "https://meta.fabricmc.net/v2/versions/game" | grep -o '"version": *"[^"]*"' | head -3 || true
+          echo "Fabric API:"; curl -fsS "https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/maven-metadata.xml" | grep -o '<version>[^<]*+26\.2</version>' | tail -3 || true
 
       - name: Build
         run: |

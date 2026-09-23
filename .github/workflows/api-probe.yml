@@ -1,0 +1,27 @@
+name: API probe
+
+# Prints real method signatures from the Minecraft/Fabric jars the mod builds against.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'tools/api-probe/**'
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 25
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Resolve classpath
+        run: |
+          chmod +x gradlew
+          ./gradlew --quiet --init-script tools/api-probe/classpath.init.gradle printProbeClasspath | grep '^PROBE_CP=' | head -1 | cut -d= -f2- > cp.txt
+          tr ':' '\n' < cp.txt | grep -iE 'minecraft|fabric-api|gametest|rendering|networking' | head -40
+      - name: Probe
+        run: tools/api-probe/probe.sh "$(cat cp.txt)"

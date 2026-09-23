@@ -1,0 +1,132 @@
+# <class> [grep -E filter]. Lines starting with # are ignored.
+# ---- entity
+net.minecraft.world.entity.Entity broadcastToPlayer|hurt|push\(|isPushable|canBeCollidedWith|isIgnoringBlockTriggers|shouldShowName|fireImmune|canRide|level\(|getEyePosition|getViewVector|discard|setYRot|setYHeadRot|setXRot|blockPosition|position\(|getDeltaMovement|setDeltaMovement|onGround|distanceTo|snapTo|moveTo|getServer|damageSources|isSpectator|isInWater|getBbHeight|getBoundingBox|getUUID|isRemoved|isInvisible|setSilent|getRandom| tick\(|getYRot|getXRot|getEyeY|causeFallDamage|entityData|getX\(|isAlive|removeVehicle|canAddPassenger|getDimensions|lookAt|getBlockY
+net.minecraft.world.entity.LivingEntity hurtServer|causeFallDamage|getLastHurtByMobTimestamp|getLastHurtMobTimestamp|isFallFlying|addEffect|getHealth|isDeadOrDying|doPush|pushEntities|setYBodyRot|yBodyRot|yHeadRot|getAttributeValue|isSleeping
+net.minecraft.world.entity.Mob checkDespawn|removeWhenFarAway|setPersistenceRequired|getNavigation|getLookControl|setPathfindingMalus|createMobAttributes|xpReward|defineSynchedData|requiresCustomPersistence|isPersistenceRequired
+net.minecraft.world.entity.PathfinderMob
+net.minecraft.world.entity.EntityType$Builder
+net.minecraft.world.entity.EntityType create|Builder|EntityFactory
+net.minecraft.world.entity.EntityType$EntityFactory
+net.minecraft.world.entity.EntitySpawnReason
+net.minecraft.world.entity.EntityDimensions makeBoundingBox
+net.minecraft.world.entity.ai.attributes.Attributes MAX_HEALTH|MOVEMENT_SPEED|FOLLOW_RANGE|KNOCKBACK_RESISTANCE
+net.minecraft.world.entity.ai.attributes.AttributeSupplier$Builder add
+net.minecraft.world.entity.ai.navigation.PathNavigation moveTo|stop|isDone|isInProgress
+net.minecraft.world.entity.ai.control.LookControl setLookAt
+net.minecraft.world.level.pathfinder.PathType WATER|LAVA|DANGER_FIRE|DAMAGE_FIRE
+net.minecraft.network.syncher.SynchedEntityData$Builder
+net.minecraft.network.syncher.SynchedEntityData defineId| get\(| set\(
+net.minecraft.network.syncher.EntityDataSerializers BYTE
+net.minecraft.world.entity.player.Player BedSleepingProblem|isCreative|isSpectator|sendSystemMessage|displayClientMessage|containerMenu|inventoryMenu|isSleeping|getGameProfile|getName|getPlainTextName|getLastHurt|getAttackStrength
+net.minecraft.world.entity.player.Player$BedSleepingProblem
+net.minecraft.server.level.ServerPlayer connection|level\(|getRespawnConfig|setRespawnPosition|sendSystemMessage|isCreative|isSpectator|gameMode|serverLevel|RespawnConfig|getRandom
+net.minecraft.server.level.ServerPlayer$RespawnConfig
+net.minecraft.server.level.ServerLevel isDarkOutside|isNight|getDayTime|setDayTime|players\(|setChunkForced|getDataStorage|addFreshEntity|getEntitiesOfClass|blockEvent|getPlayerByUUID|getServer|getChunkSource|clock|isBrightOutside
+net.minecraft.world.level.Level isDarkOutside|isNight|isBrightOutside|getDayTime|setBlock|removeBlock|blockEvent|isLoaded|hasChunk|isInWorldBounds|getMaxLocalRawBrightness|getRawBrightness|canSeeSky|getHeight\(|clip\(|noCollision|containsAnyLiquid|getBlockEntity|dimension\(|getMinY|getSeaLevel|isClientSide|getSkyDarken|sendBlockUpdated|OVERWORLD|getBlockState|getFluidState
+net.minecraft.world.level.LevelReader getMaxLocalRawBrightness|getRawBrightness|canSeeSky|getHeight|isEmptyBlock|hasChunk|isLoaded|getMinY|getBrightness
+net.minecraft.world.level.BlockAndTintGetter canSeeSky|getBrightness|getRawBrightness
+net.minecraft.world.level.CollisionGetter noCollision|containsAnyLiquid
+net.minecraft.world.level.BlockGetter clip
+net.minecraft.world.level.LevelHeightAccessor isOutsideBuildHeight|getMinY|isInsideBuildHeight
+net.minecraft.server.level.ServerChunkCache hasChunk|isChunkLoaded
+# ---- saved data and codecs
+net.minecraft.world.level.saveddata.SavedData
+net.minecraft.world.level.saveddata.SavedDataType
+net.minecraft.world.level.storage.DimensionDataStorage computeIfAbsent|get\(
+net.minecraft.core.UUIDUtil CODEC|STRING_CODEC
+# ---- sound, registries
+net.minecraft.network.protocol.game.ClientboundSoundPacket ClientboundSoundPacket\(
+net.minecraft.sounds.SoundEvent
+net.minecraft.sounds.SoundSource
+net.minecraft.sounds.SoundEvents AMBIENT_CAVE|CHEST_OPEN|CHEST_CLOSE|WARDEN_HEARTBEAT
+net.minecraft.core.Registry register
+net.minecraft.core.registries.BuiltInRegistries SOUND_EVENT|ENTITY_TYPE
+net.minecraft.core.registries.Registries ENTITY_TYPE
+net.minecraft.resources.ResourceKey create
+net.minecraft.world.level.block.SoundType get
+# ---- blocks
+net.minecraft.world.level.block.DoorBlock setOpen|OPEN|HALF|FACING|isOpen
+net.minecraft.world.level.block.entity.SignBlockEntity setText|setWaxed|getText|updateText
+net.minecraft.world.level.block.entity.SignText SignText\(|setMessage
+net.minecraft.world.level.block.StandingSignBlock ROTATION
+net.minecraft.world.level.block.state.properties.RotationSegment
+net.minecraft.world.level.block.state.BlockBehaviour$BlockStateBase isFaceSturdy|getCollisionShape|isSolidRender|canSurvive|getSoundType|public boolean is\(|isAir|getFluidState|getBlock\(|setValue|getValue
+net.minecraft.world.level.block.state.StateHolder setValue|getValue
+net.minecraft.world.level.block.ChestBlock
+net.minecraft.world.level.ClipContext ClipContext\(
+net.minecraft.world.level.ClipContext$Block
+net.minecraft.world.level.ClipContext$Fluid
+net.minecraft.world.phys.HitResult$Type
+net.minecraft.world.phys.BlockHitResult getBlockPos|getType
+net.minecraft.world.level.levelgen.Heightmap$Types
+net.minecraft.world.level.LightLayer
+net.minecraft.tags.BlockTags WOODEN_DOORS|LEAVES| FIRE|BASE_STONE_OVERWORLD| DIRT| SAND
+net.minecraft.core.Direction getApproximateNearest|getNearest|Plane|values
+net.minecraft.core.BlockPos withinManhattan|spiralAround|betweenClosed|containing|immutable|findClosestMatch|offset
+net.minecraft.world.phys.Vec3 atBottomCenterOf|atCenterOf|atLowerCornerOf|horizontalDistance|yRot
+net.minecraft.util.Mth atan2|RAD_TO_DEG|DEG_TO_RAD|clamp|floor|sin|cos|PI
+# ---- effects, damage, text, commands
+net.minecraft.world.effect.MobEffects DARKNESS
+net.minecraft.world.effect.MobEffectInstance MobEffectInstance\(
+net.minecraft.world.damagesource.DamageSources generic
+net.minecraft.network.chat.Component literal|translatable
+net.minecraft.network.chat.MutableComponent withStyle
+net.minecraft.commands.CommandSourceStack hasPermission|permission|getPlayerOrException|sendSuccess|sendFailure
+net.minecraft.commands.Commands literal|argument|hasPermission|LEVEL_
+net.minecraft.commands.SharedSuggestionProvider suggest\(
+net.minecraft.commands.arguments.EntityArgument player|getPlayer
+# ---- networking
+net.minecraft.network.codec.ByteBufCodecs VAR_INT|FLOAT
+net.minecraft.network.codec.StreamCodec composite
+net.minecraft.network.protocol.common.custom.CustomPacketPayload
+net.minecraft.network.protocol.common.custom.CustomPacketPayload$Type
+net.minecraft.network.RegistryFriendlyByteBuf
+# ---- game tests
+net.minecraft.gametest.framework.GameTestHelper makeMock|runAtTickTime|runAfterDelay|succeed|assertTrue|getLevel|absolutePos|spawn\(|onEachTick|fail
+net.fabricmc.fabric.api.gametest.v1.GameTest
+net.fabricmc.fabric.api.gametest.v1.FabricGameTest
+# ---- fabric api
+net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry
+net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking send|canSend
+net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents$AllowSleeping
+net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents$StopSleeping
+net.fabricmc.fabric.api.message.v1.ServerMessageEvents$ChatMessage
+net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
+net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry
+net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents$EndTick
+net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents$ServerStarted
+# ---- client
+net.minecraft.client.renderer.entity.HumanoidMobRenderer
+net.minecraft.client.renderer.entity.MobRenderer
+net.minecraft.client.renderer.entity.LivingEntityRenderer
+net.minecraft.client.renderer.entity.EntityRenderer shouldShowName|createRenderState|extractRenderState|getTextureLocation|submit|render\(
+net.minecraft.client.renderer.entity.EntityRendererProvider$Context bakeLayer
+net.minecraft.client.renderer.entity.state.HumanoidRenderState
+net.minecraft.client.renderer.entity.state.LivingEntityRenderState
+net.minecraft.client.renderer.entity.state.AvatarRenderState
+net.minecraft.client.model.HumanoidModel
+net.minecraft.client.model.player.PlayerModel
+net.minecraft.client.model.PlayerModel
+net.minecraft.client.model.geom.ModelPart xScale|yScale|zScale|copyFrom|xRot|zRot|yRot
+net.minecraft.client.model.geom.ModelLayers PLAYER
+net.minecraft.client.renderer.entity.layers.EyesLayer
+net.minecraft.client.renderer.entity.layers.RenderLayer
+net.minecraft.client.renderer.RenderType eyes|entityTranslucent
+net.minecraft.client.renderer.rendertype.RenderTypes eyes|entityTranslucent
+net.minecraft.client.gui.GuiGraphics fill\(|blit\(|guiWidth|guiHeight
+net.minecraft.client.renderer.RenderPipelines GUI_TEXTURED
+net.minecraft.client.Minecraft player|level|getMusicManager|getInstance
+net.minecraft.client.sounds.MusicManager stop
+net.minecraft.client.player.AbstractClientPlayer getSkin
+net.minecraft.world.entity.player.PlayerSkin
+net.minecraft.core.ClientAsset
+net.minecraft.client.DeltaTracker getGameTimeDeltaPartialTick
+net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry
+net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement
+net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements
+net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry
+net.minecraft.client.renderer.entity.EntityRenderers register
+net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking registerGlobalReceiver
+net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking$Context
+net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents$EndTick
+net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents$Disconnect

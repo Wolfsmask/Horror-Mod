@@ -1,0 +1,15 @@
+// Adds a task that prints the full compile classpath (Minecraft + Fabric), used by probe.sh.
+allprojects {
+	afterEvaluate { p ->
+		p.tasks.register("printProbeClasspath") {
+			doLast {
+				def files = new LinkedHashSet<File>()
+				["main", "client"].each { name ->
+					def ss = p.sourceSets.findByName(name)
+					if (ss != null) files.addAll(ss.compileClasspath.files)
+				}
+				println "PROBE_CP=" + files.collect { it.absolutePath }.join(File.pathSeparator)
+			}
+		}
+	}
+}
