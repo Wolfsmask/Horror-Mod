@@ -41,9 +41,9 @@ final class MiningSequence implements Sequence {
 		if (hits < hitsNeeded) {
 			hits++;
 			timer = 4 + player.getRandom().nextInt(2);
-			Cues.sound(player, group.getHitSound(), SoundSource.BLOCKS, center, 0.5f, group.getXRot() * 0.5f);
+			Cues.sound(player, group.getHitSound(), SoundSource.BLOCKS, center, 0.5f, group.getPitch() * 0.5f);
 		} else {
-			Cues.sound(player, group.getBreakSound(), SoundSource.BLOCKS, center, 1.0f, group.getXRot() * 0.8f);
+			Cues.sound(player, group.getBreakSound(), SoundSource.BLOCKS, center, 1.0f, group.getPitch() * 0.8f);
 			index++;
 			hits = 0;
 			hitsNeeded = 4 + player.getRandom().nextInt(4);

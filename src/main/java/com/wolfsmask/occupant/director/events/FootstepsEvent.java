@@ -79,7 +79,7 @@ public final class FootstepsEvent extends HorrorEvent {
 
 			BlockState floor = p.level().getBlockState(ground.below());
 			SoundType group = floor.getSoundType();
-			Cues.sound(p, group.getStepSound(), SoundSource.PLAYERS, pos, group.getVolume() * 0.22f, group.getXRot());
+			Cues.sound(p, group.getStepSound(), SoundSource.PLAYERS, pos, group.getVolume() * 0.22f, group.getPitch());
 			return --remaining > 0;
 		}
 	}
