@@ -1,3 +1,2 @@
-# Round 4: drawing text on the HUD.
-net.minecraft.client.gui.GuiGraphicsExtractor drawString|drawCentered|Text|text\(|font|Font
-net.minecraft.client.gui.Font width\(|lineHeight
+# Round 4b: how to draw text on the HUD in 26.2.
+net.minecraft.client.gui.GuiGraphicsExtractor
