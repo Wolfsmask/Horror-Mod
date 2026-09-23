@@ -127,7 +127,8 @@ public final class HuntEvent extends HorrorEvent {
 			caughtAt = age;
 			entity.halt();
 			haunt.data.encounters++;
-			Cues.sound(p, ModSounds.STINGER, SoundSource.HOSTILE, entity.getEyePosition(), 1.0f, 0.9f);
+			// It reaches you and everything simply stops. No impact, no noise to discharge it.
+			Cues.sound(p, ModSounds.BREATH, SoundSource.HOSTILE, entity.getEyePosition(), 0.6f, 0.7f);
 			Cues.effect(p, ScreenEffectPayload.BLACKOUT, 30, 1f);
 			Cues.whisper(p, 80);
 			p.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 140, 0, false, false));

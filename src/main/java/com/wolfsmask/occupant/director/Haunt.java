@@ -29,6 +29,14 @@ public final class Haunt {
 	int evalTimer = 20;
 	/** Haunt ticks until the Director next tries to start something. */
 	int nextEventIn;
+	/**
+	 * Seconds since anything more than background noise happened. Tension is built by absence,
+	 * so the longer this runs, the more the Director favours something big: the scare lands when
+	 * the player has decided nothing is coming.
+	 */
+	int quietSeconds;
+	/** Whether the last snapshot was taken at night (used only for pacing). */
+	boolean lastSituationWasNight;
 
 	// Motion tracking for Situation.
 	@Nullable
@@ -79,6 +87,7 @@ public final class Haunt {
 		boolean busy = player.containerMenu != player.inventoryMenu
 				|| player.isSleeping() || player.isPassenger() || player.isFallFlying();
 
+		lastSituationWasNight = world.isDarkOutside();
 		return new Situation(world.isDarkOutside(), light <= 5 || Spots.isDark(world, head), underground, sheltered, alone,
 				lastSpeed < 0.04, player.isSprinting(), inCombat, player.isInWater(), busy,
 				light, idleSeconds);

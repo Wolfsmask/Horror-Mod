@@ -8,56 +8,57 @@ import net.minecraft.util.Mth;
 /**
  * Moves the body built by {@link OccupantGeometry}.
  * <p>
- * The horror is meant to be in the faces, not in the shape: it is a hunched column of people who
- * did not get to stay people, and every one of them is still trying to move. So nothing here is
- * ever in unison. Each face wakes on its own count, turns to look at you at its own moment, and
- * works its jaw at its own speed, while the mass they are part of breathes underneath them.
- * <p>
- * It moves like stop-motion footage: poses hold, then snap.
+ * Almost all of the fear in this thing is in how little it does. It does not lunge, gesture or
+ * posture; it stands, at the wrong height, for too long, and every so often its head turns a
+ * few degrees further than it did before. So this class is mostly restraint:
  * <ul>
- *     <li>VEILED (early in the story): only the faces near the top are uncovered, and they are
- *     asleep. From a distance it reads as a tall, still, hunched figure.</li>
- *     <li>REVEALED: all of them are awake, and they are all looking at you.</li>
+ *     <li>Standing still means <em>still</em>: no idle sway, no breathing, no weight shifting.
+ *     The only motion is a slow drift you cannot quite be sure you saw.</li>
+ *     <li>What movement there is arrives between frames. It holds a pose, then it is in the next
+ *     one, the way a thing looks in photographs taken a second apart.</li>
+ *     <li>It only opens its mouth when it is already too late to matter.</li>
  * </ul>
+ * VEILED keeps it under a shroud so a distant shape stays unidentifiable; REVEALED is the body.
  */
 public class OccupantModel extends HumanoidModel<OccupantRenderState> {
 	private static final String[] SIDE = {"right", "left"};
 	private static final int FINGERS = 4;
-	/** How far a jaw can drop, in pixels. */
-	private static final float JAW_DROP = 3.6f;
 
-	private final ModelPart mass;
-	private final ModelPart shroud;
-	private final ModelPart crown;
-	private final ModelPart[] face = new ModelPart[OccupantGeometry.FACE_COUNT];
-	private final ModelPart[] jaw = new ModelPart[OccupantGeometry.FACE_COUNT];
-	/** Each face's rest pose, so a rotation can be added to the angle it was built at. */
-	private final float[][] rest = new float[OccupantGeometry.FACE_COUNT][3];
-	private final ModelPart[] shoulder = new ModelPart[2];
-	private final ModelPart[] forearm = new ModelPart[2];
+	private final ModelPart hips;
+	private final ModelPart spine;
+	private final ModelPart yoke;
+	private final ModelPart neck;
+	private final ModelPart neck2;
+	private final ModelPart skull;
+	private final ModelPart maw;
+	private final ModelPart[] shroud;
+	private final ModelPart[] upper = new ModelPart[2];
+	private final ModelPart[] fore = new ModelPart[2];
 	private final ModelPart[][] finger = new ModelPart[2][FINGERS];
 	private final ModelPart[][] tip = new ModelPart[2][FINGERS];
+	private final ModelPart[] thigh = new ModelPart[2];
+	private final ModelPart[] shin = new ModelPart[2];
 
 	public OccupantModel(ModelPart root) {
 		super(root);
-		this.mass = root.getChild("mass");
-		this.shroud = mass.getChild("shroud");
-		this.crown = mass.getChild("crown");
-		for (int i = 0; i < face.length; i++) {
-			String name = OccupantGeometry.FACES.get(i);
-			ModelPart parent = OccupantGeometry.FACE_PARENTS.get(i).equals("crown") ? crown : mass;
-			face[i] = parent.getChild(name);
-			jaw[i] = face[i].getChild(name + "_jaw");
-			rest[i] = new float[]{face[i].xRot, face[i].yRot, face[i].zRot};
-		}
+		this.hips = root.getChild("hips");
+		this.spine = hips.getChild("spine");
+		this.yoke = spine.getChild("yoke");
+		this.neck = yoke.getChild("neck");
+		this.neck2 = neck.getChild("neck2");
+		this.skull = neck2.getChild("skull");
+		this.maw = skull.getChild("maw");
+		this.shroud = new ModelPart[]{yoke.getChild("cloak"), neck2.getChild("hood")};
 		for (int s = 0; s < 2; s++) {
-			shoulder[s] = mass.getChild(SIDE[s] + "_shoulder");
-			forearm[s] = shoulder[s].getChild(SIDE[s] + "_forearm");
-			ModelPart palm = forearm[s].getChild(SIDE[s] + "_palm");
+			upper[s] = yoke.getChild(SIDE[s] + "_upper");
+			fore[s] = upper[s].getChild(SIDE[s] + "_fore");
+			ModelPart hand = fore[s].getChild(SIDE[s] + "_hand");
 			for (int i = 0; i < FINGERS; i++) {
-				finger[s][i] = palm.getChild(SIDE[s] + "_finger" + i);
+				finger[s][i] = hand.getChild(SIDE[s] + "_finger" + i);
 				tip[s][i] = finger[s][i].getChild(SIDE[s] + "_tip" + i);
 			}
+			thigh[s] = hips.getChild(SIDE[s] + "_thigh");
+			shin[s] = thigh[s].getChild(SIDE[s] + "_shin");
 		}
 	}
 
@@ -67,124 +68,116 @@ public class OccupantModel extends HumanoidModel<OccupantRenderState> {
 		float lookX = head.xRot;
 		float lookY = head.yRot;
 		boolean veiled = state.form == OccupantEntity.Form.VEILED;
-		OccupantEntity.Mode mode = state.mode;
 		int seed = state.seed;
 
-		// Stop-motion: the pose only changes every few ticks, so it never moves like something alive.
-		float step = mode == OccupantEntity.Mode.CHASE ? 2.0f : 3.0f;
+		for (ModelPart part : shroud) part.visible = veiled;
+
+		// Poses hold and then change. Nothing eases: easing is what living things do.
+		float step = state.mode == OccupantEntity.Mode.CHASE ? 2.0f : 8.0f;
 		float t = Mth.floor(state.ageInTicks / step) * step;
-		float breath = Mth.sin(t * 0.06f);
 
-		// The whole mass leans and swells. The shroud follows a moment later.
-		mass.xRot = 0.06f + 0.015f * breath;
-		mass.zRot = 0.02f * Mth.sin(t * 0.04f);
-		shroud.xRot = -0.04f + 0.03f * Mth.sin(t * 0.04f - 1.2f);
-		shroud.zRot = 0.035f * Mth.sin(t * 0.035f - 0.9f);
+		// A drift so slow you cannot tell whether it moved or you did.
+		float drift = Mth.sin(t * 0.013f);
+		spine.xRot = 0.03f + 0.012f * drift;
+		hips.zRot = 0.008f * drift;
 
-		switch (mode) {
-			case CHASE -> {
-				float gait = t * 0.5f;
-				mass.xRot = 0.42f;
-				mass.y = 1.1f * Math.abs(Mth.sin(gait));
-				mass.zRot = 0.1f * Mth.sin(gait);
-				shroud.xRot = 0.22f + 0.07f * Mth.sin(t * 1.1f);
-				for (int s = 0; s < 2; s++) {
-					float swing = Mth.sin(gait + s * Mth.PI);
-					arm(s, -1.4f + 0.3f * swing, 0.14f, -0.3f - 0.25f * (0.5f + 0.5f * swing));
-					grasp(s, t, 0.9f);
-				}
-			}
-			case AMBUSH -> {
-				mass.xRot = 0.3f;
-				for (int s = 0; s < 2; s++) {
-					arm(s, -1.15f, 0.28f, -0.45f);
-					grasp(s, t, 0.55f);
-				}
-			}
-			default -> {
-				for (int s = 0; s < 2; s++) {
-					shoulder[s].y -= 0.35f * breath;   // it breathes
-					if (veiled) {
-						arm(s, -0.16f, -0.12f, -0.3f); // hanging, slightly drawn in
-						grasp(s, t, 0.12f);
-					} else {
-						arm(s, 0.05f, 0.06f, 0.16f);   // hanging straight, elbows very slightly wrong
-						grasp(s, t, 0.3f);
-					}
-				}
-			}
-		}
-
-		for (int i = 0; i < face.length; i++) {
-			animateFace(i, seed, t, lookX, lookY, veiled, mode);
+		switch (state.mode) {
+			case CHASE -> chase(t, lookX, lookY);
+			case AMBUSH -> loom(lookX, lookY);
+			default -> stand(seed, t, lookX, lookY, veiled);
 		}
 	}
 
 	/**
-	 * One face. They are deliberately out of step with each other: each has its own count for
-	 * when it wakes, when it turns to you, and how fast it works its jaw.
+	 * Standing. The head follows you a beat late and a little too far, and the hands hang open
+	 * with the fingers slightly apart, which reads as waiting rather than resting.
 	 */
-	private void animateFace(int i, int seed, float t, float lookX, float lookY, boolean veiled,
-							 OccupantEntity.Mode mode) {
-		ModelPart f = face[i];
-		// Early on, only the faces near the top of the mass are uncovered.
-		boolean awake = !veiled || i < 3;
-		f.visible = awake;
-		jaw[i].visible = awake;
-		if (!awake) return;
+	private void stand(int seed, float t, float lookX, float lookY, boolean veiled) {
+		// The neck carries most of the turn, so the body stays squarely facing wherever it was.
+		neck.yRot = lookY * 0.35f;
+		neck2.yRot = lookY * 0.3f;
+		skull.yRot = lookY * 0.4f;
+		neck.xRot = lookX * 0.25f - 0.05f;
+		neck2.xRot = lookX * 0.25f;
+		skull.xRot = lookX * 0.4f;
 
-		float phase = i * 1.7f;
-		// How much this face is looking at you right now: it holds, then snaps around.
-		float attention = switch (mode) {
-			case CHASE, AMBUSH -> 1.0f;
-			case STARE, STALK -> i == 0 ? 1.0f : (hold(seed, t, 17 + i * 3, i) > -0.1f ? 1.0f : 0.0f);
-			default -> i == 0 ? 0.65f : 0.0f;
-		};
-		if (veiled && i > 0) attention *= 0.35f;
-
-		// Turning to look pulls the face away from the angle it grew at.
-		f.xRot = Mth.lerp(attention, rest[i][0], lookX * 0.9f) + 0.03f * Mth.sin(t * 0.09f + phase);
-		f.yRot = Mth.lerp(attention, rest[i][1], lookY * 0.9f) + 0.04f * Mth.sin(t * 0.07f + phase);
-		f.zRot = rest[i][2] + 0.05f * Mth.sin(t * 0.05f + phase);
-
-		// A twitch, held for a moment, then gone.
-		if (hold(seed, t, 11 + i * 2, 40 + i) > 0.86f) {
-			f.zRot += 0.35f;
-			f.xRot -= 0.12f;
+		// Every so often the head is simply somewhere else, tilted, and stays there a while.
+		float tilt = hold(seed, t, 240, 3);
+		if (tilt > 0.45f) {
+			skull.zRot = 0.5f * (tilt - 0.45f) / 0.55f;
+			neck2.zRot = 0.12f;
+		} else if (tilt < -0.75f) {
+			skull.zRot = -0.7f;                     // right over onto its shoulder
+			neck2.zRot = -0.15f;
 		}
 
-		float open = switch (mode) {
-			// Screaming, all of them, out of time with each other.
-			case CHASE -> 0.75f + 0.25f * Mth.sin(t * 1.6f + phase);
-			case AMBUSH -> 0.8f + 0.2f * Mth.sin(t * 2.1f + phase);
-			// Mouths working slowly, as if trying to say something.
-			case STARE, STALK -> veiled ? 0.04f : 0.3f + 0.3f * Mth.sin(t * 0.13f + phase)
-					+ (hold(seed, t, 23 + i * 5, 70 + i) > 0.6f ? 0.35f : 0.0f);
-			default -> veiled ? 0.0f : 0.12f + 0.1f * Mth.sin(t * 0.1f + phase);
-		};
-		open = Mth.clamp(open, 0.0f, 1.0f);
-		jaw[i].y = open * JAW_DROP;
-		jaw[i].xRot = open * 0.45f;
-		jaw[i].z = open * 0.6f;
+		for (int s = 0; s < 2; s++) {
+			// Arms hanging dead straight, turned very slightly out.
+			upper[s].xRot = 0.02f;
+			upper[s].zRot = s == 0 ? 0.045f : -0.045f;
+			fore[s].xRot = 0.05f;
+			for (int i = 0; i < FINGERS; i++) {
+				finger[s][i].xRot = -0.05f;
+				finger[s][i].zRot = (i - 1.5f) * 0.09f;
+				tip[s][i].xRot = -0.08f;
+			}
+			thigh[s].xRot = 0.0f;
+			shin[s].xRot = 0.0f;
+		}
+		maw.visible = false;
+		if (veiled) {
+			// Under the shroud it is hunched, so the shape is shorter and harder to read.
+			spine.xRot += 0.1f;
+			neck.xRot += 0.15f;
+		}
 	}
 
-	/**
-	 * Pose one arm. {@code out} swings it away from the body (negative brings the hands together),
-	 * {@code elbow} bends the forearm (negative is forward, the natural way).
-	 */
-	private void arm(int side, float forward, float out, float elbow) {
-		shoulder[side].xRot = forward;
-		shoulder[side].zRot = side == 0 ? out : -out;
-		forearm[side].xRot = elbow;
+	/** Close enough to touch you. It bends down to your height, and the mouth opens. */
+	private void loom(float lookX, float lookY) {
+		spine.xRot = 0.55f;
+		neck.xRot = -0.25f + lookX * 0.3f;
+		neck2.xRot = -0.3f;
+		skull.xRot = 0.35f + lookX * 0.4f;
+		skull.yRot = lookY * 0.5f;
+		maw.visible = true;
+		maw.yScale = 2.6f;                          // it opens down the middle of the face
+		for (int s = 0; s < 2; s++) {
+			upper[s].xRot = -0.55f;
+			upper[s].zRot = s == 0 ? 0.18f : -0.18f;
+			fore[s].xRot = -0.7f;
+			for (int i = 0; i < FINGERS; i++) {
+				finger[s][i].xRot = -0.25f;
+				finger[s][i].zRot = (i - 1.5f) * 0.22f;
+				tip[s][i].xRot = -0.35f;
+			}
+		}
 	}
 
-	/** Fingers closing, each one on its own count. */
-	private void grasp(int side, float t, float amount) {
-		for (int i = 0; i < FINGERS; i++) {
-			float a = 0.5f + 0.5f * Mth.sin(t * 0.8f + i * 1.3f + side * 2.0f);
-			finger[side][i].xRot = -amount * (0.35f + 0.5f * a);
-			tip[side][i].xRot = -amount * (0.5f + 0.5f * a);
-			finger[side][i].zRot = (i - 1.5f) * 0.07f;
+	/** Running. Far too long in the stride, and it does not swing its arms; they trail. */
+	private void chase(float t, float lookX, float lookY) {
+		float gait = t * 0.62f;
+		spine.xRot = 0.5f;
+		neck.xRot = -0.45f;
+		neck2.xRot = -0.3f;
+		skull.xRot = 0.3f + lookX * 0.3f;
+		skull.yRot = lookY * 0.3f;
+		maw.visible = true;
+		maw.yScale = 3.2f;
+		hips.y = -1.4f * Math.abs(Mth.sin(gait));
+
+		for (int s = 0; s < 2; s++) {
+			float swing = Mth.sin(gait + s * Mth.PI);
+			thigh[s].xRot = swing * 1.25f;
+			shin[s].xRot = Math.max(0.0f, -swing) * 1.5f;
+			// The arms are dragged along by the body rather than driven.
+			upper[s].xRot = -0.35f + swing * 0.25f;
+			upper[s].zRot = s == 0 ? 0.25f : -0.25f;
+			fore[s].xRot = -0.15f;
+			for (int i = 0; i < FINGERS; i++) {
+				finger[s][i].xRot = -0.15f;
+				finger[s][i].zRot = (i - 1.5f) * 0.18f;
+				tip[s][i].xRot = -0.2f;
+			}
 		}
 	}
 

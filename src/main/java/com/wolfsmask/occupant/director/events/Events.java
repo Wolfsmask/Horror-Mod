@@ -13,6 +13,8 @@ public final class Events {
 	private static final List<HorrorEvent> ALL = List.of(
 			// Act 1+: deniable
 			new FootstepsEvent(),
+			new FamiliarSoundEvent(),
+			new DistantEvent(),
 			new CaveNoiseEvent(),
 			new DistantMiningEvent(),
 			new DoorEvent(),

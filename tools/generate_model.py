@@ -14,9 +14,12 @@ the texture can never drift apart. It writes:
 
 The animation lives in OccupantModel.java, which is written by hand.
 
-What it is: a mass of faces. Not one creature with a head, but many people fused into one
-hunched column of wet dark flesh, each face still trying to move on its own. Units are pixels;
-the ground is at y = 24 and up is -y (the same convention as vanilla models).
+What it is: something far too tall and far too thin, the colour of old bone. Small blank head,
+two black pits where eyes should be, a neck that is much too long, a ribcage you can count, and
+legs that take up more than half of it. Early in the story it is under a dark shroud, so from a
+distance you cannot tell what it is. Later the shroud is gone.
+
+Units are pixels; the ground is at y = 24 and up is -y (the same convention as vanilla models).
 """
 from pathlib import Path
 
@@ -28,31 +31,17 @@ TEX = ROOT / "src/main/resources/assets/occupant/textures/entity"
 JAVA = ROOT / "src/client/java/com/wolfsmask/occupant/client/render/OccupantGeometry.java"
 TEX_W = TEX_H = 128
 
-rng = np.random.default_rng(404)
-
-# --------------------------------------------------------------------------- the body
-
-# A face and the jaw hanging under it. Each one is a separate bone so it can move on its own.
-# name, parent, pivot, rotation (radians), face size (w, h, d), jaw height
-FACES = [
-    # The head of the mass: the largest face, pushed forward, looking at you.
-    ("face_main", "crown", (0.0, -3.0, -3.0), (0.05, 0.0, 0.05), (7, 8, 5), 3),
-    # Four more growing out of the same skull, at angles no neck could make.
-    ("face_high", "crown", (-1.5, -9.5, 0.5), (-0.5, -0.3, 0.7), (5, 6, 4), 2),
-    ("face_right", "crown", (-6.0, -2.5, -1.0), (0.1, -1.3, -0.55), (5, 7, 4), 2),
-    ("face_left", "crown", (6.0, -4.5, 0.0), (-0.2, 1.4, 0.65), (5, 6, 4), 2),
-    ("face_back", "crown", (0.5, -5.5, 3.0), (0.2, 2.9, 0.3), (6, 6, 4), 2),
-    # And more down the body, pressing out through it. One of them is upside down.
-    ("face_chest", "mass", (-2.0, -13.0, -5.5), (0.2, -0.35, -0.3), (6, 7, 4), 2),
-    ("face_side", "mass", (7.0, -16.0, 0.5), (0.0, 1.5, 0.85), (5, 6, 3), 2),
-    ("face_low", "mass", (3.0, -6.5, -4.5), (-0.25, 0.4, 0.2), (5, 6, 4), 2),
-    ("face_under", "mass", (-4.0, -1.5, -3.5), (0.3, -0.55, 3.05), (4, 6, 3), 2),
-    ("face_deep", "mass", (-6.5, -9.5, 1.5), (0.0, -1.9, -0.65), (4, 5, 3), 1),
-]
-# The faces that catch the light. Any more than this and it stops being frightening.
-GLOWING = {"face_main", "face_chest"}
+rng = np.random.default_rng(909)
 
 SIDES = ("front", "back", "left", "right")
+
+# Heights, in pixels above the ground (the model is built upside down: up is -y).
+HIP = 27.0        # more than half of it is leg
+CHEST = 43.0
+SHOULDER = 42.0
+NECK_TOP = 50.0
+# Bones that only exist to be hidden: the shroud it wears early on.
+SHROUD = ("cloak", "hood")
 
 
 def parts():
@@ -60,7 +49,7 @@ def parts():
     p = [
         # HumanoidModel looks these up by name. They draw nothing; the head anchor is only used
         # to find out where the viewer is.
-        ("head", None, (0, -24, 0), (0, 0, 0), []),
+        ("head", None, (0, -NECK_TOP, 0), (0, 0, 0), []),
         ("hat", "head", (0, 0, 0), (0, 0, 0), []),
         ("body", None, (0, 0, 0), (0, 0, 0), []),
         ("right_arm", None, (0, 0, 0), (0, 0, 0), []),
@@ -68,39 +57,71 @@ def parts():
         ("right_leg", None, (0, 0, 0), (0, 0, 0), []),
         ("left_leg", None, (0, 0, 0), (0, 0, 0), []),
 
-        # The column. It has no legs: it ends in a hanging shroud that drags on the ground.
-        ("mass", None, (0, 0, 0), (0, 0, 0), [
-            ("flesh", -6.5, -21, -4, 13, 9, 8),     # shoulders, where most of them are
-            ("flesh", -5.5, -12, -3.5, 11, 9, 7),   # ribs
-            ("flesh", -4, -3, -2.5, 8, 7, 5),       # waist, narrow
+        # Hips, then a long spine with a ribcage you can count.
+        ("hips", None, (0, -HIP, 0), (0, 0, 0), [
+            ("bone", -2.5, -1.0, -1.5, 5, 5, 3),
         ]),
-        ("shroud", "mass", (0, 4, 0), (0, 0, 0), [
-            ("cloth", -5.5, 0, -4.0, 11, 12, 8),
-            ("cloth", -7.0, 11, -5.0, 14, 10, 10),  # it widens where it drags on the ground
+        ("spine", "hips", (0, -1.0, 0), (0, 0, 0), [
+            ("bone", -1.5, -15.0, -1.0, 3, 15, 2),          # the spine itself, thin
         ]),
-        ("crown", "mass", (0, -21, 0), (0, 0, 0), []),
+        ("ribs", "spine", (0, -13.0, 0), (0, 0, 0), [
+            ("ribs", -3.0, -1.0, -2.0, 6, 11, 4),
+        ]),
+        # Shoulders: a thin yoke, wider than the chest, with nothing on it.
+        ("yoke", "spine", (0, -15.0, 0), (0, 0, 0), [
+            ("bone", -5.5, -1.5, -1.5, 11, 3, 3),
+        ]),
+
+        # A neck much too long for a person, in two pieces so it can crane.
+        ("neck", "yoke", (0, -1.0, 0), (0, 0, 0), [
+            ("bone", -1.0, -4.0, -1.0, 2, 4, 2),
+        ]),
+        ("neck2", "neck", (0, -4.0, 0), (0, 0, 0), [
+            ("bone", -1.0, -4.0, -1.0, 2, 4, 2),
+        ]),
+        # A small, smooth, blank head. No hair, no ears, no expression.
+        ("skull", "neck2", (0, -4.0, 0), (0, 0, 0), [
+            ("face", -2.5, -5.0, -2.0, 5, 5, 4),
+        ]),
+        # The mouth only exists when it opens: a black slot down the middle of the face.
+        ("maw", "skull", (0, -1.6, -2.0), (0, 0, 0), [
+            ("maw", -1.0, 0.0, -0.4, 2, 4, 1),
+        ]),
+        # The shroud: a hood and a cloak, worn while it is still pretending to be a shape.
+        ("cloak", "yoke", (0, -1.5, 0), (0, 0, 0), [
+            ("cloth", -6.5, 0.0, -3.5, 13, 9, 7),           # over the shoulders
+            ("cloth", -5.0, 8.0, -3.0, 10, 14, 6),          # falling away, narrower
+            ("cloth", -3.5, 21.0, -2.5, 7, 10, 5),          # and trailing to nothing
+        ]),
+        ("hood", "neck2", (0, -4.0, 0), (0, 0, 0), [
+            ("cloth", -4.0, -6.5, -3.5, 8, 9, 7),
+        ]),
     ]
 
-    for name, parent, pivot, rot, (w, h, d), jh in FACES:
-        p.append((name, parent, pivot, rot, [("face", -w / 2.0, -h, -d / 2.0, w, h, d)]))
-        p.append((name + "_jaw", name, (0, 0, 0), (0, 0, 0),
-                  [("jaw", -w / 2.0 + 0.5, 0, -d / 2.0, w - 1, jh, d - 1)]))
-
-    # Two long arms out of the shoulders: upper arm, forearm, a palm, four two-jointed fingers.
+    # Arms: upper, fore, and a hand of four long fingers. They hang past the knees.
     for side, sx in (("right", -1), ("left", 1)):
-        p.append((side + "_shoulder", "mass", (sx * 6.5, -18.5, 0.0), (0, 0, 0),
-                  [("flesh", -1.5, -1.5, -1.5, 3, 11, 3)]))
-        p.append((side + "_forearm", side + "_shoulder", (0, 9.5, 0), (0, 0, 0),
-                  [("bone", -1.0, 0, -1.0, 2, 10, 2)]))
-        p.append((side + "_palm", side + "_forearm", (0, 10.0, 0), (0, 0, 0),
-                  [("bone", -1.0, 0, -0.75, 2, 2, 1.5)]))
+        p.append((side + "_upper", "yoke", (sx * 4.5, 0.5, 0.0), (0, 0, 0),
+                  [("bone", -1.2, -1.2, -1.2, 2.4, 14, 2.4)]))
+        p.append((side + "_fore", side + "_upper", (0, 12.8, 0), (0, 0, 0),
+                  [("bone", -1.0, 0, -1.0, 2, 13, 2)]))
+        p.append((side + "_hand", side + "_fore", (0, 13.0, 0), (0, 0, 0),
+                  [("bone", -1.0, 0, -0.6, 2, 2, 1.2)]))
         for i in range(4):
             outer = i in (0, 3)
-            a, b = (3.0, 2.5) if outer else (4.5, 3.5)
-            p.append((f"{side}_finger{i}", side + "_palm", (-0.75 + i * 0.5, 2.0, 0.0), (0, 0, 0),
+            a, b = (3.5, 3.0) if outer else (4.5, 4.0)
+            p.append((f"{side}_finger{i}", side + "_hand", (-0.75 + i * 0.5, 2.0, 0.0), (0, 0, 0),
                       [("bone", -0.2, 0, -0.2, 0.4, a, 0.4)]))
             p.append((f"{side}_tip{i}", f"{side}_finger{i}", (0, a, 0), (0, 0, 0),
                       [("bone", -0.18, 0, -0.18, 0.36, b, 0.36)]))
+
+    # Legs: thigh, shin, and a long flat foot. Most of its height is here.
+    for side, sx in (("right", -1), ("left", 1)):
+        p.append((side + "_thigh", "hips", (sx * 2.0, 3.5, 0.0), (0, 0, 0),
+                  [("bone", -1.3, 0, -1.3, 2.6, 15, 2.6)]))
+        p.append((side + "_shin", side + "_thigh", (0, 15.0, 0), (0, 0, 0),
+                  [("bone", -1.1, 0, -1.1, 2.2, 12, 2.2)]))
+        p.append((side + "_foot", side + "_shin", (0, 12.0, 0), (0, 0, 0),
+                  [("bone", -1.1, 0, -3.2, 2.2, 1.6, 5)]))
     return p
 
 
@@ -143,15 +164,15 @@ def faces_of(u, v, w, h, d):
 
 # --------------------------------------------------------------------------- painting
 
-FLESH = (26, 22, 21)       # wet, almost black
-CLOTH = (11, 10, 11)
-SKIN = (110, 102, 93)      # the faces: grey, drained
-BONE = (150, 142, 128)
+BONE = (228, 224, 214)     # old bone, not white: white looks like plastic
+SHADOW = (168, 164, 156)
+CLOTH = (13, 12, 14)
+PIT = (6, 6, 8)            # the eyes, and the inside of the mouth
 
 
 def paint_texture(boxes, placed):
     img = np.zeros((TEX_H, TEX_W, 4), dtype=np.uint8)
-    glow = np.zeros((TEX_H, TEX_W, 4), dtype=np.uint8)
+    cloth_mask = np.zeros((TEX_H, TEX_W), dtype=bool)
 
     def fill(region, rgb, jitter=6):
         x0, y0, x1, y1 = region
@@ -164,108 +185,116 @@ def paint_texture(boxes, placed):
     for i, (owner, kind, _x, _y, _z, w, h, d) in enumerate(boxes):
         u, v = placed[i]
         f = faces_of(u, v, w, h, d)
+
         if kind == "cloth":
             for side in f.values():
                 fill(side, CLOTH, 3)
-            # The shroud ends in tatters, and something shows through the folds.
+                cx0, cy0, cx1, cy1 = side
+                cloth_mask[cy0:cy1, cx0:cx1] = True
+            # The shroud hangs in strands and ends in tatters.
             for side in SIDES:
                 x0, y0, x1, y1 = f[side]
                 for x in range(x0, x1):
                     cut = int(rng.integers(0, 5))
                     if cut:
                         img[y1 - cut:y1, x, 3] = 0
-                for _ in range((x1 - x0) // 3):
+                for _ in range(max(1, (x1 - x0) // 2)):
                     fx = int(rng.integers(x0, x1))
-                    fy = int(rng.integers(y0, y1 - 2))
-                    img[fy:fy + 2, fx, :3] = (30, 26, 24)
-        elif kind == "flesh":
+                    fy = int(rng.integers(y0, max(y0 + 1, y1 - 3)))
+                    img[fy:fy + 3, fx, :3] = (26, 24, 27)
+
+        elif kind == "maw":
             for side in f.values():
-                fill(side, FLESH, 7)
-            # Wet highlights, and the shapes of more faces pressing out from the inside.
+                fill(side, PIT, 2)
+            x0, y0, x1, y1 = f["front"]
+            img[y1 - 1, x0:x1, :3] = (54, 10, 12)      # a little colour, far down it
+
+        elif kind == "ribs":
+            for side in f.values():
+                fill(side, SHADOW, 5)
+            # Ribs you can count, front and back, with the gaps between them dark.
+            for side in ("front", "back"):
+                x0, y0, x1, y1 = f[side]
+                for k, y in enumerate(range(y0 + 1, y1 - 1)):
+                    if k % 2 == 0:
+                        img[y, x0:x1, :3] = np.clip(np.array(BONE) + rng.integers(-6, 7, size=(x1 - x0, 1)), 0, 255)
+                        img[y, x0, :3] = SHADOW
+                        img[y, x1 - 1, :3] = SHADOW
+                    else:
+                        img[y, x0 + 1:x1 - 1, :3] = (44, 42, 42)
+                # A hollow down the middle, where the chest should be.
+                cx = (x0 + x1) // 2
+                img[y0 + 1:y1 - 1, cx, :3] = (34, 32, 33)
+            for side in ("left", "right"):
+                x0, y0, x1, y1 = f[side]
+                for k, y in enumerate(range(y0 + 1, y1 - 1)):
+                    img[y, x0:x1, :3] = BONE if k % 2 == 0 else (48, 46, 46)
+
+        elif kind == "face":
+            paint_face(img, f)
+
+        else:  # bone
+            for side in f.values():
+                fill(side, BONE, 7)
+            # Thin and dry: the edges darken, and the surface is not smooth.
             for side in SIDES:
                 x0, y0, x1, y1 = f[side]
-                for _ in range(max(1, (x1 - x0) * (y1 - y0) // 14)):
+                if x1 - x0 > 1:
+                    img[y0:y1, x0, :3] = SHADOW
+                    img[y0:y1, x1 - 1, :3] = SHADOW
+                for _ in range(max(1, (x1 - x0) * (y1 - y0) // 12)):
                     fx, fy = int(rng.integers(x0, x1)), int(rng.integers(y0, y1))
-                    img[fy, fx, :3] = (48, 42, 40)
-                for _ in range(max(1, (x1 - x0) // 4)):
-                    cx, cy = int(rng.integers(x0 + 1, x1 - 1)), int(rng.integers(y0 + 1, y1 - 2))
-                    img[cy, cx - 1:cx + 2, :3] = (14, 11, 12)   # a hollow
-                    img[cy + 1, cx, :3] = (40, 34, 32)
-        elif kind == "bone":
-            for side in f.values():
-                fill(side, (74, 68, 62), 8)
-            x0, y0, x1, y1 = f["front"]
-            img[max(y1 - 3, y0):y1, x0:x1, :3] = (38, 33, 30)   # dark at the fingertips
-        elif kind == "jaw":
-            for side in f.values():
-                fill(side, SKIN, 8)
-            x0, y0, x1, y1 = f["front"]
-            img[y0, x0:x1, :3] = (58, 12, 12)                   # gum line
-            for x in range(x0, x1, 2):
-                img[y0, x, :3] = (196, 188, 168)                # lower teeth
-            img[y1 - 1, x0:x1, :3] = (70, 64, 58)
-        elif kind == "face":
-            paint_face(img, glow, f, owner)
+                    img[fy, fx, :3] = (176, 171, 162)
+
+    # A faint sheen of the body, drawn full-bright over it. Without this it is invisible in
+    # real darkness, and the whole point is that you can just make something out over the trees.
+    lit = img.astype(np.float32)
+    lit[:, :, :3] *= 0.13
+    lit[cloth_mask] = 0                     # the shroud stays dark: it is meant to hide the shape
+    glow = lit.astype(np.uint8)
+    glow[:, :, 3] = np.where(img[:, :, 3] > 0, 255, 0)
+    glow[cloth_mask] = 0
 
     Image.fromarray(img, "RGBA").save(TEX / "occupant.png")
-    Image.fromarray(glow, "RGBA").save(TEX / "occupant_eyes.png")
+    Image.fromarray(glow, "RGBA").save(TEX / "occupant_glow.png")
 
 
-def paint_face(img, glow, f, owner):
-    """One human face: hollow sockets, a nose, and a mouth open far too wide."""
-    for side in ("top", "bottom", "left", "right", "back"):
-        x0, y0, x1, y1 = f[side]
-        n = rng.integers(-7, 8, size=(y1 - y0, x1 - x0, 1))
-        img[y0:y1, x0:x1, :3] = np.clip(np.array(FLESH) + n, 0, 255)
+def paint_face(img, f):
+    """
+    A head with nothing on it. Smooth bone, and two black pits set too far apart. No nose, no
+    mouth, no expression to read, which is the point: there is nothing there to appeal to.
+    """
+    for side in f.values():
+        x0, y0, x1, y1 = side
+        n = rng.integers(-5, 6, size=(y1 - y0, x1 - x0, 1))
+        img[y0:y1, x0:x1, :3] = np.clip(np.array(BONE) + n, 0, 255)
         img[y0:y1, x0:x1, 3] = 255
-        # Wisps of hair over the sides and back of the skull.
-        for _ in range((x1 - x0)):
-            hx = int(rng.integers(x0, x1))
-            hy = int(rng.integers(y0, min(y0 + 3, y1)))
-            img[hy, hx, :3] = (8, 7, 8)
+
+    # The back and top of the skull are a little darker, so the face reads as the front.
+    for side in ("back", "top"):
+        x0, y0, x1, y1 = f[side]
+        img[y0:y1, x0:x1, :3] = np.clip(img[y0:y1, x0:x1, :3].astype(int) - 26, 0, 255)
 
     x0, y0, x1, y1 = f["front"]
     w, h = x1 - x0, y1 - y0
-    n = rng.integers(-9, 10, size=(h, w, 1))
-    img[y0:y1, x0:x1, :3] = np.clip(np.array(SKIN) + n, 0, 255)
-    img[y0:y1, x0:x1, 3] = 255
+    # Two pits, deep and a little too far apart, set high in a face with nothing else in it.
+    for ex in (x0 + 1, x1 - 2):
+        img[y0 + 1:y0 + 3, ex, :3] = PIT
+    img[y0 + 1, x0 + 2, :3] = (28, 27, 29)                  # they run together across the bridge
+    img[y0 + 3, x0 + 1, :3] = (74, 71, 70)                  # and weep down the cheek a little
+    img[y0 + 3, x1 - 2, :3] = (96, 93, 92)
 
-    # A hairline, and shadow where the skull shows through above the brow.
-    img[y0, x0:x1, :3] = (16, 14, 15)
-    img[y0 + 1, x0, :3] = (58, 52, 48)
-    img[y0 + 1, x1 - 1, :3] = (58, 52, 48)
+    # A heavy brow above them and a flat, featureless lower half.
+    img[y0, x0:x1, :3] = (146, 142, 135)
+    img[y1 - 1, x0 + 1:x1 - 1, :3] = (200, 196, 187)
+    # The seam the mouth opens along, closed: barely a line.
+    img[y0 + 4:y1, (x0 + x1) // 2, :3] = (170, 166, 158)
 
-    # Sockets: deep enough that you cannot tell whether anything is inside them.
-    ey = y0 + 1
-    left, right = x0 + 1, x1 - 2
-    socket_h = 2 if h >= 6 else 1
-    img[ey:ey + socket_h, left, :3] = (5, 5, 6)
-    img[ey:ey + socket_h, right, :3] = (5, 5, 6)
-    if w >= 6:
-        img[ey, left + 1, :3] = (12, 11, 12)
-        img[ey, right - 1, :3] = (12, 11, 12)
-    img[ey + socket_h, left, :3] = (66, 60, 55)          # hollow cheeks
-    img[ey + socket_h, right, :3] = (66, 60, 55)
+    # The jaw line, on the sides only: from the front it is a smooth, blank face.
+    for side in ("left", "right"):
+        sx0, sy0, sx1, sy1 = f[side]
+        img[sy1 - 2, sx0:sx1, :3] = (166, 161, 152)
 
-    # A thin nose between them.
-    mid = x0 + w // 2
-    img[ey + socket_h - 1:ey + socket_h + 1, mid, :3] = (92, 85, 78)
-
-    # The mouth: stretched open far wider than a jaw goes, teeth along the top.
-    mouth_h = 2 if h >= 6 else 1
-    my = y1 - mouth_h
-    img[my:y1, x0 + 1:x1 - 1, :3] = (22, 5, 7)
-    for x in range(x0 + 1, x1 - 1, 2):
-        img[my, x, :3] = (112, 105, 94)
-    img[y1 - 1, x0, :3] = (44, 38, 36)                   # the corners tear upward
-    img[y1 - 1, x1 - 1, :3] = (44, 38, 36)
-
-    if owner in GLOWING:
-        glow[ey, left] = (214, 220, 228, 255)
-        glow[ey, right] = (214, 220, 228, 255)
-
-
-# --------------------------------------------------------------------------- java
 
 HEADER = """// GENERATED by tools/generate_model.py -- do not edit by hand.
 // The texture assets/occupant/textures/entity/occupant.png is written by the same script,
@@ -280,13 +309,12 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
 
 import java.util.List;
 
-/** The Occupant's body: a hunched column of wet flesh with {@value #FACE_COUNT} faces in it. */
+/** The Occupant's body. Too tall, too thin, and the colour of old bone. */
 public final class OccupantGeometry {
-\tpublic static final int FACE_COUNT = %d;
-\t/** Every face bone, largest first. Each one has a child named {@code <name>_jaw}. */
-\tpublic static final List<String> FACES = List.of(%s);
-\t/** The bone each face hangs off, in the same order as {@link #FACES}. */
-\tpublic static final List<String> FACE_PARENTS = List.of(%s);
+\t/** The bones of the shroud it wears while it is still only a shape. */
+\tpublic static final List<String> SHROUD = List.of(%s);
+\t/** Height of the built body in model pixels (16 = one block). */
+\tpublic static final float HEIGHT = %sf;
 
 \tprivate OccupantGeometry() {
 \t}
@@ -303,9 +331,8 @@ def num(v):
 
 
 def write_java(ps, boxes, placed):
-    lines = [HEADER % (len(FACES),
-                       ", ".join('"%s"' % f[0] for f in FACES),
-                       ", ".join('"%s"' % f[1] for f in FACES))]
+    height = NECK_TOP + 5.0  # the top of the skull
+    lines = [HEADER % (", ".join('"%s"' % n for n in SHROUD), num(height).rstrip("f"))]
     box_at = {}
     for i, (owner, *_rest) in enumerate(boxes):
         box_at.setdefault(owner, []).append(i)

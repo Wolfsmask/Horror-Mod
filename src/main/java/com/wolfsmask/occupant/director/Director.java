@@ -126,6 +126,7 @@ public final class Director {
 
 		if (--h.evalTimer > 0) return;
 		h.evalTimer = 20;
+		h.quietSeconds++;
 
 		Situation s = h.capture(player);
 		updateDread(h.data, s);
@@ -212,8 +213,13 @@ public final class Director {
 		};
 	}
 
-	/** How likely each tier is to be picked, per act: the shape of the story. */
-	private static Map<HorrorEvent.Tier, Double> tierWeights(int act) {
+	/**
+	 * How likely each tier is to be picked, per act: the shape of the story.
+	 * <p>
+	 * {@code quietSeconds} bends it. A player who has heard nothing for a quarter of an hour has
+	 * stopped listening, and that is exactly when the story should stop being deniable.
+	 */
+	private static Map<HorrorEvent.Tier, Double> tierWeights(int act, int quietSeconds) {
 		Map<HorrorEvent.Tier, Double> w = new EnumMap<>(HorrorEvent.Tier.class);
 		switch (act) {
 			case 1 -> {
@@ -238,6 +244,12 @@ public final class Director {
 				w.put(HorrorEvent.Tier.PEAK, 25.0);
 			}
 		}
+
+		// Up to three times as likely to be something real, after ten quiet minutes.
+		double pressure = 1.0 + 2.0 * Math.min(1.0, Math.max(0, quietSeconds - 240) / 600.0);
+		w.computeIfPresent(HorrorEvent.Tier.MAJOR, (t, v) -> v * pressure);
+		w.computeIfPresent(HorrorEvent.Tier.PEAK, (t, v) -> v * pressure);
+		w.computeIfPresent(HorrorEvent.Tier.AMBIENT, (t, v) -> v / Math.sqrt(pressure));
 		return w;
 	}
 
@@ -254,13 +266,15 @@ public final class Director {
 			byTier.computeIfAbsent(e.tier(), t -> new ArrayList<>()).add(e);
 		}
 
-		HorrorEvent.Tier[] order = pickTierOrder(tierWeights(d.act), byTier.keySet(), random);
+		HorrorEvent.Tier[] order = pickTierOrder(tierWeights(d.act, h.quietSeconds), byTier.keySet(), random);
 		for (HorrorEvent.Tier tier : order) {
 			List<HorrorEvent> pool = byTier.get(tier);
 			while (pool != null && !pool.isEmpty()) {
 				HorrorEvent e = pickWeighted(pool, ctx, random);
 				pool.remove(e);
 				if (tryBegin(h, e, ctx)) {
+					// Background noise does not relieve the pressure; it is part of the waiting.
+					if (e.tier() != HorrorEvent.Tier.AMBIENT) h.quietSeconds = 0;
 					scheduleAfter(h, e, random, cfg);
 					return;
 				}
@@ -367,6 +381,7 @@ public final class Director {
 		double minutes = range[0] + random.nextDouble() * (range[1] - range[0]);
 		minutes *= 1.0 - Math.min(0.4, h.data.dread / 250.0); // more dread, faster pace
 		if (h.data.playTicks < h.data.calmUntil) minutes *= 1.6;
+		if (h.lastSituationWasNight) minutes *= 0.75;         // the nights are busier than the days
 		minutes /= cfg.eventFrequency;
 		h.nextEventIn = (int) Math.max(20 * 30, minutes * MINUTE);
 	}
