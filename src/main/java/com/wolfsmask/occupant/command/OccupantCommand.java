@@ -6,6 +6,7 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.wolfsmask.occupant.Occupant;
 import com.wolfsmask.occupant.OccupantConfig;
 import com.wolfsmask.occupant.director.Director;
 import com.wolfsmask.occupant.director.Haunt;
@@ -15,7 +16,16 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import com.wolfsmask.occupant.entity.OccupantEntity;
+import com.wolfsmask.occupant.registry.ModEntities;
+import com.wolfsmask.occupant.util.Sight;
+import com.wolfsmask.occupant.util.Spots;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
 
@@ -41,7 +51,15 @@ public final class OccupantCommand {
 
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		dispatcher.register(literal("occupant")
-				.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+				// Operators, or anyone in their own single-player world (where "cheats" may be off,
+				// which would otherwise hide this command completely).
+				.requires(src -> Commands.hasPermission(Commands.LEVEL_GAMEMASTERS).test(src)
+						|| src.getServer().isSingleplayer())
+				.then(literal("here")
+						.executes(ctx -> here(ctx.getSource(), 5.0f))
+						.then(argument("distance", FloatArgumentType.floatArg(1.0f, 40.0f))
+								.executes(ctx -> here(ctx.getSource(), FloatArgumentType.getFloat(ctx, "distance")))))
+				.then(literal("check").executes(ctx -> check(ctx.getSource())))
 				.then(literal("status")
 						.executes(ctx -> status(ctx.getSource(), ctx.getSource().getPlayerOrException()))
 						.then(argument("player", EntityArgument.player())
@@ -96,6 +114,72 @@ public final class OccupantCommand {
 							ctx.getSource().sendSuccess(() -> Component.literal("Reloaded config/occupant.json."), true);
 							return 1;
 						})));
+	}
+
+	/**
+	 * Puts the Occupant in front of you right now, wherever you are, with no conditions at all.
+	 * The story events all need a convincing place before they will run; this one never refuses,
+	 * so there is always a way to prove the mod is working.
+	 */
+	private static int here(CommandSourceStack src, float distance) throws CommandSyntaxException {
+		ServerPlayer p = src.getPlayerOrException();
+		ServerLevel world = p.level();
+		Vec3 look = Sight.flatLook(p);
+		Vec3 want = p.position().add(look.scale(distance));
+		BlockPos feet = Spots.groundNear(world, (int) Math.floor(want.x), (int) Math.floor(want.y),
+				(int) Math.floor(want.z), 8);
+		Vec3 at = feet != null ? Vec3.atBottomCenterOf(feet) : want;
+
+		OccupantEntity e = ModEntities.OCCUPANT.create(world, EntitySpawnReason.COMMAND);
+		if (e == null) {
+			src.sendFailure(Component.literal("Could not create the entity."));
+			return 0;
+		}
+		e.standAlone(p);
+		float yaw = Sight.yawBetween(at, p.position());
+		e.snapTo(at.x, at.y, at.z, yaw, 0.0f);
+		e.setYHeadRot(yaw);
+		e.setYBodyRot(yaw);
+		e.setMode(OccupantEntity.Mode.STARE);
+		e.setForm(OccupantEntity.Form.REVEALED);
+		if (!world.addFreshEntity(e)) {
+			src.sendFailure(Component.literal("Could not place it there."));
+			return 0;
+		}
+		src.sendSuccess(() -> Component.literal("It is standing behind you... no, in front of you.")
+				.withStyle(ChatFormatting.GRAY), false);
+		return 1;
+	}
+
+	/** Answers "is this thing even working?" in one line each. */
+	private static int check(CommandSourceStack src) throws CommandSyntaxException {
+		ServerPlayer p = src.getPlayerOrException();
+		OccupantConfig cfg = OccupantConfig.get();
+		Director dir = Director.get();
+		src.sendSuccess(() -> Component.literal("The Occupant " + Occupant.VERSION_NOTE).withStyle(ChatFormatting.WHITE), false);
+		line(src, "mod loaded (server side)", true, "");
+		line(src, "director running", dir != null, "restart the world");
+		line(src, "enabled in config", cfg.enabled, "set enabled=true in config/occupant.json");
+		line(src, "this player can be haunted", !p.isCreative() || cfg.hauntCreative,
+				"you are in creative: switch to survival, or set hauntCreative=true");
+		line(src, "this world is allowed", !cfg.overworldOnly || p.level().dimension() == net.minecraft.world.level.Level.OVERWORLD,
+				"overworldOnly is on and you are not in the Overworld");
+		if (dir != null) {
+			HauntData d = dir.data(p);
+			line(src, "story started (act " + d.act + ")", d.act > 0,
+					"it waits " + cfg.graceMinutes + " min before anything happens: /occupant act " + p.getName().getString() + " 2");
+			line(src, "not paused", !d.paused, "/occupant resume " + p.getName().getString());
+		}
+		int near = p.level().getEntitiesOfClass(OccupantEntity.class, new AABB(p.blockPosition()).inflate(64)).size();
+		src.sendSuccess(() -> Component.literal("  " + near + " Occupant(s) within 64 blocks. Try /occupant here.")
+				.withStyle(ChatFormatting.GRAY), false);
+		return 1;
+	}
+
+	private static void line(CommandSourceStack src, String what, boolean ok, String fix) {
+		Component text = Component.literal(ok ? "  [ok] " : "  [--] ").withStyle(ok ? ChatFormatting.GREEN : ChatFormatting.RED)
+				.copy().append(Component.literal(what + (ok || fix.isEmpty() ? "" : " -> " + fix)).withStyle(ChatFormatting.GRAY));
+		src.sendSuccess(() -> text, false);
 	}
 
 	private static Director director(CommandSourceStack src) {

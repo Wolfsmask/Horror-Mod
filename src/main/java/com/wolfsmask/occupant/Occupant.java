@@ -22,6 +22,8 @@ import org.slf4j.LoggerFactory;
 
 public final class Occupant implements ModInitializer {
 	public static final String MOD_ID = "occupant";
+	/** Shown by /occupant check, so a report always says which build it came from. */
+	public static final String VERSION_NOTE = "is loaded.";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
 	public static Identifier id(String path) {
@@ -64,7 +66,7 @@ public final class Occupant implements ModInitializer {
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
 				OccupantCommand.register(dispatcher));
 
-		LOGGER.info("The Occupant has moved in.");
+		LOGGER.info("The Occupant has moved in. Type /occupant check in game to test it.");
 	}
 
 	private static boolean shouldDenySleep(Player player) {

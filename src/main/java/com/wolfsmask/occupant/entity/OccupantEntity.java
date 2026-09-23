@@ -53,6 +53,10 @@ public class OccupantEntity extends PathfinderMob {
 
 	/** Removed if no sequence has touched it for this long (orphan protection). */
 	private static final int ORPHAN_TICKS = 40;
+	/** How far away a summoned Occupant will look for someone to haunt. */
+	private static final double ADOPT_RANGE = 24.0;
+	/** How long a summoned (Director-less) Occupant stands there before it leaves. */
+	private static final int SUMMONED_LIFETIME = 20 * 60;
 	/** Absolute upper bound on how long it can exist, whatever happens. */
 	private static final int MAX_LIFETIME = 20 * 60 * 3;
 	/** Horizontal distance between footstep sounds while it walks. */
@@ -65,6 +69,8 @@ public class OccupantEntity extends PathfinderMob {
 	private boolean footsteps = true;
 	private double stepAccumulator;
 	private boolean vanished;
+	/** True when nothing is driving this one: summoned by a command or a spawn egg. */
+	private boolean summoned;
 
 	public OccupantEntity(EntityType<? extends OccupantEntity> type, Level level) {
 		super(type, level);
@@ -122,6 +128,20 @@ public class OccupantEntity extends PathfinderMob {
 
 	public boolean isHaunting(Player player) {
 		return targetUuid != null && targetUuid.equals(player.getUUID());
+	}
+
+	/**
+	 * Haunt this player without the Director: it stands, stares, and leaves by itself.
+	 * Used by /occupant here, and by anything summoned with a command or a spawn egg.
+	 */
+	public void standAlone(ServerPlayer target) {
+		bindTo(target);
+		summoned = true;
+	}
+
+	/** True for one spawned by /summon or a spawn egg, which drives itself. */
+	public boolean isSummoned() {
+		return summoned;
 	}
 
 	/** Called every tick by whichever sequence is controlling it. */
@@ -198,8 +218,16 @@ public class OccupantEntity extends PathfinderMob {
 		super.tick();
 		if (this.level().isClientSide() || this.isRemoved()) return;
 
+		// Summoned by a command or a spawn egg: nothing is driving it, so it adopts whoever is
+		// closest and haunts them by itself. Without this it would delete itself on its first tick.
+		if (targetUuid == null && !adoptNearestPlayer()) {
+			vanish();
+			return;
+		}
+
 		ServerPlayer target = findHauntedPlayer(true);
-		if (target == null || !target.isAlive() || ++ticksUncontrolled > ORPHAN_TICKS || this.tickCount > MAX_LIFETIME
+		boolean orphaned = summoned ? this.tickCount > SUMMONED_LIFETIME : ++ticksUncontrolled > ORPHAN_TICKS;
+		if (target == null || !target.isAlive() || orphaned || this.tickCount > MAX_LIFETIME
 				|| this.distanceToSqr(target) > 160 * 160) {
 			vanish();
 			return;
@@ -212,6 +240,29 @@ public class OccupantEntity extends PathfinderMob {
 		}
 
 		if (footsteps) tickFootsteps(target);
+	}
+
+	/**
+	 * Finds someone for a summoned Occupant to haunt. Returns false if nobody is close enough,
+	 * so one summoned in an empty world still removes itself instead of standing around forever.
+	 */
+	private boolean adoptNearestPlayer() {
+		if (!(this.level() instanceof ServerLevel level)) return false;
+		ServerPlayer closest = null;
+		double best = ADOPT_RANGE * ADOPT_RANGE;
+		for (ServerPlayer p : level.players()) {
+			if (p.isSpectator() || !p.isAlive()) continue;
+			double d = p.distanceToSqr(this);
+			if (d < best) {
+				best = d;
+				closest = p;
+			}
+		}
+		if (closest == null) return false;
+		bindTo(closest);
+		summoned = true;
+		setMode(Mode.STARE);
+		return true;
 	}
 
 	private void tickFootsteps(ServerPlayer target) {
