@@ -4,7 +4,7 @@ import com.wolfsmask.occupant.registry.ModSounds;
 import com.wolfsmask.occupant.util.Cues;
 import com.wolfsmask.occupant.util.Sight;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.BlockSoundGroup;
+import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.pathing.PathNodeType;

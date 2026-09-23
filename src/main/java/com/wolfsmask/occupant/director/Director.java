@@ -423,6 +423,7 @@ public final class Director {
 		Haunt h = haunt(player);
 		if (!forced) {
 			if (h.active != null || disabledEvents.contains(e.id())) return TriggerResult.BUSY;
+			if (!isEligible(player, h, OccupantConfig.get()) || h.data.act == 0) return TriggerResult.BUSY;
 		} else {
 			endSequence(h);
 		}

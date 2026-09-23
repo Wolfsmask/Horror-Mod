@@ -2,7 +2,7 @@ package com.wolfsmask.occupant.director.events;
 
 import com.wolfsmask.occupant.director.Sequence;
 import com.wolfsmask.occupant.util.Cues;
-import net.minecraft.block.BlockSoundGroup;
+import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.server.network.ServerPlayerEntity;

@@ -7,7 +7,7 @@ import com.wolfsmask.occupant.director.Situation;
 import com.wolfsmask.occupant.util.Cues;
 import com.wolfsmask.occupant.util.Sight;
 import com.wolfsmask.occupant.util.Spots;
-import net.minecraft.block.BlockSoundGroup;
+import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.block.BlockState;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
