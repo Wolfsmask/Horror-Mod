@@ -50,8 +50,13 @@ public final class DistantEvent extends HorrorEvent {
 	@Nullable
 	public Sequence begin(EventContext ctx) {
 		ServerPlayer p = ctx.player;
+		// Beyond the server's simulation distance the entity would not tick and would never be
+		// sent to the client, so the whole event would silently amount to nothing.
+		int simChunks = ctx.world.getServer().getPlayerList().getSimulationDistance();
+		double reach = Math.max(0.0, (simChunks - 2) * 16.0);
+		double max = Math.min(104.0, reach);
 		double min = 48.0;
-		double max = 104.0;
+		if (max < min + 8.0) return null;
 
 		// Somewhere ahead of the player, but off to one side: found, not presented.
 		BlockPos spot = Spots.aroundPlayer(p, ctx.random, min, max, 12, 60, true, 60,
@@ -61,7 +66,7 @@ public final class DistantEvent extends HorrorEvent {
 		OccupantEntity e = ctx.haunt.spawnOccupant(p, spot, OccupantEntity.Mode.STARE, ctx.haunt.pickForm(ctx.random));
 		if (e == null) return null;
 		e.setFootsteps(false);
-		return new Distant(ctx.haunt, e, 1200 + ctx.random.nextInt(1800));
+		return new Distant(ctx.haunt, e, 900 + ctx.random.nextInt(900));
 	}
 
 	/** High ground with a clear line of sight, and nothing directly around it. */
