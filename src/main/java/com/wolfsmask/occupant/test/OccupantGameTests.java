@@ -44,6 +44,27 @@ public final class OccupantGameTests {
 		});
 	}
 
+	/**
+	 * One summoned by a command has nobody to haunt, so it used to delete itself on its first
+	 * tick and nothing appeared at all. It must adopt a nearby player and stay.
+	 */
+	@GameTest
+	public void summonedOccupantAdoptsAPlayer(GameTestHelper helper) {
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		BlockPos at = helper.absolutePos(new BlockPos(1, 2, 1));
+		player.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 2.5, 0.0f, 0.0f);
+
+		OccupantEntity e = helper.spawn(ModEntities.OCCUPANT, 1, 2, 1);
+		helper.runAtTickTime(5, () -> {
+			helper.assertTrue(!e.isRemoved(), "A summoned Occupant should adopt the nearest player");
+			helper.assertTrue(e.isSummoned(), "It should know it is driving itself");
+			helper.assertTrue(e.isHaunting(player), "It should be haunting the player it adopted");
+			helper.assertTrue(e.broadcastToPlayer(player), "Its target must be sent the entity");
+			e.vanish();
+			helper.succeed();
+		});
+	}
+
 	/** It cannot be hurt, killed or farmed: any damage just makes it vanish. */
 	@GameTest
 	public void damageMakesItVanish(GameTestHelper helper) {

@@ -48,6 +48,7 @@ public final class TorchEvent extends HorrorEvent {
 		for (BlockPos pos : BlockPos.withinManhattan(p.blockPosition(), 20, 8, 20)) {
 			if (torches.size() >= 8) break;
 			if (pos.distToCenterSqr(p.position()) < 64) continue;
+			if (!Spots.isLoaded(world, pos)) continue;   // it must never pull in a chunk
 			if (!WorldBlocks.isTorch(world.getBlockState(pos))) continue;
 			if (world.getBrightness(LightLayer.SKY, pos) > 0 || !Spots.isUnderground(world, pos)) continue;
 			if (bed != null && bed.distSqr(pos) < 24 * 24) continue;

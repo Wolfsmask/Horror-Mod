@@ -163,7 +163,7 @@ public class OccupantModel extends HumanoidModel<OccupantRenderState> {
 		skull.yRot = lookY * 0.3f;
 		maw.visible = true;
 		maw.yScale = 3.2f;
-		hips.y = -1.4f * Math.abs(Mth.sin(gait));
+		hips.y -= 1.4f * Math.abs(Mth.sin(gait));   // relative: the hips rest high up, not at 0
 
 		for (int s = 0; s < 2; s++) {
 			float swing = Mth.sin(gait + s * Mth.PI);

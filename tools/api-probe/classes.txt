@@ -1,3 +1,4 @@
-# Round 4c: text drawing. GuiGraphicsExtractor has textRenderer() -> ActiveTextCollector.
-net.minecraft.client.gui.GuiGraphicsExtractor drawString|drawCentered|drawWordWrap
-net.minecraft.client.gui.ActiveTextCollector
+# Round 5: spawn reasons, so only command/egg spawns adopt a player.
+net.minecraft.world.entity.EntitySpawnReason
+@protected net.minecraft.world.entity.Mob finalizeSpawn|SpawnGroupData
+net.minecraft.gametest.framework.GameTestHelper spawn\(|makeMock
