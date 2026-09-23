@@ -1,2 +1,3 @@
-# Round 4b: how to draw text on the HUD in 26.2.
-net.minecraft.client.gui.GuiGraphicsExtractor
+# Round 4c: text drawing. GuiGraphicsExtractor has textRenderer() -> ActiveTextCollector.
+net.minecraft.client.gui.GuiGraphicsExtractor drawString|drawCentered|drawWordWrap
+net.minecraft.client.gui.ActiveTextCollector

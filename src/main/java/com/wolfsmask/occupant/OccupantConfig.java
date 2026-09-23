@@ -90,6 +90,28 @@ public final class OccupantConfig {
 			"dont leave"
 	));
 
+	/**
+	 * Lines that fade up on your screen, the way someone writes on the walls of a room they
+	 * cannot leave. Use {player} for the player's name. Set {@link #screenWhispers} to false
+	 * to turn them off entirely.
+	 */
+	public boolean screenWhispers = true;
+	public List<String> whisperLines = new ArrayList<>(List.of(
+			"IT KNOWS YOU",
+			"IT IS NOT IN YOUR HEAD",
+			"IT REMEMBERS EVERYTHING",
+			"IT FEELS LIKE HOME",
+			"YOU CANNOT LEAVE IT BEHIND",
+			"IT IS ALWAYS WATCHING",
+			"WE HAVE ALWAYS KNOWN",
+			"IT IS YOU AND IT IS NOT YOU",
+			"YOU LET IT IN",
+			"THERE IS ROOM FOR {player}",
+			"{player} IS ALREADY HERE",
+			"STOP LOOKING AT IT",
+			"IT WAS NEVER THE DARK"
+	));
+
 	/** Log director decisions to the console. */
 	public boolean debug = false;
 
@@ -138,6 +160,7 @@ public final class OccupantConfig {
 		aloneRadius = (int) clamp(aloneRadius, 0, 256);
 		if (signMessages == null || signMessages.isEmpty()) signMessages = new OccupantConfig().signMessages;
 		if (chatLines == null || chatLines.isEmpty()) chatLines = new OccupantConfig().chatLines;
+		if (whisperLines == null || whisperLines.isEmpty()) whisperLines = new OccupantConfig().whisperLines;
 		signMessages.removeIf(s -> s == null || s.isBlank());
 		chatLines.removeIf(s -> s == null || s.isBlank());
 		if (signMessages.isEmpty()) signMessages = new OccupantConfig().signMessages;

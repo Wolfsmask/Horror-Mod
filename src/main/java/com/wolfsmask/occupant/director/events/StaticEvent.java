@@ -25,6 +25,9 @@ public final class StaticEvent extends HorrorEvent {
 		return new Timeline().at(0, p -> {
 			Cues.effect(p, ScreenEffectPayload.STATIC, 14, 0.5f);
 			Cues.soundAtEars(p, ModSounds.STATIC, SoundSource.AMBIENT, 0.35f, 1.0f);
+			// Something surfaces in the noise, the way words surface on the wall of a room
+			// somebody was kept in.
+			if (p.getRandom().nextFloat() < 0.75f) Cues.whisper(p, 70);
 		});
 	}
 }

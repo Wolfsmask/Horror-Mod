@@ -93,6 +93,7 @@ public final class HuntEvent extends HorrorEvent {
 				if (age == 1) {
 					Cues.effect(p, ScreenEffectPayload.SILENCE, 0, 1f);
 					Cues.soundAtEars(p, ModSounds.DRONE, SoundSource.AMBIENT, 0.8f, 0.9f);
+					Cues.whisper(p, "RUN", 40);
 				}
 				if (age >= stareTicks || (seen && lookTicks > 15) || dist < 6) {
 					chasing = true;
@@ -128,6 +129,7 @@ public final class HuntEvent extends HorrorEvent {
 			haunt.data.encounters++;
 			Cues.sound(p, ModSounds.STINGER, SoundSource.HOSTILE, entity.getEyePosition(), 1.0f, 0.9f);
 			Cues.effect(p, ScreenEffectPayload.BLACKOUT, 30, 1f);
+			Cues.whisper(p, 80);
 			p.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 140, 0, false, false));
 			float damage = OccupantConfig.get().chaseDamage;
 			if (damage > 0) p.hurtServer(p.level(), p.damageSources().generic(), damage);

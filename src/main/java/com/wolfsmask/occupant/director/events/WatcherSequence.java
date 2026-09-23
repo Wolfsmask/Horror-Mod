@@ -36,6 +36,8 @@ public class WatcherSequence extends ApparitionSequence {
 	protected void onSeen(ServerPlayer player) {
 		haunt.data.addDread(6f);
 		Cues.effect(player, ScreenEffectPayload.SILENCE, 0, 1f);
+		// Later in the story, seeing it leaves a line behind on the screen.
+		if (haunt.data.act >= 3 && player.getRandom().nextFloat() < 0.5f) Cues.whisper(player, 90);
 		if (haunt.data.act >= 3) {
 			Cues.soundAtEars(player, ModSounds.DRONE, SoundSource.AMBIENT, 0.45f, 1.0f);
 		}

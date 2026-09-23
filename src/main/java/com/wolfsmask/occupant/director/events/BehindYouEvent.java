@@ -82,6 +82,7 @@ public final class BehindYouEvent extends HorrorEvent {
 			if (Sight.angleTo(p, entity.getEyePosition()) <= 55.0 && Sight.canSeeAnyPart(p, entity)) {
 				Cues.sound(p, ModSounds.STINGER, SoundSource.HOSTILE, entity.getEyePosition(), 1.0f, 1.0f);
 				Cues.effect(p, ScreenEffectPayload.BLACKOUT, 16, 1f);
+				Cues.whisper(p, "IT WAS ALWAYS BEHIND YOU", 60);
 				haunt.data.encounters++;
 				scaredAt = age;
 				return true;

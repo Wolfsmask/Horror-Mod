@@ -1,6 +1,8 @@
 package com.wolfsmask.occupant.util;
 
+import com.wolfsmask.occupant.OccupantConfig;
 import com.wolfsmask.occupant.network.ScreenEffectPayload;
+import com.wolfsmask.occupant.network.WhisperPayload;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -41,6 +43,26 @@ public final class Cues {
 		if (ServerPlayNetworking.canSend(player, ScreenEffectPayload.TYPE)) {
 			ServerPlayNetworking.send(player, new ScreenEffectPayload(effect, durationTicks, intensity));
 		}
+	}
+
+	/**
+	 * Fades a line of text up on this player's screen and nowhere else. Picks one of the
+	 * configured lines at random; does nothing if they are switched off.
+	 */
+	public static void whisper(ServerPlayer player, int durationTicks) {
+		OccupantConfig cfg = OccupantConfig.get();
+		if (!cfg.screenWhispers || cfg.whisperLines.isEmpty()) return;
+		String line = cfg.whisperLines.get(player.getRandom().nextInt(cfg.whisperLines.size()));
+		whisper(player, line, durationTicks);
+	}
+
+	public static void whisper(ServerPlayer player, String line, int durationTicks) {
+		OccupantConfig cfg = OccupantConfig.get();
+		if (!cfg.screenWhispers || !ServerPlayNetworking.canSend(player, WhisperPayload.TYPE)) return;
+		String text = line.replace("{player}", player.getName().getString());
+		if (text.length() > WhisperPayload.MAX_LENGTH) text = text.substring(0, WhisperPayload.MAX_LENGTH);
+		int corner = player.getRandom().nextInt(WhisperPayload.CORNERS);
+		ServerPlayNetworking.send(player, new WhisperPayload(text, durationTicks, corner));
 	}
 
 	public static void message(ServerPlayer player, Component text) {

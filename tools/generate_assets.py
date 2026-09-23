@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """
-Generates every texture and sound the mod uses, so nothing is borrowed from anyone else.
+Generates the sounds, the screen static and the mod icon, so nothing is borrowed from anyone else.
+
+The Occupant's own body and its texture come from tools/generate_model.py instead, because those
+two have to be built together.
 
     pip install numpy pillow soundfile
     python3 tools/generate_assets.py
@@ -20,176 +23,6 @@ rng = np.random.default_rng(1337)
 
 
 # --------------------------------------------------------------------------- textures
-
-def _box_faces(u, v, w, h, d):
-    """Texture regions of a Minecraft model cube: name -> (x0, y0, x1, y1)."""
-    return {
-        "top": (u + d, v, u + d + w, v + d),
-        "bottom": (u + d + w, v, u + d + 2 * w, v + d),
-        "right": (u, v + d, u + d, v + d + h),
-        "front": (u + d, v + d, u + d + w, v + d + h),
-        "left": (u + d + w, v + d, u + 2 * d + w, v + d + h),
-        "back": (u + 2 * d + w, v + d, u + 2 * d + 2 * w, v + d + h),
-    }
-
-
-# The Occupant's cubes (must match OccupantModel.createLayer): name -> (u, v, w, h, d)
-TEX_W, TEX_H = 128, 64
-BOXES = {
-    "skull": (0, 0, 6, 6, 6),
-    "jaw": (24, 0, 6, 3, 6),
-    "maw": (48, 0, 5, 5, 5),
-    "skirt": (68, 0, 10, 10, 6),
-    "hem": (68, 16, 11, 9, 7),
-    "crown": (100, 0, 7, 4, 7),
-    "brim": (0, 13, 12, 1, 12),
-    "chest": (0, 27, 8, 12, 4),
-    "collar": (24, 27, 5, 2, 5),
-    "neck": (48, 27, 2, 8, 2),
-    "right_sleeve": (0, 44, 3, 10, 3),
-    "left_sleeve": (12, 44, 3, 10, 3),
-    "right_forearm": (24, 44, 2, 9, 2),
-    "left_forearm": (32, 44, 2, 9, 2),
-}
-HANDS = (112, 34, 128, 50)  # palms and fingers all sample this pale patch
-SIDES = ("front", "back", "left", "right")
-
-CLOTH = (13, 12, 15)
-SKIN = (150, 150, 142)
-COLLAR = (196, 190, 172)
-
-
-def occupant_skin():
-    """A tall parson in a black cassock and a wide hat. Grey skin, sunken eyes, a stitched smile."""
-    r = np.random.default_rng(66)
-    img = np.zeros((TEX_H, TEX_W, 4), dtype=np.uint8)
-
-    def paint(region, rgb, jitter=5):
-        x0, y0, x1, y1 = region
-        n = r.integers(-jitter, jitter + 1, size=(y1 - y0, x1 - x0, 1))
-        img[y0:y1, x0:x1, :3] = np.clip(np.array(rgb) + n, 0, 255)
-        img[y0:y1, x0:x1, 3] = 255
-
-    def box(name, rgb, jitter=5):
-        for f in _box_faces(*BOXES[name]).values():
-            paint(f, rgb, jitter)
-
-    def face(name, side):
-        return _box_faces(*BOXES[name])[side]
-
-    def ragged(name, depth, chance):
-        """Bite pixels out of the bottom edge, so the cloth ends in tatters."""
-        for side in SIDES:
-            x0, y0, x1, y1 = face(name, side)
-            for x in range(x0, x1):
-                if r.random() < chance:
-                    cut = int(r.integers(1, depth + 1))
-                    img[y1 - cut:y1, x, 3] = 0
-
-    for name in ("skirt", "hem", "chest", "brim", "crown", "right_sleeve", "left_sleeve"):
-        box(name, CLOTH, jitter=4)
-    for name in ("skull", "jaw", "neck", "right_forearm", "left_forearm"):
-        box(name, SKIN, jitter=9)
-    box("collar", COLLAR, jitter=10)
-    paint(HANDS, (168, 166, 156), jitter=6)
-
-    # Hat band.
-    for side in SIDES:
-        x0, y0, x1, y1 = face("crown", side)
-        img[y1 - 1, x0:x1, :3] = (34, 30, 30)
-
-    # A row of dull buttons down the front of the cassock.
-    for part in ("chest", "skirt", "hem"):
-        x0, y0, x1, y1 = face(part, "front")
-        cx = (x0 + x1) // 2
-        for y in range(y0 + 1, y1 - 2, 3):
-            img[y, cx, :3] = (58, 54, 50)
-
-    # Tatters at the hem and at the elbows, where the sleeves end.
-    ragged("hem", 3, 0.7)
-    ragged("right_sleeve", 2, 0.5)
-    ragged("left_sleeve", 2, 0.5)
-
-    # The cassock is split open over its chest. Behind it: ribs, and something dark red.
-    x0, y0, x1, y1 = face("chest", "front")
-    cx = (x0 + x1) // 2
-    for y in range(y0 + 3, y0 + 10):
-        w = 1 if y in (y0 + 3, y0 + 9) else 2
-        img[y, cx - w:cx + w, :3] = (26, 4, 6)
-        if (y - y0) % 2 == 0 and w == 2:
-            img[y, cx - w:cx + w, :3] = (112, 104, 92)    # ribs
-            img[y, cx - 1, :3] = (84, 78, 70)
-
-    # The collar: stained, with a thin dark band at the top.
-    for side in SIDES:
-        x0, y0, x1, y1 = face("collar", side)
-        img[y0, x0:x1, :3] = (70, 66, 60)
-
-    # The neck has been sewn together. More than once.
-    for side in SIDES:
-        x0, y0, x1, y1 = face("neck", side)
-        for y in (y0 + 1, y0 + 4):
-            img[y, x0:x1, :3] = (60, 20, 20)
-        img[y0 + 1, x0, :3] = (176, 170, 150)
-
-    # Bare grey forearms, thin as bone, with dark veins.
-    for name in ("right_forearm", "left_forearm"):
-        for side in SIDES:
-            x0, y0, x1, y1 = face(name, side)
-            for y in range(y0, y1):
-                if r.random() < 0.35:
-                    img[y, x0 + int(r.integers(0, x1 - x0)), :3] = (70, 64, 72)
-
-    # The face. Skin stretched thin, two deep sockets of different sizes, hollow cheeks.
-    x0, y0, x1, y1 = face("skull", "front")
-    img[y0:y0 + 1, x0:x1, :3] = (112, 112, 106)          # brow in the hat's shadow
-    img[y0 + 2:y0 + 5, x0 + 1, :3] = (3, 3, 4)            # left socket, long
-    img[y0 + 2:y0 + 4, x0 + 4, :3] = (3, 3, 4)            # right socket, shorter
-    img[y0 + 5, x0 + 1:x0 + 2, :3] = (92, 92, 88)
-    img[y0 + 4, x0 + 4:x0 + 5, :3] = (92, 92, 88)
-    img[y0 + 3:y0 + 5, x0 + 2:x0 + 4, :3] = (128, 128, 120)  # thin nose
-
-    # The smile: far too wide, sewn shut, turning up at both ends.
-    x0, y0, x1, y1 = face("jaw", "front")
-    img[y0, x0, :3] = (24, 6, 6)
-    img[y0, x1 - 1, :3] = (24, 6, 6)
-    img[y0 + 1, x0 + 1:x1 - 1, :3] = (24, 6, 6)
-    for x in range(x0 + 1, x1 - 1, 2):
-        img[y0 + 1, x, :3] = (176, 170, 150)              # stitches
-    img[y1 - 1, x0:x1, :3] = (118, 118, 110)              # chin
-    # The stitches carry on up its cheeks.
-    for side, col in (("left", 0), ("right", -1)):
-        sx0, sy0, sx1, sy1 = face("jaw", side)
-        c = sx0 if col == 0 else sx1 - 1
-        img[sy0, c, :3] = (24, 6, 6)
-
-    # Behind the jaw: a red mouth with too many teeth, then a stretched grey throat.
-    for side in SIDES:
-        x0, y0, x1, y1 = face("maw", side)
-        paint((x0, y0, x1, y0 + 3), (46, 4, 6), jitter=6)
-        for x in range(x0, x1):
-            if (x - x0) % 2 == 0 or side == "front":
-                img[y0, x, :3] = (214, 206, 180)          # upper teeth
-            if (x - x0) % 2 == 1:
-                img[y0 + 2, x, :3] = (200, 192, 168)      # lower teeth
-        paint((x0, y0 + 3, x1, y1), (118, 118, 110), jitter=8)
-    x0, y0, x1, y1 = face("maw", "front")
-    img[y0 + 1, x0 + 1:x1 - 1, :3] = (8, 0, 0)            # the dark inside
-
-    # Long nails, dark at the ends.
-    x0, y0, x1, y1 = HANDS
-    img[y1 - 5:y1, x0:x1, :3] = (70, 66, 60)
-    return Image.fromarray(img, "RGBA")
-
-
-def occupant_eyes():
-    """A pinprick of light at the bottom of each socket, not quite level. Drawn full-bright, so it glows."""
-    img = np.zeros((TEX_H, TEX_W, 4), dtype=np.uint8)
-    x0, y0, _, _ = _box_faces(*BOXES["skull"])["front"]
-    img[y0 + 4, x0 + 1] = (236, 238, 242, 255)
-    img[y0 + 3, x0 + 4] = (236, 238, 242, 255)
-    return Image.fromarray(img, "RGBA")
-
 
 def static_noise(size=128):
     noise = rng.integers(0, 256, size=(size, size)).astype(np.float32)
@@ -352,8 +185,6 @@ def main():
     tex = ROOT / "textures"
     (tex / "entity").mkdir(parents=True, exist_ok=True)
     (tex / "misc").mkdir(parents=True, exist_ok=True)
-    occupant_skin().save(tex / "entity" / "occupant.png")
-    occupant_eyes().save(tex / "entity" / "occupant_eyes.png")
     static_noise().save(tex / "misc" / "static.png")
     icon().save(ROOT / "icon.png")
 
