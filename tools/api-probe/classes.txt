@@ -1,42 +1,7 @@
-# Round 2. "@protected" prefix = include protected members.
-net.minecraft.client.gui.GuiGraphicsExtractor fill\(|blit\(|guiWidth|guiHeight|pose\(
-net.minecraft.client.renderer.SubmitNodeCollector
-net.minecraft.client.renderer.OrderedSubmitNodeCollector submitModel\(
-@protected net.minecraft.client.renderer.entity.LivingEntityRenderer model|scale|shouldShowName|addLayer|getShadowRadius
-@protected net.minecraft.client.renderer.entity.EntityRenderer shouldShowName|shadowRadius
-@protected net.minecraft.client.renderer.entity.layers.EyesLayer
-net.minecraft.client.renderer.entity.layers.SpiderEyesLayer
-net.minecraft.client.renderer.entity.EntityRendererProvider
-net.minecraft.client.renderer.entity.RenderLayerParent
-net.minecraft.client.renderer.entity.AgeableMobRenderer
-net.minecraft.client.renderer.texture.OverlayTexture NO_OVERLAY
-net.minecraft.core.ClientAsset$Texture
-net.minecraft.world.entity.player.PlayerModelType
-net.minecraft.world.level.storage.SavedDataStorage computeIfAbsent|get\(
-net.minecraft.world.level.storage.LevelData$RespawnData
-net.minecraft.world.clock.ServerClockManager
-net.minecraft.world.clock.ClockManager
-net.minecraft.world.level.Level getGameTime|getServer|getDefaultClockTime|getOverworldClockTime|dayTime
-@protected net.minecraft.world.entity.LivingEntity doPush|pushEntities
-@protected net.minecraft.world.entity.Entity canRide|defineSynchedData|tickCount|entityData|isInvulnerableTo
-@protected net.minecraft.world.entity.Mob defineSynchedData|xpReward|customServerAiStep
-net.minecraft.network.chat.PlayerChatMessage signedContent
-net.minecraft.world.phys.Vec3 scale|dot\(|lengthSqr|add\(|subtract\(|normalize|length\(|distanceTo
-net.minecraft.core.Vec3i distToCenterSqr|distSqr|above|below|relative|getY\(
-net.minecraft.core.BlockPos above|below|relative
-net.minecraft.core.Direction$Plane HORIZONTAL|stream
-net.minecraft.core.Direction getUnitVec3i|getNormal|getStepX|getOpposite
-net.minecraft.world.level.block.state.BlockBehaviour$BlockStateBase is\(
-net.minecraft.server.MinecraftServer getPlayerList|overworld|getTickCount|getCommands|createCommandSourceStack
-net.minecraft.server.players.PlayerList getPlayers|getPlayer\(
-net.minecraft.commands.Commands performPrefixedCommand
-net.minecraft.world.phys.AABB AABB\(|inflate
-net.minecraft.world.level.EntityGetter getEntitiesOfClass
-net.minecraft.world.level.BlockAndLightGetter canSeeSky|getBrightness|getRawBrightness
-net.minecraft.world.level.block.Block UPDATE_ALL|UPDATE_CLIENTS
-net.minecraft.world.level.block.Blocks OAK_SIGN|REDSTONE_TORCH|SOUL_WALL_TORCH|SHORT_GRASS|POWDER_SNOW|SWEET_BERRY_BUSH|OAK_DOOR|GRASS_BLOCK
-net.minecraft.world.entity.MobCategory MISC
-net.minecraft.world.level.pathfinder.PathType
-net.minecraft.server.level.ServerPlayerGameMode getGameModeForPlayer
-net.minecraft.world.level.GameType isSurvival
-net.minecraft.client.multiplayer.ClientLevel getEntitiesOfClass
+# Round 3: what the model classes really do at runtime. "@code" = bytecode of matching methods.
+@code net.minecraft.client.model.HumanoidModel HumanoidModel\(|setupAnim
+@code net.minecraft.client.model.Model Model\(|setupAnim|resetPose
+@code net.minecraft.client.model.EntityModel EntityModel\(|setupAnim
+@protected net.minecraft.client.model.geom.ModelPart
+net.minecraft.client.renderer.entity.state.EntityRenderState
+net.minecraft.client.renderer.entity.state.LivingEntityRenderState

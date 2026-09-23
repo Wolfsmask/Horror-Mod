@@ -7,6 +7,17 @@ while IFS= read -r line; do
 	[[ -z "${line// }" || "$line" == \#* ]] && continue
 	vis="-public"
 	if [[ "$line" == @protected* ]]; then vis="-protected"; line="${line#@protected }"; fi
+	if [[ "$line" == @code* ]]; then
+		# "@code <Class> <method regex>": bytecode of the matching methods (which children a model looks up, etc.)
+		line="${line#@code }"
+		cls="${line%% *}"; meth="${line#* }"
+		echo "=== $cls (code: $meth)"
+		javap -c -p -cp "$CP" "$cls" 2>&1 | awk -v m="$meth" '
+			/^  [^ ].*\(.*\);$/ || /^  [^ ].*\{\};$/ { on = ($0 ~ m) }
+			on { print }' | grep -vE '^\s+[0-9]+: (aload|astore|dup|return|iload|fload|fstore|pop)' \
+			| sed -E 's/net\.minecraft\.//g' | head -120
+		continue
+	fi
 	cls="${line%% *}"
 	filter=""
 	[[ "$line" == *" "* ]] && filter="${line#* }"
