@@ -36,35 +36,38 @@ water, in daylight in open fields, or close enough to touch (unless that is the 
 | Act | Roughly when | What happens |
 |---|---|---|
 | 0 | First ~15 min | Nothing. Let the player get comfortable. |
-| 1: Signs | ~15-65 min | Deniable things. Footsteps behind you that stop when you turn. Cave sounds. Someone mining inside the rock nearby. A door creaks open. A chest opens behind you. A torch you placed is gone. |
-| 2: Presence | then ~40-70 min | First sightings: a figure far away in the dark, in the corner of your eye, gone when you look. Knocking on your door at night. Breathing right behind you. A sign you did not place. A fresh 2x1 tunnel. Someone with a name *almost* like yours joins the game. You can't sleep: "there are monsters nearby". There aren't. |
-| 3: Closer | then ~45-80 min | It follows you, moving only when you are not looking. You say things in chat you never typed, sometimes things you said an hour ago. The lights flicker, and between flickers something is standing in front of you. It is standing by your bed when you get home. It is right behind you, and when you turn around, the screen cuts to black. |
-| 4: Hunt | from then on | The music stops. It is standing out there, looking at you. Then it runs. |
+| 1: Signs | ~15-65 min | Deniable things. Footsteps behind you that stop when you turn. A sound you know perfectly, coming from somewhere it cannot be: a creeper's fuse at your back at night, a door in a house with no door. Something standing on a ridge a hundred blocks away that you cannot quite resolve. |
+| 2: Presence | then ~40-70 min | It is closer and it is not hiding as well. A figure in the dark at the edge of your vision. Knocking at night. Breathing behind you. A sign you did not place. A fresh tunnel. Someone with a name *almost* like yours joins the game. You can't sleep: "there are monsters nearby". There aren't. |
+| 3: Closer | then ~45-80 min | It follows you, moving only when you are not looking. You say things in chat you never typed. The lights flicker and it is standing in front of you. It is by your bed when you get home. It is behind you, and the screen goes quietly out. |
+| 4: Hunt | from then on | The music stops. It is out there, looking at you. Then it runs. |
 
 Acts need **both** time and experiences to advance, so you can't skip the story by hiding in a
 lit base, and you can't get stuck in it forever either.
 
-After every big scare there is a **long calm** of 12-20 minutes with only small, deniable
-things. Tension and release is what makes it scary instead of exhausting.
+After every big scare there is a **long calm** of 12-20 minutes with only small, deniable things.
+And the Director builds on absence: the longer nothing has happened, the more it favours
+something real, so the next thing lands once you have stopped listening for it.
+
+There are **no pop-out scares with a loud noise**. A bang makes you jump and then laugh, which
+discharges exactly the tension the rest of the mod spent an hour building. When it finally gets
+to you, the sound drops away instead.
 
 ### The entity
 
 - **Only the haunted player can see or hear it.** Your friend standing next to you sees nothing,
   hears nothing, and did not get that "joined the game" message.
-- It is **a mass of faces**: a hunched, wet black column of people fused into one thing, with ten
-  faces pressing out of it at angles no neck could make, each with its own jaw. It has no legs.
-  It ends in a shroud that drags along the ground, and two long arms with two-jointed fingers.
-- Every face **moves on its own**: its own count for when it wakes, its own moment to turn and
-  look at you, its own speed of working its jaw. Nothing about it is ever in unison, and it moves
-  in held, snapping poses, like stop-motion footage.
-- Early in the story only the faces near the top are uncovered, and they are asleep; from a
-  distance it is a tall, still, hunched shape. Later they are all awake, all looking at you, and
-  when it hunts you they are all screaming.
-- It has ~50 moving bones. Its body and its texture are generated together by
-  `tools/generate_model.py`, so the two can never disagree.
-- **Words surface on your screen**: short lines out of the dark, the way someone writes on the
-  walls of a room they cannot leave. They never appear in the chat log, so there is nothing to
-  scroll back to and check.
+- It is **far too tall and far too thin, and the colour of old bone**: a small blank head with
+  two black pits and nothing else in its face, a neck twice the length of a neck, a ribcage you
+  can count, and legs that are more than half its height. Early in the story it is under a dark
+  shroud, so a shape on a hill cannot be identified. Later the shroud is gone.
+- **It mostly does nothing, on purpose.** It does not lunge, gesture or posture. It stands, at
+  the wrong height, for too long, and now and again its head is a few degrees further round than
+  it was. What movement there is happens between frames, the way a thing looks in two photographs
+  taken a second apart. Its mouth only opens when it is already too late to matter.
+- Further away it reads as **much larger**, because there is nothing beside it to measure it
+  against. Nobody ever sees both sizes at once.
+- A faint sheen keeps it **just visible in real darkness**, so there is always something to
+  half-see over the treeline.
 - It cannot be killed, farmed, trapped or pushed. Hit it and it is simply gone.
 - It is **never saved to disk**, and it removes itself if nothing is controlling it. You will
   never find it standing around in an old save.
@@ -142,7 +145,7 @@ For testing, and for recording your own videos:
 /occupant reload                     reload config/occupant.json
 ```
 
-Events: `footsteps`, `cave_noise`, `distant_mining`, `door`, `chest`, `torch_gone`, `breath`,
+Events: `footsteps`, `familiar`, `distant`, `cave_noise`, `distant_mining`, `door`, `chest`, `torch_gone`, `breath`,
 `knock`, `fake_join`, `sign`, `marker_torch`, `tunnel`, `watcher`, `whisper`, `doppel_chat`,
 `stalker`, `flicker`, `static`, `intruder`, `behind_you`, `wake`, `hunt`.
 

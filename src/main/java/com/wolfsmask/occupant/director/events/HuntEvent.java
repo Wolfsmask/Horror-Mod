@@ -98,8 +98,9 @@ public final class HuntEvent extends HorrorEvent {
 				if (age >= stareTicks || (seen && lookTicks > 15) || dist < 6) {
 					chasing = true;
 					entity.setMode(OccupantEntity.Mode.CHASE);
-					Cues.sound(p, ModSounds.STATIC, SoundSource.HOSTILE, entity.getEyePosition(), 1.0f, 0.8f);
-					Cues.effect(p, ScreenEffectPayload.STATIC, 10, 0.5f);
+					// The moment it starts running should be a drop in sound, not a bang.
+					Cues.sound(p, ModSounds.STATIC, SoundSource.HOSTILE, entity.getEyePosition(), 0.5f, 0.8f);
+					Cues.effect(p, ScreenEffectPayload.STATIC, 10, 0.4f);
 				}
 				return age < 400;
 			}
@@ -107,7 +108,7 @@ public final class HuntEvent extends HorrorEvent {
 			chaseTicks++;
 			if (chaseTicks % 5 == 1) entity.chase(p, CHASE_SPEED);
 			if (chaseTicks % 18 == 0) {
-				Cues.sound(p, SoundEvents.WARDEN_HEARTBEAT, SoundSource.HOSTILE, p.getEyePosition(), 1.0f, 1.1f);
+				Cues.sound(p, SoundEvents.WARDEN_HEARTBEAT, SoundSource.HOSTILE, p.getEyePosition(), 0.8f, 1.1f);
 			}
 
 			if (dist < 1.7) {

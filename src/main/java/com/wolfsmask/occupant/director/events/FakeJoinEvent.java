@@ -47,6 +47,7 @@ public final class FakeJoinEvent extends HorrorEvent {
 
 	/** The player's name, very slightly wrong. */
 	static String almost(String name, RandomSource random) {
+		if (name.isEmpty()) return "?";
 		if (name.length() < 3) return name + name.charAt(name.length() - 1);
 		int i = 1 + random.nextInt(name.length() - 2);
 		if (random.nextBoolean()) {
