@@ -9,8 +9,10 @@ import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.EyesLayer;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
 
 /** Draws the Occupant. Only the haunted player is ever sent the entity, so only they see this. */
 public class OccupantRenderer extends HumanoidMobRenderer<OccupantEntity, OccupantRenderState, OccupantModel> {
@@ -26,6 +28,8 @@ public class OccupantRenderer extends HumanoidMobRenderer<OccupantEntity, Occupa
 	 * a shape standing above the treeline. Nobody ever sees both at once, which is the point.
 	 */
 	private static final float FAR_BLOCKS = 3.9f;
+	/** However cramped the room, it is never allowed to look like a person. */
+	private static final float MIN_BLOCKS = 2.0f;
 	private static final float NEAR_DISTANCE = 28.0f;
 	private static final float FAR_DISTANCE = 64.0f;
 
@@ -45,6 +49,22 @@ public class OccupantRenderer extends HumanoidMobRenderer<OccupantEntity, Occupa
 		state.mode = entity.getMode();
 		state.form = entity.getForm();
 		state.seed = entity.getId();
+		state.headroom = headroomAbove(entity);
+	}
+
+	/**
+	 * How many blocks of clear space it has to stand up in. It is drawn taller than its hitbox,
+	 * which looks right in the open and would put its head through the ceiling of somebody's
+	 * house, so indoors it simply does not stand to its full height.
+	 */
+	private static float headroomAbove(OccupantEntity entity) {
+		Level level = entity.level();
+		BlockPos feet = entity.blockPosition();
+		for (int i = 0; i < Mth.ceil(FAR_BLOCKS); i++) {
+			BlockPos p = feet.above(i);
+			if (!level.getBlockState(p).getCollisionShape(level, p).isEmpty()) return i;
+		}
+		return FAR_BLOCKS;
 	}
 
 	@Override
@@ -57,6 +77,8 @@ public class OccupantRenderer extends HumanoidMobRenderer<OccupantEntity, Occupa
 		float distance = (float) Math.sqrt(state.distanceToCameraSq);
 		float far = Mth.clamp((distance - NEAR_DISTANCE) / (FAR_DISTANCE - NEAR_DISTANCE), 0.0f, 1.0f);
 		float blocks = Mth.lerp(far, NEAR_BLOCKS, FAR_BLOCKS);
+		// Never taller than the room it is standing in, and never so short it reads as a person.
+		blocks = Math.max(MIN_BLOCKS, Math.min(blocks, state.headroom - 0.15f));
 		float scale = blocks * 16.0f / OccupantGeometry.HEIGHT;
 		poseStack.scale(scale, scale, scale);
 	}
