@@ -1,0 +1,21 @@
+=== net.minecraft.client.gui.GuiGraphicsExtractor (-public)
+public class client.gui.GuiGraphicsExtractor {
+=== net.minecraft.client.gui.ActiveTextCollector (-public)
+public interface client.gui.ActiveTextCollector {
+  public static final double PERIOD_PER_SCROLLED_PIXEL;
+  public static final double MIN_SCROLL_PERIOD;
+  public abstract client.gui.ActiveTextCollector$Parameters defaultParameters();
+  public abstract void defaultParameters(client.gui.ActiveTextCollector$Parameters);
+  public default void accept(int, int, util.FormattedCharSequence);
+  public default void accept(int, int, network.chat.Component);
+  public default void accept(client.gui.TextAlignment, int, int, client.gui.ActiveTextCollector$Parameters, network.chat.Component);
+  public abstract void accept(client.gui.TextAlignment, int, int, client.gui.ActiveTextCollector$Parameters, util.FormattedCharSequence);
+  public default void accept(client.gui.TextAlignment, int, int, network.chat.Component);
+  public default void accept(client.gui.TextAlignment, int, int, util.FormattedCharSequence);
+  public abstract void acceptScrolling(network.chat.Component, int, int, int, int, int, client.gui.ActiveTextCollector$Parameters);
+  public default void acceptScrolling(network.chat.Component, int, int, int, int, int);
+  public default void acceptScrollingWithDefaultCenter(network.chat.Component, int, int, int, int);
+  public default void defaultScrollingHelper(network.chat.Component, int, int, int, int, int, int, int, client.gui.ActiveTextCollector$Parameters);
+  public static void findElementUnderCursor(client.renderer.state.gui.GuiTextRenderState, float, float, Consumer<network.chat.Style>);
+  public static boolean isPointInRectangle(float, float, float, float, float, float);
+}
