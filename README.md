@@ -1,6 +1,6 @@
 # The Occupant
 
-*A psychological horror mod for Minecraft (Fabric 1.21.1).*
+*A psychological horror mod for Minecraft Java Edition 26.2 (Fabric).*
 
 Something else is living in your world, and it is learning how to be you.
 
@@ -75,14 +75,12 @@ things. Tension and release is what makes it scary instead of exhausting.
 
 ## Install
 
-1. Install [Fabric Loader](https://fabricmc.net/use/) for **Minecraft 1.21.1**.
-2. Put [Fabric API](https://modrinth.com/mod/fabric-api) (1.21.1) in your `mods` folder.
-3. Put `occupant-<version>.jar` in your `mods` folder.
+1. Install [Fabric Loader](https://fabricmc.net/use/) **0.19 or newer** for **Minecraft 26.2**.
+2. Put [Fabric API](https://modrinth.com/mod/fabric-api) for 26.2 in your `mods` folder.
+3. Put `occupant-<version>+mc26.2.jar` (from the `dist/` folder of this repo) in your `mods` folder.
 
-The mod is needed on **both** the server and every client.
-
-To get the jar without building: open the latest successful run under the repository's
-**Actions** tab and download the `occupant-mod` artifact.
+The mod is needed on **both** the server and every client. Minecraft 26.2 runs on Java 25, which
+the official launcher already includes.
 
 ## Config
 
@@ -137,7 +135,7 @@ with a longer view.
 
 ## Building
 
-Requires Java 21.
+Requires Java 25.
 
 ```
 ./gradlew build          # jar in build/libs/
