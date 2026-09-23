@@ -21,6 +21,9 @@ public final class ClientConfig {
 	/** Show analog static on screen when it is near. */
 	public boolean screenStatic = true;
 
+	/** Show the lines of text that surface on the screen. */
+	public boolean screenText = true;
+
 	public static ClientConfig get() {
 		return instance;
 	}

@@ -51,19 +51,20 @@ things. Tension and release is what makes it scary instead of exhausting.
 
 - **Only the haunted player can see or hear it.** Your friend standing next to you sees nothing,
   hears nothing, and did not get that "joined the game" message.
-- It looks like a **parson far too tall to be a man**: a wide-brimmed hat, a ragged black cassock
-  with nothing underneath it (it doesn't walk, it glides), grey skin, a smile sewn shut, a split in
-  its chest where ribs show through, bare bone-thin forearms, and fingers that hang almost to the ground.
-- It is built from ~50 jointed parts (elbows, wrists, two-jointed fingers, a neck, a loose jaw, a
-  two-piece robe) and it **moves like stop-motion footage**: poses hold, then snap. It breathes.
-  Its fingers flex one at a time. Every appearance twitches differently.
-- Early on it keeps its **head bowed and its hands folded**, face hidden under the brim; all you
-  see are two glowing pinprick eyes, not quite level. Every few seconds it lifts its head slightly
-  to check you are still there, and sometimes its head jerks.
-- Later it looks straight at you. Its **neck slowly stretches** and shrinks, its head lolls over
-  sideways, its elbows bend the wrong way, and its jaw hangs loose and sometimes chatters.
-- When it's right behind you it leans in with its neck out and its jaw unhinged. When it chases you
-  it hunches over and lurches forward, grasping.
+- It is **a mass of faces**: a hunched, wet black column of people fused into one thing, with ten
+  faces pressing out of it at angles no neck could make, each with its own jaw. It has no legs.
+  It ends in a shroud that drags along the ground, and two long arms with two-jointed fingers.
+- Every face **moves on its own**: its own count for when it wakes, its own moment to turn and
+  look at you, its own speed of working its jaw. Nothing about it is ever in unison, and it moves
+  in held, snapping poses, like stop-motion footage.
+- Early in the story only the faces near the top are uncovered, and they are asleep; from a
+  distance it is a tall, still, hunched shape. Later they are all awake, all looking at you, and
+  when it hunts you they are all screaming.
+- It has ~50 moving bones. Its body and its texture are generated together by
+  `tools/generate_model.py`, so the two can never disagree.
+- **Words surface on your screen**: short lines out of the dark, the way someone writes on the
+  walls of a room they cannot leave. They never appear in the chat log, so there is nothing to
+  scroll back to and check.
 - It cannot be killed, farmed, trapped or pushed. Hit it and it is simply gone.
 - It is **never saved to disk**, and it removes itself if nothing is controlling it. You will
   never find it standing around in an old save.
@@ -112,6 +113,8 @@ the official launcher already includes.
 | `requireAlone` | `true` | Visual encounters only when no other player is within `aloneRadius` |
 | `hauntCreative` | `false` | Also haunt creative players (for recording) |
 | `signMessages`, `chatLines` | | What it writes and says. `{player}` and `{day}` work in signs |
+| `screenWhispers` | `true` | Lines of text that surface on the player's screen |
+| `whisperLines` | | What those lines say. `{player}` works |
 | `debug` | `false` | Log the Director's decisions |
 
 `config/occupant-client.json` (each player):
@@ -120,12 +123,15 @@ the official launcher already includes.
 |---|---|---|
 | `reduceFlashing` | `false` | **Photosensitivity:** turns hard flashes and flicker into slow fades |
 | `screenStatic` | `true` | Analog static when it is near |
+| `screenText` | `true` | The lines of text that surface on screen |
 
 ## Commands (operators)
 
 For testing, and for recording your own videos:
 
 ```
+/occupant check                      why is nothing happening? (works in single-player, cheats or not)
+/occupant here [distance]            put it in front of you right now, anywhere, no conditions
 /occupant status [player]
 /occupant trigger <player> <event>   start an event now (it still needs a valid place to happen)
 /occupant act <player> <0-4>         jump to a point in the story
@@ -139,6 +145,10 @@ For testing, and for recording your own videos:
 Events: `footsteps`, `cave_noise`, `distant_mining`, `door`, `chest`, `torch_gone`, `breath`,
 `knock`, `fake_join`, `sign`, `marker_torch`, `tunnel`, `watcher`, `whisper`, `doppel_chat`,
 `stalker`, `flicker`, `static`, `intruder`, `behind_you`, `wake`, `hunt`.
+
+If you just installed it and want to see something **immediately**: `/occupant here`. That one
+never refuses. `/summon occupant:occupant` works too; it will haunt whoever is nearest for a
+minute. Everything else in the story deliberately waits for the right moment.
 
 Tip: to film a scene, `/occupant act @s 4`, go somewhere dark, and `/occupant trigger @s watcher`.
 If it says it could not find a convincing place, that's intentional: try somewhere darker, or
@@ -154,7 +164,8 @@ Requires Java 25.
 ./gradlew runGametest    # run the game tests on a headless server
 ```
 
-Textures and sounds are generated by `tools/generate_assets.py` (`pip install numpy pillow soundfile`).
+The body and its texture are generated by `tools/generate_model.py`; the sounds, screen static and
+icon by `tools/generate_assets.py` (`pip install numpy pillow soundfile`).
 Replace any file in `src/main/resources/assets/occupant/` with your own art or recordings.
 
 ## Project layout
