@@ -45,7 +45,7 @@ public class OccupantModel extends HumanoidModel<OccupantRenderState> {
 		this.crown = mass.getChild("crown");
 		for (int i = 0; i < face.length; i++) {
 			String name = OccupantGeometry.FACES.get(i);
-			ModelPart parent = i < 5 ? crown : mass;
+			ModelPart parent = OccupantGeometry.FACE_PARENTS.get(i).equals("crown") ? crown : mass;
 			face[i] = parent.getChild(name);
 			jaw[i] = face[i].getChild(name + "_jaw");
 			rest[i] = new float[]{face[i].xRot, face[i].yRot, face[i].zRot};

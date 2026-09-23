@@ -285,6 +285,8 @@ public final class OccupantGeometry {
 \tpublic static final int FACE_COUNT = %d;
 \t/** Every face bone, largest first. Each one has a child named {@code <name>_jaw}. */
 \tpublic static final List<String> FACES = List.of(%s);
+\t/** The bone each face hangs off, in the same order as {@link #FACES}. */
+\tpublic static final List<String> FACE_PARENTS = List.of(%s);
 
 \tprivate OccupantGeometry() {
 \t}
@@ -301,7 +303,9 @@ def num(v):
 
 
 def write_java(ps, boxes, placed):
-    lines = [HEADER % (len(FACES), ", ".join('"%s"' % f[0] for f in FACES))]
+    lines = [HEADER % (len(FACES),
+                       ", ".join('"%s"' % f[0] for f in FACES),
+                       ", ".join('"%s"' % f[1] for f in FACES))]
     box_at = {}
     for i, (owner, *_rest) in enumerate(boxes):
         box_at.setdefault(owner, []).append(i)

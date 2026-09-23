@@ -16,6 +16,8 @@ public final class OccupantGeometry {
 	public static final int FACE_COUNT = 10;
 	/** Every face bone, largest first. Each one has a child named {@code <name>_jaw}. */
 	public static final List<String> FACES = List.of("face_main", "face_high", "face_right", "face_left", "face_back", "face_chest", "face_side", "face_low", "face_under", "face_deep");
+	/** The bone each face hangs off, in the same order as {@link #FACES}. */
+	public static final List<String> FACE_PARENTS = List.of("crown", "crown", "crown", "crown", "crown", "mass", "mass", "mass", "mass", "mass");
 
 	private OccupantGeometry() {
 	}
