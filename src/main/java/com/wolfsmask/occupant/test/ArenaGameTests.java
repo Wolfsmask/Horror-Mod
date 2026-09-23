@@ -187,8 +187,8 @@ public final class ArenaGameTests implements FabricGameTest {
 					if (Sight.hasLineOfSight(player, base.add(0, 1.6, 0)) && Sight.hasLineOfSight(player, base.add(0, 0.9, 0))) seen++;
 				}
 			}
-			Occupant.LOGGER.info("[gametest] cave: feet={} underground={} skyVisible={} skyLight={} topY={} light={} look={} | ahead: standable={} dark={} visible={}",
-					feet, Spots.isUnderground(world, feet), world.isSkyVisible(feet), world.getLightLevel(LightType.SKY, feet),
+			Occupant.LOGGER.info("[gametest] cave: yaw={} feet={} underground={} skyVisible={} skyLight={} topY={} light={} look={} | ahead: standable={} dark={} visible={}",
+					player.getYaw(), feet, Spots.isUnderground(world, feet), world.isSkyVisible(feet), world.getLightLevel(LightType.SKY, feet),
 					world.getTopY(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, feet.getX(), feet.getZ()), Spots.light(world, feet.up()),
 					Sight.flatLook(player), stand, dark, seen);
 		}
@@ -196,6 +196,13 @@ public final class ArenaGameTests implements FabricGameTest {
 		private void place(BlockPos pos, float yaw) {
 			director.stopCurrent(player);
 			player.refreshPositionAndAngles(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, yaw, 0.0f);
+			// Set every rotation field directly; the mock player does not take it from the call above.
+			player.setYaw(yaw);
+			player.setPitch(0.0f);
+			player.setHeadYaw(yaw);
+			player.setBodyYaw(yaw);
+			player.prevYaw = yaw;
+			player.prevPitch = 0.0f;
 		}
 
 		private void expect(String where, String... events) {
