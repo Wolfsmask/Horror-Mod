@@ -4,20 +4,30 @@
   "version": "${version}",
   "name": "The Occupant",
   "description": "A psychological horror mod. Something else is living in your world, and it is learning how to be you.",
-  "authors": ["Wolfsmask"],
+  "authors": [
+    "Wolfsmask"
+  ],
   "contact": {
     "sources": "https://github.com/Wolfsmask/Horror-Mod"
   },
   "license": "All-Rights-Reserved",
   "environment": "*",
   "entrypoints": {
-    "main": ["com.wolfsmask.occupant.Occupant"],
-    "client": ["com.wolfsmask.occupant.client.OccupantClient"]
+    "main": [
+      "com.wolfsmask.occupant.Occupant"
+    ],
+    "client": [
+      "com.wolfsmask.occupant.client.OccupantClient"
+    ],
+    "fabric-gametest": [
+      "com.wolfsmask.occupant.test.OccupantGameTests"
+    ]
   },
   "depends": {
     "fabricloader": ">=0.16.0",
     "minecraft": "~1.21.1",
     "java": ">=21",
     "fabric-api": "*"
-  }
+  },
+  "icon": "assets/occupant/icon.png"
 }

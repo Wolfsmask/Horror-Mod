@@ -1,0 +1,8 @@
+{
+  "stinger": { "sounds": ["occupant:stinger"], "subtitle": "subtitles.occupant.stinger" },
+  "drone":   { "sounds": ["occupant:drone"],   "subtitle": "subtitles.occupant.drone" },
+  "breath":  { "sounds": ["occupant:breath"],  "subtitle": "subtitles.occupant.breath" },
+  "whisper": { "sounds": ["occupant:whisper"], "subtitle": "subtitles.occupant.whisper" },
+  "knock":   { "sounds": ["occupant:knock"],   "subtitle": "subtitles.occupant.knock" },
+  "static":  { "sounds": ["occupant:static"],  "subtitle": "subtitles.occupant.static" }
+}

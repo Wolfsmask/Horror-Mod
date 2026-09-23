@@ -29,13 +29,18 @@ jobs:
       - name: Build
         run: |
           chmod +x gradlew
-          ./gradlew build --stacktrace
+          ./gradlew build
 
       - name: Run game tests (headless server)
         run: |
           mkdir -p build/gametest
           echo "eula=true" > build/gametest/eula.txt
-          ./gradlew runGametest --stacktrace
+          ./gradlew runGametest || {
+            echo "::group::Server log (last 150 lines)"
+            tail -n 150 build/gametest/logs/latest.log || true
+            echo "::endgroup::"
+            exit 1
+          }
 
       - name: Upload mod jar
         if: always()
