@@ -56,17 +56,16 @@ to you, the sound drops away instead.
 
 - **Only the haunted player can see or hear it.** Your friend standing next to you sees nothing,
   hears nothing, and did not get that "joined the game" message.
-- It is **far too tall and far too thin, and the colour of bleached bone**: a ribcage you can
-  count, a neck twice the length of a neck, and arms that hang level with its knees. More than
-  half its height is leg.
-- Its head is **a pale mask sunk back inside a dark hood**: two black sockets far too big for it,
-  nothing else, and a long split down the middle of the face with something red far inside it.
-  The hood never comes off.
-- Early in the story it is also **under a cloak**, so a shape on a hill stays a shape on a hill.
-  Later the cloak is gone and the white body is out in the open.
+- It is **white**, from end to end, and far too tall and far too thin: a ribcage you can count as
+  faint lines on its chest, a neck twice the length of a neck, arms that hang level with its knees,
+  and legs that are more than half its height. It wears nothing.
+- Its face is **blank except for two small black eyes**. No mouth, no nose, no brow. There is
+  nothing in it to appeal to and nothing to tell you what it is about to do.
 - **It mostly does nothing, on purpose.** It stands, at the wrong height, for too long, and now
   and again its head is a few degrees further round than it was. What movement there is happens
-  between frames. Its mouth only opens when it is already too late to matter.
+  between frames, the way a thing looks in two photographs taken a second apart.
+- Early in the story it keeps its head down, which makes the shape harder to place at a distance.
+  Later it lifts it and looks at you.
 - Further away it reads as **much larger**, because there is nothing beside it to measure it
   against, and indoors it never stands up through the ceiling.
 - A faint sheen keeps it **just visible in real darkness**, so there is always something to

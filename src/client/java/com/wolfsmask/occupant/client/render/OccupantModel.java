@@ -18,8 +18,8 @@ import net.minecraft.util.Mth;
  *     one, the way a thing looks in photographs taken a second apart.</li>
  *     <li>It only opens its mouth when it is already too late to matter.</li>
  * </ul>
- * VEILED keeps a cloak over it so a distant shape stays unidentifiable; REVEALED is the body
- * underneath. The hood is not part of that: it never comes off.
+ * VEILED is early in the story, when it keeps its head down and is harder to make out at a
+ * distance; REVEALED is when it looks at you.
  */
 public class OccupantModel extends HumanoidModel<OccupantRenderState> {
 	private static final String[] SIDE = {"right", "left"};
@@ -31,8 +31,6 @@ public class OccupantModel extends HumanoidModel<OccupantRenderState> {
 	private final ModelPart neck;
 	private final ModelPart neck2;
 	private final ModelPart skull;
-	private final ModelPart maw;
-	private final ModelPart[] shroud;
 	private final ModelPart[] upper = new ModelPart[2];
 	private final ModelPart[] fore = new ModelPart[2];
 	private final ModelPart[][] finger = new ModelPart[2][FINGERS];
@@ -48,8 +46,6 @@ public class OccupantModel extends HumanoidModel<OccupantRenderState> {
 		this.neck = yoke.getChild("neck");
 		this.neck2 = neck.getChild("neck2");
 		this.skull = neck2.getChild("skull");
-		this.maw = skull.getChild("maw");
-		this.shroud = new ModelPart[]{yoke.getChild("cloak")};
 		for (int s = 0; s < 2; s++) {
 			upper[s] = yoke.getChild(SIDE[s] + "_upper");
 			fore[s] = upper[s].getChild(SIDE[s] + "_fore");
@@ -70,8 +66,6 @@ public class OccupantModel extends HumanoidModel<OccupantRenderState> {
 		float lookY = head.yRot;
 		boolean veiled = state.form == OccupantEntity.Form.VEILED;
 		int seed = state.seed;
-
-		for (ModelPart part : shroud) part.visible = veiled;
 
 		// Poses hold and then change. Nothing eases: easing is what living things do.
 		float step = state.mode == OccupantEntity.Mode.CHASE ? 2.0f : 8.0f;
@@ -125,11 +119,11 @@ public class OccupantModel extends HumanoidModel<OccupantRenderState> {
 			thigh[s].xRot = 0.0f;
 			shin[s].xRot = 0.0f;
 		}
-		maw.visible = false;
 		if (veiled) {
-			// Under the shroud it is hunched, so the shape is shorter and harder to read.
-			spine.xRot += 0.1f;
-			neck.xRot += 0.15f;
+			// Early on it keeps its head down, which makes the shape shorter and harder to read.
+			spine.xRot += 0.12f;
+			neck.xRot += 0.3f;
+			neck2.xRot += 0.2f;
 		}
 	}
 
@@ -140,8 +134,6 @@ public class OccupantModel extends HumanoidModel<OccupantRenderState> {
 		neck2.xRot = -0.3f;
 		skull.xRot = 0.35f + lookX * 0.4f;
 		skull.yRot = lookY * 0.5f;
-		maw.visible = true;
-		maw.yScale = 2.6f;                          // it opens down the middle of the face
 		for (int s = 0; s < 2; s++) {
 			upper[s].xRot = -0.55f;
 			upper[s].zRot = s == 0 ? 0.18f : -0.18f;
@@ -162,8 +154,6 @@ public class OccupantModel extends HumanoidModel<OccupantRenderState> {
 		neck2.xRot = -0.3f;
 		skull.xRot = 0.3f + lookX * 0.3f;
 		skull.yRot = lookY * 0.3f;
-		maw.visible = true;
-		maw.yScale = 3.2f;
 		hips.y -= 1.4f * Math.abs(Mth.sin(gait));   // relative: the hips rest high up, not at 0
 
 		for (int s = 0; s < 2; s++) {

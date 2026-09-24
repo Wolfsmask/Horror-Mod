@@ -40,8 +40,8 @@ HIP = 30.0        # most of it is leg
 SHOULDER = 47.0
 NECK_TOP = 56.0
 HEAD_TOP = 63.0
-# Bones hidden once it stops covering itself up. The hood is not one of them: it is part of it.
-SHROUD = ("cloak",)
+# It wears nothing, so there is nothing to take off.
+SHROUD = ()
 
 
 def parts():
@@ -68,7 +68,7 @@ def parts():
             ("ribs", -3.5, -1.0, -2.25, 7, 13, 4.5),
         ]),
         ("yoke", "spine", (0, -16.0, 0), (0, 0, 0), [
-            ("bone", -6.0, -1.5, -1.5, 12, 3, 3),
+            ("bone", -5.0, -1.5, -1.25, 10, 2.5, 2.5),
         ]),
 
         # A neck far too long for a person, in two pieces so it can crane.
@@ -79,34 +79,15 @@ def parts():
             ("bone", -1.0, -4.5, -1.0, 2, 5, 2),
         ]),
 
-        # The face: a pale mask, sunk back inside a dark hood.
+        # A small, smooth, blank head. Two eyes, and nothing else at all.
         ("skull", "neck2", (0, -4.5, 0), (0, 0, 0), [
-            ("face", -3.5, -8.0, -2.5, 7, 8, 5),
-        ]),
-        # The mouth: a long slot down the middle of it, black, with something red far inside.
-        ("maw", "skull", (0, -3.6, -2.5), (0, 0, 0), [
-            ("maw", -1.0, 0.0, -0.4, 2, 4, 1),
-        ]),
-        # The hood. Open at the front, so all you ever see inside it is the mask.
-        ("hood", "skull", (0, 0, 0), (0, 0, 0), [
-            ("cloth", -5.0, -10.5, -3.5, 10, 2.5, 8),        # a peak, standing off the skull
-            ("cloth", -5.0, -8.5, 3.0, 10, 13, 1.5),         # the back of it
-            ("cloth", -5.0, -8.5, -3.5, 1.5, 13, 7),         # and down each side, well clear
-            ("cloth", 3.5, -8.5, -3.5, 1.5, 13, 7),          # of the face, which is the point
-            ("strand", -4.6, 4.0, -1.0, 1.0, 11, 1.0),       # torn edges hanging off the rim
-            ("strand", 3.8, 4.0, 0.5, 1.0, 9, 1.0),
-        ]),
-        # Worn over everything while it is still only a shape in the dark.
-        ("cloak", "yoke", (0, -1.5, 0), (0, 0, 0), [
-            ("cloth", -7.0, 0.0, -3.5, 14, 10, 7),
-            ("cloth", -5.5, 9.0, -3.0, 11, 16, 6),
-            ("cloth", -4.0, 24.0, -2.5, 8, 12, 5),
+            ("face", -3.0, -6.5, -2.5, 6, 6.5, 5),
         ]),
     ]
 
     # Arms: long enough that the hands hang level with the knees.
     for side, sx in (("right", -1), ("left", 1)):
-        p.append((side + "_upper", "yoke", (sx * 5.0, 0.5, 0.0), (0, 0, 0),
+        p.append((side + "_upper", "yoke", (sx * 4.2, 0.5, 0.0), (0, 0, 0),
                   [("bone", -1.1, -1.1, -1.1, 2.2, 15, 2.2)]))
         p.append((side + "_fore", side + "_upper", (0, 13.9, 0), (0, 0, 0),
                   [("bone", -0.9, 0, -0.9, 1.8, 15, 1.8)]))
@@ -210,13 +191,6 @@ def paint_texture(boxes, placed):
                     fy = int(rng.integers(y0, max(y0 + 1, y1 - 3)))
                     img[fy:fy + 3, fx, :3] = (27, 25, 28)
 
-        elif kind == "maw":
-            for side in f.values():
-                fill(side, PIT, 2)
-            x0, y0, x1, y1 = f["front"]
-            img[y0, x0:x1, :3] = GUM
-            img[y1 - 1, x0:x1, :3] = (40, 8, 10)
-
         elif kind == "ribs":
             for side in f.values():
                 fill(side, SHADOW, 5)
@@ -230,13 +204,13 @@ def paint_texture(boxes, placed):
                         img[y, x0, :3] = SHADOW
                         img[y, x1 - 1, :3] = SHADOW
                     else:
-                        img[y, x0 + 1:x1 - 1, :3] = (30, 29, 30)
+                        img[y, x0 + 1:x1 - 1, :3] = (126, 123, 119)
                 cx = (x0 + x1) // 2
-                img[y0 + 1:y1 - 1, cx, :3] = (46, 44, 45)      # the hollow down the middle
+                img[y0 + 1:y1 - 1, cx, :3] = (150, 147, 142)   # the hollow down the middle
             for side in ("left", "right"):
                 x0, y0, x1, y1 = f[side]
                 for k, y in enumerate(range(y0 + 1, y1 - 1)):
-                    img[y, x0:x1, :3] = BONE if k % 2 == 0 else (36, 35, 36)
+                    img[y, x0:x1, :3] = BONE if k % 2 == 0 else (138, 135, 130)
 
         elif kind == "face":
             paint_face(img, f)
@@ -268,8 +242,8 @@ def paint_texture(boxes, placed):
 
 def paint_face(img, f):
     """
-    A mask rather than a face: smooth bleached bone, two black sockets far too big for it, and
-    a seam down the middle where the mouth comes apart. Nothing to read an expression from.
+    Two eyes in a blank white face. No mouth, no nose, no brow, no expression: there is nothing
+    in it to appeal to, and nothing to tell you what it is about to do.
     """
     for side in f.values():
         x0, y0, x1, y1 = side
@@ -277,28 +251,18 @@ def paint_face(img, f):
         img[y0:y1, x0:x1, :3] = np.clip(np.array(BONE) + n, 0, 255)
         img[y0:y1, x0:x1, 3] = 255
 
-    # It sits back inside the hood, so everything but the face itself is in shadow.
-    for side in ("back", "top", "left", "right"):
+    # The back and sides of the head are a shade lower, so the face reads as the front.
+    for side in ("back", "left", "right"):
         x0, y0, x1, y1 = f[side]
-        img[y0:y1, x0:x1, :3] = np.clip(img[y0:y1, x0:x1, :3].astype(int) - 40, 0, 255)
+        img[y0:y1, x0:x1, :3] = np.clip(img[y0:y1, x0:x1, :3].astype(int) - 18, 0, 255)
 
     x0, y0, x1, y1 = f["front"]
-    w, h = x1 - x0, y1 - y0
-
-    # The sockets: two blocks of pure black, far too big for the face, with nothing in them.
-    for ex in (x0 + 1, x1 - 3):
-        img[y0 + 1:y0 + 4, ex:ex + 2, :3] = PIT
-    img[y0, x0:x1, :3] = (196, 192, 184)
-    img[y0 + 1:y0 + 4, x0 + w // 2, :3] = (214, 210, 202)
-
-    # The mouth: a long vertical split from under the sockets to the chin, red far inside it.
-    mx = x0 + w // 2
-    img[y0 + 4:y1, mx - 1:mx + 1, :3] = (16, 14, 15)
-    img[y0 + 5:y1 - 1, mx, :3] = GUM
-    img[y1 - 1, mx - 1:mx + 1, :3] = (28, 24, 24)
-    img[y0 + 4, x0, :3] = (168, 164, 157)
-    img[y0 + 4, x1 - 1, :3] = (168, 164, 157)
-
+    w = x1 - x0
+    # Two small black eyes, set high and close together. They are the only marks on it.
+    ey = y0 + 2
+    mid = x0 + w // 2
+    img[ey:ey + 2, mid - 2, :3] = PIT
+    img[ey:ey + 2, mid + 1, :3] = PIT
 
 
 HEADER = """// GENERATED by tools/generate_model.py -- do not edit by hand.
