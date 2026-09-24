@@ -56,20 +56,21 @@ to you, the sound drops away instead.
 
 - **Only the haunted player can see or hear it.** Your friend standing next to you sees nothing,
   hears nothing, and did not get that "joined the game" message.
-- It is **white**, from end to end, and far too tall and far too thin: a ribcage you can count as
-  faint lines on its chest, a neck twice the length of a neck, arms that hang level with its knees,
-  and legs that are more than half its height. It wears nothing.
-- Its face is **blank except for two small black eyes**. No mouth, no nose, no brow. There is
-  nothing in it to appeal to and nothing to tell you what it is about to do.
+- Its face is **a smooth ivory mask with two holes in it**, and the holes are the whole design:
+  too large, with nothing behind them, so there is no way to tell where it is looking or whether
+  it is looking at all. Below the mask the face does not end cleanly. It opens into a throat that
+  goes down much further than a throat should, red at the rim and black all the way down.
+- Everything else is **dark drapery**: a robe with no hem, and a cowl of hanging strands around
+  the mask rather than a hood, so the shape moves like cloth instead of sitting on it like a box.
+  The only other pale things on it are its hands, which have far too much finger.
 - **It mostly does nothing, on purpose.** It stands, at the wrong height, for too long, and now
   and again its head is a few degrees further round than it was. What movement there is happens
   between frames, the way a thing looks in two photographs taken a second apart.
-- Early in the story it keeps its head down, which makes the shape harder to place at a distance.
-  Later it lifts it and looks at you.
+- Early in the story it keeps its head down, so the mask is hidden and the shape is only a shape.
 - Further away it reads as **much larger**, because there is nothing beside it to measure it
   against, and indoors it never stands up through the ceiling.
-- A faint sheen keeps it **just visible in real darkness**, so there is always something to
-  half-see over the treeline.
+- A faint sheen keeps the mask **just visible in real darkness**: in a black forest it is the one
+  thing you can half-see.
 - It cannot be killed, farmed, trapped or pushed. Hit it and it is simply gone.
 - It is **never saved to disk**, and it removes itself if nothing is controlling it. You will
   never find it standing around in an old save.

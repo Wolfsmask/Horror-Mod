@@ -36,12 +36,49 @@ rng = np.random.default_rng(909)
 SIDES = ("front", "back", "left", "right")
 
 # Heights, in pixels above the ground (the model is built upside down: up is -y).
-HIP = 30.0        # most of it is leg
-SHOULDER = 47.0
-NECK_TOP = 56.0
-HEAD_TOP = 63.0
-# It wears nothing, so there is nothing to take off.
+HIP = 26.0
+SHOULDER = 46.0
+NECK_TOP = 52.0
+HEAD_TOP = 62.0
+# Nothing is ever taken off. What it is wearing is most of what it is.
 SHROUD = ()
+
+# The cowl is built from many thin strands rather than a few plates, because a hood made of
+# plates reads as a box on a head, and this has to read as something hanging.
+_S = np.random.default_rng(31)
+
+
+def _cowl_strands():
+    """Strands hanging around the skull, longest at the back, shortest beside the face."""
+    out = []
+    for i in range(22):
+        a = (i / 22.0) * 2.0 * np.pi
+        # Leave the front open: the face has to be the only thing you can see in there.
+        front = np.cos(a)
+        if front < -0.62 and abs(np.sin(a)) < 0.55:
+            continue
+        r = 4.6 + 0.5 * float(_S.random())
+        x = float(np.sin(a)) * r
+        z = float(np.cos(a)) * r
+        # Longer at the back and sides, so the face sits in a gap in the middle of it.
+        length = 11.0 + 13.0 * max(0.0, (front + 0.6) / 1.6) + 5.0 * float(_S.random())
+        w = 1.0 + 0.5 * float(_S.random())
+        out.append(("strand", x - w / 2, -7.5, z - w / 2, w, length, w))
+    return out
+
+
+def _mantle_strands():
+    """The same stuff, longer, lying over the shoulders and down the back."""
+    out = []
+    for i in range(16):
+        a = (i / 16.0) * 2.0 * np.pi
+        r = 5.2 + 1.2 * float(_S.random())
+        x = float(np.sin(a)) * r
+        z = float(np.cos(a)) * r
+        length = 14.0 + 16.0 * float(_S.random())
+        w = 1.2 + 0.7 * float(_S.random())
+        out.append(("strand", x - w / 2, 0.0, z - w / 2, w, length, w))
+    return out
 
 
 def parts():
@@ -57,59 +94,66 @@ def parts():
         ("right_leg", None, (0, 0, 0), (0, 0, 0), []),
         ("left_leg", None, (0, 0, 0), (0, 0, 0), []),
 
-        # Narrow hips, a thin spine, and a ribcage you can count from across a field.
         ("hips", None, (0, -HIP, 0), (0, 0, 0), [
-            ("bone", -2.5, -1.0, -1.5, 5, 5, 3),
+            ("drape", -3.5, -1.0, -2.0, 7, 6, 4),
         ]),
         ("spine", "hips", (0, -1.0, 0), (0, 0, 0), [
-            ("bone", -1.5, -16.0, -1.0, 3, 16, 2),
+            ("drape", -3.0, -20.0, -1.75, 6, 20, 3.5),
         ]),
-        ("ribs", "spine", (0, -14.0, 0), (0, 0, 0), [
-            ("ribs", -3.5, -1.0, -2.25, 7, 13, 4.5),
-        ]),
-        ("yoke", "spine", (0, -16.0, 0), (0, 0, 0), [
-            ("bone", -5.0, -1.5, -1.25, 10, 2.5, 2.5),
+        ("yoke", "spine", (0, -20.0, 0), (0, 0, 0), [
+            ("drape", -5.5, -2.0, -2.5, 11, 4, 5),
         ]),
 
-        # A neck far too long for a person, in two pieces so it can crane.
-        ("neck", "yoke", (0, -1.0, 0), (0, 0, 0), [
-            ("bone", -1.0, -4.5, -1.0, 2, 5, 2),
+        # The robe: everything below the shoulders, hanging straight and going to pieces.
+        ("robe", "yoke", (0, -1.0, 0), (0, 0, 0), [
+            ("drape", -6.0, 0.0, -3.0, 12, 13, 6),
+            ("drape", -5.0, 12.0, -2.75, 10, 14, 5.5),
+            ("drape", -4.0, 25.0, -2.5, 8, 12, 5),
         ]),
-        ("neck2", "neck", (0, -4.5, 0), (0, 0, 0), [
-            ("bone", -1.0, -4.5, -1.0, 2, 5, 2),
+        ("mantle", "yoke", (0, -1.5, 0), (0, 0, 0), _mantle_strands()),
+
+        ("neck", "yoke", (0, -1.5, 0), (0, 0, 0), [
+            ("drape", -1.75, -5.0, -1.75, 3.5, 5, 3.5),
         ]),
 
-        # A small, smooth, blank head. Two eyes, and nothing else at all.
-        ("skull", "neck2", (0, -4.5, 0), (0, 0, 0), [
-            ("face", -3.0, -6.5, -2.5, 6, 6.5, 5),
+        # The mask. Broad, smooth, the colour of old ivory, and far too still.
+        ("skull", "neck", (0, -4.5, 0), (0, 0, 0), [
+            ("mask", -4.0, -8.5, -3.0, 8, 9, 5.5),
         ]),
+        # What is under it: a throat that goes down much further than a throat should.
+        ("maw", "skull", (0, -1.0, -2.0), (0, 0, 0), [
+            ("maw", -1.5, 0.0, -1.0, 3, 13, 3),
+        ]),
+        # The cowl, hanging off the back and sides of the mask.
+        ("cowl", "skull", (0, -1.0, 0), (0, 0, 0), _cowl_strands()),
     ]
 
-    # Arms: long enough that the hands hang level with the knees.
+    # Arms: thin, under the robe, ending in pale hands with far too much finger.
     for side, sx in (("right", -1), ("left", 1)):
-        p.append((side + "_upper", "yoke", (sx * 4.2, 0.5, 0.0), (0, 0, 0),
-                  [("bone", -1.1, -1.1, -1.1, 2.2, 15, 2.2)]))
-        p.append((side + "_fore", side + "_upper", (0, 13.9, 0), (0, 0, 0),
-                  [("bone", -0.9, 0, -0.9, 1.8, 15, 1.8)]))
-        p.append((side + "_hand", side + "_fore", (0, 15.0, 0), (0, 0, 0),
-                  [("bone", -1.0, 0, -0.6, 2, 2, 1.2)]))
+        p.append((side + "_upper", "yoke", (sx * 4.8, 0.5, 0.0), (0, 0, 0),
+                  [("drape", -1.4, -1.4, -1.4, 2.8, 15, 2.8)]))
+        p.append((side + "_fore", side + "_upper", (0, 14.0, 0), (0, 0, 0),
+                  [("drape", -1.1, 0, -1.1, 2.2, 14, 2.2)]))
+        p.append((side + "_hand", side + "_fore", (0, 14.0, 0), (0, 0, 0),
+                  [("pale", -1.1, 0, -0.7, 2.2, 2.5, 1.4)]))
         for i in range(4):
             outer = i in (0, 3)
             a, b = (3.5, 3.0) if outer else (4.5, 4.0)
-            p.append((f"{side}_finger{i}", side + "_hand", (-0.75 + i * 0.5, 2.0, 0.0), (0, 0, 0),
-                      [("bone", -0.2, 0, -0.2, 0.4, a, 0.4)]))
+            p.append((f"{side}_finger{i}", side + "_hand", (-0.8 + i * 0.55, 2.5, 0.0), (0, 0, 0),
+                      [("pale", -0.22, 0, -0.22, 0.44, a, 0.44)]))
             p.append((f"{side}_tip{i}", f"{side}_finger{i}", (0, a, 0), (0, 0, 0),
-                      [("bone", -0.18, 0, -0.18, 0.36, b, 0.36)]))
+                      [("pale", -0.2, 0, -0.2, 0.4, b, 0.4)]))
 
-    # Legs: thigh, shin, a long flat foot. Half its height is here.
+    # Legs, mostly hidden under the robe.
     for side, sx in (("right", -1), ("left", 1)):
-        p.append((side + "_thigh", "hips", (sx * 2.0, 3.5, 0.0), (0, 0, 0),
-                  [("bone", -1.3, 0, -1.3, 2.6, 17, 2.6)]))
-        p.append((side + "_shin", side + "_thigh", (0, 17.0, 0), (0, 0, 0),
-                  [("bone", -1.1, 0, -1.1, 2.2, 13, 2.2)]))
-        p.append((side + "_foot", side + "_shin", (0, 13.0, 0), (0, 0, 0),
-                  [("bone", -1.1, 0, -3.4, 2.2, 1.6, 5.2)]))
+        p.append((side + "_thigh", "hips", (sx * 2.2, 4.0, 0.0), (0, 0, 0),
+                  [("drape", -1.4, 0, -1.4, 2.8, 14, 2.8)]))
+        p.append((side + "_shin", side + "_thigh", (0, 14.0, 0), (0, 0, 0),
+                  [("drape", -1.2, 0, -1.2, 2.4, 12, 2.4)]))
+        p.append((side + "_foot", side + "_shin", (0, 12.0, 0), (0, 0, 0),
+                  [("pale", -1.2, 0, -3.0, 2.4, 1.6, 4.5)]))
     return p
+
 
 
 # --------------------------------------------------------------------------- texture packing
@@ -151,16 +195,17 @@ def faces_of(u, v, w, h, d):
 
 # --------------------------------------------------------------------------- painting
 
-BONE = (233, 230, 222)     # bleached, not glossy: pure white plastic reads as a toy
-SHADOW = (176, 172, 164)
-CLOTH = (13, 12, 14)
-PIT = (5, 5, 7)            # the eye sockets, and the back of the throat
-GUM = (74, 12, 14)         # the only colour anywhere on it
+IVORY = (214, 202, 182)    # the mask: old ivory, warm, not white
+IVORY_LOW = (172, 160, 144)
+DRAPE = (31, 25, 23)       # everything it is wearing: a brown so dark it reads as black
+DRAPE_LIT = (52, 43, 39)
+PIT = (6, 5, 6)            # the eye holes, and the back of the throat
+MEAT = (96, 44, 38)        # inside the mouth, and only there
 
 
 def paint_texture(boxes, placed):
     img = np.zeros((TEX_H, TEX_W, 4), dtype=np.uint8)
-    cloth_mask = np.zeros((TEX_H, TEX_W), dtype=bool)
+    dark_mask = np.zeros((TEX_H, TEX_W), dtype=bool)
 
     def fill(region, rgb, jitter=6):
         x0, y0, x1, y1 = region
@@ -174,95 +219,101 @@ def paint_texture(boxes, placed):
         u, v = placed[i]
         f = faces_of(u, v, w, h, d)
 
-        if kind in ("cloth", "strand"):
+        if kind in ("drape", "strand"):
             for side in f.values():
-                fill(side, CLOTH, 3)
+                fill(side, DRAPE, 5)
                 cx0, cy0, cx1, cy1 = side
-                cloth_mask[cy0:cy1, cx0:cx1] = True
+                dark_mask[cy0:cy1, cx0:cx1] = True
             for side in SIDES:
                 x0, y0, x1, y1 = f[side]
-                # Everything it wears is coming apart along its bottom edge.
+                # Nothing it wears has a hem; it all just stops.
                 for x in range(x0, x1):
-                    cut = int(rng.integers(0, 4 if kind == "cloth" else 3))
+                    cut = int(rng.integers(0, 4))
                     if cut:
                         img[y1 - cut:y1, x, 3] = 0
-                for _ in range(max(1, (x1 - x0) // 2)):
+                # A little length in the folds, so it does not read as flat black.
+                for _ in range(max(1, (x1 - x0))):
                     fx = int(rng.integers(x0, x1))
-                    fy = int(rng.integers(y0, max(y0 + 1, y1 - 3)))
-                    img[fy:fy + 3, fx, :3] = (27, 25, 28)
+                    fy = int(rng.integers(y0, max(y0 + 1, y1 - 4)))
+                    img[fy:fy + 4, fx, :3] = DRAPE_LIT
 
-        elif kind == "ribs":
+        elif kind == "maw":
             for side in f.values():
-                fill(side, SHADOW, 5)
-            # Ribs, front and back, with the gaps between them almost black.
-            for side in ("front", "back"):
-                x0, y0, x1, y1 = f[side]
-                for k, y in enumerate(range(y0 + 1, y1 - 1)):
-                    if k % 2 == 0:
-                        img[y, x0:x1, :3] = np.clip(
-                            np.array(BONE) + rng.integers(-5, 6, size=(x1 - x0, 1)), 0, 255)
-                        img[y, x0, :3] = SHADOW
-                        img[y, x1 - 1, :3] = SHADOW
-                    else:
-                        img[y, x0 + 1:x1 - 1, :3] = (126, 123, 119)
-                cx = (x0 + x1) // 2
-                img[y0 + 1:y1 - 1, cx, :3] = (150, 147, 142)   # the hollow down the middle
-            for side in ("left", "right"):
-                x0, y0, x1, y1 = f[side]
-                for k, y in enumerate(range(y0 + 1, y1 - 1)):
-                    img[y, x0:x1, :3] = BONE if k % 2 == 0 else (138, 135, 130)
-
-        elif kind == "face":
-            paint_face(img, f)
-
-        else:  # bone
-            for side in f.values():
-                fill(side, BONE, 6)
+                fill(side, PIT, 2)
+            # The throat: red at the rim where it tears into the mask, black all the way down.
             for side in SIDES:
                 x0, y0, x1, y1 = f[side]
-                if x1 - x0 > 1:
-                    img[y0:y1, x0, :3] = SHADOW
-                    img[y0:y1, x1 - 1, :3] = SHADOW
-                for _ in range(max(1, (x1 - x0) * (y1 - y0) // 14)):
-                    fx, fy = int(rng.integers(x0, x1)), int(rng.integers(y0, y1))
-                    img[fy, fx, :3] = (200, 196, 189)
+                img[y0, x0:x1, :3] = MEAT
+                img[y0 + 1, x0:x1, :3] = (54, 24, 22)
+                for _ in range(max(1, (x1 - x0) // 2)):
+                    fx = int(rng.integers(x0, x1))
+                    img[y0 + 2:y0 + 4, fx, :3] = (44, 20, 19)
+                # Threads of something pale still bridging the gap.
+                for _ in range(2):
+                    fx = int(rng.integers(x0, x1))
+                    fy = int(rng.integers(y0 + 2, max(y0 + 3, y1 - 1)))
+                    img[fy, fx, :3] = (150, 136, 120)
 
-    # A faint sheen of the body, drawn full-bright over it. Without this it is invisible in
-    # real darkness, and the whole story depends on you being able to almost see it.
+        elif kind == "pale":
+            for side in f.values():
+                fill(side, IVORY_LOW, 7)
+            x0, y0, x1, y1 = f["front"]
+            img[max(y0, y1 - 3):y1, x0:x1, :3] = (58, 48, 44)   # dark at the fingertips
+
+        elif kind == "mask":
+            paint_mask(img, f)
+
+        else:
+            for side in f.values():
+                fill(side, IVORY, 6)
+
+    # A faint sheen, drawn full-bright, so the mask is the one thing still visible in the dark.
     lit = img.astype(np.float32)
-    lit[:, :, :3] *= 0.15
-    lit[cloth_mask] = 0                     # what it wears stays dark: that is what it is for
+    lit[:, :, :3] *= 0.17
+    lit[dark_mask] = 0
     glow = lit.astype(np.uint8)
     glow[:, :, 3] = np.where(img[:, :, 3] > 0, 255, 0)
-    glow[cloth_mask] = 0
+    glow[dark_mask] = 0
 
     Image.fromarray(img, "RGBA").save(TEX / "occupant.png")
     Image.fromarray(glow, "RGBA").save(TEX / "occupant_glow.png")
 
 
-def paint_face(img, f):
+def paint_mask(img, f):
     """
-    Two eyes in a blank white face. No mouth, no nose, no brow, no expression: there is nothing
-    in it to appeal to, and nothing to tell you what it is about to do.
+    A smooth ivory face with two holes in it. The holes are the whole design: they are far too
+    large, perfectly round-edged, and there is nothing behind them, so there is no way to tell
+    where it is looking or whether it is looking at all.
     """
     for side in f.values():
         x0, y0, x1, y1 = side
-        n = rng.integers(-4, 5, size=(y1 - y0, x1 - x0, 1))
-        img[y0:y1, x0:x1, :3] = np.clip(np.array(BONE) + n, 0, 255)
+        n = rng.integers(-5, 6, size=(y1 - y0, x1 - x0, 1))
+        img[y0:y1, x0:x1, :3] = np.clip(np.array(IVORY) + n, 0, 255)
         img[y0:y1, x0:x1, 3] = 255
 
-    # The back and sides of the head are a shade lower, so the face reads as the front.
-    for side in ("back", "left", "right"):
+    # The sides and back curve away from the light, and the cowl lies over them.
+    for side in ("back", "left", "right", "top"):
         x0, y0, x1, y1 = f[side]
-        img[y0:y1, x0:x1, :3] = np.clip(img[y0:y1, x0:x1, :3].astype(int) - 18, 0, 255)
+        img[y0:y1, x0:x1, :3] = np.clip(img[y0:y1, x0:x1, :3].astype(int) - 30, 0, 255)
 
     x0, y0, x1, y1 = f["front"]
-    w = x1 - x0
-    # Two small black eyes, set high and close together. They are the only marks on it.
-    ey = y0 + 2
-    mid = x0 + w // 2
-    img[ey:ey + 2, mid - 2, :3] = PIT
-    img[ey:ey + 2, mid + 1, :3] = PIT
+    w, h = x1 - x0, y1 - y0
+
+    # Two holes, set wide in a face that is otherwise entirely smooth. They are not eyes: there
+    # is nothing behind them, which is why you cannot tell where it is looking.
+    ex0, ex1 = x0 + 1, x1 - 3
+    ey = y0 + 3
+    for ex in (ex0, ex1):
+        img[ey:ey + 2, ex:ex + 2, :3] = PIT
+        img[ey + 2, ex:ex + 2, :3] = (162, 150, 134)     # the cheekbone under them
+    img[ey:ey + 2, x0 + w // 2 - 1:x0 + w // 2 + 1, :3] = (224, 213, 194)
+
+    # The brow: one flat plane, no expression in it at all.
+    img[y0, x0:x1, :3] = (186, 174, 156)
+    # Where the mask ends and the mouth begins: it does not end cleanly.
+    img[y1 - 1, x0 + 1:x1 - 1, :3] = (120, 96, 86)
+    img[y1 - 2, x0 + 2:x1 - 2, :3] = (146, 124, 110)
+
 
 
 HEADER = """// GENERATED by tools/generate_model.py -- do not edit by hand.

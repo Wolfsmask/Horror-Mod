@@ -29,7 +29,7 @@ public class OccupantModel extends HumanoidModel<OccupantRenderState> {
 	private final ModelPart spine;
 	private final ModelPart yoke;
 	private final ModelPart neck;
-	private final ModelPart neck2;
+
 	private final ModelPart skull;
 	private final ModelPart[] upper = new ModelPart[2];
 	private final ModelPart[] fore = new ModelPart[2];
@@ -44,8 +44,7 @@ public class OccupantModel extends HumanoidModel<OccupantRenderState> {
 		this.spine = hips.getChild("spine");
 		this.yoke = spine.getChild("yoke");
 		this.neck = yoke.getChild("neck");
-		this.neck2 = neck.getChild("neck2");
-		this.skull = neck2.getChild("skull");
+		this.skull = neck.getChild("skull");
 		for (int s = 0; s < 2; s++) {
 			upper[s] = yoke.getChild(SIDE[s] + "_upper");
 			fore[s] = upper[s].getChild(SIDE[s] + "_fore");
@@ -89,21 +88,17 @@ public class OccupantModel extends HumanoidModel<OccupantRenderState> {
 	 */
 	private void stand(int seed, float t, float lookX, float lookY, boolean veiled) {
 		// The neck carries most of the turn, so the body stays squarely facing wherever it was.
-		neck.yRot = lookY * 0.35f;
-		neck2.yRot = lookY * 0.3f;
-		skull.yRot = lookY * 0.4f;
-		neck.xRot = lookX * 0.25f - 0.05f;
-		neck2.xRot = lookX * 0.25f;
-		skull.xRot = lookX * 0.4f;
+		neck.yRot = lookY * 0.45f;
+		skull.yRot = lookY * 0.55f;
+		neck.xRot = lookX * 0.3f - 0.05f;
+		skull.xRot = lookX * 0.6f;
 
 		// Every so often the head is simply somewhere else, tilted, and stays there a while.
 		float tilt = hold(seed, t, 240, 3);
 		if (tilt > 0.45f) {
 			skull.zRot = 0.5f * (tilt - 0.45f) / 0.55f;
-			neck2.zRot = 0.12f;
 		} else if (tilt < -0.75f) {
 			skull.zRot = -0.7f;                     // right over onto its shoulder
-			neck2.zRot = -0.15f;
 		}
 
 		for (int s = 0; s < 2; s++) {
@@ -122,17 +117,15 @@ public class OccupantModel extends HumanoidModel<OccupantRenderState> {
 		if (veiled) {
 			// Early on it keeps its head down, which makes the shape shorter and harder to read.
 			spine.xRot += 0.12f;
-			neck.xRot += 0.3f;
-			neck2.xRot += 0.2f;
+			neck.xRot += 0.35f;
 		}
 	}
 
 	/** Close enough to touch you. It bends down to your height, and the mouth opens. */
 	private void loom(float lookX, float lookY) {
 		spine.xRot = 0.55f;
-		neck.xRot = -0.25f + lookX * 0.3f;
-		neck2.xRot = -0.3f;
-		skull.xRot = 0.35f + lookX * 0.4f;
+		neck.xRot = -0.35f + lookX * 0.3f;
+		skull.xRot = 0.45f + lookX * 0.4f;
 		skull.yRot = lookY * 0.5f;
 		for (int s = 0; s < 2; s++) {
 			upper[s].xRot = -0.55f;
@@ -150,9 +143,8 @@ public class OccupantModel extends HumanoidModel<OccupantRenderState> {
 	private void chase(float t, float lookX, float lookY) {
 		float gait = t * 0.62f;
 		spine.xRot = 0.5f;
-		neck.xRot = -0.45f;
-		neck2.xRot = -0.3f;
-		skull.xRot = 0.3f + lookX * 0.3f;
+		neck.xRot = -0.55f;
+		skull.xRot = 0.4f + lookX * 0.3f;
 		skull.yRot = lookY * 0.3f;
 		hips.y -= 1.4f * Math.abs(Mth.sin(gait));   // relative: the hips rest high up, not at 0
 
