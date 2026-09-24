@@ -47,6 +47,19 @@ SHROUD = ()
 # plates reads as a box on a head, and this has to read as something hanging.
 _S = np.random.default_rng(31)
 
+# Strands are placed off the grid the rest of the body is built on. Two faces from different
+# bones that land in exactly the same plane flicker against each other in game, and with ~40
+# strands draped over a robe that would otherwise happen constantly. Offsetting every strand by
+# a fraction of a pixel makes it impossible by construction rather than by luck.
+# Every strand gets its own fractional position and thickness, stepped by irrational ratios so
+# the sequence never repeats. No two strands can share a face plane, and none of them can land
+# on the round coordinates the robe and the arms are built on.
+def _strand(seq, x, z, y, length):
+    fx = 0.11 + 0.78 * ((seq * 0.6180339887) % 1.0)
+    fz = 0.07 + 0.78 * ((seq * 0.4142135624) % 1.0)
+    w = 0.85 + 0.75 * ((seq * 0.2360679775) % 1.0)
+    return ("strand", np.floor(x - w / 2) + fx, y, np.floor(z - w / 2) + fz, w, length, w)
+
 
 def _cowl_strands():
     """Strands hanging around the skull, longest at the back, shortest beside the face."""
@@ -57,13 +70,13 @@ def _cowl_strands():
         front = np.cos(a)
         if front < -0.62 and abs(np.sin(a)) < 0.55:
             continue
-        r = 4.6 + 0.5 * float(_S.random())
-        x = float(np.sin(a)) * r
-        z = float(np.cos(a)) * r
-        # Longer at the back and sides, so the face sits in a gap in the middle of it.
-        length = 11.0 + 13.0 * max(0.0, (front + 0.6) / 1.6) + 5.0 * float(_S.random())
-        w = 1.0 + 0.5 * float(_S.random())
-        out.append(("strand", x - w / 2, -7.5, z - w / 2, w, length, w))
+        # An ellipse, not a circle: the head is wider than it is deep, and strands on a circle
+        # either float off the back of it or land flat on its sides.
+        x = float(np.sin(a)) * (4.9 + 0.45 * float(_S.random()))
+        z = float(np.cos(a)) * (3.6 + 0.35 * float(_S.random()))
+        # Short enough to stop above the shoulders, so the mantle takes over from there.
+        length = 8.5 + 9.5 * max(0.0, (front + 0.6) / 1.6) + 3.5 * float(_S.random())
+        out.append(_strand(i + 1, x, z, -7.13, length))
     return out
 
 
@@ -71,13 +84,10 @@ def _mantle_strands():
     """The same stuff, longer, lying over the shoulders and down the back."""
     out = []
     for i in range(16):
-        a = (i / 16.0) * 2.0 * np.pi
-        r = 5.2 + 1.2 * float(_S.random())
-        x = float(np.sin(a)) * r
-        z = float(np.cos(a)) * r
-        length = 14.0 + 16.0 * float(_S.random())
-        w = 1.2 + 0.7 * float(_S.random())
-        out.append(("strand", x - w / 2, 0.0, z - w / 2, w, length, w))
+        a = ((i + 0.37) / 16.0) * 2.0 * np.pi   # out of phase with the cowl above it
+        x = float(np.sin(a)) * (6.35 + 0.6 * float(_S.random()))
+        z = float(np.cos(a)) * (3.45 + 0.5 * float(_S.random()))
+        out.append(_strand(i + 41, x, z, 0.11, 13.0 + 16.0 * float(_S.random())))
     return out
 
 
@@ -121,8 +131,8 @@ def parts():
             ("mask", -4.0, -8.5, -3.0, 8, 9, 5.5),
         ]),
         # What is under it: a throat that goes down much further than a throat should.
-        ("maw", "skull", (0, -1.0, -2.0), (0, 0, 0), [
-            ("maw", -1.5, 0.0, -1.0, 3, 13, 3),
+        ("maw", "skull", (0, -1.0, -2.6), (0, 0, 0), [
+            ("maw", -1.5, 0.0, -1.0, 3, 9, 3),
         ]),
         # The cowl, hanging off the back and sides of the mask.
         ("cowl", "skull", (0, -1.0, 0), (0, 0, 0), _cowl_strands()),
@@ -146,7 +156,7 @@ def parts():
 
     # Legs, mostly hidden under the robe.
     for side, sx in (("right", -1), ("left", 1)):
-        p.append((side + "_thigh", "hips", (sx * 2.2, 4.0, 0.0), (0, 0, 0),
+        p.append((side + "_thigh", "hips", (sx * 2.2, 4.35, 0.0), (0, 0, 0),
                   [("drape", -1.4, 0, -1.4, 2.8, 14, 2.8)]))
         p.append((side + "_shin", side + "_thigh", (0, 14.0, 0), (0, 0, 0),
                   [("drape", -1.2, 0, -1.2, 2.4, 12, 2.4)]))
@@ -154,6 +164,77 @@ def parts():
                   [("pale", -1.2, 0, -3.0, 2.4, 1.6, 4.5)]))
     return p
 
+
+
+def _world_origins(ps):
+    """Where each bone sits once the whole tree is assembled."""
+    pivot = {n: piv for n, _p, piv, _r, _b in ps}
+    parent = {n: p for n, p, _piv, _r, _b in ps}
+    out = {}
+
+    def walk(name):
+        if name in out:
+            return out[name]
+        px, py, pz = pivot[name]
+        if parent[name] is not None:
+            qx, qy, qz = walk(parent[name])
+            px, py, pz = px + qx, py + qy, pz + qz
+        out[name] = (px, py, pz)
+        return out[name]
+
+    for n, _p, _piv, _r, _b in ps:
+        walk(n)
+    return out
+
+
+def avoid_coplanar(ps, step=0.041, tries=60):
+    """
+    Nudges each strand until none of its faces lies in the same plane as a face of anything
+    else. Two coplanar overlapping faces have no defined draw order, so in game the surface
+    flickers between them as the camera moves, and with forty strands draped over a robe that
+    would otherwise happen by luck rather than by design. Fixing it here means the geometry
+    cannot regress the next time the shape is changed.
+    """
+    origins = _world_origins(ps)
+
+    def faces(axis):
+        """Face coordinates of everything that is not a strand, plus strands placed so far."""
+        out = []
+        for name, _p, _piv, _r, boxes in ps:
+            ox, oy, oz = origins[name]
+            off = (ox, oy, oz)[axis]
+            for kind, x, y, z, w, h, d in boxes:
+                lo = (x, y, z)[axis] + off
+                out.append((lo, lo + (w, h, d)[axis]))
+        return out
+
+    moved = 0
+    for name, _p, _piv, _r, boxes in ps:
+        ox, oy, oz = origins[name]
+        for i, box in enumerate(boxes):
+            if box[0] != "strand":
+                continue
+            for _ in range(tries):
+                clash = False
+                for axis, off in ((0, ox), (2, oz)):
+                    lo = box[1 + axis] + off
+                    hi = lo + box[4 + axis]
+                    for other_lo, other_hi in faces(axis):
+                        if abs(other_lo - lo) < 1e-9 and abs(other_hi - hi) < 1e-9:
+                            continue                     # itself
+                        for a in (lo, hi):
+                            for b in (other_lo, other_hi):
+                                if abs(a - b) < 0.03:
+                                    clash = True
+                if not clash:
+                    break
+                box = (box[0], box[1] + step, box[2], box[3] + step * 0.7,
+                       box[4], box[5], box[6])
+                boxes[i] = box
+                moved += 1
+    if moved:
+        print("nudged strands %d times to keep faces out of each other's planes" % moved)
+    return ps
 
 
 # --------------------------------------------------------------------------- texture packing
@@ -384,7 +465,7 @@ def write_java(ps, boxes, placed):
 
 
 def main():
-    ps = parts()
+    ps = avoid_coplanar(parts())
     boxes = [(name, *b) for name, _p, _piv, _r, own in ps for b in own]
     placed = pack(boxes)
     paint_texture(boxes, placed)

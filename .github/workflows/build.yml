@@ -28,6 +28,18 @@ jobs:
           echo "Game:"; curl -fsS "https://meta.fabricmc.net/v2/versions/game" | grep -o '"version": *"[^"]*"' | head -3 || true
           echo "Fabric API:"; curl -fsS "https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/maven-metadata.xml" | grep -o '<version>[^<]*+26\.2</version>' | tail -3 || true
 
+      # The model is generated, so it can drift from its generator, and geometry faults (a bone
+      # the Java asks for that no longer exists, two surfaces in the same plane) do not show up
+      # in a compile or in a headless test. They only show up in front of a player.
+      - name: Check the model
+        run: |
+          python3 -m pip install --quiet numpy pillow
+          python3 tools/check_model.py
+          python3 tools/generate_model.py
+          git diff --exit-code -- src/client/java/com/wolfsmask/occupant/client/render/OccupantGeometry.java \
+            src/main/resources/assets/occupant/textures/entity \
+            || { echo "::error::The committed model does not match tools/generate_model.py. Run it and commit."; exit 1; }
+
       - name: Build
         run: |
           chmod +x gradlew
