@@ -239,9 +239,19 @@ def avoid_coplanar(ps, step=0.041, tries=60):
 
 # --------------------------------------------------------------------------- texture packing
 
+def _texels(v):
+    """
+    Texels a box dimension needs. Rounded UP, never below one: the fingers are thinner than a
+    pixel, and rounding those to zero made the packer hand out slots smaller than the faces
+    that go in them, so neighbouring parts ended up sharing texture and wearing each other's
+    pixels.
+    """
+    return max(1, int(np.ceil(v - 1e-6)))
+
+
 def unfolded(w, h, d):
     """Size of a cube's unwrapped texture region."""
-    return int(2 * round(d) + 2 * round(w)), int(round(d) + round(h))
+    return 2 * _texels(d) + 2 * _texels(w), _texels(d) + _texels(h)
 
 
 def pack(boxes):
@@ -263,7 +273,7 @@ def pack(boxes):
 
 
 def faces_of(u, v, w, h, d):
-    w, h, d = max(round(w), 1), max(round(h), 1), max(round(d), 1)
+    w, h, d = _texels(w), _texels(h), _texels(d)
     return {
         "top": (u + d, v, u + d + w, v + d),
         "bottom": (u + d + w, v, u + d + 2 * w, v + d),

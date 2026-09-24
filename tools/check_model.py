@@ -129,6 +129,30 @@ def check_buried(boxes, parents):
 HUMANOID_REQUIRED = ("head", "hat", "body", "right_arm", "left_arm", "right_leg", "left_leg")
 
 
+def check_uvs():
+    """
+    Two boxes given the same patch of texture would wear each other's pixels. The packer is
+    supposed to make that impossible, so this is checking the packer, not the model.
+    """
+    src = GEOM.read_text()
+    rects = []
+    for m in PART_RE.finditer(src):
+        name = m.group(2)
+        for uv, box in BOX_RE.findall(m.group(3)):
+            u, v = [float(t) for t in NUM_RE.findall(uv)]
+            _x, _y, _z, w, h, d = [float(t) for t in NUM_RE.findall(box)]
+            w, h, d = [max(1, int(-(-v // 1))) for v in (w, h, d)]   # ceil, min 1
+            rects.append((name, u, v, u + 2 * d + 2 * w, v + d + h))
+    bad = []
+    for i in range(len(rects)):
+        na, ax0, ay0, ax1, ay1 = rects[i]
+        for j in range(i + 1, len(rects)):
+            nb, bx0, by0, bx1, by1 = rects[j]
+            if span(ax0, ax1, bx0, bx1) > 0.5 and span(ay0, ay1, by0, by1) > 0.5:
+                bad.append((na, nb))
+    return bad
+
+
 def check_lookups():
     """Every bone OccupantModel.java asks for has to exist, or the model throws on first draw."""
     defined = set(re.findall(r'addOrReplaceChild\("(\w+)"', GEOM.read_text()))
@@ -172,6 +196,13 @@ def main():
         print("\nBROKEN TREE:")
         for name, parent in orphans:
             print("  '%s' hangs off '%s', which is not defined" % (name, parent))
+
+    uvs = check_uvs()
+    if uvs:
+        problems += len(uvs)
+        print("\nSHARED TEXTURE SPACE (parts would wear each other's pixels):")
+        for na, nb in uvs[:20]:
+            print("  %s and %s" % (na, nb))
 
     planes = check_planes(boxes, parents)
     if planes:
