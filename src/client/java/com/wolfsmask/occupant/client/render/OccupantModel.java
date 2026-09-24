@@ -18,7 +18,8 @@ import net.minecraft.util.Mth;
  *     one, the way a thing looks in photographs taken a second apart.</li>
  *     <li>It only opens its mouth when it is already too late to matter.</li>
  * </ul>
- * VEILED keeps it under a shroud so a distant shape stays unidentifiable; REVEALED is the body.
+ * VEILED keeps a cloak over it so a distant shape stays unidentifiable; REVEALED is the body
+ * underneath. The hood is not part of that: it never comes off.
  */
 public class OccupantModel extends HumanoidModel<OccupantRenderState> {
 	private static final String[] SIDE = {"right", "left"};
@@ -48,7 +49,7 @@ public class OccupantModel extends HumanoidModel<OccupantRenderState> {
 		this.neck2 = neck.getChild("neck2");
 		this.skull = neck2.getChild("skull");
 		this.maw = skull.getChild("maw");
-		this.shroud = new ModelPart[]{yoke.getChild("cloak"), neck2.getChild("hood")};
+		this.shroud = new ModelPart[]{yoke.getChild("cloak")};
 		for (int s = 0; s < 2; s++) {
 			upper[s] = yoke.getChild(SIDE[s] + "_upper");
 			fore[s] = upper[s].getChild(SIDE[s] + "_fore");

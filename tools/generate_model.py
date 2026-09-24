@@ -36,12 +36,12 @@ rng = np.random.default_rng(909)
 SIDES = ("front", "back", "left", "right")
 
 # Heights, in pixels above the ground (the model is built upside down: up is -y).
-HIP = 27.0        # more than half of it is leg
-CHEST = 43.0
-SHOULDER = 42.0
-NECK_TOP = 50.0
-# Bones that only exist to be hidden: the shroud it wears early on.
-SHROUD = ("cloak", "hood")
+HIP = 30.0        # most of it is leg
+SHOULDER = 47.0
+NECK_TOP = 56.0
+HEAD_TOP = 63.0
+# Bones hidden once it stops covering itself up. The hood is not one of them: it is part of it.
+SHROUD = ("cloak",)
 
 
 def parts():
@@ -57,54 +57,60 @@ def parts():
         ("right_leg", None, (0, 0, 0), (0, 0, 0), []),
         ("left_leg", None, (0, 0, 0), (0, 0, 0), []),
 
-        # Hips, then a long spine with a ribcage you can count.
+        # Narrow hips, a thin spine, and a ribcage you can count from across a field.
         ("hips", None, (0, -HIP, 0), (0, 0, 0), [
             ("bone", -2.5, -1.0, -1.5, 5, 5, 3),
         ]),
         ("spine", "hips", (0, -1.0, 0), (0, 0, 0), [
-            ("bone", -1.5, -15.0, -1.0, 3, 15, 2),          # the spine itself, thin
+            ("bone", -1.5, -16.0, -1.0, 3, 16, 2),
         ]),
-        ("ribs", "spine", (0, -13.0, 0), (0, 0, 0), [
-            ("ribs", -3.0, -1.0, -2.0, 6, 11, 4),
+        ("ribs", "spine", (0, -14.0, 0), (0, 0, 0), [
+            ("ribs", -3.5, -1.0, -2.25, 7, 13, 4.5),
         ]),
-        # Shoulders: a thin yoke, wider than the chest, with nothing on it.
-        ("yoke", "spine", (0, -15.0, 0), (0, 0, 0), [
-            ("bone", -5.5, -1.5, -1.5, 11, 3, 3),
+        ("yoke", "spine", (0, -16.0, 0), (0, 0, 0), [
+            ("bone", -6.0, -1.5, -1.5, 12, 3, 3),
         ]),
 
-        # A neck much too long for a person, in two pieces so it can crane.
+        # A neck far too long for a person, in two pieces so it can crane.
         ("neck", "yoke", (0, -1.0, 0), (0, 0, 0), [
-            ("bone", -1.0, -4.0, -1.0, 2, 4, 2),
+            ("bone", -1.0, -4.5, -1.0, 2, 5, 2),
         ]),
-        ("neck2", "neck", (0, -4.0, 0), (0, 0, 0), [
-            ("bone", -1.0, -4.0, -1.0, 2, 4, 2),
+        ("neck2", "neck", (0, -4.5, 0), (0, 0, 0), [
+            ("bone", -1.0, -4.5, -1.0, 2, 5, 2),
         ]),
-        # A small, smooth, blank head. No hair, no ears, no expression.
-        ("skull", "neck2", (0, -4.0, 0), (0, 0, 0), [
-            ("face", -2.5, -5.0, -2.0, 5, 5, 4),
+
+        # The face: a pale mask, sunk back inside a dark hood.
+        ("skull", "neck2", (0, -4.5, 0), (0, 0, 0), [
+            ("face", -3.5, -8.0, -2.5, 7, 8, 5),
         ]),
-        # The mouth only exists when it opens: a black slot down the middle of the face.
-        ("maw", "skull", (0, -1.6, -2.0), (0, 0, 0), [
+        # The mouth: a long slot down the middle of it, black, with something red far inside.
+        ("maw", "skull", (0, -3.6, -2.5), (0, 0, 0), [
             ("maw", -1.0, 0.0, -0.4, 2, 4, 1),
         ]),
-        # The shroud: a hood and a cloak, worn while it is still pretending to be a shape.
-        ("cloak", "yoke", (0, -1.5, 0), (0, 0, 0), [
-            ("cloth", -6.5, 0.0, -3.5, 13, 9, 7),           # over the shoulders
-            ("cloth", -5.0, 8.0, -3.0, 10, 14, 6),          # falling away, narrower
-            ("cloth", -3.5, 21.0, -2.5, 7, 10, 5),          # and trailing to nothing
+        # The hood. Open at the front, so all you ever see inside it is the mask.
+        ("hood", "skull", (0, 0, 0), (0, 0, 0), [
+            ("cloth", -5.0, -10.5, -3.5, 10, 2.5, 8),        # a peak, standing off the skull
+            ("cloth", -5.0, -8.5, 3.0, 10, 13, 1.5),         # the back of it
+            ("cloth", -5.0, -8.5, -3.5, 1.5, 13, 7),         # and down each side, well clear
+            ("cloth", 3.5, -8.5, -3.5, 1.5, 13, 7),          # of the face, which is the point
+            ("strand", -4.6, 4.0, -1.0, 1.0, 11, 1.0),       # torn edges hanging off the rim
+            ("strand", 3.8, 4.0, 0.5, 1.0, 9, 1.0),
         ]),
-        ("hood", "neck2", (0, -4.0, 0), (0, 0, 0), [
-            ("cloth", -4.0, -6.5, -3.5, 8, 9, 7),
+        # Worn over everything while it is still only a shape in the dark.
+        ("cloak", "yoke", (0, -1.5, 0), (0, 0, 0), [
+            ("cloth", -7.0, 0.0, -3.5, 14, 10, 7),
+            ("cloth", -5.5, 9.0, -3.0, 11, 16, 6),
+            ("cloth", -4.0, 24.0, -2.5, 8, 12, 5),
         ]),
     ]
 
-    # Arms: upper, fore, and a hand of four long fingers. They hang past the knees.
+    # Arms: long enough that the hands hang level with the knees.
     for side, sx in (("right", -1), ("left", 1)):
-        p.append((side + "_upper", "yoke", (sx * 4.5, 0.5, 0.0), (0, 0, 0),
-                  [("bone", -1.2, -1.2, -1.2, 2.4, 14, 2.4)]))
-        p.append((side + "_fore", side + "_upper", (0, 12.8, 0), (0, 0, 0),
-                  [("bone", -1.0, 0, -1.0, 2, 13, 2)]))
-        p.append((side + "_hand", side + "_fore", (0, 13.0, 0), (0, 0, 0),
+        p.append((side + "_upper", "yoke", (sx * 5.0, 0.5, 0.0), (0, 0, 0),
+                  [("bone", -1.1, -1.1, -1.1, 2.2, 15, 2.2)]))
+        p.append((side + "_fore", side + "_upper", (0, 13.9, 0), (0, 0, 0),
+                  [("bone", -0.9, 0, -0.9, 1.8, 15, 1.8)]))
+        p.append((side + "_hand", side + "_fore", (0, 15.0, 0), (0, 0, 0),
                   [("bone", -1.0, 0, -0.6, 2, 2, 1.2)]))
         for i in range(4):
             outer = i in (0, 3)
@@ -114,14 +120,14 @@ def parts():
             p.append((f"{side}_tip{i}", f"{side}_finger{i}", (0, a, 0), (0, 0, 0),
                       [("bone", -0.18, 0, -0.18, 0.36, b, 0.36)]))
 
-    # Legs: thigh, shin, and a long flat foot. Most of its height is here.
+    # Legs: thigh, shin, a long flat foot. Half its height is here.
     for side, sx in (("right", -1), ("left", 1)):
         p.append((side + "_thigh", "hips", (sx * 2.0, 3.5, 0.0), (0, 0, 0),
-                  [("bone", -1.3, 0, -1.3, 2.6, 15, 2.6)]))
-        p.append((side + "_shin", side + "_thigh", (0, 15.0, 0), (0, 0, 0),
-                  [("bone", -1.1, 0, -1.1, 2.2, 12, 2.2)]))
-        p.append((side + "_foot", side + "_shin", (0, 12.0, 0), (0, 0, 0),
-                  [("bone", -1.1, 0, -3.2, 2.2, 1.6, 5)]))
+                  [("bone", -1.3, 0, -1.3, 2.6, 17, 2.6)]))
+        p.append((side + "_shin", side + "_thigh", (0, 17.0, 0), (0, 0, 0),
+                  [("bone", -1.1, 0, -1.1, 2.2, 13, 2.2)]))
+        p.append((side + "_foot", side + "_shin", (0, 13.0, 0), (0, 0, 0),
+                  [("bone", -1.1, 0, -3.4, 2.2, 1.6, 5.2)]))
     return p
 
 
@@ -164,10 +170,11 @@ def faces_of(u, v, w, h, d):
 
 # --------------------------------------------------------------------------- painting
 
-BONE = (228, 224, 214)     # old bone, not white: white looks like plastic
-SHADOW = (168, 164, 156)
+BONE = (233, 230, 222)     # bleached, not glossy: pure white plastic reads as a toy
+SHADOW = (176, 172, 164)
 CLOTH = (13, 12, 14)
-PIT = (6, 6, 8)            # the eyes, and the inside of the mouth
+PIT = (5, 5, 7)            # the eye sockets, and the back of the throat
+GUM = (74, 12, 14)         # the only colour anywhere on it
 
 
 def paint_texture(boxes, placed):
@@ -186,71 +193,71 @@ def paint_texture(boxes, placed):
         u, v = placed[i]
         f = faces_of(u, v, w, h, d)
 
-        if kind == "cloth":
+        if kind in ("cloth", "strand"):
             for side in f.values():
                 fill(side, CLOTH, 3)
                 cx0, cy0, cx1, cy1 = side
                 cloth_mask[cy0:cy1, cx0:cx1] = True
-            # The shroud hangs in strands and ends in tatters.
             for side in SIDES:
                 x0, y0, x1, y1 = f[side]
+                # Everything it wears is coming apart along its bottom edge.
                 for x in range(x0, x1):
-                    cut = int(rng.integers(0, 5))
+                    cut = int(rng.integers(0, 4 if kind == "cloth" else 3))
                     if cut:
                         img[y1 - cut:y1, x, 3] = 0
                 for _ in range(max(1, (x1 - x0) // 2)):
                     fx = int(rng.integers(x0, x1))
                     fy = int(rng.integers(y0, max(y0 + 1, y1 - 3)))
-                    img[fy:fy + 3, fx, :3] = (26, 24, 27)
+                    img[fy:fy + 3, fx, :3] = (27, 25, 28)
 
         elif kind == "maw":
             for side in f.values():
                 fill(side, PIT, 2)
             x0, y0, x1, y1 = f["front"]
-            img[y1 - 1, x0:x1, :3] = (54, 10, 12)      # a little colour, far down it
+            img[y0, x0:x1, :3] = GUM
+            img[y1 - 1, x0:x1, :3] = (40, 8, 10)
 
         elif kind == "ribs":
             for side in f.values():
                 fill(side, SHADOW, 5)
-            # Ribs you can count, front and back, with the gaps between them dark.
+            # Ribs, front and back, with the gaps between them almost black.
             for side in ("front", "back"):
                 x0, y0, x1, y1 = f[side]
                 for k, y in enumerate(range(y0 + 1, y1 - 1)):
                     if k % 2 == 0:
-                        img[y, x0:x1, :3] = np.clip(np.array(BONE) + rng.integers(-6, 7, size=(x1 - x0, 1)), 0, 255)
+                        img[y, x0:x1, :3] = np.clip(
+                            np.array(BONE) + rng.integers(-5, 6, size=(x1 - x0, 1)), 0, 255)
                         img[y, x0, :3] = SHADOW
                         img[y, x1 - 1, :3] = SHADOW
                     else:
-                        img[y, x0 + 1:x1 - 1, :3] = (44, 42, 42)
-                # A hollow down the middle, where the chest should be.
+                        img[y, x0 + 1:x1 - 1, :3] = (30, 29, 30)
                 cx = (x0 + x1) // 2
-                img[y0 + 1:y1 - 1, cx, :3] = (34, 32, 33)
+                img[y0 + 1:y1 - 1, cx, :3] = (46, 44, 45)      # the hollow down the middle
             for side in ("left", "right"):
                 x0, y0, x1, y1 = f[side]
                 for k, y in enumerate(range(y0 + 1, y1 - 1)):
-                    img[y, x0:x1, :3] = BONE if k % 2 == 0 else (48, 46, 46)
+                    img[y, x0:x1, :3] = BONE if k % 2 == 0 else (36, 35, 36)
 
         elif kind == "face":
             paint_face(img, f)
 
         else:  # bone
             for side in f.values():
-                fill(side, BONE, 7)
-            # Thin and dry: the edges darken, and the surface is not smooth.
+                fill(side, BONE, 6)
             for side in SIDES:
                 x0, y0, x1, y1 = f[side]
                 if x1 - x0 > 1:
                     img[y0:y1, x0, :3] = SHADOW
                     img[y0:y1, x1 - 1, :3] = SHADOW
-                for _ in range(max(1, (x1 - x0) * (y1 - y0) // 12)):
+                for _ in range(max(1, (x1 - x0) * (y1 - y0) // 14)):
                     fx, fy = int(rng.integers(x0, x1)), int(rng.integers(y0, y1))
-                    img[fy, fx, :3] = (176, 171, 162)
+                    img[fy, fx, :3] = (200, 196, 189)
 
     # A faint sheen of the body, drawn full-bright over it. Without this it is invisible in
-    # real darkness, and the whole point is that you can just make something out over the trees.
+    # real darkness, and the whole story depends on you being able to almost see it.
     lit = img.astype(np.float32)
-    lit[:, :, :3] *= 0.13
-    lit[cloth_mask] = 0                     # the shroud stays dark: it is meant to hide the shape
+    lit[:, :, :3] *= 0.15
+    lit[cloth_mask] = 0                     # what it wears stays dark: that is what it is for
     glow = lit.astype(np.uint8)
     glow[:, :, 3] = np.where(img[:, :, 3] > 0, 255, 0)
     glow[cloth_mask] = 0
@@ -261,39 +268,37 @@ def paint_texture(boxes, placed):
 
 def paint_face(img, f):
     """
-    A head with nothing on it. Smooth bone, and two black pits set too far apart. No nose, no
-    mouth, no expression to read, which is the point: there is nothing there to appeal to.
+    A mask rather than a face: smooth bleached bone, two black sockets far too big for it, and
+    a seam down the middle where the mouth comes apart. Nothing to read an expression from.
     """
     for side in f.values():
         x0, y0, x1, y1 = side
-        n = rng.integers(-5, 6, size=(y1 - y0, x1 - x0, 1))
+        n = rng.integers(-4, 5, size=(y1 - y0, x1 - x0, 1))
         img[y0:y1, x0:x1, :3] = np.clip(np.array(BONE) + n, 0, 255)
         img[y0:y1, x0:x1, 3] = 255
 
-    # The back and top of the skull are a little darker, so the face reads as the front.
-    for side in ("back", "top"):
+    # It sits back inside the hood, so everything but the face itself is in shadow.
+    for side in ("back", "top", "left", "right"):
         x0, y0, x1, y1 = f[side]
-        img[y0:y1, x0:x1, :3] = np.clip(img[y0:y1, x0:x1, :3].astype(int) - 26, 0, 255)
+        img[y0:y1, x0:x1, :3] = np.clip(img[y0:y1, x0:x1, :3].astype(int) - 40, 0, 255)
 
     x0, y0, x1, y1 = f["front"]
     w, h = x1 - x0, y1 - y0
-    # Two pits, deep and a little too far apart, set high in a face with nothing else in it.
-    for ex in (x0 + 1, x1 - 2):
-        img[y0 + 1:y0 + 3, ex, :3] = PIT
-    img[y0 + 1, x0 + 2, :3] = (28, 27, 29)                  # they run together across the bridge
-    img[y0 + 3, x0 + 1, :3] = (74, 71, 70)                  # and weep down the cheek a little
-    img[y0 + 3, x1 - 2, :3] = (96, 93, 92)
 
-    # A heavy brow above them and a flat, featureless lower half.
-    img[y0, x0:x1, :3] = (146, 142, 135)
-    img[y1 - 1, x0 + 1:x1 - 1, :3] = (200, 196, 187)
-    # The seam the mouth opens along, closed: barely a line.
-    img[y0 + 4:y1, (x0 + x1) // 2, :3] = (170, 166, 158)
+    # The sockets: two blocks of pure black, far too big for the face, with nothing in them.
+    for ex in (x0 + 1, x1 - 3):
+        img[y0 + 1:y0 + 4, ex:ex + 2, :3] = PIT
+    img[y0, x0:x1, :3] = (196, 192, 184)
+    img[y0 + 1:y0 + 4, x0 + w // 2, :3] = (214, 210, 202)
 
-    # The jaw line, on the sides only: from the front it is a smooth, blank face.
-    for side in ("left", "right"):
-        sx0, sy0, sx1, sy1 = f[side]
-        img[sy1 - 2, sx0:sx1, :3] = (166, 161, 152)
+    # The mouth: a long vertical split from under the sockets to the chin, red far inside it.
+    mx = x0 + w // 2
+    img[y0 + 4:y1, mx - 1:mx + 1, :3] = (16, 14, 15)
+    img[y0 + 5:y1 - 1, mx, :3] = GUM
+    img[y1 - 1, mx - 1:mx + 1, :3] = (28, 24, 24)
+    img[y0 + 4, x0, :3] = (168, 164, 157)
+    img[y0 + 4, x1 - 1, :3] = (168, 164, 157)
+
 
 
 HEADER = """// GENERATED by tools/generate_model.py -- do not edit by hand.
@@ -331,7 +336,7 @@ def num(v):
 
 
 def write_java(ps, boxes, placed):
-    height = NECK_TOP + 5.0  # the top of the skull
+    height = HEAD_TOP
     lines = [HEADER % (", ".join('"%s"' % n for n in SHROUD), num(height).rstrip("f"))]
     box_at = {}
     for i, (owner, *_rest) in enumerate(boxes):
