@@ -3,7 +3,6 @@ package com.wolfsmask.occupant;
 import com.wolfsmask.occupant.command.OccupantCommand;
 import com.wolfsmask.occupant.director.Director;
 import com.wolfsmask.occupant.director.HauntData;
-import com.wolfsmask.occupant.director.events.WakeEvent;
 import com.wolfsmask.occupant.network.ScreenEffectPayload;
 import com.wolfsmask.occupant.network.WhisperPayload;
 import com.wolfsmask.occupant.registry.ModEntities;
@@ -31,6 +30,30 @@ public final class Occupant implements ModInitializer {
 		return Identifier.fromNamespaceAndPath(MOD_ID, path);
 	}
 
+	/**
+	 * Runs mod code that the game called into. Nothing the Occupant does may ever escape back
+	 * out into vanilla: an exception thrown inside one of these callbacks does not stop at the
+	 * mod, it comes out inside whatever the game was doing at the time. Thrown while the server
+	 * is placing a player into the world, for instance, it ends the join with "Invalid player
+	 * data" and the player cannot get in at all.
+	 */
+	private static void guard(String what, Runnable action) {
+		try {
+			action.run();
+		} catch (Exception | LinkageError e) {
+			LOGGER.error("The Occupant failed during {} and was ignored. The game is unaffected.", what, e);
+		}
+	}
+
+	private static <T> T guard(String what, java.util.function.Supplier<T> action, T fallback) {
+		try {
+			return action.get();
+		} catch (Exception | LinkageError e) {
+			LOGGER.error("The Occupant failed during {} and was ignored. The game is unaffected.", what, e);
+			return fallback;
+		}
+	}
+
 	@Override
 	public void onInitialize() {
 		OccupantConfig.load();
@@ -39,39 +62,42 @@ public final class Occupant implements ModInitializer {
 		PayloadTypeRegistry.clientboundPlay().register(ScreenEffectPayload.TYPE, ScreenEffectPayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(WhisperPayload.TYPE, WhisperPayload.CODEC);
 
-		ServerLifecycleEvents.SERVER_STARTED.register(Director::start);
-		ServerLifecycleEvents.SERVER_STOPPING.register(server -> Director.stop());
-		ServerTickEvents.END_SERVER_TICK.register(server -> {
+		ServerLifecycleEvents.SERVER_STARTED.register(server -> guard("start-up", () -> Director.start(server)));
+		ServerLifecycleEvents.SERVER_STOPPING.register(server -> guard("shutdown", Director::stop));
+		ServerTickEvents.END_SERVER_TICK.register(server -> guard("the server tick", () -> {
 			Director director = Director.get();
 			if (director != null) director.tick();
-		});
+		}));
 
 		// It listens.
-		ServerMessageEvents.CHAT_MESSAGE.register((message, sender, params) -> {
+		ServerMessageEvents.CHAT_MESSAGE.register((message, sender, params) -> guard("a chat message", () -> {
 			Director director = Director.get();
 			if (director != null) director.onChat(sender, message.signedContent());
-		});
+		}));
 
 		// "You may not rest now, there are monsters nearby." There are none you can see.
-		EntitySleepEvents.ALLOW_SLEEPING.register((player, sleepingPos) -> shouldDenySleep(player)
-				? Player.BedSleepingProblem.NOT_SAFE : null);
+		EntitySleepEvents.ALLOW_SLEEPING.register((player, sleepingPos) ->
+				guard("a sleep attempt", () -> shouldDenySleep(player), false)
+						? Player.BedSleepingProblem.NOT_SAFE : null);
 
 		// Waking up is not always a relief.
-		EntitySleepEvents.STOP_SLEEPING.register((entity, sleepingPos) -> {
+		//
+		// This only notes that the player woke; the Director acts on it on its next tick. The
+		// game also wakes a player while it is placing them into the world, when they logged
+		// out asleep, and at that moment the player is not yet somewhere the world can be asked
+		// questions about. Doing the work here would break the join.
+		EntitySleepEvents.STOP_SLEEPING.register((entity, sleepingPos) -> guard("waking up", () -> {
 			Director director = Director.get();
-			if (director == null || !(entity instanceof ServerPlayer player)) return;
-			if (player.getRandom().nextFloat() < 0.3f && !director.haunt(player).isBusy()) {
-				director.trigger(player, WakeEvent.ID, false);
-			}
-		});
+			if (director != null && entity instanceof ServerPlayer player) director.noteWoke(player);
+		}));
 
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
-				OccupantCommand.register(dispatcher));
+				guard("registering commands", () -> OccupantCommand.register(dispatcher)));
 
 		LOGGER.info("The Occupant has moved in. Type /occupant check in game to test it.");
 	}
 
-	private static boolean shouldDenySleep(Player player) {
+	private static Boolean shouldDenySleep(Player player) {
 		OccupantConfig cfg = OccupantConfig.get();
 		Director director = Director.get();
 		if (!cfg.enabled || !cfg.interruptSleep || director == null) return false;

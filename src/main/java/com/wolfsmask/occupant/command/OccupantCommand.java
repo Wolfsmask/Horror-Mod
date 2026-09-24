@@ -53,8 +53,10 @@ public final class OccupantCommand {
 		dispatcher.register(literal("occupant")
 				// Operators, or anyone in their own single-player world (where "cheats" may be off,
 				// which would otherwise hide this command completely).
-				.requires(src -> Commands.hasPermission(Commands.LEVEL_GAMEMASTERS).test(src)
-						|| src.getServer().isSingleplayer())
+				//
+				// The server evaluates this for every node while sending the command tree to a
+				// joining player, so a failure here would stop people getting into the world.
+				.requires(OccupantCommand::mayUse)
 				.then(literal("here")
 						.executes(ctx -> here(ctx.getSource(), 5.0f))
 						.then(argument("distance", FloatArgumentType.floatArg(1.0f, 40.0f))
@@ -180,6 +182,16 @@ public final class OccupantCommand {
 		Component text = Component.literal(ok ? "  [ok] " : "  [--] ").withStyle(ok ? ChatFormatting.GREEN : ChatFormatting.RED)
 				.copy().append(Component.literal(what + (ok || fix.isEmpty() ? "" : " -> " + fix)).withStyle(ChatFormatting.GRAY));
 		src.sendSuccess(() -> text, false);
+	}
+
+	private static boolean mayUse(CommandSourceStack src) {
+		try {
+			if (Commands.hasPermission(Commands.LEVEL_GAMEMASTERS).test(src)) return true;
+			return src.getServer() != null && src.getServer().isSingleplayer();
+		} catch (Exception | LinkageError e) {
+			Occupant.LOGGER.error("Could not work out who may use /occupant; assuming nobody.", e);
+			return false;
+		}
 	}
 
 	private static Director director(CommandSourceStack src) {

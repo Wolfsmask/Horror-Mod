@@ -3,6 +3,7 @@ package com.wolfsmask.occupant.director;
 import com.wolfsmask.occupant.Occupant;
 import com.wolfsmask.occupant.OccupantConfig;
 import com.wolfsmask.occupant.director.events.Events;
+import com.wolfsmask.occupant.director.events.WakeEvent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
@@ -41,6 +42,8 @@ public final class Director {
 	private final Map<UUID, Haunt> haunts = new HashMap<>();
 	private final Map<String, Integer> failures = new HashMap<>();
 	private final Set<String> disabledEvents = new HashSet<>();
+	/** Players who woke up since the last tick. Acted on there, never where the game told us. */
+	private final Set<UUID> woke = new HashSet<>();
 	private int totalErrors;
 
 	private Director(MinecraftServer server) {
@@ -72,6 +75,15 @@ public final class Director {
 		return totalErrors;
 	}
 
+	/**
+	 * Notes that a player woke up. Deliberately does nothing else: this is called from inside
+	 * the game's own sleeping code, including while a player who logged out asleep is being
+	 * placed into the world, where asking the world anything is not safe yet.
+	 */
+	public void noteWoke(ServerPlayer player) {
+		woke.add(player.getUUID());
+	}
+
 	public HauntData data(ServerPlayer player) {
 		return haunt(player).data;
 	}
@@ -89,13 +101,23 @@ public final class Director {
 	public void tick() {
 		OccupantConfig cfg = OccupantConfig.get();
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-			Haunt h = haunt(player);
+			Haunt h = null;
 			try {
+				// Inside the guard: building a player's story state reads the save file, and a
+				// failure there must not take the server tick down with it.
+				h = haunt(player);
+				if (woke.remove(player.getUUID())) wakeUp(h, player);
 				tickPlayer(h, player, cfg);
 			} catch (Exception | LinkageError e) {
-				reportError(h, e);
+				if (h != null) {
+					reportError(h, e);
+				} else {
+					totalErrors++;
+					Occupant.LOGGER.error("The Occupant could not read a player's story and skipped them.", e);
+				}
 			}
 		}
+		woke.removeIf(u -> server.getPlayerList().getPlayer(u) == null);
 
 		// Players who left: stop whatever was happening to them.
 		Iterator<Haunt> it = haunts.values().iterator();
@@ -108,6 +130,12 @@ public final class Director {
 		}
 
 		if (server.getTickCount() % 100 == 0) save.setDirty();
+	}
+
+	/** Waking up is not always a relief. Run a tick later, once the player is really in the world. */
+	private void wakeUp(Haunt h, ServerPlayer player) {
+		if (h.isBusy() || player.getRandom().nextFloat() >= 0.3f) return;
+		trigger(player, WakeEvent.ID, false);
 	}
 
 	private void tickPlayer(Haunt h, ServerPlayer player, OccupantConfig cfg) {

@@ -76,6 +76,31 @@ public final class OccupantGameTests {
 		});
 	}
 
+	/**
+	 * The game wakes a sleeping player while it is placing them into the world, which is before
+	 * the world can safely be asked questions about where they are. Doing any real work in that
+	 * callback ends the join with "Invalid player data" and the player cannot get in at all, so
+	 * the hook must do nothing but make a note.
+	 */
+	@GameTest
+	public void wakingUpNeverThrows(GameTestHelper helper) {
+		Director director = Director.get();
+		helper.assertTrue(director != null, "Director should be running");
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		director.data(player).setAct(HauntData.MAX_ACT);
+		int before = director.totalErrors();
+
+		// Exactly what the game does on the join path, and again on a normal morning.
+		for (int i = 0; i < 20; i++) director.noteWoke(player);
+
+		helper.runAtTickTime(4, () -> {
+			helper.assertTrue(director.totalErrors() == before,
+					"Waking up must never raise an error (see the log)");
+			director.stopCurrent(player);
+			helper.succeed();
+		});
+	}
+
 	/** It cannot be hurt, killed or farmed: any damage just makes it vanish. */
 	@GameTest
 	public void damageMakesItVanish(GameTestHelper helper) {
