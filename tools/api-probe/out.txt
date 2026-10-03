@@ -1,244 +1,135 @@
-=== jars matching client-gametest|lwjgl-vulkan|lwjgl-opengl
---- lwjgl-opengl-3.4.1.jar
-META-INF.versions.11.module-info
-org.lwjgl.opengl.AMDBlendMinmaxFactor
-org.lwjgl.opengl.AMDDebugOutput
-org.lwjgl.opengl.AMDDepthClampSeparate
-org.lwjgl.opengl.AMDDrawBuffersBlend
-org.lwjgl.opengl.AMDFramebufferMultisampleAdvanced
-org.lwjgl.opengl.AMDGPUShaderHalfFloat
-org.lwjgl.opengl.AMDGPUShaderHalfFloatFetch
-org.lwjgl.opengl.AMDGPUShaderInt64
-org.lwjgl.opengl.AMDInterleavedElements
-org.lwjgl.opengl.AMDOcclusionQueryEvent
-org.lwjgl.opengl.AMDPerformanceMonitor
-org.lwjgl.opengl.AMDPinnedMemory
-org.lwjgl.opengl.AMDQueryBufferObject
-org.lwjgl.opengl.AMDSamplePositions
-org.lwjgl.opengl.AMDSeamlessCubemapPerTexture
-org.lwjgl.opengl.AMDSparseTexture
-org.lwjgl.opengl.AMDStencilOperationExtended
-org.lwjgl.opengl.AMDTransformFeedback4
-org.lwjgl.opengl.AMDVertexShaderTessellator
-org.lwjgl.opengl.ARBBaseInstance
-org.lwjgl.opengl.ARBBindlessTexture
-org.lwjgl.opengl.ARBBlendFuncExtended
-org.lwjgl.opengl.ARBBufferStorage
-org.lwjgl.opengl.ARBCLEvent
-org.lwjgl.opengl.ARBClearBufferObject
-org.lwjgl.opengl.ARBClearTexture
-org.lwjgl.opengl.ARBClipControl
-org.lwjgl.opengl.ARBColorBufferFloat
-org.lwjgl.opengl.ARBCompressedTexturePixelStorage
-org.lwjgl.opengl.ARBComputeShader
-org.lwjgl.opengl.ARBComputeVariableGroupSize
-org.lwjgl.opengl.ARBConditionalRenderInverted
-org.lwjgl.opengl.ARBCopyBuffer
-org.lwjgl.opengl.ARBCopyImage
-org.lwjgl.opengl.ARBCullDistance
-org.lwjgl.opengl.ARBDebugOutput
-org.lwjgl.opengl.ARBDepthBufferFloat
-org.lwjgl.opengl.ARBDepthClamp
-org.lwjgl.opengl.ARBDepthTexture
-org.lwjgl.opengl.ARBDirectStateAccess
-org.lwjgl.opengl.ARBDrawBuffers
-org.lwjgl.opengl.ARBDrawBuffersBlend
-org.lwjgl.opengl.ARBDrawElementsBaseVertex
-org.lwjgl.opengl.ARBDrawIndirect
-org.lwjgl.opengl.ARBDrawInstanced
-org.lwjgl.opengl.ARBES2Compatibility
-org.lwjgl.opengl.ARBES31Compatibility
-org.lwjgl.opengl.ARBES32Compatibility
-org.lwjgl.opengl.ARBES3Compatibility
-org.lwjgl.opengl.ARBEnhancedLayouts
-org.lwjgl.opengl.ARBExplicitUniformLocation
-org.lwjgl.opengl.ARBFragmentProgram
-org.lwjgl.opengl.ARBFragmentShader
-org.lwjgl.opengl.ARBFramebufferNoAttachments
-org.lwjgl.opengl.ARBFramebufferObject
-org.lwjgl.opengl.ARBFramebufferSRGB
-org.lwjgl.opengl.ARBGLSPIRV
-org.lwjgl.opengl.ARBGPUShader5
-org.lwjgl.opengl.ARBGPUShaderFP64
-org.lwjgl.opengl.ARBGPUShaderInt64
-org.lwjgl.opengl.ARBGeometryShader4
-org.lwjgl.opengl.ARBGetProgramBinary
-org.lwjgl.opengl.ARBGetTextureSubImage
-org.lwjgl.opengl.ARBHalfFloatPixel
-org.lwjgl.opengl.ARBHalfFloatVertex
-org.lwjgl.opengl.ARBImaging
-org.lwjgl.opengl.ARBIndirectParameters
-org.lwjgl.opengl.ARBInstancedArrays
-org.lwjgl.opengl.ARBInternalformatQuery
-org.lwjgl.opengl.ARBInternalformatQuery2
-org.lwjgl.opengl.ARBInvalidateSubdata
-org.lwjgl.opengl.ARBMapBufferAlignment
-org.lwjgl.opengl.ARBMapBufferRange
-org.lwjgl.opengl.ARBMatrixPalette
-org.lwjgl.opengl.ARBMultiBind
-org.lwjgl.opengl.ARBMultiDrawIndirect
-org.lwjgl.opengl.ARBMultisample
-org.lwjgl.opengl.ARBMultitexture
-org.lwjgl.opengl.ARBOcclusionQuery
---- lwjgl-vulkan-3.4.1.jar
-META-INF.versions.11.module-info
-org.lwjgl.vulkan.AMDAntiLag
-org.lwjgl.vulkan.AMDBufferMarker
-org.lwjgl.vulkan.AMDDeviceCoherentMemory
-org.lwjgl.vulkan.AMDDisplayNativeHdr
-org.lwjgl.vulkan.AMDDrawIndirectCount
-org.lwjgl.vulkan.AMDGCNShader
-org.lwjgl.vulkan.AMDGPUShaderHalfFloat
-org.lwjgl.vulkan.AMDGPUShaderInt16
-org.lwjgl.vulkan.AMDMemoryOverallocationBehavior
-org.lwjgl.vulkan.AMDMixedAttachmentSamples
-org.lwjgl.vulkan.AMDNegativeViewportHeight
-org.lwjgl.vulkan.AMDPipelineCompilerControl
-org.lwjgl.vulkan.AMDRasterizationOrder
-org.lwjgl.vulkan.AMDShaderBallot
-org.lwjgl.vulkan.AMDShaderCoreProperties
-org.lwjgl.vulkan.AMDShaderCoreProperties2
-org.lwjgl.vulkan.AMDShaderEarlyAndLateFragmentTests
-org.lwjgl.vulkan.AMDShaderExplicitVertexParameter
-org.lwjgl.vulkan.AMDShaderFragmentMask
-org.lwjgl.vulkan.AMDShaderImageLoadStoreLod
-org.lwjgl.vulkan.AMDShaderInfo
-org.lwjgl.vulkan.AMDShaderTrinaryMinmax
-org.lwjgl.vulkan.AMDTextureGatherBiasLod
-org.lwjgl.vulkan.AMDXDenseGeometryFormat
-org.lwjgl.vulkan.AMDXShaderEnqueue
-org.lwjgl.vulkan.ANDROIDExternalFormatResolve
-org.lwjgl.vulkan.ANDROIDExternalMemoryAndroidHardwareBuffer
-org.lwjgl.vulkan.ARMDataGraph
-org.lwjgl.vulkan.ARMFormatPack
-org.lwjgl.vulkan.ARMPerformanceCountersByRegion
-org.lwjgl.vulkan.ARMPipelineOpacityMicromap
-org.lwjgl.vulkan.ARMRasterizationOrderAttachmentAccess
-org.lwjgl.vulkan.ARMRenderPassStriped
-org.lwjgl.vulkan.ARMSchedulingControls
-org.lwjgl.vulkan.ARMShaderCoreBuiltins
-org.lwjgl.vulkan.ARMShaderCoreProperties
-org.lwjgl.vulkan.ARMTensors
-org.lwjgl.vulkan.DispatchableHandleDevice
-org.lwjgl.vulkan.DispatchableHandleInstance
-org.lwjgl.vulkan.EXT4444Formats
-org.lwjgl.vulkan.EXTAcquireDrmDisplay
-org.lwjgl.vulkan.EXTAcquireXlibDisplay
-org.lwjgl.vulkan.EXTAstcDecodeMode
-org.lwjgl.vulkan.EXTAttachmentFeedbackLoopDynamicState
-org.lwjgl.vulkan.EXTAttachmentFeedbackLoopLayout
-org.lwjgl.vulkan.EXTBlendOperationAdvanced
-org.lwjgl.vulkan.EXTBorderColorSwizzle
-org.lwjgl.vulkan.EXTBufferDeviceAddress
-org.lwjgl.vulkan.EXTCalibratedTimestamps
-org.lwjgl.vulkan.EXTColorWriteEnable
-org.lwjgl.vulkan.EXTConditionalRendering
-org.lwjgl.vulkan.EXTConservativeRasterization
-org.lwjgl.vulkan.EXTCustomBorderColor
-org.lwjgl.vulkan.EXTCustomResolve
-org.lwjgl.vulkan.EXTDebugMarker
-org.lwjgl.vulkan.EXTDebugReport
-org.lwjgl.vulkan.EXTDebugUtils
-org.lwjgl.vulkan.EXTDepthBiasControl
-org.lwjgl.vulkan.EXTDepthClampControl
-org.lwjgl.vulkan.EXTDepthClampZeroOne
-org.lwjgl.vulkan.EXTDepthClipControl
-org.lwjgl.vulkan.EXTDepthClipEnable
-org.lwjgl.vulkan.EXTDepthRangeUnrestricted
-org.lwjgl.vulkan.EXTDescriptorBuffer
-org.lwjgl.vulkan.EXTDescriptorHeap
-org.lwjgl.vulkan.EXTDescriptorIndexing
-org.lwjgl.vulkan.EXTDeviceAddressBindingReport
-org.lwjgl.vulkan.EXTDeviceFault
-org.lwjgl.vulkan.EXTDeviceGeneratedCommands
-org.lwjgl.vulkan.EXTDeviceMemoryReport
-org.lwjgl.vulkan.EXTDirectModeDisplay
-org.lwjgl.vulkan.EXTDirectfbSurface
-org.lwjgl.vulkan.EXTDiscardRectangles
-org.lwjgl.vulkan.EXTDisplayControl
-org.lwjgl.vulkan.EXTDisplaySurfaceCounter
-org.lwjgl.vulkan.EXTDynamicRenderingUnusedAttachments
-org.lwjgl.vulkan.EXTExtendedDynamicState
-org.lwjgl.vulkan.EXTExtendedDynamicState2
-org.lwjgl.vulkan.EXTExtendedDynamicState3
---- fabric-client-gametest-api-v1-5.1.0+db5795489e.jar
-net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest
-net.fabricmc.fabric.api.client.gametest.v1.TestInput
-net.fabricmc.fabric.api.client.gametest.v1.package-info
-net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext
-net.fabricmc.fabric.api.client.gametest.v1.context.TestClientLevelContext
-net.fabricmc.fabric.api.client.gametest.v1.context.TestDedicatedServerContext
-net.fabricmc.fabric.api.client.gametest.v1.context.TestServerConnection
-net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext
-net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext
-net.fabricmc.fabric.api.client.gametest.v1.context.package-info
-net.fabricmc.fabric.api.client.gametest.v1.screenshot.TestScreenshotCommonOptions
-net.fabricmc.fabric.api.client.gametest.v1.screenshot.TestScreenshotComparisonAlgorithm
-net.fabricmc.fabric.api.client.gametest.v1.screenshot.TestScreenshotComparisonOptions
-net.fabricmc.fabric.api.client.gametest.v1.screenshot.TestScreenshotOptions
-net.fabricmc.fabric.api.client.gametest.v1.screenshot.package-info
-net.fabricmc.fabric.api.client.gametest.v1.world.TestWorldBuilder
-net.fabricmc.fabric.api.client.gametest.v1.world.TestWorldSave
-net.fabricmc.fabric.api.client.gametest.v1.world.package-info
-net.fabricmc.fabric.impl.client.gametest.FabricClientGameTestRunner
-net.fabricmc.fabric.impl.client.gametest.TestInputImpl
-net.fabricmc.fabric.impl.client.gametest.TestSystemProperties
-net.fabricmc.fabric.impl.client.gametest.package-info
-net.fabricmc.fabric.impl.client.gametest.context.ClientGameTestContextImpl
-net.fabricmc.fabric.impl.client.gametest.context.TestClientLevelContextImpl
-net.fabricmc.fabric.impl.client.gametest.context.TestDedicatedServerContextImpl
-net.fabricmc.fabric.impl.client.gametest.context.TestServerConnectionImpl
-net.fabricmc.fabric.impl.client.gametest.context.TestServerContextImpl
-net.fabricmc.fabric.impl.client.gametest.context.TestSingleplayerContextImpl
-net.fabricmc.fabric.impl.client.gametest.context.package-info
-net.fabricmc.fabric.impl.client.gametest.screenshot.NativeImageHooks
-net.fabricmc.fabric.impl.client.gametest.screenshot.TestScreenshotCommonOptionsImpl
-net.fabricmc.fabric.impl.client.gametest.screenshot.TestScreenshotComparisonAlgorithms
-net.fabricmc.fabric.impl.client.gametest.screenshot.TestScreenshotComparisonOptionsImpl
-net.fabricmc.fabric.impl.client.gametest.screenshot.TestScreenshotOptionsImpl
-net.fabricmc.fabric.impl.client.gametest.screenshot.package-info
-net.fabricmc.fabric.impl.client.gametest.threading.NetworkSynchronizer
-net.fabricmc.fabric.impl.client.gametest.threading.ThreadingImpl
-net.fabricmc.fabric.impl.client.gametest.threading.package-info
-net.fabricmc.fabric.impl.client.gametest.util.ClientGameTestImpl
-net.fabricmc.fabric.impl.client.gametest.util.DedicatedServerImplUtil
-net.fabricmc.fabric.impl.client.gametest.util.WindowHooks
-net.fabricmc.fabric.impl.client.gametest.util.package-info
-net.fabricmc.fabric.impl.client.gametest.world.TestWorldBuilderImpl
-net.fabricmc.fabric.impl.client.gametest.world.TestWorldSaveImpl
-net.fabricmc.fabric.impl.client.gametest.world.package-info
-net.fabricmc.fabric.mixin.client.gametest.ClientChunkCacheAccessor
-net.fabricmc.fabric.mixin.client.gametest.ClientChunkCacheStorageAccessor
-net.fabricmc.fabric.mixin.client.gametest.ClientLevelAccessor
-net.fabricmc.fabric.mixin.client.gametest.package-info
-net.fabricmc.fabric.mixin.client.gametest.gui.CycleButtonAccessor
-net.fabricmc.fabric.mixin.client.gametest.gui.ScreenAccessor
-net.fabricmc.fabric.mixin.client.gametest.gui.ScreenMixin
-net.fabricmc.fabric.mixin.client.gametest.gui.package-info
-net.fabricmc.fabric.mixin.client.gametest.input.GlCommandEncoderMixin
-net.fabricmc.fabric.mixin.client.gametest.input.InputConstantsMixin
-net.fabricmc.fabric.mixin.client.gametest.input.KeyMappingAccessor
-net.fabricmc.fabric.mixin.client.gametest.input.KeyboardHandlerAccessor
-net.fabricmc.fabric.mixin.client.gametest.input.MonitorManagerMixin
-net.fabricmc.fabric.mixin.client.gametest.input.MouseHandlerAccessor
-net.fabricmc.fabric.mixin.client.gametest.input.VulkanGpuSurfaceMixin
-net.fabricmc.fabric.mixin.client.gametest.input.WindowMixin
-net.fabricmc.fabric.mixin.client.gametest.input.package-info
-net.fabricmc.fabric.mixin.client.gametest.lifecycle.DedicatedServerMixin
-net.fabricmc.fabric.mixin.client.gametest.lifecycle.MinecraftMixin
-net.fabricmc.fabric.mixin.client.gametest.lifecycle.OptionsAccessor
-net.fabricmc.fabric.mixin.client.gametest.lifecycle.OptionsMixin
-net.fabricmc.fabric.mixin.client.gametest.lifecycle.package-info
-net.fabricmc.fabric.mixin.client.gametest.screenshot.DeltaTrackerDefaultValueAccessor
-net.fabricmc.fabric.mixin.client.gametest.screenshot.NativeImageMixin
-net.fabricmc.fabric.mixin.client.gametest.screenshot.package-info
-net.fabricmc.fabric.mixin.client.gametest.threading.BlockableEventLoopMixin
-net.fabricmc.fabric.mixin.client.gametest.threading.ConnectionMixin
-net.fabricmc.fabric.mixin.client.gametest.threading.MainMixin
-net.fabricmc.fabric.mixin.client.gametest.threading.MinecraftMixin
-net.fabricmc.fabric.mixin.client.gametest.threading.MinecraftServerMixin
-net.fabricmc.fabric.mixin.client.gametest.threading.package-info
-net.fabricmc.fabric.mixin.client.gametest.world.CreateWorldScreenMixin
-net.fabricmc.fabric.mixin.client.gametest.world.GameRulesAccessor
-net.fabricmc.fabric.mixin.client.gametest.world.package-info
-net.fabricmc.fabric.impl.client.gametest.ClientGameTestMixinConfigPlugin
+=== net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest (-public)
+public interface client.gametest.v1.FabricClientGameTest {
+  public abstract void runTest(client.gametest.v1.context.ClientGameTestContext);
+}
+=== net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext (-public)
+public interface client.gametest.v1.context.ClientGameTestContext {
+  public static final int NO_TIMEOUT;
+  public static final int DEFAULT_TIMEOUT;
+  public abstract void waitTick();
+  public abstract void waitTicks(int);
+  public abstract int waitFor(Predicate<client.Minecraft>);
+  public abstract int waitFor(Predicate<client.Minecraft>, int);
+  public abstract int waitForScreen(Class<? extends client.gui.screens.Screen>);
+  public abstract void setScreen(Supplier<client.gui.screens.Screen>);
+  public abstract void clickScreenButton(String);
+  public abstract boolean tryClickScreenButton(String);
+  public default java.nio.file.Path takeScreenshot(String);
+  public abstract java.nio.file.Path takeScreenshot(client.gametest.v1.screenshot.TestScreenshotOptions);
+  public default void assertScreenshotEquals(String);
+  public abstract void assertScreenshotEquals(client.gametest.v1.screenshot.TestScreenshotComparisonOptions);
+  public default org.joml.Vector2i assertScreenshotContains(String);
+  public abstract org.joml.Vector2i assertScreenshotContains(client.gametest.v1.screenshot.TestScreenshotComparisonOptions);
+  public abstract client.gametest.v1.TestInput getInput();
+  public abstract client.gametest.v1.world.TestWorldBuilder worldBuilder();
+  public abstract void restoreDefaultGameOptions();
+  public abstract <E extends Throwable> void runOnClient(org.apache.commons.lang3.function.FailableConsumer<client.Minecraft, E>) throws E;
+  public abstract <T, E extends Throwable> T computeOnClient(org.apache.commons.lang3.function.FailableFunction<client.Minecraft, T, E>) throws E;
+}
+=== net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext (-public)
+public interface client.gametest.v1.context.TestSingleplayerContext extends AutoCloseable {
+  public abstract client.gametest.v1.world.TestWorldSave getWorldSave();
+  public abstract client.gametest.v1.context.TestClientLevelContext getClientLevel();
+  public abstract client.gametest.v1.context.TestServerContext getServer();
+  public abstract void close();
+}
+=== net.fabricmc.fabric.api.client.gametest.v1.context.TestClientLevelContext (-public)
+public interface client.gametest.v1.context.TestClientLevelContext {
+  public static final int DEFAULT_CHUNK_LOAD_TIMEOUT;
+  public default int waitForChunksDownload();
+  public abstract int waitForChunksDownload(int);
+  public default int waitForChunksRender();
+  public default int waitForChunksRender(int);
+  public default int waitForChunksRender(boolean);
+  public abstract int waitForChunksRender(boolean, int);
+}
+=== net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext (-public)
+public interface client.gametest.v1.context.TestServerContext {
+  public abstract void runCommand(String);
+  public abstract <E extends Throwable> void runOnServer(org.apache.commons.lang3.function.FailableConsumer<server.MinecraftServer, E>) throws E;
+  public abstract <T, E extends Throwable> T computeOnServer(org.apache.commons.lang3.function.FailableFunction<server.MinecraftServer, T, E>) throws E;
+}
+=== net.fabricmc.fabric.api.client.gametest.v1.world.TestWorldBuilder (-public)
+public interface client.gametest.v1.world.TestWorldBuilder {
+  public abstract client.gametest.v1.world.TestWorldBuilder setUseConsistentSettings(boolean);
+  public abstract client.gametest.v1.world.TestWorldBuilder adjustSettings(Consumer<client.gui.screens.worldselection.WorldCreationUiState>);
+  public abstract client.gametest.v1.context.TestSingleplayerContext create();
+  public default client.gametest.v1.context.TestDedicatedServerContext createServer();
+  public abstract client.gametest.v1.context.TestDedicatedServerContext createServer(Properties);
+}
+=== net.fabricmc.fabric.api.client.gametest.v1.screenshot.TestScreenshotOptions (-public)
+public interface client.gametest.v1.screenshot.TestScreenshotOptions extends client.gametest.v1.screenshot.TestScreenshotCommonOptions<client.gametest.v1.screenshot.TestScreenshotOptions> {
+  public static client.gametest.v1.screenshot.TestScreenshotOptions of(String);
+}
+=== net.fabricmc.fabric.api.client.gametest.v1.TestInput (-public)
+public interface client.gametest.v1.TestInput {
+  public abstract void holdKey(client.KeyMapping);
+  public abstract void holdKey(Function<client.Options, client.KeyMapping>);
+  public abstract void holdKey(blaze3d.platform.InputConstants$Key);
+  public abstract void holdKey(int);
+  public abstract void holdMouse(int);
+  public abstract void holdControl();
+  public abstract void holdShift();
+  public abstract void holdAlt();
+  public abstract void releaseKey(client.KeyMapping);
+  public abstract void releaseKey(Function<client.Options, client.KeyMapping>);
+  public abstract void releaseKey(blaze3d.platform.InputConstants$Key);
+  public abstract void releaseKey(int);
+  public abstract void releaseMouse(int);
+  public abstract void releaseControl();
+  public abstract void releaseShift();
+  public abstract void releaseAlt();
+  public abstract void pressKey(client.KeyMapping);
+  public abstract void pressKey(Function<client.Options, client.KeyMapping>);
+  public abstract void pressKey(blaze3d.platform.InputConstants$Key);
+  public abstract void pressKey(int);
+  public abstract void pressMouse(int);
+  public abstract void holdKeyFor(client.KeyMapping, int);
+  public abstract void holdKeyFor(Function<client.Options, client.KeyMapping>, int);
+  public abstract void holdKeyFor(blaze3d.platform.InputConstants$Key, int);
+  public abstract void holdKeyFor(int, int);
+  public abstract void holdMouseFor(int, int);
+  public abstract void lookAt(float, float);
+  public abstract void lookAt(core.BlockPos);
+  public abstract void typeChar(int);
+  public abstract void typeChars(String);
+  public abstract void scroll(double);
+  public abstract void scroll(double, double);
+  public abstract void setCursorPos(double, double);
+  public abstract void moveCursor(double, double);
+  public abstract void resizeWindow(int, int);
+}
+=== net.fabricmc.fabric.impl.client.gametest.TestSystemProperties (-protected)
+public final class net.fabricmc.fabric.impl.client.gametest.TestSystemProperties {
+  public static final boolean ENABLED;
+  public static final String TEST_MOD_RESOURCES_PATH;
+  public static final boolean DISABLE_NETWORK_SYNCHRONIZER;
+  public static final boolean DISABLE_JOIN_ASYNC_STACK_TRACES;
+  public static final String MOD_ID_FILTER_PROPERTY;
+}
+=== net.fabricmc.fabric.impl.client.gametest.TestSystemProperties (code: <clinit>|static)
+  static {};
+    Code:
+         0: getstatic     #7                  // Field net/fabricmc/fabric/impl/client/gametest/ClientGameTestMixinConfigPlugin.ENABLED:Z
+         3: putstatic     #13                 // Field ENABLED:Z
+         6: ldc           #16                 // String fabric.client.gametest.testModResourcesPath
+         8: invokestatic  #18                 // Method java/lang/System.getProperty:(Ljava/lang/String;)Ljava/lang/String;
+        11: putstatic     #24                 // Field TEST_MOD_RESOURCES_PATH:Ljava/lang/String;
+        14: ldc           #28                 // String false
+        16: ldc           #30                 // String fabric.client.gametest.disableNetworkSynchronizer
+        18: ldc           #32                 // String true
+        20: invokestatic  #34                 // Method java/lang/System.getProperty:(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+        23: invokevirtual #37                 // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+        26: ifne          33
+        29: iconst_1
+        30: goto          34
+        33: iconst_0
+        34: putstatic     #43                 // Field DISABLE_NETWORK_SYNCHRONIZER:Z
+        37: ldc           #46                 // String fabric.client.gametest.disableJoinAsyncStackTraces
+        39: invokestatic  #18                 // Method java/lang/System.getProperty:(Ljava/lang/String;)Ljava/lang/String;
+        42: ifnull        49
+        45: iconst_1
+        46: goto          50
+        49: iconst_0
+        50: putstatic     #48                 // Field DISABLE_JOIN_ASYNC_STACK_TRACES:Z
+}
