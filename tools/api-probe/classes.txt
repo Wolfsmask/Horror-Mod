@@ -1,16 +1,7 @@
-# Round 8: the many-legged body, which plants its feet on real blocks.
-net.minecraft.client.renderer.entity.EntityRenderer Offset|extractRenderState|render\(|shadow|Shadow
-@protected net.minecraft.client.renderer.entity.LivingEntityRenderer setupRotations|scale|getFlipDegrees|extractRenderState
-@code net.minecraft.client.renderer.entity.LivingEntityRenderer submit|render
-net.minecraft.client.renderer.entity.state.EntityRenderState
-net.minecraft.client.renderer.entity.state.LivingEntityRenderState
-net.minecraft.client.model.geom.ModelPart
-net.minecraft.world.phys.shapes.VoxelShape max|min|isEmpty
-net.minecraft.world.entity.Entity getPosition|position\(|getYRot|getX\(|getEyeY|level\(|tickCount
-net.minecraft.world.entity.LivingEntity yBodyRot|getYHeadRot|getPreciseBodyRotation
-net.minecraft.world.level.Level getGameTime|getBlockState|isLoaded
-@code net.minecraft.client.model.geom.ModelPart translateAndRotate|resetPose
-# Round 9: culling by something bigger than the hitbox.
-net.minecraft.client.renderer.entity.EntityRenderer shouldRender|Culling|culling
-@protected net.minecraft.client.renderer.entity.EntityRenderer shouldRender|Culling|culling
-net.minecraft.world.entity.Entity Culling|culling
+# Round 10: a real generated world for the photographs.
+net.minecraft.server.level.ServerLevel findClosestBiome3d|getHeight|getChunk\(|setDayTime|getSharedSpawnPos|getRespawnData|getLevelData
+net.minecraft.world.level.levelgen.Heightmap$Types
+net.minecraft.world.level.biome.Biomes DARK_FOREST|FOREST|OLD_GROWTH|BIRCH|PALE
+net.minecraft.core.Holder is\(
+net.minecraft.client.gui.screens.worldselection.WorldCreationUiState set|Seed|Preset|WorldType|GameMode|Difficulty
+net.minecraft.world.entity.Entity snapTo|setYHeadRot|setYBodyRot
