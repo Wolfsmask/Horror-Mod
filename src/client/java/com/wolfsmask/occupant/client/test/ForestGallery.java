@@ -3,6 +3,7 @@ package com.wolfsmask.occupant.client.test;
 import com.wolfsmask.occupant.Occupant;
 import com.wolfsmask.occupant.director.Director;
 import com.wolfsmask.occupant.director.events.HallwayEvent;
+import com.wolfsmask.occupant.entity.OccupantEntity;
 import com.wolfsmask.occupant.world.HouseFeature;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
@@ -55,6 +56,7 @@ final class ForestGallery {
 			server.runCommand("item replace entity @p hotbar.4 with minecraft:cobblestone 64");
 			server.runCommand("item replace entity @p hotbar.6 with minecraft:crafting_table");
 
+			BlockPos spawn = server.computeOnServer(s -> s.getPlayerList().getPlayers().get(0).blockPosition());
 			BlockPos forest = server.computeOnServer(s -> findForest(s.overworld(),
 					s.getPlayerList().getPlayers().get(0).blockPosition(), true));
 			// An ordinary forest as well, for any shot the dark forest is too thick to get.
@@ -74,8 +76,9 @@ final class ForestGallery {
 			event(context, game, woods, 2, "watcher", "sighting-night", 18000, 3);
 			event(context, game, woods, 3, "distant", "far-off-dusk", 12600, 2);
 
-			// The abandoned house, in a clearing in the same woods.
-			house(context, game, woods);
+			// The abandoned house, in a clearing in the same woods, or failing that the open country
+			// where the world began.
+			house(context, game, new BlockPos[]{woods[0], woods[1], spawn});
 		} catch (RuntimeException | AssertionError e) {
 			Occupant.LOGGER.warn("[client-gametest] forest gallery stopped early", e);
 		}
@@ -97,10 +100,12 @@ final class ForestGallery {
 			if (stand == null) return;
 			server.runCommand("weather clear");
 			server.runCommand("time set " + time);
-			for (int turn = 0; turn < 4; turn++) {
-				server.runCommand("kill " + ALL);
-				server.runCommand(String.format(Locale.ROOT, "tp @p %d %d %d %d 0",
-						stand.getX(), stand.getY(), stand.getZ(), turn * 90 + n * 23));
+			BlockPos from = stand;
+			int[] yaws = server.computeOnServer(s -> openestYaws(s.overworld(), from));
+			for (int yaw : yaws) {
+				stop(server);
+				server.runCommand(String.format(Locale.ROOT, "tp @p %.1f %d %.1f %d 0",
+						stand.getX() + 0.5, stand.getY(), stand.getZ() + 0.5, yaw));
 				context.waitTicks(10);
 				game.getClientLevel().waitForChunksRender();
 				boolean started = server.computeOnServer(s -> {
@@ -109,6 +114,20 @@ final class ForestGallery {
 					return Director.get().trigger(player, event, true) == Director.TriggerResult.STARTED;
 				});
 				if (!started) continue;
+				// Having caught it out of the corner of an eye, turning towards it, not quite on it.
+				float[] turn = server.computeOnServer(s -> {
+					ServerPlayer player = s.getPlayerList().getPlayers().get(0);
+					var near = s.overworld().getEntitiesOfClass(OccupantEntity.class, player.getBoundingBox().inflate(120));
+					if (near.isEmpty()) return null;
+					OccupantEntity e = near.get(0);
+					double dx = e.getX() - player.getX(), dz = e.getZ() - player.getZ();
+					double dy = e.getY() + 3.0 - player.getEyeY();
+					return new float[]{(float) Math.toDegrees(Math.atan2(-dx, dz)) + 9.0f,
+							(float) -Math.toDegrees(Math.atan2(dy, Math.sqrt(dx * dx + dz * dz)))};
+				});
+				if (turn != null) {
+					server.runCommand(String.format(Locale.ROOT, "tp @p ~ ~ ~ %.1f %.1f", turn[0], turn[1]));
+				}
 				waitForIt(context);
 				context.waitTicks(6);
 				OccupantClientGameTest.shoot(context, "occupant-photo-" + n + "-" + name);
@@ -190,6 +209,29 @@ final class ForestGallery {
 		}
 	}
 
+	/** Directions from here with the longest clear view at eye height, best first. */
+	private static int[] openestYaws(ServerLevel level, BlockPos feet) {
+		Integer[] yaws = new Integer[24];
+		double[] reach = new double[360];
+		for (int i = 0; i < 24; i++) {
+			int yaw = i * 15;
+			yaws[i] = yaw;
+			double r = Math.toRadians(yaw);
+			double dx = -Math.sin(r), dz = Math.cos(r);
+			double d = 0.0;
+			while (d < 48.0) {
+				BlockPos p = BlockPos.containing(feet.getX() + 0.5 + dx * (d + 1.0), feet.getY() + 1.6, feet.getZ() + 0.5 + dz * (d + 1.0));
+				if (!level.getBlockState(p).getCollisionShape(level, p).isEmpty()) break;
+				d += 1.0;
+			}
+			reach[yaw] = d;
+		}
+		java.util.Arrays.sort(yaws, (a, b) -> Double.compare(reach[b], reach[a]));
+		int[] out = new int[4];
+		for (int i = 0; i < 4; i++) out[i] = yaws[i * 2];
+		return out;
+	}
+
 	/** Forest floor with room to stand, near the middle of the wood. */
 	private static BlockPos standSpot(ServerLevel level, BlockPos forest, int salt) {
 		for (int ring = 0; ring <= 48; ring += 3) {
@@ -210,50 +252,26 @@ final class ForestGallery {
 	 * footprint (and a little round it) forest floor within a block of the same height.
 	 */
 	private static BlockPos clearing(ServerLevel level, BlockPos forest) {
-		for (int ring = 0; ring <= 96; ring += 6) {
-			int steps = Math.max(1, ring);
+		for (int ring = 0; ring <= 160; ring += 8) {
+			int steps = Math.max(1, ring / 2);
 			for (int k = 0; k < steps; k++) {
 				double a = 2.0 * Math.PI * k / steps;
 				int cx = forest.getX() + (int) Math.round(Math.cos(a) * ring);
 				int cz = forest.getZ() + (int) Math.round(Math.sin(a) * ring);
 				Integer cy = ground(level, cx, cz, 3);
 				if (cy == null) continue;
-				boolean ok = true;
-				for (int dx = -8; dx <= 7 && ok; dx += 1) {
-					for (int dz = -16; dz <= 7 && ok; dz += 1) {
+				int good = 0, total = 0;
+				for (int dx = -7; dx <= 6; dx++) {
+					for (int dz = -12; dz <= 6; dz++) {
+						total++;
 						Integer y = ground(level, cx + dx, cz + dz, 2);
-						ok = y != null && Math.abs(y - cy) <= 1;
+						if (y != null && Math.abs(y - cy) <= 2) good++;
 					}
 				}
-				if (ok) return new BlockPos(cx, cy - 1, cz);
+				if (good >= total * 0.85) return new BlockPos(cx, cy - 1, cz);
 			}
 		}
 		return null;
-	}
-
-	// ---------------------------------------------------------------- finding the spot (server side)
-
-	private static BlockPos findForest(ServerLevel level, BlockPos from, boolean darkOnly) {
-		Predicate<Holder<Biome>> dark = h -> h.is(Biomes.DARK_FOREST);
-		Predicate<Holder<Biome>> any = h -> h.is(Biomes.OLD_GROWTH_SPRUCE_TAIGA)
-				|| h.is(Biomes.OLD_GROWTH_PINE_TAIGA) || h.is(Biomes.FOREST) || h.is(Biomes.BIRCH_FOREST)
-				|| h.is(Biomes.OLD_GROWTH_BIRCH_FOREST);
-		var found = darkOnly ? level.findClosestBiome3d(dark, from, 6400, 32, 64) : null;
-		Predicate<Holder<Biome>> kind = dark;
-		if (found == null) {
-			found = level.findClosestBiome3d(any, from, 6400, 32, 64);
-			kind = any;
-		}
-		if (found == null) return null;
-		BlockPos edge = found.getFirst();
-		// The closest point is the edge of it; walk on in, so it is trees in every direction.
-		double dx = edge.getX() - from.getX(), dz = edge.getZ() - from.getZ();
-		double len = Math.max(1.0, Math.hypot(dx, dz));
-		for (int in = 64; in >= 0; in -= 16) {
-			BlockPos p = new BlockPos((int) (edge.getX() + dx / len * in), 80, (int) (edge.getZ() + dz / len * in));
-			if (kind.test(level.getBiome(p))) return p;
-		}
-		return edge;
 	}
 
 	/** Forest floor: what you would actually be standing on in a wood. */
