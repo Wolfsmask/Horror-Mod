@@ -55,8 +55,7 @@ public class OccupantRenderer extends HumanoidMobRenderer<OccupantEntity, Occupa
 		state.seed = entity.getId();
 		state.headroom = headroomAbove(entity);
 		fit(state);
-		LegGait.of(entity).update(entity, state, state.occupantScale,
-				OccupantGeometry.HIPS_HEIGHT - CROUCH_DROP * state.crouch);
+		LegGait.of(entity).update(entity, state, state.occupantScale, CROUCH_DROP * state.crouch);
 	}
 
 	/**

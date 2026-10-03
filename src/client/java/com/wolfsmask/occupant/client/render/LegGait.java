@@ -64,7 +64,7 @@ final class LegGait {
 	 * planted leg's point should be (in model pixels), and how far the drawn body is from the real
 	 * one.
 	 */
-	void update(OccupantEntity entity, OccupantRenderState state, float scale, float hipsHeightPx) {
+	void update(OccupantEntity entity, OccupantRenderState state, float scale, float dropPx) {
 		Level level = entity.level();
 		Vec3 real = new Vec3(state.x, state.y, state.z);
 		float now = state.ageInTicks;
@@ -76,9 +76,8 @@ final class LegGait {
 		if (body == null || body.distanceTo(real) > SNAP || Math.abs(body.y - real.y) > 1.5) {
 			// Arrived from nowhere: already standing, every leg already braced.
 			body = real;
-			double hipY = body.y + hipsHeightPx * px;
 			for (int i = 0; i < LEGS; i++) {
-				foot[i] = findHold(i, level, yaw, OccupantGeometry.LEG_LENGTH[i] * px, hipY);
+				foot[i] = findHold(i, level, yaw, OccupantGeometry.LEG_LENGTH[i] * px, rootY(i, px, dropPx));
 				swingStart[i] = -1.0f;
 			}
 			nextFidget = now + 60.0f + rand(3, (int) now) * 120.0f;
@@ -113,7 +112,6 @@ final class LegGait {
 		leanSide += (wantS - leanSide) * ease;
 
 		// Legs.
-		double hipY = body.y + hipsHeightPx * px;
 		int swinging = 0;
 		for (int i = 0; i < LEGS; i++) if (swingStart[i] >= 0.0f) swinging++;
 		boolean recheck = (int) now / 20 != lastCheck;
@@ -128,13 +126,14 @@ final class LegGait {
 				continue;
 			}
 			double reach = OccupantGeometry.LEG_LENGTH[i] * px;
+			double hipY = rootY(i, px, dropPx);
 			Vec3 hip = new Vec3(body.x, hipY, body.z);
 			double score;
 			if (foot[i] == null) {
 				score = recheck ? 0.4 : 0.0;                  // a free leg feels about now and then
 			} else {
 				double stretch = foot[i].distanceTo(hip) / reach;
-				Vec3 ideal = ideal(i, yaw, reach, hipsHeightPx * px);
+				Vec3 ideal = ideal(i, yaw, reach, hipY - body.y);
 				double drift = ideal == null ? 0.0 : Math.hypot(foot[i].x - ideal.x, foot[i].z - ideal.z) / reach;
 				score = Math.max((stretch - 0.9) * 10.0, drift - 0.55);
 				if (recheck && !solidAt(level, foot[i])) score = 2.0;
@@ -146,11 +145,11 @@ final class LegGait {
 		}
 		int maxSwinging = chasing ? 3 : 2;
 		if (worst >= 0 && worstScore > 0.0 && swinging < maxSwinging) {
-			replant(worst, level, yaw, px, hipY, chasing ? 2.0f : 3.0f);
+			replant(worst, level, yaw, px, rootY(worst, px, dropPx), chasing ? 2.0f : 3.0f);
 		} else if (now >= nextFidget && swinging == 0 && lag < 0.1) {
 			// Standing still, every so often one leg lets go and takes a new grip, slowly.
 			int i = (int) (rand(5, (int) now) * LEGS) % LEGS;
-			replant(i, level, yaw, px, hipY, 9.0f);
+			replant(i, level, yaw, px, rootY(i, px, dropPx), 9.0f);
 			nextFidget = now + 90.0f + rand(9, (int) now) * 220.0f;
 		}
 
@@ -188,6 +187,11 @@ final class LegGait {
 		}
 	}
 
+	/** Where leg i leaves the body, as a height in the world. */
+	private double rootY(int i, double px, float dropPx) {
+		return body.y + (OccupantGeometry.LEG_ROOT_HEIGHT[i] - dropPx) * px;
+	}
+
 	/** Sends leg i off to a new hold, if it can find one; otherwise it hangs free. */
 	private void replant(int i, Level level, double yaw, double px, double hipY, float duration) {
 		double reach = OccupantGeometry.LEG_LENGTH[i] * px;
@@ -217,7 +221,7 @@ final class LegGait {
 		double across = Math.sqrt(Math.max(0.0, reach * reach - hipHeight * hipHeight));
 		if (across < 0.2) return null;
 		Vec3 d = outward(i, yaw);
-		double r = across * (0.55 + 0.25 * rand(i, 7));
+		double r = across * (0.35 + 0.5 * rand(i, 7));
 		return new Vec3(body.x + d.x * r, body.y, body.z + d.z * r);
 	}
 
@@ -229,7 +233,8 @@ final class LegGait {
 	 */
 	private Vec3 findHold(int i, Level level, double yaw, double reach, double hipY) {
 		Vec3 d = outward(i, yaw);
-		boolean high = i % 3 == 1;
+		// The legs highest up the body reach for walls and ceilings, not the floor.
+		boolean high = OccupantGeometry.LEG_ROOT_HEIGHT[i] > OccupantGeometry.HIPS_HEIGHT + 17.0f;
 		double height = (high ? 0.9 + 0.9 * rand(i, 11) : 0.15 + 0.6 * rand(i, 13)) * (hipY - body.y);
 		Vec3 hip = new Vec3(body.x, hipY, body.z);
 

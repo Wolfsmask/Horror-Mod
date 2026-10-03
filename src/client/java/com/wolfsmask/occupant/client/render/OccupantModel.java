@@ -48,7 +48,7 @@ public class OccupantModel extends HumanoidModel<OccupantRenderState> {
 		this.jaw = skull.getChild("jaw");
 		this.hair = skull.getChild("hair");
 		for (int i = 0; i < LEGS; i++) {
-			upper[i] = hips.getChild("leg" + i + "_upper");
+			upper[i] = spine.getChild("leg" + i + "_upper");
 			lower[i] = upper[i].getChild("leg" + i + "_lower");
 			lower[i].getChild("leg" + i + "_claw");   // it has to be there; it is carried along
 			upperLength[i] = lower[i].y;                 // the knee sits at the end of the thigh
@@ -135,20 +135,34 @@ public class OccupantModel extends HumanoidModel<OccupantRenderState> {
 
 	/**
 	 * Every planted leg is solved so its point lands on its hold: thigh and shin as two bones, the
-	 * knee pushed up and out, high above the body, like something braced in a doorway. A leg with
-	 * nothing to hold hangs half folded and slowly feels about.
+	 * joint pushed out sideways like an elbow, the way an arm braces against a wall to shove off
+	 * it, never peaked up over the body like a spider's knee. A leg with nothing to hold hangs
+	 * half folded and slowly feels about.
+	 * <p>
+	 * The legs leave the body all the way up the trunk, so they ride on the spine as it bends and
+	 * leans; each hold is brought into the spine's own frame before solving.
 	 */
 	private void legs(OccupantRenderState state, float t) {
-		float hx = hips.x, hy = hips.y, hz = hips.z;
+		// The spine's rotation, undone in reverse order: Z, then Y, then X.
+		float cxr = Mth.cos(-spine.xRot), sxr = Mth.sin(-spine.xRot);
+		float cyr = Mth.cos(-spine.yRot), syr = Mth.sin(-spine.yRot);
+		float czr = Mth.cos(-spine.zRot), szr = Mth.sin(-spine.zRot);
 		for (int i = 0; i < LEGS; i++) {
 			float px = upper[i].x, py = upper[i].y, pz = upper[i].z;
 			float a = OccupantGeometry.LEG_ANGLE[i];
 			float ox = Mth.sin(a), oz = Mth.cos(a);
 			float tx, ty, tz;
 			if (state.legPlanted[i]) {
-				tx = state.legTarget[i * 3] - hx;
-				ty = state.legTarget[i * 3 + 1] - hy;
-				tz = state.legTarget[i * 3 + 2] - hz;
+				// Model space, to the hips (which never turn), to the spine.
+				float x = state.legTarget[i * 3] - hips.x - spine.x;
+				float y = state.legTarget[i * 3 + 1] - hips.y - spine.y;
+				float z = state.legTarget[i * 3 + 2] - hips.z - spine.z;
+				float x1 = x * czr - y * szr, y1 = x * szr + y * czr;          // undo Z
+				float x2 = x1 * cyr + z * syr, z2 = -x1 * syr + z * cyr;      // undo Y
+				float y3 = y1 * cxr - z2 * sxr, z3 = y1 * sxr + z2 * cxr;     // undo X
+				tx = x2;
+				ty = y3;
+				tz = z3;
 			} else {
 				// Free: out to the side and down, folded, slowly feeling about.
 				float feel = Mth.sin(t * 0.031f + i * 1.7f);
@@ -157,8 +171,8 @@ public class OccupantModel extends HumanoidModel<OccupantRenderState> {
 				ty = py + reach * (0.45f + 0.12f * Mth.sin(t * 0.023f + i));
 				tz = pz + oz * reach * 0.55f;
 			}
-			// The knee goes up, and out the way the leg points.
-			if (!solve(i, px, py, pz, tx, ty, tz, ox * 0.7f, -1.0f, oz * 0.7f)) {
+			// The joint goes out the way the leg points, and only a little up.
+			if (!solve(i, px, py, pz, tx, ty, tz, ox, -0.3f, oz)) {
 				upper[i].xRot = 0.0f;
 				upper[i].yRot = 0.0f;
 				lower[i].xRot = 0.0f;

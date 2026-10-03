@@ -51,6 +51,8 @@ LEGS = 10
 LEG_UPPER = 28.0
 LEG_LOWER = 30.0
 LEG_CLAW = 6.0
+# How far up the trunk the highest legs leave it, above the hips.
+LEG_RISE = 26.0
 # Nothing is ever taken off. What it is wearing is most of what it is.
 SHROUD = ()
 
@@ -109,19 +111,23 @@ def _mantle_strands():
 
 def leg_layout():
     """
-    (angle, root height, thigh, shin, point) for every leg. Angles go all the way round the body
-    but never evenly, and the legs leave it at different heights, so it never looks like a set
-    of matching legs on something that walks.
+    (angle, rise, thigh, shin, point) for every leg. They do not all leave the body at the hips
+    like a spider's: they come out all the way up the trunk, like far too many arms, and the
+    higher a leg starts the longer it is. Angles go all the way round, but never evenly.
     """
     out = []
     for i in range(LEGS):
         angle = 2.0 * np.pi * (i + 0.5) / LEGS + 0.22 * np.sin(i * 2.399)
-        root_y = -7.0 + 9.0 * ((i * 0.6180339887) % 1.0)
-        upper = LEG_UPPER + 3.0 * (((i * 0.7548776662) % 1.0) - 0.5)
-        lower = LEG_LOWER + 3.0 * (((i * 0.5698402910) % 1.0) - 0.5)
-        out.append((float(angle), round(float(root_y), 2), round(float(upper), 2),
-                    round(float(lower), 2), LEG_CLAW))
+        rise = round(float(LEG_RISE * ((i * 0.6180339887 + 0.05) % 1.0)), 2)
+        upper = LEG_UPPER + 0.4 * rise + 3.0 * (((i * 0.7548776662) % 1.0) - 0.5)
+        lower = LEG_LOWER + 0.45 * rise + 3.0 * (((i * 0.5698402910) % 1.0) - 0.5)
+        out.append((float(angle), rise, round(float(upper), 2), round(float(lower), 2), LEG_CLAW))
     return out
+
+
+def leg_root_height(rise):
+    """Height of a leg's root above the ground, standing upright, in model pixels."""
+    return HIPS_HEIGHT + 1.0 - 2.0 + rise
 
 
 def parts():
@@ -179,13 +185,13 @@ def parts():
 
     # Ten legs, coming out all round the bottom of the body. Each is three bones hanging straight
     # down at rest; in game every one of them is aimed at somewhere real to push against.
-    for i, (angle, root_y, upper, lower, claw) in enumerate(leg_layout()):
+    for i, (angle, rise, upper, lower, claw) in enumerate(leg_layout()):
         rx = float(np.sin(angle)) * 2.3
         rz = float(np.cos(angle)) * 0.75
         w1 = 1.45 + 0.3 * ((i * 0.6180339887) % 1.0)
         w2 = 1.1 + 0.25 * ((i * 0.4142135624) % 1.0)
         w3 = 0.7 + 0.2 * ((i * 0.2360679775) % 1.0)
-        p.append((f"leg{i}_upper", "hips", (rx, root_y, rz), (0, 0, 0),
+        p.append((f"leg{i}_upper", "spine", (rx, 2.0 - rise, rz), (0, 0, 0),
                   [("limb", -w1 / 2, -0.6, -w1 / 2, w1, upper + 0.6, w1)]))
         p.append((f"leg{i}_lower", f"leg{i}_upper", (0, upper, 0), (0, 0, 0),
                   [("limb", -w2 / 2, -0.5, -w2 / 2, w2, lower + 0.5, w2)]))
@@ -540,8 +546,10 @@ public final class OccupantGeometry {
 \tpublic static final int LEGS = %d;
 \t/** Each leg's direction out from the body, in radians (model x = sin, model z = cos). */
 \tpublic static final float[] LEG_ANGLE = {%s};
-\t/** Each leg's full length, hip to point, in model pixels. */
+\t/** Each leg's full length, root to point, in model pixels. */
 \tpublic static final float[] LEG_LENGTH = {%s};
+\t/** How high each leg leaves the body, above the ground, standing upright, in model pixels. */
+\tpublic static final float[] LEG_ROOT_HEIGHT = {%s};
 
 \tprivate OccupantGeometry() {
 \t}
@@ -567,7 +575,8 @@ def write_java(ps, boxes, placed):
     lines = [HEADER % (", ".join('"%s"' % n for n in SHROUD), num(height).rstrip("f"),
                        num(HIPS_HEIGHT).rstrip("f"), LEGS,
                        ", ".join("%.4ff" % a for a, *_ in layout),
-                       ", ".join(num(u + l + c) for _a, _y, u, l, c in layout))]
+                       ", ".join(num(u + l + c) for _a, _y, u, l, c in layout),
+                       ", ".join(num(leg_root_height(r)) for _a, r, _u, _l, _c in layout))]
     box_at = {}
     for i, (owner, *_rest) in enumerate(boxes):
         box_at.setdefault(owner, []).append(i)
