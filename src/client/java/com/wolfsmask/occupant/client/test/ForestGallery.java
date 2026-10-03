@@ -274,6 +274,31 @@ final class ForestGallery {
 		return null;
 	}
 
+	// ---------------------------------------------------------------- finding the spot (server side)
+
+	private static BlockPos findForest(ServerLevel level, BlockPos from, boolean darkOnly) {
+		Predicate<Holder<Biome>> dark = h -> h.is(Biomes.DARK_FOREST);
+		Predicate<Holder<Biome>> any = h -> h.is(Biomes.OLD_GROWTH_SPRUCE_TAIGA)
+				|| h.is(Biomes.OLD_GROWTH_PINE_TAIGA) || h.is(Biomes.FOREST) || h.is(Biomes.BIRCH_FOREST)
+				|| h.is(Biomes.OLD_GROWTH_BIRCH_FOREST);
+		var found = darkOnly ? level.findClosestBiome3d(dark, from, 6400, 32, 64) : null;
+		Predicate<Holder<Biome>> kind = dark;
+		if (found == null) {
+			found = level.findClosestBiome3d(any, from, 6400, 32, 64);
+			kind = any;
+		}
+		if (found == null) return null;
+		BlockPos edge = found.getFirst();
+		// The closest point is the edge of it; walk on in, so it is trees in every direction.
+		double dx = edge.getX() - from.getX(), dz = edge.getZ() - from.getZ();
+		double len = Math.max(1.0, Math.hypot(dx, dz));
+		for (int in = 64; in >= 0; in -= 16) {
+			BlockPos p = new BlockPos((int) (edge.getX() + dx / len * in), 80, (int) (edge.getZ() + dz / len * in));
+			if (kind.test(level.getBiome(p))) return p;
+		}
+		return edge;
+	}
+
 	/** Forest floor: what you would actually be standing on in a wood. */
 	private static boolean isFloor(BlockState state) {
 		return state.is(Blocks.GRASS_BLOCK) || state.is(Blocks.DIRT) || state.is(Blocks.PODZOL)
