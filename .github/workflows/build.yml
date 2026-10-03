@@ -136,23 +136,36 @@ jobs:
       - name: Commit screenshots and the outcome
         if: always()
         run: |
-          mkdir -p docs/client-test
-          rm -f docs/client-test/*.png
+          OUT="$RUNNER_TEMP/client-test"
+          mkdir -p "$OUT"
           # The test files a copy of each photograph under its own name; fall back to a search.
-          cp build/clientGametest/occupant-shots/*.png docs/client-test/ 2>/dev/null \
-            || find build/clientGametest -iname "*occupant*.png" -exec cp {} docs/client-test/ \; || true
-          find build/clientGametest -iname "*.png" | head -n 40 > docs/client-test/files.txt || true
+          cp build/clientGametest/occupant-shots/*.png "$OUT"/ 2>/dev/null \
+            || find build/clientGametest -iname "*occupant*.png" -exec cp {} "$OUT"/ \; || true
+          find build/clientGametest -iname "*.png" | head -n 40 > "$OUT/files.txt" || true
           {
             echo "# Client game test on $GITHUB_SHA ($(date -u +%FT%TZ)): ${{ job.status }}"
             grep -E "client-gametest|Exception|Error|AssertionError|FAILED|Occupant|occupant" client.log | grep -v "DEBUG" | head -n 120
             echo "--- tail ---"
             tail -n 60 client.log
-          } > docs/client-test/result.txt
+          } > "$OUT/result.txt"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f docs/client-test
-          git diff --cached --quiet || git commit -m "Client game test results [skip ci]"
+          # Each attempt starts again from the branch as it is now, so two runs finishing together
+          # can never conflict over the same images. If newer code has been pushed since this run
+          # started, its own run will report, and this one's results are already out of date.
           for attempt in 1 2 3 4 5; do
-            git pull --rebase --quiet origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && break
+            git fetch -q origin "${GITHUB_REF_NAME}"
+            if [ -n "$(git log --format=%s "${GITHUB_SHA}..origin/${GITHUB_REF_NAME}" | grep -v '\[skip ci\]')" ]; then
+              echo "Newer code is on the branch; leaving the report to its run."
+              break
+            fi
+            git reset -q --hard "origin/${GITHUB_REF_NAME}"
+            rm -rf docs/client-test
+            mkdir -p docs/client-test
+            cp -r "$OUT"/. docs/client-test/
+            git add -A -f docs/client-test
+            git diff --cached --quiet && break
+            git commit -q -m "Client game test results [skip ci]"
+            git push origin "HEAD:${GITHUB_REF_NAME}" && break
             sleep $((attempt * 3))
           done
