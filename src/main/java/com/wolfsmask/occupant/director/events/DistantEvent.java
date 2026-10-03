@@ -59,8 +59,13 @@ public final class DistantEvent extends HorrorEvent {
 		if (max < min + 8.0) return null;
 
 		// Somewhere ahead of the player, but off to one side: found, not presented.
-		BlockPos spot = Spots.aroundPlayer(p, ctx.random, min, max, 12, 60, true, 60,
-				pos -> standsAbove(ctx, pos));
+		// Best: only its head and shoulders over a crest or past the trees.
+		BlockPos spot = Spots.aroundPlayer(p, ctx.random, min, max, 12, 60, true, 120,
+				pos -> Math.abs(pos.getY() - p.getBlockY()) <= 40 && ctx.world.canSeeSky(pos.above())
+						&& Sight.onlyJustVisible(p, Vec3.atBottomCenterOf(pos), 5.0));
+		if (spot == null) {
+			spot = Spots.aroundPlayer(p, ctx.random, min, max, 12, 60, true, 60, pos -> standsAbove(ctx, pos));
+		}
 		if (spot == null) return null;
 
 		OccupantEntity e = ctx.haunt.spawnOccupant(p, spot, OccupantEntity.Mode.STARE, ctx.haunt.pickForm(ctx.random));

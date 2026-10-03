@@ -35,6 +35,11 @@ public final class Haunt {
 	 * the player has decided nothing is coming.
 	 */
 	int quietSeconds;
+	/** The last abandoned house it was waiting in, and when, so each house happens once a visit. */
+	@Nullable
+	BlockPos lastHouse;
+	long lastHouseTick;
+	long houseRetryAt;
 	/** Whether the last snapshot was taken at night (used only for pacing). */
 	boolean lastSituationWasNight;
 

@@ -6,8 +6,10 @@ import com.wolfsmask.occupant.director.Director;
 import com.wolfsmask.occupant.director.HauntData;
 import com.wolfsmask.occupant.director.HorrorEvent;
 import com.wolfsmask.occupant.director.events.Events;
+import com.wolfsmask.occupant.director.events.HallwayEvent;
 import com.wolfsmask.occupant.entity.OccupantEntity;
 import com.wolfsmask.occupant.registry.ModEntities;
+import com.wolfsmask.occupant.world.HouseFeature;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
@@ -17,6 +19,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.phys.AABB;
 
 import java.util.ArrayList;
@@ -136,6 +139,40 @@ public final class OccupantGameTests {
 	 * A player at the very end of the story, at night, and every single event forced one after
 	 * another. Nothing may throw, and nothing may be left behind.
 	 */
+	/**
+	 * The abandoned house: it builds, the mod can tell when you are standing in it, and from just
+	 * inside the front door there is somewhere in its dark side hallway for it to stand, mostly
+	 * hidden behind the wall. Built well away from the other tests so it cannot touch them.
+	 */
+	@GameTest(maxTicks = 60)
+	public void itWaitsInTheHouseHallway(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		makeNight(level);
+		BlockPos floor = helper.absolutePos(new BlockPos(0, 1, 0)).offset(0, 0, 320);
+		level.getChunk(floor.getX() >> 4, floor.getZ() >> 4);
+		for (int dx = -1; dx <= 1; dx++) {
+			for (int dz = -1; dz <= 1; dz++) level.getChunk((floor.getX() >> 4) + dx, (floor.getZ() >> 4) + dz);
+		}
+		HouseFeature.build(level, floor, Rotation.NONE, level.getRandom());
+
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		BlockPos inside = HouseFeature.local(floor, Rotation.NONE, 4, 1, 1);   // just through the door
+		player.snapTo(inside.getX() + 0.5, inside.getY(), inside.getZ() + 0.5, 0.0f, 0.0f);
+
+		helper.runAtTickTime(5, () -> {
+			helper.assertTrue(HouseFeature.isInside(level, inside), "Standing inside the house should count as inside it");
+			helper.assertTrue(!HouseFeature.isInside(level, inside.offset(0, 0, -3)), "Outside the front door is not inside");
+			BlockPos peek = HallwayEvent.find(player, true);
+			BlockPos any = peek != null ? peek : HallwayEvent.find(player, false);
+			Occupant.LOGGER.info("[gametest] house hallway spot: peeking {} / any {}", peek, any);
+			helper.assertTrue(any != null, "There should be somewhere in the dark hallway for it to stand");
+			BlockPos hallStart = HouseFeature.local(floor, Rotation.NONE, 9, 1, 1);
+			helper.assertTrue(any.getX() >= hallStart.getX() && any.getX() <= hallStart.getX() + 1,
+					"It should be in the side hallway, not the main room (got " + any + ")");
+			helper.succeed();
+		});
+	}
+
 	@GameTest(maxTicks = 40 + TICKS_PER_EVENT * 30)
 	public void everyEventRunsCleanly(GameTestHelper helper) {
 		Director director = Director.get();

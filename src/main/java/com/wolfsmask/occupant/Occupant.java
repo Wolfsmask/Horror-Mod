@@ -7,6 +7,7 @@ import com.wolfsmask.occupant.network.ScreenEffectPayload;
 import com.wolfsmask.occupant.network.WhisperPayload;
 import com.wolfsmask.occupant.registry.ModEntities;
 import com.wolfsmask.occupant.registry.ModSounds;
+import com.wolfsmask.occupant.world.ModWorld;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents;
@@ -59,6 +60,7 @@ public final class Occupant implements ModInitializer {
 		OccupantConfig.load();
 		ModSounds.init();
 		ModEntities.init();
+		ModWorld.init();
 		PayloadTypeRegistry.clientboundPlay().register(ScreenEffectPayload.TYPE, ScreenEffectPayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(WhisperPayload.TYPE, WhisperPayload.CODEC);
 

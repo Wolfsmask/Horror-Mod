@@ -51,12 +51,52 @@ public final class Sight {
 		return hit.getType() == HitResult.Type.MISS;
 	}
 
-	/** Line of sight to any of the entity's head, chest or knees. */
+	/**
+	 * How much of it the player would see if it stood with its feet at {@code feet}: fifteen points
+	 * over its drawn shape (five heights up a body {@code height} blocks tall, at its middle and a
+	 * little to either side, across the player's line of view), each tested for line of sight.
+	 * Returns a bit mask: bit {@code row * 3 + column}, row 0 at the feet, row 4 at the head.
+	 */
+	public static int visibleParts(ServerPlayer player, Vec3 feet, double height) {
+		Vec3 eye = player.getEyePosition();
+		double dx = feet.x - eye.x, dz = feet.z - eye.z;
+		double len = Math.max(1.0E-4, Math.sqrt(dx * dx + dz * dz));
+		double sx = -dz / len * 0.6, sz = dx / len * 0.6;               // sideways, across the view
+		int mask = 0;
+		for (int row = 0; row < 5; row++) {
+			double y = height * (0.1 + 0.2 * row);
+			for (int col = 0; col < 3; col++) {
+				Vec3 point = feet.add(sx * (col - 1), y, sz * (col - 1));
+				if (hasLineOfSight(player, point)) mask |= 1 << (row * 3 + col);
+			}
+		}
+		return mask;
+	}
+
+	/**
+	 * Only just there: part of its head can be seen, but most of it is behind something, a trunk,
+	 * a wall, a doorframe, the brow of a hill. This is how it should nearly always be met.
+	 */
+	public static boolean onlyJustVisible(ServerPlayer player, Vec3 feet, double height) {
+		int mask = visibleParts(player, feet, height);
+		boolean head = (mask & (0b111 << 12 | 0b111 << 9)) != 0;      // the top two rows
+		int seen = Integer.bitCount(mask);
+		return head && seen <= 6;
+	}
+
+	/**
+	 * How tall the Occupant is actually drawn, against its hitbox: its head is up here, and when it
+	 * stands mostly hidden its head may be all there is to see.
+	 */
+	public static final double DRAWN_HEIGHT_FACTOR = 2.15;
+
+	/** Line of sight to any of its head, chest, middle or knees, as it is drawn. */
 	public static boolean canSeeAnyPart(ServerPlayer player, Entity entity) {
-		double h = entity.getBbHeight();
+		double h = entity.getBbHeight() * DRAWN_HEIGHT_FACTOR;
 		Vec3 base = entity.position();
 		return hasLineOfSight(player, base.add(0, h * 0.9, 0))
-				|| hasLineOfSight(player, base.add(0, h * 0.55, 0))
+				|| hasLineOfSight(player, base.add(0, h * 0.7, 0))
+				|| hasLineOfSight(player, base.add(0, h * 0.45, 0))
 				|| hasLineOfSight(player, base.add(0, h * 0.2, 0));
 	}
 
@@ -65,15 +105,18 @@ public final class Sight {
 	 * closer (it takes up more of the screen), so this feels right at any distance.
 	 */
 	public static boolean isLookingAt(ServerPlayer player, Entity entity) {
-		Vec3 center = entity.position().add(0, entity.getBbHeight() * 0.6, 0);
+		double h = entity.getBbHeight() * DRAWN_HEIGHT_FACTOR;
+		Vec3 center = entity.position().add(0, h * 0.55, 0);
+		Vec3 head = entity.position().add(0, h * 0.9, 0);
 		double dist = Math.max(0.5, player.getEyePosition().distanceTo(center));
-		double tolerance = 5.0 + Math.toDegrees(Math.atan((entity.getBbHeight() * 0.5) / dist));
-		return angleTo(player, center) <= tolerance && canSeeAnyPart(player, entity);
+		double tolerance = 5.0 + Math.toDegrees(Math.atan((h * 0.5) / dist));
+		boolean aimed = angleTo(player, center) <= tolerance || angleTo(player, head) <= 5.0 + Math.toDegrees(Math.atan(0.6 / dist));
+		return aimed && canSeeAnyPart(player, entity);
 	}
 
 	/** Could this entity be on the player's screen right now (inside the view cone and unobstructed)? */
 	public static boolean isOnScreen(ServerPlayer player, Entity entity) {
-		Vec3 center = entity.position().add(0, entity.getBbHeight() * 0.5, 0);
+		Vec3 center = entity.position().add(0, entity.getBbHeight() * DRAWN_HEIGHT_FACTOR * 0.5, 0);
 		return angleTo(player, center) <= 60.0 && canSeeAnyPart(player, entity);
 	}
 

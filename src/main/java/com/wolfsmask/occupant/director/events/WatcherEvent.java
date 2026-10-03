@@ -51,8 +51,13 @@ public final class WatcherEvent extends HorrorEvent {
 			maxAngle = 55;
 		}
 
-		BlockPos spot = Spots.aroundPlayer(p, ctx.random, min, max, minAngle, maxAngle, !underground, 40,
-				pos -> goodSpot(ctx, pos, min));
+		// Best of all: only just visible, its head past the edge of something.
+		BlockPos spot = Spots.aroundPlayer(p, ctx.random, min, max, minAngle, maxAngle, !underground, 120,
+				pos -> peekSpot(ctx, pos, min));
+		if (spot == null) {
+			spot = Spots.aroundPlayer(p, ctx.random, min, max, minAngle, maxAngle, !underground, 40,
+					pos -> goodSpot(ctx, pos, min));
+		}
 		if (spot == null && !underground) {
 			spot = Spots.aroundPlayer(p, ctx.random, min, max, 0, 20, true, 25, pos -> goodSpot(ctx, pos, min));
 		}
@@ -65,6 +70,16 @@ public final class WatcherEvent extends HorrorEvent {
 		boolean waitsForLookAway = act >= 3 && ctx.random.nextFloat() < 0.35f;
 		double vanishDistance = underground ? (act >= 3 ? 7 : 10) : (act >= 4 ? 10 : act == 3 ? 14 : 20);
 		return new WatcherSequence(ctx.haunt, e, reaction, waitsForLookAway, vanishDistance, 900 + ctx.random.nextInt(300));
+	}
+
+	/** Dark, out of the way, and mostly hidden behind something, with its head showing past it. */
+	static boolean peekSpot(EventContext ctx, BlockPos pos, double minDist) {
+		ServerPlayer p = ctx.player;
+		Vec3 base = Vec3.atBottomCenterOf(pos);
+		if (base.distanceTo(p.position()) < minDist * 0.8) return false;
+		if (!Spots.isDark(ctx.world, pos.above())) return false;
+		if (!Spots.awayFromOthers(p, base, 24)) return false;
+		return Sight.onlyJustVisible(p, base, 4.2);
 	}
 
 	static boolean goodSpot(EventContext ctx, BlockPos pos, double minDist) {

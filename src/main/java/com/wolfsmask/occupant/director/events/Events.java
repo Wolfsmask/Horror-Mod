@@ -20,6 +20,7 @@ public final class Events {
 			new DoorEvent(),
 			new ChestEvent(),
 			new TorchEvent(),
+			new HallwayEvent(),
 			// Act 2+: something is here
 			new CloseSoundEvent("breath", 2, 5, 12, () -> ModSounds.BREATH, true, 0.5f),
 			new KnockEvent(),

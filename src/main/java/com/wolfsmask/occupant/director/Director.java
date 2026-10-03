@@ -3,8 +3,11 @@ package com.wolfsmask.occupant.director;
 import com.wolfsmask.occupant.Occupant;
 import com.wolfsmask.occupant.OccupantConfig;
 import com.wolfsmask.occupant.director.events.Events;
+import com.wolfsmask.occupant.director.events.HallwayEvent;
 import com.wolfsmask.occupant.director.events.WakeEvent;
+import com.wolfsmask.occupant.world.HouseFeature;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import org.jetbrains.annotations.Nullable;
@@ -166,6 +169,7 @@ public final class Director {
 		}
 
 		if (h.active != null || h.data.act == 0) return;
+		if (enteredHouse(h, player)) return;
 		h.nextEventIn -= 20;
 		if (h.nextEventIn > 0) return;
 
@@ -174,6 +178,26 @@ public final class Director {
 			return;
 		}
 		scheduleNext(h, player, s, cfg);
+	}
+
+	/**
+	 * Walking into one of the abandoned houses is a moment of its own, whatever the pacing says:
+	 * the first time in each house (or the first time in a long while), it is in the hallway.
+	 */
+	private boolean enteredHouse(Haunt h, ServerPlayer player) {
+		BlockPos feet = player.blockPosition();
+		if (!HouseFeature.isInside(player.level(), feet)) return false;
+		long now = server.getTickCount();
+		boolean sameHouse = h.lastHouse != null && h.lastHouse.closerThan(feet, 20.0);
+		if (sameHouse && now - h.lastHouseTick < 20L * 60 * 20) return false;   // twenty minutes
+		if (now < h.houseRetryAt) return false;
+		if (trigger(player, HallwayEvent.ID, false) != TriggerResult.STARTED) {
+			h.houseRetryAt = now + 60;          // no good spot from here yet; look again as they move
+			return false;
+		}
+		h.lastHouse = feet;
+		h.lastHouseTick = now;
+		return true;
 	}
 
 	private boolean isEligible(ServerPlayer player, Haunt h, OccupantConfig cfg) {
