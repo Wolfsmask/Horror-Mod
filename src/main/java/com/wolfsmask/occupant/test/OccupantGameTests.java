@@ -167,8 +167,9 @@ public final class OccupantGameTests {
 			Occupant.LOGGER.info("[gametest] house hallway spot: peeking {} / any {}", peek, any);
 			helper.assertTrue(any != null, "There should be somewhere in the dark hallway for it to stand");
 			BlockPos hallStart = HouseFeature.local(floor, Rotation.NONE, 9, 1, 1);
-			helper.assertTrue(any.getX() >= hallStart.getX() && any.getX() <= hallStart.getX() + 1,
-					"It should be in the side hallway, not the main room (got " + any + ")");
+			helper.assertTrue(any.getX() >= hallStart.getX() - 1 && any.getX() <= hallStart.getX() + 1,
+					"It should be in the side hallway or its doorway, not the main room (got " + any + ")");
+			helper.assertTrue(peek != null, "From the door it should be only just visible, past the edge of the gap");
 			helper.succeed();
 		});
 	}

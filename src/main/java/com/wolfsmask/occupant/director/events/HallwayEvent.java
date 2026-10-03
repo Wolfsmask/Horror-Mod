@@ -76,15 +76,17 @@ public final class HallwayEvent extends HorrorEvent {
 					if (side < 25.0 || side > 110.0) continue;          // off to the side, not ahead
 					if (world.canSeeSky(pos.above())) continue;         // indoors
 					if (!Spots.isDark(world, pos.above())) continue;
-					if (!narrow(world, pos)) continue;
+					if (!enclosed(world, pos)) continue;
 					double height = headroom(world, pos);
 					if (height > 6.0) continue;
-					if (peek ? !Sight.onlyJustVisible(p, base, height) : Sight.visibleParts(p, base, height) == 0) {
-						continue;
-					}
-					// Not right up close, not far off: about seven blocks, at the edge of the screen,
-					// where you catch it out of the corner of your eye.
-					double score = Math.abs(flat - 7.0) + Math.abs(side - 45.0) * 0.06;
+					int mask = Sight.visibleParts(p, base, height);
+					int seen = Integer.bitCount(mask);
+					boolean head = (mask & (0b111 << 12 | 0b111 << 9)) != 0;
+					if (seen == 0) continue;
+					if (peek && (!head || seen > 8)) continue;   // its head past the edge, the rest behind it
+					// Not right up close, not far off: about seven blocks, at the edge of the screen
+					// where you catch it out of the corner of your eye, and as little of it as can be.
+					double score = Math.abs(flat - 7.0) * 0.6 + Math.abs(side - 45.0) * 0.04 + seen * 0.35;
 					if (score < bestScore) {
 						bestScore = score;
 						best = pos;
@@ -95,15 +97,19 @@ public final class HallwayEvent extends HorrorEvent {
 		return best;
 	}
 
-	/** Walls close on both sides along one axis: a hallway, a gap, a doorway. */
-	private static boolean narrow(ServerLevel world, BlockPos pos) {
+	/** Walled in on at least two sides within a few blocks: a hallway, a gap, a doorway, a corner. */
+	private static boolean enclosed(ServerLevel world, BlockPos pos) {
 		BlockPos chest = pos.above();
-		return (wallWithin(world, chest, 1, 0) && wallWithin(world, chest, -1, 0))
-				|| (wallWithin(world, chest, 0, 1) && wallWithin(world, chest, 0, -1));
+		int walls = 0;
+		if (wallWithin(world, chest, 1, 0)) walls++;
+		if (wallWithin(world, chest, -1, 0)) walls++;
+		if (wallWithin(world, chest, 0, 1)) walls++;
+		if (wallWithin(world, chest, 0, -1)) walls++;
+		return walls >= 2;
 	}
 
 	private static boolean wallWithin(ServerLevel world, BlockPos from, int sx, int sz) {
-		for (int i = 1; i <= 2; i++) {
+		for (int i = 1; i <= 3; i++) {
 			BlockPos p = from.offset(sx * i, 0, sz * i);
 			if (!world.getBlockState(p).getCollisionShape(world, p).isEmpty()) return true;
 		}
