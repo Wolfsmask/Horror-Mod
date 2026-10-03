@@ -198,7 +198,7 @@ final class ForestGallery {
 			return new float[]{(float) Math.toDegrees(Math.atan2(-dx, dz)) + off,
 					(float) -Math.toDegrees(Math.atan2(dy, flat))};
 		});
-		if (turn != null) server.runCommand(String.format(Locale.ROOT, "tp @p ~ ~ ~ %.1f %.1f", turn[0], turn[1]));
+		if (turn != null) server.runCommand(String.format(Locale.ROOT, "execute as @p at @s run tp @s ~ ~ ~ %.1f %.1f", turn[0], turn[1]));
 	}
 
 	private static void teleport(TestServerContext server, BlockPos feet, float yaw, float pitch) {
