@@ -1,332 +1,71 @@
-=== net.minecraft.client.renderer.entity.EntityRenderer (-public)
-public abstract class client.renderer.entity.EntityRenderer<T extends world.entity.Entity, S extends client.renderer.entity.state.EntityRenderState> {
-  public world.phys.Vec3 getRenderOffset(S);
-  public void extractRenderState(T, S, float);
-=== net.minecraft.client.renderer.entity.LivingEntityRenderer (-protected)
-public abstract class client.renderer.entity.LivingEntityRenderer<T extends world.entity.LivingEntity, S extends client.renderer.entity.state.LivingEntityRenderState, M extends client.model.EntityModel<? super S>> extends client.renderer.entity.EntityRenderer<T, S> implements client.renderer.entity.RenderLayerParent<S, M> {
-  protected void setupRotations(S, blaze3d.vertex.PoseStack, float, float);
-  protected float getFlipDegrees();
-  protected void scale(S, blaze3d.vertex.PoseStack);
-  public void extractRenderState(T, S, float);
-  public void extractRenderState(world.entity.Entity, client.renderer.entity.state.EntityRenderState, float);
-=== net.minecraft.client.renderer.entity.LivingEntityRenderer (code: submit|render)
-  public client.renderer.entity.LivingEntityRenderer(client.renderer.entity.EntityRendererProvider$Context, M, float);
-    Code:
-         2: invokespecial #1                  // Method net/minecraft/client/renderer/entity/EntityRenderer."<init>":(Lnet/minecraft/client/renderer/entity/EntityRendererProvider$Context;)V
-         6: invokestatic  #7                  // Method com/google/common/collect/Lists.newArrayList:()Ljava/util/ArrayList;
-         9: putfield      #13                 // Field layers:Ljava/util/List;
-        14: invokevirtual #19                 // Method net/minecraft/client/renderer/entity/EntityRendererProvider$Context.getItemModelResolver:()Lnet/minecraft/client/renderer/item/ItemModelResolver;
-        17: putfield      #25                 // Field itemModelResolver:Lnet/minecraft/client/renderer/item/ItemModelResolver;
-        22: putfield      #29                 // Field model:Lnet/minecraft/client/model/EntityModel;
-        27: putfield      #33                 // Field shadowRadius:F
-
-  protected final boolean addLayer(client.renderer.entity.layers.RenderLayer<S, M>);
-    Code:
-         1: getfield      #13                 // Field layers:Ljava/util/List;
-         5: invokeinterface #37,  2           // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
-        10: ireturn
-
-  public void submit(S, com.mojang.blaze3d.vertex.PoseStack, client.renderer.SubmitNodeCollector, client.renderer.state.level.CameraRenderState);
-    Code:
-         1: invokevirtual #79                 // Method com/mojang/blaze3d/vertex/PoseStack.pushPose:()V
-         5: getstatic     #85                 // Field net/minecraft/world/entity/Pose.SLEEPING:Lnet/minecraft/world/entity/Pose;
-         8: invokevirtual #91                 // Method net/minecraft/client/renderer/entity/state/LivingEntityRenderState.hasPose:(Lnet/minecraft/world/entity/Pose;)Z
-        11: ifeq          59
-        15: getfield      #97                 // Field net/minecraft/client/renderer/entity/state/LivingEntityRenderState.bedOrientation:Lnet/minecraft/core/Direction;
-        22: ifnull        59
-        26: getfield      #101                // Field net/minecraft/client/renderer/entity/state/LivingEntityRenderState.eyeHeight:F
-        29: ldc           #104                // float 0.1f
-        31: fsub
-        37: invokevirtual #105                // Method net/minecraft/core/Direction.getStepX:()I
-        40: ineg
-        41: i2f
-        44: fmul
-        45: fconst_0
-        48: invokevirtual #111                // Method net/minecraft/core/Direction.getStepZ:()I
-        51: ineg
-        52: i2f
-        55: fmul
-        56: invokevirtual #114                // Method com/mojang/blaze3d/vertex/PoseStack.translate:(FFF)V
-        60: getfield      #118                // Field net/minecraft/client/renderer/entity/state/LivingEntityRenderState.scale:F
-        72: invokevirtual #121                // Method com/mojang/blaze3d/vertex/PoseStack.scale:(FFF)V
-        79: getfield      #123                // Field net/minecraft/client/renderer/entity/state/LivingEntityRenderState.bodyRot:F
-        84: invokevirtual #126                // Method setupRotations:(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;FF)V
-        88: ldc           #130                // float -1.0f
-        90: ldc           #130                // float -1.0f
-        92: fconst_1
-        93: invokevirtual #121                // Method com/mojang/blaze3d/vertex/PoseStack.scale:(FFF)V
-        99: invokevirtual #131                // Method scale:(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;)V
-       103: fconst_0
-       104: ldc           #136                // float -1.501f
-       106: fconst_0
-       107: invokevirtual #114                // Method com/mojang/blaze3d/vertex/PoseStack.translate:(FFF)V
-       112: invokevirtual #137                // Method isBodyVisible:(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;)Z
-       115: istore        6
-       119: ifne          133
-       123: getfield      #141                // Field net/minecraft/client/renderer/entity/state/LivingEntityRenderState.isInvisibleToPlayer:Z
-       126: ifne          133
-       129: iconst_1
-       130: goto          134
-       133: iconst_0
-       134: istore        7
-       143: invokevirtual #145                // Method net/minecraft/client/renderer/entity/state/LivingEntityRenderState.appearsGlowing:()Z
-       146: invokevirtual #149                // Method getRenderType:(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;ZZZ)Lnet/minecraft/client/renderer/rendertype/RenderType;
-       153: ifnull        220
-       159: invokevirtual #153                // Method getWhiteOverlayProgress:(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;)F
-       162: invokestatic  #157                // Method getOverlayCoords:(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;F)I
-       165: istore        9
-       169: ifeq          177
-       172: ldc           #161                // int 654311423
-       174: goto          178
-       177: iconst_m1
-       178: istore        10
-       184: invokevirtual #164                // Method getModelTint:(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;)I
-       187: invokestatic  #168                // Method net/minecraft/util/ARGB.multiply:(II)I
-       190: istore        11
-       194: getfield      #29                 // Field model:Lnet/minecraft/client/model/EntityModel;
-       202: getfield      #174                // Field net/minecraft/client/renderer/entity/state/LivingEntityRenderState.lightCoords:I
-       209: aconst_null
-       211: getfield      #178                // Field net/minecraft/client/renderer/entity/state/LivingEntityRenderState.outlineColor:I
-       214: aconst_null
-       215: invokeinterface #181,  11         // InterfaceMethod net/minecraft/client/renderer/SubmitNodeCollector.submitModel:(Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/rendertype/RenderType;IIILnet/minecraft/client/renderer/texture/TextureAtlasSprite;ILnet/minecraft/client/renderer/feature/ModelFeatureRenderer$CrumblingOverlay;)V
-       222: invokevirtual #187                // Method shouldRenderLayers:(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;)Z
-       225: ifeq          304
-       229: getfield      #13                 // Field layers:Ljava/util/List;
-       232: invokeinterface #190,  1          // InterfaceMethod java/util/List.isEmpty:()Z
-       237: ifne          304
-       241: getfield      #29                 // Field model:Lnet/minecraft/client/model/EntityModel;
-       245: invokevirtual #193                // Method net/minecraft/client/model/EntityModel.setupAnim:(Ljava/lang/Object;)V
-       249: getfield      #13                 // Field layers:Ljava/util/List;
-       252: invokeinterface #197,  1          // InterfaceMethod java/util/List.iterator:()Ljava/util/Iterator;
-       261: invokeinterface #201,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
-       266: ifeq          304
-       271: invokeinterface #206,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
-       276: checkcast     #210                // class net/minecraft/client/renderer/entity/layers/RenderLayer
-       286: getfield      #174                // Field net/minecraft/client/renderer/entity/state/LivingEntityRenderState.lightCoords:I
-       291: getfield      #212                // Field net/minecraft/client/renderer/entity/state/LivingEntityRenderState.yRot:F
-       295: getfield      #215                // Field net/minecraft/client/renderer/entity/state/LivingEntityRenderState.xRot:F
-       298: invokevirtual #218                // Method net/minecraft/client/renderer/entity/layers/RenderLayer.submit:(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/client/renderer/entity/state/EntityRenderState;FF)V
-       301: goto          259
-       305: invokevirtual #222                // Method com/mojang/blaze3d/vertex/PoseStack.popPose:()V
-       314: invokespecial #225                // Method net/minecraft/client/renderer/entity/EntityRenderer.submit:(Lnet/minecraft/client/renderer/entity/state/EntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/level/CameraRenderState;)V
-
-  protected client.renderer.rendertype.RenderType getRenderType(S, boolean, boolean, boolean);
-    Code:
-         2: invokevirtual #228                // Method getTextureLocation:(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;)Lnet/minecraft/resources/Identifier;
-         8: ifeq          17
-        13: invokestatic  #232                // Method net/minecraft/client/renderer/rendertype/RenderTypes.entityTranslucentCullItemTarget:(Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/renderer/rendertype/RenderType;
-        16: areturn
-        18: ifeq          31
-        22: getfield      #29                 // Field model:Lnet/minecraft/client/model/EntityModel;
-        27: invokevirtual #238                // Method net/minecraft/client/model/EntityModel.renderType:(Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/renderer/rendertype/RenderType;
-        30: areturn
-        33: ifeq          42
-        38: invokestatic  #241                // Method net/minecraft/client/renderer/rendertype/RenderTypes.outline:(Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/renderer/rendertype/RenderType;
-        41: areturn
-        42: aconst_null
-        43: areturn
-
-  public static int getOverlayCoords(client.renderer.entity.state.LivingEntityRenderState, float);
-    Code:
-         1: invokestatic  #244                // Method net/minecraft/client/renderer/texture/OverlayTexture.u:(F)I
-         5: getfield      #250                // Field net/minecraft/client/renderer/entity/state/LivingEntityRenderState.hasRedOverlay:Z
-=== net.minecraft.client.renderer.entity.state.EntityRenderState (-public)
-public class client.renderer.entity.state.EntityRenderState implements client.rendering.v1.FabricRenderState {
-  public static final int NO_OUTLINE;
-  public world.entity.EntityType<?> entityType;
-  public double x;
-  public double y;
-  public double z;
-  public float ageInTicks;
-  public float boundingBoxWidth;
-  public float boundingBoxHeight;
-  public float eyeHeight;
-  public double distanceToCameraSq;
-  public boolean isInvisible;
-  public boolean isDiscrete;
-  public boolean displayFireAnimation;
-  public int lightCoords;
-  public int outlineColor;
-  public world.phys.Vec3 passengerOffset;
-  public network.chat.Component nameTag;
-  public network.chat.Component scoreText;
-  public world.phys.Vec3 nameTagAttachment;
-  public List<client.renderer.entity.state.EntityRenderState$LeashState> leashStates;
-  public float shadowRadius;
-  public final List<client.renderer.entity.state.EntityRenderState$ShadowPiece> shadowPieces;
-  public client.renderer.entity.state.EntityRenderState();
-  public boolean appearsGlowing();
-  public void fillCrashReportCategory(CrashReportCategory);
+=== net.minecraft.server.level.ServerLevel (-public)
+public class server.level.ServerLevel extends world.level.Level implements world.level.WorldGenLevel,server.level.ServerEntityGetter {
+  public datafixers.util.Pair<core.BlockPos, core.Holder<world.level.biome.Biome>> findClosestBiome3d(Predicate<core.Holder<world.level.biome.Biome>>, core.BlockPos, int, int, int);
+  public world.level.storage.LevelData$RespawnData getRespawnData();
+=== net.minecraft.world.level.levelgen.Heightmap$Types (-public)
+public final class world.level.levelgen.Heightmap$Types extends Enum<world.level.levelgen.Heightmap$Types> implements util.StringRepresentable {
+  public static final world.level.levelgen.Heightmap$Types WORLD_SURFACE_WG;
+  public static final world.level.levelgen.Heightmap$Types WORLD_SURFACE;
+  public static final world.level.levelgen.Heightmap$Types OCEAN_FLOOR_WG;
+  public static final world.level.levelgen.Heightmap$Types OCEAN_FLOOR;
+  public static final world.level.levelgen.Heightmap$Types MOTION_BLOCKING;
+  public static final world.level.levelgen.Heightmap$Types MOTION_BLOCKING_NO_LEAVES;
+  public static final serialization.Codec<world.level.levelgen.Heightmap$Types> CODEC;
+  public static final network.codec.StreamCodec<io.netty.buffer.ByteBuf, world.level.levelgen.Heightmap$Types> STREAM_CODEC;
+  public static world.level.levelgen.Heightmap$Types[] values();
+  public static world.level.levelgen.Heightmap$Types valueOf(String);
+  public String getSerializationKey();
+  public boolean sendToClient();
+  public boolean keepAfterWorldgen();
+  public Predicate<world.level.block.state.BlockState> isOpaque();
+  public String getSerializedName();
 }
-=== net.minecraft.client.renderer.entity.state.LivingEntityRenderState (-public)
-public class client.renderer.entity.state.LivingEntityRenderState extends client.renderer.entity.state.EntityRenderState {
-  public float bodyRot;
-  public float yRot;
-  public float xRot;
-  public float deathTime;
-  public float walkAnimationPos;
-  public float walkAnimationSpeed;
-  public float scale;
-  public float ageScale;
-  public float ticksSinceKineticHitFeedback;
-  public boolean isUpsideDown;
-  public boolean isFullyFrozen;
-  public boolean isBaby;
-  public boolean isInWater;
-  public boolean isAutoSpinAttack;
-  public boolean hasRedOverlay;
-  public boolean isInvisibleToPlayer;
-  public core.Direction bedOrientation;
-  public world.entity.Pose pose;
-  public final client.renderer.item.ItemStackRenderState headItem;
-  public float wornHeadAnimationPos;
-  public world.level.block.SkullBlock$Type wornHeadType;
-  public world.item.component.ResolvableProfile wornHeadProfile;
-  public client.renderer.entity.state.LivingEntityRenderState();
-  public boolean hasPose(world.entity.Pose);
-}
-=== net.minecraft.client.model.geom.ModelPart (-public)
-public final class client.model.geom.ModelPart {
-  public static final float DEFAULT_SCALE;
-  public float x;
-  public float y;
-  public float z;
-  public float xRot;
-  public float yRot;
-  public float zRot;
-  public float xScale;
-  public float yScale;
-  public float zScale;
-  public boolean visible;
-  public boolean skipDraw;
-  public client.model.geom.ModelPart(List<client.model.geom.ModelPart$Cube>, Map<String, client.model.geom.ModelPart>);
-  public client.model.geom.PartPose storePose();
-  public client.model.geom.PartPose getInitialPose();
-  public void setInitialPose(client.model.geom.PartPose);
-  public void resetPose();
-  public void loadPose(client.model.geom.PartPose);
-  public boolean hasChild(String);
-  public client.model.geom.ModelPart getChild(String);
-  public void setPos(float, float, float);
-  public void setRotation(float, float, float);
-  public void render(blaze3d.vertex.PoseStack, blaze3d.vertex.VertexConsumer, int, int);
-  public void render(blaze3d.vertex.PoseStack, blaze3d.vertex.VertexConsumer, int, int, int);
-  public void rotateBy(org.joml.Quaternionf);
-  public void getExtentsForGui(blaze3d.vertex.PoseStack, Consumer<org.joml.Vector3fc>);
-  public void visit(blaze3d.vertex.PoseStack, client.model.geom.ModelPart$Visitor);
-  public void translateAndRotate(blaze3d.vertex.PoseStack);
-  public client.model.geom.ModelPart$Cube getRandomCube(util.RandomSource);
-  public boolean isEmpty();
-  public void offsetPos(org.joml.Vector3f);
-  public void offsetRotation(org.joml.Vector3f);
-  public void offsetScale(org.joml.Vector3f);
-  public List<client.model.geom.ModelPart> getAllParts();
-  public Function<String, client.model.geom.ModelPart> createPartLookup();
-}
-=== net.minecraft.world.phys.shapes.VoxelShape (-public)
-public abstract class world.phys.shapes.VoxelShape {
-  public double min(core.Direction$Axis);
-  public double max(core.Direction$Axis);
-  public world.phys.AABB bounds();
-  public world.phys.shapes.VoxelShape singleEncompassing();
-  public abstract it.unimi.dsi.fastutil.doubles.DoubleList getCoords(core.Direction$Axis);
-  public boolean isEmpty();
-  public world.phys.shapes.VoxelShape move(world.phys.Vec3);
-  public world.phys.shapes.VoxelShape move(core.Vec3i);
-  public world.phys.shapes.VoxelShape move(double, double, double);
-  public world.phys.shapes.VoxelShape optimize();
-  public void forAllEdges(world.phys.shapes.Shapes$DoubleLineConsumer);
-  public void forAllBoxes(world.phys.shapes.Shapes$DoubleLineConsumer);
-  public List<world.phys.AABB> toAabbs();
-  public double min(core.Direction$Axis, double, double);
-  public double max(core.Direction$Axis, double, double);
-  public world.phys.BlockHitResult clip(world.phys.Vec3, world.phys.Vec3, core.BlockPos);
-  public Optional<world.phys.Vec3> closestPointTo(world.phys.Vec3);
-  public world.phys.shapes.VoxelShape getFaceShape(core.Direction);
-  public double collide(core.Direction$Axis, world.phys.AABB, double);
+=== net.minecraft.world.level.biome.Biomes (-public)
+public abstract class world.level.biome.Biomes {
+  public static final resources.ResourceKey<world.level.biome.Biome> FOREST;
+  public static final resources.ResourceKey<world.level.biome.Biome> FLOWER_FOREST;
+  public static final resources.ResourceKey<world.level.biome.Biome> BIRCH_FOREST;
+  public static final resources.ResourceKey<world.level.biome.Biome> DARK_FOREST;
+  public static final resources.ResourceKey<world.level.biome.Biome> PALE_GARDEN;
+  public static final resources.ResourceKey<world.level.biome.Biome> OLD_GROWTH_BIRCH_FOREST;
+  public static final resources.ResourceKey<world.level.biome.Biome> OLD_GROWTH_PINE_TAIGA;
+  public static final resources.ResourceKey<world.level.biome.Biome> OLD_GROWTH_SPRUCE_TAIGA;
+  public static final resources.ResourceKey<world.level.biome.Biome> WINDSWEPT_FOREST;
+  public static final resources.ResourceKey<world.level.biome.Biome> WARPED_FOREST;
+  public static final resources.ResourceKey<world.level.biome.Biome> CRIMSON_FOREST;
+=== net.minecraft.core.Holder (-public)
+public interface core.Holder<T> {
+  public abstract boolean is(resources.Identifier);
+  public abstract boolean is(resources.ResourceKey<T>);
+  public abstract boolean is(Predicate<resources.ResourceKey<T>>);
+  public abstract boolean is(tags.TagKey<T>);
+  public abstract boolean is(core.Holder<T>);
+=== net.minecraft.client.gui.screens.worldselection.WorldCreationUiState (-public)
+public class client.gui.screens.worldselection.WorldCreationUiState {
+  public client.gui.screens.worldselection.WorldCreationUiState(java.nio.file.Path, client.gui.screens.worldselection.WorldCreationContext, Optional<resources.ResourceKey<world.level.levelgen.presets.WorldPreset>>, OptionalLong);
+  public void setName(String);
+  public void setGameMode(client.gui.screens.worldselection.WorldCreationUiState$SelectedGameMode);
+  public client.gui.screens.worldselection.WorldCreationUiState$SelectedGameMode getGameMode();
+  public void setDifficulty(world.Difficulty);
+  public world.Difficulty getDifficulty();
+  public void setAllowCommands(boolean);
+  public void setSeed(String);
+  public String getSeed();
+  public void setGenerateStructures(boolean);
+  public void setBonusChest(boolean);
+  public void setSettings(client.gui.screens.worldselection.WorldCreationContext);
+  public void setWorldType(client.gui.screens.worldselection.WorldCreationUiState$WorldTypeEntry);
+  public client.gui.screens.worldselection.WorldCreationUiState$WorldTypeEntry getWorldType();
+  public client.gui.screens.worldselection.PresetEditor getPresetEditor();
+  public List<client.gui.screens.worldselection.WorldCreationUiState$WorldTypeEntry> getNormalPresetList();
+  public List<client.gui.screens.worldselection.WorldCreationUiState$WorldTypeEntry> getAltPresetList();
+  public void setGameRules(world.level.gamerules.GameRules);
 === net.minecraft.world.entity.Entity (-public)
 public abstract class world.entity.Entity implements world.Nameable, world.level.entity.EntityAccess, world.scores.ScoreHolder, network.syncher.SyncedDataHolder, core.component.DataComponentGetter, world.entity.ItemOwner, world.entity.SlotProvider, util.debug.DebugValueSource, core.TypedInstance<world.entity.EntityType<?>>, attachment.v1.AttachmentTarget, event.lifecycle.v1.EntityLoadData, permission.v1.PermissionContextOwner {
-  public int tickCount;
-  public network.protocol.game.VecDeltaCodec getPositionCodec();
-  public float getYRot(float);
-  public final world.phys.Vec3 getPosition(float);
-  public world.phys.Vec3 position();
-  public final double getX();
-  public double getX(double);
-  public double getEyeY();
-  public float getYRot();
-  public world.level.Level level();
-=== net.minecraft.world.entity.LivingEntity (-public)
-public abstract class world.entity.LivingEntity extends world.entity.Entity implements world.entity.Attackable,world.waypoints.WaypointTransmitter {
-  public float yBodyRot;
-  public float yBodyRotO;
-  public float getYHeadRot();
-  public float getPreciseBodyRotation(float);
-=== net.minecraft.world.level.Level (-public)
-public abstract class world.level.Level implements world.level.LevelAccessor,AutoCloseable,attachment.v1.AttachmentTarget,attachment.v1.GlobalAttachmentsProvider {
-  public world.level.block.state.BlockState getBlockState(core.BlockPos);
-  public boolean isLoaded(core.BlockPos);
-=== net.minecraft.client.model.geom.ModelPart (code: translateAndRotate|resetPose)
-  public void resetPose();
-    Code:
-         2: getfield      #76                 // Field initialPose:Lnet/minecraft/client/model/geom/PartPose;
-         5: invokevirtual #107                // Method loadPose:(Lnet/minecraft/client/model/geom/PartPose;)V
-
-  public void translateAndRotate(com.mojang.blaze3d.vertex.PoseStack);
-    Code:
-         2: getfield      #86                 // Field x:F
-         5: ldc_w         #322                // float 16.0f
-         8: fdiv
-        10: getfield      #88                 // Field y:F
-        13: ldc_w         #322                // float 16.0f
-        16: fdiv
-        18: getfield      #90                 // Field z:F
-        21: ldc_w         #322                // float 16.0f
-        24: fdiv
-        25: invokevirtual #325                // Method com/mojang/blaze3d/vertex/PoseStack.translate:(FFF)V
-        29: getfield      #92                 // Field xRot:F
-        32: fconst_0
-        33: fcmpl
-        34: ifne          55
-        38: getfield      #94                 // Field yRot:F
-        41: fconst_0
-        42: fcmpl
-        43: ifne          55
-        47: getfield      #96                 // Field zRot:F
-        50: fconst_0
-        51: fcmpl
-        52: ifeq          81
-        56: new           #327                // class org/joml/Quaternionf
-        60: invokespecial #328                // Method org/joml/Quaternionf."<init>":()V
-        64: getfield      #96                 // Field zRot:F
-        68: getfield      #94                 // Field yRot:F
-        72: getfield      #92                 // Field xRot:F
-        75: invokevirtual #331                // Method org/joml/Quaternionf.rotationZYX:(FFF)Lorg/joml/Quaternionf;
-        78: invokevirtual #335                // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionfc;)V
-        82: getfield      #63                 // Field xScale:F
-        85: fconst_1
-        86: fcmpl
-        87: ifne          108
-        91: getfield      #65                 // Field yScale:F
-        94: fconst_1
-        95: fcmpl
-        96: ifne          108
-       100: getfield      #67                 // Field zScale:F
-       103: fconst_1
-       104: fcmpl
-       105: ifeq          124
-       110: getfield      #63                 // Field xScale:F
-       114: getfield      #65                 // Field yScale:F
-       118: getfield      #67                 // Field zScale:F
-       121: invokevirtual #338                // Method com/mojang/blaze3d/vertex/PoseStack.scale:(FFF)V
-
-=== net.minecraft.client.renderer.entity.EntityRenderer (-public)
-public abstract class client.renderer.entity.EntityRenderer<T extends world.entity.Entity, S extends client.renderer.entity.state.EntityRenderState> {
-  public boolean shouldRender(T, client.renderer.culling.Frustum, double, double, double);
-=== net.minecraft.client.renderer.entity.EntityRenderer (-protected)
-public abstract class client.renderer.entity.EntityRenderer<T extends world.entity.Entity, S extends client.renderer.entity.state.EntityRenderState> {
-  public boolean shouldRender(T, client.renderer.culling.Frustum, double, double, double);
-  protected world.phys.AABB getBoundingBoxForCulling(T);
-  protected boolean affectedByCulling(T);
-=== net.minecraft.world.entity.Entity (-public)
-public abstract class world.entity.Entity implements world.Nameable, world.level.entity.EntityAccess, world.scores.ScoreHolder, network.syncher.SyncedDataHolder, core.component.DataComponentGetter, world.entity.ItemOwner, world.entity.SlotProvider, util.debug.DebugValueSource, core.TypedInstance<world.entity.EntityType<?>>, attachment.v1.AttachmentTarget, event.lifecycle.v1.EntityLoadData, permission.v1.PermissionContextOwner {
+  public void snapTo(world.phys.Vec3);
+  public void snapTo(double, double, double);
+  public void snapTo(core.BlockPos, float, float);
+  public void snapTo(world.phys.Vec3, float, float);
+  public void snapTo(double, double, double, float, float);
+  public void setYHeadRot(float);
+  public void setYBodyRot(float);
