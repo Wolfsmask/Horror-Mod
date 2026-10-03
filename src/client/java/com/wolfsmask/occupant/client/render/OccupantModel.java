@@ -8,58 +8,51 @@ import net.minecraft.util.Mth;
 /**
  * Moves the body built by {@link OccupantGeometry}.
  * <p>
- * Almost all of the fear in this thing is in how little it does. It does not lunge, gesture or
- * posture; it stands, at the wrong height, for too long, and every so often its head turns a
- * few degrees further than it did before. So this class is mostly restraint:
+ * Almost all of the fear in this thing is in how little it does, and in how wrongly it does the
+ * rest:
  * <ul>
- *     <li>Standing still means <em>still</em>: no idle sway, no breathing, no weight shifting.
- *     The only motion is a slow drift you cannot quite be sure you saw.</li>
- *     <li>What movement there is arrives between frames. It holds a pose, then it is in the next
- *     one, the way a thing looks in photographs taken a second apart.</li>
+ *     <li>Its legs are planted on real things, worked out by {@link LegGait}, and every joint
+ *     here is solved so that each point lands exactly there. The legs do not swing; they hold,
+ *     and push.</li>
+ *     <li>The body is shoved along between them and leans into each shove, then hangs.</li>
+ *     <li>What movement there is of its own arrives between frames. It holds a pose, then it is
+ *     in the next one, the way a thing looks in photographs taken a second apart.</li>
  *     <li>Its mouth is always open. When it is close, it opens further than a mouth goes.</li>
  * </ul>
  * VEILED is early in the story, when it keeps its head down and is harder to make out at a
  * distance; REVEALED is when it looks at you.
  */
 public class OccupantModel extends HumanoidModel<OccupantRenderState> {
-	private static final String[] SIDE = {"right", "left"};
-	private static final int FINGERS = 4;
+	private static final int LEGS = OccupantGeometry.LEGS;
 
 	private final ModelPart hips;
 	private final ModelPart spine;
-	private final ModelPart yoke;
 	private final ModelPart neck;
-
 	private final ModelPart skull;
 	/** Everything below the eyes: the cheeks, the mouth between them, the chin. */
 	private final ModelPart jaw;
 	private final ModelPart hair;
-	private final ModelPart[] upper = new ModelPart[2];
-	private final ModelPart[] fore = new ModelPart[2];
-	private final ModelPart[][] finger = new ModelPart[2][FINGERS];
-	private final ModelPart[][] tip = new ModelPart[2][FINGERS];
-	private final ModelPart[] thigh = new ModelPart[2];
-	private final ModelPart[] shin = new ModelPart[2];
+	private final ModelPart[] upper = new ModelPart[LEGS];
+	private final ModelPart[] lower = new ModelPart[LEGS];
+	private final float[] upperLength = new float[LEGS];
+	/** Shin and point together: the point carries straight on from the shin. */
+	private final float[] lowerLength = new float[LEGS];
 
 	public OccupantModel(ModelPart root) {
 		super(root);
 		this.hips = root.getChild("hips");
 		this.spine = hips.getChild("spine");
-		this.yoke = spine.getChild("yoke");
+		ModelPart yoke = spine.getChild("yoke");
 		this.neck = yoke.getChild("neck");
 		this.skull = neck.getChild("skull");
 		this.jaw = skull.getChild("jaw");
 		this.hair = skull.getChild("hair");
-		for (int s = 0; s < 2; s++) {
-			upper[s] = yoke.getChild(SIDE[s] + "_upper");
-			fore[s] = upper[s].getChild(SIDE[s] + "_fore");
-			ModelPart hand = fore[s].getChild(SIDE[s] + "_hand");
-			for (int i = 0; i < FINGERS; i++) {
-				finger[s][i] = hand.getChild(SIDE[s] + "_finger" + i);
-				tip[s][i] = finger[s][i].getChild(SIDE[s] + "_tip" + i);
-			}
-			thigh[s] = hips.getChild(SIDE[s] + "_thigh");
-			shin[s] = thigh[s].getChild(SIDE[s] + "_shin");
+		for (int i = 0; i < LEGS; i++) {
+			upper[i] = hips.getChild("leg" + i + "_upper");
+			lower[i] = upper[i].getChild("leg" + i + "_lower");
+			lower[i].getChild("leg" + i + "_claw");   // it has to be there; it is carried along
+			upperLength[i] = lower[i].y;                 // the knee sits at the end of the thigh
+			lowerLength[i] = OccupantGeometry.LEG_LENGTH[i] - upperLength[i];
 		}
 	}
 
@@ -69,7 +62,6 @@ public class OccupantModel extends HumanoidModel<OccupantRenderState> {
 		float lookX = head.xRot;
 		float lookY = head.yRot;
 		boolean veiled = state.form == OccupantEntity.Form.VEILED;
-		int seed = state.seed;
 
 		// Poses hold and then change. Nothing eases: easing is what living things do.
 		float step = state.mode == OccupantEntity.Mode.CHASE ? 2.0f : 8.0f;
@@ -78,28 +70,35 @@ public class OccupantModel extends HumanoidModel<OccupantRenderState> {
 		// A drift so slow you cannot tell whether it moved or you did.
 		float drift = Mth.sin(t * 0.013f);
 		spine.xRot = 0.03f + 0.012f * drift;
-		hips.zRot = 0.008f * drift;
 		// The hair lags behind the head and settles slowly, as if it were in water.
 		hair.xRot = 0.025f * Mth.sin(t * 0.021f + 1.3f);
 		hair.zRot = 0.03f * Mth.sin(t * 0.017f);
 		jaw.yScale = 1.0f;
 
+		// Folded down into a space too small for it: hips low, body bent over, head held up.
+		float crouch = state.crouch;
+		hips.y += OccupantRenderer.CROUCH_DROP * crouch;
+		spine.xRot += OccupantRenderer.CROUCH_BEND * crouch;
+		neck.xRot -= OccupantRenderer.CROUCH_BEND * 0.75f * crouch;
+
+		// Each shove carries it, and the body goes with it and then comes back upright.
+		spine.xRot += state.leanForward * 0.6f;
+		spine.zRot -= state.leanSide * 0.5f;
+
 		switch (state.mode) {
 			case CHASE -> chase(t, lookX, lookY);
 			case AMBUSH -> loom(lookX, lookY);
-			default -> stand(seed, t, lookX, lookY, veiled);
+			default -> stand(state.seed, t, lookX, lookY, veiled);
 		}
+		legs(state, t);
 	}
 
-	/**
-	 * Standing. The head follows you a beat late and a little too far, and the hands hang open
-	 * with the fingers slightly apart, which reads as waiting rather than resting.
-	 */
+	/** Standing. The head follows you a beat late and a little too far. */
 	private void stand(int seed, float t, float lookX, float lookY, boolean veiled) {
 		// The neck carries most of the turn, so the body stays squarely facing wherever it was.
 		neck.yRot = lookY * 0.45f;
 		skull.yRot = lookY * 0.55f;
-		neck.xRot = lookX * 0.3f - 0.05f;
+		neck.xRot += lookX * 0.3f - 0.05f;
 		skull.xRot = lookX * 0.6f;
 
 		// Every so often the head is simply somewhere else, tilted, and stays there a while.
@@ -109,22 +108,8 @@ public class OccupantModel extends HumanoidModel<OccupantRenderState> {
 		} else if (tilt < -0.75f) {
 			skull.zRot = -0.7f;                     // right over onto its shoulder
 		}
-
-		for (int s = 0; s < 2; s++) {
-			// Arms hanging dead straight, turned very slightly out.
-			upper[s].xRot = 0.02f;
-			upper[s].zRot = s == 0 ? 0.045f : -0.045f;
-			fore[s].xRot = 0.05f;
-			for (int i = 0; i < FINGERS; i++) {
-				finger[s][i].xRot = -0.05f;
-				finger[s][i].zRot = (i - 1.5f) * 0.09f;
-				tip[s][i].xRot = -0.08f;
-			}
-			thigh[s].xRot = 0.0f;
-			shin[s].xRot = 0.0f;
-		}
 		if (veiled) {
-			// Early on it keeps its head down, which makes the shape shorter and harder to read.
+			// Early on it keeps its head down, which makes the shape harder to read.
 			spine.xRot += 0.12f;
 			neck.xRot += 0.35f;
 		}
@@ -133,46 +118,112 @@ public class OccupantModel extends HumanoidModel<OccupantRenderState> {
 	/** Close enough to touch you. It bends down to your height, and the mouth opens. */
 	private void loom(float lookX, float lookY) {
 		jaw.yScale = 1.3f;                          // the face pulls longer, around the mouth
-		spine.xRot = 0.55f;
-		neck.xRot = -0.35f + lookX * 0.3f;
+		spine.xRot += 0.55f;
+		neck.xRot += -0.35f + lookX * 0.3f;
 		skull.xRot = 0.45f + lookX * 0.4f;
 		skull.yRot = lookY * 0.5f;
-		for (int s = 0; s < 2; s++) {
-			upper[s].xRot = -0.55f;
-			upper[s].zRot = s == 0 ? 0.18f : -0.18f;
-			fore[s].xRot = -0.7f;
-			for (int i = 0; i < FINGERS; i++) {
-				finger[s][i].xRot = -0.25f;
-				finger[s][i].zRot = (i - 1.5f) * 0.22f;
-				tip[s][i].xRot = -0.35f;
+	}
+
+	/** Coming for you. Bent forward into it, face first, mouth working. */
+	private void chase(float t, float lookX, float lookY) {
+		jaw.yScale = 1.25f + 0.08f * Mth.sin(t * 0.9f);
+		spine.xRot += 0.35f;
+		neck.xRot += -0.4f;
+		skull.xRot = 0.3f + lookX * 0.3f;
+		skull.yRot = lookY * 0.3f;
+	}
+
+	/**
+	 * Every planted leg is solved so its point lands on its hold: thigh and shin as two bones, the
+	 * knee pushed up and out, high above the body, like something braced in a doorway. A leg with
+	 * nothing to hold hangs half folded and slowly feels about.
+	 */
+	private void legs(OccupantRenderState state, float t) {
+		float hx = hips.x, hy = hips.y, hz = hips.z;
+		for (int i = 0; i < LEGS; i++) {
+			float px = upper[i].x, py = upper[i].y, pz = upper[i].z;
+			float a = OccupantGeometry.LEG_ANGLE[i];
+			float ox = Mth.sin(a), oz = Mth.cos(a);
+			float tx, ty, tz;
+			if (state.legPlanted[i]) {
+				tx = state.legTarget[i * 3] - hx;
+				ty = state.legTarget[i * 3 + 1] - hy;
+				tz = state.legTarget[i * 3 + 2] - hz;
+			} else {
+				// Free: out to the side and down, folded, slowly feeling about.
+				float feel = Mth.sin(t * 0.031f + i * 1.7f);
+				float reach = (upperLength[i] + lowerLength[i]) * (0.55f + 0.1f * feel);
+				tx = px + ox * reach * 0.55f;
+				ty = py + reach * (0.45f + 0.12f * Mth.sin(t * 0.023f + i));
+				tz = pz + oz * reach * 0.55f;
+			}
+			// The knee goes up, and out the way the leg points.
+			if (!solve(i, px, py, pz, tx, ty, tz, ox * 0.7f, -1.0f, oz * 0.7f)) {
+				upper[i].xRot = 0.0f;
+				upper[i].yRot = 0.0f;
+				lower[i].xRot = 0.0f;
+				lower[i].yRot = 0.0f;
 			}
 		}
 	}
 
-	/** Running. Far too long in the stride, and it does not swing its arms; they trail. */
-	private void chase(float t, float lookX, float lookY) {
-		float gait = t * 0.62f;
-		jaw.yScale = 1.25f + 0.08f * Mth.sin(t * 0.9f);
-		spine.xRot = 0.5f;
-		neck.xRot = -0.55f;
-		skull.xRot = 0.4f + lookX * 0.3f;
-		skull.yRot = lookY * 0.3f;
-		hips.y -= 1.4f * Math.abs(Mth.sin(gait));   // relative: the hips rest high up, not at 0
+	/**
+	 * Two-bone reach from the hip (px, py, pz) to (tx, ty, tz), all in the hips' frame, with the
+	 * knee bent towards (kx, ky, kz). Each bone hangs along +y at rest and is turned by X then Y,
+	 * which is the order ModelPart applies them in (Z then Y then X, with Z left at zero).
+	 */
+	private boolean solve(int i, float px, float py, float pz, float tx, float ty, float tz,
+						  float kx, float ky, float kz) {
+		float l1 = upperLength[i];
+		float l2 = lowerLength[i];
+		float dx = tx - px, dy = ty - py, dz = tz - pz;
+		float d = Mth.sqrt(dx * dx + dy * dy + dz * dz);
+		if (!(d > 1.0e-3f) || !Float.isFinite(d)) return false;
+		float ux = dx / d, uy = dy / d, uz = dz / d;
+		d = Mth.clamp(d, Math.abs(l1 - l2) + 0.05f, l1 + l2 - 0.05f);
 
-		for (int s = 0; s < 2; s++) {
-			float swing = Mth.sin(gait + s * Mth.PI);
-			thigh[s].xRot = swing * 1.25f;
-			shin[s].xRot = Math.max(0.0f, -swing) * 1.5f;
-			// The arms are dragged along by the body rather than driven.
-			upper[s].xRot = -0.35f + swing * 0.25f;
-			upper[s].zRot = s == 0 ? 0.25f : -0.25f;
-			fore[s].xRot = -0.15f;
-			for (int i = 0; i < FINGERS; i++) {
-				finger[s][i].xRot = -0.15f;
-				finger[s][i].zRot = (i - 1.5f) * 0.18f;
-				tip[s][i].xRot = -0.2f;
-			}
+		// How far along the line the knee sits, and how far off it.
+		float along = (l1 * l1 - l2 * l2 + d * d) / (2.0f * d);
+		float off = Mth.sqrt(Math.max(0.0f, l1 * l1 - along * along));
+		// The bend direction, made square to the line.
+		float dot = kx * ux + ky * uy + kz * uz;
+		float nx = kx - ux * dot, ny = ky - uy * dot, nz = kz - uz * dot;
+		float nl = Mth.sqrt(nx * nx + ny * ny + nz * nz);
+		if (nl < 1.0e-4f) {
+			nx = -uz; ny = 0.0f; nz = ux;           // any square direction will do
+			nl = Mth.sqrt(nx * nx + nz * nz);
+			if (nl < 1.0e-4f) { nx = 1.0f; nz = 0.0f; nl = 1.0f; }
 		}
+		nx /= nl; ny /= nl; nz /= nl;
+
+		float kneeX = ux * along + nx * off;
+		float kneeY = uy * along + ny * off;
+		float kneeZ = uz * along + nz * off;
+		// Thigh direction, from the hip.
+		float ax = kneeX / l1, ay = kneeY / l1, az = kneeZ / l1;
+		// Shin direction, from the knee to the point.
+		float bx = (ux * d - kneeX) / l2, by = (uy * d - kneeY) / l2, bz = (uz * d - kneeZ) / l2;
+
+		float x1 = (float) Math.acos(Mth.clamp(ay, -1.0f, 1.0f));
+		float y1 = (float) Mth.atan2(ax, az);
+		// The shin's direction in the thigh's own frame: undo the thigh's Y, then its X.
+		float cy = Mth.cos(y1), sy = Mth.sin(y1);
+		float vx = bx * cy - bz * sy;
+		float vz = bx * sy + bz * cy;
+		float cx = Mth.cos(x1), sx = Mth.sin(x1);
+		float wy = by * cx + vz * sx;
+		float wz = -by * sx + vz * cx;
+		float x2 = (float) Math.acos(Mth.clamp(wy, -1.0f, 1.0f));
+		float y2 = (float) Mth.atan2(vx, wz);
+
+		if (!Float.isFinite(x1 + y1 + x2 + y2)) return false;
+		upper[i].xRot = x1;
+		upper[i].yRot = y1;
+		upper[i].zRot = 0.0f;
+		lower[i].xRot = x2;
+		lower[i].yRot = y2;
+		lower[i].zRot = 0.0f;
+		return true;
 	}
 
 	/** A value in [-1, 1] that holds still for {@code period} ticks, then jumps somewhere else. */

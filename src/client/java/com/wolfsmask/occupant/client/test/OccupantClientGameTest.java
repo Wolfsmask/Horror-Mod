@@ -55,21 +55,21 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 			server.runCommand("execute as @p at @s run tp @s ~ ~ ~ 0 0");
 			context.waitTicks(10);
 
-			// Every pose, straight on, five blocks away.
+			// Every pose, straight on, seven blocks away: it is seventeen feet tall.
 			for (String pose : List.of("stare", "veiled", "loom", "chase")) {
-				spawn(context, server, 5, pose);
+				spawn(context, server, 7, pose);
 				shoot(context, "occupant-" + pose);
 			}
 
 			// Three quarters on, then close enough to see the face. "facing" aims from the feet, so
 			// aim at its feet (level) and then tilt up by hand to where its face actually is.
-			spawn(context, server, 5, "stare");
-			server.runCommand("execute as @p at @s run tp @s ^3 ^ ^1 facing entity " + ONE + " feet");
+			spawn(context, server, 7, "stare");
+			server.runCommand("execute as @p at @s run tp @s ^4 ^ ^2 facing entity " + ONE + " feet");
 			context.waitTicks(10);
 			shoot(context, "occupant-three-quarter");
 			server.runCommand("execute as @p at @s run tp @s ~ ~ ~ 0 0");
-			spawn(context, server, 2.5f, "stare");
-			server.runCommand("execute as @p at @s run tp @s ~ ~ ~ 0 -20");
+			spawn(context, server, 3.5f, "stare");
+			server.runCommand("execute as @p at @s run tp @s ~ ~ ~ 0 -35");
 			context.waitTicks(10);
 			Path face = shoot(context, "occupant-face");
 			// The face is the whole design. In daylight it has to come out pale, not shaded or
@@ -77,6 +77,34 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 			int pale = palePixels(face);
 			Occupant.LOGGER.info("[client-gametest] pale face pixels in the close-up: {}", pale);
 			check(pale >= 800, "the face should be pale in daylight, but only " + pale + " pale pixels were found");
+
+			// Shoved: the entity is moved two blocks at once. The body is drawn trailing behind,
+			// then shoved after it, and the legs that are left stretched let go and re-plant.
+			server.runCommand("execute as @p at @s run tp @s ~ ~ ~ 0 0");
+			spawn(context, server, 7, "stare");
+			server.runCommand("execute as " + ALL + " at @s run tp @s ~2 ~ ~");
+			context.waitTicks(3);
+			shoot(context, "occupant-shove");
+			context.waitTicks(40);
+			shoot(context, "occupant-after-shove");
+
+			// In a stone corridor three wide and four high: it folds down into it and braces its
+			// legs against the walls and the ceiling instead of standing on the floor.
+			server.runCommand("execute at @p run fill ~-2 ~-1 ~2 ~2 ~4 ~14 minecraft:stone_bricks hollow");
+			server.runCommand("execute at @p run fill ~-1 ~ ~2 ~1 ~3 ~2 minecraft:air");
+			server.runCommand("execute at @p run setblock ~ ~4 ~5 minecraft:sea_lantern");
+			server.runCommand("execute at @p run setblock ~ ~4 ~10 minecraft:sea_lantern");
+			spawn(context, server, 7, "stare");
+			shoot(context, "occupant-corridor");
+			server.runCommand("execute at @p run fill ~-2 ~ ~2 ~2 ~4 ~14 minecraft:air");
+
+			// Among tree trunks: legs on the trunks, not on the ground.
+			for (String log : List.of("~-2 ~ ~6 ~-2 ~4 ~6", "~2 ~ ~8 ~2 ~4 ~8", "~-1 ~ ~9 ~-1 ~4 ~9", "~2 ~ ~5 ~2 ~3 ~5")) {
+				server.runCommand("execute at @p run fill " + log + " minecraft:oak_log");
+			}
+			spawn(context, server, 7, "stare");
+			shoot(context, "occupant-trees");
+			server.runCommand("execute at @p run fill ~-3 ~ ~4 ~3 ~4 ~10 minecraft:air");
 
 			// Indoors, under a two-block ceiling: it has to stoop rather than stand through the roof.
 			server.runCommand("execute as @p at @s run tp @s ~ ~ ~ 0 0");

@@ -85,6 +85,10 @@ def related(a, b, parents):
     return False
 
 
+def is_leg(name):
+    return re.match(r"leg\d+_", name) is not None
+
+
 def span(a0, a1, b0, b1):
     return min(a1, b1) - max(a0, b0)
 
@@ -104,6 +108,10 @@ def check_planes(boxes, parents):
         na, pa, A = boxes[i]
         for j in range(i + 1, len(boxes)):
             nb, pb, B = boxes[j]
+            # A leg is re-aimed every frame at wherever it is planted, so where it hangs at rest
+            # says nothing about what it will touch in game. Only its own boxes are compared.
+            if na != nb and (is_leg(na) or is_leg(nb)):
+                continue
             for axis in range(3):
                 u, v = (axis + 1) % 3, (axis + 2) % 3
                 ou = span(A[u], A[u + 3], B[u], B[u + 3])
@@ -171,28 +179,50 @@ def check_lookups():
         for side in ("right", "left"):
             for k in range(4):
                 wanted.add("%s%s%d" % (side, suffix, k))
+    # Numbered bones, e.g. "leg" + i + "_upper", for every i up to OccupantGeometry.LEGS.
+    legs = re.search(r'LEGS = (\d+);', GEOM.read_text())
+    for prefix, suffix in re.findall(r'getChild\("(\w+)" \+ \w+ \+ "(\w+)"\)', src):
+        for k in range(int(legs.group(1)) if legs else 0):
+            wanted.add("%s%d%s" % (prefix, k, suffix))
     wanted.update(HUMANOID_REQUIRED)
     return sorted(w for w in wanted if w not in defined)
 
 
-def check_ground(boxes):
+def check_ground(boxes, parents):
     """
-    Minecraft draws model y = 24 at the entity's feet. If the lowest point of the body is not
-    there, it floats above the ground or stands in it, in every single frame it is ever seen.
-    The renderer also scales the body by OccupantGeometry.HEIGHT, which has to be the height that
-    was actually built or the body comes out the wrong size.
+    Minecraft draws model y = 24 at the entity's feet. The legs are planted in game, on whatever
+    is really there, so what has to hold here is that they are long enough to reach the ground
+    from where the hips stand, that the body itself stays clear of the ground, and that
+    OccupantGeometry.HEIGHT (which the renderer scales by) is the height that was really built.
     """
     problems = []
-    lowest = max(b[2][4] for b in boxes)
-    highest = min(b[2][1] for b in boxes)
-    if abs(lowest - 24.0) > 0.3:
-        where = "floats %.1f px above" % (24.0 - lowest) if lowest < 24.0 else "sinks %.1f px into" % (lowest - 24.0)
-        problems.append("its lowest point is at y = %.2f, so it %s the ground (should be 24)" % (lowest, where))
-    m = re.search(r'HEIGHT = (-?[\d.]+)f', GEOM.read_text())
+    src = GEOM.read_text()
+    body = [b for b in boxes if not is_leg(b[0])]
+    highest = min(b[2][1] for b in body)
+    lowest_body = max(b[2][4] for b in body)
+    if lowest_body > 24.0 - 1.0:
+        problems.append("the body reaches y = %.2f, into the ground (24)" % lowest_body)
+    m = re.search(r'HEIGHT = (-?[\d.]+)f', src)
     if m is None:
         problems.append("OccupantGeometry.HEIGHT is missing")
     elif abs(float(m.group(1)) - (24.0 - highest)) > 0.3:
         problems.append("HEIGHT says %s px but the body is %.2f px tall" % (m.group(1), 24.0 - highest))
+
+    hips = re.search(r'HIPS_HEIGHT = (-?[\d.]+)f', src)
+    if hips is None:
+        problems.append("OccupantGeometry.HIPS_HEIGHT is missing")
+        return problems
+    for b in boxes:
+        name = b[0]
+        if not name.endswith("_upper") or not is_leg(name):
+            continue
+        root_y = b[2][1] + 0.6                      # where the hip joint is
+        chain = [x for x in boxes if x[0].startswith(name[:-len("upper")])]
+        length = sum(x[2][4] - x[2][1] for x in chain) - 0.6 - 0.5 - 0.3
+        drop = 24.0 - root_y
+        if length < drop * 1.15:
+            problems.append("%s is %.1f px long and cannot reach the ground %.1f px below its hip"
+                            % (name[:-6], length, drop))
     return problems
 
 
@@ -217,7 +247,7 @@ def main():
         for m in missing:
             print("  OccupantModel wants a bone called '%s', which does not exist" % m)
 
-    ground = check_ground(boxes)
+    ground = check_ground(boxes, parents)
     if ground:
         problems += len(ground)
         print("\nNOT STANDING ON THE GROUND:")

@@ -14,10 +14,12 @@ the texture can never drift apart. It writes:
 
 The animation lives in OccupantModel.java, which is written by hand.
 
-What it is: something far too tall and far too thin, the colour of old bone. Small blank head,
-two black pits where eyes should be, a neck that is much too long, a ribcage you can count, and
-legs that take up more than half of it. Early in the story it is under a dark shroud, so from a
-distance you cannot tell what it is. Later the shroud is gone.
+What it is: Father Fester. A long pale face that is mostly mouth, framed by long thin hair the
+colour of dried blood, on a body far too tall and as thin as paper, carried on ten long pale
+legs. The legs are not walked on. Each one reaches out to the nearest thing it can push against,
+the ground, a wall, a tree, a ceiling, and the body is shoved along between them. Where each leg
+is planted is worked out in game (OccupantRenderer / LegGait) and the joints are solved to reach
+it (OccupantModel), so this only builds the parts at rest, hanging straight down.
 
 Units are pixels; the ground is at y = 24 and up is -y (the same convention as vanilla models).
 """
@@ -29,7 +31,7 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parent.parent
 TEX = ROOT / "src/main/resources/assets/occupant/textures/entity"
 JAVA = ROOT / "src/client/java/com/wolfsmask/occupant/client/render/OccupantGeometry.java"
-TEX_W = TEX_H = 128
+TEX_W = TEX_H = 256
 
 rng = np.random.default_rng(909)
 
@@ -40,9 +42,15 @@ SIDES = ("front", "back", "left", "right")
 # so the hips are now placed wherever puts the soles exactly on y = 24, and check_model.py
 # fails the build if they ever leave it again.
 GROUND = 24.0
-# Hip joint to sole: thigh offset, thigh, shin, foot.
-LEG = 4.35 + 14.0 + 12.0 + 1.6
-HIPS_Y = GROUND - LEG
+# How high the hips stand when it is upright. The legs are far longer than this: they are
+# planted out to the sides, never straight down.
+HIPS_HEIGHT = 44.0
+HIPS_Y = GROUND - HIPS_HEIGHT
+LEGS = 10
+# Each leg: thigh, shin and a short pale point. Lengths differ a little from leg to leg.
+LEG_UPPER = 28.0
+LEG_LOWER = 30.0
+LEG_CLAW = 6.0
 # Nothing is ever taken off. What it is wearing is most of what it is.
 SHROUD = ()
 
@@ -93,9 +101,26 @@ def _mantle_strands():
     out = []
     for i in range(16):
         a = ((i + 0.37) / 16.0) * 2.0 * np.pi   # out of phase with the cowl above it
-        x = float(np.sin(a)) * (6.35 + 0.6 * float(_S.random()))
-        z = float(np.cos(a)) * (3.45 + 0.5 * float(_S.random()))
-        out.append(_strand(i + 41, x, z, 0.11, 13.0 + 16.0 * float(_S.random())))
+        x = float(np.sin(a)) * (4.35 + 0.5 * float(_S.random()))
+        z = float(np.cos(a)) * (2.25 + 0.4 * float(_S.random()))
+        out.append(_strand(i + 41, x, z, 0.11, 16.0 + 18.0 * float(_S.random())))
+    return out
+
+
+def leg_layout():
+    """
+    (angle, root height, thigh, shin, point) for every leg. Angles go all the way round the body
+    but never evenly, and the legs leave it at different heights, so it never looks like a set
+    of matching legs on something that walks.
+    """
+    out = []
+    for i in range(LEGS):
+        angle = 2.0 * np.pi * (i + 0.5) / LEGS + 0.22 * np.sin(i * 2.399)
+        root_y = -7.0 + 9.0 * ((i * 0.6180339887) % 1.0)
+        upper = LEG_UPPER + 3.0 * (((i * 0.7548776662) % 1.0) - 0.5)
+        lower = LEG_LOWER + 3.0 * (((i * 0.5698402910) % 1.0) - 0.5)
+        out.append((float(angle), round(float(root_y), 2), round(float(upper), 2),
+                    round(float(lower), 2), LEG_CLAW))
     return out
 
 
@@ -104,7 +129,7 @@ def parts():
     p = [
         # HumanoidModel looks these up by name. They draw nothing; the head anchor is only used
         # to find out where the viewer is.
-        ("head", None, (0, HIPS_Y - 36.0, 0), (0, 0, 0), []),
+        ("head", None, (0, HIPS_Y - 44.0, 0), (0, 0, 0), []),
         ("hat", "head", (0, 0, 0), (0, 0, 0), []),
         ("body", None, (0, 0, 0), (0, 0, 0), []),
         ("right_arm", None, (0, 0, 0), (0, 0, 0), []),
@@ -113,31 +138,25 @@ def parts():
         ("left_leg", None, (0, 0, 0), (0, 0, 0), []),
 
         ("hips", None, (0, HIPS_Y, 0), (0, 0, 0), [
-            ("drape", -3.5, -1.0, -2.0, 7, 6, 4),
+            ("drape", -2.5, -1.0, -1.0, 5, 6, 2),
         ]),
+        # The body: very long and as thin as paper, mostly hidden under the hair.
         ("spine", "hips", (0, -1.0, 0), (0, 0, 0), [
-            ("drape", -3.0, -20.0, -1.75, 6, 20, 3.5),
+            ("drape", -2.25, -30.0, -0.8, 4.5, 30, 1.6),
         ]),
-        ("yoke", "spine", (0, -20.0, 0), (0, 0, 0), [
-            ("drape", -5.5, -2.0, -2.5, 11, 4, 5),
-        ]),
-
-        # The robe: everything below the shoulders, hanging straight and going to pieces.
-        ("robe", "yoke", (0, -1.0, 0), (0, 0, 0), [
-            ("drape", -6.0, 0.0, -3.0, 12, 13, 6),
-            ("drape", -5.0, 12.0, -2.75, 10, 14, 5.5),
-            ("drape", -4.0, 25.0, -2.5, 8, 12, 5),
+        ("yoke", "spine", (0, -30.0, 0), (0, 0, 0), [
+            ("drape", -3.5, -2.0, -1.2, 7, 3, 2.4),
         ]),
         ("mantle", "yoke", (0, -1.5, 0), (0, 0, 0), _mantle_strands()),
 
         # A long neck, set back and hidden in the hair, so the face seems to hang there.
-        ("neck", "yoke", (0, -1.5, 0.8), (0, 0, 0), [
-            ("drape", -1.45, -13.0, -1.45, 2.9, 13, 2.9),
+        ("neck", "yoke", (0, -1.5, 0.4), (0, 0, 0), [
+            ("drape", -1.2, -11.0, -1.2, 2.4, 11, 2.4),
         ]),
 
         # The top of the face: a broad, rounded brow and two small round holes set close
         # together over a narrow bridge.
-        ("skull", "neck", (0, -13.0, -0.8), (0, 0, 0), [
+        ("skull", "neck", (0, -11.0, -0.4), (0, 0, 0), [
             ("face", -3.5, -7.0, -3.0, 7, 7, 6),
             ("crown", -2.75, -8.1, -2.4, 5.5, 1.1, 4.8),       # rounds off the top of it
         ]),
@@ -158,30 +177,20 @@ def parts():
         ("hair", "skull", (0, 0, 0), (0, 0, 0), _cowl_strands()),
     ]
 
-    # Arms: thin, under the robe, ending in pale hands with far too much finger.
-    for side, sx in (("right", -1), ("left", 1)):
-        p.append((side + "_upper", "yoke", (sx * 4.8, 0.5, 0.0), (0, 0, 0),
-                  [("drape", -1.4, -1.4, -1.4, 2.8, 15, 2.8)]))
-        p.append((side + "_fore", side + "_upper", (0, 14.0, 0), (0, 0, 0),
-                  [("drape", -1.1, 0, -1.1, 2.2, 14, 2.2)]))
-        p.append((side + "_hand", side + "_fore", (0, 14.0, 0), (0, 0, 0),
-                  [("pale", -1.1, 0, -0.7, 2.2, 2.5, 1.4)]))
-        for i in range(4):
-            outer = i in (0, 3)
-            a, b = (3.5, 3.0) if outer else (4.5, 4.0)
-            p.append((f"{side}_finger{i}", side + "_hand", (-0.8 + i * 0.55, 2.5, 0.0), (0, 0, 0),
-                      [("pale", -0.22, 0, -0.22, 0.44, a, 0.44)]))
-            p.append((f"{side}_tip{i}", f"{side}_finger{i}", (0, a, 0), (0, 0, 0),
-                      [("pale", -0.2, 0, -0.2, 0.4, b, 0.4)]))
-
-    # Legs, mostly hidden under the robe.
-    for side, sx in (("right", -1), ("left", 1)):
-        p.append((side + "_thigh", "hips", (sx * 2.2, 4.35, 0.0), (0, 0, 0),
-                  [("drape", -1.4, 0, -1.4, 2.8, 14, 2.8)]))
-        p.append((side + "_shin", side + "_thigh", (0, 14.0, 0), (0, 0, 0),
-                  [("drape", -1.2, 0, -1.2, 2.4, 12, 2.4)]))
-        p.append((side + "_foot", side + "_shin", (0, 12.0, 0), (0, 0, 0),
-                  [("pale", -1.2, 0, -3.0, 2.4, 1.6, 4.5)]))
+    # Ten legs, coming out all round the bottom of the body. Each is three bones hanging straight
+    # down at rest; in game every one of them is aimed at somewhere real to push against.
+    for i, (angle, root_y, upper, lower, claw) in enumerate(leg_layout()):
+        rx = float(np.sin(angle)) * 2.3
+        rz = float(np.cos(angle)) * 0.75
+        w1 = 1.45 + 0.3 * ((i * 0.6180339887) % 1.0)
+        w2 = 1.1 + 0.25 * ((i * 0.4142135624) % 1.0)
+        w3 = 0.7 + 0.2 * ((i * 0.2360679775) % 1.0)
+        p.append((f"leg{i}_upper", "hips", (rx, root_y, rz), (0, 0, 0),
+                  [("limb", -w1 / 2, -0.6, -w1 / 2, w1, upper + 0.6, w1)]))
+        p.append((f"leg{i}_lower", f"leg{i}_upper", (0, upper, 0), (0, 0, 0),
+                  [("limb", -w2 / 2, -0.5, -w2 / 2, w2, lower + 0.5, w2)]))
+        p.append((f"leg{i}_claw", f"leg{i}_lower", (0, lower, 0), (0, 0, 0),
+                  [("claw", -w3 / 2, -0.3, -w3 / 2, w3, claw + 0.3, w3)]))
     return p
 
 
@@ -328,6 +337,7 @@ HAIR = (58, 32, 27)         # long, thin, the brown of old dried blood
 HAIR_LIT = (90, 54, 45)
 HAIR_DEEP = (33, 19, 17)
 DRAPE = (40, 24, 21)        # the robe: the same colour as the hair, so the two run together
+LIMB = (170, 154, 144)      # the legs
 # How strongly the face shows through in the dark, as the glow layer's opacity (0-255).
 SHEEN = 56
 
@@ -335,6 +345,7 @@ SHEEN = 56
 def paint_texture(boxes, placed):
     img = np.zeros((TEX_H, TEX_W, 4), dtype=np.uint8)
     dark_mask = np.zeros((TEX_H, TEX_W), dtype=bool)
+    limb_mask = np.zeros((TEX_H, TEX_W), dtype=bool)
 
     def fill(region, rgb, jitter=6):
         x0, y0, x1, y1 = region
@@ -430,6 +441,25 @@ def paint_texture(boxes, placed):
                 if (x - x0) % 2 == 1:
                     img[y0:y1, x, :3] = (40, 26, 24)              # the gaps between them
 
+        elif kind in ("limb", "claw"):
+            # Pale like the face but greyer and dirtier, darker towards each joint.
+            base = LIMB if kind == "limb" else (88, 70, 64)
+            for side in f.values():
+                fill(side, base, 7)
+            for name in SIDES:
+                x0, y0, x1, y1 = f[name]
+                hh = y1 - y0
+                for k in range(min(3, hh)):
+                    shade = 30 - 10 * k
+                    for row in (y0 + k, y1 - 1 - k):
+                        img[row, x0:x1, :3] = np.clip(img[row, x0:x1, :3].astype(int) - shade, 0, 255)
+                for _ in range(max(1, hh // 4)):
+                    by = int(rng.integers(y0, y1))
+                    img[by, x0:x1, :3] = np.clip(img[by, x0:x1, :3].astype(int) - 18, 0, 255)
+            for side in f.values():
+                x0, y0, x1, y1 = side
+                limb_mask[y0:y1, x0:x1] = True
+
         elif kind == "pale":
             for side in f.values():
                 fill(side, SKIN_LO, 7)
@@ -446,6 +476,7 @@ def paint_texture(boxes, placed):
     # (It used to be a dimmed copy at full opacity, which painted the face dark grey in daylight.)
     glow = img.copy()
     glow[:, :, 3] = np.where(img[:, :, 3] > 0, SHEEN, 0)
+    glow[limb_mask, 3] = SHEEN // 2                      # the legs, fainter than the face
     glow[dark_mask] = 0
 
     Image.fromarray(img, "RGBA").save(TEX / "occupant.png")
@@ -498,12 +529,19 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
 
 import java.util.List;
 
-/** The Occupant's body. Too tall, too thin, and the colour of old bone. */
+/** The Occupant's body: a long pale face on a paper-thin body, carried on ten legs. */
 public final class OccupantGeometry {
 \t/** The bones of the shroud it wears while it is still only a shape. */
 \tpublic static final List<String> SHROUD = List.of(%s);
 \t/** Height of the built body in model pixels (16 = one block). */
 \tpublic static final float HEIGHT = %sf;
+\t/** How high the hips stand above the ground when it is upright, in model pixels. */
+\tpublic static final float HIPS_HEIGHT = %sf;
+\tpublic static final int LEGS = %d;
+\t/** Each leg's direction out from the body, in radians (model x = sin, model z = cos). */
+\tpublic static final float[] LEG_ANGLE = {%s};
+\t/** Each leg's full length, hip to point, in model pixels. */
+\tpublic static final float[] LEG_LENGTH = {%s};
 
 \tprivate OccupantGeometry() {
 \t}
@@ -522,9 +560,14 @@ def num(v):
 def write_java(ps, boxes, placed):
     # Measured, not declared: the renderer scales the body by this, so it has to be what was built.
     origins = _world_origins(ps)
-    top = min(origins[name][1] + y for name, _p, _piv, _r, own in ps for (_k, _x, y, _z, _w, _h, _d) in own)
+    top = min(origins[name][1] + y for name, _p, _piv, _r, own in ps for (_k, _x, y, _z, _w, _h, _d) in own
+              if not name.startswith("leg"))
     height = GROUND - top
-    lines = [HEADER % (", ".join('"%s"' % n for n in SHROUD), num(height).rstrip("f"))]
+    layout = leg_layout()
+    lines = [HEADER % (", ".join('"%s"' % n for n in SHROUD), num(height).rstrip("f"),
+                       num(HIPS_HEIGHT).rstrip("f"), LEGS,
+                       ", ".join("%.4ff" % a for a, *_ in layout),
+                       ", ".join(num(u + l + c) for _a, _y, u, l, c in layout))]
     box_at = {}
     for i, (owner, *_rest) in enumerate(boxes):
         box_at.setdefault(owner, []).append(i)
