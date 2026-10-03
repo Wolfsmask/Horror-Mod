@@ -320,3 +320,13 @@ public abstract class world.level.Level implements world.level.LevelAccessor,Aut
        118: getfield      #67                 // Field zScale:F
        121: invokevirtual #338                // Method com/mojang/blaze3d/vertex/PoseStack.scale:(FFF)V
 
+=== net.minecraft.client.renderer.entity.EntityRenderer (-public)
+public abstract class client.renderer.entity.EntityRenderer<T extends world.entity.Entity, S extends client.renderer.entity.state.EntityRenderState> {
+  public boolean shouldRender(T, client.renderer.culling.Frustum, double, double, double);
+=== net.minecraft.client.renderer.entity.EntityRenderer (-protected)
+public abstract class client.renderer.entity.EntityRenderer<T extends world.entity.Entity, S extends client.renderer.entity.state.EntityRenderState> {
+  public boolean shouldRender(T, client.renderer.culling.Frustum, double, double, double);
+  protected world.phys.AABB getBoundingBoxForCulling(T);
+  protected boolean affectedByCulling(T);
+=== net.minecraft.world.entity.Entity (-public)
+public abstract class world.entity.Entity implements world.Nameable, world.level.entity.EntityAccess, world.scores.ScoreHolder, network.syncher.SyncedDataHolder, core.component.DataComponentGetter, world.entity.ItemOwner, world.entity.SlotProvider, util.debug.DebugValueSource, core.TypedInstance<world.entity.EntityType<?>>, attachment.v1.AttachmentTarget, event.lifecycle.v1.EntityLoadData, permission.v1.PermissionContextOwner {
