@@ -81,8 +81,8 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 			// Indoors, under a two-block ceiling: it has to stoop rather than stand through the roof.
 			server.runCommand("execute as @p at @s run tp @s ~ ~ ~ 0 0");
 			server.runCommand("execute at @p run fill ~-4 ~-1 ~-2 ~4 ~2 ~10 minecraft:stone_bricks hollow");
-			server.runCommand("execute at @p run setblock ~2 ~1 ~-1 minecraft:lantern[hanging=false]");
 			server.runCommand("execute at @p run setblock ~2 ~ ~-1 minecraft:stone_bricks");
+			server.runCommand("execute at @p run setblock ~2 ~1 ~-1 minecraft:lantern[hanging=false]");
 			spawn(context, server, 5, "stare");
 			shoot(context, "occupant-indoors");
 			server.runCommand("execute at @p run fill ~-4 ~ ~-2 ~4 ~2 ~10 minecraft:air");
