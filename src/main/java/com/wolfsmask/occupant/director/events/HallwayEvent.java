@@ -79,7 +79,7 @@ public final class HallwayEvent extends HorrorEvent {
 					if (!narrow(world, pos)) continue;
 					double height = headroom(world, pos);
 					if (height > 6.0) continue;
-					if (peek ? !Sight.onlyJustVisible(p, base, height) : !Sight.hasLineOfSight(p, base.add(0, height * 0.8, 0))) {
+					if (peek ? !Sight.onlyJustVisible(p, base, height) : Sight.visibleParts(p, base, height) == 0) {
 						continue;
 					}
 					// Not right up close, not far off: about seven blocks, at the edge of the screen,

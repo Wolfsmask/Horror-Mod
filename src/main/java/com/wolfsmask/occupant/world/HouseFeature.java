@@ -171,7 +171,7 @@ public final class HouseFeature extends Feature<NoneFeatureConfiguration> {
 
 			// The wall between the room and the hallway, with a gap in it near the front.
 			fill(8, 1, 1, 8, 3, DEPTH - 2, planks);
-			fill(8, 1, 2, 8, 2, 3, air);
+			fill(8, 1, 2, 8, 3, 3, air);                 // floor to ceiling, so you can see up into it
 
 			// The doorway, and the windows (the room only; the hallway has none).
 			fill(4, 1, 0, 4, 2, 0, air);
