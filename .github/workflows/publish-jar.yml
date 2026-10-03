@@ -47,5 +47,8 @@ jobs:
             echo "Jar unchanged."
           else
             git commit -m "Add tested mod jar [skip ci]"
-            git push
+            for attempt in 1 2 3 4 5; do
+              git pull --rebase --quiet origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && break
+              sleep $((attempt * 3))
+            done
           fi
