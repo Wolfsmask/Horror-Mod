@@ -115,19 +115,7 @@ final class ForestGallery {
 				});
 				if (!started) continue;
 				// Having caught it out of the corner of an eye, turning towards it, not quite on it.
-				float[] turn = server.computeOnServer(s -> {
-					ServerPlayer player = s.getPlayerList().getPlayers().get(0);
-					var near = s.overworld().getEntitiesOfClass(OccupantEntity.class, player.getBoundingBox().inflate(120));
-					if (near.isEmpty()) return null;
-					OccupantEntity e = near.get(0);
-					double dx = e.getX() - player.getX(), dz = e.getZ() - player.getZ();
-					double dy = e.getY() + 3.0 - player.getEyeY();
-					return new float[]{(float) Math.toDegrees(Math.atan2(-dx, dz)) + 9.0f,
-							(float) -Math.toDegrees(Math.atan2(dy, Math.sqrt(dx * dx + dz * dz)))};
-				});
-				if (turn != null) {
-					server.runCommand(String.format(Locale.ROOT, "tp @p ~ ~ ~ %.1f %.1f", turn[0], turn[1]));
-				}
+				turnTowardsIt(server, 9.0f);
 				waitForIt(context);
 				context.waitTicks(6);
 				OccupantClientGameTest.shoot(context, "occupant-photo-" + n + "-" + name);
@@ -155,7 +143,11 @@ final class ForestGallery {
 			}
 			BlockPos at = floor;
 			server.runOnServer(s -> HouseFeature.build(s.overworld(), at, Rotation.NONE, s.overworld().getRandom()));
-			BlockPos outside = HouseFeature.local(floor, Rotation.NONE, 4, 1, -9);
+			BlockPos front = HouseFeature.local(floor, Rotation.NONE, 4, 1, -8);
+			BlockPos outside = server.computeOnServer(s -> {
+				Integer y = ground(s.overworld(), front.getX(), front.getZ(), 2);
+				return y == null ? front : new BlockPos(front.getX(), y, front.getZ());
+			});
 			BlockPos inside = HouseFeature.local(floor, Rotation.NONE, 4, 1, 1);
 
 			server.runCommand("weather clear");
@@ -182,8 +174,8 @@ final class ForestGallery {
 				waitForIt(context);
 				context.waitTicks(4);
 				OccupantClientGameTest.shoot(context, "occupant-photo-" + v[1] + "-" + v[2]);
-				// And turning to look down the hallway.
-				teleport(server, inside, -40.0f, 0.0f);
+				// And turning towards the hallway, where it is.
+				turnTowardsIt(server, 6.0f);
 				context.waitTicks(3);
 				OccupantClientGameTest.shoot(context, "occupant-photo-" + v[1] + "-" + v[2] + "-turned");
 			}
@@ -191,6 +183,22 @@ final class ForestGallery {
 		} catch (RuntimeException | AssertionError e) {
 			Occupant.LOGGER.warn("[client-gametest] house photos failed", e);
 		}
+	}
+
+	/** Turns the player towards it, as someone who caught it out of the corner of their eye would. */
+	private static void turnTowardsIt(TestServerContext server, float off) {
+		float[] turn = server.computeOnServer(s -> {
+			ServerPlayer player = s.getPlayerList().getPlayers().get(0);
+			var near = s.overworld().getEntitiesOfClass(OccupantEntity.class, player.getBoundingBox().inflate(120));
+			if (near.isEmpty()) return null;
+			OccupantEntity e = near.get(0);
+			double dx = e.getX() - player.getX(), dz = e.getZ() - player.getZ();
+			double flat = Math.sqrt(dx * dx + dz * dz);
+			double dy = e.getY() + Math.min(3.0, flat * 0.3) - player.getEyeY();
+			return new float[]{(float) Math.toDegrees(Math.atan2(-dx, dz)) + off,
+					(float) -Math.toDegrees(Math.atan2(dy, flat))};
+		});
+		if (turn != null) server.runCommand(String.format(Locale.ROOT, "tp @p ~ ~ ~ %.1f %.1f", turn[0], turn[1]));
 	}
 
 	private static void teleport(TestServerContext server, BlockPos feet, float yaw, float pitch) {
