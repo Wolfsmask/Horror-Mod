@@ -1,2 +1,11 @@
-# Round 6: can the real client be booted in CI to prove the model renders?
-@jars client-gametest|lwjgl-vulkan|lwjgl-opengl
+# Round 7: the client game test API, to boot the real client in CI.
+net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest
+net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext
+net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext
+net.fabricmc.fabric.api.client.gametest.v1.context.TestClientLevelContext
+net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext
+net.fabricmc.fabric.api.client.gametest.v1.world.TestWorldBuilder
+net.fabricmc.fabric.api.client.gametest.v1.screenshot.TestScreenshotOptions
+net.fabricmc.fabric.api.client.gametest.v1.TestInput
+@protected net.fabricmc.fabric.impl.client.gametest.TestSystemProperties
+@code net.fabricmc.fabric.impl.client.gametest.TestSystemProperties <clinit>|static
