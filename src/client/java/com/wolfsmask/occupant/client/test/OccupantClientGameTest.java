@@ -188,25 +188,25 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 			scene(context, game, 1);
 			trees(server, 16, 34, 14);
 			server.runCommand("time set 12900");
-			spawn(context, server, 26, "stare");
+			look(context, server, 26, "stare");
 			context.waitTicks(20);
 			shoot(context, "occupant-gallery-1-treeline-dusk");
 
 			// The same trees after dark, closer.
 			server.runCommand("time set 18000");
-			spawn(context, server, 13, "veiled");
+			look(context, server, 13, "veiled");
 			shoot(context, "occupant-gallery-2-forest-night");
-			spawn(context, server, 8, "stare");
+			look(context, server, 8, "stare");
 			shoot(context, "occupant-gallery-3-forest-night-close");
 
 			// On the ridge across the valley, standing above the trees.
 			scene(context, game, 2);
 			for (int k = 0; k < 7; k++) {
-				server.runCommand("execute at @p run fill ~-40 ~" + (k - 1) + " ~" + (38 + 2 * k) + " ~40 ~" + (k - 1) + " ~" + (75 - 2 * k) + " minecraft:grass_block");
+				server.runCommand("execute at @p run fill ~-40 ~" + (k - 1) + " ~" + (28 + 2 * k) + " ~40 ~" + (k - 1) + " ~" + (62 - 2 * k) + " minecraft:grass_block");
 			}
-			trees(server, 40, 52, 30);
+			trees(server, 30, 44, 26);
 			server.runCommand("time set 13300");
-			spawn(context, server, 46, "stare");
+			look(context, server, 36, "stare");
 			context.waitTicks(20);
 			shoot(context, "occupant-gallery-4-on-the-ridge");
 
@@ -220,7 +220,7 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 			server.runCommand("execute at @p run setblock ~2 ~ ~2 minecraft:red_bed[facing=west,part=foot]");
 			trees(server, 14, 26, 12);
 			server.runCommand("time set 18000");
-			spawn(context, server, 9, "stare");
+			look(context, server, 9, "stare");
 			server.runCommand("execute as @p at @s run tp @s ~ ~ ~ 0 -8");
 			context.waitTicks(10);
 			shoot(context, "occupant-gallery-5-at-the-window");
@@ -230,7 +230,7 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 			trees(server, -24, -10, 14);
 			server.runCommand("time set 18500");
 			server.runCommand("execute as @p at @s run tp @s ~ ~ ~ 180 0");
-			spawn(context, server, 3.5f, "loom");
+			look(context, server, 3.5f, "loom");
 			server.runCommand("execute as @p at @s run tp @s ~ ~ ~ 0 0");
 			context.waitTicks(10);
 			shoot(context, "occupant-gallery-6-nothing-there");
@@ -246,9 +246,9 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 				server.runCommand("execute at @p run setblock ~-2 ~2 ~" + z + " minecraft:wall_torch[facing=east]");
 				server.runCommand("execute at @p run setblock ~2 ~2 ~" + (z + 3) + " minecraft:wall_torch[facing=west]");
 			}
-			spawn(context, server, 13, "stare");
+			look(context, server, 13, "stare");
 			shoot(context, "occupant-gallery-8-tunnel");
-			spawn(context, server, 6, "loom");
+			look(context, server, 6, "loom");
 			shoot(context, "occupant-gallery-9-tunnel-close");
 
 			// Out in the rain, in the last of the light.
@@ -256,14 +256,14 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 			trees(server, 18, 40, 22);
 			server.runCommand("weather rain");
 			server.runCommand("time set 13000");
-			spawn(context, server, 24, "stare");
+			look(context, server, 24, "stare");
 			context.waitTicks(40);
 			shoot(context, "occupant-gallery-10-rain");
 
 			// Coming for you through the trees.
 			server.runCommand("weather clear");
 			server.runCommand("time set 12800");
-			spawn(context, server, 16, "chase");
+			look(context, server, 16, "chase");
 			context.waitTicks(10);
 			shoot(context, "occupant-gallery-11-coming");
 			server.runCommand("kill " + ALL);
@@ -271,6 +271,17 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 			// Photographs only: never let them fail the run that proved everything else.
 			Occupant.LOGGER.warn("[client-gametest] gallery stopped early", e);
 		}
+	}
+
+	/** Like {@link #spawn}, for photographs: if it does not arrive, take the picture anyway. */
+	private static void look(ClientGameTestContext context, TestServerContext server, float distance, String pose) {
+		server.runCommand("kill " + ALL);
+		context.waitTicks(2);
+		server.runCommand("execute as @p at @s run occupant here " + distance + " " + pose);
+		for (int i = 0; i < 100 && context.computeOnClient(OccupantClientGameTest::seen) == 0; i++) {
+			context.waitTick();
+		}
+		context.waitTicks(30);
 	}
 
 	/** Moves the player somewhere new and untouched, facing south, and waits for it to load. */
