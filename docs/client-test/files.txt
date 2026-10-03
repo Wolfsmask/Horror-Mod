@@ -1,3 +1,4 @@
+build/clientGametest/occupant-shots/occupant-gallery-2-forest-night.png
 build/clientGametest/occupant-shots/occupant-corridor.png
 build/clientGametest/occupant-shots/occupant-three-quarter.png
 build/clientGametest/occupant-shots/occupant-veiled.png
@@ -10,13 +11,17 @@ build/clientGametest/occupant-shots/occupant-shove.png
 build/clientGametest/occupant-shots/occupant-looking-up.png
 build/clientGametest/occupant-shots/occupant-after-shove.png
 build/clientGametest/occupant-shots/occupant-chase.png
+build/clientGametest/occupant-shots/occupant-gallery-3-forest-night-close.png
 build/clientGametest/occupant-shots/occupant-night-distant.png
+build/clientGametest/occupant-shots/occupant-gallery-1-treeline-dusk.png
 build/clientGametest/occupant-shots/occupant-loom.png
 build/clientGametest/occupant-shots/occupant-stare.png
+build/clientGametest/saves/New World (1)/icon.png
 build/clientGametest/saves/New World/icon.png
 build/clientGametest/screenshots/0002_occupant-loom.png
 build/clientGametest/screenshots/0006_occupant-looking-up.png
 build/clientGametest/screenshots/0007_occupant-shove.png
+build/clientGametest/screenshots/0016_occupant-gallery-2-forest-night.png
 build/clientGametest/screenshots/0000_occupant-stare.png
 build/clientGametest/screenshots/0008_occupant-after-shove.png
 build/clientGametest/screenshots/0014_occupant-after-rejoin.png
@@ -28,4 +33,6 @@ build/clientGametest/screenshots/0013_occupant-night-close.png
 build/clientGametest/screenshots/0004_occupant-three-quarter.png
 build/clientGametest/screenshots/0010_occupant-trees.png
 build/clientGametest/screenshots/0005_occupant-face.png
+build/clientGametest/screenshots/0015_occupant-gallery-1-treeline-dusk.png
+build/clientGametest/screenshots/0017_occupant-gallery-3-forest-night-close.png
 build/clientGametest/screenshots/0009_occupant-corridor.png
