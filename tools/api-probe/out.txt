@@ -1,43 +1,244 @@
-=== net.minecraft.world.entity.EntitySpawnReason (-public)
-public final class world.entity.EntitySpawnReason extends Enum<world.entity.EntitySpawnReason> {
-  public static final world.entity.EntitySpawnReason NATURAL;
-  public static final world.entity.EntitySpawnReason CHUNK_GENERATION;
-  public static final world.entity.EntitySpawnReason SPAWNER;
-  public static final world.entity.EntitySpawnReason STRUCTURE;
-  public static final world.entity.EntitySpawnReason BREEDING;
-  public static final world.entity.EntitySpawnReason MOB_SUMMONED;
-  public static final world.entity.EntitySpawnReason JOCKEY;
-  public static final world.entity.EntitySpawnReason EVENT;
-  public static final world.entity.EntitySpawnReason CONVERSION;
-  public static final world.entity.EntitySpawnReason REINFORCEMENT;
-  public static final world.entity.EntitySpawnReason TRIGGERED;
-  public static final world.entity.EntitySpawnReason BUCKET;
-  public static final world.entity.EntitySpawnReason SPAWN_ITEM_USE;
-  public static final world.entity.EntitySpawnReason COMMAND;
-  public static final world.entity.EntitySpawnReason DISPENSER;
-  public static final world.entity.EntitySpawnReason PATROL;
-  public static final world.entity.EntitySpawnReason TRIAL_SPAWNER;
-  public static final world.entity.EntitySpawnReason LOAD;
-  public static final world.entity.EntitySpawnReason DIMENSION_TRAVEL;
-  public static world.entity.EntitySpawnReason[] values();
-  public static world.entity.EntitySpawnReason valueOf(String);
-  public static boolean isSpawner(world.entity.EntitySpawnReason);
-  public static boolean ignoresLightRequirements(world.entity.EntitySpawnReason);
-}
-=== net.minecraft.world.entity.Mob (-protected)
-public abstract class world.entity.Mob extends world.entity.LivingEntity implements world.entity.Targeting,world.entity.EquipmentUser,world.entity.Leashable {
-  public world.entity.SpawnGroupData finalizeSpawn(world.level.ServerLevelAccessor, world.DifficultyInstance, world.entity.EntitySpawnReason, world.entity.SpawnGroupData);
-=== net.minecraft.gametest.framework.GameTestHelper (-public)
-public class gametest.framework.GameTestHelper {
-  public <E extends world.entity.Entity> E spawn(world.entity.EntityType<E>, core.BlockPos);
-  public <E extends world.entity.Entity> List<E> spawn(world.entity.EntityType<E>, core.BlockPos, int);
-  public <E extends world.entity.Entity> List<E> spawn(world.entity.EntityType<E>, world.phys.Vec3, int);
-  public <E extends world.entity.Entity> E spawn(world.entity.EntityType<E>, world.phys.Vec3);
-  public <E extends world.entity.Mob> E spawn(world.entity.EntityType<E>, double, double, double, world.entity.EntitySpawnReason);
-  public <E extends world.entity.Entity> E spawn(world.entity.EntityType<E>, core.BlockPos, world.entity.EntitySpawnReason);
-  public <E extends world.entity.Entity> E spawn(world.entity.EntityType<E>, world.phys.Vec3, world.entity.EntitySpawnReason);
-  public <E extends world.entity.Entity> E spawn(world.entity.EntityType<E>, int, int, int);
-  public <E extends world.entity.Entity> E spawn(world.entity.EntityType<E>, float, float, float);
-  public world.entity.player.Player makeMockPlayer(world.level.GameType);
-  public world.entity.player.Player makeMockServerPlayer(world.level.GameType);
-  public server.level.ServerPlayer makeMockServerPlayerInLevel();
+=== jars matching client-gametest|lwjgl-vulkan|lwjgl-opengl
+--- lwjgl-opengl-3.4.1.jar
+META-INF.versions.11.module-info
+org.lwjgl.opengl.AMDBlendMinmaxFactor
+org.lwjgl.opengl.AMDDebugOutput
+org.lwjgl.opengl.AMDDepthClampSeparate
+org.lwjgl.opengl.AMDDrawBuffersBlend
+org.lwjgl.opengl.AMDFramebufferMultisampleAdvanced
+org.lwjgl.opengl.AMDGPUShaderHalfFloat
+org.lwjgl.opengl.AMDGPUShaderHalfFloatFetch
+org.lwjgl.opengl.AMDGPUShaderInt64
+org.lwjgl.opengl.AMDInterleavedElements
+org.lwjgl.opengl.AMDOcclusionQueryEvent
+org.lwjgl.opengl.AMDPerformanceMonitor
+org.lwjgl.opengl.AMDPinnedMemory
+org.lwjgl.opengl.AMDQueryBufferObject
+org.lwjgl.opengl.AMDSamplePositions
+org.lwjgl.opengl.AMDSeamlessCubemapPerTexture
+org.lwjgl.opengl.AMDSparseTexture
+org.lwjgl.opengl.AMDStencilOperationExtended
+org.lwjgl.opengl.AMDTransformFeedback4
+org.lwjgl.opengl.AMDVertexShaderTessellator
+org.lwjgl.opengl.ARBBaseInstance
+org.lwjgl.opengl.ARBBindlessTexture
+org.lwjgl.opengl.ARBBlendFuncExtended
+org.lwjgl.opengl.ARBBufferStorage
+org.lwjgl.opengl.ARBCLEvent
+org.lwjgl.opengl.ARBClearBufferObject
+org.lwjgl.opengl.ARBClearTexture
+org.lwjgl.opengl.ARBClipControl
+org.lwjgl.opengl.ARBColorBufferFloat
+org.lwjgl.opengl.ARBCompressedTexturePixelStorage
+org.lwjgl.opengl.ARBComputeShader
+org.lwjgl.opengl.ARBComputeVariableGroupSize
+org.lwjgl.opengl.ARBConditionalRenderInverted
+org.lwjgl.opengl.ARBCopyBuffer
+org.lwjgl.opengl.ARBCopyImage
+org.lwjgl.opengl.ARBCullDistance
+org.lwjgl.opengl.ARBDebugOutput
+org.lwjgl.opengl.ARBDepthBufferFloat
+org.lwjgl.opengl.ARBDepthClamp
+org.lwjgl.opengl.ARBDepthTexture
+org.lwjgl.opengl.ARBDirectStateAccess
+org.lwjgl.opengl.ARBDrawBuffers
+org.lwjgl.opengl.ARBDrawBuffersBlend
+org.lwjgl.opengl.ARBDrawElementsBaseVertex
+org.lwjgl.opengl.ARBDrawIndirect
+org.lwjgl.opengl.ARBDrawInstanced
+org.lwjgl.opengl.ARBES2Compatibility
+org.lwjgl.opengl.ARBES31Compatibility
+org.lwjgl.opengl.ARBES32Compatibility
+org.lwjgl.opengl.ARBES3Compatibility
+org.lwjgl.opengl.ARBEnhancedLayouts
+org.lwjgl.opengl.ARBExplicitUniformLocation
+org.lwjgl.opengl.ARBFragmentProgram
+org.lwjgl.opengl.ARBFragmentShader
+org.lwjgl.opengl.ARBFramebufferNoAttachments
+org.lwjgl.opengl.ARBFramebufferObject
+org.lwjgl.opengl.ARBFramebufferSRGB
+org.lwjgl.opengl.ARBGLSPIRV
+org.lwjgl.opengl.ARBGPUShader5
+org.lwjgl.opengl.ARBGPUShaderFP64
+org.lwjgl.opengl.ARBGPUShaderInt64
+org.lwjgl.opengl.ARBGeometryShader4
+org.lwjgl.opengl.ARBGetProgramBinary
+org.lwjgl.opengl.ARBGetTextureSubImage
+org.lwjgl.opengl.ARBHalfFloatPixel
+org.lwjgl.opengl.ARBHalfFloatVertex
+org.lwjgl.opengl.ARBImaging
+org.lwjgl.opengl.ARBIndirectParameters
+org.lwjgl.opengl.ARBInstancedArrays
+org.lwjgl.opengl.ARBInternalformatQuery
+org.lwjgl.opengl.ARBInternalformatQuery2
+org.lwjgl.opengl.ARBInvalidateSubdata
+org.lwjgl.opengl.ARBMapBufferAlignment
+org.lwjgl.opengl.ARBMapBufferRange
+org.lwjgl.opengl.ARBMatrixPalette
+org.lwjgl.opengl.ARBMultiBind
+org.lwjgl.opengl.ARBMultiDrawIndirect
+org.lwjgl.opengl.ARBMultisample
+org.lwjgl.opengl.ARBMultitexture
+org.lwjgl.opengl.ARBOcclusionQuery
+--- lwjgl-vulkan-3.4.1.jar
+META-INF.versions.11.module-info
+org.lwjgl.vulkan.AMDAntiLag
+org.lwjgl.vulkan.AMDBufferMarker
+org.lwjgl.vulkan.AMDDeviceCoherentMemory
+org.lwjgl.vulkan.AMDDisplayNativeHdr
+org.lwjgl.vulkan.AMDDrawIndirectCount
+org.lwjgl.vulkan.AMDGCNShader
+org.lwjgl.vulkan.AMDGPUShaderHalfFloat
+org.lwjgl.vulkan.AMDGPUShaderInt16
+org.lwjgl.vulkan.AMDMemoryOverallocationBehavior
+org.lwjgl.vulkan.AMDMixedAttachmentSamples
+org.lwjgl.vulkan.AMDNegativeViewportHeight
+org.lwjgl.vulkan.AMDPipelineCompilerControl
+org.lwjgl.vulkan.AMDRasterizationOrder
+org.lwjgl.vulkan.AMDShaderBallot
+org.lwjgl.vulkan.AMDShaderCoreProperties
+org.lwjgl.vulkan.AMDShaderCoreProperties2
+org.lwjgl.vulkan.AMDShaderEarlyAndLateFragmentTests
+org.lwjgl.vulkan.AMDShaderExplicitVertexParameter
+org.lwjgl.vulkan.AMDShaderFragmentMask
+org.lwjgl.vulkan.AMDShaderImageLoadStoreLod
+org.lwjgl.vulkan.AMDShaderInfo
+org.lwjgl.vulkan.AMDShaderTrinaryMinmax
+org.lwjgl.vulkan.AMDTextureGatherBiasLod
+org.lwjgl.vulkan.AMDXDenseGeometryFormat
+org.lwjgl.vulkan.AMDXShaderEnqueue
+org.lwjgl.vulkan.ANDROIDExternalFormatResolve
+org.lwjgl.vulkan.ANDROIDExternalMemoryAndroidHardwareBuffer
+org.lwjgl.vulkan.ARMDataGraph
+org.lwjgl.vulkan.ARMFormatPack
+org.lwjgl.vulkan.ARMPerformanceCountersByRegion
+org.lwjgl.vulkan.ARMPipelineOpacityMicromap
+org.lwjgl.vulkan.ARMRasterizationOrderAttachmentAccess
+org.lwjgl.vulkan.ARMRenderPassStriped
+org.lwjgl.vulkan.ARMSchedulingControls
+org.lwjgl.vulkan.ARMShaderCoreBuiltins
+org.lwjgl.vulkan.ARMShaderCoreProperties
+org.lwjgl.vulkan.ARMTensors
+org.lwjgl.vulkan.DispatchableHandleDevice
+org.lwjgl.vulkan.DispatchableHandleInstance
+org.lwjgl.vulkan.EXT4444Formats
+org.lwjgl.vulkan.EXTAcquireDrmDisplay
+org.lwjgl.vulkan.EXTAcquireXlibDisplay
+org.lwjgl.vulkan.EXTAstcDecodeMode
+org.lwjgl.vulkan.EXTAttachmentFeedbackLoopDynamicState
+org.lwjgl.vulkan.EXTAttachmentFeedbackLoopLayout
+org.lwjgl.vulkan.EXTBlendOperationAdvanced
+org.lwjgl.vulkan.EXTBorderColorSwizzle
+org.lwjgl.vulkan.EXTBufferDeviceAddress
+org.lwjgl.vulkan.EXTCalibratedTimestamps
+org.lwjgl.vulkan.EXTColorWriteEnable
+org.lwjgl.vulkan.EXTConditionalRendering
+org.lwjgl.vulkan.EXTConservativeRasterization
+org.lwjgl.vulkan.EXTCustomBorderColor
+org.lwjgl.vulkan.EXTCustomResolve
+org.lwjgl.vulkan.EXTDebugMarker
+org.lwjgl.vulkan.EXTDebugReport
+org.lwjgl.vulkan.EXTDebugUtils
+org.lwjgl.vulkan.EXTDepthBiasControl
+org.lwjgl.vulkan.EXTDepthClampControl
+org.lwjgl.vulkan.EXTDepthClampZeroOne
+org.lwjgl.vulkan.EXTDepthClipControl
+org.lwjgl.vulkan.EXTDepthClipEnable
+org.lwjgl.vulkan.EXTDepthRangeUnrestricted
+org.lwjgl.vulkan.EXTDescriptorBuffer
+org.lwjgl.vulkan.EXTDescriptorHeap
+org.lwjgl.vulkan.EXTDescriptorIndexing
+org.lwjgl.vulkan.EXTDeviceAddressBindingReport
+org.lwjgl.vulkan.EXTDeviceFault
+org.lwjgl.vulkan.EXTDeviceGeneratedCommands
+org.lwjgl.vulkan.EXTDeviceMemoryReport
+org.lwjgl.vulkan.EXTDirectModeDisplay
+org.lwjgl.vulkan.EXTDirectfbSurface
+org.lwjgl.vulkan.EXTDiscardRectangles
+org.lwjgl.vulkan.EXTDisplayControl
+org.lwjgl.vulkan.EXTDisplaySurfaceCounter
+org.lwjgl.vulkan.EXTDynamicRenderingUnusedAttachments
+org.lwjgl.vulkan.EXTExtendedDynamicState
+org.lwjgl.vulkan.EXTExtendedDynamicState2
+org.lwjgl.vulkan.EXTExtendedDynamicState3
+--- fabric-client-gametest-api-v1-5.1.0+db5795489e.jar
+net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest
+net.fabricmc.fabric.api.client.gametest.v1.TestInput
+net.fabricmc.fabric.api.client.gametest.v1.package-info
+net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext
+net.fabricmc.fabric.api.client.gametest.v1.context.TestClientLevelContext
+net.fabricmc.fabric.api.client.gametest.v1.context.TestDedicatedServerContext
+net.fabricmc.fabric.api.client.gametest.v1.context.TestServerConnection
+net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext
+net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext
+net.fabricmc.fabric.api.client.gametest.v1.context.package-info
+net.fabricmc.fabric.api.client.gametest.v1.screenshot.TestScreenshotCommonOptions
+net.fabricmc.fabric.api.client.gametest.v1.screenshot.TestScreenshotComparisonAlgorithm
+net.fabricmc.fabric.api.client.gametest.v1.screenshot.TestScreenshotComparisonOptions
+net.fabricmc.fabric.api.client.gametest.v1.screenshot.TestScreenshotOptions
+net.fabricmc.fabric.api.client.gametest.v1.screenshot.package-info
+net.fabricmc.fabric.api.client.gametest.v1.world.TestWorldBuilder
+net.fabricmc.fabric.api.client.gametest.v1.world.TestWorldSave
+net.fabricmc.fabric.api.client.gametest.v1.world.package-info
+net.fabricmc.fabric.impl.client.gametest.FabricClientGameTestRunner
+net.fabricmc.fabric.impl.client.gametest.TestInputImpl
+net.fabricmc.fabric.impl.client.gametest.TestSystemProperties
+net.fabricmc.fabric.impl.client.gametest.package-info
+net.fabricmc.fabric.impl.client.gametest.context.ClientGameTestContextImpl
+net.fabricmc.fabric.impl.client.gametest.context.TestClientLevelContextImpl
+net.fabricmc.fabric.impl.client.gametest.context.TestDedicatedServerContextImpl
+net.fabricmc.fabric.impl.client.gametest.context.TestServerConnectionImpl
+net.fabricmc.fabric.impl.client.gametest.context.TestServerContextImpl
+net.fabricmc.fabric.impl.client.gametest.context.TestSingleplayerContextImpl
+net.fabricmc.fabric.impl.client.gametest.context.package-info
+net.fabricmc.fabric.impl.client.gametest.screenshot.NativeImageHooks
+net.fabricmc.fabric.impl.client.gametest.screenshot.TestScreenshotCommonOptionsImpl
+net.fabricmc.fabric.impl.client.gametest.screenshot.TestScreenshotComparisonAlgorithms
+net.fabricmc.fabric.impl.client.gametest.screenshot.TestScreenshotComparisonOptionsImpl
+net.fabricmc.fabric.impl.client.gametest.screenshot.TestScreenshotOptionsImpl
+net.fabricmc.fabric.impl.client.gametest.screenshot.package-info
+net.fabricmc.fabric.impl.client.gametest.threading.NetworkSynchronizer
+net.fabricmc.fabric.impl.client.gametest.threading.ThreadingImpl
+net.fabricmc.fabric.impl.client.gametest.threading.package-info
+net.fabricmc.fabric.impl.client.gametest.util.ClientGameTestImpl
+net.fabricmc.fabric.impl.client.gametest.util.DedicatedServerImplUtil
+net.fabricmc.fabric.impl.client.gametest.util.WindowHooks
+net.fabricmc.fabric.impl.client.gametest.util.package-info
+net.fabricmc.fabric.impl.client.gametest.world.TestWorldBuilderImpl
+net.fabricmc.fabric.impl.client.gametest.world.TestWorldSaveImpl
+net.fabricmc.fabric.impl.client.gametest.world.package-info
+net.fabricmc.fabric.mixin.client.gametest.ClientChunkCacheAccessor
+net.fabricmc.fabric.mixin.client.gametest.ClientChunkCacheStorageAccessor
+net.fabricmc.fabric.mixin.client.gametest.ClientLevelAccessor
+net.fabricmc.fabric.mixin.client.gametest.package-info
+net.fabricmc.fabric.mixin.client.gametest.gui.CycleButtonAccessor
+net.fabricmc.fabric.mixin.client.gametest.gui.ScreenAccessor
+net.fabricmc.fabric.mixin.client.gametest.gui.ScreenMixin
+net.fabricmc.fabric.mixin.client.gametest.gui.package-info
+net.fabricmc.fabric.mixin.client.gametest.input.GlCommandEncoderMixin
+net.fabricmc.fabric.mixin.client.gametest.input.InputConstantsMixin
+net.fabricmc.fabric.mixin.client.gametest.input.KeyMappingAccessor
+net.fabricmc.fabric.mixin.client.gametest.input.KeyboardHandlerAccessor
+net.fabricmc.fabric.mixin.client.gametest.input.MonitorManagerMixin
+net.fabricmc.fabric.mixin.client.gametest.input.MouseHandlerAccessor
+net.fabricmc.fabric.mixin.client.gametest.input.VulkanGpuSurfaceMixin
+net.fabricmc.fabric.mixin.client.gametest.input.WindowMixin
+net.fabricmc.fabric.mixin.client.gametest.input.package-info
+net.fabricmc.fabric.mixin.client.gametest.lifecycle.DedicatedServerMixin
+net.fabricmc.fabric.mixin.client.gametest.lifecycle.MinecraftMixin
+net.fabricmc.fabric.mixin.client.gametest.lifecycle.OptionsAccessor
+net.fabricmc.fabric.mixin.client.gametest.lifecycle.OptionsMixin
+net.fabricmc.fabric.mixin.client.gametest.lifecycle.package-info
+net.fabricmc.fabric.mixin.client.gametest.screenshot.DeltaTrackerDefaultValueAccessor
+net.fabricmc.fabric.mixin.client.gametest.screenshot.NativeImageMixin
+net.fabricmc.fabric.mixin.client.gametest.screenshot.package-info
+net.fabricmc.fabric.mixin.client.gametest.threading.BlockableEventLoopMixin
+net.fabricmc.fabric.mixin.client.gametest.threading.ConnectionMixin
+net.fabricmc.fabric.mixin.client.gametest.threading.MainMixin
+net.fabricmc.fabric.mixin.client.gametest.threading.MinecraftMixin
+net.fabricmc.fabric.mixin.client.gametest.threading.MinecraftServerMixin
+net.fabricmc.fabric.mixin.client.gametest.threading.package-info
+net.fabricmc.fabric.mixin.client.gametest.world.CreateWorldScreenMixin
+net.fabricmc.fabric.mixin.client.gametest.world.GameRulesAccessor
+net.fabricmc.fabric.mixin.client.gametest.world.package-info
+net.fabricmc.fabric.impl.client.gametest.ClientGameTestMixinConfigPlugin
