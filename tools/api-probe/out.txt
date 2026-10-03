@@ -1,71 +1,116 @@
-=== net.minecraft.server.level.ServerLevel (-public)
-public class server.level.ServerLevel extends world.level.Level implements world.level.WorldGenLevel,server.level.ServerEntityGetter {
-  public datafixers.util.Pair<core.BlockPos, core.Holder<world.level.biome.Biome>> findClosestBiome3d(Predicate<core.Holder<world.level.biome.Biome>>, core.BlockPos, int, int, int);
-  public world.level.storage.LevelData$RespawnData getRespawnData();
-=== net.minecraft.world.level.levelgen.Heightmap$Types (-public)
-public final class world.level.levelgen.Heightmap$Types extends Enum<world.level.levelgen.Heightmap$Types> implements util.StringRepresentable {
-  public static final world.level.levelgen.Heightmap$Types WORLD_SURFACE_WG;
-  public static final world.level.levelgen.Heightmap$Types WORLD_SURFACE;
-  public static final world.level.levelgen.Heightmap$Types OCEAN_FLOOR_WG;
-  public static final world.level.levelgen.Heightmap$Types OCEAN_FLOOR;
-  public static final world.level.levelgen.Heightmap$Types MOTION_BLOCKING;
-  public static final world.level.levelgen.Heightmap$Types MOTION_BLOCKING_NO_LEAVES;
-  public static final serialization.Codec<world.level.levelgen.Heightmap$Types> CODEC;
-  public static final network.codec.StreamCodec<io.netty.buffer.ByteBuf, world.level.levelgen.Heightmap$Types> STREAM_CODEC;
-  public static world.level.levelgen.Heightmap$Types[] values();
-  public static world.level.levelgen.Heightmap$Types valueOf(String);
-  public String getSerializationKey();
-  public boolean sendToClient();
-  public boolean keepAfterWorldgen();
-  public Predicate<world.level.block.state.BlockState> isOpaque();
+=== net.minecraft.world.level.levelgen.feature.Feature (-public)
+public abstract class world.level.levelgen.feature.Feature<FC extends world.level.levelgen.feature.configurations.FeatureConfiguration> {
+  public static final world.level.levelgen.feature.Feature<world.level.levelgen.feature.configurations.ReplaceBlockConfiguration> REPLACE_SINGLE_BLOCK;
+  public static final world.level.levelgen.feature.Feature<world.level.levelgen.feature.configurations.ReplaceSphereConfiguration> REPLACE_BLOBS;
+  public world.level.levelgen.feature.Feature(serialization.Codec<FC>);
+  public static Predicate<world.level.block.state.BlockState> isReplaceable(tags.TagKey<world.level.block.Block>);
+  public abstract boolean place(world.level.levelgen.feature.FeaturePlaceContext<FC>);
+  public boolean place(FC, world.level.WorldGenLevel, world.level.chunk.ChunkGenerator, util.RandomSource, core.BlockPos);
+=== net.minecraft.world.level.levelgen.feature.Feature (-protected)
+public abstract class world.level.levelgen.feature.Feature<FC extends world.level.levelgen.feature.configurations.FeatureConfiguration> {
+  public world.level.levelgen.feature.Feature(serialization.Codec<FC>);
+  protected void setBlock(world.level.LevelWriter, core.BlockPos, world.level.block.state.BlockState);
+=== net.minecraft.world.level.levelgen.feature.FeaturePlaceContext (-public)
+public class world.level.levelgen.feature.FeaturePlaceContext<FC extends world.level.levelgen.feature.configurations.FeatureConfiguration> {
+  public world.level.levelgen.feature.FeaturePlaceContext(Optional<world.level.levelgen.feature.ConfiguredFeature<?, ?>>, world.level.WorldGenLevel, world.level.chunk.ChunkGenerator, util.RandomSource, core.BlockPos, FC);
+  public Optional<world.level.levelgen.feature.ConfiguredFeature<?, ?>> topFeature();
+  public world.level.WorldGenLevel level();
+  public world.level.chunk.ChunkGenerator chunkGenerator();
+  public util.RandomSource random();
+  public core.BlockPos origin();
+  public FC config();
+}
+=== net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration (-public)
+public class world.level.levelgen.feature.configurations.NoneFeatureConfiguration implements world.level.levelgen.feature.configurations.FeatureConfiguration {
+  public static final world.level.levelgen.feature.configurations.NoneFeatureConfiguration INSTANCE;
+  public static final serialization.Codec<world.level.levelgen.feature.configurations.NoneFeatureConfiguration> CODEC;
+  public world.level.levelgen.feature.configurations.NoneFeatureConfiguration();
+}
+=== net.minecraft.world.level.LevelWriter (-public)
+public interface world.level.LevelWriter {
+  public abstract boolean setBlock(core.BlockPos, world.level.block.state.BlockState, int, int);
+  public default boolean setBlock(core.BlockPos, world.level.block.state.BlockState, int);
+=== net.minecraft.world.level.WorldGenLevel (-public)
+public interface world.level.WorldGenLevel extends world.level.ServerLevelAccessor {
+  public abstract long getSeed();
+  public default boolean ensureCanWrite(core.BlockPos);
+  public default void setCurrentlyGenerating(Supplier<String>);
+}
+=== net.fabricmc.fabric.api.biome.v1.BiomeModifications (-public)
+public final class biome.v1.BiomeModifications {
+  public static void addFeature(Predicate<biome.v1.BiomeSelectionContext>, world.level.levelgen.GenerationStep$Decoration, resources.ResourceKey<world.level.levelgen.placement.PlacedFeature>);
+=== net.fabricmc.fabric.api.biome.v1.BiomeSelectors (-public)
+public final class biome.v1.BiomeSelectors {
+  public static Predicate<biome.v1.BiomeSelectionContext> all();
+  public static Predicate<biome.v1.BiomeSelectionContext> vanilla();
+  public static Predicate<biome.v1.BiomeSelectionContext> foundInOverworld();
+  public static Predicate<biome.v1.BiomeSelectionContext> foundInTheNether();
+  public static Predicate<biome.v1.BiomeSelectionContext> foundInTheEnd();
+  public static Predicate<biome.v1.BiomeSelectionContext> tag(tags.TagKey<world.level.biome.Biome>);
+  public static Predicate<biome.v1.BiomeSelectionContext> excludeByKey(resources.ResourceKey<world.level.biome.Biome>...);
+  public static Predicate<biome.v1.BiomeSelectionContext> excludeByKey(Collection<resources.ResourceKey<world.level.biome.Biome>>);
+  public static Predicate<biome.v1.BiomeSelectionContext> includeByKey(resources.ResourceKey<world.level.biome.Biome>...);
+  public static Predicate<biome.v1.BiomeSelectionContext> includeByKey(Collection<resources.ResourceKey<world.level.biome.Biome>>);
+  public static Predicate<biome.v1.BiomeSelectionContext> spawnsOneOf(world.entity.EntityType<?>...);
+  public static Predicate<biome.v1.BiomeSelectionContext> spawnsOneOf(Set<world.entity.EntityType<?>>);
+}
+=== net.fabricmc.fabric.api.biome.v1.BiomeSelectionContext (-public)
+public interface biome.v1.BiomeSelectionContext {
+  public abstract resources.ResourceKey<world.level.biome.Biome> getBiomeKey();
+  public abstract world.level.biome.Biome getBiome();
+  public abstract core.Holder<world.level.biome.Biome> getBiomeHolder();
+  public default boolean hasFeature(resources.ResourceKey<world.level.levelgen.feature.ConfiguredFeature<?, ?>>);
+  public default boolean hasPlacedFeature(resources.ResourceKey<world.level.levelgen.placement.PlacedFeature>);
+  public abstract Optional<resources.ResourceKey<world.level.levelgen.feature.ConfiguredFeature<?, ?>>> getFeatureKey(world.level.levelgen.feature.ConfiguredFeature<?, ?>);
+  public abstract Optional<resources.ResourceKey<world.level.levelgen.placement.PlacedFeature>> getPlacedFeatureKey(world.level.levelgen.placement.PlacedFeature);
+  public abstract boolean validForStructure(resources.ResourceKey<world.level.levelgen.structure.Structure>);
+  public abstract Optional<resources.ResourceKey<world.level.levelgen.structure.Structure>> getStructureKey(world.level.levelgen.structure.Structure);
+  public abstract boolean canGenerateIn(resources.ResourceKey<world.level.dimension.LevelStem>);
+  public abstract boolean hasTag(tags.TagKey<world.level.biome.Biome>);
+}
+=== net.minecraft.world.level.levelgen.GenerationStep$Decoration (-public)
+public final class world.level.levelgen.GenerationStep$Decoration extends Enum<world.level.levelgen.GenerationStep$Decoration> implements util.StringRepresentable {
+  public static final world.level.levelgen.GenerationStep$Decoration RAW_GENERATION;
+  public static final world.level.levelgen.GenerationStep$Decoration LAKES;
+  public static final world.level.levelgen.GenerationStep$Decoration LOCAL_MODIFICATIONS;
+  public static final world.level.levelgen.GenerationStep$Decoration UNDERGROUND_STRUCTURES;
+  public static final world.level.levelgen.GenerationStep$Decoration SURFACE_STRUCTURES;
+  public static final world.level.levelgen.GenerationStep$Decoration STRONGHOLDS;
+  public static final world.level.levelgen.GenerationStep$Decoration UNDERGROUND_ORES;
+  public static final world.level.levelgen.GenerationStep$Decoration UNDERGROUND_DECORATION;
+  public static final world.level.levelgen.GenerationStep$Decoration FLUID_SPRINGS;
+  public static final world.level.levelgen.GenerationStep$Decoration VEGETAL_DECORATION;
+  public static final world.level.levelgen.GenerationStep$Decoration TOP_LAYER_MODIFICATION;
+  public static final serialization.Codec<world.level.levelgen.GenerationStep$Decoration> CODEC;
+  public static world.level.levelgen.GenerationStep$Decoration[] values();
+  public static world.level.levelgen.GenerationStep$Decoration valueOf(String);
+  public String getName();
   public String getSerializedName();
 }
-=== net.minecraft.world.level.biome.Biomes (-public)
-public abstract class world.level.biome.Biomes {
-  public static final resources.ResourceKey<world.level.biome.Biome> FOREST;
-  public static final resources.ResourceKey<world.level.biome.Biome> FLOWER_FOREST;
-  public static final resources.ResourceKey<world.level.biome.Biome> BIRCH_FOREST;
-  public static final resources.ResourceKey<world.level.biome.Biome> DARK_FOREST;
-  public static final resources.ResourceKey<world.level.biome.Biome> PALE_GARDEN;
-  public static final resources.ResourceKey<world.level.biome.Biome> OLD_GROWTH_BIRCH_FOREST;
-  public static final resources.ResourceKey<world.level.biome.Biome> OLD_GROWTH_PINE_TAIGA;
-  public static final resources.ResourceKey<world.level.biome.Biome> OLD_GROWTH_SPRUCE_TAIGA;
-  public static final resources.ResourceKey<world.level.biome.Biome> WINDSWEPT_FOREST;
-  public static final resources.ResourceKey<world.level.biome.Biome> WARPED_FOREST;
-  public static final resources.ResourceKey<world.level.biome.Biome> CRIMSON_FOREST;
-=== net.minecraft.core.Holder (-public)
-public interface core.Holder<T> {
-  public abstract boolean is(resources.Identifier);
-  public abstract boolean is(resources.ResourceKey<T>);
-  public abstract boolean is(Predicate<resources.ResourceKey<T>>);
-  public abstract boolean is(tags.TagKey<T>);
-  public abstract boolean is(core.Holder<T>);
-=== net.minecraft.client.gui.screens.worldselection.WorldCreationUiState (-public)
-public class client.gui.screens.worldselection.WorldCreationUiState {
-  public client.gui.screens.worldselection.WorldCreationUiState(java.nio.file.Path, client.gui.screens.worldselection.WorldCreationContext, Optional<resources.ResourceKey<world.level.levelgen.presets.WorldPreset>>, OptionalLong);
-  public void setName(String);
-  public void setGameMode(client.gui.screens.worldselection.WorldCreationUiState$SelectedGameMode);
-  public client.gui.screens.worldselection.WorldCreationUiState$SelectedGameMode getGameMode();
-  public void setDifficulty(world.Difficulty);
-  public world.Difficulty getDifficulty();
-  public void setAllowCommands(boolean);
-  public void setSeed(String);
-  public String getSeed();
-  public void setGenerateStructures(boolean);
-  public void setBonusChest(boolean);
-  public void setSettings(client.gui.screens.worldselection.WorldCreationContext);
-  public void setWorldType(client.gui.screens.worldselection.WorldCreationUiState$WorldTypeEntry);
-  public client.gui.screens.worldselection.WorldCreationUiState$WorldTypeEntry getWorldType();
-  public client.gui.screens.worldselection.PresetEditor getPresetEditor();
-  public List<client.gui.screens.worldselection.WorldCreationUiState$WorldTypeEntry> getNormalPresetList();
-  public List<client.gui.screens.worldselection.WorldCreationUiState$WorldTypeEntry> getAltPresetList();
-  public void setGameRules(world.level.gamerules.GameRules);
-=== net.minecraft.world.entity.Entity (-public)
-public abstract class world.entity.Entity implements world.Nameable, world.level.entity.EntityAccess, world.scores.ScoreHolder, network.syncher.SyncedDataHolder, core.component.DataComponentGetter, world.entity.ItemOwner, world.entity.SlotProvider, util.debug.DebugValueSource, core.TypedInstance<world.entity.EntityType<?>>, attachment.v1.AttachmentTarget, event.lifecycle.v1.EntityLoadData, permission.v1.PermissionContextOwner {
-  public void snapTo(world.phys.Vec3);
-  public void snapTo(double, double, double);
-  public void snapTo(core.BlockPos, float, float);
-  public void snapTo(world.phys.Vec3, float, float);
-  public void snapTo(double, double, double, float, float);
-  public void setYHeadRot(float);
-  public void setYBodyRot(float);
+=== net.minecraft.core.registries.Registries (-public)
+public class core.registries.Registries {
+  public static final resources.ResourceKey<core.Registry<world.level.levelgen.feature.featuresize.FeatureSizeType<?>>> FEATURE_SIZE_TYPE;
+  public static final resources.ResourceKey<core.Registry<world.level.levelgen.feature.Feature<?>>> FEATURE;
+  public static final resources.ResourceKey<core.Registry<world.level.levelgen.feature.ConfiguredFeature<?, ?>>> CONFIGURED_FEATURE;
+  public static final resources.ResourceKey<core.Registry<world.level.levelgen.placement.PlacedFeature>> PLACED_FEATURE;
+=== net.minecraft.core.registries.BuiltInRegistries (-public)
+public class core.registries.BuiltInRegistries {
+  public static final core.Registry<world.level.levelgen.feature.Feature<?>> FEATURE;
+  public static final core.Registry<world.level.levelgen.feature.featuresize.FeatureSizeType<?>> FEATURE_SIZE_TYPE;
+=== net.minecraft.world.level.block.StairBlock (-public)
+public class world.level.block.StairBlock extends world.level.block.Block implements world.level.block.SimpleWaterloggedBlock {
+  public static final world.level.block.state.properties.EnumProperty<core.Direction> FACING;
+  public static final world.level.block.state.properties.EnumProperty<world.level.block.state.properties.Half> HALF;
+=== net.minecraft.world.level.block.SlabBlock (-public)
+public class world.level.block.SlabBlock extends world.level.block.Block implements world.level.block.SimpleWaterloggedBlock {
+  public static final world.level.block.state.properties.EnumProperty<world.level.block.state.properties.SlabType> TYPE;
+=== net.minecraft.tags.BiomeTags (-public)
+public class tags.BiomeTags {
+  public static final tags.TagKey<world.level.biome.Biome> IS_OCEAN;
+  public static final tags.TagKey<world.level.biome.Biome> IS_RIVER;
+  public static final tags.TagKey<world.level.biome.Biome> IS_TAIGA;
+  public static final tags.TagKey<world.level.biome.Biome> IS_FOREST;
+=== net.minecraft.resources.ResourceKey (-public)
+public class resources.ResourceKey<T> {
+  public static <T> resources.ResourceKey<T> create(resources.ResourceKey<? extends core.Registry<T>>, resources.Identifier);
+  public static <T> resources.ResourceKey<core.Registry<T>> createRegistryKey(resources.Identifier);
