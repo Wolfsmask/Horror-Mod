@@ -167,144 +167,7 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 			shoot(context, "occupant-after-rejoin");
 		}
 		Occupant.LOGGER.info("[client-gametest] all client checks passed");
-		gallery(context);
-	}
-
-	/**
-	 * Not a check: photographs of it the way a player actually meets it, from the player's own
-	 * eyes with the HUD up, in the places the story puts it. Each scene is built fresh, a long way
-	 * from the last, so nothing from one shows up in another.
-	 */
-	private static void gallery(ClientGameTestContext context) {
-		try (TestSingleplayerContext game = context.worldBuilder().create()) {
-			game.getClientLevel().waitForChunksRender();
-			TestServerContext server = game.getServer();
-			// No "It is standing behind you..." in the chat: that is only there for /occupant here.
-			server.runCommand("gamerule sendCommandFeedback false");
-			server.runCommand("gamerule send_command_feedback false");
-			server.runCommand("weather clear");
-
-			// Watching from the treeline at dusk, too far to make out.
-			scene(context, game, 1);
-			trees(server, 16, 34, 14);
-			server.runCommand("time set 12900");
-			look(context, server, 26, "stare");
-			context.waitTicks(20);
-			shoot(context, "occupant-gallery-1-treeline-dusk");
-
-			// The same trees after dark, closer.
-			server.runCommand("time set 18000");
-			look(context, server, 13, "veiled");
-			shoot(context, "occupant-gallery-2-forest-night");
-			look(context, server, 8, "stare");
-			shoot(context, "occupant-gallery-3-forest-night-close");
-
-			// On the ridge across the valley, standing above the trees.
-			scene(context, game, 2);
-			for (int k = 0; k < 7; k++) {
-				server.runCommand("execute at @p run fill ~-40 ~" + (k - 1) + " ~" + (28 + 2 * k) + " ~40 ~" + (k - 1) + " ~" + (62 - 2 * k) + " minecraft:grass_block");
-			}
-			trees(server, 30, 44, 26);
-			server.runCommand("time set 13300");
-			look(context, server, 36, "stare");
-			context.waitTicks(20);
-			shoot(context, "occupant-gallery-4-on-the-ridge");
-
-			// Outside the window, at night, from inside a lit room.
-			scene(context, game, 3);
-			server.runCommand("execute at @p run fill ~-4 ~-1 ~-4 ~4 ~3 ~3 minecraft:spruce_planks hollow");
-			server.runCommand("execute at @p run fill ~-1 ~1 ~3 ~1 ~2 ~3 minecraft:glass_pane");
-			server.runCommand("execute at @p run setblock ~3 ~ ~-3 minecraft:lantern");
-			server.runCommand("execute at @p run setblock ~-3 ~ ~2 minecraft:crafting_table");
-			server.runCommand("execute at @p run setblock ~3 ~ ~2 minecraft:red_bed[facing=west,part=head]");
-			server.runCommand("execute at @p run setblock ~2 ~ ~2 minecraft:red_bed[facing=west,part=foot]");
-			trees(server, 14, 26, 12);
-			server.runCommand("time set 18000");
-			look(context, server, 9, "stare");
-			server.runCommand("execute as @p at @s run tp @s ~ ~ ~ 0 -8");
-			context.waitTicks(10);
-			shoot(context, "occupant-gallery-5-at-the-window");
-
-			// Facing away from it in the dark, then turning round.
-			scene(context, game, 4);
-			trees(server, -24, -10, 14);
-			server.runCommand("time set 18500");
-			server.runCommand("execute as @p at @s run tp @s ~ ~ ~ 180 0");
-			look(context, server, 3.5f, "loom");
-			server.runCommand("execute as @p at @s run tp @s ~ ~ ~ 0 0");
-			context.waitTicks(10);
-			shoot(context, "occupant-gallery-6-nothing-there");
-			server.runCommand("execute as @p at @s run tp @s ~ ~ ~ 180 -12");
-			context.waitTicks(4);
-			shoot(context, "occupant-gallery-7-turned-around");
-
-			// Down a tunnel lit by torches, braced against the walls.
-			scene(context, game, 5);
-			server.runCommand("execute at @p run fill ~-3 ~-1 ~-2 ~3 ~4 ~30 minecraft:deepslate_bricks hollow");
-			server.runCommand("execute at @p run fill ~-2 ~-1 ~-1 ~2 ~-1 ~29 minecraft:cobbled_deepslate");
-			for (int z = 3; z <= 27; z += 6) {
-				server.runCommand("execute at @p run setblock ~-2 ~2 ~" + z + " minecraft:wall_torch[facing=east]");
-				server.runCommand("execute at @p run setblock ~2 ~2 ~" + (z + 3) + " minecraft:wall_torch[facing=west]");
-			}
-			look(context, server, 13, "stare");
-			shoot(context, "occupant-gallery-8-tunnel");
-			look(context, server, 6, "loom");
-			shoot(context, "occupant-gallery-9-tunnel-close");
-
-			// Out in the rain, in the last of the light.
-			scene(context, game, 6);
-			trees(server, 18, 40, 22);
-			server.runCommand("weather rain");
-			server.runCommand("time set 13000");
-			look(context, server, 24, "stare");
-			context.waitTicks(40);
-			shoot(context, "occupant-gallery-10-rain");
-
-			// Coming for you through the trees.
-			server.runCommand("weather clear");
-			server.runCommand("time set 12800");
-			look(context, server, 16, "chase");
-			context.waitTicks(10);
-			shoot(context, "occupant-gallery-11-coming");
-			server.runCommand("kill " + ALL);
-		} catch (RuntimeException | AssertionError e) {
-			// Photographs only: never let them fail the run that proved everything else.
-			Occupant.LOGGER.warn("[client-gametest] gallery stopped early", e);
-		}
-	}
-
-	/** Like {@link #spawn}, for photographs: if it does not arrive, take the picture anyway. */
-	private static void look(ClientGameTestContext context, TestServerContext server, float distance, String pose) {
-		server.runCommand("kill " + ALL);
-		context.waitTicks(2);
-		server.runCommand("execute as @p at @s run occupant here " + distance + " " + pose);
-		for (int i = 0; i < 100 && context.computeOnClient(OccupantClientGameTest::seen) == 0; i++) {
-			context.waitTick();
-		}
-		context.waitTicks(30);
-	}
-
-	/** Moves the player somewhere new and untouched, facing south, and waits for it to load. */
-	private static void scene(ClientGameTestContext context, TestSingleplayerContext game, int n) {
-		TestServerContext server = game.getServer();
-		server.runCommand("kill " + ALL);
-		server.runCommand("execute as @p at @s run tp @s ~" + 400 + " ~ ~ 0 0");
-		server.runCommand("execute as @p at @s run tp @s ~ ~ ~ 0 0");
-		context.waitTicks(20);
-		game.getClientLevel().waitForChunksRender();
-		Occupant.LOGGER.info("[client-gametest] gallery scene {}", n);
-	}
-
-	/** A scattering of trees across the view, from {@code near} to {@code far} blocks ahead. */
-	private static void trees(TestServerContext server, int near, int far, int count) {
-		String[] kinds = {"minecraft:oak", "minecraft:dark_oak", "minecraft:birch", "minecraft:spruce", "minecraft:fancy_oak"};
-		for (int i = 0; i < count; i++) {
-			int x = (int) Math.round(Math.sin(i * 2.399) * (8 + (i * 7) % 23));
-			int z = near + (int) Math.abs(Math.round(((i * 0.618) % 1.0) * (far - near)));
-			if (Math.abs(x) < 3 && Math.abs(z) < 30) x += x < 0 ? -4 : 4;   // keep the middle clear
-			String kind = kinds[i % kinds.length];
-			server.runCommand("execute at @p run place feature " + kind + " ~" + x + " ~ ~" + z);
-		}
+		ForestGallery.run(context);
 	}
 
 	/** Clears away any Occupant, puts a new one in front of the player, and waits for it to arrive. */
@@ -318,7 +181,7 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 	}
 
 	/** Takes a screenshot and files a copy under a fixed name, whatever the game called it. */
-	private static Path shoot(ClientGameTestContext context, String name) {
+	static Path shoot(ClientGameTestContext context, String name) {
 		Path taken = context.takeScreenshot(name);
 		Path kept = SHOTS.resolve(name + ".png");
 		try {
@@ -357,7 +220,7 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 		return count;
 	}
 
-	private static int seen(Minecraft mc) {
+	static int seen(Minecraft mc) {
 		if (mc.level == null || mc.player == null) return 0;
 		return mc.level.getEntitiesOfClass(OccupantEntity.class, mc.player.getBoundingBox().inflate(48)).size();
 	}
