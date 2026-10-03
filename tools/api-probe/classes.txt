@@ -10,3 +10,7 @@ net.minecraft.world.entity.Entity getPosition|position\(|getYRot|getX\(|getEyeY|
 net.minecraft.world.entity.LivingEntity yBodyRot|getYHeadRot|getPreciseBodyRotation
 net.minecraft.world.level.Level getGameTime|getBlockState|isLoaded
 @code net.minecraft.client.model.geom.ModelPart translateAndRotate|resetPose
+# Round 9: culling by something bigger than the hitbox.
+net.minecraft.client.renderer.entity.EntityRenderer shouldRender|Culling|culling
+@protected net.minecraft.client.renderer.entity.EntityRenderer shouldRender|Culling|culling
+net.minecraft.world.entity.Entity Culling|culling

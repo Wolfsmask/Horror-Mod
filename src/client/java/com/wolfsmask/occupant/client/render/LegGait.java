@@ -136,7 +136,7 @@ final class LegGait {
 				Vec3 ideal = ideal(i, yaw, reach, hipY - body.y);
 				double drift = ideal == null ? 0.0 : Math.hypot(foot[i].x - ideal.x, foot[i].z - ideal.z) / reach;
 				score = Math.max((stretch - 0.9) * 10.0, drift - 0.55);
-				if (recheck && !solidAt(level, foot[i])) score = 2.0;
+				if (recheck && !heldBy(level, foot[i])) score = 2.0;   // what it held is gone
 			}
 			if (score > worstScore) {
 				worstScore = score;
@@ -269,11 +269,26 @@ final class LegGait {
 			BlockState bs = level.getBlockState(pos);
 			VoxelShape shape = bs.getCollisionShape(level, pos);
 			if (!shape.isEmpty()) {
+				// Solid right at the top of the search means the spot is inside a wall or a hill,
+				// not on top of anything: no hold there.
+				if (y == top) return null;
 				Vec3 at = new Vec3(g.x, y + shape.max(Direction.Axis.Y), g.z);
 				return at.distanceTo(hip) <= reach * 0.97 ? at : null;
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Whether a planted point is still against something. Holds sit exactly on a surface (the top
+	 * of a block, or just off the face of a wall), so look a little way off it in every direction
+	 * rather than at the point itself, which is always in the air.
+	 */
+	private static boolean heldBy(Level level, Vec3 p) {
+		for (Direction d : Direction.values()) {
+			if (solidAt(level, p.add(d.getStepX() * 0.12, d.getStepY() * 0.12, d.getStepZ() * 0.12))) return true;
+		}
+		return false;
 	}
 
 	private static boolean solidAt(Level level, Vec3 p) {

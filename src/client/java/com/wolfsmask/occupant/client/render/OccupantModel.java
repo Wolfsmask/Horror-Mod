@@ -164,12 +164,12 @@ public class OccupantModel extends HumanoidModel<OccupantRenderState> {
 				ty = y3;
 				tz = z3;
 			} else {
-				// Free: out to the side and down, folded, slowly feeling about.
+				// Free: hanging down beside the body, long and limp, slowly feeling about.
 				float feel = Mth.sin(t * 0.031f + i * 1.7f);
-				float reach = (upperLength[i] + lowerLength[i]) * (0.55f + 0.1f * feel);
-				tx = px + ox * reach * 0.55f;
-				ty = py + reach * (0.45f + 0.12f * Mth.sin(t * 0.023f + i));
-				tz = pz + oz * reach * 0.55f;
+				float reach = (upperLength[i] + lowerLength[i]) * (0.8f + 0.08f * feel);
+				tx = px + ox * reach * (0.3f + 0.06f * Mth.sin(t * 0.023f + i));
+				ty = py + reach * 0.88f;
+				tz = pz + oz * reach * 0.3f;
 			}
 			// The joint goes out the way the leg points, and only a little up.
 			if (!solve(i, px, py, pz, tx, ty, tz, ox, -0.3f, oz)) {
