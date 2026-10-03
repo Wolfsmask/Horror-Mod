@@ -1,7 +1,17 @@
-# Round 10: a real generated world for the photographs.
-net.minecraft.server.level.ServerLevel findClosestBiome3d|getHeight|getChunk\(|setDayTime|getSharedSpawnPos|getRespawnData|getLevelData
-net.minecraft.world.level.levelgen.Heightmap$Types
-net.minecraft.world.level.biome.Biomes DARK_FOREST|FOREST|OLD_GROWTH|BIRCH|PALE
-net.minecraft.core.Holder is\(
-net.minecraft.client.gui.screens.worldselection.WorldCreationUiState set|Seed|Preset|WorldType|GameMode|Difficulty
-net.minecraft.world.entity.Entity snapTo|setYHeadRot|setYBodyRot
+# Round 11: a house that generates in the world.
+net.minecraft.world.level.levelgen.feature.Feature Feature\(|place|setBlock|register
+@protected net.minecraft.world.level.levelgen.feature.Feature Feature\(|setBlock
+net.minecraft.world.level.levelgen.feature.FeaturePlaceContext
+net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration
+net.minecraft.world.level.LevelWriter setBlock
+net.minecraft.world.level.WorldGenLevel
+net.fabricmc.fabric.api.biome.v1.BiomeModifications addFeature
+net.fabricmc.fabric.api.biome.v1.BiomeSelectors
+net.fabricmc.fabric.api.biome.v1.BiomeSelectionContext
+net.minecraft.world.level.levelgen.GenerationStep$Decoration
+net.minecraft.core.registries.Registries PLACED_FEATURE|CONFIGURED_FEATURE|FEATURE
+net.minecraft.core.registries.BuiltInRegistries FEATURE
+net.minecraft.world.level.block.StairBlock FACING|HALF
+net.minecraft.world.level.block.SlabBlock TYPE
+net.minecraft.tags.BiomeTags IS_FOREST|IS_TAIGA|IS_OCEAN|IS_RIVER
+net.minecraft.resources.ResourceKey create
