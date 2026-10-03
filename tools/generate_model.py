@@ -35,11 +35,14 @@ rng = np.random.default_rng(909)
 
 SIDES = ("front", "back", "left", "right")
 
-# Heights, in pixels above the ground (the model is built upside down: up is -y).
-HIP = 26.0
-SHOULDER = 46.0
-NECK_TOP = 52.0
-HEAD_TOP = 62.0
+# Minecraft draws model y = 24 at the entity's feet (up is -y). Everything was once built as
+# though the ground were y = 0, which left the whole body floating a block in the air in game,
+# so the hips are now placed wherever puts the soles exactly on y = 24, and check_model.py
+# fails the build if they ever leave it again.
+GROUND = 24.0
+# Hip joint to sole: thigh offset, thigh, shin, foot.
+LEG = 4.35 + 14.0 + 12.0 + 1.6
+HIPS_Y = GROUND - LEG
 # Nothing is ever taken off. What it is wearing is most of what it is.
 SHROUD = ()
 
@@ -54,29 +57,34 @@ _S = np.random.default_rng(31)
 # Every strand gets its own fractional position and thickness, stepped by irrational ratios so
 # the sequence never repeats. No two strands can share a face plane, and none of them can land
 # on the round coordinates the robe and the arms are built on.
-def _strand(seq, x, z, y, length):
+def _strand(seq, x, z, y, length, thin=False):
     fx = 0.11 + 0.78 * ((seq * 0.6180339887) % 1.0)
     fz = 0.07 + 0.78 * ((seq * 0.4142135624) % 1.0)
-    w = 0.85 + 0.75 * ((seq * 0.2360679775) % 1.0)
-    return ("strand", np.floor(x - w / 2) + fx, y, np.floor(z - w / 2) + fz, w, length, w)
+    span = (0.55, 0.6) if thin else (0.85, 0.75)
+    w = span[0] + span[1] * ((seq * 0.2360679775) % 1.0)
+    kind = "hair" if thin else "strand"
+    return (kind, np.floor(x - w / 2) + fx, y, np.floor(z - w / 2) + fz, w, length, w)
 
 
 def _cowl_strands():
-    """Strands hanging around the skull, longest at the back, shortest beside the face."""
+    """
+    Long hair: thin strands falling from the crown down both sides of the face and down the
+    back, leaving the front open so the face is the one thing you can see in it.
+    """
     out = []
-    for i in range(22):
-        a = (i / 22.0) * 2.0 * np.pi
-        # Leave the front open: the face has to be the only thing you can see in there.
+    for i in range(30):
+        a = (i / 30.0) * 2.0 * np.pi
         front = np.cos(a)
-        if front < -0.62 and abs(np.sin(a)) < 0.55:
-            continue
-        # An ellipse, not a circle: the head is wider than it is deep, and strands on a circle
-        # either float off the back of it or land flat on its sides.
-        x = float(np.sin(a)) * (4.9 + 0.45 * float(_S.random()))
-        z = float(np.cos(a)) * (3.6 + 0.35 * float(_S.random()))
-        # Short enough to stop above the shoulders, so the mantle takes over from there.
-        length = 8.5 + 9.5 * max(0.0, (front + 0.6) / 1.6) + 3.5 * float(_S.random())
-        out.append(_strand(i + 1, x, z, -7.13, length))
+        if front < -0.5 and abs(np.sin(a)) < 0.62:
+            continue                                   # the face
+        x = float(np.sin(a)) * (4.25 + 0.5 * float(_S.random()))
+        z = float(np.cos(a)) * (3.55 + 0.45 * float(_S.random()))
+        if front < 0.0:
+            # Beside the face the hair has to hang clear of the cheeks, not through them.
+            x = float(np.sign(np.sin(a))) * max(abs(x), 4.05)
+        # Long enough at the sides to frame the face past the chin; longest down the back.
+        length = 20.0 + 9.0 * max(0.0, (front + 1.0) / 2.0) + 6.0 * float(_S.random())
+        out.append(_strand(i + 1, x, z, -6.9, length, thin=True))
     return out
 
 
@@ -96,7 +104,7 @@ def parts():
     p = [
         # HumanoidModel looks these up by name. They draw nothing; the head anchor is only used
         # to find out where the viewer is.
-        ("head", None, (0, -NECK_TOP, 0), (0, 0, 0), []),
+        ("head", None, (0, HIPS_Y - 36.0, 0), (0, 0, 0), []),
         ("hat", "head", (0, 0, 0), (0, 0, 0), []),
         ("body", None, (0, 0, 0), (0, 0, 0), []),
         ("right_arm", None, (0, 0, 0), (0, 0, 0), []),
@@ -104,7 +112,7 @@ def parts():
         ("right_leg", None, (0, 0, 0), (0, 0, 0), []),
         ("left_leg", None, (0, 0, 0), (0, 0, 0), []),
 
-        ("hips", None, (0, -HIP, 0), (0, 0, 0), [
+        ("hips", None, (0, HIPS_Y, 0), (0, 0, 0), [
             ("drape", -3.5, -1.0, -2.0, 7, 6, 4),
         ]),
         ("spine", "hips", (0, -1.0, 0), (0, 0, 0), [
@@ -122,20 +130,32 @@ def parts():
         ]),
         ("mantle", "yoke", (0, -1.5, 0), (0, 0, 0), _mantle_strands()),
 
-        ("neck", "yoke", (0, -1.5, 0), (0, 0, 0), [
-            ("drape", -1.75, -5.0, -1.75, 3.5, 5, 3.5),
+        # A long neck, set back and hidden in the hair, so the face seems to hang there.
+        ("neck", "yoke", (0, -1.5, 0.8), (0, 0, 0), [
+            ("drape", -1.45, -13.0, -1.45, 2.9, 13, 2.9),
         ]),
 
-        # The mask. Broad, smooth, the colour of old ivory, and far too still.
-        ("skull", "neck", (0, -4.5, 0), (0, 0, 0), [
-            ("mask", -4.0, -8.5, -3.0, 8, 9, 5.5),
+        # The top of the face: a broad, rounded brow and two small round holes set close
+        # together over a narrow bridge.
+        ("skull", "neck", (0, -13.0, -0.8), (0, 0, 0), [
+            ("face", -3.5, -7.0, -3.0, 7, 7, 6),
+            ("crown", -2.75, -8.1, -2.4, 5.5, 1.1, 4.8),       # rounds off the top of it
         ]),
-        # What is under it: a throat that goes down much further than a throat should.
-        ("maw", "skull", (0, -1.0, -2.6), (0, 0, 0), [
-            ("maw", -1.5, 0.0, -1.0, 3, 9, 3),
+        # The rest of the face is the mouth. The skin carries on down both sides of it, much
+        # too far, to a small pointed chin; between them it is open, with a row of small teeth
+        # along the top and something red at the bottom.
+        ("jaw", "skull", (0, 0, 0), (0, 0, 0), [
+            ("cheek", 1.75, 0.0, -2.95, 1.7, 6.0, 3.35),       # cheeks, either side
+            ("cheek", -3.45, 0.0, -2.95, 1.7, 6.0, 3.35),
+            ("cheek", 1.35, 6.0, -2.8, 1.4, 4.6, 3.0),         # narrowing towards the chin
+            ("cheek", -2.75, 6.0, -2.8, 1.4, 4.6, 3.0),
+            ("chin", -1.85, 9.55, -2.6, 3.7, 2.1, 2.55),
+            ("mouth", -1.74, 0.02, -2.0, 3.48, 9.56, 1.9),     # set back: the inside of it
+            ("teeth", -1.68, 0.05, -2.72, 3.36, 0.85, 0.71),
         ]),
-        # The cowl, hanging off the back and sides of the mask.
-        ("cowl", "skull", (0, -1.0, 0), (0, 0, 0), _cowl_strands()),
+        # No loose hairs standing up off the crown: in blocks, anything sticking up off a head
+        # reads as horns or antennae, however short it is.
+        ("hair", "skull", (0, 0, 0), (0, 0, 0), _cowl_strands()),
     ]
 
     # Arms: thin, under the robe, ending in pale hands with far too much finger.
@@ -187,53 +207,65 @@ def _world_origins(ps):
     return out
 
 
-def avoid_coplanar(ps, step=0.041, tries=60):
+def avoid_coplanar(ps, tries=400):
     """
-    Nudges each strand until none of its faces lies in the same plane as a face of anything
-    else. Two coplanar overlapping faces have no defined draw order, so in game the surface
-    flickers between them as the camera moves, and with forty strands draped over a robe that
-    would otherwise happen by luck rather than by design. Fixing it here means the geometry
-    cannot regress the next time the shape is changed.
+    Moves each strand until none of its six faces lies in the same plane as a face of any box
+    it overlaps. Entity models are drawn without back-face culling, so two coplanar overlapping
+    faces have no defined order: the surface flickers between them as the camera moves. With
+    sixty-odd strands of hair laid over a robe that happens by luck rather than design, so it is
+    removed here, on every regeneration, instead of relying on the shape staying as it is.
+
+    Positions are compared after rounding to the precision the Java is written with, so what is
+    checked here is exactly what the game will build.
     """
     origins = _world_origins(ps)
 
-    def faces(axis):
-        """Face coordinates of everything that is not a strand, plus strands placed so far."""
-        out = []
-        for name, _p, _piv, _r, boxes in ps:
-            ox, oy, oz = origins[name]
-            off = (ox, oy, oz)[axis]
-            for kind, x, y, z, w, h, d in boxes:
-                lo = (x, y, z)[axis] + off
-                out.append((lo, lo + (w, h, d)[axis]))
-        return out
+    def world(name, box):
+        ox, oy, oz = origins[name]
+        _k, x, y, z, w, h, d = box
+        lo = (round(x, 2) + ox, round(y, 2) + oy, round(z, 2) + oz)
+        return lo, (lo[0] + round(w, 2), lo[1] + round(h, 2), lo[2] + round(d, 2))
+
+    def clashes(name, i, box):
+        lo, hi = world(name, box)
+        for other_name, _p, _piv, _r, others in ps:
+            for j, other in enumerate(others):
+                if other_name == name and j == i:
+                    continue
+                olo, ohi = world(other_name, other)
+                for axis in range(3):
+                    u, v = (axis + 1) % 3, (axis + 2) % 3
+                    if min(hi[u], ohi[u]) - max(lo[u], olo[u]) <= 0.02:
+                        continue
+                    if min(hi[v], ohi[v]) - max(lo[v], olo[v]) <= 0.02:
+                        continue
+                    for a_ in (lo[axis], hi[axis]):
+                        for b_ in (olo[axis], ohi[axis]):
+                            if abs(a_ - b_) < 0.03:
+                                return True
+        return False
 
     moved = 0
     for name, _p, _piv, _r, boxes in ps:
-        ox, oy, oz = origins[name]
         for i, box in enumerate(boxes):
-            if box[0] != "strand":
+            if box[0] not in ("strand", "hair"):
                 continue
-            for _ in range(tries):
-                clash = False
-                for axis, off in ((0, ox), (2, oz)):
-                    lo = box[1 + axis] + off
-                    hi = lo + box[4 + axis]
-                    for other_lo, other_hi in faces(axis):
-                        if abs(other_lo - lo) < 1e-9 and abs(other_hi - hi) < 1e-9:
-                            continue                     # itself
-                        for a in (lo, hi):
-                            for b in (other_lo, other_hi):
-                                if abs(a - b) < 0.03:
-                                    clash = True
-                if not clash:
-                    break
-                box = (box[0], box[1] + step, box[2], box[3] + step * 0.7,
-                       box[4], box[5], box[6])
+            k = 0
+            while clashes(name, i, box) and k < tries:
+                # A small step in a direction that never repeats, so it cannot oscillate
+                # between two bad positions.
+                k += 1
+                dx = 0.09 * (((k * 0.6180339887) % 1.0) - 0.5)
+                dz = 0.09 * (((k * 0.7548776662) % 1.0) - 0.5)
+                dy = 0.09 * (((k * 0.5698402910) % 1.0) - 0.5)
+                kind, x, y, z, w, h, d = box
+                box = (kind, x + dx, y + dy, z + dz, w, h, d)
                 boxes[i] = box
                 moved += 1
+            if k >= tries:
+                raise SystemExit("could not place a strand of %s clear of everything else" % name)
     if moved:
-        print("nudged strands %d times to keep faces out of each other's planes" % moved)
+        print("moved strands %d times to keep their faces out of each other's planes" % moved)
     return ps
 
 
@@ -286,12 +318,16 @@ def faces_of(u, v, w, h, d):
 
 # --------------------------------------------------------------------------- painting
 
-IVORY = (214, 202, 182)    # the mask: old ivory, warm, not white
-IVORY_LOW = (172, 160, 144)
-DRAPE = (31, 25, 23)       # everything it is wearing: a brown so dark it reads as black
-DRAPE_LIT = (52, 43, 39)
-PIT = (6, 5, 6)            # the eye holes, and the back of the throat
-MEAT = (96, 44, 38)        # inside the mouth, and only there
+SKIN = (198, 180, 168)      # pale, faintly pink, like something kept out of the light
+SKIN_HI = (219, 205, 193)
+SKIN_LO = (156, 134, 124)
+PIT = (8, 5, 5)             # the eye holes, and the inside of the mouth
+RED = (112, 40, 36)         # the bottom of the mouth, and only there
+TOOTH = (206, 193, 176)
+HAIR = (58, 32, 27)         # long, thin, the brown of old dried blood
+HAIR_LIT = (90, 54, 45)
+HAIR_DEEP = (33, 19, 17)
+DRAPE = (40, 24, 21)        # the robe: the same colour as the hair, so the two run together
 
 
 def paint_texture(boxes, placed):
@@ -306,59 +342,103 @@ def paint_texture(boxes, placed):
         img[y0:y1, x0:x1, :3] = np.clip(np.array(rgb) + n, 0, 255)
         img[y0:y1, x0:x1, 3] = 255
 
+    def mark_dark(f):
+        for side in f.values():
+            cx0, cy0, cx1, cy1 = side
+            dark_mask[cy0:cy1, cx0:cx1] = True
+
+    def skin(f, shade_sides=24):
+        """Pale skin, blotched, darker where it turns away from the light."""
+        for side in f.values():
+            fill(side, SKIN, 6)
+        for name in ("left", "right", "back"):
+            x0, y0, x1, y1 = f[name]
+            img[y0:y1, x0:x1, :3] = np.clip(img[y0:y1, x0:x1, :3].astype(int) - shade_sides, 0, 255)
+        for name in SIDES:
+            x0, y0, x1, y1 = f[name]
+            for _ in range(max(1, (x1 - x0) * (y1 - y0) // 10)):
+                bx, by = int(rng.integers(x0, x1)), int(rng.integers(y0, y1))
+                img[by, bx, :3] = (184, 158, 150)                 # faint blotches
+
     for i, (owner, kind, _x, _y, _z, w, h, d) in enumerate(boxes):
         u, v = placed[i]
         f = faces_of(u, v, w, h, d)
 
-        if kind in ("drape", "strand"):
+        if kind in ("drape", "strand", "hair"):
+            base = DRAPE if kind == "drape" else HAIR
             for side in f.values():
-                fill(side, DRAPE, 5)
-                cx0, cy0, cx1, cy1 = side
-                dark_mask[cy0:cy1, cx0:cx1] = True
+                fill(side, base, 5)
+            mark_dark(f)
             for side in SIDES:
                 x0, y0, x1, y1 = f[side]
-                # Nothing it wears has a hem; it all just stops.
                 for x in range(x0, x1):
                     cut = int(rng.integers(0, 4))
                     if cut:
-                        img[y1 - cut:y1, x, 3] = 0
-                # A little length in the folds, so it does not read as flat black.
-                for _ in range(max(1, (x1 - x0))):
+                        img[y1 - cut:y1, x, 3] = 0                # it frays out, never a hem
+                for _ in range(max(1, (x1 - x0) * 2)):
                     fx = int(rng.integers(x0, x1))
-                    fy = int(rng.integers(y0, max(y0 + 1, y1 - 4)))
-                    img[fy:fy + 4, fx, :3] = DRAPE_LIT
+                    fy = int(rng.integers(y0, max(y0 + 1, y1 - 3)))
+                    img[fy:fy + 3, fx, :3] = HAIR_LIT if rng.random() < 0.5 else HAIR_DEEP
 
-        elif kind == "maw":
+        elif kind == "face":
+            paint_face(img, f)
+
+        elif kind == "crown":
+            skin(f, shade_sides=18)
+            x0, y0, x1, y1 = f["top"]
+            img[y0:y1, x0:x1, :3] = np.clip(img[y0:y1, x0:x1, :3].astype(int) - 14, 0, 255)
+
+        elif kind == "cheek":
+            skin(f)
+            # The edge that faces into the mouth is in its shadow.
+            for name in ("left", "right"):
+                x0, y0, x1, y1 = f[name]
+                img[y0:y1, x0:x1, :3] = np.clip(img[y0:y1, x0:x1, :3].astype(int) - 40, 0, 255)
+            x0, y0, x1, y1 = f["front"]
+            img[y0:y1, x0, :3] = SKIN_LO
+            img[y0:y1, x1 - 1, :3] = SKIN_LO
+
+        elif kind == "chin":
+            skin(f)
+            x0, y0, x1, y1 = f["front"]
+            img[y0, x0:x1, :3] = RED                              # the lower lip, wet
+            x0, y0, x1, y1 = f["top"]
+            img[y0:y1, x0:x1, :3] = RED
+
+        elif kind == "mouth":
             for side in f.values():
                 fill(side, PIT, 2)
-            # The throat: red at the rim where it tears into the mask, black all the way down.
-            for side in SIDES:
-                x0, y0, x1, y1 = f[side]
-                img[y0, x0:x1, :3] = MEAT
-                img[y0 + 1, x0:x1, :3] = (54, 24, 22)
-                for _ in range(max(1, (x1 - x0) // 2)):
-                    fx = int(rng.integers(x0, x1))
-                    img[y0 + 2:y0 + 4, fx, :3] = (44, 20, 19)
-                # Threads of something pale still bridging the gap.
-                for _ in range(2):
-                    fx = int(rng.integers(x0, x1))
-                    fy = int(rng.integers(y0 + 2, max(y0 + 3, y1 - 1)))
-                    img[fy, fx, :3] = (150, 136, 120)
+            x0, y0, x1, y1 = f["front"]
+            h_ = y1 - y0
+            # Black all the way in, going to red at the bottom.
+            for k in range(min(3, h_)):
+                t = (k + 1) / 3.0
+                row = y1 - 1 - k
+                img[row, x0:x1, :3] = np.clip(np.array(RED) * (1.0 - 0.3 * k) + np.array(PIT) * 0.3 * k, 0, 255)
+            # Something pale and stringy hanging down from behind the teeth.
+            for _ in range(2):
+                sx = int(rng.integers(x0, x1))
+                img[y0 + 1:y0 + 3, sx, :3] = (120, 104, 96)
+
+        elif kind == "teeth":
+            for side in f.values():
+                fill(side, TOOTH, 6)
+            x0, y0, x1, y1 = f["front"]
+            for x in range(x0, x1):
+                if (x - x0) % 2 == 1:
+                    img[y0:y1, x, :3] = (40, 26, 24)              # the gaps between them
 
         elif kind == "pale":
             for side in f.values():
-                fill(side, IVORY_LOW, 7)
+                fill(side, SKIN_LO, 7)
             x0, y0, x1, y1 = f["front"]
-            img[max(y0, y1 - 3):y1, x0:x1, :3] = (58, 48, 44)   # dark at the fingertips
-
-        elif kind == "mask":
-            paint_mask(img, f)
+            img[max(y0, y1 - 3):y1, x0:x1, :3] = (70, 48, 44)     # dark at the fingertips
 
         else:
             for side in f.values():
-                fill(side, IVORY, 6)
+                fill(side, SKIN, 6)
 
-    # A faint sheen, drawn full-bright, so the mask is the one thing still visible in the dark.
+    # A faint sheen, drawn full-bright, so the face is the one thing still visible in the dark.
     lit = img.astype(np.float32)
     lit[:, :, :3] *= 0.17
     lit[dark_mask] = 0
@@ -370,40 +450,36 @@ def paint_texture(boxes, placed):
     Image.fromarray(glow, "RGBA").save(TEX / "occupant_glow.png")
 
 
-def paint_mask(img, f):
+def paint_face(img, f):
     """
-    A smooth ivory face with two holes in it. The holes are the whole design: they are far too
-    large, perfectly round-edged, and there is nothing behind them, so there is no way to tell
-    where it is looking or whether it is looking at all.
+    The top of the face: a broad pale brow, two small round black holes set close over a
+    narrow bridge, and nothing else. The rest of the face is the mouth, built separately.
     """
     for side in f.values():
         x0, y0, x1, y1 = side
         n = rng.integers(-5, 6, size=(y1 - y0, x1 - x0, 1))
-        img[y0:y1, x0:x1, :3] = np.clip(np.array(IVORY) + n, 0, 255)
+        img[y0:y1, x0:x1, :3] = np.clip(np.array(SKIN) + n, 0, 255)
         img[y0:y1, x0:x1, 3] = 255
-
-    # The sides and back curve away from the light, and the cowl lies over them.
     for side in ("back", "left", "right", "top"):
         x0, y0, x1, y1 = f[side]
-        img[y0:y1, x0:x1, :3] = np.clip(img[y0:y1, x0:x1, :3].astype(int) - 30, 0, 255)
+        img[y0:y1, x0:x1, :3] = np.clip(img[y0:y1, x0:x1, :3].astype(int) - 24, 0, 255)
 
     x0, y0, x1, y1 = f["front"]
-    w, h = x1 - x0, y1 - y0
-
-    # Two holes, set wide in a face that is otherwise entirely smooth. They are not eyes: there
-    # is nothing behind them, which is why you cannot tell where it is looking.
-    ex0, ex1 = x0 + 1, x1 - 3
+    w = x1 - x0
+    # The brow catches the most light.
+    img[y0:y0 + 2, x0 + 1:x1 - 1, :3] = SKIN_HI
+    # Two small round holes, close together, low on the brow.
     ey = y0 + 3
-    for ex in (ex0, ex1):
+    for ex in (x0 + 1, x0 + w - 3):
         img[ey:ey + 2, ex:ex + 2, :3] = PIT
-        img[ey + 2, ex:ex + 2, :3] = (162, 150, 134)     # the cheekbone under them
-    img[ey:ey + 2, x0 + w // 2 - 1:x0 + w // 2 + 1, :3] = (224, 213, 194)
-
-    # The brow: one flat plane, no expression in it at all.
-    img[y0, x0:x1, :3] = (186, 174, 156)
-    # Where the mask ends and the mouth begins: it does not end cleanly.
-    img[y1 - 1, x0 + 1:x1 - 1, :3] = (120, 96, 86)
-    img[y1 - 2, x0 + 2:x1 - 2, :3] = (146, 124, 110)
+        # A ring of shadow, so the hole reads round rather than square.
+        img[ey - 1, ex:ex + 2, :3] = SKIN_LO
+        img[ey + 2, ex:ex + 2, :3] = SKIN_LO
+        img[ey:ey + 2, ex - 1 if ex > x0 else ex, :3] = np.minimum(
+            img[ey:ey + 2, ex - 1 if ex > x0 else ex, :3], np.array(SKIN_LO))
+    # The narrow bridge between them, and the shadow under it where the mouth begins.
+    img[ey:ey + 3, x0 + w // 2, :3] = SKIN_HI
+    img[y1 - 1, x0 + 2:x1 - 2, :3] = SKIN_LO
 
 
 
@@ -442,7 +518,10 @@ def num(v):
 
 
 def write_java(ps, boxes, placed):
-    height = HEAD_TOP
+    # Measured, not declared: the renderer scales the body by this, so it has to be what was built.
+    origins = _world_origins(ps)
+    top = min(origins[name][1] + y for name, _p, _piv, _r, own in ps for (_k, _x, y, _z, _w, _h, _d) in own)
+    height = GROUND - top
     lines = [HEADER % (", ".join('"%s"' % n for n in SHROUD), num(height).rstrip("f"))]
     box_at = {}
     for i, (owner, *_rest) in enumerate(boxes):

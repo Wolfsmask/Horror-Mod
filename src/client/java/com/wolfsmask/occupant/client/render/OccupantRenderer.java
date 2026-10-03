@@ -22,12 +22,12 @@ public class OccupantRenderer extends HumanoidMobRenderer<OccupantEntity, Occupa
 	 * Its built height in blocks. Up close it is kept near this, so it still fits in the rooms
 	 * and caves the story puts it in.
 	 */
-	private static final float NEAR_BLOCKS = 2.6f;
+	private static final float NEAR_BLOCKS = 2.9f;
 	/**
 	 * Far away there is nothing beside it to measure it against, and it reads as much larger:
 	 * a shape standing above the treeline. Nobody ever sees both at once, which is the point.
 	 */
-	private static final float FAR_BLOCKS = 3.9f;
+	private static final float FAR_BLOCKS = 4.2f;
 	/** However cramped the room, it is never allowed to look like a person. */
 	private static final float MIN_BLOCKS = 2.0f;
 	private static final float NEAR_DISTANCE = 28.0f;

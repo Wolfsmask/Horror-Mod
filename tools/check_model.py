@@ -90,24 +90,30 @@ def span(a0, a1, b0, b1):
 
 
 def check_planes(boxes, parents):
-    """Coplanar, overlapping faces from unrelated bones: the cause of flickering surfaces."""
+    """
+    Two faces lying in the same plane, pointing the same way, and overlapping. Entity models
+    are drawn without back-face culling, so there is no rule for which one wins: the surface
+    flickers between them as the camera moves. This applies between any two boxes at all,
+    including two in the same bone and a bone and its own parent.
+
+    Two boxes that merely touch (one's right face against the other's left face) are a seam,
+    not a flicker: the shared plane is enclosed by the two boxes and can never be seen.
+    """
     bad = []
     for i in range(len(boxes)):
         na, pa, A = boxes[i]
         for j in range(i + 1, len(boxes)):
             nb, pb, B = boxes[j]
-            if related(na, nb, parents):
-                continue
             for axis in range(3):
                 u, v = (axis + 1) % 3, (axis + 2) % 3
                 ou = span(A[u], A[u + 3], B[u], B[u + 3])
                 ov = span(A[v], A[v + 3], B[v], B[v + 3])
                 if ou <= AREA_EPS or ov <= AREA_EPS:
                     continue
-                for fa in (A[axis], A[axis + 3]):
-                    for fb in (B[axis], B[axis + 3]):
-                        if abs(fa - fb) < PLANE_EPS:
-                            bad.append((na, nb, "xyz"[axis], fa, ou * ov))
+                # Same side only: both minimum faces, or both maximum faces.
+                for side in (0, 3):
+                    if abs(A[axis + side] - B[axis + side]) < PLANE_EPS:
+                        bad.append((na, nb, "xyz"[axis], A[axis + side], ou * ov))
     return bad
 
 
@@ -169,6 +175,27 @@ def check_lookups():
     return sorted(w for w in wanted if w not in defined)
 
 
+def check_ground(boxes):
+    """
+    Minecraft draws model y = 24 at the entity's feet. If the lowest point of the body is not
+    there, it floats above the ground or stands in it, in every single frame it is ever seen.
+    The renderer also scales the body by OccupantGeometry.HEIGHT, which has to be the height that
+    was actually built or the body comes out the wrong size.
+    """
+    problems = []
+    lowest = max(b[2][4] for b in boxes)
+    highest = min(b[2][1] for b in boxes)
+    if abs(lowest - 24.0) > 0.3:
+        where = "floats %.1f px above" % (24.0 - lowest) if lowest < 24.0 else "sinks %.1f px into" % (lowest - 24.0)
+        problems.append("its lowest point is at y = %.2f, so it %s the ground (should be 24)" % (lowest, where))
+    m = re.search(r'HEIGHT = (-?[\d.]+)f', GEOM.read_text())
+    if m is None:
+        problems.append("OccupantGeometry.HEIGHT is missing")
+    elif abs(float(m.group(1)) - (24.0 - highest)) > 0.3:
+        problems.append("HEIGHT says %s px but the body is %.2f px tall" % (m.group(1), 24.0 - highest))
+    return problems
+
+
 def check_tree(parents):
     """Every bone has to hang off something that exists, or the mesh cannot be built."""
     bad = []
@@ -189,6 +216,13 @@ def main():
         print("\nBROKEN LOOKUPS (the model will throw when it is first drawn):")
         for m in missing:
             print("  OccupantModel wants a bone called '%s', which does not exist" % m)
+
+    ground = check_ground(boxes)
+    if ground:
+        problems += len(ground)
+        print("\nNOT STANDING ON THE GROUND:")
+        for g in ground:
+            print("  " + g)
 
     orphans = check_tree(parents)
     if orphans:

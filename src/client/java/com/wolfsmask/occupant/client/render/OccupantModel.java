@@ -16,7 +16,7 @@ import net.minecraft.util.Mth;
  *     The only motion is a slow drift you cannot quite be sure you saw.</li>
  *     <li>What movement there is arrives between frames. It holds a pose, then it is in the next
  *     one, the way a thing looks in photographs taken a second apart.</li>
- *     <li>It only opens its mouth when it is already too late to matter.</li>
+ *     <li>Its mouth is always open. When it is close, it opens further than a mouth goes.</li>
  * </ul>
  * VEILED is early in the story, when it keeps its head down and is harder to make out at a
  * distance; REVEALED is when it looks at you.
@@ -31,6 +31,9 @@ public class OccupantModel extends HumanoidModel<OccupantRenderState> {
 	private final ModelPart neck;
 
 	private final ModelPart skull;
+	/** Everything below the eyes: the cheeks, the mouth between them, the chin. */
+	private final ModelPart jaw;
+	private final ModelPart hair;
 	private final ModelPart[] upper = new ModelPart[2];
 	private final ModelPart[] fore = new ModelPart[2];
 	private final ModelPart[][] finger = new ModelPart[2][FINGERS];
@@ -45,6 +48,8 @@ public class OccupantModel extends HumanoidModel<OccupantRenderState> {
 		this.yoke = spine.getChild("yoke");
 		this.neck = yoke.getChild("neck");
 		this.skull = neck.getChild("skull");
+		this.jaw = skull.getChild("jaw");
+		this.hair = skull.getChild("hair");
 		for (int s = 0; s < 2; s++) {
 			upper[s] = yoke.getChild(SIDE[s] + "_upper");
 			fore[s] = upper[s].getChild(SIDE[s] + "_fore");
@@ -74,6 +79,10 @@ public class OccupantModel extends HumanoidModel<OccupantRenderState> {
 		float drift = Mth.sin(t * 0.013f);
 		spine.xRot = 0.03f + 0.012f * drift;
 		hips.zRot = 0.008f * drift;
+		// The hair lags behind the head and settles slowly, as if it were in water.
+		hair.xRot = 0.025f * Mth.sin(t * 0.021f + 1.3f);
+		hair.zRot = 0.03f * Mth.sin(t * 0.017f);
+		jaw.yScale = 1.0f;
 
 		switch (state.mode) {
 			case CHASE -> chase(t, lookX, lookY);
@@ -123,6 +132,7 @@ public class OccupantModel extends HumanoidModel<OccupantRenderState> {
 
 	/** Close enough to touch you. It bends down to your height, and the mouth opens. */
 	private void loom(float lookX, float lookY) {
+		jaw.yScale = 1.3f;                          // the face pulls longer, around the mouth
 		spine.xRot = 0.55f;
 		neck.xRot = -0.35f + lookX * 0.3f;
 		skull.xRot = 0.45f + lookX * 0.4f;
@@ -142,6 +152,7 @@ public class OccupantModel extends HumanoidModel<OccupantRenderState> {
 	/** Running. Far too long in the stride, and it does not swing its arms; they trail. */
 	private void chase(float t, float lookX, float lookY) {
 		float gait = t * 0.62f;
+		jaw.yScale = 1.25f + 0.08f * Mth.sin(t * 0.9f);
 		spine.xRot = 0.5f;
 		neck.xRot = -0.55f;
 		skull.xRot = 0.4f + lookX * 0.3f;
