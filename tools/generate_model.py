@@ -328,6 +328,8 @@ HAIR = (58, 32, 27)         # long, thin, the brown of old dried blood
 HAIR_LIT = (90, 54, 45)
 HAIR_DEEP = (33, 19, 17)
 DRAPE = (40, 24, 21)        # the robe: the same colour as the hair, so the two run together
+# How strongly the face shows through in the dark, as the glow layer's opacity (0-255).
+SHEEN = 56
 
 
 def paint_texture(boxes, placed):
@@ -439,11 +441,11 @@ def paint_texture(boxes, placed):
                 fill(side, SKIN, 6)
 
     # A faint sheen, drawn full-bright, so the face is the one thing still visible in the dark.
-    lit = img.astype(np.float32)
-    lit[:, :, :3] *= 0.17
-    lit[dark_mask] = 0
-    glow = lit.astype(np.uint8)
-    glow[:, :, 3] = np.where(img[:, :, 3] > 0, 255, 0)
+    # The game draws this layer BLENDED over the body, not added to it: an opaque pixel here
+    # replaces the lit face underneath. So the sheen is the face's own colour at low opacity.
+    # (It used to be a dimmed copy at full opacity, which painted the face dark grey in daylight.)
+    glow = img.copy()
+    glow[:, :, 3] = np.where(img[:, :, 3] > 0, SHEEN, 0)
     glow[dark_mask] = 0
 
     Image.fromarray(img, "RGBA").save(TEX / "occupant.png")

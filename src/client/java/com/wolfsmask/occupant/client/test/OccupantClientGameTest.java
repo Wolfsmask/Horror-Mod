@@ -13,12 +13,15 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+
+import javax.imageio.ImageIO;
 
 /**
  * Boots the real game client, with a real renderer, and does what a player does.
@@ -58,16 +61,22 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 				shoot(context, "occupant-" + pose);
 			}
 
-			// Three quarters on, then close enough to see the face.
+			// Three quarters on, then close enough to see the face. "facing" aims from the feet, so
+			// aim at its feet (level) and then tilt up by hand to where its face actually is.
 			spawn(context, server, 5, "stare");
-			server.runCommand("execute as @p at @s run tp @s ^3 ^ ^1 facing entity " + ONE + " eyes");
+			server.runCommand("execute as @p at @s run tp @s ^3 ^ ^1 facing entity " + ONE + " feet");
 			context.waitTicks(10);
 			shoot(context, "occupant-three-quarter");
 			server.runCommand("execute as @p at @s run tp @s ~ ~ ~ 0 0");
 			spawn(context, server, 2.5f, "stare");
-			server.runCommand("execute as @p at @s run tp @s ~ ~ ~ facing entity " + ONE + " eyes");
+			server.runCommand("execute as @p at @s run tp @s ~ ~ ~ 0 -20");
 			context.waitTicks(10);
-			shoot(context, "occupant-face");
+			Path face = shoot(context, "occupant-face");
+			// The face is the whole design. In daylight it has to come out pale, not shaded or
+			// painted over by another layer, which is exactly what once happened.
+			int pale = palePixels(face);
+			Occupant.LOGGER.info("[client-gametest] pale face pixels in the close-up: {}", pale);
+			check(pale >= 800, "the face should be pale in daylight, but only " + pale + " pale pixels were found");
 
 			// Indoors, under a two-block ceiling: it has to stoop rather than stand through the roof.
 			server.runCommand("execute as @p at @s run tp @s ~ ~ ~ 0 0");
@@ -133,15 +142,43 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 	}
 
 	/** Takes a screenshot and files a copy under a fixed name, whatever the game called it. */
-	private static void shoot(ClientGameTestContext context, String name) {
+	private static Path shoot(ClientGameTestContext context, String name) {
 		Path taken = context.takeScreenshot(name);
+		Path kept = SHOTS.resolve(name + ".png");
 		try {
 			Files.createDirectories(SHOTS);
-			Files.copy(taken, SHOTS.resolve(name + ".png"), StandardCopyOption.REPLACE_EXISTING);
+			Files.copy(taken, kept, StandardCopyOption.REPLACE_EXISTING);
 		} catch (IOException e) {
 			throw new UncheckedIOException("could not keep screenshot " + taken, e);
 		}
 		Occupant.LOGGER.info("[client-gametest] screenshot {} -> {}", name, taken);
+		return kept;
+	}
+
+	/**
+	 * Counts the ivory, faintly pink pixels in a screenshot: the colour of its face. The sky is
+	 * blue, the grass green and the hearts red, so none of those count. The bottom of the screen
+	 * is left out, where the hotbar and the player's own (skin-coloured) arm are.
+	 */
+	private static int palePixels(Path shot) {
+		BufferedImage img;
+		try {
+			img = ImageIO.read(shot.toFile());
+		} catch (IOException e) {
+			throw new UncheckedIOException("could not read screenshot " + shot, e);
+		}
+		check(img != null, "could not decode screenshot " + shot);
+		int count = 0;
+		int bottom = (int) (img.getHeight() * 0.8f);
+		int right = (int) (img.getWidth() * 0.7f);
+		for (int y = 0; y < bottom; y++) {
+			for (int x = 0; x < right; x++) {
+				int rgb = img.getRGB(x, y);
+				int r = (rgb >> 16) & 0xFF, g = (rgb >> 8) & 0xFF, b = rgb & 0xFF;
+				if (r >= 110 && r >= b + 8 && r - b <= 70 && g >= r - 45 && g <= r) count++;
+			}
+		}
+		return count;
 	}
 
 	private static int seen(Minecraft mc) {

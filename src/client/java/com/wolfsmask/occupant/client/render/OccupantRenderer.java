@@ -89,9 +89,13 @@ public class OccupantRenderer extends HumanoidMobRenderer<OccupantEntity, Occupa
 	}
 
 	/**
-	 * A very faint copy of the body, drawn full-bright. Bone does not glow, but without this it
-	 * would be a black cutout in a dark forest, and the whole story depends on you being able to
-	 * almost see it. The shroud is left out of it, so the covered shape stays unreadable.
+	 * A very faint copy of the face and hands, drawn full-bright. Skin does not glow, but without
+	 * this it would be a black cutout in a dark forest, and the whole story depends on you being
+	 * able to almost see it. The hair and the body are left out of it, so the shape stays
+	 * unreadable.
+	 * <p>
+	 * This layer is alpha-blended over the body, not added to it, so the texture carries the face's
+	 * real colour at low opacity: in daylight it changes nothing, in the dark it is all you see.
 	 */
 	private static final class PaleSheen extends EyesLayer<OccupantRenderState, OccupantModel> {
 		private static final RenderType TYPE = RenderTypes.eyes(GLOW);
