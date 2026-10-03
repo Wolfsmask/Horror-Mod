@@ -6,14 +6,12 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CrossCollisionBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -22,7 +20,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConf
 
 /**
  * A small abandoned house that turns up on its own in woods and fields. Nobody lives in it. There
- * is a main room you walk straight into, with a cold bed and a table and a little grey light from
+ * is a main room you walk straight into, with an old barrel and a table and a little grey light from
  * two windows, and off to the right, through a gap in the inside wall, a long narrow hallway with
  * no windows at all that runs the length of the house into the dark.
  * <p>
@@ -35,7 +33,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConf
  *   x: 0 1 2 3 4 5 6 7 8 9 10 11
  * z=10 # # # # # # # # # # #  #    back
  *   9  # B . . . S S . # .  .  #
- *   8  # B . . . . . . # .  .  #    B bed, S shelves, T table, c chair
+ *   8  # B . . . . . . # .  .  #    B barrel, S shelves, T table, c chair
  *   7  # . . . . . . . # .  .  #
  *   6  = . c T . . . . # .  .  #    = window
  *   5  # . . . . . . . # .  .  #
@@ -202,10 +200,8 @@ public final class HouseFeature extends Feature<NoneFeatureConfiguration> {
 					Blocks.DARK_OAK_SLAB.defaultBlockState().setValue(SlabBlock.TYPE, SlabType.BOTTOM));
 
 			// What was left behind.
-			put(1, 1, 8, Blocks.RED_BED.defaultBlockState().setValue(BedBlock.FACING, Direction.SOUTH)
-					.setValue(BedBlock.PART, BedPart.FOOT));
-			put(1, 1, 9, Blocks.RED_BED.defaultBlockState().setValue(BedBlock.FACING, Direction.SOUTH)
-					.setValue(BedBlock.PART, BedPart.HEAD));
+			put(1, 1, 9, Blocks.BARREL.defaultBlockState());
+			put(1, 1, 8, Blocks.SPRUCE_SLAB.defaultBlockState());
 			put(3, 1, 6, Blocks.SPRUCE_FENCE.defaultBlockState());
 			put(3, 2, 6, Blocks.SPRUCE_PRESSURE_PLATE.defaultBlockState());
 			put(2, 1, 6, Blocks.SPRUCE_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.WEST));
