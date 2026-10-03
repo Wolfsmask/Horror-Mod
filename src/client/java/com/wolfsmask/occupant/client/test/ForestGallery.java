@@ -58,30 +58,40 @@ final class ForestGallery {
 			server.runCommand("item replace entity @p hotbar.6 with minecraft:crafting_table");
 
 			BlockPos forest = server.computeOnServer(s -> findForest(s.overworld(),
-					s.getPlayerList().getPlayers().get(0).blockPosition()));
+					s.getPlayerList().getPlayers().get(0).blockPosition(), true));
+			// An ordinary forest as well, for any shot the dark forest is too thick to get.
+			BlockPos other = server.computeOnServer(s -> findForest(s.overworld(),
+					s.getPlayerList().getPlayers().get(0).blockPosition(), false));
+			if (forest == null) forest = other;
+			if (other == null) other = forest;
 			if (forest == null) {
 				Occupant.LOGGER.warn("[client-gametest] no forest found for the gallery");
 				return;
 			}
-			Occupant.LOGGER.info("[client-gametest] gallery forest at {}", forest);
+			Occupant.LOGGER.info("[client-gametest] gallery forests at {} and {}", forest, other);
+			BlockPos[] woods = {forest, other};
 
-			scene(context, game, forest, 1, "forest-day", 6000, 17, "stare", false);
-			scene(context, game, forest, 2, "forest-dusk", 12700, 22, "veiled", false);
-			scene(context, game, forest, 3, "forest-night", 18000, 11, "stare", false);
-			scene(context, game, forest, 4, "forest-night-close", 18000, 5.5, "loom", false);
-			behindYou(context, game, forest);
-			scene(context, game, forest, 7, "coming-through-the-trees", 13000, 15, "chase", false);
-			scene(context, game, forest, 8, "rain", 12900, 16, "stare", true);
+			scene(context, game, woods, 1, "forest-day", 6000, 17, "stare", false);
+			scene(context, game, woods, 2, "forest-dusk", 12700, 22, "veiled", false);
+			scene(context, game, woods, 3, "forest-night", 18000, 11, "stare", false);
+			scene(context, game, woods, 4, "forest-night-close", 18000, 5.5, "loom", false);
+			behindYou(context, game, woods);
+			scene(context, game, woods, 7, "coming-through-the-trees", 13000, 15, "chase", false);
+			scene(context, game, woods, 8, "rain", 12900, 16, "stare", true);
 		} catch (RuntimeException | AssertionError e) {
 			Occupant.LOGGER.warn("[client-gametest] forest gallery stopped early", e);
 		}
 	}
 
-	private static void scene(ClientGameTestContext context, TestSingleplayerContext game, BlockPos forest,
+	private static void scene(ClientGameTestContext context, TestSingleplayerContext game, BlockPos[] woods,
 							  int n, String name, int time, double distance, String pose, boolean rain) {
 		try {
 			TestServerContext server = game.getServer();
-			Shot shot = server.computeOnServer(s -> frame(s.overworld(), forest, distance, n));
+			Shot shot = null;
+			for (BlockPos forest : woods) {
+				shot = server.computeOnServer(s -> frame(s.overworld(), forest, distance, n));
+				if (shot != null) break;
+			}
 			if (shot == null) {
 				Occupant.LOGGER.warn("[client-gametest] no clear view for gallery shot {}", name);
 				return;
@@ -97,10 +107,14 @@ final class ForestGallery {
 	}
 
 	/** Facing away from it in the dark, then turning round to find it right there. */
-	private static void behindYou(ClientGameTestContext context, TestSingleplayerContext game, BlockPos forest) {
+	private static void behindYou(ClientGameTestContext context, TestSingleplayerContext game, BlockPos[] woods) {
 		try {
 			TestServerContext server = game.getServer();
-			Shot shot = server.computeOnServer(s -> frame(s.overworld(), forest, 3.5, 5));
+			Shot shot = null;
+			for (BlockPos forest : woods) {
+				shot = server.computeOnServer(s -> frame(s.overworld(), forest, 3.5, 5));
+				if (shot != null) break;
+			}
 			if (shot == null) return;
 			server.runCommand("weather clear");
 			server.runCommand("time set 18500");
@@ -149,12 +163,12 @@ final class ForestGallery {
 
 	// ---------------------------------------------------------------- finding the spot (server side)
 
-	private static BlockPos findForest(ServerLevel level, BlockPos from) {
+	private static BlockPos findForest(ServerLevel level, BlockPos from, boolean darkOnly) {
 		Predicate<Holder<Biome>> dark = h -> h.is(Biomes.DARK_FOREST);
-		Predicate<Holder<Biome>> any = h -> h.is(Biomes.DARK_FOREST) || h.is(Biomes.OLD_GROWTH_SPRUCE_TAIGA)
+		Predicate<Holder<Biome>> any = h -> h.is(Biomes.OLD_GROWTH_SPRUCE_TAIGA)
 				|| h.is(Biomes.OLD_GROWTH_PINE_TAIGA) || h.is(Biomes.FOREST) || h.is(Biomes.BIRCH_FOREST)
 				|| h.is(Biomes.OLD_GROWTH_BIRCH_FOREST);
-		var found = level.findClosestBiome3d(dark, from, 6400, 32, 64);
+		var found = darkOnly ? level.findClosestBiome3d(dark, from, 6400, 32, 64) : null;
 		Predicate<Holder<Biome>> kind = dark;
 		if (found == null) {
 			found = level.findClosestBiome3d(any, from, 6400, 32, 64);
@@ -177,42 +191,52 @@ final class ForestGallery {
 	 * clear line from the player's eyes to its whole height. Trees all round, just not in the way.
 	 */
 	private static Shot frame(ServerLevel level, BlockPos forest, double distance, int salt) {
-		for (int ring = 0; ring <= 48; ring += 4) {
+		int columns = 0, standable = 0, pairs = 0, lowLines = 0;
+		Shot fallback = null;
+		for (int ring = 0; ring <= 64; ring += 4) {
 			int steps = Math.max(1, ring * 2);
 			for (int k = 0; k < steps; k++) {
 				double a = 2.0 * Math.PI * (k + 0.37 * salt) / steps;
 				int px = forest.getX() + (int) Math.round(Math.cos(a) * ring) + salt * 9;
 				int pz = forest.getZ() + (int) Math.round(Math.sin(a) * ring);
-				Integer py = ground(level, px, pz);
+				columns++;
+				Integer py = ground(level, px, pz, 3);
 				if (py == null) continue;
+				standable++;
 				for (int d = 0; d < 16; d++) {
 					double yaw = Math.toRadians(d * 22.5 + salt * 37.0);
 					double ex = px + 0.5 - Math.sin(yaw) * distance;
 					double ez = pz + 0.5 + Math.cos(yaw) * distance;
-					Integer ey = ground(level, (int) Math.floor(ex), (int) Math.floor(ez));
-					if (ey == null || Math.abs(ey - py) > 3) continue;
+					Integer ey = ground(level, (int) Math.floor(ex), (int) Math.floor(ez), 2);
+					if (ey == null || Math.abs(ey - py) > 4) continue;
+					pairs++;
 					double eye = py + 1.62;
-					if (!clear(level, px + 0.5, eye, pz + 0.5, ex, ey + 1.0, ez)) continue;
-					if (!clear(level, px + 0.5, eye, pz + 0.5, ex, ey + 2.6, ez)) continue;
-					if (!clear(level, px + 0.5, eye, pz + 0.5, ex, ey + 4.0, ez)) continue;
+					// Its legs and body have to be in view; its head may be in the leaves.
+					if (!clear(level, px + 0.5, eye, pz + 0.5, ex, ey + 0.8, ez)) continue;
+					if (!clear(level, px + 0.5, eye, pz + 0.5, ex, ey + 2.0, ez)) continue;
+					lowLines++;
 					float look = (float) Math.toDegrees(Math.atan2(-(ex - px - 0.5), ez - pz - 0.5));
-					float pitch = (float) -Math.toDegrees(Math.atan2(ey + 2.4 - eye, distance));
+					float pitch = (float) -Math.toDegrees(Math.atan2(ey + 1.8 - eye, distance));
 					float back = (float) Math.toDegrees(Math.atan2(-(px + 0.5 - ex), pz + 0.5 - ez));
-					return new Shot(px + 0.5, py, pz + 0.5, look, pitch, ex, ey, ez, back);
+					Shot shot = new Shot(px + 0.5, py, pz + 0.5, look, pitch, ex, ey, ez, back);
+					if (clear(level, px + 0.5, eye, pz + 0.5, ex, ey + 3.4, ez)) return shot;  // face too
+					if (fallback == null) fallback = shot;
 				}
 			}
 		}
-		return null;
+		Occupant.LOGGER.info("[client-gametest] framing {} at {}: {} columns, {} standable, {} pairs, {} with a view",
+				salt, distance, columns, standable, pairs, lowLines);
+		return fallback;
 	}
 
 	/** The ground to stand on in this column, under the canopy; null if it is not forest floor. */
-	private static Integer ground(ServerLevel level, int x, int z) {
+	private static Integer ground(ServerLevel level, int x, int z, int headroom) {
 		level.getChunk(x >> 4, z >> 4);
 		int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
 		BlockPos feet = new BlockPos(x, y, z);
 		BlockState floor = level.getBlockState(feet.below());
 		if (!floor.is(BlockTags.DIRT)) return null;                    // a trunk, a rock, water
-		for (int h = 0; h < 5; h++) {
+		for (int h = 0; h < headroom; h++) {
 			BlockPos p = feet.above(h);
 			if (!level.getBlockState(p).getCollisionShape(level, p).isEmpty()) return null;
 			if (!level.getFluidState(p).isEmpty()) return null;
