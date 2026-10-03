@@ -7,6 +7,16 @@ while IFS= read -r line; do
 	[[ -z "${line// }" || "$line" == \#* ]] && continue
 	vis="-public"
 	if [[ "$line" == @protected* ]]; then vis="-protected"; line="${line#@protected }"; fi
+	if [[ "$line" == @jars* ]]; then
+		# "@jars <regex>": which jars on the classpath match, and the classes inside them.
+		pat="${line#@jars }"
+		echo "=== jars matching $pat"
+		tr ':' '\n' <<< "$CP" | grep -E "$pat" | while read -r jar; do
+			echo "--- $(basename "$jar")"
+			unzip -Z1 "$jar" 2>/dev/null | grep '\.class$' | grep -v '\$' | sed 's/\.class$//; s#/#.#g' | head -80
+		done
+		continue
+	fi
 	if [[ "$line" == @code* ]]; then
 		# "@code <Class> <method regex>": bytecode of the matching methods (which children a model looks up, etc.)
 		line="${line#@code }"

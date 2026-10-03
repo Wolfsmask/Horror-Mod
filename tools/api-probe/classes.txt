@@ -1,4 +1,2 @@
-# Round 5: spawn reasons, so only command/egg spawns adopt a player.
-net.minecraft.world.entity.EntitySpawnReason
-@protected net.minecraft.world.entity.Mob finalizeSpawn|SpawnGroupData
-net.minecraft.gametest.framework.GameTestHelper spawn\(|makeMock
+# Round 6: can the real client be booted in CI to prove the model renders?
+@jars client-gametest|lwjgl-vulkan|lwjgl-opengl
