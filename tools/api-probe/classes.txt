@@ -1,11 +1,11 @@
-# Round 7: the client game test API, to boot the real client in CI.
-net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest
-net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext
-net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext
-net.fabricmc.fabric.api.client.gametest.v1.context.TestClientLevelContext
-net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext
-net.fabricmc.fabric.api.client.gametest.v1.world.TestWorldBuilder
-net.fabricmc.fabric.api.client.gametest.v1.screenshot.TestScreenshotOptions
-net.fabricmc.fabric.api.client.gametest.v1.TestInput
-@protected net.fabricmc.fabric.impl.client.gametest.TestSystemProperties
-@code net.fabricmc.fabric.impl.client.gametest.TestSystemProperties <clinit>|static
+# Round 8: the many-legged body, which plants its feet on real blocks.
+net.minecraft.client.renderer.entity.EntityRenderer Offset|extractRenderState|render\(|shadow|Shadow
+@protected net.minecraft.client.renderer.entity.LivingEntityRenderer setupRotations|scale|getFlipDegrees|extractRenderState
+@code net.minecraft.client.renderer.entity.LivingEntityRenderer submit|render
+net.minecraft.client.renderer.entity.state.EntityRenderState
+net.minecraft.client.renderer.entity.state.LivingEntityRenderState
+net.minecraft.client.model.geom.ModelPart
+net.minecraft.world.phys.shapes.VoxelShape max|min|isEmpty
+net.minecraft.world.entity.Entity getPosition|position\(|getYRot|getX\(|getEyeY|level\(|tickCount
+net.minecraft.world.entity.LivingEntity yBodyRot|getYHeadRot|getPreciseBodyRotation
+net.minecraft.world.level.Level getGameTime|getBlockState|isLoaded
