@@ -138,7 +138,10 @@ jobs:
         run: |
           mkdir -p docs/client-test
           rm -f docs/client-test/*.png
-          find build/clientGametest -name "occupant-*.png" -exec cp {} docs/client-test/ \; || true
+          # The test files a copy of each photograph under its own name; fall back to a search.
+          cp build/clientGametest/occupant-shots/*.png docs/client-test/ 2>/dev/null \
+            || find build/clientGametest -iname "*occupant*.png" -exec cp {} docs/client-test/ \; || true
+          find build/clientGametest -iname "*.png" | head -n 40 > docs/client-test/files.txt || true
           {
             echo "# Client game test on $GITHUB_SHA ($(date -u +%FT%TZ)): ${{ job.status }}"
             grep -E "client-gametest|Exception|Error|AssertionError|FAILED|Occupant|occupant" client.log | grep -v "DEBUG" | head -n 120

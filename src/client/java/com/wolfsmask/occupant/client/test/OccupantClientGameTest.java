@@ -8,10 +8,16 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
 import net.fabricmc.fabric.api.client.gametest.v1.world.TestWorldSave;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 /**
@@ -27,6 +33,9 @@ import java.util.List;
  */
 public final class OccupantClientGameTest implements FabricClientGameTest {
 	private static final String ALL = "@e[type=occupant:occupant]";
+	private static final String ONE = "@e[type=occupant:occupant,limit=1]";
+	/** Where the photographs are gathered, so CI can pick them up by a name it knows. */
+	private static final Path SHOTS = FabricLoader.getInstance().getGameDir().resolve("occupant-shots");
 
 	@Override
 	public void runTest(ClientGameTestContext context) {
@@ -46,36 +55,35 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 			// Every pose, straight on, five blocks away.
 			for (String pose : List.of("stare", "veiled", "loom", "chase")) {
 				spawn(context, server, 5, pose);
-				context.takeScreenshot("occupant-" + pose);
+				shoot(context, "occupant-" + pose);
 			}
 
 			// Three quarters on, then close enough to see the face.
 			spawn(context, server, 5, "stare");
-			server.runCommand("execute as @p at @s run tp @s ^3 ^ ^1 facing entity " + ALL + "[limit=1] eyes");
+			server.runCommand("execute as @p at @s run tp @s ^3 ^ ^1 facing entity " + ONE + " eyes");
 			context.waitTicks(10);
-			context.takeScreenshot("occupant-three-quarter");
+			shoot(context, "occupant-three-quarter");
 			server.runCommand("execute as @p at @s run tp @s ~ ~ ~ 0 0");
 			spawn(context, server, 2.5f, "stare");
-			server.runCommand("execute as @p at @s run tp @s ~ ~ ~ facing entity " + ALL + "[limit=1] eyes");
+			server.runCommand("execute as @p at @s run tp @s ~ ~ ~ facing entity " + ONE + " eyes");
 			context.waitTicks(10);
-			context.takeScreenshot("occupant-face");
+			shoot(context, "occupant-face");
 
 			// Indoors, under a two-block ceiling: it has to stoop rather than stand through the roof.
 			server.runCommand("execute as @p at @s run tp @s ~ ~ ~ 0 0");
-			server.runCommand("execute at @p run fill ~-4 ~-1 ~-2 ~4 ~3 ~10 minecraft:stone_bricks hollow");
-			server.runCommand("execute at @p run fill ~-3 ~ ~-1 ~3 ~1 ~9 minecraft:air");
+			server.runCommand("execute at @p run fill ~-4 ~-1 ~-2 ~4 ~2 ~10 minecraft:stone_bricks hollow");
 			server.runCommand("execute at @p run setblock ~2 ~1 ~-1 minecraft:lantern[hanging=false]");
 			server.runCommand("execute at @p run setblock ~2 ~ ~-1 minecraft:stone_bricks");
 			spawn(context, server, 5, "stare");
-			context.takeScreenshot("occupant-indoors");
-			server.runCommand("execute at @p run fill ~-4 ~-1 ~-2 ~4 ~3 ~10 minecraft:air");
+			shoot(context, "occupant-indoors");
+			server.runCommand("execute at @p run fill ~-4 ~ ~-2 ~4 ~2 ~10 minecraft:air");
 
 			// At night, from a long way off: it should still be just about visible.
 			server.runCommand("time set midnight");
 			spawn(context, server, 30, "stare");
-			context.takeScreenshot("occupant-night-distant");
+			shoot(context, "occupant-night-distant");
 			spawn(context, server, 6, "stare");
-			context.takeScreenshot("occupant-night-close");
+			shoot(context, "occupant-night-close");
 			server.runCommand("kill " + ALL);
 
 			// The way the user was locked out: going to sleep, quitting, and coming back. The game
@@ -109,7 +117,7 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 			check(errors == 0, "rejoining raised " + errors + " error(s) in the Occupant; see the log");
 			// And it still works afterwards.
 			spawn(context, again.getServer(), 5, "stare");
-			context.takeScreenshot("occupant-after-rejoin");
+			shoot(context, "occupant-after-rejoin");
 		}
 		Occupant.LOGGER.info("[client-gametest] all client checks passed");
 	}
@@ -122,6 +130,18 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 		// It is only ever sent to the player it is haunting, so this proves that path works too.
 		context.waitFor(mc -> seen(mc) == 1, 100);
 		context.waitTicks(30);   // let its pose settle; it moves in held steps
+	}
+
+	/** Takes a screenshot and files a copy under a fixed name, whatever the game called it. */
+	private static void shoot(ClientGameTestContext context, String name) {
+		Path taken = context.takeScreenshot(name);
+		try {
+			Files.createDirectories(SHOTS);
+			Files.copy(taken, SHOTS.resolve(name + ".png"), StandardCopyOption.REPLACE_EXISTING);
+		} catch (IOException e) {
+			throw new UncheckedIOException("could not keep screenshot " + taken, e);
+		}
+		Occupant.LOGGER.info("[client-gametest] screenshot {} -> {}", name, taken);
 	}
 
 	private static int seen(Minecraft mc) {
