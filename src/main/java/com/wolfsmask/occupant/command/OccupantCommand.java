@@ -58,9 +58,13 @@ public final class OccupantCommand {
 				// joining player, so a failure here would stop people getting into the world.
 				.requires(OccupantCommand::mayUse)
 				.then(literal("here")
-						.executes(ctx -> here(ctx.getSource(), 5.0f))
+						.executes(ctx -> here(ctx.getSource(), 5.0f, "stare"))
 						.then(argument("distance", FloatArgumentType.floatArg(1.0f, 40.0f))
-								.executes(ctx -> here(ctx.getSource(), FloatArgumentType.getFloat(ctx, "distance")))))
+								.executes(ctx -> here(ctx.getSource(), FloatArgumentType.getFloat(ctx, "distance"), "stare"))
+								.then(argument("pose", StringArgumentType.word())
+										.suggests((ctx, builder) -> SharedSuggestionProvider.suggest(POSES, builder))
+										.executes(ctx -> here(ctx.getSource(), FloatArgumentType.getFloat(ctx, "distance"),
+												StringArgumentType.getString(ctx, "pose"))))))
 				.then(literal("check").executes(ctx -> check(ctx.getSource())))
 				.then(literal("status")
 						.executes(ctx -> status(ctx.getSource(), ctx.getSource().getPlayerOrException()))
@@ -123,7 +127,14 @@ public final class OccupantCommand {
 	 * The story events all need a convincing place before they will run; this one never refuses,
 	 * so there is always a way to prove the mod is working.
 	 */
-	private static int here(CommandSourceStack src, float distance) throws CommandSyntaxException {
+	/** Poses for /occupant here, for filming it, and for the client test to photograph. */
+	private static final java.util.List<String> POSES = java.util.List.of("stare", "veiled", "loom", "chase");
+
+	private static int here(CommandSourceStack src, float distance, String pose) throws CommandSyntaxException {
+		if (!POSES.contains(pose)) {
+			src.sendFailure(Component.literal("No such pose: " + pose + ". Try " + String.join(", ", POSES) + "."));
+			return 0;
+		}
 		ServerPlayer p = src.getPlayerOrException();
 		ServerLevel world = p.level();
 		Vec3 look = Sight.flatLook(p);
@@ -142,8 +153,12 @@ public final class OccupantCommand {
 		e.snapTo(at.x, at.y, at.z, yaw, 0.0f);
 		e.setYHeadRot(yaw);
 		e.setYBodyRot(yaw);
-		e.setMode(OccupantEntity.Mode.STARE);
-		e.setForm(OccupantEntity.Form.REVEALED);
+		e.setMode(switch (pose) {
+			case "loom" -> OccupantEntity.Mode.AMBUSH;
+			case "chase" -> OccupantEntity.Mode.CHASE;
+			default -> OccupantEntity.Mode.STARE;
+		});
+		e.setForm("veiled".equals(pose) ? OccupantEntity.Form.VEILED : OccupantEntity.Form.REVEALED);
 		if (!world.addFreshEntity(e)) {
 			src.sendFailure(Component.literal("Could not place it there."));
 			return 0;

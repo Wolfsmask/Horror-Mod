@@ -22,6 +22,9 @@
     "fabric-gametest": [
       "com.wolfsmask.occupant.test.OccupantGameTests",
       "com.wolfsmask.occupant.test.ArenaGameTests"
+    ],
+    "fabric-client-gametest": [
+      "com.wolfsmask.occupant.client.test.OccupantClientGameTest"
     ]
   },
   "depends": {
