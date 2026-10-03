@@ -10,10 +10,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 
@@ -229,13 +229,27 @@ final class ForestGallery {
 		return fallback;
 	}
 
+	/** Forest floor: what you would actually be standing on in a wood. */
+	private static boolean isFloor(BlockState state) {
+		return state.is(Blocks.GRASS_BLOCK) || state.is(Blocks.DIRT) || state.is(Blocks.PODZOL)
+				|| state.is(Blocks.COARSE_DIRT) || state.is(Blocks.MOSS_BLOCK) || state.is(Blocks.ROOTED_DIRT)
+				|| state.is(Blocks.MYCELIUM) || state.is(Blocks.PALE_MOSS_BLOCK) || state.is(Blocks.SNOW_BLOCK);
+	}
+
+	private static int rejected;
+
 	/** The ground to stand on in this column, under the canopy; null if it is not forest floor. */
 	private static Integer ground(ServerLevel level, int x, int z, int headroom) {
 		level.getChunk(x >> 4, z >> 4);
 		int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
 		BlockPos feet = new BlockPos(x, y, z);
 		BlockState floor = level.getBlockState(feet.below());
-		if (!floor.is(BlockTags.DIRT)) return null;                    // a trunk, a rock, water
+		if (!isFloor(floor)) {                                          // a trunk, a rock, water
+			if (rejected++ < 6) {
+				Occupant.LOGGER.info("[client-gametest] not floor at {} {} {}: {}", x, y - 1, z, floor);
+			}
+			return null;
+		}
 		for (int h = 0; h < headroom; h++) {
 			BlockPos p = feet.above(h);
 			if (!level.getBlockState(p).getCollisionShape(level, p).isEmpty()) return null;
