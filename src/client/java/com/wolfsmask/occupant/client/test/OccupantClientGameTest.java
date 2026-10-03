@@ -78,6 +78,16 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 			Occupant.LOGGER.info("[client-gametest] pale face pixels in the close-up: {}", pale);
 			check(pale >= 800, "the face should be pale in daylight, but only " + pale + " pale pixels were found");
 
+			// Right underneath it, looking straight up at the face. Its hitbox is far below the
+			// screen here, so if the game culled it by the hitbox it would simply not be there.
+			server.runCommand("execute as @p at @s run tp @s ~ ~ ~ 0 0");
+			spawn(context, server, 2.0f, "stare");
+			server.runCommand("execute as @p at @s run tp @s ~ ~ ~ 0 -55");
+			context.waitTicks(10);
+			int above = palePixels(shoot(context, "occupant-looking-up"));
+			Occupant.LOGGER.info("[client-gametest] pale pixels looking up at it: {}", above);
+			check(above >= 400, "looking up at it from underneath, it was not drawn (" + above + " pale pixels)");
+
 			// Shoved: the entity is moved two blocks at once. The body is drawn trailing behind,
 			// then shoved after it, and the legs that are left stretched let go and re-plant.
 			server.runCommand("execute as @p at @s run tp @s ~ ~ ~ 0 0");
