@@ -1,111 +1,171 @@
-=== net.minecraft.client.input.MouseButtonEvent (-public)
-public final class client.input.MouseButtonEvent extends Record implements client.input.InputWithModifiers {
-  public client.input.MouseButtonEvent(double, double, client.input.MouseButtonInfo);
-  public int input();
-  public int button();
-  public int modifiers();
-  public final String toString();
-  public final int hashCode();
-  public final boolean equals(Object);
-  public double x();
-  public double y();
-  public client.input.MouseButtonInfo buttonInfo();
-}
-=== net.minecraft.client.input.MouseButtonInfo (-public)
-public final class client.input.MouseButtonInfo extends Record implements client.input.InputWithModifiers {
-  public client.input.MouseButtonInfo(int, int);
-  public int input();
-  public final String toString();
-  public final int hashCode();
-  public final boolean equals(Object);
-  public int button();
-  public int modifiers();
-}
-=== net.minecraft.client.gui.screens.Screen (-protected)
-public abstract class client.gui.screens.Screen extends client.gui.components.events.AbstractContainerEventHandler implements client.gui.components.Renderable {
-  public static final resources.Identifier MENU_BACKGROUND;
-  public static final resources.Identifier HEADER_SEPARATOR;
-  public static final resources.Identifier FOOTER_SEPARATOR;
-  public static final resources.Identifier INWORLD_HEADER_SEPARATOR;
-  public static final resources.Identifier INWORLD_FOOTER_SEPARATOR;
-  protected final network.chat.Component title;
-  protected final client.Minecraft minecraft;
-  public int width;
-  public int height;
-  protected final client.gui.Font font;
-  protected client.gui.components.CycleButton<client.NarratorStatus> narratorButton;
-  protected client.gui.screens.Screen(network.chat.Component);
-  protected client.gui.screens.Screen(client.Minecraft, client.gui.Font, network.chat.Component);
-  public network.chat.Component getTitle();
-  public network.chat.Component getNarrationMessage();
-  public final void extractRenderStateWithTooltipAndSubtitles(client.gui.GuiGraphicsExtractor, int, int, float);
-  public void extractRenderState(client.gui.GuiGraphicsExtractor, int, int, float);
-  public boolean keyPressed(client.input.KeyEvent);
-  protected void setInitialFocus(client.gui.components.events.GuiEventListener);
-  protected void changeFocus(client.gui.ComponentPath);
-  public boolean shouldCloseOnEsc();
-  public void onClose();
-  protected <T extends client.gui.components.events.GuiEventListener & client.gui.components.Renderable & client.gui.narration.NarratableEntry> T addRenderableWidget(T);
-  protected <T extends client.gui.components.Renderable> T addRenderableOnly(T);
-  protected <T extends client.gui.components.events.GuiEventListener & client.gui.narration.NarratableEntry> T addWidget(T);
-  protected void removeWidget(client.gui.components.events.GuiEventListener);
-  public static List<network.chat.Component> getTooltipFromItem(client.Minecraft, world.item.ItemStack);
-  protected static void defaultHandleGameClickEvent(network.chat.ClickEvent, client.Minecraft, client.gui.screens.Screen);
-  protected static void defaultHandleClickEvent(network.chat.ClickEvent, client.Minecraft, client.gui.screens.Screen);
-  protected static boolean clickUrlAction(client.Minecraft, client.gui.screens.Screen, java.net.URI);
-  protected static void clickCommandAction(client.player.LocalPlayer, String, client.gui.screens.Screen);
-  public final void init(int, int);
-  public List<? extends client.gui.components.events.GuiEventListener> children();
-  protected void init();
-  public void tick();
-  public void removed();
-  public void added();
-  public void extractBackground(client.gui.GuiGraphicsExtractor, int, int, float);
-  protected void extractBlurredBackground(client.gui.GuiGraphicsExtractor);
-  protected void extractPanorama(client.gui.GuiGraphicsExtractor, float);
-  protected void extractMenuBackground(client.gui.GuiGraphicsExtractor);
-  protected void extractMenuBackground(client.gui.GuiGraphicsExtractor, int, int, int, int);
-  public static void extractMenuBackgroundTexture(client.gui.GuiGraphicsExtractor, resources.Identifier, int, int, float, float, int, int);
-  public void extractTransparentBackground(client.gui.GuiGraphicsExtractor);
-  public boolean isPauseScreen();
-  public void fillCrashDetails(CrashReport);
-  protected void updateNarrationState(client.gui.narration.NarrationElementOutput);
-  protected void updateNarratedWidget(client.gui.narration.NarrationElementOutput);
-  protected network.chat.Component getUsageNarration();
-  public static client.gui.screens.Screen$NarratableSearchResult findNarratableWidget(List<? extends client.gui.narration.NarratableEntry>, client.gui.narration.NarratableEntry);
-  public client.gui.Font getFont();
-  public boolean canInterruptWithAnotherScreen();
-  public client.gui.navigation.ScreenRectangle getRectangle();
-  public sounds.Music getBackgroundMusic();
-=== net.minecraft.client.gui.screens.worldselection.CreateWorldScreen (-p)
-public class client.gui.screens.worldselection.CreateWorldScreen extends client.gui.screens.Screen {
-  private boolean recreated;
-  private final client.gui.screens.worldselection.CreateWorldCallback createWorldCallback;
-  public static void openFresh(client.Minecraft, Runnable);
-  public static void openFresh(client.Minecraft, Runnable, client.gui.screens.worldselection.CreateWorldCallback);
-  private static void openCreateWorldScreen(client.Minecraft, Runnable, Function<server.WorldLoader$DataLoadContext, world.level.levelgen.WorldGenSettings>, client.gui.screens.worldselection.WorldCreationContextMapper, resources.ResourceKey<world.level.levelgen.presets.WorldPreset>, client.gui.screens.worldselection.CreateWorldCallback);
-  public static client.gui.screens.worldselection.CreateWorldScreen createFromExisting(client.Minecraft, Runnable, world.level.LevelSettings, client.gui.screens.worldselection.WorldCreationContext, java.nio.file.Path);
-  private client.gui.screens.worldselection.CreateWorldScreen(client.Minecraft, Runnable, client.gui.screens.worldselection.WorldCreationContext, Optional<resources.ResourceKey<world.level.levelgen.presets.WorldPreset>>, OptionalLong, client.gui.screens.worldselection.CreateWorldCallback);
-  private void createWorldAndCleanup(core.LayeredRegistryAccess<server.RegistryLayer>, world.level.storage.LevelDataAndDimensions$WorldDataAndGenSettings, Optional<world.level.gamerules.GameRules>);
-  private boolean createNewWorld(core.LayeredRegistryAccess<server.RegistryLayer>, world.level.storage.LevelDataAndDimensions$WorldDataAndGenSettings, Optional<world.level.gamerules.GameRules>);
-  private world.level.LevelSettings createLevelSettings(boolean);
-  private static server.WorldLoader$InitConfig createDefaultLoadConfig(server.packs.repository.PackRepository, world.level.WorldDataConfiguration);
-  private static Optional<world.level.storage.LevelStorageSource$LevelStorageAccess> createNewWorldDirectory(client.Minecraft, String, java.nio.file.Path);
-  public static java.nio.file.Path createTempDataPackDirFromExistingWorld(java.nio.file.Path, client.Minecraft);
-  private static void lambda$createTempDataPackDirFromExistingWorld$1(org.apache.commons.lang3.mutable.MutableObject, java.nio.file.Path, java.nio.file.Path);
-  private static boolean lambda$createTempDataPackDirFromExistingWorld$0(java.nio.file.Path, java.nio.file.Path);
-  private static void lambda$createNewWorldDirectory$1(java.nio.file.Path, java.nio.file.Path, java.nio.file.Path);
-  private static boolean lambda$createNewWorldDirectory$0(java.nio.file.Path, java.nio.file.Path);
-  private static boolean lambda$createFromExisting$0(client.gui.screens.worldselection.CreateWorldScreen, core.LayeredRegistryAccess, world.level.storage.LevelDataAndDimensions$WorldDataAndGenSettings, Optional, java.nio.file.Path);
-  private static world.level.levelgen.WorldGenSettings lambda$openFresh$2(server.WorldLoader$DataLoadContext);
-  private static client.gui.screens.worldselection.WorldCreationContext lambda$openFresh$1(server.ReloadableServerResources, core.LayeredRegistryAccess, client.gui.screens.worldselection.DataPackReloadCookie);
-  private static boolean lambda$openFresh$0(client.gui.screens.worldselection.CreateWorldScreen, core.LayeredRegistryAccess, world.level.storage.LevelDataAndDimensions$WorldDataAndGenSettings, Optional, java.nio.file.Path);
-=== net.minecraft.client.Minecraft (-public)
-public class client.Minecraft extends util.thread.ReentrantBlockableEventLoop<Runnable> implements blaze3d.platform.WindowEventHandler {
-  public client.sounds.MusicManager getMusicManager();
-  public void setScreenAndShow(client.gui.screens.Screen);
-  public client.sounds.SoundManager getSoundManager();
-=== org.joml.Matrix3x2fStack (-public)
-public class org.joml.Matrix3x2fStack extends org.joml.Matrix3x2f {
-  public org.joml.Matrix3x2fStack pushMatrix();
-  public org.joml.Matrix3x2fStack popMatrix();
+=== Minecraft versions known to Fabric (newest first)
+26.4-snapshot-2 snapshot
+26.4-snapshot-1 snapshot
+26.3 stable
+26.3-rc-3 snapshot
+26.3-rc-2 snapshot
+26.3-rc-1 snapshot
+26.3-pre-3 snapshot
+26.3-pre-2 snapshot
+26.3-pre-1 snapshot
+26.3-snapshot-10 snapshot
+26.3-snapshot-9 snapshot
+26.3-snapshot-8 snapshot
+26.3-snapshot-7 snapshot
+26.3-snapshot-6 snapshot
+26.3-snapshot-5 snapshot
+26.3-snapshot-4 snapshot
+26.3-snapshot-3 snapshot
+26.3-snapshot-2 snapshot
+26.3-snapshot-1 snapshot
+26.2 stable
+26.2-rc-2 snapshot
+26.2-rc-1 snapshot
+26.2-pre-6 snapshot
+26.2-pre-5 snapshot
+26.2-pre-4 snapshot
+26.2-pre-3 snapshot
+26.2-pre-2 snapshot
+26.2-pre-1 snapshot
+26.2-snapshot-8 snapshot
+26.2-snapshot-7 snapshot
+26.2-snapshot-6 snapshot
+26.2-snapshot-5 snapshot
+26.2-snapshot-4 snapshot
+26.2-snapshot-3 snapshot
+26.2-snapshot-2 snapshot
+26.1.2 stable
+26.1.2-rc-1 snapshot
+26.2-snapshot-1 snapshot
+26w14a snapshot
+26.1.1 stable
+26.1.1-rc-1 snapshot
+26.1 stable
+26.1-rc-3 snapshot
+26.1-rc-2 snapshot
+26.1-rc-1 snapshot
+26.1-pre-3 snapshot
+26.1-pre-2 snapshot
+26.1-pre-1 snapshot
+26.1-snapshot-11 snapshot
+26.1-snapshot-10 snapshot
+26.1-snapshot-9 snapshot
+26.1-snapshot-8 snapshot
+26.1-snapshot-7 snapshot
+26.1-snapshot-6 snapshot
+26.1-snapshot-5 snapshot
+26.1-snapshot-4 snapshot
+26.1-snapshot-3 snapshot
+26.1-snapshot-2 snapshot
+26.1-snapshot-1 snapshot
+1.21.11 stable
+=== Fabric API builds (newest 80)
+0.149.0+26.2
+0.149.1+26.1.2
+0.149.1+26.2
+0.149.2+26.2
+0.150.0+26.1.2
+0.150.0+26.2
+0.150.1+26.2
+0.150.2+26.2
+0.150.3+26.2
+0.151.0+26.1.2
+0.151.0+26.2
+0.152.0+26.2
+0.152.1+26.1.2
+0.152.1+26.2
+0.152.2+26.2
+0.153.0+26.1.2
+0.153.0+26.2
+0.153.1+26.3
+0.153.2+26.3
+0.116.13+1.21.1
+0.154.0+26.1.2
+0.154.0+26.2
+0.154.0+26.3
+0.154.1+26.2
+0.154.1+26.3
+0.154.2+26.1.2
+0.154.2+26.2
+0.154.2+26.3
+0.154.3+26.3
+0.92.10+1.20.1
+0.92.11+1.20.1
+0.116.14+1.21.1
+0.141.5+1.21.11
+0.155.0+26.2
+0.155.0+26.3
+0.155.0+26.1.2
+0.155.1+26.3
+0.155.2+26.1.2
+0.155.2+26.2
+0.155.2+26.3
+0.155.3+26.3
+0.116.15+1.21.1
+0.141.6+1.21.11
+0.156.0+26.2
+0.156.0+26.3
+0.156.1+26.3
+0.156.2+26.3
+0.156.3+26.3
+0.157.0+26.2
+0.157.0+26.3
+0.157.1+26.3
+0.157.2+26.3
+0.158.0+26.2
+0.158.0+26.3
+0.158.1+26.3
+0.158.2+26.3
+0.158.3+26.3
+0.92.12+1.20.1
+0.116.16+1.21.1
+0.159.0+26.2
+0.159.0+26.3
+0.159.1+26.3
+0.116.17+1.21.1
+0.159.2+26.3
+0.159.3+26.3
+0.159.4+26.3
+0.155.3+26.1.2
+0.160.0+26.2
+0.160.0+26.3
+0.160.1+26.3
+0.160.2+26.3
+0.160.3+26.3
+0.160.4+26.3
+0.160.5+26.3
+0.160.6+26.3
+0.160.7+26.3
+0.161.0+26.2
+0.161.0+26.3
+0.161.1+26.4
+0.161.2+26.4
+=== Fabric API builds for the old versions
+0.116.12+1.21.1
+0.141.4+1.21.11
+0.116.13+1.21.1
+0.92.10+1.20.1
+0.92.11+1.20.1
+0.116.14+1.21.1
+0.141.5+1.21.11
+0.116.15+1.21.1
+0.141.6+1.21.11
+0.92.12+1.20.1
+0.116.16+1.21.1
+0.116.17+1.21.1
+=== Loom versions
+1.18.0-alpha.13
+1.18.0-alpha.14
+1.18.0-alpha.15
+1.18.0-alpha.16
+1.17.20
+1.18.0-alpha.17
+1.18.0-alpha.18
+1.18.0-alpha.19
+1.18.0-alpha.20
+1.18.0-alpha.21
+1.17.21
+1.18.0-alpha.23
+1.18.1
+1.18-SNAPSHOT
+1.18.2
