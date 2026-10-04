@@ -1,72 +1,31 @@
-# 26.3 on 5cb7ca4d36d2fff25ee0598988d3f3ada311d59f: build failure, tests skipped
+# 26.3 on 9f26aa73a1c98bc597a3aecd9f8668056f55c41e: build failure, tests skipped
 > Configure project :
 > Task :compileJava
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:24: error: package net.minecraft.world.level.levelgen.feature.configurations does not exist
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/world/ModWorld.java:13: error: package net.minecraft.world.level.levelgen.feature.configurations does not exist
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/world/HouseFeature.java:26: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/world/HouseFeature.java:27: error: package net.minecraft.world.level.levelgen.feature.configurations does not exist
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/world/HouseFeature.java:55: error: no interface expected here
-public final class HouseFeature extends Feature<NoneFeatureConfiguration> {
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/world/HouseFeature.java:55: error: cannot find symbol
-public final class HouseFeature extends Feature<NoneFeatureConfiguration> {
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/world/HouseFeature.java:55: error: type Feature does not take parameters
-public final class HouseFeature extends Feature<NoneFeatureConfiguration> {
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/world/HouseFeature.java:73: error: cannot find symbol
-	public HouseFeature(Codec<NoneFeatureConfiguration> codec) {
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/world/HouseFeature.java:113: error: cannot find symbol
-	public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> ctx) {
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/world/HouseFeature.java:113: error: cannot find symbol
-	public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> ctx) {
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/DoorEvent.java:49: error: method withinManhattan in class BlockPos cannot be applied to given types;
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/SignEvent.java:61: error: constructor SignText in class SignText cannot be applied to given types;
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/SignEvent.java:63: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/SignEvent.java:65: error: incompatible types: boolean cannot be converted to SignTextSlot
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/TorchEvent.java:48: error: method withinManhattan in class BlockPos cannot be applied to given types;
 /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/ArenaGameTests.java:104: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:62: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:94: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:160: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:194: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:195: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:211: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/world/ModWorld.java:21: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/world/ModWorld.java:22: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/world/HouseFeature.java:112: error: method does not override or implement a method from a supertype
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/util/Spots.java:133: error: method withinManhattan in class BlockPos cannot be applied to given types;
-> Task :compileJava FAILED
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:60: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:92: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:158: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:209: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+> Task :processResources
+> Task :classes
+> Task :compileClientJava FAILED
+/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/render/OccupantRenderer.java:97: error: method does not override or implement a method from a supertype
+/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/render/OccupantRenderer.java:99: error: method shouldRender in class EntityRenderer<T,S> cannot be applied to given types;
+/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/render/OccupantRenderer.java:102: error: method does not override or implement a method from a supertype
+/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/ForestGallery.java:45: error: cannot find symbol
+/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/ForestGallery.java:111: error: cannot find symbol
+/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/ForestGallery.java:159: error: cannot find symbol
+/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:60: error: cannot find symbol
+/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:173: error: cannot find symbol
 * What went wrong:
 > Compilation failed; see the compiler output below.
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/world/HouseFeature.java:55: error: type Feature does not take parameters
-  public final class HouseFeature extends Feature<NoneFeatureConfiguration> {
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/DoorEvent.java:49: error: method withinManhattan in class BlockPos cannot be applied to given types;
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/SignEvent.java:61: error: constructor SignText in class SignText cannot be applied to given types;
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/TorchEvent.java:48: error: method withinManhattan in class BlockPos cannot be applied to given types;
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/util/Spots.java:133: error: method withinManhattan in class BlockPos cannot be applied to given types;
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/world/HouseFeature.java:55: error: no interface expected here
-  public final class HouseFeature extends Feature<NoneFeatureConfiguration> {
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/SignEvent.java:65: error: incompatible types: boolean cannot be converted to SignTextSlot
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/world/HouseFeature.java:26: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/world/HouseFeature.java:73: error: cannot find symbol
-  	public HouseFeature(Codec<NoneFeatureConfiguration> codec) {
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/world/HouseFeature.java:113: error: cannot find symbol
-  	public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> ctx) {
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/world/HouseFeature.java:113: error: cannot find symbol
-  	public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> ctx) {
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:194: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:195: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/world/ModWorld.java:21: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/world/ModWorld.java:22: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/world/HouseFeature.java:112: error: method does not override or implement a method from a supertype
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/ArenaGameTests.java:104: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:62: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:94: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:160: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:211: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/world/HouseFeature.java:55: error: cannot find symbol
-  public final class HouseFeature extends Feature<NoneFeatureConfiguration> {
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/SignEvent.java:63: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:24: error: package net.minecraft.world.level.levelgen.feature.configurations does not exist
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/world/ModWorld.java:13: error: package net.minecraft.world.level.levelgen.feature.configurations does not exist
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/world/HouseFeature.java:27: error: package net.minecraft.world.level.levelgen.feature.configurations does not exist
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/render/OccupantRenderer.java:99: error: method shouldRender in class EntityRenderer<T,S> cannot be applied to given types;
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/render/OccupantRenderer.java:97: error: method does not override or implement a method from a supertype
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/render/OccupantRenderer.java:102: error: method does not override or implement a method from a supertype
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/ForestGallery.java:45: error: cannot find symbol
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/ForestGallery.java:111: error: cannot find symbol
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/ForestGallery.java:159: error: cannot find symbol
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:60: error: cannot find symbol
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:173: error: cannot find symbol
 > Check your code and dependencies to fix the compilation error(s)
 > Run with --scan to get full insights from a Build Scan (powered by Develocity).
