@@ -1,5 +1,8 @@
 plugins {
-	id 'net.fabricmc.fabric-loom' version "${loom_version}"
+	// Two flavours of Loom: one for the unobfuscated 26.x releases, and the remapping one for the
+	// obfuscated versions before them. Which is applied depends on the version being built.
+	id 'net.fabricmc.fabric-loom' version "${loom_version}" apply false
+	id 'fabric-loom' version "${loom_version}" apply false
 }
 
 // One mod, built for several Minecraft versions: -Pmc=26.3 reads versions/26.3.properties, and
@@ -10,6 +13,9 @@ def versionFile = file("versions/${mc}.properties")
 if (versionFile.exists()) versionFile.withInputStream { versionProps.load(it) }
 versionProps.each { k, v -> project.ext.set(k, v) }
 if (!project.hasProperty("minecraft_dep")) project.ext.set("minecraft_dep", "~${project.minecraft_version}")
+def obfuscated = versionProps.getProperty("mappings") == "mojang"
+apply plugin: obfuscated ? 'fabric-loom' : 'net.fabricmc.fabric-loom'
+
 // 26.x is unobfuscated and needs Java 25; older versions use Mojang's mappings and an older Java.
 def javaRelease = (versionProps.getProperty("java_release") ?: "25") as int
 project.ext.set("java_dep", ">=${javaRelease}")
@@ -69,11 +75,14 @@ loom {
 
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	if (versionProps.getProperty("mappings") == "mojang") {
+	if (obfuscated) {
 		mappings loom.officialMojangMappings()
+		modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+		modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	} else {
+		implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+		implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 	}
-	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
-	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 }
 
 processResources {
