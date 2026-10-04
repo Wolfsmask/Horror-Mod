@@ -1,5 +1,6 @@
 package com.wolfsmask.occupant.director.events;
 
+import com.wolfsmask.occupant.compat.Compat;
 import com.wolfsmask.occupant.OccupantConfig;
 import com.wolfsmask.occupant.director.EventContext;
 import com.wolfsmask.occupant.director.HorrorEvent;
@@ -11,7 +12,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
-import net.minecraft.world.level.block.entity.SignText;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.StandingSignBlock;
@@ -58,11 +58,7 @@ public final class SignEvent extends HorrorEvent {
 
 		if (world.getBlockEntity(spot) instanceof SignBlockEntity sign) {
 			String[] lines = pickMessage(ctx).split("\\|", -1);
-			SignText text = new SignText();
-			for (int i = 0; i < 4 && i < lines.length; i++) {
-				text = text.setMessage(i, Component.literal(lines[i]));
-			}
-			sign.setText(text, true);
+			Compat.writeSign(sign, lines);
 			sign.setWaxed(true);
 			sign.setChanged();
 			world.sendBlockUpdated(spot, state, state, Block.UPDATE_ALL);

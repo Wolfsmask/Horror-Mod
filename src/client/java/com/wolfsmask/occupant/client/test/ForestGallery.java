@@ -4,7 +4,7 @@ import com.wolfsmask.occupant.Occupant;
 import com.wolfsmask.occupant.director.Director;
 import com.wolfsmask.occupant.director.events.HallwayEvent;
 import com.wolfsmask.occupant.entity.OccupantEntity;
-import com.wolfsmask.occupant.world.HouseFeature;
+import com.wolfsmask.occupant.world.House;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
@@ -143,13 +143,13 @@ final class ForestGallery {
 				return;
 			}
 			BlockPos at = floor;
-			server.runOnServer(s -> HouseFeature.build(s.overworld(), at, Rotation.NONE, s.overworld().getRandom()));
-			BlockPos front = HouseFeature.local(floor, Rotation.NONE, 4, 1, -8);
+			server.runOnServer(s -> House.build(s.overworld(), at, Rotation.NONE, s.overworld().getRandom()));
+			BlockPos front = House.local(floor, Rotation.NONE, 4, 1, -8);
 			BlockPos outside = server.computeOnServer(s -> {
 				Integer y = ground(s.overworld(), front.getX(), front.getZ(), 2);
 				return y == null ? front : new BlockPos(front.getX(), y, front.getZ());
 			});
-			BlockPos inside = HouseFeature.local(floor, Rotation.NONE, 4, 1, 1);
+			BlockPos inside = House.local(floor, Rotation.NONE, 4, 1, 1);
 
 			server.runCommand("weather clear");
 			server.runCommand("time set 12700");

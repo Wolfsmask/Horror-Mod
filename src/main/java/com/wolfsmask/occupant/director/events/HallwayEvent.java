@@ -7,7 +7,7 @@ import com.wolfsmask.occupant.director.Situation;
 import com.wolfsmask.occupant.entity.OccupantEntity;
 import com.wolfsmask.occupant.util.Sight;
 import com.wolfsmask.occupant.util.Spots;
-import com.wolfsmask.occupant.world.HouseFeature;
+import com.wolfsmask.occupant.world.House;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -37,7 +37,7 @@ public final class HallwayEvent extends HorrorEvent {
 
 	@Override
 	public double situationalWeight(EventContext ctx) {
-		return HouseFeature.isInside(ctx.world, ctx.player.blockPosition()) ? 12.0 : 2.5;
+		return House.isInside(ctx.world, ctx.player.blockPosition()) ? 12.0 : 2.5;
 	}
 
 	@Override

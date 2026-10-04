@@ -5,7 +5,7 @@ import com.wolfsmask.occupant.OccupantConfig;
 import com.wolfsmask.occupant.director.events.Events;
 import com.wolfsmask.occupant.director.events.HallwayEvent;
 import com.wolfsmask.occupant.director.events.WakeEvent;
-import com.wolfsmask.occupant.world.HouseFeature;
+import com.wolfsmask.occupant.world.House;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
@@ -186,7 +186,7 @@ public final class Director {
 	 */
 	private boolean enteredHouse(Haunt h, ServerPlayer player) {
 		BlockPos feet = player.blockPosition();
-		if (!HouseFeature.isInside(player.level(), feet)) return false;
+		if (!House.isInside(player.level(), feet)) return false;
 		long now = server.getTickCount();
 		boolean sameHouse = h.lastHouse != null && h.lastHouse.closerThan(feet, 20.0);
 		if (sameHouse && now - h.lastHouseTick < 20L * 60 * 20) return false;   // twenty minutes

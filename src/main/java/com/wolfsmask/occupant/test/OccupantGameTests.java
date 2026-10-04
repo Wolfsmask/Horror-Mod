@@ -9,8 +9,7 @@ import com.wolfsmask.occupant.director.events.Events;
 import com.wolfsmask.occupant.director.events.HallwayEvent;
 import com.wolfsmask.occupant.entity.OccupantEntity;
 import com.wolfsmask.occupant.registry.ModEntities;
-import com.wolfsmask.occupant.world.HouseFeature;
-import com.wolfsmask.occupant.world.ModWorld;
+import com.wolfsmask.occupant.world.House;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
@@ -21,7 +20,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.phys.AABB;
 
 import java.util.ArrayList;
@@ -155,20 +153,20 @@ public final class OccupantGameTests {
 		for (int dx = -1; dx <= 1; dx++) {
 			for (int dz = -1; dz <= 1; dz++) level.getChunk((floor.getX() >> 4) + dx, (floor.getZ() >> 4) + dz);
 		}
-		HouseFeature.build(level, floor, Rotation.NONE, level.getRandom());
+		House.build(level, floor, Rotation.NONE, level.getRandom());
 
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
-		BlockPos inside = HouseFeature.local(floor, Rotation.NONE, 4, 1, 1);   // just through the door
+		BlockPos inside = House.local(floor, Rotation.NONE, 4, 1, 1);   // just through the door
 		player.snapTo(inside.getX() + 0.5, inside.getY(), inside.getZ() + 0.5, 0.0f, 0.0f);
 
 		helper.runAtTickTime(5, () -> {
-			helper.assertTrue(HouseFeature.isInside(level, inside), "Standing inside the house should count as inside it");
-			helper.assertTrue(!HouseFeature.isInside(level, inside.offset(0, 0, -3)), "Outside the front door is not inside");
+			helper.assertTrue(House.isInside(level, inside), "Standing inside the house should count as inside it");
+			helper.assertTrue(!House.isInside(level, inside.offset(0, 0, -3)), "Outside the front door is not inside");
 			BlockPos peek = HallwayEvent.find(player, true);
 			BlockPos any = peek != null ? peek : HallwayEvent.find(player, false);
 			Occupant.LOGGER.info("[gametest] house hallway spot: peeking {} / any {}", peek, any);
 			helper.assertTrue(any != null, "There should be somewhere in the dark hallway for it to stand");
-			BlockPos hallStart = HouseFeature.local(floor, Rotation.NONE, 9, 1, 1);
+			BlockPos hallStart = House.local(floor, Rotation.NONE, 9, 1, 1);
 			helper.assertTrue(any.getX() >= hallStart.getX() - 1 && any.getX() <= hallStart.getX() + 1,
 					"It should be in the side hallway or its doorway, not the main room (got " + any + ")");
 			helper.assertTrue(peek != null, "From the door it should be only just visible, past the edge of the gap");
@@ -190,13 +188,13 @@ public final class OccupantGameTests {
 				for (int dz = -1; dz <= 1; dz++) level.getChunk((at.getX() >> 4) + dx, (at.getZ() >> 4) + dz);
 			}
 		}
-		boolean builtBefore = HouseFeature.built();
-		boolean a = ModWorld.HOUSE.place(NoneFeatureConfiguration.INSTANCE, level, level.getChunkSource().getGenerator(), level.getRandom(), first);
-		boolean b = ModWorld.HOUSE.place(NoneFeatureConfiguration.INSTANCE, level, level.getChunkSource().getGenerator(), level.getRandom(), second);
+		boolean builtBefore = House.built();
+		boolean a = House.tryPlace(level, level.getRandom(), first);
+		boolean b = House.tryPlace(level, level.getRandom(), second);
 		Occupant.LOGGER.info("[gametest] houses: already built {}, first {}, second {}", builtBefore, a, b);
 		helper.assertTrue(builtBefore || a, "On open flat ground far from the middle, the first house should be built");
 		helper.assertTrue(!b, "A second house must never be built in the same world");
-		helper.assertTrue(HouseFeature.built(), "The world should now remember that its house exists");
+		helper.assertTrue(House.built(), "The world should now remember that its house exists");
 		helper.succeed();
 	}
 

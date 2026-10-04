@@ -1,5 +1,6 @@
 package com.wolfsmask.occupant.util;
 
+import com.wolfsmask.occupant.compat.Compat;
 import com.wolfsmask.occupant.registry.ModEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -130,7 +131,7 @@ public final class Spots {
 	@Nullable
 	public static BlockPos nearestBlock(ServerLevel world, BlockPos center, int rangeXZ, int rangeY,
 										Predicate<BlockPos> accept) {
-		for (BlockPos p : BlockPos.withinManhattan(center, rangeXZ, rangeY, rangeXZ)) {
+		for (BlockPos p : Compat.withinManhattan(center, rangeXZ, rangeY, rangeXZ)) {
 			if (!isLoaded(world, p)) continue;
 			if (accept.test(p)) return p.immutable();
 		}

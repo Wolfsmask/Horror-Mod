@@ -1,5 +1,6 @@
 package com.wolfsmask.occupant.director.events;
 
+import com.wolfsmask.occupant.compat.Compat;
 import com.wolfsmask.occupant.OccupantConfig;
 import com.wolfsmask.occupant.director.EventContext;
 import com.wolfsmask.occupant.director.HorrorEvent;
@@ -46,7 +47,7 @@ public final class DoorEvent extends HorrorEvent {
 		ServerPlayer p = ctx.player;
 		ServerLevel world = ctx.world;
 		List<BlockPos> doors = new ArrayList<>();
-		for (BlockPos pos : BlockPos.withinManhattan(p.blockPosition(), 14, 4, 14)) {
+		for (BlockPos pos : Compat.withinManhattan(p.blockPosition(), 14, 4, 14)) {
 			if (doors.size() >= 6) break;
 			if (pos.distToCenterSqr(p.position()) < 16) continue;
 			if (!WorldBlocks.isClosedWoodenDoor(world, pos)) continue;

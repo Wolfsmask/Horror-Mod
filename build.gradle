@@ -53,7 +53,7 @@ loom {
 
 // Version-specific replacements for individual source files.
 ["main", "client"].each { setName ->
-	def overrides = file("versions/${mc}/${setName}")
+	def overrides = file("versions/${versionProps.getProperty('overrides', mc)}/${setName}")
 	if (overrides.exists()) {
 		def replaced = [] as Set
 		overrides.eachFileRecurse(groovy.io.FileType.FILES) { f -> replaced << overrides.toPath().relativize(f.toPath()).toString().replace('\\', '/') }

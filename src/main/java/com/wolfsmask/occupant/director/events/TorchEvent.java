@@ -1,5 +1,6 @@
 package com.wolfsmask.occupant.director.events;
 
+import com.wolfsmask.occupant.compat.Compat;
 import com.wolfsmask.occupant.OccupantConfig;
 import com.wolfsmask.occupant.director.EventContext;
 import com.wolfsmask.occupant.director.HorrorEvent;
@@ -45,7 +46,7 @@ public final class TorchEvent extends HorrorEvent {
 		BlockPos bed = Spots.respawnPos(p);
 
 		List<BlockPos> torches = new ArrayList<>();
-		for (BlockPos pos : BlockPos.withinManhattan(p.blockPosition(), 20, 8, 20)) {
+		for (BlockPos pos : Compat.withinManhattan(p.blockPosition(), 20, 8, 20)) {
 			if (torches.size() >= 8) break;
 			if (pos.distToCenterSqr(p.position()) < 64) continue;
 			if (!Spots.isLoaded(world, pos)) continue;   // it must never pull in a chunk
