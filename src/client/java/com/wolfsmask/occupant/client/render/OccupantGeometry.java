@@ -90,7 +90,14 @@ public final class OccupantGeometry {
 				.texOffs(0, 76).addBox(-2.75f, 6.0f, -2.80f, 1.40f, 4.60f, 3.0f)
 				.texOffs(92, 76).addBox(-1.85f, 9.55f, -2.60f, 3.70f, 2.10f, 2.55f)
 				.texOffs(194, 45).addBox(-1.74f, 0.02f, -2.0f, 3.48f, 9.56f, 1.90f)
-				.texOffs(106, 76).addBox(-1.68f, 0.05f, -2.72f, 3.36f, 0.85f, 0.71f), PartPose.offset(0.0f, -2.30f, 0.0f));
+				.texOffs(122, 76).addBox(-1.13f, 0.05f, -2.72f, 0.42f, 0.95f, 0.66f)
+				.texOffs(126, 76).addBox(-0.55f, 0.05f, -2.70f, 0.43f, 0.78f, 0.64f)
+				.texOffs(130, 76).addBox(0.04f, 0.05f, -2.71f, 0.41f, 0.92f, 0.65f)
+				.texOffs(134, 76).addBox(0.62f, 0.05f, -2.69f, 0.44f, 0.74f, 0.63f)
+				.texOffs(106, 76).addBox(-1.74f, 0.0f, -2.86f, 0.53f, 1.55f, 0.79f)
+				.texOffs(110, 76).addBox(1.21f, 0.0f, -2.86f, 0.53f, 1.55f, 0.79f)
+				.texOffs(114, 76).addBox(-1.33f, 8.15f, -2.84f, 0.48f, 1.42f, 0.77f)
+				.texOffs(118, 76).addBox(0.85f, 8.15f, -2.84f, 0.48f, 1.42f, 0.77f), PartPose.offset(0.0f, -2.30f, 0.0f));
 		PartDefinition p_jaw = p;
 		p = p_skull.addOrReplaceChild("hair", CubeListBuilder.create()
 				.texOffs(222, 0).addBox(-0.43f, -6.90f, 3.38f, 0.69f, 30.49f, 0.69f)

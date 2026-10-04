@@ -180,7 +180,18 @@ def parts():
             ("cheek", -2.75, 6.0, -2.8, 1.4, 4.6, 3.0),
             ("chin", -1.85, 9.55, -2.6, 3.7, 2.1, 2.55),
             ("mouth", -1.74, 0.02, -2.0, 3.48, 9.56, 1.9),     # set back: the inside of it
-            ("teeth", -1.68, 0.05, -2.72, 3.36, 0.85, 0.71),
+            # A row of small, separate teeth along the top, each its own tiny box so the gaps
+            # between them are real; one painted gap on a single box read as a grey block.
+            ("tooth", -1.13, 0.05, -2.72, 0.42, 0.95, 0.66),
+            ("tooth", -0.55, 0.05, -2.70, 0.43, 0.78, 0.64),
+            ("tooth", 0.04, 0.05, -2.71, 0.41, 0.92, 0.65),
+            ("tooth", 0.62, 0.05, -2.69, 0.44, 0.74, 0.63),
+            # The skin folds in at the corners, top and bottom, so the opening is long and
+            # rounded rather than a slot cut out of the face.
+            ("lip", -1.74, 0.0, -2.86, 0.53, 1.55, 0.79),
+            ("lip", 1.21, 0.0, -2.86, 0.53, 1.55, 0.79),
+            ("lip", -1.33, 8.15, -2.84, 0.48, 1.42, 0.77),
+            ("lip", 0.85, 8.15, -2.84, 0.48, 1.42, 0.77),
         ]),
         # No loose hairs standing up off the crown: in blocks, anything sticking up off a head
         # reads as horns or antennae, however short it is.
@@ -433,23 +444,26 @@ def paint_texture(boxes, placed):
                 fill(side, PIT, 2)
             x0, y0, x1, y1 = f["front"]
             h_ = y1 - y0
-            # Black all the way in, going to red at the bottom.
-            for k in range(min(3, h_)):
-                t = (k + 1) / 3.0
-                row = y1 - 1 - k
-                img[row, x0:x1, :3] = np.clip(np.array(RED) * (1.0 - 0.3 * k) + np.array(PIT) * 0.3 * k, 0, 255)
-            # Something pale and stringy hanging down from behind the teeth.
-            for _ in range(2):
-                sx = int(rng.integers(x0, x1))
-                img[y0 + 1:y0 + 3, sx, :3] = (120, 104, 96)
+            # Black all the way in, deepening slowly to a wet dark red at the bottom.
+            ramp = [(26, 8, 8), (52, 14, 13), (78, 22, 20), (100, 32, 29), (112, 40, 36)]
+            for k, colour in enumerate(ramp):
+                row = y1 - len(ramp) + k
+                if row >= y0:
+                    img[row, x0:x1, :3] = colour
+            # A little darker down the middle, so it reads as a hollow and not a panel.
+            mid = x0 + (x1 - x0) // 2
+            img[y1 - 3:y1, mid - 1:mid + 1, :3] = np.clip(img[y1 - 3:y1, mid - 1:mid + 1, :3].astype(int) - 18, 0, 255)
 
-        elif kind == "teeth":
+        elif kind == "tooth":
             for side in f.values():
-                fill(side, TOOTH, 6)
+                fill(side, TOOTH, 5)
             x0, y0, x1, y1 = f["front"]
-            for x in range(x0, x1):
-                if (x - x0) % 2 == 1:
-                    img[y0:y1, x, :3] = (40, 26, 24)              # the gaps between them
+            img[y1 - 1, x0:x1, :3] = (176, 160, 140)               # the worn tip
+
+        elif kind == "lip":
+            skin(f, shade_sides=30)
+            x0, y0, x1, y1 = f["front"]
+            img[y0:y1, x0:x1, :3] = np.clip(img[y0:y1, x0:x1, :3].astype(int) - 12, 0, 255)
 
         elif kind in ("limb", "claw"):
             # Pale like the face but greyer and dirtier, darker towards each joint.
