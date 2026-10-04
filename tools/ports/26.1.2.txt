@@ -1,11 +1,11 @@
-# 26.1.2 on cb6e8d974afb16dc289d9f1679b1c2faa0f4dbb3: build success, tests success
+# 26.1.2 on 12984109178ef95acbebc780fd4781648af2ce02: build success, tests success
 > Configure project :
 > Task :compileJava
 /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/ArenaGameTests.java:104: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
 /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:60: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
 /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:92: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
 /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:158: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:209: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:214: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
 > Task :processResources
 > Task :classes
 > Task :compileClientJava
@@ -13,12 +13,19 @@
 > Task :processIncludeJars
 > Task :clientClasses
 > Task :compileTestJava NO-SOURCE
+> Task :jar
 > Task :processTestResources NO-SOURCE
+> Task :assemble
 > Task :testClasses UP-TO-DATE
 > Task :test NO-SOURCE
 > Task :validateAccessWidener NO-SOURCE
 > Task :check UP-TO-DATE
-> Task :jar
-> Task :assemble
 > Task :build
-[23:37:09] [Server thread/INFO] (Minecraft) ========= 10 GAME TESTS COMPLETE IN 6.895 s ======================
+[23:39:19] [Server thread/INFO] (occupant) [gametest] houses: already built false, first true, second false
+[23:39:20] [Server thread/INFO] (occupant) [gametest] house hallway spot: peeking BlockPos{x=11052914, y=-55, z=13944443} / any BlockPos{x=11052914, y=-55, z=13944443} (relative to the floor: BlockPos{x=4, y=1, z=0})
+[23:39:20] [Server thread/INFO] (occupant) [gametest] hallway light at the far end: block 0 sky 0, dark true
+[23:39:21] [Server thread/INFO] (occupant) [gametest] field: darkOutside=true skyDarken=7 light=8 skyLight=15 blockLight=0 isDark=true grassInDirtTag=false
+[23:39:21] [Server thread/INFO] (occupant) [gametest] cave: yaw=-90.0 feet=BlockPos{x=11053244, y=60, z=13944260} underground=true skyVisible=false skyLight=0 topY=69 light=0 look=(1.0, 0.0, 1.2246468525851679E-16) | ahead: standable=55 dark=55 visible=55
+[23:39:21] [Server thread/INFO] (occupant) [gametest] arena failures: []
+[23:39:25] [Server thread/INFO] (occupant) [gametest] events that found a place to happen: [familiar, cave_noise, breath, fake_join, sign, whisper, doppel_chat, stalker, flicker, static, wake]
+[23:39:26] [Server thread/INFO] (Minecraft) ========= 10 GAME TESTS COMPLETE IN 8.637 s ======================
