@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        mc: ['26.1.2', '26.2', '26.3', '26.4-snapshot-2']
+        mc: ['1.21.11', '26.1.2', '26.2', '26.3', '26.4-snapshot-2']
     steps:
       - uses: actions/checkout@v4
 

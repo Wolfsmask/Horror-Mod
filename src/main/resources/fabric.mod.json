@@ -30,7 +30,7 @@
   "depends": {
     "fabricloader": ">=0.19.0",
     "minecraft": "${minecraft_dep}",
-    "java": ">=25",
+    "java": "${java_dep}",
     "fabric-api": "*"
   },
   "icon": "assets/occupant/icon.png"

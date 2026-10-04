@@ -10,6 +10,9 @@ def versionFile = file("versions/${mc}.properties")
 if (versionFile.exists()) versionFile.withInputStream { versionProps.load(it) }
 versionProps.each { k, v -> project.ext.set(k, v) }
 if (!project.hasProperty("minecraft_dep")) project.ext.set("minecraft_dep", "~${project.minecraft_version}")
+// 26.x is unobfuscated and needs Java 25; older versions use Mojang's mappings and an older Java.
+def javaRelease = (versionProps.getProperty("java_release") ?: "25") as int
+project.ext.set("java_dep", ">=${javaRelease}")
 
 version = "${project.mod_version}+mc${project.minecraft_version}"
 group = project.maven_group
@@ -66,6 +69,9 @@ loom {
 
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	if (versionProps.getProperty("mappings") == "mojang") {
+		mappings loom.officialMojangMappings()
+	}
 	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 }
@@ -73,22 +79,24 @@ dependencies {
 processResources {
 	def version = project.version
 	def minecraftDep = project.minecraft_dep
+	def javaDep = project.java_dep
 	inputs.property "version", version
 	inputs.property "minecraft_dep", minecraftDep
+	inputs.property "java_dep", javaDep
 
 	filesMatching("fabric.mod.json") {
-		expand "version": version, "minecraft_dep": minecraftDep
+		expand "version": version, "minecraft_dep": minecraftDep, "java_dep": javaDep
 	}
 }
 
 tasks.withType(JavaCompile).configureEach {
-	it.options.release = 25
+	it.options.release = javaRelease
 	it.options.encoding = "UTF-8"
 }
 
 java {
-	sourceCompatibility = JavaVersion.VERSION_25
-	targetCompatibility = JavaVersion.VERSION_25
+	sourceCompatibility = JavaVersion.toVersion(javaRelease)
+	targetCompatibility = JavaVersion.toVersion(javaRelease)
 }
 
 // Same sources always give the same jar.
