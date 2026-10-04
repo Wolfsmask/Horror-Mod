@@ -42,7 +42,7 @@ final class ForestGallery {
 				.setUseConsistentSettings(false)
 				.adjustSettings(s -> s.setSeed("the occupant"))
 				.create()) {
-			game.getClientLevel().waitForChunksRender();
+			TestCompat.waitForWorld(game);
 			context.waitTicks(120);
 			TestServerContext server = game.getServer();
 			server.runCommand("gamerule sendCommandFeedback false");
@@ -108,7 +108,7 @@ final class ForestGallery {
 				server.runCommand(String.format(Locale.ROOT, "tp @p %.1f %d %.1f %d 0",
 						stand.getX() + 0.5, stand.getY(), stand.getZ() + 0.5, yaw));
 				context.waitTicks(10);
-				game.getClientLevel().waitForChunksRender();
+				TestCompat.waitForWorld(game);
 				boolean started = server.computeOnServer(s -> {
 					ServerPlayer player = s.getPlayerList().getPlayers().get(0);
 					Director.get().data(player).setAct(act);
@@ -156,7 +156,7 @@ final class ForestGallery {
 			stop(server);
 			teleport(server, outside, 0.0f, -4.0f);
 			context.waitTicks(10);
-			game.getClientLevel().waitForChunksRender();
+			TestCompat.waitForWorld(game);
 			context.waitTicks(10);
 			OccupantClientGameTest.shoot(context, "occupant-photo-4-the-house");
 

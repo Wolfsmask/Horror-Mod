@@ -57,7 +57,7 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 
 		TestWorldSave save;
 		try (TestSingleplayerContext game = context.worldBuilder().create()) {
-			game.getClientLevel().waitForChunksRender();
+			TestCompat.waitForWorld(game);
 			context.waitTicks(120);   // the way in: a few seconds of black, then the world
 			TestServerContext server = game.getServer();
 			int errorsBefore = server.computeOnServer(s -> Director.get() == null ? -1 : Director.get().totalErrors());
@@ -170,7 +170,7 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 
 		// Back into the same world, which still has the player asleep in it.
 		try (TestSingleplayerContext again = save.open()) {
-			again.getClientLevel().waitForChunksRender();
+			TestCompat.waitForWorld(again);
 			context.waitTicks(120);
 			boolean inWorld = context.computeOnClient(mc -> mc.player != null && mc.level != null);
 			check(inWorld, "rejoining a world the player left asleep in must work");

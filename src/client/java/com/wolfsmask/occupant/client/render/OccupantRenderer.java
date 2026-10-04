@@ -3,7 +3,6 @@ package com.wolfsmask.occupant.client.render;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.wolfsmask.occupant.Occupant;
 import com.wolfsmask.occupant.entity.OccupantEntity;
-import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
@@ -14,11 +13,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /** Draws the Occupant. Only the haunted player is ever sent the entity, so only they see this. */
-public class OccupantRenderer extends HumanoidMobRenderer<OccupantEntity, OccupantRenderState, OccupantModel> {
+public class OccupantRenderer extends CullingRenderer {
 	private static final Identifier TEXTURE = Occupant.id("textures/entity/occupant.png");
 	private static final Identifier GLOW = Occupant.id("textures/entity/occupant_glow.png");
 	/**
@@ -87,22 +85,6 @@ public class OccupantRenderer extends HumanoidMobRenderer<OccupantEntity, Occupa
 		return (hips + above * Mth.cos(CROUCH_BEND * crouch)) / OccupantGeometry.HEIGHT;
 	}
 
-	/**
-	 * The game only draws an entity while its box is on screen, and its hitbox is a person-sized
-	 * sliver of what is actually drawn. Without this, looking up at its face from close by, or at
-	 * a leg braced on a wall beside you, would make the whole thing blink out of existence. The
-	 * box covers its full height, how far its legs reach, and how far the body trails behind.
-	 */
-	/** Not drawn while it is concealed: it is never seen arriving. */
-	@Override
-	public boolean shouldRender(OccupantEntity entity, Frustum frustum, double x, double y, double z) {
-		return !entity.isConcealed() && super.shouldRender(entity, frustum, x, y, z);
-	}
-
-	@Override
-	protected AABB getBoundingBoxForCulling(OccupantEntity entity) {
-		return entity.getBoundingBox().inflate(6.5, 0.0, 6.5).expandTowards(0.0, FAR_BLOCKS + 1.5, 0.0);
-	}
 
 	@Override
 	public Vec3 getRenderOffset(OccupantRenderState state) {
