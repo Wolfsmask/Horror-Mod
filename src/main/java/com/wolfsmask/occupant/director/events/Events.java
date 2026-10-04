@@ -26,6 +26,7 @@ public final class Events {
 			new KnockEvent(),
 			new FakeJoinEvent(),
 			new SignEvent(),
+			new RearrangedEvent(),
 			new MarkerTorchEvent(),
 			new TunnelEvent(),
 			new WatcherEvent(),
