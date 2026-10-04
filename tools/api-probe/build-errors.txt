@@ -1,37 +1,40 @@
-# Build failed at 2026-10-03T23:12:35Z on e540158375baea8d3bfb98d670c550aedbcef4b4
+# Build failed at 2026-10-04T22:34:19Z on 9293033d338fd18aeff397c1b11935497d55d281
 /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/ArenaGameTests.java:104: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:60: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:92: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:158: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:184: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/ForestGallery.java:60: error: cannot find symbol
-  symbol:   method findForest(ServerLevel,BlockPos,boolean)
-  location: class ForestGallery
-/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/ForestGallery.java:63: error: cannot find symbol
-  symbol:   method findForest(ServerLevel,BlockPos,boolean)
-  location: class ForestGallery
-  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/ForestGallery.java:60: error: cannot find symbol
-    symbol:   method findForest(ServerLevel,BlockPos,boolean)
-    location: class ForestGallery
-  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/ForestGallery.java:63: error: cannot find symbol
-    symbol:   method findForest(ServerLevel,BlockPos,boolean)
-    location: class ForestGallery
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:62: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:94: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:160: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:211: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/GateScreen.java:58: error: cannot find symbol
+  symbol:   method setScreen(TitleScreen)
+  location: variable mc of type Minecraft
+/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/GateScreen.java:177: error: cannot find symbol
+  symbol:   method setScreen(GateScreen)
+  location: variable mc of type Minecraft
+/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/GateScreen.java:186: error: cannot find symbol
+  symbol:   method setScreen(TitleScreen)
+  location: variable minecraft of type Minecraft
+/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:49: error: cannot find symbol
+  symbol:   variable screen
+  location: variable mc of type Minecraft
+/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/TitleAtmosphere.java:58: error: cannot find symbol
+  symbol:   method setScreen(GateScreen)
+  location: variable client of type Minecraft
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:49: error: cannot find symbol
+    symbol:   variable screen
+    location: variable mc of type Minecraft
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/GateScreen.java:58: error: cannot find symbol
+    symbol:   method setScreen(TitleScreen)
+    location: variable mc of type Minecraft
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/GateScreen.java:177: error: cannot find symbol
+    symbol:   method setScreen(GateScreen)
+    location: variable mc of type Minecraft
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/GateScreen.java:186: error: cannot find symbol
+    symbol:   method setScreen(TitleScreen)
+    location: variable minecraft of type Minecraft
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/TitleAtmosphere.java:58: error: cannot find symbol
+    symbol:   method setScreen(GateScreen)
+    location: variable client of type Minecraft
 --- tail ---
-			                                              ^
-  symbol:   method findForest(ServerLevel,BlockPos,boolean)
-  location: class ForestGallery
-/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/ForestGallery.java:63: error: cannot find symbol
-			BlockPos other = server.computeOnServer(s -> findForest(s.overworld(),
-			                                             ^
-  symbol:   method findForest(ServerLevel,BlockPos,boolean)
-  location: class ForestGallery
-Note: /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/OccupantClient.java uses or overrides a deprecated API.
-Note: Recompile with -Xlint:deprecation for details.
-2 errors
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_3-1791069147344.json
-
-[Incubating] Problems report is available at: file:///home/runner/work/Horror-Mod/Horror-Mod/build/reports/problems/problems-report.html
-
 FAILURE: Build failed with an exception.
 
 * What went wrong:
@@ -39,21 +42,36 @@ Execution failed for task ':compileClientJava' (registered by plugin class 'org.
 > Compilation failed; see the compiler output below.
   Note: /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/OccupantClient.java uses or overrides a deprecated API.
   Note: Recompile with -Xlint:deprecation for details.
-  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/ForestGallery.java:60: error: cannot find symbol
-  			BlockPos forest = server.computeOnServer(s -> findForest(s.overworld(),
-  			                                              ^
-    symbol:   method findForest(ServerLevel,BlockPos,boolean)
-    location: class ForestGallery
-  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/ForestGallery.java:63: error: cannot find symbol
-  			BlockPos other = server.computeOnServer(s -> findForest(s.overworld(),
-  			                                             ^
-    symbol:   method findForest(ServerLevel,BlockPos,boolean)
-    location: class ForestGallery
-  2 errors
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:49: error: cannot find symbol
+  		check(context.computeOnClient(mc -> mc.screen instanceof GateScreen), "the first screen should be the gate");
+  		                                      ^
+    symbol:   variable screen
+    location: variable mc of type Minecraft
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/GateScreen.java:58: error: cannot find symbol
+  		mc.setScreen(new TitleScreen());
+  		  ^
+    symbol:   method setScreen(TitleScreen)
+    location: variable mc of type Minecraft
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/GateScreen.java:177: error: cannot find symbol
+  			mc.setScreen(new GateScreen());
+  			  ^
+    symbol:   method setScreen(GateScreen)
+    location: variable mc of type Minecraft
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/GateScreen.java:186: error: cannot find symbol
+  		this.minecraft.setScreen(new TitleScreen());
+  		              ^
+    symbol:   method setScreen(TitleScreen)
+    location: variable minecraft of type Minecraft
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/TitleAtmosphere.java:58: error: cannot find symbol
+  				client.execute(() -> client.setScreen(new GateScreen()));
+  				                           ^
+    symbol:   method setScreen(GateScreen)
+    location: variable client of type Minecraft
+  5 errors
 
 * Try:
 > Check your code and dependencies to fix the compilation error(s)
 > Run with --scan to get full insights from a Build Scan (powered by Develocity).
 
-BUILD FAILED in 9s
+BUILD FAILED in 11s
 3 actionable tasks: 3 executed
