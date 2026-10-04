@@ -43,6 +43,7 @@ final class ForestGallery {
 				.adjustSettings(s -> s.setSeed("the occupant"))
 				.create()) {
 			game.getClientLevel().waitForChunksRender();
+			context.waitTicks(120);
 			TestServerContext server = game.getServer();
 			server.runCommand("gamerule sendCommandFeedback false");
 			server.runCommand("gamerule send_command_feedback false");

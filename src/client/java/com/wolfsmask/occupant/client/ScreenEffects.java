@@ -42,7 +42,51 @@ public final class ScreenEffects {
 	private static int whisperLength;
 	private static int whisperCorner;
 
+	/** How heavy the atmosphere is right now (smoothed): the dark, and how near it is. */
+	private static float atmosphere;
+	/** How near it is, 0 to 1 (smoothed), for the pulse at the edges of the screen. */
+	private static float nearness;
+	/** Ticks since joining a world, for the way in. */
+	private static int introAge = -1;
+	private static final int INTRO_TICKS = 110;
+	private static final String[] INTRO_LINES = {
+			"you are not the first to live here", "it was here before you", "something else lives in this world",
+			"it has been waiting", "it knows this place better than you"};
+	private static String introLine = INTRO_LINES[0];
+
 	private ScreenEffects() {
+	}
+
+	/** On joining a world: a few seconds of black, a line, and then the world, slowly. */
+	public static void joined() {
+		introAge = 0;
+		introLine = INTRO_LINES[ThreadLocalRandom.current().nextInt(INTRO_LINES.length)];
+	}
+
+	/**
+	 * Under the HUD, over the world: the dark closing in from the edges, film grain, and a cold
+	 * cast. Always a little there; heavier in the dark; much heavier, and slowly pulsing like a
+	 * heartbeat at the edges, when it is close.
+	 */
+	public static void renderAtmosphere(GuiGraphicsExtractor ctx, float tickDelta) {
+		ClientConfig cfg = ClientConfig.get();
+		if (!cfg.atmosphere) return;
+		int w = ctx.guiWidth();
+		int h = ctx.guiHeight();
+		float a = atmosphere;
+		if (a < 0.01f) return;
+
+		ctx.fill(0, 0, w, h, ((int) (a * 34f) << 24) | 0x0A1420);              // cold
+		float beat = 0f;
+		if (nearness > 0.05f && !cfg.reduceFlashing) {
+			Minecraft mc = Minecraft.getInstance();
+			float t = (mc.level != null ? mc.level.getGameTime() : 0L) + tickDelta;
+			float phase = (t % 22f) / 22f;                                       // lub-dub, about once a second
+			beat = (float) (Math.exp(-Math.pow((phase - 0.08f) / 0.05f, 2)) + 0.6 * Math.exp(-Math.pow((phase - 0.28f) / 0.05f, 2)));
+			beat *= nearness * 0.25f;
+		}
+		TitleAtmosphere.drawVignette(ctx, w, h, Math.min(1f, 0.35f + a * 0.55f + beat));
+		if (cfg.screenStatic) drawStatic(ctx, w, h, 0.025f + a * 0.05f);
 	}
 
 	public static void trigger(ScreenEffectPayload payload, Minecraft client) {
@@ -81,6 +125,8 @@ public final class ScreenEffects {
 		proximityStatic = 0f;
 		whisperText = "";
 		whisperAge = whisperLength = 0;
+		introAge = -1;
+		atmosphere = nearness = 0f;
 	}
 
 	public static void tick(Minecraft client) {
@@ -105,6 +151,22 @@ public final class ScreenEffects {
 			}
 		}
 		proximityStatic += (target - proximityStatic) * 0.2f;
+
+		// The atmosphere: how dark it is where the player is standing, and how near it is.
+		float near = 0f;
+		float dark = 0f;
+		if (player != null && client.level != null) {
+			int light = client.level.getMaxLocalRawBrightness(player.blockPosition());
+			dark = 1f - light / 15f;
+			for (OccupantEntity e : client.level.getEntitiesOfClass(OccupantEntity.class,
+					player.getBoundingBox().inflate(40.0), e -> !e.isRemoved() && !e.isConcealed())) {
+				near = Math.max(near, (float) Mth.clamp(1.0 - e.distanceTo(player) / 40.0, 0.0, 1.0));
+			}
+		}
+		float want = Mth.clamp(0.15f + dark * 0.45f + near * 0.5f, 0f, 1f);
+		atmosphere += (want - atmosphere) * 0.05f;
+		nearness += (near - nearness) * 0.08f;
+		if (introAge >= 0 && ++introAge > INTRO_TICKS) introAge = -1;
 	}
 
 	public static void render(GuiGraphicsExtractor ctx, float tickDelta) {
@@ -125,6 +187,21 @@ public final class ScreenEffects {
 
 		// Drawn after the blackout, so a line can surface in the dark and be the only thing there.
 		if (cfg.screenText) drawWhisper(ctx, w, h, tickDelta, cfg);
+		drawIntro(ctx, w, h, tickDelta);
+	}
+
+	/** Black, then a line rising out of it and sinking back, then the world fading up. */
+	private static void drawIntro(GuiGraphicsExtractor ctx, int w, int h, float tickDelta) {
+		if (introAge < 0) return;
+		float t = (introAge + tickDelta) / INTRO_TICKS;
+		float black = t < 0.55f ? 1f : Mth.clamp(1f - (t - 0.55f) / 0.45f, 0f, 1f);
+		ctx.fill(0, 0, w, h, ((int) (black * 255f) << 24));
+		float textIn = Mth.clamp((t - 0.08f) / 0.15f, 0f, 1f) * Mth.clamp((0.6f - t) / 0.15f, 0f, 1f);
+		if (textIn <= 0.02f || !ClientConfig.get().screenText) return;
+		int v = (int) Mth.lerp(textIn, 10f, 150f);
+		Component line = Component.literal(introLine).withStyle(Style.EMPTY.withColor(TextColor.fromRgb(v << 16 | v << 8 | (v + 4))));
+		Font font = Minecraft.getInstance().font;
+		ctx.textRenderer().accept((w - font.width(introLine)) / 2, h / 2 - 4, line);
 	}
 
 	/**

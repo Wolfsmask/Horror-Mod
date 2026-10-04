@@ -24,6 +24,12 @@ public final class ClientConfig {
 	/** Show the lines of text that surface on the screen. */
 	public boolean screenText = true;
 
+	/** The mod's own title screen: the wood at night, and what stands in it. */
+	public boolean titleScreen = true;
+
+	/** The dark at the edges of the screen, the grain, the cold: stronger in the dark and when it is near. */
+	public boolean atmosphere = true;
+
 	public static ClientConfig get() {
 		return instance;
 	}

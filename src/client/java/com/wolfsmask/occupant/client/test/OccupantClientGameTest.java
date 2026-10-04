@@ -42,9 +42,16 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 
 	@Override
 	public void runTest(ClientGameTestContext context) {
+		// The title screen, as it first opens and then a while later, when it may be standing there.
+		context.waitTicks(60);
+		shoot(context, "occupant-title");
+		context.waitTicks(280);
+		shoot(context, "occupant-title-later");
+
 		TestWorldSave save;
 		try (TestSingleplayerContext game = context.worldBuilder().create()) {
 			game.getClientLevel().waitForChunksRender();
+			context.waitTicks(120);   // the way in: a few seconds of black, then the world
 			TestServerContext server = game.getServer();
 			int errorsBefore = server.computeOnServer(s -> Director.get() == null ? -1 : Director.get().totalErrors());
 			check(errorsBefore >= 0, "the Director should be running once a world is open");
@@ -157,7 +164,7 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 		// Back into the same world, which still has the player asleep in it.
 		try (TestSingleplayerContext again = save.open()) {
 			again.getClientLevel().waitForChunksRender();
-			context.waitTicks(40);
+			context.waitTicks(120);
 			boolean inWorld = context.computeOnClient(mc -> mc.player != null && mc.level != null);
 			check(inWorld, "rejoining a world the player left asleep in must work");
 			int errors = again.getServer().computeOnServer(s -> Director.get() == null ? -1 : Director.get().totalErrors());
