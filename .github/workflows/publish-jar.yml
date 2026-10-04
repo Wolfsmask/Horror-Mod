@@ -36,7 +36,7 @@ jobs:
       - name: Commit jar to dist/
         run: |
           mkdir -p dist
-          rm -f dist/*.jar
+          rm -f dist/*+mc26.2.jar
           cp build/libs/occupant-*.jar dist/
           rm -f dist/*-sources.jar
           ls -la dist
