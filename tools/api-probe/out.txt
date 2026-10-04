@@ -1,119 +1,241 @@
-=== net.minecraft.world.level.levelgen.feature.Feature (-public)
-public interface world.level.levelgen.feature.Feature {
-  public static final serialization.Codec<world.level.levelgen.feature.Feature> DIRECT_CODEC;
-  public static final serialization.Codec<core.Holder<world.level.levelgen.feature.Feature>> CODEC;
-  public static final serialization.Codec<core.HolderSet<world.level.levelgen.feature.Feature>> LIST_CODEC;
-  public abstract serialization.MapCodec<? extends world.level.levelgen.feature.Feature> codec();
-  public abstract boolean place(world.level.WorldGenLevel, world.level.chunk.ChunkGenerator, util.RandomSource, core.BlockPos);
-  public default stream.Stream<core.Holder<world.level.levelgen.feature.Feature>> getSubFeatures();
-  public default void setBlock(world.level.LevelWriter, core.BlockPos, world.level.block.state.BlockState);
-  public default void safeSetBlock(world.level.WorldGenLevel, core.BlockPos, world.level.block.state.BlockState, Predicate<world.level.block.state.BlockState>);
-  public default void markAboveForPostProcessing(world.level.WorldGenLevel, core.BlockPos);
+=== net.minecraft.world.level.levelgen.feature.SimpleBlockFeature (-p)
+public final class world.level.levelgen.feature.SimpleBlockFeature extends Record implements world.level.levelgen.feature.Feature {
+  private final core.Holder<world.level.levelgen.feature.stateproviders.BlockStateProvider> toPlace;
+  private final boolean scheduleTick;
+  public static final serialization.MapCodec<world.level.levelgen.feature.SimpleBlockFeature> CODEC;
+  public world.level.levelgen.feature.SimpleBlockFeature(core.Holder<world.level.levelgen.feature.stateproviders.BlockStateProvider>);
+  public world.level.levelgen.feature.SimpleBlockFeature(world.level.levelgen.feature.stateproviders.BlockStateProvider);
+  public world.level.levelgen.feature.SimpleBlockFeature(core.Holder<world.level.levelgen.feature.stateproviders.BlockStateProvider>, boolean);
+  public serialization.MapCodec<world.level.levelgen.feature.SimpleBlockFeature> codec();
+  public boolean place(world.level.WorldGenLevel, world.level.chunk.ChunkGenerator, util.RandomSource, core.BlockPos);
+  public final String toString();
+  public final int hashCode();
+  public final boolean equals(Object);
+  public core.Holder<world.level.levelgen.feature.stateproviders.BlockStateProvider> toPlace();
+  public boolean scheduleTick();
+  private static datafixers.kinds.App lambda$static$0(serialization.codecs.RecordCodecBuilder$Instance);
+  static {};
 }
-=== net.minecraft.world.level.levelgen.feature.FeaturePlaceContext (-public)
-Error: class not found: world.level.levelgen.feature.FeaturePlaceContext
-=== classes matching levelgen\.feature\.(Feature|.*Configuration|Configured|.*PlaceContext|.*Placed|configurations)|levelgen\.feature\.[A-Z][a-zA-Z]*Feature$
-net.minecraft.world.level.levelgen.feature.IcebergFeature
-net.minecraft.world.level.levelgen.feature.SnowAndFreezeFeature
-net.minecraft.world.level.levelgen.feature.VinesFeature
-net.minecraft.world.level.levelgen.feature.FillLayerFeature
-net.minecraft.world.level.levelgen.feature.FossilFeature
-net.minecraft.world.level.levelgen.feature.SpringFeature
-net.minecraft.world.level.levelgen.feature.VoidStartPlatformFeature
-net.minecraft.world.level.levelgen.feature.ReplaceBlobsFeature
-net.minecraft.world.level.levelgen.feature.EndPodiumFeature
-net.minecraft.world.level.levelgen.feature.FeatureTypes
-net.minecraft.world.level.levelgen.feature.SpeleothemClusterFeature
-net.minecraft.world.level.levelgen.feature.HugeFungusFeature
-net.minecraft.world.level.levelgen.feature.FeatureCountTracker
-net.minecraft.world.level.levelgen.feature.SingleBlockPillarFeature
-net.minecraft.world.level.levelgen.feature.OreFeature
-net.minecraft.world.level.levelgen.feature.TreeFeature
-net.minecraft.world.level.levelgen.feature.BonusChestFeature
-net.minecraft.world.level.levelgen.feature.DiskFeature
-net.minecraft.world.level.levelgen.feature.SpeleothemFeature
-net.minecraft.world.level.levelgen.feature.LargeDripstoneFeature
-net.minecraft.world.level.levelgen.feature.HugeRedMushroomFeature
-net.minecraft.world.level.levelgen.feature.GeodeFeature
-net.minecraft.world.level.levelgen.feature.EndPlatformFeature
-net.minecraft.world.level.levelgen.feature.LakeFeature
-net.minecraft.world.level.levelgen.feature.NoOpFeature
-net.minecraft.world.level.levelgen.feature.CoralTreeFeature
-net.minecraft.world.level.levelgen.feature.BlockPileFeature
-net.minecraft.world.level.levelgen.feature.AbstractOreFeature
-net.minecraft.world.level.levelgen.feature.EndIslandFeature
-net.minecraft.world.level.levelgen.feature.VegetationPatchFeature
-net.minecraft.world.level.levelgen.feature.BlockBlobFeature
-net.minecraft.world.level.levelgen.feature.UnderwaterMagmaFeature
-net.minecraft.world.level.levelgen.feature.ReplaceBlockFeature
-net.minecraft.world.level.levelgen.feature.EndSpikeFeature
-net.minecraft.world.level.levelgen.feature.EndGatewayFeature
-net.minecraft.world.level.levelgen.feature.Feature
-net.minecraft.world.level.levelgen.feature.OverlayFeature
-net.minecraft.world.level.levelgen.feature.SimpleRandomSelectorFeature
-net.minecraft.world.level.levelgen.feature.RandomSelectorFeature
-net.minecraft.world.level.levelgen.feature.ChorusPlantFeature
-net.minecraft.world.level.levelgen.feature.SteppedColumnClusterFeature
-net.minecraft.world.level.levelgen.feature.WaterloggedVegetationPatchFeature
-net.minecraft.world.level.levelgen.feature.CoralClawFeature
-net.minecraft.world.level.levelgen.feature.TemplateFeature
-net.minecraft.world.level.levelgen.feature.DeltaFeature
-net.minecraft.world.level.levelgen.feature.SimpleBlockFeature
-net.minecraft.world.level.levelgen.feature.FallenTreeFeature
-net.minecraft.world.level.levelgen.feature.RootSystemFeature
-net.minecraft.world.level.levelgen.feature.WeightedRandomSelectorFeature
-net.minecraft.world.level.levelgen.feature.MultifaceGrowthFeature
-net.minecraft.world.level.levelgen.feature.SculkPatchFeature
-net.minecraft.world.level.levelgen.feature.WeightedPlacedFeature
-net.minecraft.world.level.levelgen.feature.AbstractHugeMushroomFeature
-net.minecraft.world.level.levelgen.feature.SequenceFeature
-net.minecraft.world.level.levelgen.feature.RandomNeighborSpreadFeature
-net.minecraft.world.level.levelgen.feature.ScatteredOreFeature
-net.minecraft.world.level.levelgen.feature.MonsterRoomFeature
-net.minecraft.world.level.levelgen.feature.RandomBooleanSelectorFeature
-net.minecraft.world.level.levelgen.feature.BambooFeature
-net.minecraft.world.level.levelgen.feature.HugeBrownMushroomFeature
-=== net.minecraft.core.BlockPos (-public)
-public class core.BlockPos extends core.Vec3i {
-  public static Iterable<core.BlockPos> withinManhattan(core.BlockPos, int);
-  public static Iterable<core.BlockPos> betweenClosed(world.phys.AABB);
-  public static Iterable<core.BlockPos> betweenClosed(core.BlockPos, core.BlockPos);
-  public static stream.Stream<core.BlockPos> betweenClosedStream(core.BlockPos, core.BlockPos);
-  public static stream.Stream<core.BlockPos> betweenClosedStream(world.level.levelgen.structure.BoundingBox);
-  public static stream.Stream<core.BlockPos> betweenClosedStream(world.phys.AABB);
-  public static stream.Stream<core.BlockPos> betweenClosedStream(int, int, int, int, int, int);
-  public static Iterable<core.BlockPos> betweenClosed(int, int, int, int, int, int);
-=== net.minecraft.world.level.block.entity.SignText (-public)
-public class world.level.block.entity.SignText {
-  public static final int LINES;
-  public static final serialization.Codec<world.level.block.entity.SignText> CODEC;
-  public static final network.codec.StreamCodec<network.RegistryFriendlyByteBuf, world.level.block.entity.SignText> STREAM_CODEC;
-  public static final world.item.component.TooltipProvider$Getter<world.level.block.entity.SignText> FRONT_TEXT;
-  public static final world.item.component.TooltipProvider$Getter<world.level.block.entity.SignText> BACK_TEXT;
-  public static final world.level.block.entity.SignText EMPTY;
-  public world.level.block.entity.SignText(List<network.chat.Component>, List<network.chat.Component>, world.item.DyeColor, boolean);
-  public boolean hasGlowingText();
-  public world.level.block.entity.SignText withGlowingText(boolean);
-  public world.item.DyeColor getColor();
-  public world.level.block.entity.SignText withColor(world.item.DyeColor);
-  public boolean hasMessage(boolean);
-  public List<network.chat.Component> getMessages(boolean);
-  public util.FormattedCharSequence[] getRenderMessages(boolean, Function<network.chat.Component, util.FormattedCharSequence>);
-  public boolean hasAnyClickCommands(boolean);
-  public boolean hasEditableText(boolean);
-  public boolean equals(Object);
-  public int hashCode();
-  public world.level.block.entity.SignText$Mutable asMutable();
-  public static world.item.component.TooltipProvider$Getter<world.level.block.entity.SignText> createTooltip(network.chat.Component);
+=== net.minecraft.world.level.levelgen.feature.NoOpFeature (-p)
+public final class world.level.levelgen.feature.NoOpFeature extends Record implements world.level.levelgen.feature.Feature {
+  public static final serialization.MapCodec<world.level.levelgen.feature.NoOpFeature> CODEC;
+  public world.level.levelgen.feature.NoOpFeature();
+  public serialization.MapCodec<world.level.levelgen.feature.NoOpFeature> codec();
+  public boolean place(world.level.WorldGenLevel, world.level.chunk.ChunkGenerator, util.RandomSource, core.BlockPos);
+  public final String toString();
+  public final int hashCode();
+  public final boolean equals(Object);
+  static {};
 }
-=== net.minecraft.world.level.block.entity.SignTextSlot (-public)
-public final class world.level.block.entity.SignTextSlot extends Enum<world.level.block.entity.SignTextSlot> {
-  public static final world.level.block.entity.SignTextSlot BACK;
-  public static final world.level.block.entity.SignTextSlot FRONT;
-  public static final network.codec.StreamCodec<io.netty.buffer.ByteBuf, world.level.block.entity.SignTextSlot> STREAM_CODEC;
-  public static world.level.block.entity.SignTextSlot[] values();
-  public static world.level.block.entity.SignTextSlot valueOf(String);
+=== net.minecraft.world.level.levelgen.feature.FeatureTypes (-public)
+public interface world.level.levelgen.feature.FeatureTypes {
+  public static serialization.MapCodec<? extends world.level.levelgen.feature.Feature> bootstrap(core.Registry<serialization.MapCodec<? extends world.level.levelgen.feature.Feature>>);
 }
-=== net.minecraft.world.level.levelgen.feature.Feature (code: place|<init>|register)
-  public abstract boolean place(world.level.WorldGenLevel, world.level.chunk.ChunkGenerator, util.RandomSource, core.BlockPos);
+=== net.minecraft.core.registries.Registries (-public)
+public class core.registries.Registries {
+  public static final resources.ResourceKey<core.Registry<world.level.levelgen.feature.featuresize.FeatureSizeType<?>>> FEATURE_SIZE_TYPE;
+  public static final resources.ResourceKey<core.Registry<serialization.MapCodec<? extends world.level.levelgen.feature.Feature>>> FEATURE_TYPE;
+  public static final resources.ResourceKey<core.Registry<world.level.levelgen.feature.Feature>> FEATURE;
+  public static final resources.ResourceKey<core.Registry<world.level.levelgen.placement.PlacedFeature>> PLACED_FEATURE;
+=== net.minecraft.world.level.levelgen.placement.PlacedFeature (-public)
+public final class world.level.levelgen.placement.PlacedFeature extends Record {
+  public static final serialization.Codec<world.level.levelgen.placement.PlacedFeature> DIRECT_CODEC;
+  public static final serialization.Codec<core.Holder<world.level.levelgen.placement.PlacedFeature>> CODEC;
+  public static final serialization.Codec<core.HolderSet<world.level.levelgen.placement.PlacedFeature>> LIST_CODEC;
+  public static final serialization.Codec<List<core.HolderSet<world.level.levelgen.placement.PlacedFeature>>> LIST_OF_LISTS_CODEC;
+  public world.level.levelgen.placement.PlacedFeature(core.Holder<world.level.levelgen.feature.Feature>, List<world.level.levelgen.placement.PlacementModifier>);
+  public boolean place(world.level.WorldGenLevel, world.level.chunk.ChunkGenerator, util.RandomSource, core.BlockPos);
+  public stream.Stream<core.Holder<world.level.levelgen.feature.Feature>> getFeatures();
+  public String toString();
+  public final int hashCode();
+  public final boolean equals(Object);
+  public core.Holder<world.level.levelgen.feature.Feature> feature();
+  public List<world.level.levelgen.placement.PlacementModifier> placement();
+}
+=== data files matching data/minecraft/worldgen/(placed_feature|feature|configured_feature)/(disk_sand|blue_ice|ice_spike|desert_well|lake_lava_surface)\.json
+--- data/minecraft/worldgen/placed_feature/lake_lava_surface.json
+{
+  "feature": "minecraft:lake_lava",
+  "placement": [
+    {
+      "type": "minecraft:rarity_filter",
+      "chance": 200
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "minecraft:heightmap",
+      "heightmap": "WORLD_SURFACE_WG"
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}
+--- data/minecraft/worldgen/feature/blue_ice.json
+{
+  "type": "minecraft:blue_ice"
+}
+--- data/minecraft/worldgen/placed_feature/ice_spike.json
+{
+  "feature": "minecraft:ice_spike",
+  "placement": [
+    {
+      "type": "minecraft:count",
+      "count": 3
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "minecraft:heightmap",
+      "heightmap": "MOTION_BLOCKING"
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}
+--- data/minecraft/worldgen/feature/disk_sand.json
+{
+  "type": "minecraft:disk",
+  "half_height": 2,
+  "radius": {
+    "type": "minecraft:uniform",
+    "max_inclusive": 6,
+    "min_inclusive": 2
+  },
+  "state_provider": {
+    "type": "minecraft:rule_based",
+    "fallback": {
+      "id": "minecraft:sand"
+    },
+    "rules": [
+      {
+        "if_true": {
+          "type": "minecraft:matching_blocks",
+          "blocks": "minecraft:air",
+          "offset": [
+            0,
+            -1,
+            0
+          ]
+        },
+        "then": {
+          "id": "minecraft:sandstone"
+        }
+      }
+    ]
+  },
+  "target": {
+    "type": "minecraft:matching_blocks",
+    "blocks": [
+      "minecraft:dirt",
+      "minecraft:grass_block"
+    ]
+  }
+}
+--- data/minecraft/worldgen/placed_feature/blue_ice.json
+{
+  "feature": "minecraft:blue_ice",
+  "placement": [
+    {
+      "type": "minecraft:count",
+      "count": {
+        "type": "minecraft:uniform",
+        "max_inclusive": 19,
+        "min_inclusive": 0
+      }
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "minecraft:height_range",
+      "height": {
+        "type": "minecraft:uniform",
+        "max_inclusive": {
+          "absolute": 61
+        },
+        "min_inclusive": {
+          "absolute": 30
+        }
+      }
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}
+--- data/minecraft/worldgen/placed_feature/desert_well.json
+{
+  "feature": "minecraft:desert_well",
+  "placement": [
+    {
+      "type": "minecraft:rarity_filter",
+      "chance": 1000
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "minecraft:heightmap",
+      "heightmap": "MOTION_BLOCKING"
+    },
+    {
+      "type": "minecraft:offset",
+      "x": 0,
+      "y": -1,
+      "z": 0
+    },
+    {
+      "type": "minecraft:block_predicate_filter",
+      "predicate": {
+        "type": "minecraft:all_of",
+        "predicates": [
+          {
+            "type": "minecraft:matching_blocks",
+            "blocks": "minecraft:sand"
+          },
+          {
+            "type": "minecraft:volume_match",
+            "match": {
+              "type": "minecraft:not",
+              "predicate": {
+                "type": "minecraft:matching_block_tag",
+                "tag": "minecraft:air"
+              }
+            },
+            "max": [
+              2,
+              -1,
+              2
+            ],
+            "min": [
+              -2,
+              -2,
+              -2
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}
+=== data files matching data/minecraft/worldgen/[a-z_]+/$
+--- data/minecraft/worldgen/placed_feature/
+
+--- data/minecraft/worldgen/structure/
+
+--- data/minecraft/worldgen/biome/
+
+--- data/minecraft/worldgen/template_pool/
+
+--- data/minecraft/worldgen/processor_list/
+
+--- data/minecraft/worldgen/material_rule/
 
