@@ -1,171 +1,119 @@
-=== Minecraft versions known to Fabric (newest first)
-26.4-snapshot-2 snapshot
-26.4-snapshot-1 snapshot
-26.3 stable
-26.3-rc-3 snapshot
-26.3-rc-2 snapshot
-26.3-rc-1 snapshot
-26.3-pre-3 snapshot
-26.3-pre-2 snapshot
-26.3-pre-1 snapshot
-26.3-snapshot-10 snapshot
-26.3-snapshot-9 snapshot
-26.3-snapshot-8 snapshot
-26.3-snapshot-7 snapshot
-26.3-snapshot-6 snapshot
-26.3-snapshot-5 snapshot
-26.3-snapshot-4 snapshot
-26.3-snapshot-3 snapshot
-26.3-snapshot-2 snapshot
-26.3-snapshot-1 snapshot
-26.2 stable
-26.2-rc-2 snapshot
-26.2-rc-1 snapshot
-26.2-pre-6 snapshot
-26.2-pre-5 snapshot
-26.2-pre-4 snapshot
-26.2-pre-3 snapshot
-26.2-pre-2 snapshot
-26.2-pre-1 snapshot
-26.2-snapshot-8 snapshot
-26.2-snapshot-7 snapshot
-26.2-snapshot-6 snapshot
-26.2-snapshot-5 snapshot
-26.2-snapshot-4 snapshot
-26.2-snapshot-3 snapshot
-26.2-snapshot-2 snapshot
-26.1.2 stable
-26.1.2-rc-1 snapshot
-26.2-snapshot-1 snapshot
-26w14a snapshot
-26.1.1 stable
-26.1.1-rc-1 snapshot
-26.1 stable
-26.1-rc-3 snapshot
-26.1-rc-2 snapshot
-26.1-rc-1 snapshot
-26.1-pre-3 snapshot
-26.1-pre-2 snapshot
-26.1-pre-1 snapshot
-26.1-snapshot-11 snapshot
-26.1-snapshot-10 snapshot
-26.1-snapshot-9 snapshot
-26.1-snapshot-8 snapshot
-26.1-snapshot-7 snapshot
-26.1-snapshot-6 snapshot
-26.1-snapshot-5 snapshot
-26.1-snapshot-4 snapshot
-26.1-snapshot-3 snapshot
-26.1-snapshot-2 snapshot
-26.1-snapshot-1 snapshot
-1.21.11 stable
-=== Fabric API builds (newest 80)
-0.149.0+26.2
-0.149.1+26.1.2
-0.149.1+26.2
-0.149.2+26.2
-0.150.0+26.1.2
-0.150.0+26.2
-0.150.1+26.2
-0.150.2+26.2
-0.150.3+26.2
-0.151.0+26.1.2
-0.151.0+26.2
-0.152.0+26.2
-0.152.1+26.1.2
-0.152.1+26.2
-0.152.2+26.2
-0.153.0+26.1.2
-0.153.0+26.2
-0.153.1+26.3
-0.153.2+26.3
-0.116.13+1.21.1
-0.154.0+26.1.2
-0.154.0+26.2
-0.154.0+26.3
-0.154.1+26.2
-0.154.1+26.3
-0.154.2+26.1.2
-0.154.2+26.2
-0.154.2+26.3
-0.154.3+26.3
-0.92.10+1.20.1
-0.92.11+1.20.1
-0.116.14+1.21.1
-0.141.5+1.21.11
-0.155.0+26.2
-0.155.0+26.3
-0.155.0+26.1.2
-0.155.1+26.3
-0.155.2+26.1.2
-0.155.2+26.2
-0.155.2+26.3
-0.155.3+26.3
-0.116.15+1.21.1
-0.141.6+1.21.11
-0.156.0+26.2
-0.156.0+26.3
-0.156.1+26.3
-0.156.2+26.3
-0.156.3+26.3
-0.157.0+26.2
-0.157.0+26.3
-0.157.1+26.3
-0.157.2+26.3
-0.158.0+26.2
-0.158.0+26.3
-0.158.1+26.3
-0.158.2+26.3
-0.158.3+26.3
-0.92.12+1.20.1
-0.116.16+1.21.1
-0.159.0+26.2
-0.159.0+26.3
-0.159.1+26.3
-0.116.17+1.21.1
-0.159.2+26.3
-0.159.3+26.3
-0.159.4+26.3
-0.155.3+26.1.2
-0.160.0+26.2
-0.160.0+26.3
-0.160.1+26.3
-0.160.2+26.3
-0.160.3+26.3
-0.160.4+26.3
-0.160.5+26.3
-0.160.6+26.3
-0.160.7+26.3
-0.161.0+26.2
-0.161.0+26.3
-0.161.1+26.4
-0.161.2+26.4
-=== Fabric API builds for the old versions
-0.116.12+1.21.1
-0.141.4+1.21.11
-0.116.13+1.21.1
-0.92.10+1.20.1
-0.92.11+1.20.1
-0.116.14+1.21.1
-0.141.5+1.21.11
-0.116.15+1.21.1
-0.141.6+1.21.11
-0.92.12+1.20.1
-0.116.16+1.21.1
-0.116.17+1.21.1
-=== Loom versions
-1.18.0-alpha.13
-1.18.0-alpha.14
-1.18.0-alpha.15
-1.18.0-alpha.16
-1.17.20
-1.18.0-alpha.17
-1.18.0-alpha.18
-1.18.0-alpha.19
-1.18.0-alpha.20
-1.18.0-alpha.21
-1.17.21
-1.18.0-alpha.23
-1.18.1
-1.18-SNAPSHOT
-1.18.2
+=== net.minecraft.world.level.levelgen.feature.Feature (-public)
+public interface world.level.levelgen.feature.Feature {
+  public static final serialization.Codec<world.level.levelgen.feature.Feature> DIRECT_CODEC;
+  public static final serialization.Codec<core.Holder<world.level.levelgen.feature.Feature>> CODEC;
+  public static final serialization.Codec<core.HolderSet<world.level.levelgen.feature.Feature>> LIST_CODEC;
+  public abstract serialization.MapCodec<? extends world.level.levelgen.feature.Feature> codec();
+  public abstract boolean place(world.level.WorldGenLevel, world.level.chunk.ChunkGenerator, util.RandomSource, core.BlockPos);
+  public default stream.Stream<core.Holder<world.level.levelgen.feature.Feature>> getSubFeatures();
+  public default void setBlock(world.level.LevelWriter, core.BlockPos, world.level.block.state.BlockState);
+  public default void safeSetBlock(world.level.WorldGenLevel, core.BlockPos, world.level.block.state.BlockState, Predicate<world.level.block.state.BlockState>);
+  public default void markAboveForPostProcessing(world.level.WorldGenLevel, core.BlockPos);
+}
+=== net.minecraft.world.level.levelgen.feature.FeaturePlaceContext (-public)
+Error: class not found: world.level.levelgen.feature.FeaturePlaceContext
+=== classes matching levelgen\.feature\.(Feature|.*Configuration|Configured|.*PlaceContext|.*Placed|configurations)|levelgen\.feature\.[A-Z][a-zA-Z]*Feature$
+net.minecraft.world.level.levelgen.feature.IcebergFeature
+net.minecraft.world.level.levelgen.feature.SnowAndFreezeFeature
+net.minecraft.world.level.levelgen.feature.VinesFeature
+net.minecraft.world.level.levelgen.feature.FillLayerFeature
+net.minecraft.world.level.levelgen.feature.FossilFeature
+net.minecraft.world.level.levelgen.feature.SpringFeature
+net.minecraft.world.level.levelgen.feature.VoidStartPlatformFeature
+net.minecraft.world.level.levelgen.feature.ReplaceBlobsFeature
+net.minecraft.world.level.levelgen.feature.EndPodiumFeature
+net.minecraft.world.level.levelgen.feature.FeatureTypes
+net.minecraft.world.level.levelgen.feature.SpeleothemClusterFeature
+net.minecraft.world.level.levelgen.feature.HugeFungusFeature
+net.minecraft.world.level.levelgen.feature.FeatureCountTracker
+net.minecraft.world.level.levelgen.feature.SingleBlockPillarFeature
+net.minecraft.world.level.levelgen.feature.OreFeature
+net.minecraft.world.level.levelgen.feature.TreeFeature
+net.minecraft.world.level.levelgen.feature.BonusChestFeature
+net.minecraft.world.level.levelgen.feature.DiskFeature
+net.minecraft.world.level.levelgen.feature.SpeleothemFeature
+net.minecraft.world.level.levelgen.feature.LargeDripstoneFeature
+net.minecraft.world.level.levelgen.feature.HugeRedMushroomFeature
+net.minecraft.world.level.levelgen.feature.GeodeFeature
+net.minecraft.world.level.levelgen.feature.EndPlatformFeature
+net.minecraft.world.level.levelgen.feature.LakeFeature
+net.minecraft.world.level.levelgen.feature.NoOpFeature
+net.minecraft.world.level.levelgen.feature.CoralTreeFeature
+net.minecraft.world.level.levelgen.feature.BlockPileFeature
+net.minecraft.world.level.levelgen.feature.AbstractOreFeature
+net.minecraft.world.level.levelgen.feature.EndIslandFeature
+net.minecraft.world.level.levelgen.feature.VegetationPatchFeature
+net.minecraft.world.level.levelgen.feature.BlockBlobFeature
+net.minecraft.world.level.levelgen.feature.UnderwaterMagmaFeature
+net.minecraft.world.level.levelgen.feature.ReplaceBlockFeature
+net.minecraft.world.level.levelgen.feature.EndSpikeFeature
+net.minecraft.world.level.levelgen.feature.EndGatewayFeature
+net.minecraft.world.level.levelgen.feature.Feature
+net.minecraft.world.level.levelgen.feature.OverlayFeature
+net.minecraft.world.level.levelgen.feature.SimpleRandomSelectorFeature
+net.minecraft.world.level.levelgen.feature.RandomSelectorFeature
+net.minecraft.world.level.levelgen.feature.ChorusPlantFeature
+net.minecraft.world.level.levelgen.feature.SteppedColumnClusterFeature
+net.minecraft.world.level.levelgen.feature.WaterloggedVegetationPatchFeature
+net.minecraft.world.level.levelgen.feature.CoralClawFeature
+net.minecraft.world.level.levelgen.feature.TemplateFeature
+net.minecraft.world.level.levelgen.feature.DeltaFeature
+net.minecraft.world.level.levelgen.feature.SimpleBlockFeature
+net.minecraft.world.level.levelgen.feature.FallenTreeFeature
+net.minecraft.world.level.levelgen.feature.RootSystemFeature
+net.minecraft.world.level.levelgen.feature.WeightedRandomSelectorFeature
+net.minecraft.world.level.levelgen.feature.MultifaceGrowthFeature
+net.minecraft.world.level.levelgen.feature.SculkPatchFeature
+net.minecraft.world.level.levelgen.feature.WeightedPlacedFeature
+net.minecraft.world.level.levelgen.feature.AbstractHugeMushroomFeature
+net.minecraft.world.level.levelgen.feature.SequenceFeature
+net.minecraft.world.level.levelgen.feature.RandomNeighborSpreadFeature
+net.minecraft.world.level.levelgen.feature.ScatteredOreFeature
+net.minecraft.world.level.levelgen.feature.MonsterRoomFeature
+net.minecraft.world.level.levelgen.feature.RandomBooleanSelectorFeature
+net.minecraft.world.level.levelgen.feature.BambooFeature
+net.minecraft.world.level.levelgen.feature.HugeBrownMushroomFeature
+=== net.minecraft.core.BlockPos (-public)
+public class core.BlockPos extends core.Vec3i {
+  public static Iterable<core.BlockPos> withinManhattan(core.BlockPos, int);
+  public static Iterable<core.BlockPos> betweenClosed(world.phys.AABB);
+  public static Iterable<core.BlockPos> betweenClosed(core.BlockPos, core.BlockPos);
+  public static stream.Stream<core.BlockPos> betweenClosedStream(core.BlockPos, core.BlockPos);
+  public static stream.Stream<core.BlockPos> betweenClosedStream(world.level.levelgen.structure.BoundingBox);
+  public static stream.Stream<core.BlockPos> betweenClosedStream(world.phys.AABB);
+  public static stream.Stream<core.BlockPos> betweenClosedStream(int, int, int, int, int, int);
+  public static Iterable<core.BlockPos> betweenClosed(int, int, int, int, int, int);
+=== net.minecraft.world.level.block.entity.SignText (-public)
+public class world.level.block.entity.SignText {
+  public static final int LINES;
+  public static final serialization.Codec<world.level.block.entity.SignText> CODEC;
+  public static final network.codec.StreamCodec<network.RegistryFriendlyByteBuf, world.level.block.entity.SignText> STREAM_CODEC;
+  public static final world.item.component.TooltipProvider$Getter<world.level.block.entity.SignText> FRONT_TEXT;
+  public static final world.item.component.TooltipProvider$Getter<world.level.block.entity.SignText> BACK_TEXT;
+  public static final world.level.block.entity.SignText EMPTY;
+  public world.level.block.entity.SignText(List<network.chat.Component>, List<network.chat.Component>, world.item.DyeColor, boolean);
+  public boolean hasGlowingText();
+  public world.level.block.entity.SignText withGlowingText(boolean);
+  public world.item.DyeColor getColor();
+  public world.level.block.entity.SignText withColor(world.item.DyeColor);
+  public boolean hasMessage(boolean);
+  public List<network.chat.Component> getMessages(boolean);
+  public util.FormattedCharSequence[] getRenderMessages(boolean, Function<network.chat.Component, util.FormattedCharSequence>);
+  public boolean hasAnyClickCommands(boolean);
+  public boolean hasEditableText(boolean);
+  public boolean equals(Object);
+  public int hashCode();
+  public world.level.block.entity.SignText$Mutable asMutable();
+  public static world.item.component.TooltipProvider$Getter<world.level.block.entity.SignText> createTooltip(network.chat.Component);
+}
+=== net.minecraft.world.level.block.entity.SignTextSlot (-public)
+public final class world.level.block.entity.SignTextSlot extends Enum<world.level.block.entity.SignTextSlot> {
+  public static final world.level.block.entity.SignTextSlot BACK;
+  public static final world.level.block.entity.SignTextSlot FRONT;
+  public static final network.codec.StreamCodec<io.netty.buffer.ByteBuf, world.level.block.entity.SignTextSlot> STREAM_CODEC;
+  public static world.level.block.entity.SignTextSlot[] values();
+  public static world.level.block.entity.SignTextSlot valueOf(String);
+}
+=== net.minecraft.world.level.levelgen.feature.Feature (code: place|<init>|register)
+  public abstract boolean place(world.level.WorldGenLevel, world.level.chunk.ChunkGenerator, util.RandomSource, core.BlockPos);
+
