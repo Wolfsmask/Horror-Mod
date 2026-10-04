@@ -1,2 +1,9 @@
-# Round 14: which versions exist, for porting.
-@versions
+@mc 26.3
+# Round 15: what changed in 26.3 (features, BlockPos, signs).
+net.minecraft.world.level.levelgen.feature.Feature
+net.minecraft.world.level.levelgen.feature.FeaturePlaceContext
+@find levelgen\.feature\.(Feature|.*Configuration|Configured|.*PlaceContext|.*Placed|configurations)|levelgen\.feature\.[A-Z][a-zA-Z]*Feature$
+net.minecraft.core.BlockPos withinManhattan|betweenClosed
+net.minecraft.world.level.block.entity.SignText
+net.minecraft.world.level.block.entity.SignTextSlot
+@code net.minecraft.world.level.levelgen.feature.Feature place|<init>|register

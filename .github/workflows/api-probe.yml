@@ -23,7 +23,7 @@ jobs:
       - name: Resolve classpath
         run: |
           chmod +x gradlew
-          ./gradlew --quiet --init-script tools/api-probe/classpath.init.gradle printProbeClasspath | grep '^PROBE_CP=' | head -1 | cut -d= -f2- > cp.txt
+          MC=$(grep -m1 '^@mc ' tools/api-probe/classes.txt | awk '{print $2}'); ./gradlew --quiet ${MC:+-Pmc=$MC} --init-script tools/api-probe/classpath.init.gradle printProbeClasspath | grep '^PROBE_CP=' | head -1 | cut -d= -f2- > cp.txt
           tr ':' '\n' < cp.txt | grep -iE 'minecraft|fabric-api|gametest|rendering|networking' | head -40
       - name: Probe
         run: tools/api-probe/probe.sh "$(cat cp.txt)" | tee tools/api-probe/out.txt

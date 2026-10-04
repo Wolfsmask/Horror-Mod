@@ -83,7 +83,9 @@ public final class HallwayEvent extends HorrorEvent {
 					int seen = Integer.bitCount(mask);
 					boolean head = (mask & (0b111 << 12 | 0b111 << 9)) != 0;
 					if (seen == 0) continue;
-					if (peek && (!head || seen > 8)) continue;   // its head past the edge, the rest behind it
+					// Its head past the edge, and one whole side of it, knees to crown, behind a wall or a
+					// doorframe. Furniture is too low to hide that, so a spot behind a table never counts.
+					if (peek && (!head || seen > 8 || !sideHidden(mask))) continue;
 					// Not right up close, not far off: about seven blocks, at the edge of the screen
 					// where you catch it out of the corner of your eye, and as little of it as can be.
 					double score = Math.abs(flat - 7.0) * 0.6 + Math.abs(side - 45.0) * 0.04 + seen * 0.35;
@@ -95,6 +97,16 @@ public final class HallwayEvent extends HorrorEvent {
 			}
 		}
 		return best;
+	}
+
+	/** One column of the sample points (rows 1 to 4, knee height up) entirely out of sight. */
+	private static boolean sideHidden(int mask) {
+		for (int col = 0; col < 3; col++) {
+			boolean any = false;
+			for (int row = 1; row < 5; row++) any |= (mask & (1 << (row * 3 + col))) != 0;
+			if (!any) return true;
+		}
+		return false;
 	}
 
 	/** Walled in on at least two sides within a few blocks: a hallway, a gap, a doorway, a corner. */

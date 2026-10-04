@@ -4,7 +4,7 @@
 set -u
 CP="$1"
 while IFS= read -r line; do
-	[[ -z "${line// }" || "$line" == \#* ]] && continue
+	[[ -z "${line// }" || "$line" == \#* || "$line" == @mc* ]] && continue
 	vis="-public"
 	if [[ "$line" == @protected* ]]; then vis="-protected"; line="${line#@protected }"; fi
 	if [[ "$line" == @private* ]]; then vis="-p"; line="${line#@private }"; fi
@@ -18,6 +18,15 @@ while IFS= read -r line; do
 		curl -s https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/maven-metadata.xml | grep -o '<version>[^<]*</version>' | sed 's/<[^>]*>//g' | grep -E '\+(1\.20\.1|1\.21\.1|1\.21\.11|26\.1)$' | tail -n 12
 		echo "=== Loom versions"
 		curl -s https://maven.fabricmc.net/net/fabricmc/fabric-loom/maven-metadata.xml | grep -o '<version>[^<]*</version>' | sed 's/<[^>]*>//g' | tail -n 15
+		continue
+	fi
+	if [[ "$line" == @find* ]]; then
+		# "@find <regex>": every Minecraft class whose name matches.
+		pat="${line#@find }"
+		echo "=== classes matching $pat"
+		tr ':' '\n' <<< "$CP" | grep -E 'minecraft-(common|clientOnly|merged)' | while read -r jar; do
+			unzip -Z1 "$jar" 2>/dev/null | grep '\.class$' | grep -v '\$' | sed 's/\.class$//; s#/#.#g' | grep -E "$pat" | head -60
+		done
 		continue
 	fi
 	if [[ "$line" == @jars* ]]; then
