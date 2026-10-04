@@ -29,6 +29,7 @@ public final class GateScreen extends Screen {
 	private static final String LEAVE = "or leave it alone";
 
 	private static boolean passed;
+	private static boolean showing;
 	private static boolean accepted;
 	private static Boolean configured;
 
@@ -55,11 +56,17 @@ public final class GateScreen extends Screen {
 	public static void passForTest(Minecraft mc) {
 		passed = true;
 		accepted = true;
-		mc.setScreen(new TitleScreen());
+		mc.setScreenAndShow(new TitleScreen());
+	}
+
+	/** Is the gate on screen right now? */
+	public static boolean showing() {
+		return showing;
 	}
 
 	@Override
 	protected void init() {
+		showing = true;
 		TitleAtmosphere.opened();
 	}
 
@@ -70,6 +77,7 @@ public final class GateScreen extends Screen {
 
 	@Override
 	public void removed() {
+		showing = false;
 		TitleAtmosphere.closed(this.minecraft);
 	}
 
@@ -174,7 +182,7 @@ public final class GateScreen extends Screen {
 		Minecraft mc = this.minecraft;
 		CreateWorldScreen.openFresh(mc, () -> {
 			passed = false;
-			mc.setScreen(new GateScreen());
+			mc.setScreenAndShow(new GateScreen());
 		});
 	}
 
@@ -183,7 +191,7 @@ public final class GateScreen extends Screen {
 		passed = true;
 		accepted = false;
 		setHaunting(false);
-		this.minecraft.setScreen(new TitleScreen());
+		this.minecraft.setScreenAndShow(new TitleScreen());
 	}
 
 	/** Only ever for this session: the config file itself is never changed. */

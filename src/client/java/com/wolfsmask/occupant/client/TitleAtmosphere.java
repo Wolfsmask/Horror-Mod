@@ -55,7 +55,7 @@ public final class TitleAtmosphere {
 			if (!(screen instanceof TitleScreen) || !ClientConfig.get().titleScreen) return;
 			// The first thing anyone sees is the gate, not the menu.
 			if (!GateScreen.passed()) {
-				client.execute(() -> client.setScreen(new GateScreen()));
+				client.execute(() -> client.setScreenAndShow(new GateScreen()));
 				return;
 			}
 			// Said no at the gate: the game's own title screen, untouched.

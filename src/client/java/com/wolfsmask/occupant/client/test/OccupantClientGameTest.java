@@ -46,7 +46,7 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 		// The title screen, as it first opens and then a while later, when it may be standing there.
 		// The gate comes first: the wood, the title, and one thing to do.
 		context.waitTicks(60);
-		check(context.computeOnClient(mc -> mc.screen instanceof GateScreen), "the first screen should be the gate");
+		check(context.computeOnClient(mc -> GateScreen.showing()), "the first screen should be the gate");
 		shoot(context, "occupant-gate");
 		context.waitTicks(280);
 		shoot(context, "occupant-gate-later");
