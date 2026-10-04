@@ -1,0 +1,8 @@
+# 1.21.11 on 6e5ba6eee98c38273de16c09a0efab46e2c72cad: build failure, tests skipped
+> Configure project :
+* What went wrong:
+> Cannot use Mojang mappings in a non-obfuscated environment
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
