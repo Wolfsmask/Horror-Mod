@@ -1,0 +1,24 @@
+# 26.1.2 on 5cb7ca4d36d2fff25ee0598988d3f3ada311d59f: build success, tests success
+> Configure project :
+> Task :compileJava
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/ArenaGameTests.java:104: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:62: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:94: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:160: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:211: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+> Task :processResources
+> Task :classes
+> Task :compileClientJava
+> Task :processClientResources NO-SOURCE
+> Task :processIncludeJars
+> Task :clientClasses
+> Task :compileTestJava NO-SOURCE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+> Task :jar
+> Task :assemble
+> Task :test NO-SOURCE
+> Task :validateAccessWidener NO-SOURCE
+> Task :check UP-TO-DATE
+> Task :build
+[23:14:24] [Server thread/INFO] (Minecraft) ========= 10 GAME TESTS COMPLETE IN 8.340 s ======================
