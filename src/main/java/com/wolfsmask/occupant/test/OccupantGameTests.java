@@ -164,7 +164,12 @@ public final class OccupantGameTests {
 			helper.assertTrue(!House.isInside(level, inside.offset(0, 0, -3)), "Outside the front door is not inside");
 			BlockPos peek = HallwayEvent.find(player, true);
 			BlockPos any = peek != null ? peek : HallwayEvent.find(player, false);
-			Occupant.LOGGER.info("[gametest] house hallway spot: peeking {} / any {}", peek, any);
+			Occupant.LOGGER.info("[gametest] house hallway spot: peeking {} / any {} (relative to the floor: {})", peek, any,
+					any == null ? "-" : any.subtract(floor));
+			Occupant.LOGGER.info("[gametest] hallway light at the far end: block {} sky {}, dark {}",
+					level.getBrightness(net.minecraft.world.level.LightLayer.BLOCK, House.local(floor, Rotation.NONE, 10, 2, 7)),
+					level.getBrightness(net.minecraft.world.level.LightLayer.SKY, House.local(floor, Rotation.NONE, 10, 2, 7)),
+					com.wolfsmask.occupant.util.Spots.isDark(level, House.local(floor, Rotation.NONE, 10, 2, 7)));
 			helper.assertTrue(any != null, "There should be somewhere in the dark hallway for it to stand");
 			BlockPos hallStart = House.local(floor, Rotation.NONE, 9, 1, 1);
 			helper.assertTrue(any.getX() >= hallStart.getX() - 1 && any.getX() <= hallStart.getX() + 1,

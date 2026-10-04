@@ -57,7 +57,7 @@ jobs:
           {
             echo "# ${{ matrix.mc }} on $GITHUB_SHA: build ${{ steps.build.outcome }}, tests ${{ steps.tests.outcome }}"
             grep -E "error:|warning: \[removal\]|What went wrong|Could not|> " build.log | head -n 150 || true
-            if [ -f test.log ]; then grep -E "GAME TESTS COMPLETE|required tests failed|  - occupant" test.log | head -n 30; fi
+            if [ -f test.log ]; then grep -E "GAME TESTS COMPLETE|required tests failed|  - occupant|\[gametest\]" test.log | head -n 30; fi
           } > "$OUT/result.txt"
           if [ "${{ steps.tests.outcome }}" = "success" ]; then
             cp build/libs/occupant-*.jar "$OUT/" 2>/dev/null || true
