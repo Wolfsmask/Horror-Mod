@@ -20,6 +20,16 @@ while IFS= read -r line; do
 		curl -s https://maven.fabricmc.net/net/fabricmc/fabric-loom/maven-metadata.xml | grep -o '<version>[^<]*</version>' | sed 's/<[^>]*>//g' | tail -n 15
 		continue
 	fi
+	if [[ "$line" == @data* ]]; then
+		# "@data <path-regex>": data files in the Minecraft jars matching, and the first few printed.
+		pat="${line#@data }"
+		echo "=== data files matching $pat"
+		tr ':' '\n' <<< "$CP" | grep -E 'minecraft-(common|clientOnly|merged)' | while read -r jar; do
+			files=$(unzip -Z1 "$jar" 2>/dev/null | grep -E "$pat" | head -n 6)
+			for f in $files; do echo "--- $f"; unzip -p "$jar" "$f" | head -c 1500; echo; done
+		done
+		continue
+	fi
 	if [[ "$line" == @find* ]]; then
 		# "@find <regex>": every Minecraft class whose name matches.
 		pat="${line#@find }"
