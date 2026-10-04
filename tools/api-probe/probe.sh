@@ -7,6 +7,7 @@ while IFS= read -r line; do
 	[[ -z "${line// }" || "$line" == \#* ]] && continue
 	vis="-public"
 	if [[ "$line" == @protected* ]]; then vis="-protected"; line="${line#@protected }"; fi
+	if [[ "$line" == @private* ]]; then vis="-p"; line="${line#@private }"; fi
 	if [[ "$line" == @jars* ]]; then
 		# "@jars <regex>": which jars on the classpath match, and the classes inside them.
 		pat="${line#@jars }"

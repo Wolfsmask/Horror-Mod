@@ -1,17 +1,14 @@
-# Round 11: a house that generates in the world.
-net.minecraft.world.level.levelgen.feature.Feature Feature\(|place|setBlock|register
-@protected net.minecraft.world.level.levelgen.feature.Feature Feature\(|setBlock
-net.minecraft.world.level.levelgen.feature.FeaturePlaceContext
-net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration
-net.minecraft.world.level.LevelWriter setBlock
-net.minecraft.world.level.WorldGenLevel
-net.fabricmc.fabric.api.biome.v1.BiomeModifications addFeature
-net.fabricmc.fabric.api.biome.v1.BiomeSelectors
-net.fabricmc.fabric.api.biome.v1.BiomeSelectionContext
-net.minecraft.world.level.levelgen.GenerationStep$Decoration
-net.minecraft.core.registries.Registries PLACED_FEATURE|CONFIGURED_FEATURE|FEATURE
-net.minecraft.core.registries.BuiltInRegistries FEATURE
-net.minecraft.world.level.block.StairBlock FACING|HALF
-net.minecraft.world.level.block.SlabBlock TYPE
-net.minecraft.tags.BiomeTags IS_FOREST|IS_TAIGA|IS_OCEAN|IS_RIVER
-net.minecraft.resources.ResourceKey create
+# Round 12: a title screen of its own, and one house per world.
+net.fabricmc.fabric.api.client.screen.v1.ScreenEvents
+net.fabricmc.fabric.api.client.screen.v1.Screens
+@private net.minecraft.client.gui.screens.TitleScreen
+@private net.minecraft.client.gui.screens.Screen extract|render|Background|Panorama|PANORAMA|blur|Blur
+net.minecraft.client.renderer.PanoramaRenderer
+net.minecraft.client.gui.GuiGraphicsExtractor blit|fill|text|pose|guiWidth|nextStratum
+net.minecraft.client.resources.sounds.SimpleSoundInstance forUI|forMusic|forAmbientAddition
+net.minecraft.client.sounds.SoundManager play|stop|isActive
+net.minecraft.world.level.storage.LevelResource ROOT
+net.minecraft.server.MinecraftServer getWorldPath
+net.minecraft.client.gui.components.Renderable
+net.minecraft.client.gui.components.AbstractWidget extract|render|setAlpha
+@code net.minecraft.client.gui.screens.TitleScreen extract|render
