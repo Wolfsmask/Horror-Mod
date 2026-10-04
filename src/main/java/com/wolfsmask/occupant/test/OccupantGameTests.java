@@ -10,6 +10,7 @@ import com.wolfsmask.occupant.director.events.HallwayEvent;
 import com.wolfsmask.occupant.entity.OccupantEntity;
 import com.wolfsmask.occupant.registry.ModEntities;
 import com.wolfsmask.occupant.world.HouseFeature;
+import com.wolfsmask.occupant.world.ModWorld;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
@@ -20,6 +21,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.phys.AABB;
 
 import java.util.ArrayList;
@@ -172,6 +174,30 @@ public final class OccupantGameTests {
 			helper.assertTrue(peek != null, "From the door it should be only just visible, past the edge of the gap");
 			helper.succeed();
 		});
+	}
+
+	/**
+	 * There is only one house in a world. Once it has been built, nothing can build another,
+	 * however far away and however suitable the ground.
+	 */
+	@GameTest(maxTicks = 40)
+	public void onlyOneHouseEverGenerates(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos first = helper.absolutePos(new BlockPos(0, 1, 0)).offset(600, 0, 0);
+		BlockPos second = first.offset(0, 0, 200);
+		for (BlockPos at : List.of(first, second)) {
+			for (int dx = -1; dx <= 1; dx++) {
+				for (int dz = -1; dz <= 1; dz++) level.getChunk((at.getX() >> 4) + dx, (at.getZ() >> 4) + dz);
+			}
+		}
+		boolean builtBefore = HouseFeature.built();
+		boolean a = ModWorld.HOUSE.place(NoneFeatureConfiguration.INSTANCE, level, level.getChunkSource().getGenerator(), level.getRandom(), first);
+		boolean b = ModWorld.HOUSE.place(NoneFeatureConfiguration.INSTANCE, level, level.getChunkSource().getGenerator(), level.getRandom(), second);
+		Occupant.LOGGER.info("[gametest] houses: already built {}, first {}, second {}", builtBefore, a, b);
+		helper.assertTrue(builtBefore || a, "On open flat ground far from the middle, the first house should be built");
+		helper.assertTrue(!b, "A second house must never be built in the same world");
+		helper.assertTrue(HouseFeature.built(), "The world should now remember that its house exists");
+		helper.succeed();
 	}
 
 	@GameTest(maxTicks = 40 + TICKS_PER_EVENT * 30)

@@ -114,6 +114,19 @@ public final class Sight {
 		return aimed && canSeeAnyPart(player, entity);
 	}
 
+	/**
+	 * Could the player possibly see this right now, at any field of view anyone plays with?
+	 * Deliberately generous: this decides whether it is safe for something to appear.
+	 */
+	public static boolean couldBeSeen(ServerPlayer player, Entity entity) {
+		double h = entity.getBbHeight() * DRAWN_HEIGHT_FACTOR;
+		Vec3 base = entity.position();
+		boolean inCone = angleTo(player, base.add(0, h * 0.5, 0)) < OUT_OF_VIEW_DEGREES
+				|| angleTo(player, base.add(0, h * 0.9, 0)) < OUT_OF_VIEW_DEGREES
+				|| angleTo(player, base.add(0, h * 0.1, 0)) < OUT_OF_VIEW_DEGREES;
+		return inCone && canSeeAnyPart(player, entity);
+	}
+
 	/** Could this entity be on the player's screen right now (inside the view cone and unobstructed)? */
 	public static boolean isOnScreen(ServerPlayer player, Entity entity) {
 		Vec3 center = entity.position().add(0, entity.getBbHeight() * DRAWN_HEIGHT_FACTOR * 0.5, 0);

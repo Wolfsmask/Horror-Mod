@@ -3,6 +3,7 @@ package com.wolfsmask.occupant.client.render;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.wolfsmask.occupant.Occupant;
 import com.wolfsmask.occupant.entity.OccupantEntity;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
@@ -92,6 +93,12 @@ public class OccupantRenderer extends HumanoidMobRenderer<OccupantEntity, Occupa
 	 * a leg braced on a wall beside you, would make the whole thing blink out of existence. The
 	 * box covers its full height, how far its legs reach, and how far the body trails behind.
 	 */
+	/** Not drawn while it is concealed: it is never seen arriving. */
+	@Override
+	public boolean shouldRender(OccupantEntity entity, Frustum frustum, double x, double y, double z) {
+		return !entity.isConcealed() && super.shouldRender(entity, frustum, x, y, z);
+	}
+
 	@Override
 	protected AABB getBoundingBoxForCulling(OccupantEntity entity) {
 		return entity.getBoundingBox().inflate(6.5, 0.0, 6.5).expandTowards(0.0, FAR_BLOCKS + 1.5, 0.0);

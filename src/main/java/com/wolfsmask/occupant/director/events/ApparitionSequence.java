@@ -27,7 +27,8 @@ public abstract class ApparitionSequence implements Sequence {
 		entity.keepAlive();
 		age++;
 
-		boolean looking = Sight.isLookingAt(player, entity);
+		// Nothing is there to see until it has been revealed.
+		boolean looking = !entity.isConcealed() && Sight.isLookingAt(player, entity);
 		if (looking) {
 			lookTicks++;
 			if (!seen) {

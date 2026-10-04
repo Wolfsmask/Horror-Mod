@@ -54,6 +54,11 @@ public class OccupantEntity extends PathfinderMob {
 
 	private static final EntityDataAccessor<Byte> MODE = SynchedEntityData.defineId(OccupantEntity.class, EntityDataSerializers.BYTE);
 	private static final EntityDataAccessor<Byte> FORM = SynchedEntityData.defineId(OccupantEntity.class, EntityDataSerializers.BYTE);
+	/**
+	 * Not drawn yet. It never comes into being in front of anyone: if the place it is put is in
+	 * view, it stays unseen until the player has looked away from it, and then it is simply there.
+	 */
+	private static final EntityDataAccessor<Boolean> CONCEALED = SynchedEntityData.defineId(OccupantEntity.class, EntityDataSerializers.BOOLEAN);
 
 	/** Removed if no sequence has touched it for this long (orphan protection). */
 	private static final int ORPHAN_TICKS = 40;
@@ -116,9 +121,18 @@ public class OccupantEntity extends PathfinderMob {
 		super.defineSynchedData(builder);
 		builder.define(MODE, (byte) Mode.IDLE.ordinal());
 		builder.define(FORM, (byte) Form.VEILED.ordinal());
+		builder.define(CONCEALED, false);
 	}
 
 	// ------------------------------------------------------------------ state
+
+	public boolean isConcealed() {
+		return this.entityData.get(CONCEALED);
+	}
+
+	public void setConcealed(boolean concealed) {
+		this.entityData.set(CONCEALED, concealed);
+	}
 
 	public Mode getMode() {
 		byte b = this.entityData.get(MODE);
@@ -252,6 +266,9 @@ public class OccupantEntity extends PathfinderMob {
 			vanish();
 			return;
 		}
+
+		// Revealed the moment the player is not looking: it is never seen arriving.
+		if (isConcealed() && !Sight.couldBeSeen(target, this)) setConcealed(false);
 
 		if (gazeLocked && !isPathing()) {
 			faceTowards(target.getEyePosition());

@@ -7,6 +7,7 @@ import com.wolfsmask.occupant.network.ScreenEffectPayload;
 import com.wolfsmask.occupant.network.WhisperPayload;
 import com.wolfsmask.occupant.registry.ModEntities;
 import com.wolfsmask.occupant.registry.ModSounds;
+import com.wolfsmask.occupant.world.HouseFeature;
 import com.wolfsmask.occupant.world.ModWorld;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -64,6 +65,9 @@ public final class Occupant implements ModInitializer {
 		PayloadTypeRegistry.clientboundPlay().register(ScreenEffectPayload.TYPE, ScreenEffectPayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(WhisperPayload.TYPE, WhisperPayload.CODEC);
 
+		// Before any of the world is generated, so the one house is never built twice.
+		ServerLifecycleEvents.SERVER_STARTING.register(server -> guard("opening the world", () -> HouseFeature.open(server)));
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> guard("closing the world", HouseFeature::close));
 		ServerLifecycleEvents.SERVER_STARTED.register(server -> guard("start-up", () -> Director.start(server)));
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> guard("shutdown", Director::stop));
 		ServerTickEvents.END_SERVER_TICK.register(server -> guard("the server tick", () -> {

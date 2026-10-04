@@ -80,8 +80,8 @@ public final class OccupantGeometry {
 				.texOffs(156, 45).addBox(-1.20f, -11.0f, -1.20f, 2.40f, 11.0f, 2.40f), PartPose.offset(0.0f, -1.50f, 0.40f));
 		PartDefinition p_neck = p;
 		p = p_neck.addOrReplaceChild("skull", CubeListBuilder.create()
-				.texOffs(168, 45).addBox(-3.50f, -7.0f, -3.0f, 7.0f, 7.0f, 6.0f)
-				.texOffs(50, 76).addBox(-2.75f, -8.10f, -2.40f, 5.50f, 1.10f, 4.80f), PartPose.offset(0.0f, -11.0f, -0.40f));
+				.texOffs(168, 45).addBox(-3.50f, -9.30f, -3.0f, 7.0f, 7.0f, 6.0f)
+				.texOffs(50, 76).addBox(-2.75f, -10.40f, -2.40f, 5.50f, 1.10f, 4.80f), PartPose.offset(0.0f, -8.70f, -0.40f));
 		PartDefinition p_skull = p;
 		p = p_skull.addOrReplaceChild("jaw", CubeListBuilder.create()
 				.texOffs(206, 45).addBox(1.75f, 0.0f, -2.95f, 1.70f, 6.0f, 3.35f)
@@ -90,7 +90,7 @@ public final class OccupantGeometry {
 				.texOffs(0, 76).addBox(-2.75f, 6.0f, -2.80f, 1.40f, 4.60f, 3.0f)
 				.texOffs(92, 76).addBox(-1.85f, 9.55f, -2.60f, 3.70f, 2.10f, 2.55f)
 				.texOffs(194, 45).addBox(-1.74f, 0.02f, -2.0f, 3.48f, 9.56f, 1.90f)
-				.texOffs(106, 76).addBox(-1.68f, 0.05f, -2.72f, 3.36f, 0.85f, 0.71f), PartPose.ZERO);
+				.texOffs(106, 76).addBox(-1.68f, 0.05f, -2.72f, 3.36f, 0.85f, 0.71f), PartPose.offset(0.0f, -2.30f, 0.0f));
 		PartDefinition p_jaw = p;
 		p = p_skull.addOrReplaceChild("hair", CubeListBuilder.create()
 				.texOffs(222, 0).addBox(-0.43f, -6.90f, 3.38f, 0.69f, 30.49f, 0.69f)
@@ -115,7 +115,7 @@ public final class OccupantGeometry {
 				.texOffs(32, 45).addBox(-3.34f, -6.93f, 2.17f, 0.77f, 28.95f, 0.77f)
 				.texOffs(230, 0).addBox(-2.67f, -6.86f, 2.50f, 0.92f, 30.48f, 0.92f)
 				.texOffs(120, 0).addBox(-2.17f, -6.90f, 2.08f, 1.06f, 33.15f, 1.06f)
-				.texOffs(128, 0).addBox(-1.47f, -6.90f, 3.40f, 0.60f, 34.39f, 0.60f), PartPose.ZERO);
+				.texOffs(128, 0).addBox(-1.47f, -6.90f, 3.40f, 0.60f, 34.39f, 0.60f), PartPose.offset(0.0f, -2.30f, 0.0f));
 		PartDefinition p_hair = p;
 		p = p_spine.addOrReplaceChild("leg0_upper", CubeListBuilder.create()
 				.texOffs(36, 45).addBox(-0.72f, -0.60f, -0.72f, 1.45f, 27.62f, 1.45f), PartPose.offset(0.71f, 0.70f, 0.71f));

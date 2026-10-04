@@ -102,12 +102,16 @@ public class OccupantModel extends HumanoidModel<OccupantRenderState> {
 		skull.xRot = lookX * 0.6f;
 
 		// Every so often the head is simply somewhere else, tilted, and stays there a while.
+		// The neck takes some of it, so the whole face goes over together, as a head does.
 		float tilt = hold(seed, t, 240, 3);
+		float lean = 0.0f;
 		if (tilt > 0.45f) {
-			skull.zRot = 0.5f * (tilt - 0.45f) / 0.55f;
+			lean = 0.34f * (tilt - 0.45f) / 0.55f;
 		} else if (tilt < -0.75f) {
-			skull.zRot = -0.7f;                     // right over onto its shoulder
+			lean = -0.42f;                          // well over to one side, and held there
 		}
+		neck.zRot = lean * 0.35f;
+		skull.zRot = lean * 0.65f;
 		if (veiled) {
 			// Early on it keeps its head down, which makes the shape harder to read.
 			spine.xRot += 0.12f;

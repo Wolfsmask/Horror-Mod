@@ -51,6 +51,8 @@ LEGS = 10
 LEG_UPPER = 28.0
 LEG_LOWER = 30.0
 LEG_CLAW = 6.0
+# From the bottom of the eyes to the middle of the face (eyes to chin), which is what it tilts about.
+FACE_MID = 2.3
 # How far up the trunk the highest legs leave it, above the hips.
 LEG_RISE = 26.0
 # Nothing is ever taken off. What it is wearing is most of what it is.
@@ -162,14 +164,16 @@ def parts():
 
         # The top of the face: a broad, rounded brow and two small round holes set close
         # together over a narrow bridge.
-        ("skull", "neck", (0, -11.0, -0.4), (0, 0, 0), [
-            ("face", -3.5, -7.0, -3.0, 7, 7, 6),
-            ("crown", -2.75, -8.1, -2.4, 5.5, 1.1, 4.8),       # rounds off the top of it
+        # The skull turns about the middle of the whole face, eyes to chin, not about the top of
+        # the neck: turned about the neck, a tilt swung the long jaw out sideways like a pendulum.
+        ("skull", "neck", (0, -11.0 + FACE_MID, -0.4), (0, 0, 0), [
+            ("face", -3.5, -7.0 - FACE_MID, -3.0, 7, 7, 6),
+            ("crown", -2.75, -8.1 - FACE_MID, -2.4, 5.5, 1.1, 4.8),       # rounds off the top of it
         ]),
         # The rest of the face is the mouth. The skin carries on down both sides of it, much
         # too far, to a small pointed chin; between them it is open, with a row of small teeth
         # along the top and something red at the bottom.
-        ("jaw", "skull", (0, 0, 0), (0, 0, 0), [
+        ("jaw", "skull", (0, -FACE_MID, 0), (0, 0, 0), [
             ("cheek", 1.75, 0.0, -2.95, 1.7, 6.0, 3.35),       # cheeks, either side
             ("cheek", -3.45, 0.0, -2.95, 1.7, 6.0, 3.35),
             ("cheek", 1.35, 6.0, -2.8, 1.4, 4.6, 3.0),         # narrowing towards the chin
@@ -180,7 +184,7 @@ def parts():
         ]),
         # No loose hairs standing up off the crown: in blocks, anything sticking up off a head
         # reads as horns or antennae, however short it is.
-        ("hair", "skull", (0, 0, 0), (0, 0, 0), _cowl_strands()),
+        ("hair", "skull", (0, -FACE_MID, 0), (0, 0, 0), _cowl_strands()),
     ]
 
     # Ten legs, coming out all round the bottom of the body. Each is three bones hanging straight

@@ -127,6 +127,8 @@ public final class Haunt {
 		e.setYBodyRot(yaw);
 		e.setMode(mode);
 		e.setForm(form);
+		// If that spot is in front of the player right now, it waits, unseen, for them to look away.
+		e.setConcealed(Sight.couldBeSeen(player, e));
 		if (!world.addFreshEntity(e)) return null;
 		return e;
 	}

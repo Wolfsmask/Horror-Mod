@@ -1,6 +1,14 @@
 package com.wolfsmask.occupant.world;
 
 import com.mojang.serialization.Codec;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.level.storage.LevelResource;
+import org.jetbrains.annotations.Nullable;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.concurrent.atomic.AtomicBoolean;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -19,7 +27,7 @@ import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 /**
- * A small abandoned house that turns up on its own in woods and fields. Nobody lives in it. There
+ * A small abandoned house that turns up on its own in woods and fields, once in each world. Nobody lives in it. There
  * is a main room you walk straight into, with an old barrel and a table and a little grey light from
  * two windows, and off to the right, through a gap in the inside wall, a long narrow hallway with
  * no windows at all that runs the length of the house into the dark.
@@ -51,8 +59,48 @@ public final class HouseFeature extends Feature<NoneFeatureConfiguration> {
 	private static final int CX = 6;
 	private static final int CZ = 5;
 
+	/** It stands at least this far from the middle of the world, so it is found, not given. */
+	private static final int MIN_DISTANCE = 160;
+	/**
+	 * There is only ever one. Once it has been built anywhere in a world, no other chunk can ever
+	 * build another: the first to claim it wins (world generation runs on several threads at
+	 * once), and a small file in the world folder remembers it across restarts.
+	 */
+	private static final AtomicBoolean BUILT = new AtomicBoolean(true);
+	@Nullable
+	private static volatile Path record;
+
 	public HouseFeature(Codec<NoneFeatureConfiguration> codec) {
 		super(codec);
+	}
+
+	/** Called as a world is opened, before any of it is generated. */
+	public static void open(MinecraftServer server) {
+		Path file = server.getWorldPath(LevelResource.ROOT).resolve("occupant_house.txt");
+		record = file;
+		BUILT.set(Files.exists(file));
+	}
+
+	/** Called as a world is closed: nothing may build a house with no world to record it in. */
+	public static void close() {
+		BUILT.set(true);
+		record = null;
+	}
+
+	/** Whether this world's one house has been built yet. */
+	public static boolean built() {
+		return BUILT.get();
+	}
+
+	private static void remember(BlockPos where) {
+		Path file = record;
+		if (file == null) return;
+		try {
+			Files.writeString(file, where.getX() + " " + where.getY() + " " + where.getZ() + "\n");
+		} catch (IOException e) {
+			// Worst case it is forgotten on a restart and a second may appear far away; never fatal.
+			com.wolfsmask.occupant.Occupant.LOGGER.warn("Could not record where the house is", e);
+		}
 	}
 
 	/** Is the player standing on the floor of one of these houses? */
@@ -73,7 +121,10 @@ public final class HouseFeature extends Feature<NoneFeatureConfiguration> {
 		int highest = Integer.MIN_VALUE;
 		for (int[] c : new int[][]{{0, 0}, {WIDTH - 1, 0}, {0, DEPTH - 1}, {WIDTH - 1, DEPTH - 1}, {CX, CZ}, {4, -2}}) {
 			BlockPos column = origin.offset(new BlockPos(c[0] - CX, 0, c[1] - CZ).rotate(rotation));
-			int top = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, column.getX(), column.getZ());
+			// The _WG heightmaps only exist while a chunk is being generated (as it is in real world
+			// generation); placed into a finished world, as the tests do, it reads the live one.
+			Heightmap.Types surface = level instanceof ServerLevel ? Heightmap.Types.WORLD_SURFACE : Heightmap.Types.WORLD_SURFACE_WG;
+			int top = level.getHeight(surface, column.getX(), column.getZ());
 			BlockState ground = level.getBlockState(new BlockPos(column.getX(), top - 1, column.getZ()));
 			if (!ground.getFluidState().isEmpty() || ground.is(Blocks.ICE)) return false;
 			lowest = Math.min(lowest, top);
@@ -82,8 +133,14 @@ public final class HouseFeature extends Feature<NoneFeatureConfiguration> {
 		if (highest - lowest > 3) return false;
 		BlockPos base = new BlockPos(origin.getX(), highest - 1, origin.getZ());   // the floor
 		if (!level.ensureCanWrite(base)) return false;
+		if ((long) origin.getX() * origin.getX() + (long) origin.getZ() * origin.getZ() < (long) MIN_DISTANCE * MIN_DISTANCE) {
+			return false;
+		}
+		// The one and only: whoever gets here first builds it, and nobody else ever will.
+		if (BUILT.get() || !BUILT.compareAndSet(false, true)) return false;
 
 		build(level, base, rotation, random);
+		remember(base);
 		return true;
 	}
 
