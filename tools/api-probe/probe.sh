@@ -8,6 +8,18 @@ while IFS= read -r line; do
 	vis="-public"
 	if [[ "$line" == @protected* ]]; then vis="-protected"; line="${line#@protected }"; fi
 	if [[ "$line" == @private* ]]; then vis="-p"; line="${line#@private }"; fi
+	if [[ "$line" == @versions* ]]; then
+		# Which Minecraft versions Fabric supports, and which Fabric API builds exist for them.
+		echo "=== Minecraft versions known to Fabric (newest first)"
+		curl -s https://meta.fabricmc.net/v2/versions/game | python3 -c 'import json,sys; v=json.load(sys.stdin); print("\n".join(("%s %s" % (x["version"], "stable" if x["stable"] else "snapshot")) for x in v[:60]))'
+		echo "=== Fabric API builds (newest 80)"
+		curl -s https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/maven-metadata.xml | grep -o '<version>[^<]*</version>' | sed 's/<[^>]*>//g' | tail -n 80
+		echo "=== Fabric API builds for the old versions"
+		curl -s https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/maven-metadata.xml | grep -o '<version>[^<]*</version>' | sed 's/<[^>]*>//g' | grep -E '\+(1\.20\.1|1\.21\.1|1\.21\.11|26\.1)$' | tail -n 12
+		echo "=== Loom versions"
+		curl -s https://maven.fabricmc.net/net/fabricmc/fabric-loom/maven-metadata.xml | grep -o '<version>[^<]*</version>' | sed 's/<[^>]*>//g' | tail -n 15
+		continue
+	fi
 	if [[ "$line" == @jars* ]]; then
 		# "@jars <regex>": which jars on the classpath match, and the classes inside them.
 		pat="${line#@jars }"
