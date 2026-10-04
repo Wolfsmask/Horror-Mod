@@ -1,9 +1,6 @@
 @mc 26.3
-# Round 16: how a feature is defined and registered in 26.3.
-@private net.minecraft.world.level.levelgen.feature.SimpleBlockFeature
-@private net.minecraft.world.level.levelgen.feature.NoOpFeature
-net.minecraft.world.level.levelgen.feature.FeatureTypes
-net.minecraft.core.registries.Registries FEATURE
-net.minecraft.world.level.levelgen.placement.PlacedFeature
-@data data/minecraft/worldgen/(placed_feature|feature|configured_feature)/(disk_sand|blue_ice|ice_spike|desert_well|lake_lava_surface)\.json
-@data data/minecraft/worldgen/[a-z_]+/$
+# Round 17: 26.3 culling and the client test API.
+net.minecraft.client.renderer.entity.EntityRenderer shouldRender|Culling|culling|affected
+@protected net.minecraft.client.renderer.entity.EntityRenderer shouldRender|Culling|culling|affected
+net.fabricmc.fabric.api.client.gametest.v1.context.TestClientLevelContext
+net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext
