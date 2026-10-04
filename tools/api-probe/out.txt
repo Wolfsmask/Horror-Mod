@@ -1,76 +1,65 @@
-=== net.fabricmc.fabric.api.client.screen.v1.ScreenEvents (-public)
-public final class client.screen.v1.ScreenEvents {
-  public static final event.Event<client.screen.v1.ScreenEvents$BeforeInit> BEFORE_INIT;
-  public static final event.Event<client.screen.v1.ScreenEvents$AfterInit> AFTER_INIT;
-  public static event.Event<client.screen.v1.ScreenEvents$Remove> remove(client.gui.screens.Screen);
-  public static event.Event<client.screen.v1.ScreenEvents$BeforeExtract> beforeExtract(client.gui.screens.Screen);
-  public static event.Event<client.screen.v1.ScreenEvents$AfterBackground> afterBackground(client.gui.screens.Screen);
-  public static event.Event<client.screen.v1.ScreenEvents$AfterExtract> afterExtract(client.gui.screens.Screen);
-  public static event.Event<client.screen.v1.ScreenEvents$BeforeTick> beforeTick(client.gui.screens.Screen);
-  public static event.Event<client.screen.v1.ScreenEvents$AfterTick> afterTick(client.gui.screens.Screen);
+=== net.minecraft.client.input.MouseButtonEvent (-public)
+public final class client.input.MouseButtonEvent extends Record implements client.input.InputWithModifiers {
+  public client.input.MouseButtonEvent(double, double, client.input.MouseButtonInfo);
+  public int input();
+  public int button();
+  public int modifiers();
+  public final String toString();
+  public final int hashCode();
+  public final boolean equals(Object);
+  public double x();
+  public double y();
+  public client.input.MouseButtonInfo buttonInfo();
 }
-=== net.fabricmc.fabric.api.client.screen.v1.Screens (-public)
-public final class client.screen.v1.Screens {
-  public static List<client.gui.components.AbstractWidget> getWidgets(client.gui.screens.Screen);
-  public static client.gui.Font getFont(client.gui.screens.Screen);
-  public static client.Minecraft getMinecraft(client.gui.screens.Screen);
+=== net.minecraft.client.input.MouseButtonInfo (-public)
+public final class client.input.MouseButtonInfo extends Record implements client.input.InputWithModifiers {
+  public client.input.MouseButtonInfo(int, int);
+  public int input();
+  public final String toString();
+  public final int hashCode();
+  public final boolean equals(Object);
+  public int button();
+  public int modifiers();
 }
-=== net.minecraft.client.gui.screens.TitleScreen (-p)
-public class client.gui.screens.TitleScreen extends client.gui.screens.Screen {
-  private static final org.slf4j.Logger LOGGER;
-  private static final network.chat.Component TITLE;
-  private static final network.chat.Component COPYRIGHT_TEXT;
-  private static final String DEMO_LEVEL_ID;
-  private client.gui.components.SplashRenderer splash;
-  private realmsclient.gui.screens.RealmsNotificationsScreen realmsNotificationsScreen;
-  private client.gui.components.FriendsButton friends;
-  private boolean fading;
-  private long fadeInStart;
-  private final client.gui.components.LogoRenderer logoRenderer;
-  public client.gui.screens.TitleScreen();
-  public client.gui.screens.TitleScreen(boolean);
-  public client.gui.screens.TitleScreen(boolean, client.gui.components.LogoRenderer);
-  private boolean realmsNotificationsEnabled();
-  public void tick();
-  public static void registerTextures(client.renderer.texture.TextureManager);
-  public boolean isPauseScreen();
-  public boolean shouldCloseOnEsc();
-  protected void init();
-  private int getHorizontalPosition(int, int, int);
-  private int createNormalMenuOptions(int, int);
-  private network.chat.Component getMultiplayerDisabledReason();
-  private int createDemoMenuOptions(int, int);
-  private boolean checkDemoWorldPresence();
-  public void extractRenderState(client.gui.GuiGraphicsExtractor, int, int, float);
-  public void extractBackground(client.gui.GuiGraphicsExtractor, int, int, float);
-  public boolean mouseClicked(client.input.MouseButtonEvent, boolean);
-  public void removed();
-  public void added();
-  private void confirmDemo(boolean);
-  public boolean canInterruptWithAnotherScreen();
-  private void lambda$createDemoMenuOptions$2(client.gui.components.Button);
-  private void lambda$createDemoMenuOptions$0(boolean, client.gui.components.Button);
-  private void lambda$createDemoMenuOptions$1();
-  private void lambda$createNormalMenuOptions$4(client.gui.components.Button);
-  private void lambda$createNormalMenuOptions$3(client.gui.components.Button);
-  private void lambda$createNormalMenuOptions$1(client.gui.components.Button);
-  private void lambda$createNormalMenuOptions$2();
-  private void lambda$createNormalMenuOptions$0(client.gui.components.Button);
-  private void lambda$init$6(client.gui.components.Button);
-  private void lambda$init$5(client.gui.components.Button);
-  private void lambda$init$4(client.gui.components.Button);
-  private void lambda$init$3(client.gui.components.Button);
-  private void lambda$init$2(client.gui.components.Button);
-  private void lambda$init$0(client.gui.components.Button);
-  private void lambda$init$1();
-  private static client.gui.components.LogoRenderer lambda$new$0();
-  static {};
-}
-=== net.minecraft.client.gui.screens.Screen (-p)
+=== net.minecraft.client.gui.screens.Screen (-protected)
 public abstract class client.gui.screens.Screen extends client.gui.components.events.AbstractContainerEventHandler implements client.gui.components.Renderable {
-  private final List<client.gui.components.Renderable> renderables;
+  public static final resources.Identifier MENU_BACKGROUND;
+  public static final resources.Identifier HEADER_SEPARATOR;
+  public static final resources.Identifier FOOTER_SEPARATOR;
+  public static final resources.Identifier INWORLD_HEADER_SEPARATOR;
+  public static final resources.Identifier INWORLD_FOOTER_SEPARATOR;
+  protected final network.chat.Component title;
+  protected final client.Minecraft minecraft;
+  public int width;
+  public int height;
+  protected final client.gui.Font font;
+  protected client.gui.components.CycleButton<client.NarratorStatus> narratorButton;
+  protected client.gui.screens.Screen(network.chat.Component);
+  protected client.gui.screens.Screen(client.Minecraft, client.gui.Font, network.chat.Component);
+  public network.chat.Component getTitle();
+  public network.chat.Component getNarrationMessage();
   public final void extractRenderStateWithTooltipAndSubtitles(client.gui.GuiGraphicsExtractor, int, int, float);
   public void extractRenderState(client.gui.GuiGraphicsExtractor, int, int, float);
+  public boolean keyPressed(client.input.KeyEvent);
+  protected void setInitialFocus(client.gui.components.events.GuiEventListener);
+  protected void changeFocus(client.gui.ComponentPath);
+  public boolean shouldCloseOnEsc();
+  public void onClose();
+  protected <T extends client.gui.components.events.GuiEventListener & client.gui.components.Renderable & client.gui.narration.NarratableEntry> T addRenderableWidget(T);
+  protected <T extends client.gui.components.Renderable> T addRenderableOnly(T);
+  protected <T extends client.gui.components.events.GuiEventListener & client.gui.narration.NarratableEntry> T addWidget(T);
+  protected void removeWidget(client.gui.components.events.GuiEventListener);
+  public static List<network.chat.Component> getTooltipFromItem(client.Minecraft, world.item.ItemStack);
+  protected static void defaultHandleGameClickEvent(network.chat.ClickEvent, client.Minecraft, client.gui.screens.Screen);
+  protected static void defaultHandleClickEvent(network.chat.ClickEvent, client.Minecraft, client.gui.screens.Screen);
+  protected static boolean clickUrlAction(client.Minecraft, client.gui.screens.Screen, java.net.URI);
+  protected static void clickCommandAction(client.player.LocalPlayer, String, client.gui.screens.Screen);
+  public final void init(int, int);
+  public List<? extends client.gui.components.events.GuiEventListener> children();
+  protected void init();
+  public void tick();
+  public void removed();
+  public void added();
   public void extractBackground(client.gui.GuiGraphicsExtractor, int, int, float);
   protected void extractBlurredBackground(client.gui.GuiGraphicsExtractor);
   protected void extractPanorama(client.gui.GuiGraphicsExtractor, float);
@@ -78,172 +67,45 @@ public abstract class client.gui.screens.Screen extends client.gui.components.ev
   protected void extractMenuBackground(client.gui.GuiGraphicsExtractor, int, int, int, int);
   public static void extractMenuBackgroundTexture(client.gui.GuiGraphicsExtractor, resources.Identifier, int, int, float, float, int, int);
   public void extractTransparentBackground(client.gui.GuiGraphicsExtractor);
+  public boolean isPauseScreen();
+  public void fillCrashDetails(CrashReport);
+  protected void updateNarrationState(client.gui.narration.NarrationElementOutput);
+  protected void updateNarratedWidget(client.gui.narration.NarrationElementOutput);
+  protected network.chat.Component getUsageNarration();
+  public static client.gui.screens.Screen$NarratableSearchResult findNarratableWidget(List<? extends client.gui.narration.NarratableEntry>, client.gui.narration.NarratableEntry);
+  public client.gui.Font getFont();
+  public boolean canInterruptWithAnotherScreen();
+  public client.gui.navigation.ScreenRectangle getRectangle();
   public sounds.Music getBackgroundMusic();
-=== net.minecraft.client.renderer.PanoramaRenderer (-public)
-Error: class not found: client.renderer.PanoramaRenderer
-=== net.minecraft.client.gui.GuiGraphicsExtractor (-public)
-public class client.gui.GuiGraphicsExtractor {
-  public int guiWidth();
-  public org.joml.Matrix3x2fStack pose();
-  public void nextStratum();
-  public void fill(int, int, int, int, int);
-  public void fill(blaze3d.pipeline.RenderPipeline, int, int, int, int, int);
-  public void fillGradient(int, int, int, int, int, int);
-  public void fill(blaze3d.pipeline.RenderPipeline, client.gui.render.TextureSetup, int, int, int, int);
-  public void textHighlight(int, int, int, int, boolean);
-  public void text(client.gui.Font, String, int, int, int);
-  public void text(client.gui.Font, String, int, int, int, boolean);
-  public void text(client.gui.Font, util.FormattedCharSequence, int, int, int);
-  public void text(client.gui.Font, util.FormattedCharSequence, int, int, int, boolean);
-  public void text(client.gui.Font, network.chat.Component, int, int, int);
-  public void text(client.gui.Font, network.chat.Component, int, int, int, boolean);
-  public void textWithWordWrap(client.gui.Font, network.chat.FormattedText, int, int, int, int);
-  public void textWithWordWrap(client.gui.Font, network.chat.FormattedText, int, int, int, int, boolean);
-  public void textWithBackdrop(client.gui.Font, network.chat.Component, int, int, int, int);
-  public void blit(blaze3d.pipeline.RenderPipeline, resources.Identifier, int, int, float, float, int, int, int, int, int);
-  public void blit(blaze3d.pipeline.RenderPipeline, resources.Identifier, int, int, float, float, int, int, int, int);
-  public void blit(blaze3d.pipeline.RenderPipeline, resources.Identifier, int, int, float, float, int, int, int, int, int, int);
-  public void blit(blaze3d.pipeline.RenderPipeline, resources.Identifier, int, int, float, float, int, int, int, int, int, int, int);
-  public void blit(resources.Identifier, int, int, int, int, float, float, float, float);
-  public void blit(blaze3d.textures.GpuTextureView, blaze3d.textures.GpuSampler, int, int, int, int, float, float, float, float);
-  public void blitSprite(blaze3d.pipeline.RenderPipeline, resources.Identifier, int, int, int, int);
-  public void blitSprite(blaze3d.pipeline.RenderPipeline, resources.Identifier, int, int, int, int, float);
-  public void blitSprite(blaze3d.pipeline.RenderPipeline, resources.Identifier, int, int, int, int, int);
-  public void blitSprite(blaze3d.pipeline.RenderPipeline, resources.Identifier, int, int, int, int, int, int, int, int);
-  public void blitSprite(blaze3d.pipeline.RenderPipeline, resources.Identifier, int, int, int, int, int, int, int, int, int);
-  public void blitSprite(blaze3d.pipeline.RenderPipeline, client.renderer.texture.TextureAtlasSprite, int, int, int, int);
-  public void blitSprite(blaze3d.pipeline.RenderPipeline, client.renderer.texture.TextureAtlasSprite, int, int, int, int, int);
-  public client.renderer.texture.TextureAtlasSprite getSprite(client.resources.model.sprite.SpriteId);
-  public client.gui.ActiveTextCollector textRendererForWidget(client.gui.components.AbstractWidget, client.gui.GuiGraphicsExtractor$HoveredTextEffects);
-  public client.gui.ActiveTextCollector textRenderer();
-  public client.gui.ActiveTextCollector textRenderer(client.gui.GuiGraphicsExtractor$HoveredTextEffects);
-  public client.gui.ActiveTextCollector textRenderer(client.gui.GuiGraphicsExtractor$HoveredTextEffects, Consumer<network.chat.Style>);
-=== net.minecraft.client.resources.sounds.SimpleSoundInstance (-public)
-public class client.resources.sounds.SimpleSoundInstance extends client.resources.sounds.AbstractSoundInstance {
-  public static client.resources.sounds.SimpleSoundInstance forUI(sounds.SoundEvent, float);
-  public static client.resources.sounds.SimpleSoundInstance forUI(core.Holder<sounds.SoundEvent>, float);
-  public static client.resources.sounds.SimpleSoundInstance forUI(sounds.SoundEvent, float, float);
-  public static client.resources.sounds.SimpleSoundInstance forMusic(sounds.SoundEvent);
-  public static client.resources.sounds.SimpleSoundInstance forAmbientAddition(sounds.SoundEvent);
-=== net.minecraft.client.sounds.SoundManager (-public)
-public class client.sounds.SoundManager extends server.packs.resources.SimplePreparableReloadListener<client.sounds.SoundManager$Preparations> {
-  public client.sounds.SoundEngine$PlayResult play(client.resources.sounds.SoundInstance);
-  public void playDelayed(client.resources.sounds.SoundInstance, int);
-  public void stop();
-  public void stop(client.resources.sounds.SoundInstance);
-  public boolean isActive(client.resources.sounds.SoundInstance);
-  public void stop(resources.Identifier, sounds.SoundSource);
-=== net.minecraft.world.level.storage.LevelResource (-public)
-public final class world.level.storage.LevelResource extends Record {
-  public static final world.level.storage.LevelResource ROOT;
-=== net.minecraft.server.MinecraftServer (-public)
-public abstract class server.MinecraftServer extends util.thread.ReentrantBlockableEventLoop<server.TickTask> implements commands.CommandSource, server.ServerInfo, world.level.chunk.storage.ChunkIOErrorReporter, attachment.v1.GlobalAttachmentsProvider, resource.v1.DataResourceStore {
-  public java.nio.file.Path getWorldPath(world.level.storage.LevelResource);
-=== net.minecraft.client.gui.components.Renderable (-public)
-public interface client.gui.components.Renderable {
-  public abstract void extractRenderState(client.gui.GuiGraphicsExtractor, int, int, float);
-}
-=== net.minecraft.client.gui.components.AbstractWidget (-public)
-public abstract class client.gui.components.AbstractWidget implements client.gui.layouts.LayoutElement,client.gui.components.Renderable,client.gui.components.events.GuiEventListener,client.gui.narration.NarratableEntry {
-  public final void extractRenderState(client.gui.GuiGraphicsExtractor, int, int, float);
-  public void setAlpha(float);
-=== net.minecraft.client.gui.screens.TitleScreen (code: extract|render)
-  public static void registerTextures(client.renderer.texture.TextureManager);
-    Code:
-         1: getstatic     #92                 // Field net/minecraft/client/gui/components/LogoRenderer.MINECRAFT_LOGO:Lnet/minecraft/resources/Identifier;
-         4: invokevirtual #96                 // Method net/minecraft/client/renderer/texture/TextureManager.registerForNextReload:(Lnet/minecraft/resources/Identifier;)V
-         8: getstatic     #102                // Field net/minecraft/client/gui/components/LogoRenderer.MINECRAFT_EDITION:Lnet/minecraft/resources/Identifier;
-        11: invokevirtual #96                 // Method net/minecraft/client/renderer/texture/TextureManager.registerForNextReload:(Lnet/minecraft/resources/Identifier;)V
-        15: getstatic     #105                // Field net/minecraft/client/renderer/Panorama.PANORAMA_OVERLAY:Lnet/minecraft/resources/Identifier;
-        18: invokevirtual #96                 // Method net/minecraft/client/renderer/texture/TextureManager.registerForNextReload:(Lnet/minecraft/resources/Identifier;)V
-
-  public void extractRenderState(client.gui.GuiGraphicsExtractor, int, int, float);
-    Code:
-         1: getfield      #354                // Field fadeInStart:J
-         4: lconst_0
-         5: lcmp
-         6: ifne          23
-        10: getfield      #19                 // Field fading:Z
-        13: ifeq          23
-        17: invokestatic  #358                // Method net/minecraft/util/Util.getMillis:()J
-        20: putfield      #354                // Field fadeInStart:J
-        23: fconst_1
-        27: getfield      #19                 // Field fading:Z
-        30: ifeq          91
-        33: invokestatic  #358                // Method net/minecraft/util/Util.getMillis:()J
-        37: getfield      #354                // Field fadeInStart:J
-        40: lsub
-        41: l2f
-        42: ldc_w         #364                // float 2000.0f
-        45: fdiv
-        50: fconst_1
-        51: fcmpl
-        52: ifle          63
-        56: iconst_0
-        57: putfield      #19                 // Field fading:Z
-        60: goto          85
-        65: fconst_0
-        66: fconst_1
-        67: invokestatic  #365                // Method net/minecraft/util/Mth.clamp:(FFF)F
-        74: ldc_w         #371                // float 0.5f
-        77: fconst_1
-        78: fconst_0
-        79: fconst_1
-        80: invokestatic  #372                // Method net/minecraft/util/Mth.clampedMap:(FFFFF)F
-        88: invokevirtual #376                // Method fadeWidgets:(F)V
-        95: invokevirtual #380                // Method extractPanorama:(Lnet/minecraft/client/gui/GuiGraphicsExtractor;F)V
-       104: invokespecial #384                // Method net/minecraft/client/gui/screens/Screen.extractRenderState:(Lnet/minecraft/client/gui/GuiGraphicsExtractor;IIF)V
-       108: getfield      #35                 // Field logoRenderer:Lnet/minecraft/client/gui/components/LogoRenderer;
-       113: getfield      #141                // Field width:I
-       117: getfield      #35                 // Field logoRenderer:Lnet/minecraft/client/gui/components/LogoRenderer;
-       120: invokevirtual #388                // Method net/minecraft/client/gui/components/LogoRenderer.keepLogoThroughFade:()Z
-       123: ifeq          130
-       126: fconst_1
-       127: goto          132
-       132: invokevirtual #391                // Method net/minecraft/client/gui/components/LogoRenderer.extractRenderState:(Lnet/minecraft/client/gui/GuiGraphicsExtractor;IF)V
-       136: getfield      #108                // Field splash:Lnet/minecraft/client/gui/components/SplashRenderer;
-       139: ifnull        182
-       143: getfield      #39                 // Field minecraft:Lnet/minecraft/client/Minecraft;
-       146: getfield      #394                // Field net/minecraft/client/Minecraft.options:Lnet/minecraft/client/Options;
-       149: invokevirtual #398                // Method net/minecraft/client/Options.hideSplashTexts:()Lnet/minecraft/client/OptionInstance;
-       152: invokevirtual #404                // Method net/minecraft/client/OptionInstance.get:()Ljava/lang/Object;
-       155: checkcast     #409                // class java/lang/Boolean
-       158: invokevirtual #411                // Method java/lang/Boolean.booleanValue:()Z
-       161: ifne          182
-       165: getfield      #108                // Field splash:Lnet/minecraft/client/gui/components/SplashRenderer;
-       170: getfield      #141                // Field width:I
-       174: getfield      #128                // Field font:Lnet/minecraft/client/gui/Font;
-       179: invokevirtual #414                // Method net/minecraft/client/gui/components/SplashRenderer.extractRenderState:(Lnet/minecraft/client/gui/GuiGraphicsExtractor;ILnet/minecraft/client/gui/Font;F)V
-       182: invokestatic  #419                // Method net/minecraft/SharedConstants.getCurrentVersion:()Lnet/minecraft/WorldVersion;
-       185: invokeinterface #423,  1          // InterfaceMethod net/minecraft/WorldVersion.name:()Ljava/lang/String;
-       190: invokedynamic #429,  0            // InvokeDynamic #13:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
-       198: getfield      #39                 // Field minecraft:Lnet/minecraft/client/Minecraft;
-       201: invokevirtual #147                // Method net/minecraft/client/Minecraft.isDemo:()Z
-       204: ifeq          216
-       209: invokedynamic #433,  0            // InvokeDynamic #14:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
-       216: invokestatic  #434                // Method net/minecraft/client/Minecraft.checkModStatus:()Lnet/minecraft/util/ModCheck;
-       219: invokevirtual #438                // Method net/minecraft/util/ModCheck.shouldReportAsModified:()Z
-       222: ifeq          244
-       227: ldc_w         #443                // String menu.modded
-       230: iconst_0
-       231: anewarray     #445                // class java/lang/Object
-       234: invokestatic  #447                // Method net/minecraft/client/resources/language/I18n.get:(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;
-       237: invokedynamic #452,  0            // InvokeDynamic #15:makeConcatWithConstants:(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
-       246: getfield      #128                // Field font:Lnet/minecraft/client/gui/Font;
-       251: iconst_2
-       253: getfield      #144                // Field height:I
-       256: bipush        10
-       258: isub
-       261: invokestatic  #455                // Method net/minecraft/util/ARGB.white:(F)I
-       264: invokevirtual #461                // Method net/minecraft/client/gui/GuiGraphicsExtractor.text:(Lnet/minecraft/client/gui/Font;Ljava/lang/String;III)V
-       268: invokevirtual #65                 // Method realmsNotificationsEnabled:()Z
-       271: ifeq          293
-       276: fconst_1
-       277: fcmpl
-       278: iflt          293
-       282: getfield      #61                 // Field realmsNotificationsScreen:Lcom/mojang/realmsclient/gui/screens/RealmsNotificationsScreen;
-       290: invokevirtual #467                // Method com/mojang/realmsclient/gui/screens/RealmsNotificationsScreen.extractRenderState:(Lnet/minecraft/client/gui/GuiGraphicsExtractor;IIF)V
-
-  public void extractBackground(client.gui.GuiGraphicsExtractor, int, int, float);
-    Code:
-
+=== net.minecraft.client.gui.screens.worldselection.CreateWorldScreen (-p)
+public class client.gui.screens.worldselection.CreateWorldScreen extends client.gui.screens.Screen {
+  private boolean recreated;
+  private final client.gui.screens.worldselection.CreateWorldCallback createWorldCallback;
+  public static void openFresh(client.Minecraft, Runnable);
+  public static void openFresh(client.Minecraft, Runnable, client.gui.screens.worldselection.CreateWorldCallback);
+  private static void openCreateWorldScreen(client.Minecraft, Runnable, Function<server.WorldLoader$DataLoadContext, world.level.levelgen.WorldGenSettings>, client.gui.screens.worldselection.WorldCreationContextMapper, resources.ResourceKey<world.level.levelgen.presets.WorldPreset>, client.gui.screens.worldselection.CreateWorldCallback);
+  public static client.gui.screens.worldselection.CreateWorldScreen createFromExisting(client.Minecraft, Runnable, world.level.LevelSettings, client.gui.screens.worldselection.WorldCreationContext, java.nio.file.Path);
+  private client.gui.screens.worldselection.CreateWorldScreen(client.Minecraft, Runnable, client.gui.screens.worldselection.WorldCreationContext, Optional<resources.ResourceKey<world.level.levelgen.presets.WorldPreset>>, OptionalLong, client.gui.screens.worldselection.CreateWorldCallback);
+  private void createWorldAndCleanup(core.LayeredRegistryAccess<server.RegistryLayer>, world.level.storage.LevelDataAndDimensions$WorldDataAndGenSettings, Optional<world.level.gamerules.GameRules>);
+  private boolean createNewWorld(core.LayeredRegistryAccess<server.RegistryLayer>, world.level.storage.LevelDataAndDimensions$WorldDataAndGenSettings, Optional<world.level.gamerules.GameRules>);
+  private world.level.LevelSettings createLevelSettings(boolean);
+  private static server.WorldLoader$InitConfig createDefaultLoadConfig(server.packs.repository.PackRepository, world.level.WorldDataConfiguration);
+  private static Optional<world.level.storage.LevelStorageSource$LevelStorageAccess> createNewWorldDirectory(client.Minecraft, String, java.nio.file.Path);
+  public static java.nio.file.Path createTempDataPackDirFromExistingWorld(java.nio.file.Path, client.Minecraft);
+  private static void lambda$createTempDataPackDirFromExistingWorld$1(org.apache.commons.lang3.mutable.MutableObject, java.nio.file.Path, java.nio.file.Path);
+  private static boolean lambda$createTempDataPackDirFromExistingWorld$0(java.nio.file.Path, java.nio.file.Path);
+  private static void lambda$createNewWorldDirectory$1(java.nio.file.Path, java.nio.file.Path, java.nio.file.Path);
+  private static boolean lambda$createNewWorldDirectory$0(java.nio.file.Path, java.nio.file.Path);
+  private static boolean lambda$createFromExisting$0(client.gui.screens.worldselection.CreateWorldScreen, core.LayeredRegistryAccess, world.level.storage.LevelDataAndDimensions$WorldDataAndGenSettings, Optional, java.nio.file.Path);
+  private static world.level.levelgen.WorldGenSettings lambda$openFresh$2(server.WorldLoader$DataLoadContext);
+  private static client.gui.screens.worldselection.WorldCreationContext lambda$openFresh$1(server.ReloadableServerResources, core.LayeredRegistryAccess, client.gui.screens.worldselection.DataPackReloadCookie);
+  private static boolean lambda$openFresh$0(client.gui.screens.worldselection.CreateWorldScreen, core.LayeredRegistryAccess, world.level.storage.LevelDataAndDimensions$WorldDataAndGenSettings, Optional, java.nio.file.Path);
+=== net.minecraft.client.Minecraft (-public)
+public class client.Minecraft extends util.thread.ReentrantBlockableEventLoop<Runnable> implements blaze3d.platform.WindowEventHandler {
+  public client.sounds.MusicManager getMusicManager();
+  public void setScreenAndShow(client.gui.screens.Screen);
+  public client.sounds.SoundManager getSoundManager();
+=== org.joml.Matrix3x2fStack (-public)
+public class org.joml.Matrix3x2fStack extends org.joml.Matrix3x2f {
+  public org.joml.Matrix3x2fStack pushMatrix();
+  public org.joml.Matrix3x2fStack popMatrix();
