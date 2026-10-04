@@ -1,4 +1,4 @@
-# 26.4-snapshot-2 on 9f26aa73a1c98bc597a3aecd9f8668056f55c41e: build failure, tests skipped
+# 26.4-snapshot-2 on cb6e8d974afb16dc289d9f1679b1c2faa0f4dbb3: build success, tests failure
 > Configure project :
 > Task :compileJava
 /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/ArenaGameTests.java:104: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
@@ -8,24 +8,19 @@
 /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:209: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
 > Task :processResources
 > Task :classes
-> Task :compileClientJava FAILED
-/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/render/OccupantRenderer.java:97: error: method does not override or implement a method from a supertype
-/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/render/OccupantRenderer.java:99: error: method shouldRender in class EntityRenderer<T,S> cannot be applied to given types;
-/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/render/OccupantRenderer.java:102: error: method does not override or implement a method from a supertype
-/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/ForestGallery.java:45: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/ForestGallery.java:111: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/ForestGallery.java:159: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:60: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:173: error: cannot find symbol
-* What went wrong:
-> Compilation failed; see the compiler output below.
-  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/render/OccupantRenderer.java:99: error: method shouldRender in class EntityRenderer<T,S> cannot be applied to given types;
-  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/render/OccupantRenderer.java:97: error: method does not override or implement a method from a supertype
-  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/render/OccupantRenderer.java:102: error: method does not override or implement a method from a supertype
-  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/ForestGallery.java:45: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/ForestGallery.java:111: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/ForestGallery.java:159: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:60: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:173: error: cannot find symbol
-> Check your code and dependencies to fix the compilation error(s)
-> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Task :compileClientJava
+> Task :processClientResources NO-SOURCE
+> Task :processIncludeJars
+> Task :clientClasses
+> Task :compileTestJava NO-SOURCE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+> Task :jar
+> Task :test NO-SOURCE
+> Task :assemble
+> Task :validateAccessWidener NO-SOURCE
+> Task :check UP-TO-DATE
+> Task :build
+[23:37:25] [Server thread/INFO] (Minecraft) ========= 10 GAME TESTS COMPLETE IN 9.565 s ======================
+[23:37:25] [Server thread/INFO] (Minecraft) 1 required tests failed :(
+[23:37:25] [Server thread/INFO] (Minecraft)    - occupant:occupant_game_tests_it_waits_in_the_house_hallway: It should be in the side hallway or its doorway, not the main room (got BlockPos{x=8526759, y=8, z=-8384113}) on tick 5
