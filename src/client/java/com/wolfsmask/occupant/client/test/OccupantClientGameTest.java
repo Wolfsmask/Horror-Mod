@@ -1,6 +1,7 @@
 package com.wolfsmask.occupant.client.test;
 
 import com.wolfsmask.occupant.Occupant;
+import com.wolfsmask.occupant.client.GateScreen;
 import com.wolfsmask.occupant.director.Director;
 import com.wolfsmask.occupant.entity.OccupantEntity;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
@@ -43,10 +44,16 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 	@Override
 	public void runTest(ClientGameTestContext context) {
 		// The title screen, as it first opens and then a while later, when it may be standing there.
+		// The gate comes first: the wood, the title, and one thing to do.
 		context.waitTicks(60);
-		shoot(context, "occupant-title");
+		check(context.computeOnClient(mc -> mc.screen instanceof GateScreen), "the first screen should be the gate");
+		shoot(context, "occupant-gate");
 		context.waitTicks(280);
-		shoot(context, "occupant-title-later");
+		shoot(context, "occupant-gate-later");
+		// Through it, as if CREATE WORLD were chosen, to the title screen behind it.
+		context.runOnClient(GateScreen::passForTest);
+		context.waitTicks(40);
+		shoot(context, "occupant-title");
 
 		TestWorldSave save;
 		try (TestSingleplayerContext game = context.worldBuilder().create()) {

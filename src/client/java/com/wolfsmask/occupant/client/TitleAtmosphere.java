@@ -53,6 +53,13 @@ public final class TitleAtmosphere {
 	public static void register() {
 		ScreenEvents.AFTER_INIT.register((client, screen, width, height) -> {
 			if (!(screen instanceof TitleScreen) || !ClientConfig.get().titleScreen) return;
+			// The first thing anyone sees is the gate, not the menu.
+			if (!GateScreen.passed()) {
+				client.execute(() -> client.setScreen(new GateScreen()));
+				return;
+			}
+			// Said no at the gate: the game's own title screen, untouched.
+			if (!GateScreen.accepted()) return;
 			opened();
 			ScreenEvents.afterBackground(screen).register((s, graphics, mouseX, mouseY, delta) ->
 					drawScene(graphics, s.width, s.height, s.height));
@@ -62,7 +69,7 @@ public final class TitleAtmosphere {
 		});
 	}
 
-	private static void opened() {
+	static void opened() {
 		long now = System.currentTimeMillis();
 		if (openedAt == 0L) {
 			openedAt = now;
@@ -71,7 +78,7 @@ public final class TitleAtmosphere {
 		}
 	}
 
-	private static void tick(Minecraft client) {
+	static void tick(Minecraft client) {
 		// No music here: just the drone, over and over.
 		client.getMusicManager().stopPlaying();
 		if (drone == null || !client.getSoundManager().isActive(drone)) {
@@ -80,13 +87,13 @@ public final class TitleAtmosphere {
 		}
 	}
 
-	private static void closed(Minecraft client) {
+	static void closed(Minecraft client) {
 		if (drone != null) client.getSoundManager().stop(drone);
 		drone = null;
 	}
 
 	/** The wood, the mist, it, the grain and the dark at the edges, drawn down to {@code bottom}. */
-	private static void drawScene(GuiGraphicsExtractor g, int w, int h, int bottom) {
+	static void drawScene(GuiGraphicsExtractor g, int w, int h, int bottom) {
 		long now = System.currentTimeMillis();
 		float dt = lastFrame == 0L ? 0f : Math.min(0.1f, (now - lastFrame) / 1000f);
 		lastFrame = now;
@@ -182,6 +189,21 @@ public final class TitleAtmosphere {
 		}
 	}
 
+	/** Draw it forward: the next time it is there, it is the nearest it can be, and it stays. */
+	static void beckon(boolean on) {
+		if (on) {
+			if (spot != 3) {
+				if (figureAlpha < 0.01f) {
+					spot = 3;
+				} else {
+					figureTarget = 0f;          // gone first; it never moves while it is seen
+				}
+			}
+			if (spot == 3) figureTarget = 0.85f;
+			nextChange = System.currentTimeMillis() + 4000;
+		}
+	}
+
 	private static void drawFog(GuiGraphicsExtractor g, int w, int y, int height, float scroll, float strength) {
 		int tw = Math.round(512f * height / 128f);
 		int off = Math.floorMod(Math.round(scroll), tw);
@@ -203,10 +225,14 @@ public final class TitleAtmosphere {
 		int band = h / 4 + 40;
 		drawScene(g, w, h, band);
 
+		drawLogo(g, w, h, Math.max(8, h / 4 - Math.min(512, Math.round(w * 0.78f)) * 96 / 512 - 4));
+	}
+
+	/** THE OCCUPANT, worn, slipping now and then by a pixel with a red ghost behind it. */
+	static void drawLogo(GuiGraphicsExtractor g, int w, int h, int ly) {
 		int lw = Math.min(512, Math.round(w * 0.78f));
 		int lh = lw * 96 / 512;
 		int lx = (w - lw) / 2;
-		int ly = Math.max(8, h / 4 - lh - 4);
 		long now = System.currentTimeMillis();
 		// Every so often it slips, by a pixel, and a red ghost of it lags behind.
 		boolean slip = (now / 120) % 53 == 0 && !ClientConfig.get().reduceFlashing;
