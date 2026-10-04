@@ -2,6 +2,15 @@ plugins {
 	id 'net.fabricmc.fabric-loom' version "${loom_version}"
 }
 
+// One mod, built for several Minecraft versions: -Pmc=26.3 reads versions/26.3.properties, and
+// any file under versions/26.3/<sourceSet>/ replaces the file of the same path in src/<sourceSet>/java.
+def mc = project.findProperty("mc") ?: "26.2"
+def versionProps = new Properties()
+def versionFile = file("versions/${mc}.properties")
+if (versionFile.exists()) versionFile.withInputStream { versionProps.load(it) }
+versionProps.each { k, v -> project.ext.set(k, v) }
+if (!project.hasProperty("minecraft_dep")) project.ext.set("minecraft_dep", "~${project.minecraft_version}")
+
 version = "${project.mod_version}+mc${project.minecraft_version}"
 group = project.maven_group
 
@@ -42,6 +51,19 @@ loom {
 	}
 }
 
+// Version-specific replacements for individual source files.
+["main", "client"].each { setName ->
+	def overrides = file("versions/${mc}/${setName}")
+	if (overrides.exists()) {
+		def replaced = [] as Set
+		overrides.eachFileRecurse(groovy.io.FileType.FILES) { f -> replaced << overrides.toPath().relativize(f.toPath()).toString().replace('\\', '/') }
+		sourceSets[setName].java {
+			srcDir overrides
+			exclude { e -> !e.file.toPath().startsWith(overrides.toPath()) && replaced.contains(e.relativePath.pathString) }
+		}
+	}
+}
+
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
@@ -50,10 +72,12 @@ dependencies {
 
 processResources {
 	def version = project.version
+	def minecraftDep = project.minecraft_dep
 	inputs.property "version", version
+	inputs.property "minecraft_dep", minecraftDep
 
 	filesMatching("fabric.mod.json") {
-		expand "version": version
+		expand "version": version, "minecraft_dep": minecraftDep
 	}
 }
 

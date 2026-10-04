@@ -1,0 +1,82 @@
+name: Ports
+
+# Builds the mod for every Minecraft version in versions/, runs the game tests where it builds,
+# and records the result for each: compile errors in tools/ports/<version>.txt, and a tested jar
+# in dist/ when everything passes.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'versions/**'
+      - '.github/workflows/ports.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  port:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        mc: ['26.1.2', '26.2', '26.3', '26.4-snapshot-2']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 25
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Build for ${{ matrix.mc }}
+        id: build
+        continue-on-error: true
+        run: |
+          chmod +x gradlew
+          set -o pipefail
+          ./gradlew build -Pmc=${{ matrix.mc }} --console=plain 2>&1 | tee build.log
+
+      - name: Game tests for ${{ matrix.mc }}
+        id: tests
+        if: steps.build.outcome == 'success'
+        continue-on-error: true
+        run: |
+          mkdir -p build/gametest
+          echo "eula=true" > build/gametest/eula.txt
+          set -o pipefail
+          ./gradlew runGametest -Pmc=${{ matrix.mc }} --console=plain 2>&1 | tee test.log
+
+      - name: Record the result
+        if: always()
+        run: |
+          OUT="$RUNNER_TEMP/port"
+          mkdir -p "$OUT"
+          {
+            echo "# ${{ matrix.mc }} on $GITHUB_SHA: build ${{ steps.build.outcome }}, tests ${{ steps.tests.outcome }}"
+            grep -E "error:|warning: \[removal\]|What went wrong|Could not|> " build.log | head -n 150 || true
+            if [ -f test.log ]; then grep -E "GAME TESTS COMPLETE|required tests failed|  - occupant" test.log | head -n 30; fi
+          } > "$OUT/result.txt"
+          if [ "${{ steps.tests.outcome }}" = "success" ]; then
+            cp build/libs/occupant-*.jar "$OUT/" 2>/dev/null || true
+            rm -f "$OUT"/*-sources.jar
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for attempt in 1 2 3 4 5 6; do
+            git fetch -q origin "${GITHUB_REF_NAME}"
+            git reset -q --hard "origin/${GITHUB_REF_NAME}"
+            mkdir -p tools/ports dist
+            cp "$OUT/result.txt" "tools/ports/${{ matrix.mc }}.txt"
+            if ls "$OUT"/*.jar >/dev/null 2>&1; then
+              rm -f dist/occupant-*+mc${{ matrix.mc }}.jar
+              cp "$OUT"/*.jar dist/
+            fi
+            git add -A tools/ports dist
+            git diff --cached --quiet && break
+            git commit -q -m "Port result for ${{ matrix.mc }} [skip ci]"
+            git push origin "HEAD:${GITHUB_REF_NAME}" && break
+            sleep $((attempt * 4))
+          done
