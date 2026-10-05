@@ -1,5 +1,6 @@
 package com.wolfsmask.occupant.client;
 
+import com.wolfsmask.occupant.Occupant;
 import com.wolfsmask.occupant.OccupantConfig;
 import com.wolfsmask.occupant.registry.ModSounds;
 import net.minecraft.client.Minecraft;
@@ -31,6 +32,7 @@ public final class GateScreen extends Screen {
 	private static boolean showing;
 	private static boolean accepted;
 	private static Boolean configured;
+	private static boolean drawn;
 
 	private boolean hoverEnter;
 	private boolean hoverLeave;
@@ -92,6 +94,10 @@ public final class GateScreen extends Screen {
 
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float delta) {
+		if (!drawn) {
+			drawn = true;
+			Occupant.LOGGER.info("[client] the gate screen has been drawn");
+		}
 		int w = this.width;
 		int h = this.height;
 		boolean calm = ClientConfig.get().reduceFlashing;

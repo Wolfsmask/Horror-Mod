@@ -1,0 +1,95 @@
+name: Client start
+
+# Starts the real game client for each ported version under a virtual display and software
+# rendering. Versions with Fabric's client test API run the full client game test (photographs
+# and all); the older ones, which have no such API, are started, left on the first screen long
+# enough to draw it many times, and checked for a crash. Results go to tools/ports/<mc>-client.txt.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'versions/**'
+      - 'src/client/**'
+      - 'build.gradle'
+      - '.github/workflows/client-smoke.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  client:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        mc: ['1.20.1', '1.21.1', '1.21.11', '26.1.2', '26.3', '26.4-snapshot-2']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 25
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Virtual display and software rendering
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb mesa-utils libgl1-mesa-dri mesa-vulkan-drivers > /dev/null
+
+      - name: Start the client
+        id: client
+        continue-on-error: true
+        env:
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: |
+          chmod +x gradlew
+          if grep -q '^exclude_sources=.*client/test' "versions/${{ matrix.mc }}.properties"; then
+            # No client test API: start the game, wait for the first screen to be drawn, keep it
+            # up for a while, then close it. Any crash, or never getting that far, is a failure.
+            mkdir -p run
+            # A first start would open the accessibility screen, not the title screen.
+            echo "onboardAccessibility:false" > run/options.txt
+            xvfb-run -a -s "-screen 0 1280x720x24" ./gradlew runClient -Pmc=${{ matrix.mc }} --console=plain > client.log 2>&1 &
+            for i in $(seq 1 180); do
+              grep -q "the gate screen has been drawn" client.log && break
+              grep -qE "Game crashed|#@!@# Game crashed|Failed to start the minecraft server|BUILD FAILED" client.log && break
+              sleep 5
+            done
+            if grep -q "the gate screen has been drawn" client.log; then sleep 30; fi
+            pkill -f "net.fabricmc.devlaunchinjector|KnotClient|net.minecraft.client.main.Main" || true
+            sleep 5
+            grep -q "the gate screen has been drawn" client.log || exit 1
+            if grep -qE "Game crashed|Exception in thread|---- Minecraft Crash Report" client.log; then exit 1; fi
+          else
+            set -o pipefail
+            xvfb-run -a -s "-screen 0 1280x720x24" ./gradlew runClientGametest -Pmc=${{ matrix.mc }} --console=plain 2>&1 | tee client.log
+          fi
+
+      - name: Record the result
+        if: always()
+        run: |
+          OUT="$RUNNER_TEMP/client"
+          mkdir -p "$OUT"
+          {
+            echo "# ${{ matrix.mc }} client on $GITHUB_SHA: ${{ steps.client.outcome }}"
+            grep -E "\[client\]|client-gametest|Exception|Caused by|Crash|FAILED|What went wrong|occupant" client.log \
+              | grep -vE "DEBUG|Datafixer" | head -n 80 || true
+            echo "--- tail ---"
+            tail -n 40 client.log || true
+          } > "$OUT/result.txt"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for attempt in 1 2 3 4 5 6; do
+            git fetch -q origin "${GITHUB_REF_NAME}"
+            git reset -q --hard "origin/${GITHUB_REF_NAME}"
+            mkdir -p tools/ports
+            cp "$OUT/result.txt" "tools/ports/${{ matrix.mc }}-client.txt"
+            git add -A tools/ports
+            git diff --cached --quiet && break
+            git commit -q -m "Client start result for ${{ matrix.mc }} [skip ci]"
+            git push origin "HEAD:${GITHUB_REF_NAME}" && break
+            sleep $((attempt * 4))
+          done
