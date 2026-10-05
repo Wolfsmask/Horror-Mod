@@ -130,7 +130,7 @@ jobs:
         run: |
           chmod +x gradlew
           set -o pipefail
-          xvfb-run -a -s "-screen 0 1280x720x24" ./gradlew runClientGametest --console=plain 2>&1 | tee client.log
+          xvfb-run -a -s "-screen 0 1920x1080x24" ./gradlew runClientGametest --console=plain 2>&1 | tee client.log
 
       # The screenshots are the point, pass or fail, so they are kept in the repository.
       - name: Commit screenshots and the outcome

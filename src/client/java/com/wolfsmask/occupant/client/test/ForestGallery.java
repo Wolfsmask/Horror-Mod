@@ -80,6 +80,9 @@ final class ForestGallery {
 			// The abandoned house, in a clearing in the same woods, or failing that the open country
 			// where the world began.
 			house(context, game, new BlockPos[]{woods[0], woods[1], spawn});
+
+			// And the stills for the mod's page, in the same world.
+			Cinematic.run(context, game, woods, spawn);
 		} catch (RuntimeException | AssertionError e) {
 			Occupant.LOGGER.warn("[client-gametest] forest gallery stopped early", e);
 		}
@@ -219,7 +222,7 @@ final class ForestGallery {
 	}
 
 	/** Directions from here with the longest clear view at eye height, best first. */
-	private static int[] openestYaws(ServerLevel level, BlockPos feet) {
+	static int[] openestYaws(ServerLevel level, BlockPos feet) {
 		Integer[] yaws = new Integer[24];
 		double[] reach = new double[360];
 		for (int i = 0; i < 24; i++) {
@@ -242,7 +245,7 @@ final class ForestGallery {
 	}
 
 	/** Forest floor with room to stand, near the middle of the wood. */
-	private static BlockPos standSpot(ServerLevel level, BlockPos forest, int salt) {
+	static BlockPos standSpot(ServerLevel level, BlockPos forest, int salt) {
 		for (int ring = 0; ring <= 48; ring += 3) {
 			int steps = Math.max(1, ring * 2);
 			for (int k = 0; k < steps; k++) {
@@ -260,7 +263,7 @@ final class ForestGallery {
 	 * Somewhere flat enough, and clear enough of trunks, for the house: every column of its
 	 * footprint (and a little round it) forest floor within a block of the same height.
 	 */
-	private static BlockPos clearing(ServerLevel level, BlockPos forest) {
+	static BlockPos clearing(ServerLevel level, BlockPos forest) {
 		for (int ring = 0; ring <= 160; ring += 8) {
 			int steps = Math.max(1, ring / 2);
 			for (int k = 0; k < steps; k++) {

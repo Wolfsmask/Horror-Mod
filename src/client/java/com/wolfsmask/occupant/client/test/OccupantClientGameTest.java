@@ -174,6 +174,7 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 			// The places it haunts, each built in turn and photographed from above and to one side
 			// at midday, so what they look like is a matter of record.
 			server.runCommand("time set noon");
+			server.runCommand("gamemode spectator @p");         // a camera, not a body: it neither falls nor dies
 			BlockPos here = server.computeOnServer(s -> s.getPlayerList().getPlayers().get(0).blockPosition());
 			String[] kinds = {"village", "ruin", "camp", "graves", "cottage"};
 			for (int i = 0; i < kinds.length; i++) {
@@ -194,6 +195,10 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 				context.waitTicks(40);
 				shoot(context, "place-" + kind);
 			}
+			// Back where it all started, on the ground, for what comes next.
+			server.runCommand("tp @p " + (here.getX() + 0.5) + " " + here.getY() + " " + (here.getZ() + 0.5) + " 0 0");
+			server.runCommand("gamemode survival @p");
+			context.waitTicks(40);
 
 			// The way the user was locked out: going to sleep, quitting, and coming back. The game
 			// wakes a sleeper while it is placing them into the world, which once threw out of the
