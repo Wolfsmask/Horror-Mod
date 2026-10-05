@@ -9,6 +9,7 @@ import com.wolfsmask.occupant.director.events.Events;
 import com.wolfsmask.occupant.director.events.HallwayEvent;
 import com.wolfsmask.occupant.entity.OccupantEntity;
 import com.wolfsmask.occupant.registry.ModEntities;
+import net.minecraft.world.entity.EntitySpawnReason;
 import com.wolfsmask.occupant.world.House;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.commands.CommandSourceStack;
@@ -243,6 +244,36 @@ public final class OccupantGameTests {
 		helper.assertTrue(House.found(), "Walking up to a house should count as finding it");
 		helper.assertTrue(!d, "Once a house has been found, no other may ever be built");
 		helper.succeed();
+	}
+
+	/**
+	 * It stands in plain view and the player looks the other way: after ten seconds they are told,
+	 * once. Looking at it before then means nothing is said.
+	 */
+	@GameTest(maxTicks = 300)
+	public void anUnnoticedSightingIsPointedOut(GameTestHelper helper) {
+		Director director = Director.get();
+		helper.assertTrue(director != null, "Director should be running");
+		ServerLevel world = helper.getLevel();
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		BlockPos stand = helper.absolutePos(new BlockPos(1, 1, 1));
+		player.snapTo(stand.getX() + 0.5, stand.getY(), stand.getZ() + 0.5, 180.0f, 0.0f);   // facing north
+		OccupantEntity e = ModEntities.OCCUPANT.create(world, EntitySpawnReason.COMMAND);
+		helper.assertTrue(e != null, "Could not create the entity");
+		e.standAlone(player);
+		e.snapTo(stand.getX() + 0.5, stand.getY(), stand.getZ() + 9.5, 180.0f, 0.0f);       // nine blocks south, behind
+		world.addFreshEntity(e);
+		int before = director.data(player).ignored;
+		helper.onEachTick(() -> {
+			player.snapTo(stand.getX() + 0.5, stand.getY(), stand.getZ() + 0.5, 180.0f, 0.0f);
+			director.watchForTest(player);
+		});
+		helper.runAtTickTime(240, () -> {
+			int after = director.data(player).ignored;
+			e.discard();
+			helper.assertTrue(after == before + 1, "Ignored for ten seconds, it should have been pointed out once (" + (after - before) + ")");
+			helper.succeed();
+		});
 	}
 
 	/**

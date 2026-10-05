@@ -56,6 +56,40 @@ final class Places {
 	static void close() {
 		record = null;
 		PLACES.clear();
+		SIGNS.clear();
+	}
+
+	/**
+	 * Words for signs placed while the world was being generated. A sign cannot be written then
+	 * (there is no world yet for it to tell), so it is put up blank and written here, on the
+	 * server's own thread, as soon as its chunk is properly loaded.
+	 */
+	private static final java.util.Map<BlockPos, String[]> SIGNS = new java.util.concurrent.ConcurrentHashMap<>();
+
+	static void sign(WorldGenLevel level, BlockPos pos, String[] lines) {
+		if (level instanceof ServerLevel live) {
+			write(live, pos, lines);
+		} else {
+			SIGNS.put(pos.immutable(), lines);
+		}
+	}
+
+	/** Called every second: writes any waiting signs whose chunks are now loaded. */
+	public static void tick(MinecraftServer server) {
+		if (SIGNS.isEmpty()) return;
+		ServerLevel level = server.overworld();
+		SIGNS.entrySet().removeIf(e -> {
+			BlockPos pos = e.getKey();
+			if (!level.hasChunk(pos.getX() >> 4, pos.getZ() >> 4)) return false;
+			write(level, pos, e.getValue());
+			return true;
+		});
+	}
+
+	private static void write(ServerLevel level, BlockPos pos, String[] lines) {
+		if (level.getBlockEntity(pos) instanceof net.minecraft.world.level.block.entity.SignBlockEntity sign) {
+			com.wolfsmask.occupant.compat.Compat.writeSign(sign, lines);
+		}
 	}
 
 	private static synchronized boolean claim(BlockPos at) {

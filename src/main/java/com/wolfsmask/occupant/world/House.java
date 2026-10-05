@@ -139,6 +139,11 @@ public final class House {
 		return List.copyOf(HOUSES);
 	}
 
+	/** Called every second by the server: finishes what world generation could not. */
+	public static void tick(MinecraftServer server) {
+		Places.tick(server);
+	}
+
 	/** Has anyone found a house in this world yet? */
 	public static boolean found() {
 		return found;

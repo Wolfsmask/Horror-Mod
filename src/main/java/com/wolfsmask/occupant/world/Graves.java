@@ -1,13 +1,11 @@
 package com.wolfsmask.occupant.world;
 
-import com.wolfsmask.occupant.compat.Compat;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
@@ -75,8 +73,6 @@ final class Graves extends Build {
 		// A sign at the gate, facing whoever comes.
 		int sy = floor(0, -5);
 		put(0, sy, -5, Blocks.OAK_SIGN.defaultBlockState().setValue(BlockStateProperties.ROTATION_16, 8));
-		if (level.getBlockEntity(at(0, sy, -5)) instanceof SignBlockEntity sign) {
-			Compat.writeSign(sign, SIGNS[random.nextInt(SIGNS.length)]);
-		}
+		Places.sign(level, at(0, sy, -5), SIGNS[random.nextInt(SIGNS.length)]);
 	}
 }

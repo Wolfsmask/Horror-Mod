@@ -98,6 +98,12 @@ public final class Director {
 		return haunts.computeIfAbsent(player.getUUID(), u -> new Haunt(u, save.forPlayer(u), player.getRandom()));
 	}
 
+	/** For the game tests: one tick of watching whether this player has noticed it. */
+	public void watchForTest(ServerPlayer player) {
+		Haunt h = haunt(player);
+		h.unnoticed.tick(player, h);
+	}
+
 	public void markDirty() {
 		save.setDirty();
 	}

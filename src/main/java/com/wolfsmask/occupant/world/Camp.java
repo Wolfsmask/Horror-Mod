@@ -1,6 +1,5 @@
 package com.wolfsmask.occupant.world;
 
-import com.wolfsmask.occupant.compat.Compat;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
@@ -9,7 +8,6 @@ import net.minecraft.world.level.block.BarrelBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
@@ -73,8 +71,6 @@ final class Camp extends Build {
 		container(-3, floor(-3, 2), 2, facing(Blocks.CHEST.defaultBlockState(), Direction.EAST), Loot.Kind.CAMP);
 		int sy = floor(0, -4);
 		put(0, sy, -4, Blocks.OAK_SIGN.defaultBlockState().setValue(BlockStateProperties.ROTATION_16, 8));
-		if (level.getBlockEntity(at(0, sy, -4)) instanceof SignBlockEntity sign) {
-			Compat.writeSign(sign, SIGNS[random.nextInt(SIGNS.length)]);
-		}
+		Places.sign(level, at(0, sy, -4), SIGNS[random.nextInt(SIGNS.length)]);
 	}
 }

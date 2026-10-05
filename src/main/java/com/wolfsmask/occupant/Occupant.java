@@ -88,6 +88,7 @@ public final class Occupant implements ModInitializer {
 		ServerTickEvents.END_SERVER_TICK.register(server -> guard("the server tick", () -> {
 			Director director = Director.get();
 			if (director != null) director.tick();
+			if (server.getTickCount() % 20 == 0) House.tick(server);
 		}));
 
 		// It listens.
