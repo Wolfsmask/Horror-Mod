@@ -178,6 +178,16 @@ public final class OccupantGameTests {
 						level.getBrightness(net.minecraft.world.level.LightLayer.BLOCK, House.local(floor, Rotation.NONE, 4, 2, 5)),
 						level.getBrightness(net.minecraft.world.level.LightLayer.SKY, House.local(floor, Rotation.NONE, 4, 2, 5)));
 			}
+			if (any == null || any.getX() < House.local(floor, Rotation.NONE, 8, 1, 1).getX()) {
+				StringBuilder why = new StringBuilder();
+				for (int z = 1; z <= 9; z++) {
+					for (int x = 8; x <= 10; x++) {
+						BlockPos at = House.local(floor, Rotation.NONE, x, 1, z);
+						why.append(" (").append(x).append(',').append(z).append(") ").append(HallwayEvent.explain(player, at, true));
+					}
+				}
+				Occupant.LOGGER.info("[gametest] hallway spots:{}", why);
+			}
 			helper.assertTrue(any != null, "There should be somewhere in the dark hallway for it to stand");
 			BlockPos hallStart = House.local(floor, Rotation.NONE, 9, 1, 1);
 			helper.assertTrue(any.getX() >= hallStart.getX() - 1 && any.getX() <= hallStart.getX() + 1,

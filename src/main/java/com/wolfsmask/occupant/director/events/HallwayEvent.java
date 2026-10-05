@@ -11,6 +11,7 @@ import com.wolfsmask.occupant.world.House;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -88,7 +89,9 @@ public final class HallwayEvent extends HorrorEvent {
 					if (peek && (!head || seen > 8 || !sideHidden(mask))) continue;
 					// Not right up close, not far off: about seven blocks, at the edge of the screen
 					// where you catch it out of the corner of your eye, and as little of it as can be.
-					double score = Math.abs(flat - 7.0) * 0.6 + Math.abs(side - 45.0) * 0.04 + seen * 0.35;
+					// And truly dark: back where no light from a window or the night sky reaches.
+					int sky = world.getBrightness(LightLayer.SKY, pos.above());
+					double score = Math.abs(flat - 7.0) * 0.6 + Math.abs(side - 45.0) * 0.04 + seen * 0.35 + sky * 0.5;
 					if (score < bestScore) {
 						bestScore = score;
 						best = pos;
@@ -97,6 +100,30 @@ public final class HallwayEvent extends HorrorEvent {
 			}
 		}
 		return best;
+	}
+
+	/** Which of {@link #find}'s checks rules {@code pos} out, for tests to report; "ok" if none. */
+	public static String explain(ServerPlayer p, BlockPos pos, boolean peek) {
+		ServerLevel world = p.level();
+		BlockPos at = p.blockPosition();
+		double flat = Math.sqrt(Math.pow(pos.getX() - at.getX(), 2) + Math.pow(pos.getZ() - at.getZ(), 2));
+		if (flat < 3.0 || flat > 14.0) return "distance " + flat;
+		if (Math.abs(pos.getY() - at.getY()) > 2) return "height";
+		if (!Spots.canStand(world, pos)) return "can't stand";
+		Vec3 base = Vec3.atBottomCenterOf(pos);
+		double side = Sight.yawAngleTo(p, base);
+		if (side < 25.0 || side > 110.0) return "angle " + Math.round(side);
+		if (world.canSeeSky(pos.above())) return "sky";
+		if (!Spots.isDark(world, pos.above())) return "light";
+		if (!enclosed(world, pos)) return "open";
+		double height = headroom(world, pos);
+		if (height > 6.0) return "headroom";
+		int mask = Sight.visibleParts(p, base, height);
+		int seen = Integer.bitCount(mask);
+		boolean head = (mask & (0b111 << 12 | 0b111 << 9)) != 0;
+		if (seen == 0) return "unseen";
+		if (peek && (!head || seen > 8 || !sideHidden(mask))) return "peek " + Integer.toBinaryString(mask);
+		return "ok";
 	}
 
 	/** One column of the sample points (rows 1 to 4, knee height up) entirely out of sight. */
