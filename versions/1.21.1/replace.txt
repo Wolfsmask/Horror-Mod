@@ -27,3 +27,4 @@ import net.fabricmc.fabric.api.gametest.v1.GameTest; -> import net.minecraft.gam
 regex @GameTest$ -> @GameTest(template = "fabric-gametest-api-v1:empty")
 public boolean causeFallDamage(double fallDistance -> public boolean causeFallDamage(float fallDistance
 public boolean canBeCollidedWith(@Nullable Entity entity) -> public boolean canBeCollidedWith()
+.build(OCCUPANT_KEY)) -> .build(OCCUPANT_KEY.location().toString()))
