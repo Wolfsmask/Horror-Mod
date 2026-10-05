@@ -8,6 +8,7 @@ on:
   push:
     paths:
       - 'versions/**'
+      - 'build.gradle'
       - '.github/workflows/ports.yml'
 
 permissions:
