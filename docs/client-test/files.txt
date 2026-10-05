@@ -21,20 +21,20 @@ build/clientGametest/occupant-shots/occupant-chase.png
 build/clientGametest/occupant-shots/occupant-night-distant.png
 build/clientGametest/occupant-shots/occupant-photo-2-sighting-night.png
 build/clientGametest/occupant-shots/occupant-loom.png
-build/clientGametest/occupant-shots/occupant-photo-3-far-off-dusk.png
 build/clientGametest/occupant-shots/occupant-stare.png
 build/clientGametest/occupant-shots/occupant-title.png
 build/clientGametest/saves/New World (1)/icon.png
 build/clientGametest/saves/New World/icon.png
 build/clientGametest/screenshots/0002_occupant-title.png
 build/clientGametest/screenshots/0013_occupant-trees.png
+build/clientGametest/screenshots/0022_occupant-photo-5-house-day-turned.png
 build/clientGametest/screenshots/0004_occupant-veiled.png
-build/clientGametest/screenshots/0020_occupant-photo-3-far-off-dusk.png
 build/clientGametest/screenshots/0014_occupant-indoors.png
 build/clientGametest/screenshots/0019_occupant-photo-2-sighting-night.png
 build/clientGametest/screenshots/0005_occupant-loom.png
-build/clientGametest/screenshots/0024_occupant-photo-6-house-dusk.png
+build/clientGametest/screenshots/0023_occupant-photo-6-house-dusk.png
 build/clientGametest/screenshots/0007_occupant-three-quarter.png
+build/clientGametest/screenshots/0020_occupant-photo-4-the-house.png
 build/clientGametest/screenshots/0000_occupant-gate.png
 build/clientGametest/screenshots/0008_occupant-face.png
 build/clientGametest/screenshots/0012_occupant-corridor.png
