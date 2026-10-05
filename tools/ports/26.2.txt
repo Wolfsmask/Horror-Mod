@@ -1,4 +1,4 @@
-# 26.2 on 6938540f0f645856857542b3be877a23d5ba597b: build success, tests success
+# 26.2 on 315603f558cc102cd5918975d91e86c812ba4b27: build success, tests failure
 > Configure project :
 > Task :compileJava
 > Task :processResources
@@ -7,23 +7,25 @@
 > Task :processClientResources NO-SOURCE
 > Task :processIncludeJars
 > Task :clientClasses
-> Task :jar
 > Task :compileTestJava NO-SOURCE
-> Task :assemble
 > Task :processTestResources NO-SOURCE
 > Task :testClasses UP-TO-DATE
 > Task :test NO-SOURCE
 > Task :validateAccessWidener NO-SOURCE
 > Task :check UP-TO-DATE
+> Task :jar
+> Task :assemble
 > Task :build
-[22:48:25] [Server thread/INFO] (occupant) [gametest] houses: found before false, first true, too close false, second true, after finding false
-[22:48:25] [Server thread/INFO] (occupant) [gametest] places without loot: [], page found: true
-[22:48:26] [Server thread/INFO] (occupant) [gametest] house test player at BlockPos{x=-2, y=1, z=-4} facing 0.0 / (0.0, -0.0, 1.0)
-[22:48:26] [Server thread/INFO] (occupant) [gametest] house hallway spot: peeking BlockPos{x=-9366472, y=-55, z=6700532} / any BlockPos{x=-9366472, y=-55, z=6700532} (relative to the floor: BlockPos{x=4, y=1, z=0})
-[22:48:26] [Server thread/INFO] (occupant) [gametest] hallway light at the far end: block 0 sky 0, dark true
-[22:48:26] [Server thread/INFO] (occupant) [gametest] that spot: mask 1001001001, block light 0, sky 2, main room middle block light 0 sky 8
-[22:48:27] [Server thread/INFO] (occupant) [gametest] field: darkOutside=true skyDarken=7 light=8 skyLight=15 blockLight=0 isDark=true grassInDirtTag=false
-[22:48:27] [Server thread/INFO] (occupant) [gametest] cave: yaw=-90.0 feet=BlockPos{x=-9366127, y=60, z=6700349} underground=true skyVisible=false skyLight=0 topY=69 light=0 look=(1.0, 0.0, 1.2246468525851679E-16) | ahead: standable=55 dark=55 visible=55
-[22:48:27] [Server thread/INFO] (occupant) [gametest] arena failures: []
-[22:48:31] [Server thread/INFO] (occupant) [gametest] events that found a place to happen: [cave_noise, breath, fake_join, sign, whisper, doppel_chat, stalker, flicker, static, wake]
-[22:48:32] [Server thread/INFO] (Minecraft) ========= 11 GAME TESTS COMPLETE IN 10.93 s ======================
+[23:58:30] [Server thread/INFO] (occupant) [gametest] houses: found before false, first true, too close false, second true, after finding false
+[23:58:30] [Server thread/INFO] (occupant) [gametest] places without loot: [], page found: true
+[23:58:31] [Server thread/INFO] (occupant) [gametest] house test player at BlockPos{x=-2, y=1, z=-4} facing 0.0 / (0.0, -0.0, 1.0)
+[23:58:31] [Server thread/INFO] (occupant) [gametest] house hallway spot: peeking BlockPos{x=5383683, y=-55, z=-1439248} / any BlockPos{x=5383683, y=-55, z=-1439248} (relative to the floor: BlockPos{x=4, y=1, z=0})
+[23:58:31] [Server thread/INFO] (occupant) [gametest] hallway light at the far end: block 0 sky 0, dark true
+[23:58:31] [Server thread/INFO] (occupant) [gametest] that spot: mask 1001001001, block light 0, sky 2, main room middle block light 0 sky 8
+[23:58:32] [Server thread/INFO] (occupant) [gametest] field: darkOutside=true skyDarken=7 light=8 skyLight=15 blockLight=0 isDark=true grassInDirtTag=false
+[23:58:32] [Server thread/INFO] (occupant) [gametest] cave: yaw=-90.0 feet=BlockPos{x=5384043, y=60, z=-1439431} underground=true skyVisible=false skyLight=0 topY=69 light=0 look=(1.0, 0.0, 1.2246468525851679E-16) | ahead: standable=55 dark=55 visible=55
+[23:58:32] [Server thread/INFO] (occupant) [gametest] arena failures: []
+[23:58:36] [Server thread/INFO] (occupant) [gametest] events that found a place to happen: [cave_noise, breath, fake_join, sign, whisper, doppel_chat, stalker, flicker, static, wake]
+[23:58:37] [Server thread/INFO] (Minecraft) ========= 12 GAME TESTS COMPLETE IN 10.72 s ======================
+[23:58:37] [Server thread/INFO] (Minecraft) 1 required tests failed :(
+[23:58:37] [Server thread/INFO] (Minecraft)    - occupant:occupant_game_tests_an_unnoticed_sighting_is_pointed_out: Ignored for ten seconds, it should have been pointed out once (0) on tick 240
