@@ -1,12 +1,15 @@
 @mc 26.3
-# Round 20: why clicks miss on 26.3, and making a world without the creation screen.
-net.minecraft.client.gui.screens.Screen mouse|click|Click|extract|render
-net.minecraft.client.gui.components.events.ContainerEventHandler mouse|click|Click
-net.minecraft.client.gui.components.events.GuiEventListener mouse|click|Click
-net.minecraft.client.input.MouseButtonEvent
-net.minecraft.client.gui.screens.worldselection.CreateWorldScreen
-@private net.minecraft.client.gui.screens.worldselection.CreateWorldScreen onCreate|create|Create
-net.minecraft.client.gui.screens.worldselection.WorldOpenFlows
-net.minecraft.client.gui.screens.worldselection.WorldCreationUiState
-net.minecraft.client.gui.components.AbstractButton onPress
-@code net.minecraft.client.gui.screens.Screen mouseClicked
+# Round 21: key events, the client test's input, spawn position, the gate's widgets.
+net.minecraft.client.input.KeyEvent
+net.minecraft.client.input.MouseButtonInfo
+net.fabricmc.fabric.api.client.gametest.v1.TestInput
+net.minecraft.world.level.storage.LevelData spawn|Spawn|respawn|Respawn
+net.minecraft.world.level.storage.LevelData$RespawnData
+net.minecraft.server.level.ServerLevel spawn|Spawn|respawn|Respawn
+net.minecraft.world.level.Level spawn|Spawn|respawn|Respawn|getLevelData
+net.minecraft.client.gui.components.Button builder|OnPress|onPress
+net.minecraft.client.gui.components.Button$OnPress
+net.minecraft.client.gui.components.Button$Builder
+@protected net.minecraft.client.gui.screens.Screen addWidget|addRenderableWidget|clearWidgets
+@code net.minecraft.client.gui.screens.worldselection.CreateWorldScreen keyPressed
+@code net.minecraft.client.MouseHandler onButton|onPress|mouseClicked
