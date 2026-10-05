@@ -1,6 +1,5 @@
 package com.wolfsmask.occupant.compat;
 
-import com.google.common.collect.Iterables;
 import com.mojang.serialization.Codec;
 import java.util.function.Supplier;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
@@ -13,54 +12,53 @@ import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.SignText;
-import net.minecraft.world.level.block.entity.SignTextSlot;
 
-import java.util.ArrayList;
-import java.util.List;
-
-/** The few places where Minecraft versions disagree about something small. This copy is for 26.3 and later. */
+/**
+ * The few places where Minecraft versions disagree about something small. Each supported version
+ * has its own copy of this class (versions/<group>/main/...), so the rest of the mod never changes.
+ * This copy is for 1.21.11.
+ */
 public final class Compat {
 	private Compat() {
 	}
 
 	/** Every position within the given distance of {@code center} on each axis, nearest first. */
 	public static Iterable<BlockPos> withinManhattan(BlockPos center, int rx, int ry, int rz) {
-		int r = Math.max(rx, Math.max(ry, rz));
-		return Iterables.filter(BlockPos.withinManhattan(center, r), p -> Math.abs(p.getX() - center.getX()) <= rx
-				&& Math.abs(p.getY() - center.getY()) <= ry && Math.abs(p.getZ() - center.getZ()) <= rz);
+		return BlockPos.withinManhattan(center, rx, ry, rz);
 	}
 
 	/** Write up to four lines on the front of a sign. */
 	public static void writeSign(SignBlockEntity sign, String[] lines) {
-		List<Component> messages = new ArrayList<>();
-		for (int i = 0; i < 4; i++) messages.add(Component.literal(i < lines.length ? lines[i] : ""));
-		sign.setText(new SignText(messages, messages, DyeColor.BLACK, false), SignTextSlot.FRONT);
+		SignText text = new SignText();
+		for (int i = 0; i < 4 && i < lines.length; i++) {
+			text = text.setMessage(i, Component.literal(lines[i]));
+		}
+		sign.setText(text, true);
 	}
 
 	/** Where the server-to-client payloads are registered. */
 	public static PayloadTypeRegistry<RegistryFriendlyByteBuf> serverToClient() {
-		return PayloadTypeRegistry.clientboundPlay();
+		return PayloadTypeRegistry.playS2C();
 	}
 
 	/** The time of day in the overworld, in ticks since the world began. */
 	public static long dayTime(Level level) {
-		return level.getOverworldClockTime();
+		return level.getDayTime();
 	}
 
 	/** The type of a piece of data saved with the world, under {@code data/occupant/<name>}. */
 	public static <T extends SavedData> SavedDataType<T> savedData(String name, Supplier<T> fresh, Codec<T> codec, DataFixTypes fix) {
-		return new SavedDataType<>(com.wolfsmask.occupant.Occupant.id(name), fresh, codec, fix);
+		return new SavedDataType<>("occupant_" + name, fresh, codec, fix);
 	}
 
 	/** Keep a mob's paths out of water, lava, fire and anything else that hurts. */
 	public static void avoidHazards(Mob mob) {
 		mob.setPathfindingMalus(PathType.WATER, -1.0f);
 		mob.setPathfindingMalus(PathType.LAVA, -1.0f);
-		mob.setPathfindingMalus(PathType.FIRE, -1.0f);
-		mob.setPathfindingMalus(PathType.FIRE_IN_NEIGHBOR, -1.0f);
-		mob.setPathfindingMalus(PathType.DAMAGING, -1.0f);
+		mob.setPathfindingMalus(PathType.DAMAGE_FIRE, -1.0f);
+		mob.setPathfindingMalus(PathType.DANGER_FIRE, -1.0f);
+		mob.setPathfindingMalus(PathType.DAMAGE_OTHER, -1.0f);
 	}
 }

@@ -1,5 +1,6 @@
 package com.wolfsmask.occupant.entity;
 
+import com.wolfsmask.occupant.compat.Compat;
 import com.wolfsmask.occupant.registry.ModSounds;
 import com.wolfsmask.occupant.util.Cues;
 import com.wolfsmask.occupant.util.Sight;
@@ -26,7 +27,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -92,11 +92,7 @@ public class OccupantEntity extends PathfinderMob {
 		this.setSilent(true);
 		this.setPersistenceRequired();
 		this.xpReward = 0;
-		this.setPathfindingMalus(PathType.WATER, -1.0f);
-		this.setPathfindingMalus(PathType.LAVA, -1.0f);
-		this.setPathfindingMalus(PathType.FIRE, -1.0f);
-		this.setPathfindingMalus(PathType.FIRE_IN_NEIGHBOR, -1.0f);
-		this.setPathfindingMalus(PathType.DAMAGING, -1.0f);
+		Compat.avoidHazards(this);
 	}
 
 	@Override

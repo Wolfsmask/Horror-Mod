@@ -70,7 +70,7 @@ public final class SignEvent extends HorrorEvent {
 	private static String pickMessage(EventContext ctx) {
 		List<String> options = ctx.config.signMessages;
 		String msg = options.get(ctx.random.nextInt(options.size()));
-		long day = ctx.world.getOverworldClockTime() / 24000L + 1;
+		long day = Compat.dayTime(ctx.world) / 24000L + 1;
 		return msg.replace("{player}", ctx.player.getName().getString()).replace("{day}", Long.toString(day));
 	}
 }

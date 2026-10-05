@@ -1,8 +1,8 @@
 package com.wolfsmask.occupant.director;
 
+import com.wolfsmask.occupant.compat.Compat;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.wolfsmask.occupant.Occupant;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.datafix.DataFixTypes;
@@ -20,8 +20,8 @@ public final class OccupantSaveData extends SavedData {
 					.forGetter(d -> d.players)
 	).apply(i, OccupantSaveData::new));
 
-	public static final SavedDataType<OccupantSaveData> TYPE = new SavedDataType<>(
-			Occupant.id("haunts"), OccupantSaveData::new, CODEC, DataFixTypes.SAVED_DATA_COMMAND_STORAGE);
+	public static final SavedDataType<OccupantSaveData> TYPE = Compat.savedData(
+			"haunts", OccupantSaveData::new, CODEC, DataFixTypes.SAVED_DATA_COMMAND_STORAGE);
 
 	private final Map<UUID, HauntData> players = new HashMap<>();
 

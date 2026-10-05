@@ -1,5 +1,6 @@
 package com.wolfsmask.occupant;
 
+import com.wolfsmask.occupant.compat.Compat;
 import com.wolfsmask.occupant.command.OccupantCommand;
 import com.wolfsmask.occupant.director.Director;
 import com.wolfsmask.occupant.director.HauntData;
@@ -15,7 +16,6 @@ import net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.level.ServerPlayer;
@@ -62,8 +62,8 @@ public final class Occupant implements ModInitializer {
 		ModSounds.init();
 		ModEntities.init();
 		ModWorld.init();
-		PayloadTypeRegistry.clientboundPlay().register(ScreenEffectPayload.TYPE, ScreenEffectPayload.CODEC);
-		PayloadTypeRegistry.clientboundPlay().register(WhisperPayload.TYPE, WhisperPayload.CODEC);
+		Compat.serverToClient().register(ScreenEffectPayload.TYPE, ScreenEffectPayload.CODEC);
+		Compat.serverToClient().register(WhisperPayload.TYPE, WhisperPayload.CODEC);
 
 		// Before any of the world is generated, so the one house is never built twice.
 		ServerLifecycleEvents.SERVER_STARTING.register(server -> guard("opening the world", () -> House.open(server)));
@@ -111,7 +111,7 @@ public final class Occupant implements ModInitializer {
 
 		HauntData data = director.data(sp);
 		if (data.paused || data.act < 2) return false;
-		long day = sp.level().getOverworldClockTime() / 24000L;
+		long day = Compat.dayTime(sp.level()) / 24000L;
 		if (data.sleepDenyDay == day) return false;
 		if (sp.getRandom().nextFloat() >= 0.35f) return false;
 
