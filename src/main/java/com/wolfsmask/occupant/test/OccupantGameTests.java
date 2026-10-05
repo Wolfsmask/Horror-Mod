@@ -149,9 +149,10 @@ public final class OccupantGameTests {
 		ServerLevel level = helper.getLevel();
 		makeNight(level);
 		BlockPos floor = helper.absolutePos(new BlockPos(0, 1, 0)).offset(0, 0, 320);
-		level.getChunk(floor.getX() >> 4, floor.getZ() >> 4);
+		// Held loaded for the whole test: nobody is standing there, so otherwise the game is free to
+		// unload part of the house again before the check runs.
 		for (int dx = -1; dx <= 1; dx++) {
-			for (int dz = -1; dz <= 1; dz++) level.getChunk((floor.getX() >> 4) + dx, (floor.getZ() >> 4) + dz);
+			for (int dz = -1; dz <= 1; dz++) level.setChunkForced((floor.getX() >> 4) + dx, (floor.getZ() >> 4) + dz, true);
 		}
 		House.build(level, floor, Rotation.NONE, level.getRandom());
 
@@ -199,6 +200,9 @@ public final class OccupantGameTests {
 			helper.assertTrue(any.getX() >= hallStart.getX() - 1 && any.getX() <= hallStart.getX() + 1,
 					"It should be in the side hallway or its doorway, not the main room (got " + any + ")");
 			helper.assertTrue(peek != null, "From the door it should be only just visible, past the edge of the gap");
+			for (int dx = -1; dx <= 1; dx++) {
+				for (int dz = -1; dz <= 1; dz++) level.setChunkForced((floor.getX() >> 4) + dx, (floor.getZ() >> 4) + dz, false);
+			}
 			helper.succeed();
 		});
 	}
