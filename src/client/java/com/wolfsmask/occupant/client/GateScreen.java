@@ -6,7 +6,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
-import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
@@ -125,9 +124,9 @@ public final class GateScreen extends Screen {
 		int bone = 0xD8CCBC;
 		int blood = 0x8A1A16;
 		int colour = lerpColour(bone, blood, held);
-		g.pose().pushMatrix();
-		g.pose().translate(tx, ty);
-		g.pose().scale(scale, scale);
+		GuiCompat.push(g);
+		GuiCompat.translate(g, tx, ty);
+		GuiCompat.scale(g, scale);
 		int x = 0;
 		for (int i = 0; i < ENTER.length(); i++) {
 			String c = String.valueOf(ENTER.charAt(i));
@@ -135,12 +134,12 @@ public final class GateScreen extends Screen {
 			int jx = calm ? 0 : (r.nextFloat() < 0.04f + held * 0.5f ? r.nextInt(3) - 1 : 0);
 			int jy = calm ? 0 : (r.nextFloat() < 0.03f + held * 0.45f ? r.nextInt(3) - 1 : 0);
 			if (held > 0.3f && !calm && r.nextFloat() < held * 0.25f) {
-				g.text(this.font, c, x + jx + 1, jy, 0x70000000 | blood, false);   // a ghost of it, a little behind
+				GuiCompat.text(g, this.font, c, x + jx + 1, jy, 0x70000000 | blood);   // a ghost of it, a little behind
 			}
-			g.text(this.font, c, x + jx, jy, 0xFF000000 | colour, false);
+			GuiCompat.text(g, this.font, c, x + jx, jy, 0xFF000000 | colour);
 			x += this.font.width(c);
 		}
-		g.pose().popMatrix();
+		GuiCompat.pop(g);
 
 		// And underneath, a line writes itself out while you hover, and unwrites when you stop.
 		int shown = Math.round(UNDER.length() * held);
@@ -148,7 +147,7 @@ public final class GateScreen extends Screen {
 			String line = UNDER.substring(0, shown);
 			int lw = this.font.width(UNDER);
 			int v = (int) Mth.lerp(held, 40f, 150f);
-			g.text(this.font, line, (w - lw) / 2, ty + th + 12, 0xFF000000 | v << 16 | (v - 10) << 8 | (v - 14), false);
+			GuiCompat.text(g, this.font, line, (w - lw) / 2, ty + th + 12, 0xFF000000 | v << 16 | (v - 10) << 8 | (v - 14));
 		}
 
 		// The way out, very small, at the bottom.
@@ -157,7 +156,7 @@ public final class GateScreen extends Screen {
 		int ly = h - 22;
 		hoverLeave = mouseX >= lx - 6 && mouseX <= lx + lw + 6 && mouseY >= ly - 4 && mouseY <= ly + this.font.lineHeight + 4;
 		int grey = hoverLeave ? 0x8C8478 : 0x3E3A36;
-		g.text(this.font, LEAVE, lx, ly, 0xFF000000 | grey, false);
+		GuiCompat.text(g, this.font, LEAVE, lx, ly, 0xFF000000 | grey);
 	}
 
 	@Override
@@ -180,7 +179,7 @@ public final class GateScreen extends Screen {
 		accepted = true;
 		setHaunting(true);
 		Minecraft mc = this.minecraft;
-		CreateWorldScreen.openFresh(mc, () -> {
+		GuiCompat.createWorld(mc, () -> {
 			passed = false;
 			mc.setScreenAndShow(new GateScreen());
 		});

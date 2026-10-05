@@ -8,7 +8,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
@@ -201,7 +200,7 @@ public final class ScreenEffects {
 		int v = (int) Mth.lerp(textIn, 10f, 150f);
 		Component line = Component.literal(introLine).withStyle(Style.EMPTY.withColor(TextColor.fromRgb(v << 16 | v << 8 | (v + 4))));
 		Font font = Minecraft.getInstance().font;
-		ctx.textRenderer().accept((w - font.width(introLine)) / 2, h / 2 - 4, line);
+		GuiCompat.text(ctx, (w - font.width(introLine)) / 2, h / 2 - 4, line);
 	}
 
 	/**
@@ -239,7 +238,7 @@ public final class ScreenEffects {
 			case 4 -> h / 3;
 			default -> margin + font.lineHeight;
 		};
-		ctx.textRenderer().accept(x, y, line);
+		GuiCompat.text(ctx, x, y, line);
 	}
 
 	private static float blackoutDarkness(float tickDelta, ClientConfig cfg) {
@@ -270,7 +269,7 @@ public final class ScreenEffects {
 		int color = ((int) (alpha * 255f) << 24) | 0xFFFFFF;
 		for (int x = -ox; x < w; x += STATIC_SIZE) {
 			for (int y = -oy; y < h; y += STATIC_SIZE) {
-				ctx.blit(RenderPipelines.GUI_TEXTURED, STATIC_TEXTURE, x, y, 0f, 0f,
+				GuiCompat.blit(ctx, STATIC_TEXTURE, x, y, 0f, 0f, STATIC_SIZE, STATIC_SIZE,
 						STATIC_SIZE, STATIC_SIZE, STATIC_SIZE, STATIC_SIZE, color);
 			}
 		}

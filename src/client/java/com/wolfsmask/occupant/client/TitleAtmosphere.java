@@ -7,7 +7,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
-import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.resources.Identifier;
@@ -61,8 +60,7 @@ public final class TitleAtmosphere {
 			// Said no at the gate: the game's own title screen, untouched.
 			if (!GateScreen.accepted()) return;
 			opened();
-			ScreenEvents.afterBackground(screen).register((s, graphics, mouseX, mouseY, delta) ->
-					drawScene(graphics, s.width, s.height, s.height));
+			GuiCompat.afterBackground(screen, (graphics, s) -> drawScene(graphics, s.width, s.height, s.height));
 			ScreenEvents.afterExtract(screen).register((s, graphics, mouseX, mouseY, delta) -> drawTitle(graphics, s));
 			ScreenEvents.beforeTick(screen).register(s -> tick(client));
 			ScreenEvents.remove(screen).register(s -> closed(client));
@@ -111,13 +109,13 @@ public final class TitleAtmosphere {
 		int visible = Math.min(dh, bottom - y0);
 		if (visible > 0) {
 			int region = Math.max(1, Math.round(visible / scale));
-			g.blit(RenderPipelines.GUI_TEXTURED, FOREST, x0, y0, 0f, 0f, dw, Math.round(region * scale), 1024, region, 1024, 512, 0xFFFFFFFF);
+			GuiCompat.blit(g, FOREST, x0, y0, 0f, 0f, dw, Math.round(region * scale), 1024, region, 1024, 512, 0xFFFFFFFF);
 		}
 		if (bottom < h) {
 			// Just the top band, redrawn over the game's own logo: the same picture, the same dark.
 			drawGrain(g, w, bottom);
 			int vh = Math.max(1, Math.round(256f * bottom / h));
-			g.blit(RenderPipelines.GUI_TEXTURED, VIGNETTE, 0, 0, 0f, 0f, w, bottom, 256, vh, 256, 256, 0xFFFFFFFF);
+			GuiCompat.blit(g, VIGNETTE, 0, 0, 0f, 0f, w, bottom, 256, vh, 256, 256, 0xFFFFFFFF);
 			return;
 		}
 
@@ -129,7 +127,7 @@ public final class TitleAtmosphere {
 			int fx = x0 + Math.round(s[0] * scale) - fw / 2;
 			int fy = y0 + Math.round(s[1] * scale) - fh;
 			int a = (int) (Mth.clamp(figureAlpha, 0f, 1f) * 255f);
-			g.blit(RenderPipelines.GUI_TEXTURED, FIGURE, fx, fy, 0f, 0f, fw, fh, 64, 128, 64, 128, a << 24 | 0xFFFFFF);
+			GuiCompat.blit(g, FIGURE, fx, fy, 0f, 0f, fw, fh, 64, 128, 64, 128, a << 24 | 0xFFFFFF);
 		}
 
 		// Mist in two layers, moving at different speeds across the lower half.
@@ -184,7 +182,7 @@ public final class TitleAtmosphere {
 			for (int y = -grainY; y < h; y += 128) {
 				int rows = Math.min(128, h - y);
 				if (rows <= 0) continue;
-				g.blit(RenderPipelines.GUI_TEXTURED, STATIC, x, y, 0f, 0f, 128, rows, 128, rows, 128, 128, 0x12FFFFFF);
+				GuiCompat.blit(g, STATIC, x, y, 0f, 0f, 128, rows, 128, rows, 128, 128, 0x12FFFFFF);
 			}
 		}
 	}
@@ -209,13 +207,13 @@ public final class TitleAtmosphere {
 		int off = Math.floorMod(Math.round(scroll), tw);
 		int a = (int) (strength * 255f);
 		for (int x = -off; x < w; x += tw) {
-			g.blit(RenderPipelines.GUI_TEXTURED, FOG, x, y, 0f, 0f, tw, height, 512, 128, 512, 128, a << 24 | 0xFFFFFF);
+			GuiCompat.blit(g, FOG, x, y, 0f, 0f, tw, height, 512, 128, 512, 128, a << 24 | 0xFFFFFF);
 		}
 	}
 
 	static void drawVignette(GuiGraphicsExtractor g, int w, int h, float strength) {
 		int a = (int) (Mth.clamp(strength, 0f, 1f) * 255f);
-		g.blit(RenderPipelines.GUI_TEXTURED, VIGNETTE, 0, 0, 0f, 0f, w, h, 256, 256, 256, 256, a << 24 | 0xFFFFFF);
+		GuiCompat.blit(g, VIGNETTE, 0, 0, 0f, 0f, w, h, 256, 256, 256, 256, a << 24 | 0xFFFFFF);
 	}
 
 	/** Over the top band, where the game's own logo and splash would be: the wood again, and the title. */
@@ -237,8 +235,8 @@ public final class TitleAtmosphere {
 		// Every so often it slips, by a pixel, and a red ghost of it lags behind.
 		boolean slip = (now / 120) % 53 == 0 && !ClientConfig.get().reduceFlashing;
 		if (slip) {
-			g.blit(RenderPipelines.GUI_TEXTURED, LOGO, lx + 2, ly, 0f, 0f, lw, lh, 512, 96, 512, 96, 0x90B02020);
+			GuiCompat.blit(g, LOGO, lx + 2, ly, 0f, 0f, lw, lh, 512, 96, 512, 96, 0x90B02020);
 		}
-		g.blit(RenderPipelines.GUI_TEXTURED, LOGO, lx + (slip ? -1 : 0), ly, 0f, 0f, lw, lh, 512, 96, 512, 96, 0xFFFFFFFF);
+		GuiCompat.blit(g, LOGO, lx + (slip ? -1 : 0), ly, 0f, 0f, lw, lh, 512, 96, 512, 96, 0xFFFFFFFF);
 	}
 }

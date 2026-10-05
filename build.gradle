@@ -66,6 +66,8 @@ loom {
 //    for versions where the only difference is what something is called. A line starting
 //    "regex " is a regular expression instead, with $1 and so on in the replacement.
 def group = versionProps.getProperty('overrides', mc)
+// Source paths (Ant patterns, comma separated) left out entirely, for things a version cannot have.
+def dropped = (versionProps.getProperty('exclude_sources') ?: '').split(',').collect { it.trim() }.findAll { it }
 def renameFile = file("versions/${group}/replace.txt")
 def renames = renameFile.exists() ? renameFile.readLines().findAll { it.contains(' -> ') && !it.startsWith('#') }.collect { line ->
 	def regex = line.startsWith('regex ')
@@ -81,7 +83,10 @@ def renames = renameFile.exists() ? renameFile.readLines().findAll { it.contains
 	if (!renames.isEmpty()) {
 		def out = layout.buildDirectory.dir("versioned/${setName}")
 		def task = tasks.register("versionSources${setName.capitalize()}", Sync) {
-			from("src/${setName}/java") { exclude { e -> replaced.contains(e.relativePath.pathString) } }
+			from("src/${setName}/java") {
+				exclude { e -> replaced.contains(e.relativePath.pathString) }
+				exclude dropped
+			}
 			if (overrides.exists()) from(overrides)
 			into out
 			inputs.file renameFile
@@ -94,6 +99,9 @@ def renames = renameFile.exists() ? renameFile.readLines().findAll { it.contains
 			srcDir overrides
 			exclude { e -> !e.file.toPath().startsWith(overrides.toPath()) && replaced.contains(e.relativePath.pathString) }
 		}
+	}
+	if (renames.isEmpty() && !dropped.isEmpty()) {
+		sourceSets[setName].java.exclude dropped
 	}
 }
 

@@ -3,4 +3,4 @@ GuiGraphicsExtractor -> GuiGraphics
 public void extractBackground(GuiGraphics -> public void renderBackground(GuiGraphics
 public void extractRenderState(GuiGraphics -> public void render(GuiGraphics
 ScreenEvents.afterExtract( -> ScreenEvents.afterRender(
-g.text(this.font -> g.drawString(this.font
+g.text(font, text, x, y, color, false) -> g.drawString(font, text, x, y, color, false)

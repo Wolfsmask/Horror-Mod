@@ -5,7 +5,6 @@ GuiGraphicsExtractor -> GuiGraphics
 public void extractBackground(GuiGraphics -> public void renderBackground(GuiGraphics
 public void extractRenderState(GuiGraphics -> public void render(GuiGraphics
 ScreenEvents.afterExtract( -> ScreenEvents.afterRender(
-g.text(this.font -> g.drawString(this.font
 snapTo( -> moveTo(
 .isDarkOutside() -> .isNight()
 .getUnitVec3i() -> .getNormal()
@@ -28,3 +27,12 @@ regex @GameTest$ -> @GameTest(template = "fabric-gametest-api-v1:empty")
 public boolean causeFallDamage(double fallDistance -> public boolean causeFallDamage(float fallDistance
 public boolean canBeCollidedWith(@Nullable Entity entity) -> public boolean canBeCollidedWith()
 .build(OCCUPANT_KEY)) -> .build(OCCUPANT_KEY.location().toString()))
+# Client: before 1.21.2 the hat hangs off the model's root, not the head.
+p = p_head.addOrReplaceChild("hat" -> p = root.addOrReplaceChild("hat"
+.setScreenAndShow( -> .setScreen(
+import net.minecraft.client.input.MouseButtonEvent; -> 
+public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) { -> public boolean mouseClicked(double mouseX, double mouseY, int button) {
+event.button() -> button
+super.mouseClicked(event, doubleClick) -> super.mouseClicked(mouseX, mouseY, button)
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry; -> import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+regex HudElementRegistry\.add(First|Last)\(Occupant\.id\("\w+"\), -> HudRenderCallback.EVENT.register(
