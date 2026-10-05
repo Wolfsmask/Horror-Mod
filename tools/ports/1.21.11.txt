@@ -1,34 +1,57 @@
-# 1.21.11 on 8cabccbb8dc2858824f8b981371a3ae8e0481e70: build failure, tests skipped
+# 1.21.11 on 7f554fe86047329667e5baaf5dfbff02bea62e94: build failure, tests skipped
 > Configure project :
 > Task :compileJava
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/entity/OccupantEntity.java:97: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/entity/OccupantEntity.java:98: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/entity/OccupantEntity.java:99: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/SignEvent.java:73: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/OccupantSaveData.java:24: error: incompatible types: Identifier cannot be converted to String
 /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/ArenaGameTests.java:104: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
 /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:60: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
 /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:92: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
 /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:158: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
 /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:214: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/Occupant.java:65: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/Occupant.java:66: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/Occupant.java:114: error: cannot find symbol
-> Task :compileJava FAILED
+> Task :processResources
+> Task :classes
+> Task :compileClientJava FAILED
+/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/ScreenEffects.java:8: error: cannot find symbol
+/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/ScreenEffects.java:71: error: cannot find symbol
+/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/ScreenEffects.java:172: error: cannot find symbol
+/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/ScreenEffects.java:194: error: cannot find symbol
+/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/ScreenEffects.java:211: error: cannot find symbol
+/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/ScreenEffects.java:266: error: cannot find symbol
+/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/GateScreen.java:6: error: cannot find symbol
+/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/GateScreen.java:90: error: cannot find symbol
+/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/GateScreen.java:95: error: cannot find symbol
+/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/TitleAtmosphere.java:7: error: cannot find symbol
+/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/TitleAtmosphere.java:96: error: cannot find symbol
+/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/TitleAtmosphere.java:176: error: cannot find symbol
+/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/TitleAtmosphere.java:207: error: cannot find symbol
+/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/TitleAtmosphere.java:216: error: cannot find symbol
+/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/TitleAtmosphere.java:222: error: cannot find symbol
+/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/TitleAtmosphere.java:232: error: cannot find symbol
+/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/GateScreen.java:89: error: method does not override or implement a method from a supertype
+/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/GateScreen.java:94: error: method does not override or implement a method from a supertype
+/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/TestCompat.java:12: error: cannot find symbol
+/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/TitleAtmosphere.java:66: error: cannot find symbol
+			ScreenEvents.afterExtract(screen).register((s, graphics, mouseX, mouseY, delta) -> drawTitle(graphics, s));
 * What went wrong:
 > Compilation failed; see the compiler output below.
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/OccupantSaveData.java:24: error: incompatible types: Identifier cannot be converted to String
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/entity/OccupantEntity.java:97: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/entity/OccupantEntity.java:98: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/entity/OccupantEntity.java:99: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/ArenaGameTests.java:104: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:60: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:92: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:158: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:214: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/SignEvent.java:73: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/Occupant.java:65: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/Occupant.java:66: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/Occupant.java:114: error: cannot find symbol
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/ScreenEffects.java:8: error: cannot find symbol
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/ScreenEffects.java:71: error: cannot find symbol
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/ScreenEffects.java:172: error: cannot find symbol
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/ScreenEffects.java:194: error: cannot find symbol
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/ScreenEffects.java:211: error: cannot find symbol
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/ScreenEffects.java:266: error: cannot find symbol
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/GateScreen.java:6: error: cannot find symbol
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/GateScreen.java:90: error: cannot find symbol
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/GateScreen.java:95: error: cannot find symbol
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/TitleAtmosphere.java:7: error: cannot find symbol
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/TitleAtmosphere.java:96: error: cannot find symbol
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/TitleAtmosphere.java:176: error: cannot find symbol
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/TitleAtmosphere.java:207: error: cannot find symbol
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/TitleAtmosphere.java:216: error: cannot find symbol
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/TitleAtmosphere.java:222: error: cannot find symbol
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/TitleAtmosphere.java:232: error: cannot find symbol
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/GateScreen.java:89: error: method does not override or implement a method from a supertype
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/GateScreen.java:94: error: method does not override or implement a method from a supertype
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/TestCompat.java:12: error: cannot find symbol
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/TitleAtmosphere.java:66: error: cannot find symbol
+  			ScreenEvents.afterExtract(screen).register((s, graphics, mouseX, mouseY, delta) -> drawTitle(graphics, s));
 > Check your code and dependencies to fix the compilation error(s)
 > Run with --scan to get full insights from a Build Scan (powered by Develocity).
