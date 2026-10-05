@@ -1,17 +1,271 @@
+=== net.minecraft.client.gui.GuiGraphics (-public)
+public class client.gui.GuiGraphics {
+  public org.joml.Matrix3x2fStack pose();
+  public void fill(int, int, int, int, int);
+  public void fill(blaze3d.pipeline.RenderPipeline, int, int, int, int, int);
+  public void fillGradient(int, int, int, int, int, int);
+  public void fill(blaze3d.pipeline.RenderPipeline, client.gui.render.TextureSetup, int, int, int, int);
+  public void textHighlight(int, int, int, int, boolean);
+  public void drawString(client.gui.Font, String, int, int, int);
+  public void drawString(client.gui.Font, String, int, int, int, boolean);
+  public void drawString(client.gui.Font, util.FormattedCharSequence, int, int, int);
+  public void drawString(client.gui.Font, util.FormattedCharSequence, int, int, int, boolean);
+  public void drawString(client.gui.Font, network.chat.Component, int, int, int);
+  public void drawString(client.gui.Font, network.chat.Component, int, int, int, boolean);
+  public void drawWordWrap(client.gui.Font, network.chat.FormattedText, int, int, int, int);
+  public void drawWordWrap(client.gui.Font, network.chat.FormattedText, int, int, int, int, boolean);
+  public void drawStringWithBackdrop(client.gui.Font, network.chat.Component, int, int, int, int);
+  public void blitSprite(blaze3d.pipeline.RenderPipeline, resources.Identifier, int, int, int, int);
+  public void blitSprite(blaze3d.pipeline.RenderPipeline, resources.Identifier, int, int, int, int, float);
+  public void blitSprite(blaze3d.pipeline.RenderPipeline, resources.Identifier, int, int, int, int, int);
+  public void blitSprite(blaze3d.pipeline.RenderPipeline, resources.Identifier, int, int, int, int, int, int, int, int);
+  public void blitSprite(blaze3d.pipeline.RenderPipeline, resources.Identifier, int, int, int, int, int, int, int, int, int);
+  public void blitSprite(blaze3d.pipeline.RenderPipeline, client.renderer.texture.TextureAtlasSprite, int, int, int, int);
+  public void blitSprite(blaze3d.pipeline.RenderPipeline, client.renderer.texture.TextureAtlasSprite, int, int, int, int, int);
+  public void blit(blaze3d.pipeline.RenderPipeline, resources.Identifier, int, int, float, float, int, int, int, int, int);
+  public void blit(blaze3d.pipeline.RenderPipeline, resources.Identifier, int, int, float, float, int, int, int, int);
+  public void blit(blaze3d.pipeline.RenderPipeline, resources.Identifier, int, int, float, float, int, int, int, int, int, int);
+  public void blit(blaze3d.pipeline.RenderPipeline, resources.Identifier, int, int, float, float, int, int, int, int, int, int, int);
+  public void blit(resources.Identifier, int, int, int, int, float, float, float, float);
+  public client.renderer.texture.TextureAtlasSprite getSprite(client.resources.model.Material);
+  public client.gui.ActiveTextCollector textRendererForWidget(client.gui.components.AbstractWidget, client.gui.GuiGraphics$HoveredTextEffects);
+  public client.gui.ActiveTextCollector textRenderer();
+  public client.gui.ActiveTextCollector textRenderer(client.gui.GuiGraphics$HoveredTextEffects);
+  public client.gui.ActiveTextCollector textRenderer(client.gui.GuiGraphics$HoveredTextEffects, Consumer<network.chat.Style>);
+=== net.minecraft.client.gui.screens.Screen (-public)
+public abstract class client.gui.screens.Screen extends client.gui.components.events.AbstractContainerEventHandler implements client.gui.components.Renderable {
+  public final void renderWithTooltipAndSubtitles(client.gui.GuiGraphics, int, int, float);
+  public void render(client.gui.GuiGraphics, int, int, float);
+  public boolean shouldCloseOnEsc();
+  public void onClose();
+  public final void init(int, int);
+  public void tick();
+  public void removed();
+  public void added();
+  public void renderBackground(client.gui.GuiGraphics, int, int, float);
+  public static void renderMenuBackgroundTexture(client.gui.GuiGraphics, resources.Identifier, int, int, float, float, int, int);
+  public void renderTransparentBackground(client.gui.GuiGraphics);
+  public boolean isPauseScreen();
+  public sounds.Music getBackgroundMusic();
+=== net.minecraft.client.Minecraft (-public)
+public class client.Minecraft extends util.thread.ReentrantBlockableEventLoop<Runnable> implements blaze3d.platform.WindowEventHandler {
+  public client.gui.screens.Screen screen;
+  public void setScreen(client.gui.screens.Screen);
+  public void setOverlay(client.gui.screens.Overlay);
+  public client.gui.screens.worldselection.WorldOpenFlows createWorldOpenFlows();
+  public void disconnect(client.gui.screens.Screen, boolean);
+  public void disconnect(client.gui.screens.Screen, boolean, boolean);
+  public void clearClientLevel(client.gui.screens.Screen);
+  public void setScreenAndShow(client.gui.screens.Screen);
+  public client.sounds.SoundManager getSoundManager();
+  public client.gui.screens.Overlay getOverlay();
+  public client.gui.screens.social.PlayerSocialManager getPlayerSocialManager();
+  public blaze3d.platform.Window getWindow();
+=== net.fabricmc.fabric.api.client.screen.v1.ScreenEvents (-public)
+public final class client.screen.v1.ScreenEvents {
+  public static final event.Event<client.screen.v1.ScreenEvents$BeforeInit> BEFORE_INIT;
+  public static final event.Event<client.screen.v1.ScreenEvents$AfterInit> AFTER_INIT;
+  public static event.Event<client.screen.v1.ScreenEvents$Remove> remove(client.gui.screens.Screen);
+  public static event.Event<client.screen.v1.ScreenEvents$BeforeRender> beforeRender(client.gui.screens.Screen);
+  public static event.Event<client.screen.v1.ScreenEvents$AfterBackground> afterBackground(client.gui.screens.Screen);
+  public static event.Event<client.screen.v1.ScreenEvents$AfterRender> afterRender(client.gui.screens.Screen);
+  public static event.Event<client.screen.v1.ScreenEvents$BeforeTick> beforeTick(client.gui.screens.Screen);
+  public static event.Event<client.screen.v1.ScreenEvents$AfterTick> afterTick(client.gui.screens.Screen);
+}
+=== net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry (-public)
+public interface client.rendering.v1.hud.HudElementRegistry {
+  public static void addFirst(resources.Identifier, client.rendering.v1.hud.HudElement);
+  public static void addLast(resources.Identifier, client.rendering.v1.hud.HudElement);
+  public static void attachElementBefore(resources.Identifier, resources.Identifier, client.rendering.v1.hud.HudElement);
+  public static void attachElementAfter(resources.Identifier, resources.Identifier, client.rendering.v1.hud.HudElement);
+  public static void removeElement(resources.Identifier);
+  public static void replaceElement(resources.Identifier, Function<client.rendering.v1.hud.HudElement, client.rendering.v1.hud.HudElement>);
+}
+=== net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement (-public)
+public interface client.rendering.v1.hud.HudElement {
+  public abstract void render(client.gui.GuiGraphics, client.DeltaTracker);
+}
 === net.minecraft.client.renderer.entity.EntityRenderer (-public)
 public abstract class client.renderer.entity.EntityRenderer<T extends world.entity.Entity, S extends client.renderer.entity.state.EntityRenderState> {
-  public boolean shouldRender(T, client.renderer.culling.Frustum, double, double, double, float);
+  public boolean shouldRender(T, client.renderer.culling.Frustum, double, double, double);
+  public world.phys.Vec3 getRenderOffset(S);
+  public void submit(S, blaze3d.vertex.PoseStack, client.renderer.SubmitNodeCollector, client.renderer.state.CameraRenderState);
+  public abstract S createRenderState();
+  public final S createRenderState(T, float);
+  public void extractRenderState(T, S, float);
 === net.minecraft.client.renderer.entity.EntityRenderer (-protected)
 public abstract class client.renderer.entity.EntityRenderer<T extends world.entity.Entity, S extends client.renderer.entity.state.EntityRenderState> {
-  public boolean shouldRender(T, client.renderer.culling.Frustum, double, double, double, float);
-  protected world.phys.AABB getBoundingBoxForCulling(T, float);
+  public boolean shouldRender(T, client.renderer.culling.Frustum, double, double, double);
+  protected world.phys.AABB getBoundingBoxForCulling(T);
   protected boolean affectedByCulling(T);
-=== net.fabricmc.fabric.api.client.gametest.v1.context.TestClientLevelContext (-public)
-Error: class not found: client.gametest.v1.context.TestClientLevelContext
+  public world.phys.Vec3 getRenderOffset(S);
+=== net.minecraft.client.renderer.entity.LivingEntityRenderer (-public)
+public abstract class client.renderer.entity.LivingEntityRenderer<T extends world.entity.LivingEntity, S extends client.renderer.entity.state.LivingEntityRenderState, M extends client.model.EntityModel<? super S>> extends client.renderer.entity.EntityRenderer<T, S> implements client.renderer.entity.RenderLayerParent<S, M> {
+  public client.renderer.entity.LivingEntityRenderer(client.renderer.entity.EntityRendererProvider$Context, M, float);
+  public M getModel();
+  public void submit(S, blaze3d.vertex.PoseStack, client.renderer.SubmitNodeCollector, client.renderer.state.CameraRenderState);
+  public abstract resources.Identifier getTextureLocation(S);
+  public static int getOverlayCoords(client.renderer.entity.state.LivingEntityRenderState, float);
+  public boolean isEntityUpsideDown(T);
+  public void extractRenderState(T, S, float);
+  public void extractRenderState(world.entity.Entity, client.renderer.entity.state.EntityRenderState, float);
+  public void submit(client.renderer.entity.state.EntityRenderState, blaze3d.vertex.PoseStack, client.renderer.SubmitNodeCollector, client.renderer.state.CameraRenderState);
+}
+=== net.minecraft.client.renderer.entity.LivingEntityRenderer (-protected)
+public abstract class client.renderer.entity.LivingEntityRenderer<T extends world.entity.LivingEntity, S extends client.renderer.entity.state.LivingEntityRenderState, M extends client.model.EntityModel<? super S>> extends client.renderer.entity.EntityRenderer<T, S> implements client.renderer.entity.RenderLayerParent<S, M> {
+  protected client.renderer.rendertype.RenderType getRenderType(S, boolean, boolean, boolean);
+  protected boolean isShaking(S);
+  protected void setupRotations(S, blaze3d.vertex.PoseStack, float, float);
+  protected float getFlipDegrees();
+  protected void scale(S, blaze3d.vertex.PoseStack);
+=== net.minecraft.client.renderer.entity.HumanoidMobRenderer (-public)
+public abstract class client.renderer.entity.HumanoidMobRenderer<T extends world.entity.Mob, S extends client.renderer.entity.state.HumanoidRenderState, M extends client.model.HumanoidModel<S>> extends client.renderer.entity.AgeableMobRenderer<T, S, M> {
+  public client.renderer.entity.HumanoidMobRenderer(client.renderer.entity.EntityRendererProvider$Context, M, float);
+  public client.renderer.entity.HumanoidMobRenderer(client.renderer.entity.EntityRendererProvider$Context, M, M, float);
+  public client.renderer.entity.HumanoidMobRenderer(client.renderer.entity.EntityRendererProvider$Context, M, M, float, client.renderer.entity.layers.CustomHeadLayer$Transforms);
+  public void extractRenderState(T, S, float);
+  public static void extractHumanoidRenderState(world.entity.LivingEntity, client.renderer.entity.state.HumanoidRenderState, float, client.renderer.item.ItemModelResolver);
+  public void extractRenderState(world.entity.LivingEntity, client.renderer.entity.state.LivingEntityRenderState, float);
+  public void extractRenderState(world.entity.Entity, client.renderer.entity.state.EntityRenderState, float);
+}
+=== net.minecraft.client.renderer.entity.layers.EyesLayer (-public)
+public abstract class client.renderer.entity.layers.EyesLayer<S extends client.renderer.entity.state.EntityRenderState, M extends client.model.EntityModel<S>> extends client.renderer.entity.layers.RenderLayer<S, M> {
+  public client.renderer.entity.layers.EyesLayer(client.renderer.entity.RenderLayerParent<S, M>);
+  public void submit(blaze3d.vertex.PoseStack, client.renderer.SubmitNodeCollector, int, S, float, float);
+  public abstract client.renderer.rendertype.RenderType renderType();
+}
+=== classes matching RenderType|RenderPipelines|EyesLayer|GuiGraphics
+net.minecraft.util.datafix.fixes.ObjectiveRenderTypeFix
+net.minecraft.client.gui.GuiGraphics
+net.minecraft.client.gui.font.GlyphRenderTypes
+net.minecraft.client.particle.ParticleRenderType
+net.minecraft.client.renderer.ItemBlockRenderTypes
+net.minecraft.client.renderer.RenderPipelines
+net.minecraft.client.renderer.entity.layers.BreezeEyesLayer
+net.minecraft.client.renderer.entity.layers.EnderEyesLayer
+net.minecraft.client.renderer.entity.layers.EyesLayer
+net.minecraft.client.renderer.entity.layers.PhantomEyesLayer
+net.minecraft.client.renderer.entity.layers.SpiderEyesLayer
+net.minecraft.client.renderer.rendertype.RenderType
+net.minecraft.client.renderer.rendertype.RenderTypes
+=== net.minecraft.client.renderer.RenderType (-public)
+Error: class not found: client.renderer.RenderType
+=== net.minecraft.client.renderer.entity.state.HumanoidRenderState (-public)
+public class client.renderer.entity.state.HumanoidRenderState extends client.renderer.entity.state.ArmedEntityRenderState {
+  public float swimAmount;
+  public float speedValue;
+  public float maxCrossbowChargeDuration;
+  public float ticksUsingItem;
+  public world.entity.HumanoidArm attackArm;
+  public world.InteractionHand useItemHand;
+  public boolean isCrouching;
+  public boolean isFallFlying;
+  public boolean isVisuallySwimming;
+  public boolean isPassenger;
+  public boolean isUsingItem;
+  public float elytraRotX;
+  public float elytraRotY;
+  public float elytraRotZ;
+  public world.item.ItemStack headEquipment;
+  public world.item.ItemStack chestEquipment;
+  public world.item.ItemStack legsEquipment;
+  public world.item.ItemStack feetEquipment;
+  public client.renderer.entity.state.HumanoidRenderState();
+  public float ticksUsingItem(world.entity.HumanoidArm);
+}
+=== net.minecraft.client.resources.sounds.SimpleSoundInstance (-public)
+public class client.resources.sounds.SimpleSoundInstance extends client.resources.sounds.AbstractSoundInstance {
+  public static client.resources.sounds.SimpleSoundInstance forUI(sounds.SoundEvent, float);
+  public static client.resources.sounds.SimpleSoundInstance forUI(core.Holder<sounds.SoundEvent>, float);
+  public static client.resources.sounds.SimpleSoundInstance forUI(sounds.SoundEvent, float, float);
+=== net.minecraft.client.gui.screens.worldselection.CreateWorldScreen (-public)
+public class client.gui.screens.worldselection.CreateWorldScreen extends client.gui.screens.Screen {
+  public static void openFresh(client.Minecraft, Runnable);
+  public static void openFresh(client.Minecraft, Runnable, client.gui.screens.worldselection.CreateWorldCallback);
 === net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext (-public)
 public interface client.gametest.v1.context.TestSingleplayerContext extends AutoCloseable {
   public abstract client.gametest.v1.world.TestWorldSave getWorldSave();
-  public abstract client.gametest.v1.context.TestServerConnection getConnection();
+  public abstract client.gametest.v1.context.TestClientWorldContext getClientWorld();
   public abstract client.gametest.v1.context.TestServerContext getServer();
   public abstract void close();
+}
+=== net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext (-public)
+public interface client.gametest.v1.context.ClientGameTestContext {
+  public static final int NO_TIMEOUT;
+  public static final int DEFAULT_TIMEOUT;
+  public abstract void waitTick();
+  public abstract void waitTicks(int);
+  public abstract int waitFor(Predicate<client.Minecraft>);
+  public abstract int waitFor(Predicate<client.Minecraft>, int);
+  public abstract int waitForScreen(Class<? extends client.gui.screens.Screen>);
+  public abstract void setScreen(Supplier<client.gui.screens.Screen>);
+  public abstract void clickScreenButton(String);
+  public abstract boolean tryClickScreenButton(String);
+  public default java.nio.file.Path takeScreenshot(String);
+  public abstract java.nio.file.Path takeScreenshot(client.gametest.v1.screenshot.TestScreenshotOptions);
+  public default void assertScreenshotEquals(String);
+  public abstract void assertScreenshotEquals(client.gametest.v1.screenshot.TestScreenshotComparisonOptions);
+  public default org.joml.Vector2i assertScreenshotContains(String);
+  public abstract org.joml.Vector2i assertScreenshotContains(client.gametest.v1.screenshot.TestScreenshotComparisonOptions);
+  public abstract client.gametest.v1.TestInput getInput();
+  public abstract client.gametest.v1.world.TestWorldBuilder worldBuilder();
+  public abstract void restoreDefaultGameOptions();
+  public abstract <E extends Throwable> void runOnClient(org.apache.commons.lang3.function.FailableConsumer<client.Minecraft, E>) throws E;
+  public abstract <T, E extends Throwable> T computeOnClient(org.apache.commons.lang3.function.FailableFunction<client.Minecraft, T, E>) throws E;
+}
+=== net.fabricmc.fabric.api.client.gametest.v1.context.TestClientLevelContext (-public)
+Error: class not found: client.gametest.v1.context.TestClientLevelContext
+=== net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext (-public)
+public interface client.gametest.v1.context.TestServerContext {
+  public abstract void runCommand(String);
+  public abstract <E extends Throwable> void runOnServer(org.apache.commons.lang3.function.FailableConsumer<server.MinecraftServer, E>) throws E;
+  public abstract <T, E extends Throwable> T computeOnServer(org.apache.commons.lang3.function.FailableFunction<server.MinecraftServer, T, E>) throws E;
+}
+=== net.fabricmc.fabric.api.client.gametest.v1.world.TestWorldSave (-public)
+public interface client.gametest.v1.world.TestWorldSave {
+  public abstract java.nio.file.Path getSaveDirectory();
+  public abstract client.gametest.v1.context.TestSingleplayerContext open();
+}
+=== net.minecraft.client.model.HumanoidModel (-public)
+public class client.model.HumanoidModel<T extends client.renderer.entity.state.HumanoidRenderState> extends client.model.EntityModel<T> implements client.model.ArmedModel<T>, client.model.HeadedModel {
+  public static client.model.geom.builders.MeshDefinition createMesh(client.model.geom.builders.CubeDeformation, float);
+  public void setupAnim(T);
+  public void setupAnim(Object);
+=== net.minecraft.client.model.geom.ModelPart (-public)
+public final class client.model.geom.ModelPart {
+  public static final float DEFAULT_SCALE;
+  public float x;
+  public float y;
+  public float z;
+  public float xRot;
+  public float yRot;
+  public float zRot;
+  public float xScale;
+  public float yScale;
+  public float zScale;
+  public boolean visible;
+  public boolean skipDraw;
+  public client.model.geom.ModelPart(List<client.model.geom.ModelPart$Cube>, Map<String, client.model.geom.ModelPart>);
+  public client.model.geom.PartPose storePose();
+  public client.model.geom.PartPose getInitialPose();
+  public void setInitialPose(client.model.geom.PartPose);
+  public void resetPose();
+  public void loadPose(client.model.geom.PartPose);
+  public boolean hasChild(String);
+  public client.model.geom.ModelPart getChild(String);
+  public void setPos(float, float, float);
+  public void setRotation(float, float, float);
+  public void render(blaze3d.vertex.PoseStack, blaze3d.vertex.VertexConsumer, int, int);
+  public void render(blaze3d.vertex.PoseStack, blaze3d.vertex.VertexConsumer, int, int, int);
+  public void rotateBy(org.joml.Quaternionf);
+  public void getExtentsForGui(blaze3d.vertex.PoseStack, Consumer<org.joml.Vector3fc>);
+  public void visit(blaze3d.vertex.PoseStack, client.model.geom.ModelPart$Visitor);
+  public void translateAndRotate(blaze3d.vertex.PoseStack);
+  public client.model.geom.ModelPart$Cube getRandomCube(util.RandomSource);
+  public boolean isEmpty();
+  public void offsetPos(org.joml.Vector3f);
+  public void offsetRotation(org.joml.Vector3f);
+  public void offsetScale(org.joml.Vector3f);
+  public List<client.model.geom.ModelPart> getAllParts();
+  public Function<String, client.model.geom.ModelPart> createPartLookup();
 }
