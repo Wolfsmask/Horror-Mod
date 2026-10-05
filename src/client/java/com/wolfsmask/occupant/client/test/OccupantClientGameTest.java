@@ -198,6 +198,7 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 			// Back where it all started, on the ground, for what comes next.
 			server.runCommand("tp @p " + (here.getX() + 0.5) + " " + here.getY() + " " + (here.getZ() + 0.5) + " 0 0");
 			server.runCommand("gamemode survival @p");
+			server.runCommand("time set midnight");             // nobody sleeps at noon: the game wakes them
 			context.waitTicks(40);
 
 			// The way the user was locked out: going to sleep, quitting, and coming back. The game

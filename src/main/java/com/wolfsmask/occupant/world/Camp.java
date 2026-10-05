@@ -53,16 +53,20 @@ final class Camp extends Build {
 		put(-1, floor(-1, 2), 2, across);
 		put(0, floor(0, 2), 2, across);
 
-		// The tent: a ridge of boards over a narrow space, open at the front, their things inside.
+		// The tent: an A-frame of boards two high over a space three wide, open at the front, closed
+		// at the back, their things inside.
 		int t = floor(3, 0);
 		for (int z = -2; z <= 1; z++) {
-			fill(2, t, z, 4, t + 2, z, Blocks.AIR.defaultBlockState());
-			for (int x = 2; x <= 4; x++) foundation(x, t, z, Blocks.DIRT.defaultBlockState());
-			put(2, t, z, stairs(Blocks.SPRUCE_STAIRS, Direction.EAST));
-			put(4, t, z, stairs(Blocks.SPRUCE_STAIRS, Direction.WEST));
-			put(3, t + 1, z, Blocks.SPRUCE_SLAB.defaultBlockState());
+			fill(1, t, z, 5, t + 3, z, Blocks.AIR.defaultBlockState());
+			for (int x = 1; x <= 5; x++) foundation(x, t, z, Blocks.DIRT.defaultBlockState());
+			put(1, t, z, stairs(Blocks.SPRUCE_STAIRS, Direction.EAST));
+			put(5, t, z, stairs(Blocks.SPRUCE_STAIRS, Direction.WEST));
+			put(2, t + 1, z, stairs(Blocks.SPRUCE_STAIRS, Direction.EAST));
+			put(4, t + 1, z, stairs(Blocks.SPRUCE_STAIRS, Direction.WEST));
+			put(3, t + 2, z, Blocks.SPRUCE_SLAB.defaultBlockState());
 		}
-		put(3, t, 1, Blocks.SPRUCE_PLANKS.defaultBlockState());
+		fill(2, t, 1, 4, t, 1, Blocks.SPRUCE_PLANKS.defaultBlockState());
+		put(3, t + 1, 1, Blocks.SPRUCE_PLANKS.defaultBlockState());
 		container(3, t, 0, Blocks.BARREL.defaultBlockState().setValue(BarrelBlock.FACING, Direction.UP), Loot.Kind.CAMP);
 
 		// Supplies by the fire, and a sign at the edge of the camp, facing whoever comes.

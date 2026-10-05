@@ -31,7 +31,7 @@ final class Cottage extends Build {
 		BlockState mossy = Blocks.MOSSY_COBBLESTONE.defaultBlockState();
 		boolean collapsed = chance(0.4f);
 
-		fill(-4, 1, -4, 4, 8, 3, air);
+		fill(-4, 1, -4, 4, 9, 3, air);
 		for (int x = -3; x <= 3; x++) {
 			for (int z = -3; z <= 2; z++) {
 				boolean edge = x == -3 || x == 3 || z == -3 || z == 2;
@@ -42,6 +42,7 @@ final class Cottage extends Build {
 				boolean corner = (x == -3 || x == 3) && (z == -3 || z == 2);
 				put(x, 2, z, corner ? log : planks);
 				put(x, 3, z, corner ? log : planks);
+				put(x, 4, z, corner ? log : planks);
 			}
 		}
 		// The door, and a window in each side and the back.
@@ -57,22 +58,22 @@ final class Cottage extends Build {
 		// A pitched roof, ridge running front to back, overhanging all round, gable ends filled.
 		for (int z = -4; z <= 3; z++) {
 			for (int k = 0; k <= 3; k++) {
-				put(-4 + k, 3 + k, z, stairs(stair, Direction.EAST));
-				put(4 - k, 3 + k, z, stairs(stair, Direction.WEST));
+				put(-4 + k, 4 + k, z, stairs(stair, Direction.EAST));
+				put(4 - k, 4 + k, z, stairs(stair, Direction.WEST));
 			}
-			put(0, 6, z, planks);                                         // the ridge
-			put(0, 7, z, Blocks.SPRUCE_SLAB.defaultBlockState());
+			put(0, 7, z, planks);                                         // the ridge
+			put(0, 8, z, Blocks.SPRUCE_SLAB.defaultBlockState());
 		}
 		for (int z : new int[]{-3, 2}) {
-			for (int y = 4; y <= 6; y++) {
-				for (int x = -(6 - y); x <= 6 - y; x++) put(x, y, z, planks);
+			for (int y = 5; y <= 7; y++) {
+				for (int x = -(7 - y); x <= 7 - y; x++) put(x, y, z, planks);
 			}
 		}
 		if (collapsed) {
 			// Part of the roof has come in, and lies on the floor.
 			for (int x = 1; x <= 4; x++) {
 				for (int z = -1; z <= 3; z++) {
-					if (chance(0.7f)) fill(x, 3 + Math.max(0, 4 - x), z, x, 7, z, air);
+					if (chance(0.7f)) fill(x, 4 + Math.max(0, 4 - x), z, x, 8, z, air);
 				}
 			}
 			for (int n = 0; n < 4; n++) put(1 + random.nextInt(2), 1, -1 + random.nextInt(3), old(Blocks.GRAVEL.defaultBlockState(), cobble, 0.5f));
