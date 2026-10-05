@@ -1,265 +1,173 @@
-=== net.minecraft.client.input.KeyEvent (-public)
-public final class client.input.KeyEvent extends Record implements client.input.InputWithModifiers {
-  public client.input.KeyEvent(int, int, int);
-  public int input();
-  public int shortcutKey();
+=== net.minecraft.world.item.component.WrittenBookContent (-public)
+public final class world.item.component.WrittenBookContent extends Record implements world.item.component.BookContent<network.chat.Component, world.item.component.WrittenBookContent>, world.item.component.TooltipProvider {
+  public static final world.item.component.WrittenBookContent EMPTY;
+  public static final int PAGE_LENGTH;
+  public static final int TITLE_LENGTH;
+  public static final int TITLE_MAX_LENGTH;
+  public static final int MAX_GENERATION;
+  public static final serialization.Codec<network.chat.Component> CONTENT_CODEC;
+  public static final serialization.Codec<List<server.network.Filterable<network.chat.Component>>> PAGES_CODEC;
+  public static final serialization.Codec<world.item.component.WrittenBookContent> CODEC;
+  public static final network.codec.StreamCodec<network.RegistryFriendlyByteBuf, world.item.component.WrittenBookContent> STREAM_CODEC;
+  public world.item.component.WrittenBookContent(server.network.Filterable<String>, String, int, List<server.network.Filterable<network.chat.Component>>, boolean);
+  public static serialization.Codec<List<server.network.Filterable<network.chat.Component>>> pagesCodec(serialization.Codec<network.chat.Component>);
+  public world.item.component.WrittenBookContent craftCopy();
+  public static boolean resolveForItem(world.item.ItemStack, network.chat.ResolutionContext, core.HolderLookup$Provider);
+  public world.item.component.WrittenBookContent resolve(network.chat.ResolutionContext, core.HolderLookup$Provider);
+  public world.item.component.WrittenBookContent markResolved();
+  public List<network.chat.Component> getPages(boolean);
+  public world.item.component.WrittenBookContent withReplacedPages(List<server.network.Filterable<network.chat.Component>>);
+  public void addToTooltip(world.item.Item$TooltipContext, Consumer<network.chat.Component>, world.item.TooltipFlag, core.component.DataComponentGetter);
   public final String toString();
   public final int hashCode();
   public final boolean equals(Object);
-  public int key();
-  public int keycode();
-  public int modifiers();
+  public server.network.Filterable<String> title();
+  public String author();
+  public int generation();
+  public List<server.network.Filterable<network.chat.Component>> pages();
+  public boolean resolved();
+  public Object withReplacedPages(List);
 }
-=== net.minecraft.client.input.MouseButtonInfo (-public)
-public final class client.input.MouseButtonInfo extends Record implements client.input.InputWithModifiers {
-  public client.input.MouseButtonInfo(int, int);
-  public int input();
+=== net.minecraft.server.network.Filterable (-public)
+public final class server.network.Filterable<T> extends Record {
+  public server.network.Filterable(T, Optional<T>);
+  public static <T> serialization.Codec<server.network.Filterable<T>> codec(serialization.Codec<T>);
+  public static <B extends io.netty.buffer.ByteBuf, T> network.codec.StreamCodec<B, server.network.Filterable<T>> streamCodec(network.codec.StreamCodec<B, T>);
+  public static <T> server.network.Filterable<T> passThrough(T);
+  public static server.network.Filterable<String> from(server.network.FilteredText);
+  public T get(boolean);
+  public <U> server.network.Filterable<U> map(Function<T, U>);
+  public <U> Optional<server.network.Filterable<U>> resolve(Function<T, Optional<U>>);
   public final String toString();
   public final int hashCode();
   public final boolean equals(Object);
-  public int button();
-  public int modifiers();
+  public T raw();
+  public Optional<T> filtered();
 }
-=== net.fabricmc.fabric.api.client.gametest.v1.TestInput (-public)
-public interface client.gametest.v1.TestInput {
-  public abstract void holdKey(client.KeyMapping);
-  public abstract void holdKey(Function<client.Options, client.KeyMapping>);
-  public abstract void holdKey(blaze3d.platform.InputConstants$Key);
-  public abstract void holdKey(int);
-  public abstract void holdMouse(int);
-  public abstract void holdControl();
-  public abstract void holdShift();
-  public abstract void holdAlt();
-  public abstract void releaseKey(client.KeyMapping);
-  public abstract void releaseKey(Function<client.Options, client.KeyMapping>);
-  public abstract void releaseKey(blaze3d.platform.InputConstants$Key);
-  public abstract void releaseKey(int);
-  public abstract void releaseMouse(int);
-  public abstract void releaseControl();
-  public abstract void releaseShift();
-  public abstract void releaseAlt();
-  public abstract void pressKey(client.KeyMapping);
-  public abstract void pressKey(Function<client.Options, client.KeyMapping>);
-  public abstract void pressKey(blaze3d.platform.InputConstants$Key);
-  public abstract void pressKey(int);
-  public abstract void pressMouse(int);
-  public abstract void holdKeyFor(client.KeyMapping, int);
-  public abstract void holdKeyFor(Function<client.Options, client.KeyMapping>, int);
-  public abstract void holdKeyFor(blaze3d.platform.InputConstants$Key, int);
-  public abstract void holdKeyFor(int, int);
-  public abstract void holdMouseFor(int, int);
-  public abstract void lookAt(float, float);
-  public abstract void lookAt(core.BlockPos);
-  public abstract void typeChar(int);
-  public abstract void typeChars(String);
-  public abstract void scroll(double);
-  public abstract void scroll(double, double);
-  public abstract void setCursorPos(double, double);
-  public abstract void moveCursor(double, double);
-  public abstract void resizeWindow(int, int);
+=== net.minecraft.core.component.DataComponents (-public)
+public class core.component.DataComponents {
+  public static final core.component.DataComponentType<network.chat.Component> CUSTOM_NAME;
+  public static final core.component.DataComponentType<world.item.component.ItemLore> LORE;
+  public static final core.component.DataComponentType<world.item.component.WrittenBookContent> WRITTEN_BOOK_CONTENT;
+=== net.minecraft.world.item.ItemStack (-public)
+public final class world.item.ItemStack implements core.component.DataComponentHolder,world.item.ItemInstance,item.v1.FabricItemStack {
+  public world.item.ItemStack(world.level.ItemLike, int);
+  public world.item.ItemStack(world.level.ItemLike);
+  public world.item.ItemStack(core.Holder<world.item.Item>, int);
+  public world.item.ItemStack(core.Holder<world.item.Item>);
+  public world.item.ItemStack(core.Holder<world.item.Item>, int, core.component.DataComponentPatch);
+  public <T> T set(core.component.DataComponentType<T>, T);
+  public <T> T set(core.component.TypedDataComponent<T>);
+=== net.fabricmc.fabric.api.event.player.UseBlockCallback (-public)
+public interface event.player.UseBlockCallback {
+  public static final event.Event<event.player.UseBlockCallback> EVENT;
+  public abstract world.InteractionResult interact(world.entity.player.Player, world.level.Level, world.InteractionHand, world.phys.BlockHitResult);
 }
-=== net.minecraft.world.level.storage.LevelData (-public)
-public interface world.level.storage.LevelData {
-  public abstract world.level.storage.LevelData$RespawnData getRespawnData();
-=== net.minecraft.world.level.storage.LevelData$RespawnData (-public)
-public final class world.level.storage.LevelData$RespawnData extends Record {
-  public static final world.level.storage.LevelData$RespawnData DEFAULT;
-  public static final serialization.MapCodec<world.level.storage.LevelData$RespawnData> MAP_CODEC;
-  public static final serialization.Codec<world.level.storage.LevelData$RespawnData> CODEC;
-  public static final network.codec.StreamCodec<io.netty.buffer.ByteBuf, world.level.storage.LevelData$RespawnData> STREAM_CODEC;
-  public world.level.storage.LevelData$RespawnData(core.GlobalPos, float, float);
-  public static world.level.storage.LevelData$RespawnData of(resources.ResourceKey<world.level.Level>, core.BlockPos, float, float);
-  public resources.ResourceKey<world.level.Level> dimension();
-  public core.BlockPos pos();
-  public final String toString();
-  public final int hashCode();
-  public final boolean equals(Object);
-  public core.GlobalPos globalPos();
-  public float yaw();
-  public float pitch();
-}
-=== net.minecraft.server.level.ServerLevel (-public)
-public class server.level.ServerLevel extends world.level.Level implements world.level.WorldGenLevel,server.level.ServerEntityGetter {
-  public server.level.ServerLevel(server.MinecraftServer, concurrent.Executor, world.level.storage.LevelStorageSource$LevelStorageAccess, world.level.storage.ServerLevelData, resources.ResourceKey<world.level.Level>, world.level.dimension.LevelStem, boolean, long, List<world.level.CustomSpawner>, boolean);
-  public void tickCustomSpawners(boolean);
-  public void addRespawnedPlayer(server.level.ServerPlayer);
-  public void setRespawnData(world.level.storage.LevelData$RespawnData);
-  public world.level.storage.LevelData$RespawnData getRespawnData();
-  public boolean isSpawningMonsters();
-  public boolean anyPlayerCloseEnoughForSpawning(core.BlockPos);
-  public boolean anyPlayerCloseEnoughForSpawning(world.level.ChunkPos);
-  public boolean canSpawnEntitiesInChunk(world.level.ChunkPos);
-  public boolean isSpawnerBlockEnabled();
 === net.minecraft.world.level.Level (-public)
 public abstract class world.level.Level implements world.level.LevelAccessor,AutoCloseable,attachment.v1.AttachmentTarget,attachment.v1.GlobalAttachmentsProvider {
-  public static boolean isInSpawnableBounds(core.BlockPos);
-  public void setSpawnSettings(boolean);
-  public abstract void setRespawnData(world.level.storage.LevelData$RespawnData);
-  public abstract world.level.storage.LevelData$RespawnData getRespawnData();
-  public world.level.storage.LevelData$RespawnData getWorldBorderAdjustedRespawnData(world.level.storage.LevelData$RespawnData);
-  public world.level.storage.LevelData getLevelData();
-=== net.minecraft.client.gui.components.Button (-public)
-public abstract class client.gui.components.Button extends client.gui.components.AbstractButton {
-  public static client.gui.components.Button$Builder builder(network.chat.Component, client.gui.components.Button$OnPress);
-  public void onPress(client.input.InputWithModifiers);
-=== net.minecraft.client.gui.components.Button$OnPress (-public)
-public interface client.gui.components.Button$OnPress {
-  public abstract void onPress(client.gui.components.Button);
+  public boolean isClientSide();
+=== net.minecraft.world.level.block.state.BlockBehaviour$BlockStateBase (-public)
+public abstract class world.level.block.state.BlockBehaviour$BlockStateBase extends world.level.block.state.StateHolder<world.level.block.Block, world.level.block.state.BlockState> implements core.TypedInstance<world.level.block.Block> {
+  public world.level.block.state.BlockState rotate(world.level.block.Rotation);
+  public world.level.block.state.BlockState mirror(world.level.block.Mirror);
+=== net.minecraft.world.Container (-public)
+public interface world.Container extends world.Clearable, Iterable<world.item.ItemStack>, world.entity.SlotProvider {
+  public abstract int getContainerSize();
+  public abstract world.item.ItemStack getItem(int);
+  public abstract void setItem(int, world.item.ItemStack);
+=== net.minecraft.world.level.block.entity.BaseContainerBlockEntity (-public)
+public abstract class world.level.block.entity.BaseContainerBlockEntity extends world.level.block.entity.BlockEntity implements world.Container,world.MenuProvider,world.Nameable {
+  public network.chat.Component getName();
+  public network.chat.Component getDisplayName();
+  public network.chat.Component getCustomName();
+  public boolean canOpen(world.entity.player.Player);
+  public static void sendChestLockedNotifications(world.phys.Vec3, world.entity.player.Player, network.chat.Component);
+  public boolean isLocked();
+  public boolean isEmpty();
+  public world.item.ItemStack getItem(int);
+  public world.item.ItemStack removeItem(int, int);
+  public world.item.ItemStack removeItemNoUpdate(int);
+  public void setItem(int, world.item.ItemStack);
+  public boolean stillValid(world.entity.player.Player);
+  public void clearContent();
+  public world.inventory.AbstractContainerMenu createMenu(int, world.entity.player.Inventory, world.entity.player.Player);
+  public void removeComponentsFromTag(world.level.storage.ValueOutput);
 }
-=== net.minecraft.client.gui.components.Button$Builder (-public)
-public class client.gui.components.Button$Builder {
-  public client.gui.components.Button$Builder(network.chat.Component, client.gui.components.Button$OnPress);
-  public client.gui.components.Button$Builder pos(int, int);
-  public client.gui.components.Button$Builder width(int);
-  public client.gui.components.Button$Builder size(int, int);
-  public client.gui.components.Button$Builder bounds(int, int, int, int);
-  public client.gui.components.Button$Builder tooltip(client.gui.components.Tooltip);
-  public client.gui.components.Button$Builder createNarration(client.gui.components.Button$CreateNarration);
-  public client.gui.components.Button build();
+=== net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity (-public)
+public abstract class world.level.block.entity.RandomizableContainerBlockEntity extends world.level.block.entity.BaseContainerBlockEntity implements world.RandomizableContainer {
+  public resources.ResourceKey<world.level.storage.loot.LootTable> getLootTable();
+  public void setLootTable(resources.ResourceKey<world.level.storage.loot.LootTable>);
+  public long getLootTableSeed();
+  public void setLootTableSeed(long);
+  public boolean isEmpty();
+  public world.item.ItemStack getItem(int);
+  public world.item.ItemStack removeItem(int, int);
+  public world.item.ItemStack removeItemNoUpdate(int);
+  public void setItem(int, world.item.ItemStack);
+  public boolean canOpen(world.entity.player.Player);
+  public world.inventory.AbstractContainerMenu createMenu(int, world.entity.player.Inventory, world.entity.player.Player);
+  public void removeComponentsFromTag(world.level.storage.ValueOutput);
 }
-=== net.minecraft.client.gui.screens.Screen (-protected)
-public abstract class client.gui.screens.Screen extends client.gui.components.events.AbstractContainerEventHandler implements client.gui.components.Renderable {
-  protected <T extends client.gui.components.events.GuiEventListener & client.gui.components.Renderable & client.gui.narration.NarratableEntry> T addRenderableWidget(T);
-  protected <T extends client.gui.components.events.GuiEventListener & client.gui.narration.NarratableEntry> T addWidget(T);
-  protected void clearWidgets();
-=== net.minecraft.client.gui.screens.worldselection.CreateWorldScreen (code: keyPressed)
-  public boolean keyPressed(client.input.KeyEvent);
-    Code:
-         1: getfield      #415                // Field tabNavigationBar:Lnet/minecraft/client/gui/components/tabs/MenuTabBar;
-         5: invokevirtual #730                // Method net/minecraft/client/gui/components/tabs/MenuTabBar.keyPressed:(Lnet/minecraft/client/input/KeyEvent;)Z
-         8: ifeq          13
-        11: iconst_1
-        12: ireturn
-        15: invokespecial #734                // Method net/minecraft/client/gui/screens/Screen.keyPressed:(Lnet/minecraft/client/input/KeyEvent;)Z
-        18: ifeq          23
-        21: iconst_1
-        22: ireturn
-        24: invokevirtual #735                // Method net/minecraft/client/input/KeyEvent.isConfirmation:()Z
-        27: ifeq          36
-        31: invokevirtual #740                // Method onCreate:()V
-        34: iconst_1
-        35: ireturn
-        36: iconst_0
-        37: ireturn
-
-=== net.minecraft.client.MouseHandler (code: onButton|onPress|mouseClicked)
-  public void onButton(long, client.input.MouseButtonInfo, int);
-    Code:
-         1: getfield      #37                 // Field minecraft:Lnet/minecraft/client/Minecraft;
-         4: invokevirtual #48                 // Method net/minecraft/client/Minecraft.getWindow:()Lcom/mojang/blaze3d/platform/Window;
-         9: lload_1
-        10: lconst_0
-        11: lcmp
-        12: ifeq          25
-        15: lload_1
-        18: invokevirtual #56                 // Method com/mojang/blaze3d/platform/Window.handle:()J
-        21: lcmp
-        22: ifeq          26
-        27: getfield      #37                 // Field minecraft:Lnet/minecraft/client/Minecraft;
-        30: invokevirtual #62                 // Method net/minecraft/client/Minecraft.getFramerateLimitTracker:()Lcom/mojang/blaze3d/platform/FramerateLimitTracker;
-        33: invokevirtual #66                 // Method com/mojang/blaze3d/platform/FramerateLimitTracker.onInputReceived:()V
-        37: getfield      #37                 // Field minecraft:Lnet/minecraft/client/Minecraft;
-        40: getfield      #71                 // Field net/minecraft/client/Minecraft.gui:Lnet/minecraft/client/gui/Gui;
-        43: invokevirtual #75                 // Method net/minecraft/client/gui/Gui.screen:()Lnet/minecraft/client/gui/screens/Screen;
-        46: ifnull        59
-        50: getfield      #37                 // Field minecraft:Lnet/minecraft/client/Minecraft;
-        53: getstatic     #81                 // Field net/minecraft/client/InputType.MOUSE:Lnet/minecraft/client/InputType;
-        56: invokevirtual #87                 // Method net/minecraft/client/Minecraft.setLastInputType:(Lnet/minecraft/client/InputType;)V
-        61: iconst_1
-        62: if_icmpne     69
-        65: iconst_1
-        66: goto          70
-        69: iconst_0
-        70: istore        6
-        74: ifeq          92
-        79: putfield      #9                  // Field activeButton:Lnet/minecraft/client/input/MouseButtonInfo;
-        83: invokestatic  #93                 // Method com/mojang/blaze3d/Blaze3D.getTime:()D
-        86: putfield      #99                 // Field mousePressedTime:D
-        89: goto          104
-        93: getfield      #9                  // Field activeButton:Lnet/minecraft/client/input/MouseButtonInfo;
-        96: ifnull        104
-       100: aconst_null
-       101: putfield      #9                  // Field activeButton:Lnet/minecraft/client/input/MouseButtonInfo;
-       105: getfield      #37                 // Field minecraft:Lnet/minecraft/client/Minecraft;
-       108: getfield      #71                 // Field net/minecraft/client/Minecraft.gui:Lnet/minecraft/client/gui/Gui;
-       111: invokevirtual #102                // Method net/minecraft/client/gui/Gui.overlay:()Lnet/minecraft/client/gui/screens/Overlay;
-       114: ifnull        120
-       117: goto          455
-       122: ifeq          150
-       126: getfield      #37                 // Field minecraft:Lnet/minecraft/client/Minecraft;
-       129: getstatic     #106                // Field com/mojang/blaze3d/platform/InputConstants$Type.MOUSE:Lcom/mojang/blaze3d/platform/InputConstants$Type;
-       133: invokevirtual #111                // Method net/minecraft/client/input/MouseButtonInfo.button:()I
-       136: invokevirtual #117                // Method com/mojang/blaze3d/platform/InputConstants$Type.getOrCreate:(I)Lcom/mojang/blaze3d/platform/InputConstants$Key;
-       140: invokevirtual #121                // Method net/minecraft/client/input/MouseButtonInfo.hasControlDownWithQuirk:()Z
-       143: invokevirtual #125                // Method net/minecraft/client/Minecraft.handleGlobalKeyPress:(Lcom/mojang/blaze3d/platform/InputConstants$Key;Z)Z
-       146: ifeq          150
-       151: getfield      #37                 // Field minecraft:Lnet/minecraft/client/Minecraft;
-       154: getfield      #71                 // Field net/minecraft/client/Minecraft.gui:Lnet/minecraft/client/gui/Gui;
-       157: invokevirtual #75                 // Method net/minecraft/client/gui/Gui.screen:()Lnet/minecraft/client/gui/screens/Screen;
-       160: ifnonnull     182
-       164: getfield      #129                // Field mouseGrabbed:Z
-       167: ifne          455
-       172: ifeq          455
-       176: invokevirtual #132                // Method grabMouse:()V
-       179: goto          455
-       185: invokevirtual #135                // Method getScaledXPos:(Lcom/mojang/blaze3d/platform/Window;)D
-       188: dstore        7
-       193: invokevirtual #139                // Method getScaledYPos:(Lcom/mojang/blaze3d/platform/Window;)D
-       196: dstore        9
-       199: getfield      #37                 // Field minecraft:Lnet/minecraft/client/Minecraft;
-       202: getfield      #71                 // Field net/minecraft/client/Minecraft.gui:Lnet/minecraft/client/gui/Gui;
-       205: invokevirtual #75                 // Method net/minecraft/client/gui/Gui.screen:()Lnet/minecraft/client/gui/screens/Screen;
-       210: new           #142                // class net/minecraft/client/input/MouseButtonEvent
-       214: dload         7
-       216: dload         9
-       219: invokespecial #144                // Method net/minecraft/client/input/MouseButtonEvent."<init>":(DDLnet/minecraft/client/input/MouseButtonInfo;)V
-       226: ifeq          387
-       231: invokevirtual #147                // Method net/minecraft/client/gui/screens/Screen.afterMouseAction:()V
-       234: invokestatic  #152                // Method net/minecraft/util/Util.getMillis:()J
-       237: lstore        13
-       240: getfield      #157                // Field lastClick:Lnet/minecraft/client/MouseHandler$LastClick;
-       243: ifnull        291
-       246: lload         13
-       249: getfield      #157                // Field lastClick:Lnet/minecraft/client/MouseHandler$LastClick;
-       252: invokevirtual #161                // Method net/minecraft/client/MouseHandler$LastClick.time:()J
-       255: lsub
-       256: ldc2_w        #166                // long 250l
-       259: lcmp
-       260: ifge          291
-       264: getfield      #157                // Field lastClick:Lnet/minecraft/client/MouseHandler$LastClick;
-       267: invokevirtual #168                // Method net/minecraft/client/MouseHandler$LastClick.screen:()Lnet/minecraft/client/gui/screens/Screen;
-       272: if_acmpne     291
-       276: getfield      #169                // Field lastClickButton:I
-       281: invokevirtual #173                // Method net/minecraft/client/input/MouseButtonEvent.button:()I
-       284: if_icmpne     291
-       287: iconst_1
-       288: goto          292
-       291: iconst_0
-       292: istore        15
-       300: invokevirtual #174                // Method net/minecraft/client/gui/screens/Screen.mouseClicked:(Lnet/minecraft/client/input/MouseButtonEvent;Z)Z
-       303: ifeq          330
-       307: new           #162                // class net/minecraft/client/MouseHandler$LastClick
-       311: lload         13
-       315: invokespecial #178                // Method net/minecraft/client/MouseHandler$LastClick."<init>":(JLnet/minecraft/client/gui/screens/Screen;)V
-       318: putfield      #157                // Field lastClick:Lnet/minecraft/client/MouseHandler$LastClick;
-       323: invokevirtual #111                // Method net/minecraft/client/input/MouseButtonInfo.button:()I
-       326: putfield      #169                // Field lastClickButton:I
-       330: goto          455
-       337: ldc           #183                // String mouseClicked event handler
-       339: invokestatic  #185                // Method net/minecraft/CrashReport.forThrowable:(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/CrashReport;
-       346: ldc           #191                // String Mouse
-       348: invokevirtual #193                // Method net/minecraft/CrashReport.addCategory:(Ljava/lang/String;)Lnet/minecraft/CrashReportCategory;
-       358: invokevirtual #197                // Method fillMousePositionDetails:(Lnet/minecraft/CrashReportCategory;Lcom/mojang/blaze3d/platform/Window;)V
-       363: ldc           #201                // String Button
-       367: invokevirtual #173                // Method net/minecraft/client/input/MouseButtonEvent.button:()I
-       370: invokestatic  #203                // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
-       373: invokevirtual #209                // Method net/minecraft/CrashReportCategory.setDetail:(Ljava/lang/String;Ljava/lang/Object;)Lnet/minecraft/CrashReportCategory;
-       377: new           #215                // class net/minecraft/ReportedException
-       383: invokespecial #217                // Method net/minecraft/ReportedException."<init>":(Lnet/minecraft/CrashReport;)V
-       386: athrow
-       391: invokevirtual #220                // Method net/minecraft/client/gui/screens/Screen.mouseReleased:(Lnet/minecraft/client/input/MouseButtonEvent;)Z
-       394: ifeq          398
-       398: goto          455
-       405: ldc           #224                // String mouseReleased event handler
-       407: invokestatic  #185                // Method net/minecraft/CrashReport.forThrowable:(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/CrashReport;
-       414: ldc           #191                // String Mouse
+=== com.mojang.blaze3d.platform.Window (-public)
+public final class blaze3d.platform.Window implements AutoCloseable {
+  public int calculateScale(int, boolean);
+  public int getWidth();
+  public void setWidth(int);
+  public int getHeight();
+  public void setHeight(int);
+  public int getScreenWidth();
+  public int getScreenHeight();
+  public int getGuiScaledWidth();
+  public int getGuiScaledHeight();
+  public int getGuiScale();
+  public void setGuiScale(int);
+  public float getAppropriateLineWidth();
+=== net.minecraft.world.level.block.CampfireBlock (-public)
+public class world.level.block.CampfireBlock extends world.level.block.BaseEntityBlock implements world.level.block.SimpleWaterloggedBlock {
+  public static final world.level.block.state.properties.BooleanProperty LIT;
+  public static final world.level.block.state.properties.BooleanProperty SIGNAL_FIRE;
+=== net.minecraft.world.level.block.FurnaceBlock|AbstractFurnaceBlock (-public)
+Error: class not found: world.level.block.FurnaceBlock|AbstractFurnaceBlock
+=== classes matching Lantern|Candle|Campfire|Barrel|Chest
+net.minecraft.world.entity.vehicle.boat.AbstractChestBoat
+net.minecraft.world.level.block.WeatheringCopperChestBlock
+net.minecraft.util.datafix.fixes.WeaponSmithChestLootTableFix
+net.minecraft.world.level.block.TrappedChestBlock
+net.minecraft.world.level.block.entity.CampfireBlockEntity
+net.minecraft.data.loot.packs.TradeRebalanceChestLoot
+net.minecraft.world.item.crafting.CampfireCookingRecipe
+net.minecraft.world.level.levelgen.feature.BonusChestFeature
+net.minecraft.world.entity.vehicle.boat.ChestRaft
+net.minecraft.world.level.block.WeatheringLanternBlock
+net.minecraft.util.datafix.fixes.ChestedHorsesInventoryZeroIndexingFix
+net.minecraft.world.level.block.CandleBlock
+net.minecraft.world.level.block.BarrelBlock
+net.minecraft.world.level.block.AbstractCandleBlock
+net.minecraft.world.level.block.EnderChestBlock
+net.minecraft.world.level.block.ChestBlock
+net.minecraft.world.level.block.LanternBlock
+net.minecraft.world.level.block.CandleCakeBlock
+net.minecraft.world.level.block.CopperChestBlock
+net.minecraft.world.inventory.PlayerEnderChestContainer
+net.minecraft.world.level.block.entity.ChestBlockEntity
+net.minecraft.world.entity.vehicle.boat.ChestBoat
+net.minecraft.world.level.block.AbstractChestBlock
+net.minecraft.world.level.block.entity.ChestLidController
+net.minecraft.world.level.block.entity.BarrelBlockEntity
+net.minecraft.world.entity.vehicle.minecart.MinecartChest
+net.minecraft.data.loot.packs.VanillaChestLoot
+net.minecraft.world.inventory.ChestMenu
+net.minecraft.util.datafix.fixes.TrappedChestBlockEntityFix
+net.minecraft.world.level.block.CampfireBlock
+net.minecraft.world.level.block.entity.EnderChestBlockEntity
+net.minecraft.world.level.block.state.properties.ChestType
+net.minecraft.world.entity.animal.equine.AbstractChestedHorse
+net.minecraft.world.level.block.entity.TrappedChestBlockEntity
+net.minecraft.client.renderer.blockentity.CampfireRenderer
+net.minecraft.client.renderer.blockentity.ChestRenderer
+net.minecraft.client.renderer.blockentity.state.CampfireRenderState
+net.minecraft.client.model.object.chest.ChestModel
+net.minecraft.client.particle.CampfireSmokeParticle
+net.minecraft.client.renderer.MultiblockChestResources
+net.minecraft.client.renderer.blockentity.state.ChestRenderState
+net.minecraft.client.renderer.special.ChestSpecialRenderer
