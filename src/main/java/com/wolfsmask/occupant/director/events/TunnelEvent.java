@@ -43,8 +43,9 @@ public final class TunnelEvent extends HorrorEvent {
 		ServerLevel world = ctx.world;
 
 		for (int attempt = 0; attempt < 12; attempt++) {
+			// Only beside a wall: somewhere it could have dug in from.
 			BlockPos stand = Spots.aroundPlayer(p, ctx.random, 8, 18, 70, 180, false, 3, pos ->
-					Sight.isHidden(p, pos) && Sight.isHidden(p, pos.above()));
+					Sight.isHidden(p, pos) && Sight.isHidden(p, pos.above()) && besideStone(world, pos));
 			if (stand == null) continue;
 
 			List<Direction> dirs = new ArrayList<>(Direction.Plane.HORIZONTAL.stream().toList());
@@ -72,6 +73,16 @@ public final class TunnelEvent extends HorrorEvent {
 			}
 		}
 		return null;
+	}
+
+	private static boolean besideStone(ServerLevel world, BlockPos pos) {
+		for (Direction dir : Direction.Plane.HORIZONTAL) {
+			BlockPos side = pos.relative(dir);
+			if (Spots.isNaturalStone(world.getBlockState(side)) && Spots.isNaturalStone(world.getBlockState(side.above()))) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** Blocks to remove (feet and head, alternating), stopping at anything that is not plain stone. */
