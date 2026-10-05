@@ -32,6 +32,7 @@ import java.util.Locale;
  */
 final class Cinematic {
 	private static final String ALL = "@e[type=occupant:occupant]";
+	private static final int KEY_F1 = 290;
 
 	private Cinematic() {
 	}
@@ -41,7 +42,7 @@ final class Cinematic {
 		try {
 			server.runCommand("gamemode spectator @p");
 			server.runCommand("weather clear");
-			context.runOnClient(mc -> mc.options.hideGui = true);
+			hud(context, false);
 			context.getInput().resizeWindow(1920, 1080);
 			context.waitTicks(20);
 
@@ -71,7 +72,7 @@ final class Cinematic {
 			Occupant.LOGGER.warn("[client-gametest] cinematic stills stopped early", e);
 		} finally {
 			server.runCommand("kill " + ALL);
-			context.runOnClient(mc -> mc.options.hideGui = false);
+			hud(context, true);
 			server.runCommand("gamemode survival @p");
 			context.getInput().resizeWindow(854, 480);
 		}
@@ -182,6 +183,28 @@ final class Cinematic {
 		place(server, at);
 		camera(context, game, ground.getX() + 0.8, ground.getY() + 1.5, ground.getZ() + 0.5, at.getX() + 0.5, at.getY() + 4.6, at.getZ() + 0.5, 12450);
 		still(context, game, "cinematic-face");
+	}
+
+	/**
+	 * The HUD on or off. The option has had more than one name, so it is found by what it is
+	 * called; failing that, F1, as a player would.
+	 */
+	private static void hud(ClientGameTestContext context, boolean shown) {
+		boolean set = context.computeOnClient(mc -> {
+			for (java.lang.reflect.Field f : mc.options.getClass().getFields()) {
+				String n = f.getName().toLowerCase(Locale.ROOT);
+				if (f.getType() == boolean.class && n.contains("hide") && n.contains("gui")) {
+					try {
+						f.setBoolean(mc.options, !shown);
+						return true;
+					} catch (IllegalAccessException e) {
+						return false;
+					}
+				}
+			}
+			return false;
+		});
+		if (!set) context.getInput().pressKey(KEY_F1);
 	}
 
 	/** Puts it there, facing the player, the way /occupant here does. */

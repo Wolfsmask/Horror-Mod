@@ -42,11 +42,17 @@ public final class TunnelEvent extends HorrorEvent {
 		ServerPlayer p = ctx.player;
 		ServerLevel world = ctx.world;
 
-		for (int attempt = 0; attempt < 12; attempt++) {
-			// Only beside a wall: somewhere it could have dug in from.
-			BlockPos stand = Spots.aroundPlayer(p, ctx.random, 8, 18, 70, 180, false, 3, pos ->
-					Sight.isHidden(p, pos) && Sight.isHidden(p, pos.above()) && besideStone(world, pos));
-			if (stand == null) continue;
+		// Only beside a wall, somewhere it could have dug in from, out of sight behind the player.
+		List<BlockPos> stands = new ArrayList<>(Spots.allAroundPlayer(p, 8, 18, 70, 180, pos ->
+				besideStone(world, pos) && Sight.isHidden(p, pos) && Sight.isHidden(p, pos.above())));
+		for (int i = stands.size() - 1; i > 0; i--) {
+			int j = ctx.random.nextInt(i + 1);
+			BlockPos tmp = stands.get(i);
+			stands.set(i, stands.get(j));
+			stands.set(j, tmp);
+		}
+		for (int attempt = 0; attempt < Math.min(20, stands.size()); attempt++) {
+			BlockPos stand = stands.get(attempt);
 
 			List<Direction> dirs = new ArrayList<>(Direction.Plane.HORIZONTAL.stream().toList());
 			for (int i = dirs.size() - 1; i > 0; i--) {

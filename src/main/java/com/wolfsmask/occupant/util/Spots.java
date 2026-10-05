@@ -127,6 +127,33 @@ public final class Spots {
 		return null;
 	}
 
+	/**
+	 * Every spot in the band {@link #aroundPlayer} samples at random, in no particular order: for
+	 * events that need somewhere quite particular (beside a wall, in a cave), where a few random
+	 * guesses can easily all land in solid rock.
+	 */
+	public static java.util.List<BlockPos> allAroundPlayer(ServerPlayer player, double minDist, double maxDist,
+														   double minAngle, double maxAngle, Predicate<BlockPos> accept) {
+		ServerLevel world = Compat.level(player);
+		Vec3 origin = player.position();
+		Vec3 look = Sight.flatLook(player);
+		java.util.Set<BlockPos> seen = new java.util.HashSet<>();
+		java.util.List<BlockPos> out = new java.util.ArrayList<>();
+		for (double dist = minDist; dist <= maxDist; dist += 1.0) {
+			for (double angle = minAngle; angle <= maxAngle; angle += 4.0) {
+				for (int side = -1; side <= 1; side += 2) {
+					Vec3 dir = Sight.rotateY(look, angle * side);
+					int x = (int) Math.floor(origin.x + dir.x * dist);
+					int z = (int) Math.floor(origin.z + dir.z * dist);
+					if (!seen.add(new BlockPos(x, 0, z))) continue;
+					BlockPos spot = groundNear(world, x, (int) Math.floor(origin.y), z, 6);
+					if (spot != null && accept.test(spot)) out.add(spot);
+				}
+			}
+		}
+		return out;
+	}
+
 	/** Nearest block matching the predicate, searching outward from {@code center}. */
 	@Nullable
 	public static BlockPos nearestBlock(ServerLevel world, BlockPos center, int rangeXZ, int rangeY,
