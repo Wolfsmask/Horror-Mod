@@ -161,12 +161,13 @@ public final class Director {
 		h.quietSeconds++;
 
 		Situation s = h.capture(player);
+		House.noticeNear(player.blockPosition());
 		updateDread(h.data, s);
 		int actBefore = h.data.act;
 		updateAct(h.data, cfg, player);
 		if (actBefore == 0 && h.data.act == 1) {
 			// The very first thing should come a little while after the grace period, not on the dot.
-			h.nextEventIn = 20 * (120 + player.getRandom().nextInt(180));
+			h.nextEventIn = 20 * (45 + player.getRandom().nextInt(75));
 		}
 
 		if (h.active != null || h.data.act == 0) return;
@@ -236,13 +237,13 @@ public final class Director {
 				if (d.playTicks >= cfg.graceMinutes * MINUTE) d.setAct(1);
 			}
 			case 1 -> {
-				if (inAct >= 30 * MINUTE * pace && d.actEventCount >= 4 || inAct >= 50 * MINUTE * pace) d.setAct(2);
+				if (inAct >= 8 * MINUTE * pace && d.actEventCount >= 3 || inAct >= 15 * MINUTE * pace) d.setAct(2);
 			}
 			case 2 -> {
-				if (inAct >= 40 * MINUTE * pace && d.sightings >= 2 || inAct >= 70 * MINUTE * pace) d.setAct(3);
+				if (inAct >= 12 * MINUTE * pace && d.sightings >= 2 || inAct >= 22 * MINUTE * pace) d.setAct(3);
 			}
 			case 3 -> {
-				if (inAct >= 45 * MINUTE * pace && (d.encounters >= 1 || d.sightings >= 4) || inAct >= 80 * MINUTE * pace) {
+				if (inAct >= 15 * MINUTE * pace && (d.encounters >= 1 || d.sightings >= 4) || inAct >= 30 * MINUTE * pace) {
 					d.setAct(4);
 				}
 			}
@@ -256,13 +257,16 @@ public final class Director {
 		}
 	}
 
+	/** Tried first, in this order, until the player has seen it once. */
+	private static final List<String> FIRST_SIGHTINGS = List.of("distant", "hallway", "watcher");
+
 	/** Minutes until the Director next tries something, for the current act. */
 	private static double[] intervalMinutes(int act) {
 		return switch (act) {
-			case 1 -> new double[]{5.0, 9.0};
-			case 2 -> new double[]{3.5, 7.0};
-			case 3 -> new double[]{2.5, 5.5};
-			default -> new double[]{2.0, 4.5};
+			case 1 -> new double[]{1.5, 3.0};
+			case 2 -> new double[]{1.2, 2.5};
+			case 3 -> new double[]{1.0, 2.2};
+			default -> new double[]{0.8, 1.8};
 		};
 	}
 
@@ -276,8 +280,9 @@ public final class Director {
 		Map<HorrorEvent.Tier, Double> w = new EnumMap<>(HorrorEvent.Tier.class);
 		switch (act) {
 			case 1 -> {
-				w.put(HorrorEvent.Tier.AMBIENT, 80.0);
-				w.put(HorrorEvent.Tier.MINOR, 20.0);
+				w.put(HorrorEvent.Tier.AMBIENT, 50.0);
+				w.put(HorrorEvent.Tier.MINOR, 40.0);
+				w.put(HorrorEvent.Tier.MAJOR, 10.0);
 			}
 			case 2 -> {
 				w.put(HorrorEvent.Tier.AMBIENT, 40.0);
@@ -298,8 +303,8 @@ public final class Director {
 			}
 		}
 
-		// Up to three times as likely to be something real, after ten quiet minutes.
-		double pressure = 1.0 + 2.0 * Math.min(1.0, Math.max(0, quietSeconds - 240) / 600.0);
+		// Up to three times as likely to be something real, after a few quiet minutes.
+		double pressure = 1.0 + 2.0 * Math.min(1.0, Math.max(0, quietSeconds - 120) / 300.0);
 		w.computeIfPresent(HorrorEvent.Tier.MAJOR, (t, v) -> v * pressure);
 		w.computeIfPresent(HorrorEvent.Tier.PEAK, (t, v) -> v * pressure);
 		w.computeIfPresent(HorrorEvent.Tier.AMBIENT, (t, v) -> v / Math.sqrt(pressure));
@@ -317,6 +322,21 @@ public final class Director {
 		for (HorrorEvent e : Events.all()) {
 			if (!isCandidate(e, ctx, calm)) continue;
 			byTier.computeIfAbsent(e.tier(), t -> new ArrayList<>()).add(e);
+		}
+
+		// Until it has been seen at least once, being seen comes first: far off, then closer.
+		if (d.sightings == 0) {
+			for (String id : FIRST_SIGHTINGS) {
+				for (List<HorrorEvent> pool : byTier.values()) {
+					for (HorrorEvent e : List.copyOf(pool)) {
+						if (e.id().equals(id) && tryBegin(h, e, ctx)) {
+							h.quietSeconds = 0;
+							scheduleAfter(h, e, random, cfg);
+							return;
+						}
+					}
+				}
+			}
 		}
 
 		HorrorEvent.Tier[] order = pickTierOrder(tierWeights(d.act, h.quietSeconds), byTier.keySet(), random);
@@ -417,11 +437,11 @@ public final class Director {
 		if (e.tier() == HorrorEvent.Tier.PEAK) {
 			d.lastPeakAt = d.playTicks;
 			d.dread = 15f;
-			d.calmUntil = d.playTicks + (long) ((12 + ctx.random.nextInt(9)) * MINUTE / ctx.config.eventFrequency);
+			d.calmUntil = d.playTicks + (long) ((4 + ctx.random.nextInt(4)) * MINUTE / ctx.config.eventFrequency);
 		} else {
 			d.addDread(e.tier().dread);
 			if (e.tier() == HorrorEvent.Tier.MAJOR) {
-				d.calmUntil = Math.max(d.calmUntil, d.playTicks + (long) ((3 + ctx.random.nextInt(3)) * MINUTE / ctx.config.eventFrequency));
+				d.calmUntil = Math.max(d.calmUntil, d.playTicks + (long) ((1 + ctx.random.nextInt(2)) * MINUTE / ctx.config.eventFrequency));
 			}
 		}
 		save.setDirty();

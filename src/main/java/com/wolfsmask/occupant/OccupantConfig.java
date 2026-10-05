@@ -21,14 +21,19 @@ import java.util.List;
 public final class OccupantConfig {
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 	private static final String FILE_NAME = "occupant.json";
+	/** 2: a three-minute grace instead of fifteen. */
+	private static final int CURRENT_VERSION = 2;
 
 	private static OccupantConfig instance = new OccupantConfig();
 
 	/** Master switch. */
 	public boolean enabled = true;
 
+	/** Which defaults this file was written with; older files are brought up to date once. */
+	public int configVersion;   // missing from files older than version 2, so read as 0
+
 	/** Real minutes a player must play before anything at all happens. */
-	public double graceMinutes = 15.0;
+	public double graceMinutes = 3.0;
 
 	/** Multiplies how long each act of the story lasts. 2.0 = slow burn, 0.5 = fast. */
 	public double storyPace = 1.0;
@@ -136,7 +141,12 @@ public final class OccupantConfig {
 			}
 		}
 
-		instance = loaded == null ? new OccupantConfig() : loaded.sanitized();
+		if (loaded == null) {
+			instance = new OccupantConfig();
+			instance.configVersion = CURRENT_VERSION;
+		} else {
+			instance = loaded.sanitized();
+		}
 		save(path);
 	}
 
@@ -153,6 +163,11 @@ public final class OccupantConfig {
 
 	/** Clamp values so a typo in the file can never produce absurd behaviour. */
 	private OccupantConfig sanitized() {
+		if (configVersion < 2) {
+			// The old default kept the first quarter of an hour empty. Only an untouched value moves.
+			if (graceMinutes == 15.0) graceMinutes = 3.0;
+			configVersion = 2;
+		}
 		graceMinutes = clamp(graceMinutes, 0.0, 600.0);
 		storyPace = clamp(storyPace, 0.1, 20.0);
 		eventFrequency = clamp(eventFrequency, 0.1, 10.0);

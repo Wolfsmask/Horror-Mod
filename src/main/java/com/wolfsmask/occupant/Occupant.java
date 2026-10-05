@@ -66,8 +66,10 @@ public final class Occupant implements ModInitializer {
 		Compat.serverToClient().register(ScreenEffectPayload.TYPE, ScreenEffectPayload.CODEC);
 		Compat.serverToClient().register(WhisperPayload.TYPE, WhisperPayload.CODEC);
 
-		// Before any of the world is generated, so the one house is never built twice.
+		// Before any of the world is generated: which houses exist, and whether one has been found.
 		ServerLifecycleEvents.SERVER_STARTING.register(server -> guard("opening the world", () -> House.open(server)));
+		// Only once the world is open is it known where players appear, so only then are houses built.
+		ServerLifecycleEvents.SERVER_STARTED.register(server -> guard("starting the world", () -> House.started(server)));
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> guard("closing the world", House::close));
 		ServerLifecycleEvents.SERVER_STARTED.register(server -> guard("start-up", () -> Director.start(server)));
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> guard("shutdown", Director::stop));

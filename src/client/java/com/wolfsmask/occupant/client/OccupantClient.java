@@ -34,5 +34,6 @@ public final class OccupantClient implements ClientModInitializer {
 		HudElementRegistry.addFirst(Occupant.id("atmosphere"), (graphics, deltaTracker) ->
 				ScreenEffects.renderAtmosphere(graphics, deltaTracker.getGameTimeDeltaPartialTick(false)));
 		TitleAtmosphere.register();
+		QuickWorld.register();
 	}
 }

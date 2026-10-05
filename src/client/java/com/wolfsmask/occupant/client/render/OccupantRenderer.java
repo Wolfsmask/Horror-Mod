@@ -9,34 +9,13 @@ import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.EyesLayer;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
-import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Mth;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 /** Draws the Occupant. Only the haunted player is ever sent the entity, so only they see this. */
 public class OccupantRenderer extends CullingRenderer {
 	private static final Identifier TEXTURE = Occupant.id("textures/entity/occupant.png");
 	private static final Identifier GLOW = Occupant.id("textures/entity/occupant_glow.png");
-	/**
-	 * Its height in blocks, standing up, close to. Seventeen feet, near enough. It does not fit
-	 * in most of the places the story puts it, so it folds down into them rather than shrinking.
-	 */
-	private static final float NEAR_BLOCKS = 4.4f;
-	/**
-	 * Far away there is nothing beside it to measure it against, and it reads as much larger:
-	 * a shape standing above the treeline. Nobody ever sees both at once, which is the point.
-	 */
-	private static final float FAR_BLOCKS = 5.6f;
-	/** However cramped the room, it is never allowed to look like a person. */
-	private static final float MIN_BLOCKS = 2.6f;
-	private static final float NEAR_DISTANCE = 28.0f;
-	private static final float FAR_DISTANCE = 64.0f;
-	/** How far the hips drop, in model pixels, and how far the body bends, when fully folded. */
-	static final float CROUCH_DROP = 26.0f;
-	static final float CROUCH_BEND = 0.95f;
-
 	public OccupantRenderer(EntityRendererProvider.Context ctx) {
 		super(ctx, new OccupantModel(OccupantGeometry.create().bakeRoot()), 0.4f);
 		this.addLayer(new PaleSheen(this));
@@ -53,57 +32,13 @@ public class OccupantRenderer extends CullingRenderer {
 		state.mode = entity.getMode();
 		state.form = entity.getForm();
 		state.seed = entity.getId();
-		state.headroom = headroomAbove(entity);
-		fit(state);
-		LegGait.of(entity).update(entity, state, state.occupantScale, CROUCH_DROP * state.crouch);
+		OccupantFit.fit(entity.level(), state, state.x, state.y, state.z);
+		LegGait.of(entity).update(entity, state, state.occupantScale, OccupantFit.CROUCH_DROP * state.crouch);
 	}
-
-	/**
-	 * Works out how big to draw it and how far it has to fold to fit where it is. It keeps its
-	 * full size if it can by folding down, hips low and body bent over, legs braced out to the
-	 * walls; only if that is still too tall does it get smaller.
-	 */
-	private static void fit(OccupantRenderState state) {
-		float distance = (float) Math.sqrt(state.distanceToCameraSq);
-		float far = Mth.clamp((distance - NEAR_DISTANCE) / (FAR_DISTANCE - NEAR_DISTANCE), 0.0f, 1.0f);
-		float blocks = Mth.lerp(far, NEAR_BLOCKS, FAR_BLOCKS);
-		float room = state.headroom - 0.15f;
-		float crouch = 0.0f;
-		while (crouch < 1.0f && blocks * foldedHeight(crouch) > room) crouch += 0.05f;
-		crouch = Math.min(crouch, 1.0f);
-		float tall = blocks * foldedHeight(crouch);
-		if (tall > room) blocks *= room / tall;
-		blocks = Math.max(blocks, MIN_BLOCKS);
-		state.crouch = crouch;
-		state.occupantScale = blocks * 16.0f / OccupantGeometry.HEIGHT;
-	}
-
-	/** Its height when folded by {@code crouch}, as a fraction of its full height. */
-	private static float foldedHeight(float crouch) {
-		float hips = OccupantGeometry.HIPS_HEIGHT - CROUCH_DROP * crouch;
-		float above = OccupantGeometry.HEIGHT - OccupantGeometry.HIPS_HEIGHT;
-		return (hips + above * Mth.cos(CROUCH_BEND * crouch)) / OccupantGeometry.HEIGHT;
-	}
-
 
 	@Override
 	public Vec3 getRenderOffset(OccupantRenderState state) {
 		return new Vec3(state.offsetX, 0.0, state.offsetZ);
-	}
-
-	/**
-	 * How many blocks of clear space it has to stand up in. It is drawn taller than its hitbox,
-	 * which looks right in the open and would put its head through the ceiling of somebody's
-	 * house, so indoors it simply does not stand to its full height.
-	 */
-	private static float headroomAbove(OccupantEntity entity) {
-		Level level = entity.level();
-		BlockPos feet = entity.blockPosition();
-		for (int i = 0; i < Mth.ceil(FAR_BLOCKS); i++) {
-			BlockPos p = feet.above(i);
-			if (!level.getBlockState(p).getCollisionShape(level, p).isEmpty()) return i;
-		}
-		return 64.0f;                                         // open sky
 	}
 
 	@Override

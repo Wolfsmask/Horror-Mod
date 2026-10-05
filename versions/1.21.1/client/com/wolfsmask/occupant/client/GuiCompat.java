@@ -83,4 +83,9 @@ public final class GuiCompat {
 			}
 		});
 	}
+
+	/** Presses world creation's "Create New World": Enter does the same thing there. */
+	public static void confirmWorldCreation(Screen creation) {
+		creation.keyPressed(257, 0, 0);
+	}
 }

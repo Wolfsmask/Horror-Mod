@@ -100,6 +100,11 @@ final class LegGait {
 			bx += gap.x * (1.0 - k) * pull;
 			bz += gap.z * (1.0 - k) * pull;
 		}
+		// Never drawn inside anything: if the trailing body would be in a wall, it is where the real one is.
+		if (!columnClear(level, bx, real.y, bz)) {
+			bx = real.x;
+			bz = real.z;
+		}
 		body = new Vec3(bx, real.y, bz);
 
 		// Lean into the shove, in its own frame.
@@ -168,9 +173,23 @@ final class LegGait {
 				double lift = Math.sin(Math.PI * f) * Math.min(0.6, from[i].distanceTo(at) * 0.4);
 				at = new Vec3(Mth.lerp(e, from[i].x, at.x), Mth.lerp(e, from[i].y, at.y) + lift, Mth.lerp(e, from[i].z, at.z));
 			}
+			double reach = OccupantGeometry.LEG_LENGTH[i] * px;
+			Vec3 hip = new Vec3(body.x, rootY(i, px, dropPx), body.z);
+			if (at == null) at = dangle(i, level, yaw, reach, hip, now);
 			if (at == null) {
 				state.legPlanted[i] = false;
+				state.legBendSet[i] = false;
 				continue;
+			}
+			// Which way the knee goes: the first way that keeps the whole leg out of the blocks.
+			Vec3 bend = kneeBend(i, level, yaw, px, hip, at);
+			state.legBendSet[i] = bend != null;
+			if (bend != null) {
+				double bx2 = bend.x * c - bend.z * sn;
+				double bz2 = bend.x * sn + bend.z * c;
+				state.legBend[i * 3] = (float) -bx2;
+				state.legBend[i * 3 + 1] = (float) -bend.y;
+				state.legBend[i * 3 + 2] = (float) bz2;
 			}
 			// World to model: undo the renderer's translate, rotation, flip and scale.
 			double wx = at.x - body.x, wy = at.y - body.y, wz = at.z - body.z;
@@ -243,7 +262,7 @@ final class LegGait {
 			Vec3 p = new Vec3(body.x + d.x * t, body.y + height, body.z + d.z * t);
 			if (solidAt(level, p)) {
 				Vec3 face = new Vec3(p.x - d.x * 0.06, p.y, p.z - d.z * 0.06);
-				if (face.distanceTo(hip) <= reach * 0.97) return face;
+				if (face.distanceTo(hip) <= reach * 0.97 && lineClear(level, hip, face)) return face;
 				break;
 			}
 		}
@@ -253,7 +272,7 @@ final class LegGait {
 				Vec3 p = new Vec3(body.x + d.x * 0.6, hipY + up, body.z + d.z * 0.6);
 				if (solidAt(level, p)) {
 					Vec3 face = new Vec3(p.x, Math.floor(p.y) - 0.04, p.z);
-					return face.distanceTo(hip) <= reach * 0.97 ? face : null;
+					return face.distanceTo(hip) <= reach * 0.97 && lineClear(level, hip, face) ? face : null;
 				}
 			}
 			return null;
@@ -273,7 +292,7 @@ final class LegGait {
 				// not on top of anything: no hold there.
 				if (y == top) return null;
 				Vec3 at = new Vec3(g.x, y + shape.max(Direction.Axis.Y), g.z);
-				return at.distanceTo(hip) <= reach * 0.97 ? at : null;
+				return at.distanceTo(hip) <= reach * 0.97 && lineClear(level, hip, at) ? at : null;
 			}
 		}
 		return null;
@@ -291,7 +310,97 @@ final class LegGait {
 		return false;
 	}
 
-	private static boolean solidAt(Level level, Vec3 p) {
+	/**
+	 * Where a leg with nothing to hold hangs: down beside the body, long and limp, slowly feeling
+	 * about, but never into the ground or a wall. Null only if there is no room at all.
+	 */
+	private Vec3 dangle(int i, Level level, double yaw, double reach, Vec3 hip, float now) {
+		Vec3 d = outward(i, yaw);
+		double feel = Math.sin(now * 0.031 + i * 1.7);
+		double out = reach * (0.3 + 0.06 * Math.sin(now * 0.023 + i));
+		double down = reach * (0.8 + 0.08 * feel) * 0.88;
+		for (int tries = 0; tries < 6; tries++) {
+			Vec3 p = new Vec3(hip.x + d.x * out, hip.y - down, hip.z + d.z * out);
+			// Not into the floor: stop just above whatever is under it.
+			for (double y = hip.y; y > p.y; y -= 0.25) {
+				if (solidAt(level, new Vec3(p.x, y, p.z))) {
+					p = new Vec3(p.x, Math.floor(y) + 1.15, p.z);
+					break;
+				}
+			}
+			if (!solidAt(level, p) && lineClear(level, hip, p)) return p;
+			out *= 0.6;                                   // tuck it in closer to the body
+			down *= 0.8;
+		}
+		return null;
+	}
+
+	/**
+	 * The way leg i's knee bends, in the world, or null if none keeps it clear (then it bends the
+	 * usual way). The usual way is out from the body and a little up, like an elbow braced against
+	 * a wall; but bracing against a wall close by, that would put the knee into the wall, so up,
+	 * back, and either side are tried in turn.
+	 */
+	private Vec3 kneeBend(int i, Level level, double yaw, double px, Vec3 hip, Vec3 foot) {
+		double l1 = OccupantGeometry.LEG_UPPER[i] * px;
+		double l2 = (OccupantGeometry.LEG_LENGTH[i] - OccupantGeometry.LEG_UPPER[i]) * px;
+		Vec3 d = outward(i, yaw);
+		Vec3 side = new Vec3(-d.z, 0.0, d.x);
+		Vec3[] tries = {
+				d.add(0.0, 0.3, 0.0), new Vec3(d.x * 0.25, 1.0, d.z * 0.25), d.scale(-1.0).add(0.0, 0.6, 0.0),
+				side.add(0.0, 0.3, 0.0), side.scale(-1.0).add(0.0, 0.3, 0.0), new Vec3(d.x * 0.3, -1.0, d.z * 0.3)};
+		Vec3 best = null;
+		int bestHits = Integer.MAX_VALUE;
+		for (Vec3 k : tries) {
+			Vec3 knee = knee(hip, foot, l1, l2, k);
+			if (knee == null) return null;
+			int hits = 0;
+			for (double t = 0.1; t < 0.95; t += 0.1) {
+				if (solidAt(level, hip.lerp(knee, t))) hits++;
+				if (t < 0.85 && solidAt(level, knee.lerp(foot, t))) hits++;
+			}
+			if (hits == 0) return k;
+			if (hits < bestHits) {
+				bestHits = hits;
+				best = k;
+			}
+		}
+		return best;
+	}
+
+	/** Where the knee of a two-bone leg from {@code hip} to {@code foot} sits, bent towards {@code k}. */
+	private static Vec3 knee(Vec3 hip, Vec3 foot, double l1, double l2, Vec3 k) {
+		Vec3 line = foot.subtract(hip);
+		double dist = line.length();
+		if (dist < 1.0e-3) return null;
+		Vec3 u = line.scale(1.0 / dist);
+		dist = Mth.clamp(dist, Math.abs(l1 - l2) + 0.01, l1 + l2 - 0.01);
+		double along = (l1 * l1 - l2 * l2 + dist * dist) / (2.0 * dist);
+		double off = Math.sqrt(Math.max(0.0, l1 * l1 - along * along));
+		Vec3 n = k.subtract(u.scale(k.dot(u)));
+		if (n.lengthSqr() < 1.0e-6) n = new Vec3(-u.z, 0.0, u.x);
+		if (n.lengthSqr() < 1.0e-6) n = new Vec3(1.0, 0.0, 0.0);
+		n = n.normalize();
+		return hip.add(u.scale(along)).add(n.scale(off));
+	}
+
+	/** Nothing solid on the straight line between two points, short of the last little bit. */
+	private static boolean lineClear(Level level, Vec3 from, Vec3 to) {
+		for (double t = 0.08; t < 0.9; t += 0.08) {
+			if (solidAt(level, from.lerp(to, t))) return false;
+		}
+		return true;
+	}
+
+	/** Room for the body where it is drawn, from its feet to above its hips. */
+	private static boolean columnClear(Level level, double x, double y, double z) {
+		for (double h = 0.3; h <= 2.7; h += 0.6) {
+			if (solidAt(level, new Vec3(x, y + h, z))) return false;
+		}
+		return true;
+	}
+
+	static boolean solidAt(Level level, Vec3 p) {
 		BlockPos pos = BlockPos.containing(p);
 		VoxelShape shape = level.getBlockState(pos).getCollisionShape(level, pos);
 		if (shape.isEmpty()) return false;

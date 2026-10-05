@@ -568,6 +568,8 @@ public final class OccupantGeometry {
 \tpublic static final float[] LEG_LENGTH = {%s};
 \t/** How high each leg leaves the body, above the ground, standing upright, in model pixels. */
 \tpublic static final float[] LEG_ROOT_HEIGHT = {%s};
+\t/** Each leg's thigh, root to knee, in model pixels: where the knee is when the leg is solved. */
+\tpublic static final float[] LEG_UPPER = {%s};
 
 \tprivate OccupantGeometry() {
 \t}
@@ -594,7 +596,8 @@ def write_java(ps, boxes, placed):
                        num(HIPS_HEIGHT).rstrip("f"), LEGS,
                        ", ".join("%.4ff" % a for a, *_ in layout),
                        ", ".join(num(u + l + c) for _a, _y, u, l, c in layout),
-                       ", ".join(num(leg_root_height(r)) for _a, r, _u, _l, _c in layout))]
+                       ", ".join(num(leg_root_height(r)) for _a, r, _u, _l, _c in layout),
+                       ", ".join(num(u) for _a, _r, u, _l, _c in layout))]
     box_at = {}
     for i, (owner, *_rest) in enumerate(boxes):
         box_at.setdefault(owner, []).append(i)

@@ -75,9 +75,9 @@ final class OccupantPose {
 
 		// Folded down into a space too small for it: hips low, body bent over, head held up.
 		float crouch = state.crouch;
-		hips.y += OccupantRenderer.CROUCH_DROP * crouch;
-		spine.xRot += OccupantRenderer.CROUCH_BEND * crouch;
-		neck.xRot -= OccupantRenderer.CROUCH_BEND * 0.75f * crouch;
+		hips.y += OccupantFit.CROUCH_DROP * crouch;
+		spine.xRot += OccupantFit.CROUCH_BEND * crouch;
+		neck.xRot -= OccupantFit.CROUCH_BEND * 0.75f * crouch;
 
 		// Each shove carries it, and the body goes with it and then comes back upright.
 		spine.xRot += state.leanForward * 0.6f;
@@ -173,8 +173,18 @@ final class OccupantPose {
 				ty = py + reach * 0.88f;
 				tz = pz + oz * reach * 0.3f;
 			}
-			// The joint goes out the way the leg points, and only a little up.
-			if (!solve(i, px, py, pz, tx, ty, tz, ox, -0.3f, oz)) {
+			// The joint goes out the way the leg points, and only a little up, unless that would put it
+			// into something: then the way the gait found clear, brought into the spine's frame.
+			float kx = ox, ky = -0.3f, kz = oz;
+			if (state.legBendSet[i]) {
+				float x = state.legBend[i * 3], y = state.legBend[i * 3 + 1], z = state.legBend[i * 3 + 2];
+				float x1 = x * czr - y * szr, y1 = x * szr + y * czr;
+				float x2 = x1 * cyr + z * syr, z2 = -x1 * syr + z * cyr;
+				kx = x2;
+				ky = y1 * cxr - z2 * sxr;
+				kz = y1 * sxr + z2 * cxr;
+			}
+			if (!solve(i, px, py, pz, tx, ty, tz, kx, ky, kz)) {
 				upper[i].xRot = 0.0f;
 				upper[i].yRot = 0.0f;
 				lower[i].xRot = 0.0f;

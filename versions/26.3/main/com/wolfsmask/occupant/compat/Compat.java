@@ -87,4 +87,9 @@ public final class Compat {
 		player.setRespawnPosition(new ServerPlayer.RespawnConfig(
 				LevelData.RespawnData.of(player.level().dimension(), pos, 0.0f, 0.0f), true), false);
 	}
+
+	/** Where players first appear in this world. */
+	public static BlockPos spawnPos(ServerLevel level) {
+		return level.getRespawnData().pos();
+	}
 }

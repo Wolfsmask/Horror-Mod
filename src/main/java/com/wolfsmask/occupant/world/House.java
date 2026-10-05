@@ -7,6 +7,8 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -23,7 +25,7 @@ import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 /**
- * A small abandoned house that turns up on its own in woods and fields, once in each world. Nobody lives in it. There
+ * A small abandoned house that turns up on its own in woods and fields, until somebody finds one. Nobody lives in it. There
  * is a main room you walk straight into, with an old barrel and a table and a little grey light from
  * two windows, and off to the right, through a gap in the inside wall, a long narrow hallway with
  * no windows at all that runs the length of the house into the dark.
@@ -55,47 +57,140 @@ public final class House {
 	private static final int CX = 6;
 	private static final int CZ = 5;
 
-	/** It stands at least this far from the middle of the world, so it is found, not given. */
-	private static final int MIN_DISTANCE = 160;
+	/** It stands at least this far from where players first appear, so it is found, not given. */
+	private static final int MIN_FROM_SPAWN = 240;
+	/** And this far from any other, while there are still more than one. */
+	private static final int MIN_APART = 320;
+	/** Coming this close to any house (one chunk) is finding it. */
+	private static final int FOUND_WITHIN = 16;
+
 	/**
-	 * There is only ever one. Once it has been built anywhere in a world, no other chunk can ever
-	 * build another: the first to claim it wins (world generation runs on several threads at
-	 * once), and a small file in the world folder remembers it across restarts.
+	 * Houses turn up until somebody finds one: once any player has come within a chunk of any of
+	 * them, no new one is ever built in that world. Until the world has finished opening this is
+	 * also shut, so nothing is built before anyone knows where players will appear. A small file in
+	 * the world folder remembers the houses and whether one has been found, across restarts.
 	 */
-	private static final AtomicBoolean BUILT = new AtomicBoolean(true);
+	private static final AtomicBoolean CLOSED = new AtomicBoolean(true);
+	private static final List<BlockPos> HOUSES = new CopyOnWriteArrayList<>();
+	private static volatile boolean found = true;
 	@Nullable
 	private static volatile Path record;
+	@Nullable
+	private static volatile BlockPos spawn;
 
 	private House() {
 	}
 
-	/** Called as a world is opened, before any of it is generated. */
+	/** Called as a world is opened, before any of it is generated. Nothing is built yet. */
 	public static void open(MinecraftServer server) {
 		Path file = server.getWorldPath(LevelResource.ROOT).resolve("occupant_house.txt");
 		record = file;
-		BUILT.set(Files.exists(file));
+		HOUSES.clear();
+		found = false;
+		CLOSED.set(true);
+		if (Files.exists(file)) {
+			try {
+				List<String> lines = Files.readAllLines(file);
+				boolean anyHouse = false;
+				boolean oldFormat = false;
+				for (String line : lines) {
+					String[] p = line.trim().split("\\s+");
+					if (p.length == 1 && p[0].equals("found")) found = true;
+					if (p.length == 4 && p[0].equals("house")) {
+						HOUSES.add(new BlockPos(Integer.parseInt(p[1]), Integer.parseInt(p[2]), Integer.parseInt(p[3])));
+						anyHouse = true;
+					}
+					if (p.length == 3) {   // written by 0.13 and earlier: one house, and that was that
+						HOUSES.add(new BlockPos(Integer.parseInt(p[0]), Integer.parseInt(p[1]), Integer.parseInt(p[2])));
+						oldFormat = true;
+					}
+				}
+				if (oldFormat && !anyHouse) found = true;
+			} catch (IOException | RuntimeException e) {
+				com.wolfsmask.occupant.Occupant.LOGGER.warn("Could not read where the houses are; building no more", e);
+				found = true;
+			}
+		}
+	}
+
+	/** Called once the world is open and its spawn is settled: from now on, houses may be built. */
+	public static void started(MinecraftServer server) {
+		spawn = com.wolfsmask.occupant.compat.Compat.spawnPos(server.overworld());
+		CLOSED.set(found);
 	}
 
 	/** Called as a world is closed: nothing may build a house with no world to record it in. */
 	public static void close() {
-		BUILT.set(true);
+		CLOSED.set(true);
 		record = null;
+		spawn = null;
+		HOUSES.clear();
 	}
 
-	/** Whether this world's one house has been built yet. */
-	public static boolean built() {
-		return BUILT.get();
+	/** Whether this world will build no more houses: one has been found, or no world is open. */
+	public static boolean closed() {
+		return CLOSED.get();
 	}
 
-	private static void remember(BlockPos where) {
+	/** Every house built in this world so far. */
+	public static List<BlockPos> houses() {
+		return List.copyOf(HOUSES);
+	}
+
+	/** Has anyone found a house in this world yet? */
+	public static boolean found() {
+		return found;
+	}
+
+	/**
+	 * Checks whether {@code player} has just come within a chunk of a house. The first time anyone
+	 * does, the world stops building them. Cheap: a handful of distance checks.
+	 */
+	public static void noticeNear(BlockPos feet) {
+		if (found) return;
+		for (BlockPos h : HOUSES) {
+			long dx = h.getX() - feet.getX();
+			long dz = h.getZ() - feet.getZ();
+			if (dx * dx + dz * dz <= (long) (FOUND_WITHIN + CX) * (FOUND_WITHIN + CX)) {
+				markFound();
+				return;
+			}
+		}
+	}
+
+	/** No more houses in this world, from now on. */
+	public static synchronized void markFound() {
+		if (found) return;
+		found = true;
+		CLOSED.set(true);
+		save();
+	}
+
+	private static synchronized void save() {
 		Path file = record;
 		if (file == null) return;
+		StringBuilder out = new StringBuilder();
+		for (BlockPos h : HOUSES) out.append("house ").append(h.getX()).append(' ').append(h.getY()).append(' ').append(h.getZ()).append('\n');
+		if (found) out.append("found\n");
 		try {
-			Files.writeString(file, where.getX() + " " + where.getY() + " " + where.getZ() + "\n");
+			Files.writeString(file, out.toString());
 		} catch (IOException e) {
-			// Worst case it is forgotten on a restart and a second may appear far away; never fatal.
-			com.wolfsmask.occupant.Occupant.LOGGER.warn("Could not record where the house is", e);
+			// Worst case it is forgotten on a restart and another may appear far away; never fatal.
+			com.wolfsmask.occupant.Occupant.LOGGER.warn("Could not record where the houses are", e);
 		}
+	}
+
+	/** Claims a place for a new house, unless one is too close or the world has stopped building them. */
+	private static synchronized boolean claim(BlockPos base) {
+		if (CLOSED.get()) return false;
+		for (BlockPos h : HOUSES) {
+			long dx = h.getX() - base.getX();
+			long dz = h.getZ() - base.getZ();
+			if (dx * dx + dz * dz < (long) MIN_APART * MIN_APART) return false;
+		}
+		HOUSES.add(base);
+		save();
+		return true;
 	}
 
 	/** Is the player standing on the floor of one of these houses? */
@@ -126,17 +221,19 @@ public final class House {
 			lowest = Math.min(lowest, top);
 			highest = Math.max(highest, top);
 		}
+		if (CLOSED.get()) return false;   // the usual answer, so it comes before any of the work below
 		if (highest - lowest > 3) return false;
 		BlockPos base = new BlockPos(origin.getX(), highest - 1, origin.getZ());   // the floor
 		if (!level.ensureCanWrite(base)) return false;
-		if ((long) origin.getX() * origin.getX() + (long) origin.getZ() * origin.getZ() < (long) MIN_DISTANCE * MIN_DISTANCE) {
-			return false;
-		}
-		// The one and only: whoever gets here first builds it, and nobody else ever will.
-		if (BUILT.get() || !BUILT.compareAndSet(false, true)) return false;
+		BlockPos from = spawn;
+		if (from == null) return false;
+		long sx = origin.getX() - from.getX();
+		long sz = origin.getZ() - from.getZ();
+		if (sx * sx + sz * sz < (long) MIN_FROM_SPAWN * MIN_FROM_SPAWN) return false;
+		// World generation runs on several threads at once: whoever claims the spot builds there.
+		if (!claim(base)) return false;
 
 		build(level, base, rotation, random);
-		remember(base);
 		return true;
 	}
 

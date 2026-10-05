@@ -23,6 +23,9 @@ public class OccupantRenderState extends HumanoidRenderState {
 	public final float[] legTarget = new float[OccupantGeometry.LEGS * 3];
 	/** Whether each leg is planted on something, or hanging free. */
 	public final boolean[] legPlanted = new boolean[OccupantGeometry.LEGS];
+	/** Which way each knee bends to stay out of the blocks, in model space; used where set. */
+	public final float[] legBend = new float[OccupantGeometry.LEGS * 3];
+	public final boolean[] legBendSet = new boolean[OccupantGeometry.LEGS];
 	/** Model pixels to blocks, worked out once per frame. */
 	public float occupantScale = 1.0f;
 }

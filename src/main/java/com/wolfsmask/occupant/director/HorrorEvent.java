@@ -59,8 +59,9 @@ public abstract class HorrorEvent {
 		return weight;
 	}
 
+	/** How long before it can happen again. Half its listed minutes: the story keeps moving. */
 	public final long cooldownTicks() {
-		return cooldownMinutes * 1200L;
+		return cooldownMinutes * 600L;
 	}
 
 	/** Is this event switched on in the config? */

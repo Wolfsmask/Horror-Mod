@@ -208,26 +208,36 @@ public final class OccupantGameTests {
 	}
 
 	/**
-	 * There is only one house in a world. Once it has been built, nothing can build another,
-	 * however far away and however suitable the ground.
+	 * Houses keep turning up, well apart, until somebody comes within a chunk of one. From then
+	 * on, nothing builds another, however far away and however suitable the ground.
 	 */
 	@GameTest(maxTicks = 40)
-	public void onlyOneHouseEverGenerates(GameTestHelper helper) {
+	public void housesStopOnceOneIsFound(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		BlockPos first = helper.absolutePos(new BlockPos(0, 1, 0)).offset(600, 0, 0);
-		BlockPos second = first.offset(0, 0, 200);
-		for (BlockPos at : List.of(first, second)) {
+		BlockPos tooClose = first.offset(0, 0, 100);
+		BlockPos second = first.offset(0, 0, 400);
+		BlockPos third = first.offset(0, 0, 800);
+		for (BlockPos at : List.of(first, tooClose, second, third)) {
 			for (int dx = -1; dx <= 1; dx++) {
 				for (int dz = -1; dz <= 1; dz++) level.getChunk((at.getX() >> 4) + dx, (at.getZ() >> 4) + dz);
 			}
 		}
-		boolean builtBefore = House.built();
+		boolean foundBefore = House.found();
 		boolean a = House.tryPlace(level, level.getRandom(), first);
-		boolean b = House.tryPlace(level, level.getRandom(), second);
-		Occupant.LOGGER.info("[gametest] houses: already built {}, first {}, second {}", builtBefore, a, b);
-		helper.assertTrue(builtBefore || a, "On open flat ground far from the middle, the first house should be built");
-		helper.assertTrue(!b, "A second house must never be built in the same world");
-		helper.assertTrue(House.built(), "The world should now remember that its house exists");
+		boolean b = House.tryPlace(level, level.getRandom(), tooClose);
+		boolean c = House.tryPlace(level, level.getRandom(), second);
+		House.noticeNear(first.offset(10, 1, 4));          // a player walks up to the first one
+		boolean d = House.tryPlace(level, level.getRandom(), third);
+		Occupant.LOGGER.info("[gametest] houses: found before {}, first {}, too close {}, second {}, after finding {}",
+				foundBefore, a, b, c, d);
+		if (!foundBefore) {
+			helper.assertTrue(a, "On open flat ground far from spawn, a house should be built");
+			helper.assertTrue(!b, "Never two houses close together");
+			helper.assertTrue(c, "Until one has been found, another far enough away may be built");
+		}
+		helper.assertTrue(House.found(), "Walking up to a house should count as finding it");
+		helper.assertTrue(!d, "Once a house has been found, no other may ever be built");
 		helper.succeed();
 	}
 

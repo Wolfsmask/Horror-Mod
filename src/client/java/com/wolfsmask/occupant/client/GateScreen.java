@@ -33,6 +33,7 @@ public final class GateScreen extends Screen {
 	private static boolean accepted;
 	private static Boolean configured;
 	private static boolean drawn;
+	private static GateScreen current;
 
 	private boolean hoverEnter;
 	private boolean hoverLeave;
@@ -65,9 +66,15 @@ public final class GateScreen extends Screen {
 		return showing;
 	}
 
+	/** The gate on screen now, if any, for the automated test. */
+	public static GateScreen current() {
+		return current;
+	}
+
 	@Override
 	protected void init() {
 		showing = true;
+		current = this;
 		TitleAtmosphere.opened();
 	}
 
@@ -79,6 +86,7 @@ public final class GateScreen extends Screen {
 	@Override
 	public void removed() {
 		showing = false;
+		if (current == this) current = null;
 		TitleAtmosphere.closed(this.minecraft);
 	}
 
@@ -104,12 +112,12 @@ public final class GateScreen extends Screen {
 		TitleAtmosphere.drawScene(g, w, h, h);
 
 		// The way in.
-		float scale = Math.max(2f, Math.min(3f, w / 220f));
+		float scale = enterScale();
 		int tw = Math.round(this.font.width(ENTER) * scale);
 		int th = Math.round(this.font.lineHeight * scale);
 		int tx = (w - tw) / 2;
 		int ty = Math.round(h * 0.58f);
-		boolean over = mouseX >= tx - 12 && mouseX <= tx + tw + 12 && mouseY >= ty - 8 && mouseY <= ty + th + 8;
+		boolean over = inside(enterBox(), mouseX, mouseY);
 		if (over != hoverEnter) {
 			hoverEnter = over;
 			hoverSince = System.currentTimeMillis();
@@ -160,32 +168,73 @@ public final class GateScreen extends Screen {
 		int lw = this.font.width(LEAVE);
 		int lx = (w - lw) / 2;
 		int ly = h - 22;
-		hoverLeave = mouseX >= lx - 6 && mouseX <= lx + lw + 6 && mouseY >= ly - 4 && mouseY <= ly + this.font.lineHeight + 4;
+		hoverLeave = inside(leaveBox(), mouseX, mouseY);
 		int grey = hoverLeave ? 0x8C8478 : 0x3E3A36;
 		GuiCompat.text(g, this.font, LEAVE, lx, ly, 0xFF000000 | grey);
 	}
 
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-		if (event.button() != 0) return super.mouseClicked(event, doubleClick);
-		if (hoverEnter) {
-			enter();
-			return true;
-		}
-		if (hoverLeave) {
-			leave();
-			return true;
+		// Decided from where the click is, not from what was last drawn: the two are not always in
+		// step, and a click that lands on the words must always count.
+		double x = event.x();
+		double y = event.y();
+		if (event.button() == 0) {
+			boolean onEnter = inside(enterBox(), x, y);
+			boolean onLeave = inside(leaveBox(), x, y);
+			Occupant.LOGGER.info("[client] gate clicked at {}, {}: {}", Math.round(x), Math.round(y),
+					onEnter ? "create world" : onLeave ? "leave it alone" : "nothing");
+			if (onEnter) {
+				enter();
+				return true;
+			}
+			if (onLeave) {
+				leave();
+				return true;
+			}
 		}
 		return super.mouseClicked(event, doubleClick);
 	}
 
-	/** Make a world for it. Backing out of world creation comes back here, not to the menu. */
+	private float enterScale() {
+		return Math.max(2f, Math.min(3f, this.width / 220f));
+	}
+
+	/** Where CREATE WORLD can be clicked: left, top, right, bottom, in screen coordinates. */
+	private int[] enterBox() {
+		float scale = enterScale();
+		int tw = Math.round(this.font.width(ENTER) * scale);
+		int th = Math.round(this.font.lineHeight * scale);
+		int tx = (this.width - tw) / 2;
+		int ty = Math.round(this.height * 0.58f);
+		return new int[]{tx - 12, ty - 8, tx + tw + 12, ty + th + 8};
+	}
+
+	/** Where "or leave it alone" can be clicked. */
+	private int[] leaveBox() {
+		int lw = this.font.width(LEAVE);
+		int lx = (this.width - lw) / 2;
+		int ly = this.height - 22;
+		return new int[]{lx - 6, ly - 4, lx + lw + 6, ly + this.font.lineHeight + 4};
+	}
+
+	private static boolean inside(int[] box, double x, double y) {
+		return x >= box[0] && x <= box[2] && y >= box[1] && y <= box[3];
+	}
+
+	/** For the automated test: the middle of either choice, in screen coordinates. */
+	public double[] centreOf(boolean enter) {
+		int[] b = enter ? enterBox() : leaveBox();
+		return new double[]{(b[0] + b[2]) / 2.0, (b[1] + b[3]) / 2.0};
+	}
+
+	/** Make a world for it, straight away. If that is cancelled, it comes back here, not to the menu. */
 	private void enter() {
 		passed = true;
 		accepted = true;
 		setHaunting(true);
 		Minecraft mc = this.minecraft;
-		GuiCompat.createWorld(mc, () -> {
+		QuickWorld.begin(mc, () -> {
 			passed = false;
 			mc.setScreenAndShow(new GateScreen());
 		});

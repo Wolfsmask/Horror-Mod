@@ -50,7 +50,28 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 		shoot(context, "occupant-gate");
 		context.waitTicks(280);
 		shoot(context, "occupant-gate-later");
-		// Through it, as if CREATE WORLD were chosen, to the title screen behind it.
+		// A real click on "or leave it alone": the game's own menu, with the haunting off.
+		clickGate(context, false);
+		context.waitTicks(20);
+		check(context.computeOnClient(mc -> !GateScreen.showing() && GateScreen.passed() && !GateScreen.accepted()),
+				"clicking 'or leave it alone' should leave the gate for the game's own menu");
+		shoot(context, "occupant-left-alone");
+
+		// Back to the gate, and a real click on CREATE WORLD: straight into a new world, no settings.
+		context.runOnClient(mc -> mc.setScreenAndShow(new GateScreen()));
+		context.waitTicks(20);
+		clickGate(context, true);
+		context.waitFor(mc -> mc.level != null, 20 * 60 * 5);
+		context.waitTicks(100);
+		shoot(context, "occupant-quick-world");
+		// And out again, the way a player leaves.
+		context.getInput().pressKey(KEY_ESCAPE);
+		context.waitTicks(10);
+		context.clickScreenButton("menu.returnToMenu");
+		context.waitFor(mc -> mc.level == null, 20 * 60 * 2);
+		context.waitTicks(40);
+
+		// Through the gate, as if CREATE WORLD were chosen, to the title screen behind it.
 		context.runOnClient(GateScreen::passForTest);
 		context.waitTicks(40);
 		shoot(context, "occupant-title");
@@ -237,6 +258,22 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 	static int seen(Minecraft mc) {
 		if (mc.level == null || mc.player == null) return 0;
 		return mc.level.getEntitiesOfClass(OccupantEntity.class, mc.player.getBoundingBox().inflate(48)).size();
+	}
+
+	private static final int KEY_ESCAPE = 256;
+
+	/** Moves the real mouse onto one of the gate's two choices and clicks it. */
+	private static void clickGate(ClientGameTestContext context, boolean enter) {
+		double[] at = context.computeOnClient(mc -> {
+			GateScreen gate = GateScreen.current();
+			check(gate != null, "the gate should be on screen to click");
+			double[] c = gate.centreOf(enter);
+			double scale = mc.getWindow().getGuiScale();
+			return new double[]{c[0] * scale, c[1] * scale};
+		});
+		context.getInput().setCursorPos(at[0], at[1]);
+		context.waitTicks(5);
+		context.getInput().pressMouse(0);
 	}
 
 	private static void check(boolean ok, String what) {

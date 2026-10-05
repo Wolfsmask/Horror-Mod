@@ -6,6 +6,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -65,4 +66,22 @@ public final class GuiCompat {
 	public static void createWorld(Minecraft mc, Runnable onBack) {
 		CreateWorldScreen.openFresh(mc, onBack);
 	}
+
+	/**
+	 * Presses world creation's "Create New World". Where the game's own names are kept at run
+	 * time (26.x) its handler is called directly; otherwise Enter does the same thing there.
+	 */
+	public static void confirmWorldCreation(Screen creation) {
+		try {
+			java.lang.reflect.Method create = creation.getClass().getDeclaredMethod("onCreate");
+			create.setAccessible(true);
+			create.invoke(creation);
+			return;
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			// Not by that name here: fall back on the key.
+		}
+		creation.keyPressed(new KeyEvent(GLFW_ENTER, 0, 0));
+	}
+
+	private static final int GLFW_ENTER = 257;
 }

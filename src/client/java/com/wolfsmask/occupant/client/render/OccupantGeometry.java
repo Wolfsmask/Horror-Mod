@@ -26,6 +26,8 @@ public final class OccupantGeometry {
 	public static final float[] LEG_LENGTH = {62.11f, 79.74f, 69.28f, 83.91f, 73.44f, 68.97f, 80.60f, 73.13f, 84.77f, 77.30f};
 	/** How high each leg leaves the body, above the ground, standing upright, in model pixels. */
 	public static final float[] LEG_ROOT_HEIGHT = {44.30f, 60.37f, 50.44f, 66.51f, 56.58f, 46.64f, 62.71f, 52.78f, 68.85f, 58.92f};
+	/** Each leg's thigh, root to knee, in model pixels: where the knee is when the leg is solved. */
+	public static final float[] LEG_UPPER = {27.02f, 35.71f, 31.01f, 36.70f, 31.99f, 30.28f, 35.97f, 31.26f, 36.96f, 35.25f};
 
 	private OccupantGeometry() {
 	}

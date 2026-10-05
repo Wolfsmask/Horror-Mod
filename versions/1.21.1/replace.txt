@@ -36,3 +36,5 @@ event.button() -> button
 super.mouseClicked(event, doubleClick) -> super.mouseClicked(mouseX, mouseY, button)
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry; -> import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 regex HudElementRegistry\.add(First|Last)\(Occupant\.id\("\w+"\), -> HudRenderCallback.EVENT.register(
+double x = event.x(); -> double x = mouseX;
+double y = event.y(); -> double y = mouseY;
