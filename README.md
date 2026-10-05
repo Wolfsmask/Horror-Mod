@@ -107,7 +107,7 @@ to you, the sound drops away instead.
 | 1.20.1 | `occupant-<version>+mc1.20.1.jar` | 17+ |
 | 1.21.1 | `occupant-<version>+mc1.21.1.jar` | 21+ |
 | 1.21.11 | `occupant-<version>+mc1.21.11.jar` | 21+ |
-| 26.1, 26.1.1, 26.1.2 | `occupant-<version>+mc26.1.2.jar` | 25 |
+| 26.1.2 (26.1 and 26.1.1 are allowed but untested) | `occupant-<version>+mc26.1.2.jar` | 25 |
 | 26.2 | `occupant-<version>+mc26.2.jar` | 25 |
 | 26.3 | `occupant-<version>+mc26.3.jar` | 25 |
 | 26.4-snapshot-2 | `occupant-<version>+mc26.4-snapshot-2.jar` | 25 |
