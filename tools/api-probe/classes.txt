@@ -1,21 +1,12 @@
-@mc 1.21.1
-# Round 19: the 1.21.1 client.
-net.minecraft.client.gui.GuiGraphics blit|fill|drawString|pose|guiWidth|setColor|flush
-net.minecraft.client.gui.screens.Screen render|Background|mouseClicked|keyPressed
-net.minecraft.client.Minecraft setScreen|screen
-net.fabricmc.fabric.api.client.screen.v1.ScreenEvents
-net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback
-net.minecraft.client.renderer.entity.EntityRenderer shouldRender|getRenderOffset|render|getBoundingBox|getTextureLocation|shouldShowName
-@protected net.minecraft.client.renderer.entity.LivingEntityRenderer scale|setupRotations|shouldShowName|getRenderType|render
-net.minecraft.client.renderer.entity.HumanoidMobRenderer
-net.minecraft.client.renderer.entity.layers.EyesLayer
-net.minecraft.client.renderer.RenderType eyes
-net.minecraft.client.model.HumanoidModel setupAnim|HumanoidModel\(|prepareMobModel
-net.minecraft.client.model.geom.ModelPart resetPose|getAllParts|getInitialPose
-net.minecraft.world.entity.Entity getBoundingBoxForCulling
-net.minecraft.client.resources.sounds.SimpleSoundInstance forUI
-net.minecraft.client.gui.screens.worldselection.CreateWorldScreen openFresh
-net.minecraft.client.renderer.entity.EntityRenderDispatcher distanceToSqr
-net.minecraft.client.DeltaTracker
-net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking registerGlobalReceiver
-@find gametest
+@mc 26.3
+# Round 20: why clicks miss on 26.3, and making a world without the creation screen.
+net.minecraft.client.gui.screens.Screen mouse|click|Click|extract|render
+net.minecraft.client.gui.components.events.ContainerEventHandler mouse|click|Click
+net.minecraft.client.gui.components.events.GuiEventListener mouse|click|Click
+net.minecraft.client.input.MouseButtonEvent
+net.minecraft.client.gui.screens.worldselection.CreateWorldScreen
+@private net.minecraft.client.gui.screens.worldselection.CreateWorldScreen onCreate|create|Create
+net.minecraft.client.gui.screens.worldselection.WorldOpenFlows
+net.minecraft.client.gui.screens.worldselection.WorldCreationUiState
+net.minecraft.client.gui.components.AbstractButton onPress
+@code net.minecraft.client.gui.screens.Screen mouseClicked
