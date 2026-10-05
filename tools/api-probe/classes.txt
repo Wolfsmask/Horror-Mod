@@ -1,6 +1,26 @@
-@mc 26.3
-# Round 17: 26.3 culling and the client test API.
-net.minecraft.client.renderer.entity.EntityRenderer shouldRender|Culling|culling|affected
-@protected net.minecraft.client.renderer.entity.EntityRenderer shouldRender|Culling|culling|affected
-net.fabricmc.fabric.api.client.gametest.v1.context.TestClientLevelContext
+@mc 1.21.11
+# Round 18: the 1.21.11 client.
+net.minecraft.client.gui.GuiGraphics blit|fill|drawString|pose|text|Text
+net.minecraft.client.gui.screens.Screen render|Background|mouseClicked|tick|init|onClose|removed|added|isPauseScreen|shouldClose
+net.minecraft.client.Minecraft setScreen|screen|getWindow|getSoundManager
+net.fabricmc.fabric.api.client.screen.v1.ScreenEvents
+net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry
+net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement
+net.minecraft.client.renderer.entity.EntityRenderer shouldRender|Culling|submit|getRenderOffset|createRenderState|extractRenderState
+@protected net.minecraft.client.renderer.entity.EntityRenderer shouldRender|Culling|getRenderOffset|affected
+net.minecraft.client.renderer.entity.LivingEntityRenderer
+@protected net.minecraft.client.renderer.entity.LivingEntityRenderer setupRotations|scale|getRenderType|isShaking|getFlipDegrees
+net.minecraft.client.renderer.entity.HumanoidMobRenderer
+net.minecraft.client.renderer.entity.layers.EyesLayer
+@find RenderType|RenderPipelines|EyesLayer|GuiGraphics
+net.minecraft.client.renderer.RenderType eyes|entityCutout|entityTranslucent
+net.minecraft.client.renderer.entity.state.HumanoidRenderState
+net.minecraft.client.resources.sounds.SimpleSoundInstance forUI
+net.minecraft.client.gui.screens.worldselection.CreateWorldScreen open
 net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext
+net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext
+net.fabricmc.fabric.api.client.gametest.v1.context.TestClientLevelContext
+net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext
+net.fabricmc.fabric.api.client.gametest.v1.world.TestWorldSave
+net.minecraft.client.model.HumanoidModel setupAnim|<init>|createMesh
+net.minecraft.client.model.geom.ModelPart
