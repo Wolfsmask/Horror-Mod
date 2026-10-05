@@ -1,4 +1,4 @@
-# 26.1.2 on 6e183aa8e18636fe80c5b6fac35e7efb83f49e2b: build success, tests success
+# 26.1.2 on 30c41ba9441660006eb586277476e8f79a6d72d0: build success, tests success
 > Configure project :
 > Task :compileJava
 > Task :processResources
@@ -8,22 +8,22 @@
 > Task :processIncludeJars
 > Task :clientClasses
 > Task :compileTestJava NO-SOURCE
-> Task :processTestResources NO-SOURCE
-> Task :testClasses UP-TO-DATE
 > Task :jar
+> Task :processTestResources NO-SOURCE
 > Task :assemble
+> Task :testClasses UP-TO-DATE
 > Task :test NO-SOURCE
 > Task :validateAccessWidener NO-SOURCE
 > Task :check UP-TO-DATE
 > Task :build
-[21:48:57] [Server thread/INFO] (occupant) [gametest] places without loot: [], page found: true
-[21:48:57] [Server thread/INFO] (occupant) [gametest] houses: found before false, first true, too close false, second true, after finding false
-[21:48:57] [Server thread/INFO] (occupant) [gametest] house test player at BlockPos{x=-2, y=1, z=-4} facing 0.0 / (0.0, -0.0, 1.0)
-[21:48:57] [Server thread/INFO] (occupant) [gametest] house hallway spot: peeking BlockPos{x=-3116710, y=-55, z=-11120509} / any BlockPos{x=-3116710, y=-55, z=-11120509} (relative to the floor: BlockPos{x=4, y=1, z=0})
-[21:48:57] [Server thread/INFO] (occupant) [gametest] hallway light at the far end: block 0 sky 0, dark true
-[21:48:57] [Server thread/INFO] (occupant) [gametest] that spot: mask 1001001001, block light 0, sky 2, main room middle block light 0 sky 8
-[21:48:58] [Server thread/INFO] (occupant) [gametest] field: darkOutside=true skyDarken=7 light=8 skyLight=15 blockLight=0 isDark=true grassInDirtTag=false
-[21:48:58] [Server thread/INFO] (occupant) [gametest] cave: yaw=-90.0 feet=BlockPos{x=-3116365, y=60, z=-11120692} underground=true skyVisible=false skyLight=0 topY=69 light=0 look=(1.0, 0.0, 1.2246468525851679E-16) | ahead: standable=55 dark=55 visible=55
-[21:48:58] [Server thread/INFO] (occupant) [gametest] arena failures: []
-[21:49:00] [Server thread/INFO] (occupant) [gametest] events that found a place to happen: [familiar, cave_noise, breath, fake_join, sign, whisper, doppel_chat, flicker, static, wake]
-[21:49:01] [Server thread/INFO] (Minecraft) ========= 11 GAME TESTS COMPLETE IN 5.654 s ======================
+[22:10:28] [Server thread/INFO] (occupant) [gametest] houses: found before false, first true, too close false, second true, after finding false
+[22:10:28] [Server thread/INFO] (occupant) [gametest] places without loot: [], page found: true
+[22:10:29] [Server thread/INFO] (occupant) [gametest] house test player at BlockPos{x=-2, y=1, z=-4} facing 0.0 / (0.0, -0.0, 1.0)
+[22:10:29] [Server thread/INFO] (occupant) [gametest] house hallway spot: peeking BlockPos{x=1308152, y=-55, z=782840} / any BlockPos{x=1308152, y=-55, z=782840} (relative to the floor: BlockPos{x=4, y=1, z=0})
+[22:10:29] [Server thread/INFO] (occupant) [gametest] hallway light at the far end: block 0 sky 0, dark true
+[22:10:29] [Server thread/INFO] (occupant) [gametest] that spot: mask 1001001001, block light 0, sky 2, main room middle block light 0 sky 8
+[22:10:30] [Server thread/INFO] (occupant) [gametest] field: darkOutside=true skyDarken=7 light=8 skyLight=15 blockLight=0 isDark=true grassInDirtTag=false
+[22:10:30] [Server thread/INFO] (occupant) [gametest] cave: yaw=-90.0 feet=BlockPos{x=1308497, y=60, z=782657} underground=true skyVisible=false skyLight=0 topY=69 light=0 look=(1.0, 0.0, 1.2246468525851679E-16) | ahead: standable=55 dark=55 visible=55
+[22:10:30] [Server thread/INFO] (occupant) [gametest] arena failures: []
+[22:10:34] [Server thread/INFO] (occupant) [gametest] events that found a place to happen: [cave_noise, breath, fake_join, sign, whisper, doppel_chat, flicker, static, wake]
+[22:10:34] [Server thread/INFO] (Minecraft) ========= 11 GAME TESTS COMPLETE IN 8.384 s ======================
