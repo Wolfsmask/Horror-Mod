@@ -1,0 +1,48 @@
+package com.wolfsmask.occupant.world;
+
+import com.wolfsmask.occupant.compat.Compat;
+import net.minecraft.world.item.ItemStack;
+
+import java.util.List;
+
+/**
+ * The survivor's log: the pages somebody kept, the last time it lived in a world. One turns up in
+ * every chest and barrel that nobody has opened, always the next page for whoever opens it, so it
+ * reads in order however the places are found.
+ */
+public final class SurvivorLog {
+	private static final String AUTHOR = "unknown";
+	private static final List<String> PAGES = List.of(
+			"Day 1.\n\nFound this place empty. Door open, food still on the table. Whoever lived here left in a hurry.\n\nI'll stay a night or two.",
+			"Day 3.\n\nThere is someone at the treeline in the evenings. Tall. Too tall.\n\nIt doesn't move when I wave.\n\nI stopped waving.",
+			"Day 4.\n\nTried to count its legs through the window. Lost count.\n\nI keep the light low now.",
+			"Day 6.\n\nIt was closer this morning. Same place it stood yesterday, only closer. As if I had walked towards it in my sleep.",
+			"Day 7.\n\nIf you are reading this, you have the same problem I did.\n\nDon't look at it for long. It gets braver when you look.",
+			"Day 9.\n\nHeard my own footsteps on the path behind me.\n\nI was standing still.",
+			"Day 11.\n\nThe torches by the door were gone when I woke. Set out in a line towards the trees.\n\nPointing at me.",
+			"Day 12.\n\nIt has a face like ours. Mostly.\n\nThe mouth doesn't stop.",
+			"Day 14.\n\nSomeone knocked tonight. Three times, then three more.\n\nNobody else lives within a day's walk of here.",
+			"Day 15.\n\nI tried to leave. Every path came back round to here.\n\nIt is always standing at the edge of what I can see.",
+			"Day 17.\n\nI don't think it wants to kill me.\n\nI think it wants to BE me. It practises my walk at night.",
+			"Day 18.\n\nDon't sleep in the dark rooms. Don't go down the hallway.\n\nIf it is in the hallway, it has already seen you.",
+			"Day ??\n\nIt's watching me write this. I can see it in the window glass.\n\nIt's smiling.\n\nIt's coming.",
+			"it is coming it is coming it is coming it is coming it is coming\n\nit is already here\n\nit is reading this with you");
+
+	private SurvivorLog() {
+	}
+
+	/** How many pages there are before they run out. */
+	public static int length() {
+		return PAGES.size();
+	}
+
+	/** Page {@code n} (from 1) as a written book, for {@code reader}. */
+	public static ItemStack page(int n, String reader) {
+		if (n >= 1 && n <= PAGES.size()) {
+			return Compat.writtenBook("Survivor's log, page " + n, AUTHOR, List.of(PAGES.get(n - 1)));
+		}
+		// The log has run out. What is left is not in the same hand.
+		return Compat.writtenBook("A torn page", AUTHOR, List.of(
+				"The rest of the pages have been torn out.\n\nAt the bottom, very neatly, in a different hand:\n\nI SEE YOU, " + reader.toUpperCase() + "."));
+	}
+}

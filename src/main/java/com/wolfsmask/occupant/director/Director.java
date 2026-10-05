@@ -1,5 +1,7 @@
 package com.wolfsmask.occupant.director;
 
+import com.wolfsmask.occupant.network.ScreenEffectPayload;
+import com.wolfsmask.occupant.util.Cues;
 import com.wolfsmask.occupant.compat.Compat;
 import com.wolfsmask.occupant.Occupant;
 import com.wolfsmask.occupant.OccupantConfig;
@@ -155,6 +157,14 @@ public final class Director {
 
 		if (!eligible) return;
 		h.data.playTicks++;
+
+		// The first time in this world, once they are actually in it: black, and it tells them.
+		if (!h.data.introduced && player.tickCount > 60) {
+			h.data.introduced = true;
+			Cues.effect(player, ScreenEffectPayload.FIRST_ARRIVAL, 240, 1.0f);
+			save.setDirty();
+		}
+		h.unnoticed.tick(player, h);
 
 		if (--h.evalTimer > 0) return;
 		h.evalTimer = 20;

@@ -22,6 +22,13 @@ public final class HauntData {
 	private static final int HISTORY_SIZE = 6;
 	private static final int CHAT_MEMORY = 8;
 
+	/** The later additions, kept together (one codec takes at most sixteen fields). */
+	private static final Codec<int[]> STORY = RecordCodecBuilder.create(i -> i.group(
+			Codec.INT.optionalFieldOf("logsFound", 0).forGetter(a -> a[0]),
+			Codec.INT.optionalFieldOf("ignored", 0).forGetter(a -> a[1]),
+			Codec.BOOL.optionalFieldOf("introduced", false).forGetter(a -> a[2] != 0)
+	).apply(i, (logs, ignored, introduced) -> new int[]{logs, ignored, introduced ? 1 : 0}));
+
 	/** Every field is optional with a default, so old or partial saves always load. */
 	public static final Codec<HauntData> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Codec.INT.optionalFieldOf("act", 0).forGetter(d -> d.act),
@@ -38,7 +45,8 @@ public final class HauntData {
 			Codec.BOOL.optionalFieldOf("paused", false).forGetter(d -> d.paused),
 			Codec.unboundedMap(Codec.STRING, Codec.LONG).optionalFieldOf("cooldowns", Map.of()).forGetter(HauntData::activeCooldowns),
 			Codec.STRING.listOf().optionalFieldOf("history", List.of()).forGetter(d -> new ArrayList<>(d.history)),
-			Codec.STRING.listOf().optionalFieldOf("heardChat", List.of()).forGetter(d -> new ArrayList<>(d.heardChat))
+			Codec.STRING.listOf().optionalFieldOf("heardChat", List.of()).forGetter(d -> new ArrayList<>(d.heardChat)),
+			STORY.optionalFieldOf("story", new int[3]).forGetter(d -> new int[]{d.logsFound, d.ignored, d.introduced ? 1 : 0})
 	).apply(i, HauntData::fromCodec));
 
 	/** 0 = nothing yet, 1 = signs, 2 = presence, 3 = closer, 4 = hunt. */
@@ -65,6 +73,13 @@ public final class HauntData {
 	/** World day on which sleep was last interrupted (so it happens at most once per night). */
 	public long sleepDenyDay = -1;
 
+	/** Pages of the survivor's log this player has found so far. */
+	public int logsFound = 0;
+	/** Times it stood there and the player never noticed: the warnings get worse with each. */
+	public int ignored = 0;
+	/** Whether the player has had the black screen that tells them, on first arriving. */
+	public boolean introduced = false;
+
 	/** Paused by an operator with /occupant pause. */
 	public boolean paused = false;
 
@@ -78,7 +93,7 @@ public final class HauntData {
 	private static HauntData fromCodec(int act, float dread, long playTicks, long actStartedAt, int eventCount,
 									   int actEventCount, int sightings, int encounters, long calmUntil, long lastPeakAt,
 									   long sleepDenyDay, boolean paused, Map<String, Long> cooldowns,
-									   List<String> history, List<String> heardChat) {
+									   List<String> history, List<String> heardChat, int[] story) {
 		HauntData d = new HauntData();
 		d.act = Math.max(0, Math.min(MAX_ACT, act));
 		d.dread = Float.isNaN(dread) ? 0f : Math.max(0f, Math.min(100f, dread));
@@ -95,6 +110,11 @@ public final class HauntData {
 		d.cooldowns.putAll(cooldowns);
 		history.stream().limit(HISTORY_SIZE).forEach(d.history::addLast);
 		heardChat.stream().limit(CHAT_MEMORY).forEach(d.heardChat::addLast);
+		if (story.length >= 3) {
+			d.logsFound = Math.max(0, story[0]);
+			d.ignored = Math.max(0, story[1]);
+			d.introduced = story[2] != 0;
+		}
 		return d;
 	}
 

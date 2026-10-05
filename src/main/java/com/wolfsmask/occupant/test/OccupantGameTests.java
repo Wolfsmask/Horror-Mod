@@ -124,12 +124,16 @@ public final class OccupantGameTests {
 		d.playTicks = 123456;
 		d.sightings = 7;
 		d.encounters = 2;
+		d.logsFound = 5;
+		d.ignored = 3;
+		d.introduced = true;
 		d.recordEvent("watcher", 2400);
 		d.rememberChat("hello there");
 		Tag saved = HauntData.CODEC.encodeStart(NbtOps.INSTANCE, d).getOrThrow();
 		HauntData copy = HauntData.CODEC.parse(NbtOps.INSTANCE, saved).getOrThrow();
 		helper.assertTrue(copy.act == 3 && copy.dread == 42.5f && copy.playTicks == 123456, "Core values should round-trip");
 		helper.assertTrue(copy.sightings == 7 && copy.encounters == 2, "Counters should round-trip");
+		helper.assertTrue(copy.logsFound == 5 && copy.ignored == 3 && copy.introduced, "The story so far should round-trip");
 		helper.assertTrue(copy.isOnCooldown("watcher") && copy.recency("watcher") == 0, "Cooldowns and history should round-trip");
 		helper.assertTrue("hello there".equals(copy.heardChat.peekFirst()), "Remembered chat should round-trip");
 		helper.succeed();
@@ -224,11 +228,11 @@ public final class OccupantGameTests {
 			}
 		}
 		boolean foundBefore = House.found();
-		boolean a = House.tryPlace(level, level.getRandom(), first);
-		boolean b = House.tryPlace(level, level.getRandom(), tooClose);
-		boolean c = House.tryPlace(level, level.getRandom(), second);
+		boolean a = House.tryPlaceHouse(level, level.getRandom(), first);
+		boolean b = House.tryPlaceHouse(level, level.getRandom(), tooClose);
+		boolean c = House.tryPlaceHouse(level, level.getRandom(), second);
 		House.noticeNear(first.offset(10, 1, 4));          // a player walks up to the first one
-		boolean d = House.tryPlace(level, level.getRandom(), third);
+		boolean d = House.tryPlaceHouse(level, level.getRandom(), third);
 		Occupant.LOGGER.info("[gametest] houses: found before {}, first {}, too close {}, second {}, after finding {}",
 				foundBefore, a, b, c, d);
 		if (!foundBefore) {
@@ -238,6 +242,61 @@ public final class OccupantGameTests {
 		}
 		helper.assertTrue(House.found(), "Walking up to a house should count as finding it");
 		helper.assertTrue(!d, "Once a house has been found, no other may ever be built");
+		helper.succeed();
+	}
+
+	/**
+	 * Every kind of place builds, has something left in it, and the first time one of its
+	 * containers is opened, the next page of the survivor's log is in there.
+	 */
+	@GameTest(maxTicks = 60)
+	public void placesHoldLootAndTheLog(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos start = helper.absolutePos(new BlockPos(0, 1, 0)).offset(-640, 0, 0);
+		String[] kinds = {"ruin", "camp", "graves", "cottage"};
+		List<BlockPos> chunks = new java.util.ArrayList<>();
+		for (int i = 0; i < kinds.length; i++) {
+			BlockPos at = start.offset(i * 40, 0, 0);
+			for (int dx = -1; dx <= 1; dx++) {
+				for (int dz = -1; dz <= 1; dz++) {
+					level.setChunkForced((at.getX() >> 4) + dx, (at.getZ() >> 4) + dz, true);
+					chunks.add(new BlockPos((at.getX() >> 4) + dx, 0, (at.getZ() >> 4) + dz));
+				}
+			}
+		}
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		List<String> missing = new java.util.ArrayList<>();
+		boolean pageFound = false;
+		for (int i = 0; i < kinds.length; i++) {
+			BlockPos at = start.offset(i * 40, 0, 0);
+			int top = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, at.getX(), at.getZ());
+			BlockPos base = new BlockPos(at.getX(), top - 1, at.getZ());
+			House.buildPlaceForTest(kinds[i], level, base, level.getRandom());
+			BlockPos box = null;
+			for (BlockPos p : BlockPos.betweenClosed(base.offset(-8, -3, -8), base.offset(8, 10, 8))) {
+				if (level.getBlockEntity(p) instanceof net.minecraft.world.Container && com.wolfsmask.occupant.world.Loot.unopened(p)) {
+					box = p.immutable();
+					break;
+				}
+			}
+			if (box == null) {
+				missing.add(kinds[i]);
+				continue;
+			}
+			net.minecraft.world.Container container = (net.minecraft.world.Container) level.getBlockEntity(box);
+			boolean anything = false;
+			for (int s = 0; s < container.getContainerSize(); s++) anything |= !container.getItem(s).isEmpty();
+			if (!anything) missing.add(kinds[i] + " (empty)");
+			com.wolfsmask.occupant.world.Loot.opening(player, box, container, 1);
+			for (int s = 0; s < container.getContainerSize(); s++) {
+				pageFound |= container.getItem(s).is(net.minecraft.world.item.Items.WRITTEN_BOOK);
+			}
+			helper.assertTrue(!com.wolfsmask.occupant.world.Loot.unopened(box), "An opened container is no longer unopened");
+		}
+		for (BlockPos c : chunks) level.setChunkForced(c.getX(), c.getZ(), false);
+		Occupant.LOGGER.info("[gametest] places without loot: {}, page found: {}", missing, pageFound);
+		helper.assertTrue(missing.isEmpty(), "Every place should have a container with something in it: missing " + missing);
+		helper.assertTrue(pageFound, "Opening a container nobody has opened should put a page of the log in it");
 		helper.succeed();
 	}
 

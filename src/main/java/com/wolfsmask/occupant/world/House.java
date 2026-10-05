@@ -15,6 +15,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.block.BarrelBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CrossCollisionBlock;
 import net.minecraft.world.level.block.Rotation;
@@ -22,7 +23,6 @@ import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.SlabType;
-import net.minecraft.world.level.levelgen.Heightmap;
 
 /**
  * A small abandoned house that turns up on its own in woods and fields, until somebody finds one. Nobody lives in it. There
@@ -88,6 +88,7 @@ public final class House {
 		HOUSES.clear();
 		found = false;
 		CLOSED.set(true);
+		Places.open(server);
 		if (Files.exists(file)) {
 			try {
 				List<String> lines = Files.readAllLines(file);
@@ -122,6 +123,7 @@ public final class House {
 	/** Called as a world is closed: nothing may build a house with no world to record it in. */
 	public static void close() {
 		CLOSED.set(true);
+		Places.close();
 		record = null;
 		spawn = null;
 		HOUSES.clear();
@@ -200,11 +202,33 @@ public final class House {
 	}
 
 	/**
-	 * World generation's attempt to put the house at {@code origin}. Refuses unless the ground is
-	 * fairly flat and dry, it is far enough from the middle of the world, and no house has been
-	 * built in this world yet. Each Minecraft version's own feature class calls this.
+	 * World generation's chance at a place around {@code origin}'s chunk. While no house has been
+	 * found, often a house, and then often a village round it; otherwise a ruin, a camp or a
+	 * graveyard, which keep turning up however much of the story has passed. Each Minecraft
+	 * version's own feature class calls this.
 	 */
 	public static boolean tryPlace(WorldGenLevel level, RandomSource random, BlockPos origin) {
+		BlockPos from = spawn;
+		if (from == null) return false;                       // the world is not open yet
+		// The middle of the chunk: from there a build can reach furthest in every direction.
+		BlockPos centre = new BlockPos((origin.getX() & ~15) + 8, origin.getY(), (origin.getZ() & ~15) + 8);
+		double fromSpawn = Math.sqrt(Math.pow(centre.getX() - from.getX(), 2) + Math.pow(centre.getZ() - from.getZ(), 2));
+		if (!CLOSED.get() && random.nextFloat() < 0.6f && tryPlaceHouse(level, random, centre)) return true;
+		return Places.tryPlace(level, random, centre, fromSpawn);
+	}
+
+	/**
+	 * A house at {@code origin}, and sometimes its village. Refuses unless the ground is fairly
+	 * flat and dry, it is far enough from spawn and from any other house, and nobody has found a
+	 * house in this world yet.
+	 */
+	public static boolean tryPlaceHouse(WorldGenLevel level, RandomSource random, BlockPos origin) {
+		if (CLOSED.get()) return false;                      // the usual answer, before any of the work
+		BlockPos from = spawn;
+		if (from == null) return false;
+		long sx = origin.getX() - from.getX();
+		long sz = origin.getZ() - from.getZ();
+		if (sx * sx + sz * sz < (long) MIN_FROM_SPAWN * MIN_FROM_SPAWN) return false;
 		Rotation rotation = Rotation.getRandom(random);
 
 		// Somewhere fairly flat and dry, or nowhere at all.
@@ -212,28 +236,22 @@ public final class House {
 		int highest = Integer.MIN_VALUE;
 		for (int[] c : new int[][]{{0, 0}, {WIDTH - 1, 0}, {0, DEPTH - 1}, {WIDTH - 1, DEPTH - 1}, {CX, CZ}, {4, -2}}) {
 			BlockPos column = origin.offset(new BlockPos(c[0] - CX, 0, c[1] - CZ).rotate(rotation));
-			// The _WG heightmaps only exist while a chunk is being generated (as it is in real world
-			// generation); placed into a finished world, as the tests do, it reads the live one.
-			Heightmap.Types surface = level instanceof ServerLevel ? Heightmap.Types.WORLD_SURFACE : Heightmap.Types.WORLD_SURFACE_WG;
-			int top = level.getHeight(surface, column.getX(), column.getZ());
+			int top = Places.surface(level, column.getX(), column.getZ());
 			BlockState ground = level.getBlockState(new BlockPos(column.getX(), top - 1, column.getZ()));
-			if (!ground.getFluidState().isEmpty() || ground.is(Blocks.ICE)) return false;
+			BlockState above = level.getBlockState(new BlockPos(column.getX(), top, column.getZ()));
+			if (!ground.getFluidState().isEmpty() || !above.getFluidState().isEmpty() || ground.is(Blocks.ICE)) return false;
 			lowest = Math.min(lowest, top);
 			highest = Math.max(highest, top);
 		}
-		if (CLOSED.get()) return false;   // the usual answer, so it comes before any of the work below
 		if (highest - lowest > 3) return false;
 		BlockPos base = new BlockPos(origin.getX(), highest - 1, origin.getZ());   // the floor
 		if (!level.ensureCanWrite(base)) return false;
-		BlockPos from = spawn;
-		if (from == null) return false;
-		long sx = origin.getX() - from.getX();
-		long sz = origin.getZ() - from.getZ();
-		if (sx * sx + sz * sz < (long) MIN_FROM_SPAWN * MIN_FROM_SPAWN) return false;
 		// World generation runs on several threads at once: whoever claims the spot builds there.
 		if (!claim(base)) return false;
 
 		build(level, base, rotation, random);
+		// Now and then it was not alone: the rest of a village stands round it, as empty as it is.
+		if (random.nextFloat() < 0.55f) Places.village(level, random, base, rotation);
 		return true;
 	}
 
@@ -245,40 +263,29 @@ public final class House {
 		new Builder(level, floor, rotation, random).build();
 	}
 
+	/** For the game tests: a ruin, camp, graves, well or cottage with its middle at {@code base}. */
+	public static void buildPlaceForTest(String kind, WorldGenLevel level, BlockPos base, RandomSource random) {
+		Places.buildForTest(kind, level, base, random);
+	}
+
 	/** Where, in the world, a spot in the house's own coordinates is. */
 	public static BlockPos local(BlockPos floor, Rotation rotation, int x, int y, int z) {
 		return floor.offset(new BlockPos(x - CX, y, z - CZ).rotate(rotation));
 	}
 
 	/** Places blocks in the house's own coordinates: x across the front, z from front to back. */
-	private static final class Builder {
-		private final WorldGenLevel level;
-		private final BlockPos base;
-		private final Rotation rotation;
-		private final RandomSource random;
-
+	private static final class Builder extends Build {
 		Builder(WorldGenLevel level, BlockPos base, Rotation rotation, RandomSource random) {
-			this.level = level;
-			this.base = base;
-			this.rotation = rotation;
-			this.random = random;
+			super(level, base, rotation, random);
 		}
 
-		void put(int x, int y, int z, BlockState state) {
-			BlockPos at = base.offset(new BlockPos(x - CX, y, z - CZ).rotate(rotation));
-			level.setBlock(at, state.rotate(rotation), 2);
+		/** The house's own coordinates start at its front left corner, not its middle. */
+		@Override
+		BlockPos at(int x, int y, int z) {
+			return base.offset(new BlockPos(x - CX, y, z - CZ).rotate(rotation));
 		}
 
-		void fill(int x0, int y0, int z0, int x1, int y1, int z1, BlockState state) {
-			for (int x = x0; x <= x1; x++)
-				for (int y = y0; y <= y1; y++)
-					for (int z = z0; z <= z1; z++) put(x, y, z, state);
-		}
-
-		BlockState old(BlockState clean, BlockState aged, float chance) {
-			return random.nextFloat() < chance ? aged : clean;
-		}
-
+		@Override
 		void build() {
 			BlockState air = Blocks.AIR.defaultBlockState();
 			BlockState planks = Blocks.SPRUCE_PLANKS.defaultBlockState();
@@ -350,7 +357,7 @@ public final class House {
 					Blocks.DARK_OAK_SLAB.defaultBlockState().setValue(SlabBlock.TYPE, SlabType.BOTTOM));
 
 			// What was left behind.
-			put(1, 1, 9, Blocks.BARREL.defaultBlockState());
+			container(1, 1, 9, Blocks.BARREL.defaultBlockState().setValue(BarrelBlock.FACING, Direction.UP), Loot.Kind.HOME);
 			put(1, 1, 8, Blocks.SPRUCE_SLAB.defaultBlockState());
 			put(3, 1, 6, Blocks.SPRUCE_FENCE.defaultBlockState());
 			put(3, 2, 6, Blocks.SPRUCE_PRESSURE_PLATE.defaultBlockState());
@@ -358,7 +365,9 @@ public final class House {
 			put(5, 1, 9, Blocks.BOOKSHELF.defaultBlockState());
 			put(6, 1, 9, Blocks.BOOKSHELF.defaultBlockState());
 			put(6, 2, 9, Blocks.POTTED_DEAD_BUSH.defaultBlockState());
-			put(7, 1, 1, Blocks.FURNACE.defaultBlockState());
+			put(7, 1, 1, facing(Blocks.FURNACE.defaultBlockState(), Direction.SOUTH));   // into the room
+			// At the far end of the dark hallway, something worth walking down it for.
+			container(9, 1, 9, facing(Blocks.CHEST.defaultBlockState(), Direction.NORTH), Loot.Kind.HOME);
 			BlockState web = Blocks.COBWEB.defaultBlockState();
 			put(1, 3, 1, web);
 			put(7, 3, 9, web);
@@ -366,6 +375,9 @@ public final class House {
 			put(9, 3, 4, web);
 			put(10, 3, 7, web);
 			put(10, 1, 9, web);
+
+			// However the ground falls away, there is a way up to the door.
+			steps(4, 0, Direction.NORTH, Blocks.COBBLESTONE_STAIRS, cobble);
 		}
 	}
 }

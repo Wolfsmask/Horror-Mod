@@ -22,6 +22,8 @@ public record ScreenEffectPayload(int effect, int duration, float intensity) imp
 	public static final int STATIC = 2;
 	/** Stop whatever music is playing, as if something is listening. */
 	public static final int SILENCE = 3;
+	/** The first time a player is in a world: a long black, and it tells them they are not alone. */
+	public static final int FIRST_ARRIVAL = 4;
 
 	public static final PacketType<ScreenEffectPayload> TYPE = PacketType.create(Occupant.id("screen_effect"),
 			buf -> new ScreenEffectPayload(buf.readVarInt(), buf.readVarInt(), buf.readFloat()));

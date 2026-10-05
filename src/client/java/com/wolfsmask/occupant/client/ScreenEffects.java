@@ -52,6 +52,15 @@ public final class ScreenEffects {
 			"you are not the first to live here", "it was here before you", "something else lives in this world",
 			"it has been waiting", "it knows this place better than you"};
 	private static String introLine = INTRO_LINES[0];
+	/** How long this way in lasts, and the second line under the first, the first time only. */
+	private static int introLength = INTRO_TICKS;
+	@org.jetbrains.annotations.Nullable
+	private static String introSub;
+	private static final int ARRIVAL_TICKS = 240;
+	private static final String[][] ARRIVAL_LINES = {
+			{"There is something in this world with you.", "It was here first."},
+			{"You are not alone in this world.", "You never were."},
+			{"Something else lives here.", "It has already seen you."}};
 
 	private ScreenEffects() {
 	}
@@ -59,7 +68,18 @@ public final class ScreenEffects {
 	/** On joining a world: a few seconds of black, a line, and then the world, slowly. */
 	public static void joined() {
 		introAge = 0;
+		introLength = INTRO_TICKS;
+		introSub = null;
 		introLine = INTRO_LINES[ThreadLocalRandom.current().nextInt(INTRO_LINES.length)];
+	}
+
+	/** The first time in a world: longer, in black, and it tells you. */
+	private static void arrived() {
+		String[] lines = ARRIVAL_LINES[ThreadLocalRandom.current().nextInt(ARRIVAL_LINES.length)];
+		introAge = 0;
+		introLength = ARRIVAL_TICKS;
+		introLine = lines[0];
+		introSub = lines[1];
 	}
 
 	/**
@@ -104,6 +124,7 @@ public final class ScreenEffects {
 				staticStrength = Mth.clamp(payload.intensity(), 0f, 1f);
 			}
 			case ScreenEffectPayload.SILENCE -> client.getMusicManager().stopPlaying();
+			case ScreenEffectPayload.FIRST_ARRIVAL -> arrived();
 			default -> {
 			}
 		}
@@ -165,7 +186,7 @@ public final class ScreenEffects {
 		float want = Mth.clamp(0.15f + dark * 0.45f + near * 0.5f, 0f, 1f);
 		atmosphere += (want - atmosphere) * 0.05f;
 		nearness += (near - nearness) * 0.08f;
-		if (introAge >= 0 && ++introAge > INTRO_TICKS) introAge = -1;
+		if (introAge >= 0 && ++introAge > introLength) introAge = -1;
 	}
 
 	public static void render(GuiGraphicsExtractor ctx, float tickDelta) {
@@ -192,15 +213,33 @@ public final class ScreenEffects {
 	/** Black, then a line rising out of it and sinking back, then the world fading up. */
 	private static void drawIntro(GuiGraphicsExtractor ctx, int w, int h, float tickDelta) {
 		if (introAge < 0) return;
-		float t = (introAge + tickDelta) / INTRO_TICKS;
-		float black = t < 0.55f ? 1f : Mth.clamp(1f - (t - 0.55f) / 0.45f, 0f, 1f);
+		float t = (introAge + tickDelta) / introLength;
+		boolean arrival = introSub != null;
+		float hold = arrival ? 0.72f : 0.55f;
+		float black = t < hold ? 1f : Mth.clamp(1f - (t - hold) / (1f - hold), 0f, 1f);
 		ctx.fill(0, 0, w, h, ((int) (black * 255f) << 24));
-		float textIn = Mth.clamp((t - 0.08f) / 0.15f, 0f, 1f) * Mth.clamp((0.6f - t) / 0.15f, 0f, 1f);
+		float textIn = Mth.clamp((t - 0.08f) / 0.15f, 0f, 1f) * Mth.clamp((hold + 0.05f - t) / 0.15f, 0f, 1f);
 		if (textIn <= 0.02f || !ClientConfig.get().screenText) return;
-		int v = (int) Mth.lerp(textIn, 10f, 150f);
+		int v = (int) Mth.lerp(textIn, 10f, arrival ? 190f : 150f);
 		Component line = Component.literal(introLine).withStyle(Style.EMPTY.withColor(TextColor.fromRgb(v << 16 | v << 8 | (v + 4))));
 		Font font = Minecraft.getInstance().font;
-		GuiCompat.text(ctx, (w - font.width(introLine)) / 2, h / 2 - 4, line);
+		if (!arrival) {
+			GuiCompat.text(ctx, (w - font.width(introLine)) / 2, h / 2 - 4, line);
+			return;
+		}
+		// The first time: larger, and after a moment a second line under it, in a colour like old blood.
+		float scale = 1.6f;
+		GuiCompat.push(ctx);
+		GuiCompat.translate(ctx, (w - font.width(introLine) * scale) / 2f, h / 2f - 18f);
+		GuiCompat.scale(ctx, scale);
+		GuiCompat.text(ctx, 0, 0, line);
+		GuiCompat.pop(ctx);
+		float subIn = Mth.clamp((t - 0.32f) / 0.12f, 0f, 1f) * Mth.clamp((hold + 0.05f - t) / 0.15f, 0f, 1f);
+		if (subIn > 0.02f) {
+			int r = (int) Mth.lerp(subIn, 10f, 150f);
+			Component sub = Component.literal(introSub).withStyle(Style.EMPTY.withColor(TextColor.fromRgb(r << 16 | (r / 5) << 8 | (r / 6))));
+			GuiCompat.text(ctx, (w - font.width(introSub)) / 2, h / 2 + 8, sub);
+		}
 	}
 
 	/**

@@ -4,6 +4,12 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
@@ -71,5 +77,18 @@ public final class Compat {
 	/** Where players first appear in this world. */
 	public static BlockPos spawnPos(ServerLevel level) {
 		return level.getSharedSpawnPos();
+	}
+
+	/** A finished written book. */
+	public static ItemStack writtenBook(String title, String author, java.util.List<String> pages) {
+		ItemStack book = new ItemStack(Items.WRITTEN_BOOK);
+		CompoundTag tag = book.getOrCreateTag();
+		tag.putString("title", title);
+		tag.putString("author", author);
+		tag.putBoolean("resolved", true);
+		ListTag list = new ListTag();
+		for (String page : pages) list.add(StringTag.valueOf(Component.Serializer.toJson(Component.literal(page))));
+		tag.put("pages", list);
+		return book;
 	}
 }

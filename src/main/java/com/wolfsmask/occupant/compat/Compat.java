@@ -11,6 +11,12 @@ import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.server.network.Filterable;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.WrittenBookContent;
+
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.storage.LevelData;
@@ -89,5 +95,14 @@ public final class Compat {
 	/** Where players first appear in this world. */
 	public static BlockPos spawnPos(ServerLevel level) {
 		return level.getRespawnData().pos();
+	}
+
+	/** A finished written book. */
+	public static ItemStack writtenBook(String title, String author, java.util.List<String> pages) {
+		ItemStack book = new ItemStack(Items.WRITTEN_BOOK);
+		java.util.List<Filterable<Component>> content = new java.util.ArrayList<>();
+		for (String page : pages) content.add(Filterable.<Component>passThrough(Component.literal(page)));
+		book.set(DataComponents.WRITTEN_BOOK_CONTENT, new WrittenBookContent(Filterable.passThrough(title), author, 0, content, true));
+		return book;
 	}
 }

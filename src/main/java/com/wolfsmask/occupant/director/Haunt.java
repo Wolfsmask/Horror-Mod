@@ -41,6 +41,9 @@ public final class Haunt {
 	BlockPos lastHouse;
 	long lastHouseTick;
 	long houseRetryAt;
+	/** Watches for it standing in plain view without being noticed. */
+	final Unnoticed unnoticed = new Unnoticed();
+
 	/** Whether the last snapshot was taken at night (used only for pacing). */
 	boolean lastSituationWasNight;
 

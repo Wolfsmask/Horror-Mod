@@ -10,6 +10,12 @@ import com.wolfsmask.occupant.registry.ModEntities;
 import com.wolfsmask.occupant.registry.ModSounds;
 import com.wolfsmask.occupant.world.House;
 import com.wolfsmask.occupant.world.ModWorld;
+import com.wolfsmask.occupant.director.HauntData;
+import com.wolfsmask.occupant.world.Loot;
+import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.Container;
+import net.minecraft.world.InteractionResult;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents;
@@ -67,10 +73,16 @@ public final class Occupant implements ModInitializer {
 		Compat.serverToClient().register(WhisperPayload.TYPE, WhisperPayload.CODEC);
 
 		// Before any of the world is generated: which houses exist, and whether one has been found.
-		ServerLifecycleEvents.SERVER_STARTING.register(server -> guard("opening the world", () -> House.open(server)));
+		ServerLifecycleEvents.SERVER_STARTING.register(server -> guard("opening the world", () -> {
+			House.open(server);
+			Loot.open(server);
+		}));
 		// Only once the world is open is it known where players appear, so only then are houses built.
 		ServerLifecycleEvents.SERVER_STARTED.register(server -> guard("starting the world", () -> House.started(server)));
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> guard("closing the world", House::close));
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> guard("closing the world", () -> {
+			House.close();
+			Loot.close();
+		}));
 		ServerLifecycleEvents.SERVER_STARTED.register(server -> guard("start-up", () -> Director.start(server)));
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> guard("shutdown", Director::stop));
 		ServerTickEvents.END_SERVER_TICK.register(server -> guard("the server tick", () -> {
@@ -99,6 +111,23 @@ public final class Occupant implements ModInitializer {
 			Director director = Director.get();
 			if (director != null && entity instanceof ServerPlayer player) director.noteWoke(player);
 		}));
+
+		// Opening a chest or barrel nobody has opened before: the next page of the survivor's log is in it.
+		UseBlockCallback.EVENT.register((player, world, hand, hit) -> {
+			if (!world.isClientSide() && player instanceof ServerPlayer sp) {
+				BlockPos pos = hit.getBlockPos();
+				if (Loot.unopened(pos)) guard("opening a container", () -> {
+					Director director = Director.get();
+					if (director != null && world.getBlockEntity(pos) instanceof Container box) {
+						HauntData data = director.data(sp);
+						data.logsFound++;
+						Loot.opening(sp, pos, box, data.logsFound);
+						director.markDirty();
+					}
+				});
+			}
+			return InteractionResult.PASS;
+		});
 
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
 				guard("registering commands", () -> OccupantCommand.register(dispatcher)));
