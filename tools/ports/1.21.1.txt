@@ -1,151 +1,184 @@
-# 1.21.1 on 9510ba7017a4c843eda90eef4affffd83e232f5c: build failure, tests skipped
+# 1.21.1 on a6c965b1db1697f31e534cd203431b50fa48c2b9: build failure, tests skipped
+com/wolfsmask/occupant/entity/OccupantEntity.java:20: error: cannot find symbol
+  symbol:   class EntitySpawnReason
+  location: package net.minecraft.world.entity
+com/wolfsmask/occupant/entity/OccupantEntity.java:100: error: cannot find symbol
+  symbol:   class EntitySpawnReason
+  location: class OccupantEntity
+com/wolfsmask/occupant/director/Haunt.java:12: error: cannot find symbol
+  symbol:   class EntitySpawnReason
+  location: package net.minecraft.world.entity
+com/wolfsmask/occupant/director/OccupantSaveData.java:10: error: cannot find symbol
+  symbol:   class SavedDataType
+  location: package net.minecraft.world.level.saveddata
+com/wolfsmask/occupant/director/OccupantSaveData.java:23: error: cannot find symbol
+  symbol:   class SavedDataType
+  location: class OccupantSaveData
+com/wolfsmask/occupant/test/ArenaGameTests.java:10: error: cannot find symbol
+  symbol:   class GameTest
+  location: package net.fabricmc.fabric.api.gametest.v1
+com/wolfsmask/occupant/test/OccupantGameTests.java:13: error: cannot find symbol
+  symbol:   class GameTest
+  location: package net.fabricmc.fabric.api.gametest.v1
+com/wolfsmask/occupant/compat/Compat.java:12: error: cannot find symbol
+  symbol:   class SavedDataType
+  location: package net.minecraft.world.level.saveddata
+com/wolfsmask/occupant/compat/Compat.java:52: error: cannot find symbol
+  symbol:   class SavedDataType
+  location: class Compat
+com/wolfsmask/occupant/command/OccupantCommand.java:26: error: cannot find symbol
+  symbol:   class EntitySpawnReason
+  location: package net.minecraft.world.entity
+com/wolfsmask/occupant/test/ArenaGameTests.java:41: error: cannot find symbol
+  symbol:   class GameTest
+  location: class ArenaGameTests
+com/wolfsmask/occupant/test/OccupantGameTests.java:42: error: cannot find symbol
+  symbol:   class GameTest
+  location: class OccupantGameTests
+com/wolfsmask/occupant/test/OccupantGameTests.java:57: error: cannot find symbol
+  symbol:   class GameTest
+  location: class OccupantGameTests
+com/wolfsmask/occupant/test/OccupantGameTests.java:88: error: cannot find symbol
+  symbol:   class GameTest
+  location: class OccupantGameTests
+com/wolfsmask/occupant/test/OccupantGameTests.java:108: error: cannot find symbol
+  symbol:   class GameTest
+  location: class OccupantGameTests
+com/wolfsmask/occupant/test/OccupantGameTests.java:119: error: cannot find symbol
+  symbol:   class GameTest
+  location: class OccupantGameTests
+com/wolfsmask/occupant/test/OccupantGameTests.java:147: error: cannot find symbol
+  symbol:   class GameTest
+  location: class OccupantGameTests
+com/wolfsmask/occupant/test/OccupantGameTests.java:204: error: cannot find symbol
+  symbol:   class GameTest
+  location: class OccupantGameTests
+com/wolfsmask/occupant/test/OccupantGameTests.java:224: error: cannot find symbol
+  symbol:   class GameTest
+  location: class OccupantGameTests
+com/wolfsmask/occupant/entity/OccupantEntity.java:101: error: cannot find symbol
+  symbol:   variable EntitySpawnReason
+  location: class OccupantEntity
+com/wolfsmask/occupant/entity/OccupantEntity.java:102: error: cannot find symbol
+  symbol:   variable EntitySpawnReason
+  location: class OccupantEntity
+com/wolfsmask/occupant/entity/OccupantEntity.java:103: error: cannot find symbol
+  symbol:   variable EntitySpawnReason
+  location: class OccupantEntity
+com/wolfsmask/occupant/entity/OccupantEntity.java:324: error: method does not override or implement a method from a supertype
+com/wolfsmask/occupant/entity/OccupantEntity.java:335: error: method does not override or implement a method from a supertype
+com/wolfsmask/occupant/entity/OccupantEntity.java:358: error: method does not override or implement a method from a supertype
+com/wolfsmask/occupant/director/EventContext.java:22: error: incompatible types: Level cannot be converted to ServerLevel
+com/wolfsmask/occupant/director/Haunt.java:71: error: incompatible types: Level cannot be converted to ServerLevel
+com/wolfsmask/occupant/director/Haunt.java:95: error: cannot find symbol
+  symbol:   method isDarkOutside()
+  location: variable world of type ServerLevel
+com/wolfsmask/occupant/director/Haunt.java:96: error: cannot find symbol
+  symbol:   method isDarkOutside()
+  location: variable world of type ServerLevel
+com/wolfsmask/occupant/director/Haunt.java:118: error: incompatible types: Level cannot be converted to ServerLevel
+com/wolfsmask/occupant/director/Haunt.java:120: error: cannot find symbol
+  symbol:   variable EntitySpawnReason
+  location: class Haunt
+com/wolfsmask/occupant/director/Haunt.java:125: error: cannot find symbol
+  symbol:   method snapTo(double,double,double,float,float)
+  location: variable e of type OccupantEntity
+com/wolfsmask/occupant/director/events/HallwayEvent.java:64: error: incompatible types: Level cannot be converted to ServerLevel
+com/wolfsmask/occupant/director/events/HallwayEvent.java:107: error: incompatible types: Level cannot be converted to ServerLevel
+com/wolfsmask/occupant/director/events/HuntEvent.java:137: error: cannot find symbol
+  symbol:   method hurtServer(Level,DamageSource,float)
+  location: variable p of type ServerPlayer
+com/wolfsmask/occupant/director/events/FootstepsEvent.java:76: error: incompatible types: Level cannot be converted to ServerLevel
+com/wolfsmask/occupant/director/events/DistantMiningEvent.java:40: error: cannot find symbol
+  symbol:   method getApproximateNearest(double,int,double)
+  location: class Direction
+com/wolfsmask/occupant/director/events/KnockEvent.java:51: error: cannot find symbol
+  symbol:   method getUnitVec3i()
+  location: variable outside of type Direction
+com/wolfsmask/occupant/director/events/KnockEvent.java:80: error: incompatible types: Level cannot be converted to ServerLevel
+com/wolfsmask/occupant/director/events/KnockEvent.java:101: error: cannot find symbol
+  symbol:   method getUnitVec3i()
+  location: variable outside of type Direction
+com/wolfsmask/occupant/director/OccupantSaveData.java:17: error: OccupantSaveData is not abstract and does not override abstract method save(CompoundTag,Provider) in SavedData
+com/wolfsmask/occupant/director/Director.java:189: error: incompatible types: Level cannot be converted to ServerLevel
+com/wolfsmask/occupant/registry/ModEntities.java:30: error: cannot find symbol
+  symbol:   method noLootTable()
+  location: class Builder<OccupantEntity>
+com/wolfsmask/occupant/test/ArenaGameTests.java:91: error: cannot find symbol
+  symbol:   method isDarkOutside()
+  location: variable world of type ServerLevel
+com/wolfsmask/occupant/test/ArenaGameTests.java:158: error: cannot find symbol
+  symbol:   method isDarkOutside()
+  location: variable world of type ServerLevel
+com/wolfsmask/occupant/test/ArenaGameTests.java:161: error: cannot find symbol
+  symbol:   class RespawnConfig
+  location: class ServerPlayer
+com/wolfsmask/occupant/test/ArenaGameTests.java:162: error: cannot find symbol
+  symbol:   variable RespawnData
+  location: interface LevelData
+com/wolfsmask/occupant/test/ArenaGameTests.java:202: error: cannot find symbol
+  symbol:   method snapTo(double,int,double,float,float)
+  location: variable player of type ServerPlayer
+com/wolfsmask/occupant/test/OccupantGameTests.java:62: error: cannot find symbol
+  symbol:   method snapTo(double,int,double,float,float)
+  location: variable player of type ServerPlayer
+com/wolfsmask/occupant/test/OccupantGameTests.java:160: error: cannot find symbol
+  symbol:   method snapTo(double,int,double,float,float)
+  location: variable player of type ServerPlayer
+com/wolfsmask/occupant/test/OccupantGameTests.java:234: error: cannot find symbol
+  symbol:   method snapTo(double,int,double,float,float)
+  location: variable player of type ServerPlayer
+com/wolfsmask/occupant/compat/Compat.java:43: error: cannot find symbol
+  symbol:   method clientboundPlay()
+  location: interface PayloadTypeRegistry
+com/wolfsmask/occupant/compat/Compat.java:48: error: cannot find symbol
+  symbol:   method getOverworldClockTime()
+  location: variable level of type Level
+com/wolfsmask/occupant/compat/Compat.java:53: error: cannot find symbol
+  symbol:   class SavedDataType
+  location: class Compat
+com/wolfsmask/occupant/compat/Compat.java:60: error: cannot find symbol
+  symbol:   variable FIRE
+  location: class PathType
+com/wolfsmask/occupant/compat/Compat.java:61: error: cannot find symbol
+  symbol:   variable FIRE_IN_NEIGHBOR
+  location: class PathType
+com/wolfsmask/occupant/compat/Compat.java:62: error: cannot find symbol
+  symbol:   variable DAMAGING
+  location: class PathType
+com/wolfsmask/occupant/command/OccupantCommand.java:139: error: incompatible types: Level cannot be converted to ServerLevel
+com/wolfsmask/occupant/command/OccupantCommand.java:146: error: cannot find symbol
+  symbol:   variable EntitySpawnReason
+  location: class OccupantCommand
+com/wolfsmask/occupant/command/OccupantCommand.java:153: error: cannot find symbol
+  symbol:   method snapTo(double,double,double,float,float)
+  location: variable e of type OccupantEntity
+com/wolfsmask/occupant/command/OccupantCommand.java:204: error: cannot find symbol
+  symbol:   method hasPermission(int)
+  location: class Commands
+com/wolfsmask/occupant/util/Spots.java:71: error: cannot find symbol
+  symbol:   method getMinY()
+  location: variable world of type ServerLevel
+com/wolfsmask/occupant/util/Spots.java:89: error: cannot find symbol
+  symbol:   method isDarkOutside()
+  location: variable world of type ServerLevel
+com/wolfsmask/occupant/util/Spots.java:94: error: incompatible types: CAP#1 cannot be converted to ServerPlayer
+com/wolfsmask/occupant/util/Spots.java:110: error: incompatible types: Level cannot be converted to ServerLevel
+com/wolfsmask/occupant/util/Spots.java:151: error: cannot find symbol
+  symbol:   class RespawnConfig
+  location: class ServerPlayer
+com/wolfsmask/occupant/util/Spots.java:151: error: cannot find symbol
+  symbol:   method getRespawnConfig()
+  location: variable player of type ServerPlayer
+com/wolfsmask/occupant/util/Sight.java:145: error: method isSolidRender in class BlockStateBase cannot be applied to given types;
+  required: BlockGetter,BlockPos
+  found:    no arguments
+  reason: actual and formal argument lists differ in length
 > Configure project :
 > Task :versionSourcesMain
 > Task :compileJava
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/entity/OccupantEntity.java:20: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/entity/OccupantEntity.java:100: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/Haunt.java:12: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/OccupantSaveData.java:10: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/OccupantSaveData.java:23: error: cannot find symbol
-	public static final SavedDataType<OccupantSaveData> TYPE = Compat.savedData(
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/ArenaGameTests.java:10: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:13: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/compat/Compat.java:12: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/compat/Compat.java:52: error: cannot find symbol
-	public static <T extends SavedData> SavedDataType<T> savedData(String name, Supplier<T> fresh, Codec<T> codec, DataFixTypes fix) {
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/command/OccupantCommand.java:26: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/ArenaGameTests.java:41: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:42: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:57: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:88: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:108: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:119: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:147: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:194: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:214: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/entity/OccupantEntity.java:101: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/entity/OccupantEntity.java:102: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/entity/OccupantEntity.java:103: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/entity/OccupantEntity.java:324: error: method does not override or implement a method from a supertype
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/entity/OccupantEntity.java:335: error: method does not override or implement a method from a supertype
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/entity/OccupantEntity.java:358: error: method does not override or implement a method from a supertype
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/EventContext.java:22: error: incompatible types: Level cannot be converted to ServerLevel
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/Haunt.java:71: error: incompatible types: Level cannot be converted to ServerLevel
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/Haunt.java:95: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/Haunt.java:96: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/Haunt.java:118: error: incompatible types: Level cannot be converted to ServerLevel
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/Haunt.java:120: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/Haunt.java:125: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/events/HallwayEvent.java:63: error: incompatible types: Level cannot be converted to ServerLevel
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/events/HuntEvent.java:137: error: cannot find symbol
-			if (damage > 0) p.hurtServer(p.level(), p.damageSources().generic(), damage);
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/events/FootstepsEvent.java:76: error: incompatible types: Level cannot be converted to ServerLevel
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/events/DistantMiningEvent.java:40: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/events/KnockEvent.java:51: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/events/KnockEvent.java:80: error: incompatible types: Level cannot be converted to ServerLevel
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/events/KnockEvent.java:101: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/OccupantSaveData.java:17: error: OccupantSaveData is not abstract and does not override abstract method save(CompoundTag,Provider) in SavedData
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/Director.java:189: error: incompatible types: Level cannot be converted to ServerLevel
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/registry/ModEntities.java:30: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/ArenaGameTests.java:91: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/ArenaGameTests.java:104: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/ArenaGameTests.java:158: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/ArenaGameTests.java:161: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/ArenaGameTests.java:162: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/ArenaGameTests.java:202: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:60: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:62: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:92: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:158: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:160: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:222: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:224: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/compat/Compat.java:43: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/compat/Compat.java:48: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/compat/Compat.java:53: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/compat/Compat.java:60: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/compat/Compat.java:61: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/compat/Compat.java:62: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/command/OccupantCommand.java:139: error: incompatible types: Level cannot be converted to ServerLevel
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/command/OccupantCommand.java:146: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/command/OccupantCommand.java:153: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/command/OccupantCommand.java:204: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/util/Spots.java:71: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/util/Spots.java:89: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/util/Spots.java:94: error: incompatible types: CAP#1 cannot be converted to ServerPlayer
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/util/Spots.java:110: error: incompatible types: Level cannot be converted to ServerLevel
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/util/Spots.java:151: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/util/Spots.java:151: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/util/Sight.java:145: error: method isSolidRender in class BlockStateBase cannot be applied to given types;
 > Task :compileJava FAILED
 * What went wrong:
 > Compilation failed; see the compiler output below.
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/util/Sight.java:145: error: method isSolidRender in class BlockStateBase cannot be applied to given types;
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/OccupantSaveData.java:17: error: OccupantSaveData is not abstract and does not override abstract method save(CompoundTag,Provider) in SavedData
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/EventContext.java:22: error: incompatible types: Level cannot be converted to ServerLevel
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/Haunt.java:71: error: incompatible types: Level cannot be converted to ServerLevel
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/Haunt.java:118: error: incompatible types: Level cannot be converted to ServerLevel
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/events/HallwayEvent.java:63: error: incompatible types: Level cannot be converted to ServerLevel
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/events/FootstepsEvent.java:76: error: incompatible types: Level cannot be converted to ServerLevel
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/events/KnockEvent.java:80: error: incompatible types: Level cannot be converted to ServerLevel
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/Director.java:189: error: incompatible types: Level cannot be converted to ServerLevel
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/command/OccupantCommand.java:139: error: incompatible types: Level cannot be converted to ServerLevel
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/util/Spots.java:94: error: incompatible types: CAP#1 cannot be converted to ServerPlayer
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/util/Spots.java:110: error: incompatible types: Level cannot be converted to ServerLevel
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/entity/OccupantEntity.java:20: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/entity/OccupantEntity.java:100: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/Haunt.java:12: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/OccupantSaveData.java:10: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/OccupantSaveData.java:23: error: cannot find symbol
-  	public static final SavedDataType<OccupantSaveData> TYPE = Compat.savedData(
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/ArenaGameTests.java:10: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:13: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/compat/Compat.java:12: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/compat/Compat.java:52: error: cannot find symbol
-  	public static <T extends SavedData> SavedDataType<T> savedData(String name, Supplier<T> fresh, Codec<T> codec, DataFixTypes fix) {
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/command/OccupantCommand.java:26: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/ArenaGameTests.java:41: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:42: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:57: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:88: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:108: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:119: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:147: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:194: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:214: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/entity/OccupantEntity.java:101: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/entity/OccupantEntity.java:102: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/entity/OccupantEntity.java:103: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/Haunt.java:120: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/ArenaGameTests.java:161: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/ArenaGameTests.java:162: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/compat/Compat.java:53: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/compat/Compat.java:60: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/compat/Compat.java:61: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/compat/Compat.java:62: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/command/OccupantCommand.java:146: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/util/Spots.java:151: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/entity/OccupantEntity.java:324: error: method does not override or implement a method from a supertype
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/entity/OccupantEntity.java:335: error: method does not override or implement a method from a supertype
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/entity/OccupantEntity.java:358: error: method does not override or implement a method from a supertype
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/ArenaGameTests.java:104: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:60: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:92: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:158: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:222: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/Haunt.java:95: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/Haunt.java:96: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/Haunt.java:125: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/events/HuntEvent.java:137: error: cannot find symbol
-  			if (damage > 0) p.hurtServer(p.level(), p.damageSources().generic(), damage);
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/events/DistantMiningEvent.java:40: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/events/KnockEvent.java:51: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/events/KnockEvent.java:101: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/registry/ModEntities.java:30: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/ArenaGameTests.java:91: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/ArenaGameTests.java:158: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/ArenaGameTests.java:202: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:62: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:160: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:224: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/compat/Compat.java:43: error: cannot find symbol
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
