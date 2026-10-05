@@ -55,6 +55,11 @@ loom {
 			client()
 			name "Client Game Test"
 			vmArg "-Dfabric.client.gametest"
+			// Some versions' client test API stops the game when the mod's own packets go past its
+			// network synchroniser; there it is switched off.
+			if (versionProps.getProperty("client_test_no_sync") == "true") {
+				vmArg "-Dfabric.client.gametest.disableNetworkSynchronizer=true"
+			}
 			runDir "build/clientGametest"
 		}
 	}
