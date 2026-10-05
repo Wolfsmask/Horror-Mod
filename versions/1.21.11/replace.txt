@@ -1,0 +1,6 @@
+# 26.1 renamed the GUI drawing class and the methods that use it. Back to the 1.21.11 names:
+GuiGraphicsExtractor -> GuiGraphics
+public void extractBackground(GuiGraphics -> public void renderBackground(GuiGraphics
+public void extractRenderState(GuiGraphics -> public void render(GuiGraphics
+ScreenEvents.afterExtract( -> ScreenEvents.afterRender(
+g.text(this.font -> g.drawString(this.font

@@ -60,12 +60,31 @@ loom {
 	}
 }
 
-// Version-specific replacements for individual source files.
+// Version-specific sources. Two kinds, both under versions/<group>/:
+//  - <sourceSet>/...: whole files that replace the file of the same path in src/<sourceSet>/java;
+//  - replace.txt: "old -> new" lines, plain text renames applied (in order) to every source file,
+//    for versions where the only difference is what something is called.
+def group = versionProps.getProperty('overrides', mc)
+def renameFile = file("versions/${group}/replace.txt")
+def renames = renameFile.exists() ? renameFile.readLines().findAll { it.contains(' -> ') && !it.startsWith('#') }.collect { it.split(' -> ', 2) as List } : []
 ["main", "client"].each { setName ->
-	def overrides = file("versions/${versionProps.getProperty('overrides', mc)}/${setName}")
+	def overrides = file("versions/${group}/${setName}")
+	def replaced = [] as Set
 	if (overrides.exists()) {
-		def replaced = [] as Set
 		overrides.eachFileRecurse(groovy.io.FileType.FILES) { f -> replaced << overrides.toPath().relativize(f.toPath()).toString().replace('\\', '/') }
+	}
+	if (!renames.isEmpty()) {
+		def out = layout.buildDirectory.dir("versioned/${setName}")
+		def task = tasks.register("versionSources${setName.capitalize()}", Sync) {
+			from("src/${setName}/java") { exclude { e -> replaced.contains(e.relativePath.pathString) } }
+			if (overrides.exists()) from(overrides)
+			into out
+			inputs.file renameFile
+			filteringCharset = 'UTF-8'
+			filter { String line -> renames.inject(line) { l, r -> l.replace(r[0], r[1]) } }
+		}
+		sourceSets[setName].java.setSrcDirs([task])
+	} else if (overrides.exists()) {
 		sourceSets[setName].java {
 			srcDir overrides
 			exclude { e -> !e.file.toPath().startsWith(overrides.toPath()) && replaced.contains(e.relativePath.pathString) }
