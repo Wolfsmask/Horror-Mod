@@ -1,4 +1,4 @@
-# 26.4-snapshot-2 on c57f2a7c01c1b876f716faf27a0ce77a895ec403: build success, tests success
+# 26.4-snapshot-2 on 5e73e82c0f0f848a3028ccd6917305761709e29c: build success, tests success
 > Configure project :
 > Task :compileJava
 > Task :processResources
@@ -11,18 +11,18 @@
 > Task :processTestResources NO-SOURCE
 > Task :testClasses UP-TO-DATE
 > Task :jar
-> Task :assemble
 > Task :test NO-SOURCE
+> Task :assemble
 > Task :validateAccessWidener NO-SOURCE
 > Task :check UP-TO-DATE
 > Task :build
-[00:39:05] [Server thread/INFO] (occupant) [gametest] houses: already built false, first true, second false
-[00:39:07] [Server thread/INFO] (occupant) [gametest] house test player at BlockPos{x=-2, y=1, z=-4} facing 0.0 / (0.0, -0.0, 1.0)
-[00:39:07] [Server thread/INFO] (occupant) [gametest] house hallway spot: peeking BlockPos{x=4284947, y=8, z=-237869} / any BlockPos{x=4284947, y=8, z=-237869} (relative to the floor: BlockPos{x=4, y=1, z=0})
-[00:39:07] [Server thread/INFO] (occupant) [gametest] hallway light at the far end: block 0 sky 0, dark true
-[00:39:07] [Server thread/INFO] (occupant) [gametest] that spot: mask 1001001001, block light 0, sky 2, main room middle block light 0 sky 8
-[00:39:07] [Server thread/INFO] (occupant) [gametest] field: darkOutside=true skyDarken=7 light=8 skyLight=15 blockLight=0 isDark=true grassInDirtTag=false
-[00:39:07] [Server thread/INFO] (occupant) [gametest] cave: yaw=-90.0 feet=BlockPos{x=4285277, y=60, z=-238052} underground=true skyVisible=false skyLight=0 topY=69 light=0 look=(1.0, 0.0, 0.0) | ahead: standable=55 dark=55 visible=55
-[00:39:07] [Server thread/INFO] (occupant) [gametest] arena failures: []
-[00:39:11] [Server thread/INFO] (occupant) [gametest] events that found a place to happen: [familiar, cave_noise, breath, fake_join, whisper, doppel_chat, stalker, flicker, static, wake]
-[00:39:12] [Server thread/INFO] (Minecraft) ========= 10 GAME TESTS COMPLETE IN 10.11 s ======================
+[00:43:59] [Server thread/INFO] (occupant) [gametest] houses: already built false, first true, second false
+[00:44:00] [Server thread/INFO] (occupant) [gametest] house test player at BlockPos{x=-2, y=1, z=-4} facing 0.0 / (0.0, -0.0, 1.0)
+[00:44:00] [Server thread/INFO] (occupant) [gametest] house hallway spot: peeking BlockPos{x=487821, y=8, z=-11945853} / any BlockPos{x=487821, y=8, z=-11945853} (relative to the floor: BlockPos{x=4, y=1, z=0})
+[00:44:00] [Server thread/INFO] (occupant) [gametest] hallway light at the far end: block 0 sky 0, dark true
+[00:44:00] [Server thread/INFO] (occupant) [gametest] that spot: mask 1001001001, block light 0, sky 2, main room middle block light 0 sky 8
+[00:44:01] [Server thread/INFO] (occupant) [gametest] field: darkOutside=true skyDarken=9 light=6 skyLight=15 blockLight=0 isDark=true grassInDirtTag=false
+[00:44:01] [Server thread/INFO] (occupant) [gametest] cave: yaw=-90.0 feet=BlockPos{x=488151, y=60, z=-11946036} underground=true skyVisible=false skyLight=0 topY=69 light=0 look=(1.0, 0.0, 0.0) | ahead: standable=55 dark=55 visible=55
+[00:44:01] [Server thread/INFO] (occupant) [gametest] arena failures: []
+[00:44:04] [Server thread/INFO] (occupant) [gametest] events that found a place to happen: [familiar, cave_noise, breath, fake_join, whisper, doppel_chat, stalker, flicker, static, wake]
+[00:44:04] [Server thread/INFO] (Minecraft) ========= 10 GAME TESTS COMPLETE IN 9.805 s ======================
