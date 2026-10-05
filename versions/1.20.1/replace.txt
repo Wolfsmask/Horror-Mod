@@ -1,7 +1,17 @@
-# Names that changed after this version.
-net.minecraft.resources.Identifier -> net.minecraft.resources.ResourceLocation
-Identifier -> ResourceLocation
-GuiGraphicsExtractor -> GuiGraphics
-public void extractBackground(GuiGraphics -> public void renderBackground(GuiGraphics
-public void extractRenderState(GuiGraphics -> public void render(GuiGraphics
-ScreenEvents.afterExtract( -> ScreenEvents.afterRender(
+# 1.20.1, on top of 1.21.1's renames (which are applied first).
+ResourceLocation.fromNamespaceAndPath( -> new ResourceLocation(
+.eyeHeight(1.74f) -> 
+.getOrThrow() -> .getOrThrow(false, error -> {})
+protected void defineSynchedData(SynchedEntityData.Builder builder) { -> protected void defineSynchedData() {
+super.defineSynchedData(builder); -> super.defineSynchedData();
+builder.define( -> this.entityData.define(
+MobSpawnType reason, @Nullable SpawnGroupData data) { -> MobSpawnType reason, @Nullable SpawnGroupData data, @Nullable net.minecraft.nbt.CompoundTag tag) {
+super.finalizeSpawn(level, difficulty, reason, data); -> super.finalizeSpawn(level, difficulty, reason, data, tag);
+# Client
+deltaTracker.getGameTimeDeltaPartialTick(false) -> deltaTracker
+(payload, context) -> (payload, player, sender)
+context.client() -> net.minecraft.client.Minecraft.getInstance()
+public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float delta) { -> public void renderBackground(GuiGraphics g) {
+# No payload registry: a packet type needs no registering.
+Compat.serverToClient().register(ScreenEffectPayload.TYPE, ScreenEffectPayload.CODEC); -> 
+Compat.serverToClient().register(WhisperPayload.TYPE, WhisperPayload.CODEC); -> 

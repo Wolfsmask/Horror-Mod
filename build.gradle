@@ -65,43 +65,52 @@ loom {
 //  - replace.txt: "old -> new" lines, plain text renames applied (in order) to every source file,
 //    for versions where the only difference is what something is called. A line starting
 //    "regex " is a regular expression instead, with $1 and so on in the replacement.
-def group = versionProps.getProperty('overrides', mc)
+// "overrides" may name several groups, most specific first (1.20.1,1.21.1): a file in an earlier
+// group wins, and the renames of the later, more general groups are applied first.
+def groups = versionProps.getProperty('overrides', mc).split(',').collect { it.trim() }.findAll { it }
 // Source paths (Ant patterns, comma separated) left out entirely, for things a version cannot have.
 def dropped = (versionProps.getProperty('exclude_sources') ?: '').split(',').collect { it.trim() }.findAll { it }
-def renameFile = file("versions/${group}/replace.txt")
-def renames = renameFile.exists() ? renameFile.readLines().findAll { it.contains(' -> ') && !it.startsWith('#') }.collect { line ->
+def renameFiles = groups.reverse().collect { file("versions/${it}/replace.txt") }.findAll { it.exists() }
+def renames = renameFiles.collectMany { it.readLines() }.findAll { it.contains(' -> ') && !it.startsWith('#') }.collect { line ->
 	def regex = line.startsWith('regex ')
 	def parts = (regex ? line.substring(6) : line).split(' -> ', 2)
 	[parts[0], parts[1], regex]
-} : []
+}
 ["main", "client"].each { setName ->
-	def overrides = file("versions/${group}/${setName}")
-	def replaced = [] as Set
-	if (overrides.exists()) {
-		overrides.eachFileRecurse(groovy.io.FileType.FILES) { f -> replaced << overrides.toPath().relativize(f.toPath()).toString().replace('\\', '/') }
+	// Every overridden path, and the group directory that provides it.
+	def provided = [:]
+	groups.each { g ->
+		def dir = file("versions/${g}/${setName}")
+		if (dir.exists()) dir.eachFileRecurse(groovy.io.FileType.FILES) { f ->
+			def path = dir.toPath().relativize(f.toPath()).toString().replace('\\', '/')
+			if (!provided.containsKey(path)) provided[path] = dir
+		}
 	}
-	if (!renames.isEmpty()) {
+	def dirs = groups.collect { file("versions/${it}/${setName}") }.findAll { it.exists() }
+	if (!renames.isEmpty() || dirs.size() > 1) {
 		def out = layout.buildDirectory.dir("versioned/${setName}")
 		def task = tasks.register("versionSources${setName.capitalize()}", Sync) {
 			from("src/${setName}/java") {
-				exclude { e -> replaced.contains(e.relativePath.pathString) }
+				exclude { e -> provided.containsKey(e.relativePath.pathString) }
 				exclude dropped
 			}
-			if (overrides.exists()) from(overrides)
+			dirs.each { dir ->
+				from(dir) { exclude { e -> !e.directory && provided[e.relativePath.pathString] != dir } }
+			}
 			into out
-			inputs.file renameFile
+			renameFiles.each { inputs.file it }
 			filteringCharset = 'UTF-8'
 			filter { String line -> renames.inject(line) { l, r -> r[2] ? l.replaceAll(r[0], r[1]) : l.replace(r[0], r[1]) } }
 		}
 		sourceSets[setName].java.setSrcDirs([task])
-	} else if (overrides.exists()) {
-		sourceSets[setName].java {
-			srcDir overrides
-			exclude { e -> !e.file.toPath().startsWith(overrides.toPath()) && replaced.contains(e.relativePath.pathString) }
+	} else {
+		dirs.each { dir ->
+			sourceSets[setName].java {
+				srcDir dir
+				exclude { e -> !e.file.toPath().startsWith(dir.toPath()) && provided.containsKey(e.relativePath.pathString) }
+			}
 		}
-	}
-	if (renames.isEmpty() && !dropped.isEmpty()) {
-		sourceSets[setName].java.exclude dropped
+		if (!dropped.isEmpty()) sourceSets[setName].java.exclude dropped
 	}
 }
 
