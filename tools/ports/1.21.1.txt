@@ -1,236 +1,31 @@
-# 1.21.1 on 276c800bc1d30a6be946aa9638cf75a0e434af2b: build failure, tests skipped
-com/wolfsmask/occupant/client/ScreenEffects.java:11: error: cannot find symbol
-  symbol:   class RenderPipelines
-  location: package net.minecraft.client.renderer
-com/wolfsmask/occupant/client/render/OccupantRenderer.java:10: error: package net.minecraft.client.renderer.rendertype does not exist
-com/wolfsmask/occupant/client/render/OccupantRenderer.java:11: error: package net.minecraft.client.renderer.rendertype does not exist
-com/wolfsmask/occupant/client/render/OccupantRenderState.java:4: error: package net.minecraft.client.renderer.entity.state does not exist
-com/wolfsmask/occupant/client/render/OccupantRenderState.java:7: error: cannot find symbol
-  symbol: class HumanoidRenderState
-com/wolfsmask/occupant/client/render/CullingRenderer.java:13: error: wrong number of type arguments; required 2
-com/wolfsmask/occupant/client/render/OccupantRenderer.java:135: error: cannot find symbol
-  symbol:   class RenderType
-  location: class PaleSheen
-com/wolfsmask/occupant/client/render/OccupantRenderer.java:142: error: cannot find symbol
-  symbol:   class RenderType
-  location: class PaleSheen
-com/wolfsmask/occupant/client/OccupantClient.java:13: error: package net.fabricmc.fabric.api.client.rendering.v1.hud does not exist
-com/wolfsmask/occupant/client/GateScreen.java:10: error: package net.minecraft.client.input does not exist
-com/wolfsmask/occupant/client/GateScreen.java:164: error: cannot find symbol
-  symbol:   class MouseButtonEvent
-  location: class GateScreen
-com/wolfsmask/occupant/client/test/ForestGallery.java:8: error: package net.fabricmc.fabric.api.client.gametest.v1.context does not exist
-com/wolfsmask/occupant/client/test/ForestGallery.java:9: error: package net.fabricmc.fabric.api.client.gametest.v1.context does not exist
-com/wolfsmask/occupant/client/test/ForestGallery.java:10: error: package net.fabricmc.fabric.api.client.gametest.v1.context does not exist
-com/wolfsmask/occupant/client/test/ForestGallery.java:40: error: cannot find symbol
-  symbol:   class ClientGameTestContext
-  location: class ForestGallery
-com/wolfsmask/occupant/client/test/ForestGallery.java:92: error: cannot find symbol
-  symbol:   class ClientGameTestContext
-  location: class ForestGallery
-com/wolfsmask/occupant/client/test/ForestGallery.java:92: error: cannot find symbol
-  symbol:   class TestSingleplayerContext
-  location: class ForestGallery
-com/wolfsmask/occupant/client/test/ForestGallery.java:133: error: cannot find symbol
-  symbol:   class ClientGameTestContext
-  location: class ForestGallery
-com/wolfsmask/occupant/client/test/ForestGallery.java:133: error: cannot find symbol
-  symbol:   class TestSingleplayerContext
-  location: class ForestGallery
-com/wolfsmask/occupant/client/test/ForestGallery.java:190: error: cannot find symbol
-  symbol:   class TestServerContext
-  location: class ForestGallery
-com/wolfsmask/occupant/client/test/ForestGallery.java:205: error: cannot find symbol
-  symbol:   class TestServerContext
-  location: class ForestGallery
-com/wolfsmask/occupant/client/test/ForestGallery.java:210: error: cannot find symbol
-  symbol:   class TestServerContext
-  location: class ForestGallery
-com/wolfsmask/occupant/client/test/ForestGallery.java:215: error: cannot find symbol
-  symbol:   class ClientGameTestContext
-  location: class ForestGallery
-com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:7: error: package net.fabricmc.fabric.api.client.gametest.v1 does not exist
-com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:8: error: package net.fabricmc.fabric.api.client.gametest.v1.context does not exist
-com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:9: error: package net.fabricmc.fabric.api.client.gametest.v1.context does not exist
-com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:10: error: package net.fabricmc.fabric.api.client.gametest.v1.context does not exist
-com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:11: error: package net.fabricmc.fabric.api.client.gametest.v1.world does not exist
-com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:38: error: cannot find symbol
-  symbol: class FabricClientGameTest
-com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:45: error: cannot find symbol
-  symbol:   class ClientGameTestContext
-  location: class OccupantClientGameTest
-com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:188: error: cannot find symbol
-  symbol:   class ClientGameTestContext
-  location: class OccupantClientGameTest
-com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:188: error: cannot find symbol
-  symbol:   class TestServerContext
-  location: class OccupantClientGameTest
-com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:198: error: cannot find symbol
-  symbol:   class ClientGameTestContext
-  location: class OccupantClientGameTest
-com/wolfsmask/occupant/client/test/TestCompat.java:3: error: package net.fabricmc.fabric.api.client.gametest.v1.context does not exist
-com/wolfsmask/occupant/client/test/TestCompat.java:11: error: cannot find symbol
-  symbol:   class TestSingleplayerContext
-  location: class TestCompat
-com/wolfsmask/occupant/client/TitleAtmosphere.java:10: error: cannot find symbol
-  symbol:   class RenderPipelines
-  location: package net.minecraft.client.renderer
-com/wolfsmask/occupant/client/ScreenEffects.java:204: error: cannot find symbol
-  symbol:   method textRenderer()
-  location: variable ctx of type GuiGraphics
-com/wolfsmask/occupant/client/ScreenEffects.java:242: error: cannot find symbol
-  symbol:   method textRenderer()
-  location: variable ctx of type GuiGraphics
-com/wolfsmask/occupant/client/ScreenEffects.java:273: error: cannot find symbol
-  symbol:   variable RenderPipelines
-  location: class ScreenEffects
-com/wolfsmask/occupant/client/render/CullingRenderer.java:22: error: method does not override or implement a method from a supertype
-com/wolfsmask/occupant/client/render/CullingRenderer.java:24: error: cannot find symbol
-  symbol:   variable super
-  location: class CullingRenderer
-com/wolfsmask/occupant/client/render/CullingRenderer.java:33: error: method does not override or implement a method from a supertype
-com/wolfsmask/occupant/client/render/OccupantRenderer.java:42: error: incompatible types: OccupantRenderer cannot be converted to RenderLayerParent<OccupantRenderState,OccupantModel>
-com/wolfsmask/occupant/client/render/OccupantRenderer.java:45: error: method does not override or implement a method from a supertype
-com/wolfsmask/occupant/client/render/OccupantRenderer.java:50: error: method does not override or implement a method from a supertype
-com/wolfsmask/occupant/client/render/OccupantRenderer.java:52: error: cannot find symbol
-  symbol: method extractRenderState(OccupantEntity,OccupantRenderState,float)
-com/wolfsmask/occupant/client/render/OccupantRenderer.java:67: error: cannot find symbol
-  symbol:   variable distanceToCameraSq
-  location: variable state of type OccupantRenderState
-com/wolfsmask/occupant/client/render/OccupantRenderer.java:89: error: method does not override or implement a method from a supertype
-com/wolfsmask/occupant/client/render/OccupantRenderer.java:109: error: method does not override or implement a method from a supertype
-com/wolfsmask/occupant/client/render/OccupantRenderer.java:114: error: method does not override or implement a method from a supertype
-com/wolfsmask/occupant/client/render/OccupantRenderer.java:120: error: method does not override or implement a method from a supertype
-com/wolfsmask/occupant/client/render/OccupantRenderer.java:134: error: type argument OccupantRenderState is not within bounds of type-variable T
-com/wolfsmask/occupant/client/render/OccupantRenderer.java:135: error: cannot find symbol
-  symbol:   variable RenderTypes
-  location: class PaleSheen
-com/wolfsmask/occupant/client/render/OccupantRenderer.java:137: error: type argument OccupantRenderState is not within bounds of type-variable T
-com/wolfsmask/occupant/client/render/OccupantModel.java:25: error: type argument OccupantRenderState is not within bounds of type-variable T
-com/wolfsmask/occupant/client/render/OccupantModel.java:59: error: method does not override or implement a method from a supertype
-com/wolfsmask/occupant/client/render/OccupantModel.java:61: error: method setupAnim in class HumanoidModel<T> cannot be applied to given types;
-  required: OccupantRenderState,float,float,float,float,float
-  found:    OccupantRenderState
-  reason: actual and formal argument lists differ in length
-com/wolfsmask/occupant/client/render/OccupantModel.java:68: error: cannot find symbol
-  symbol:   variable ageInTicks
-  location: variable state of type OccupantRenderState
-com/wolfsmask/occupant/client/render/LegGait.java:69: error: cannot find symbol
-  symbol:   variable x
-  location: variable state of type OccupantRenderState
-com/wolfsmask/occupant/client/render/LegGait.java:69: error: cannot find symbol
-  symbol:   variable y
-  location: variable state of type OccupantRenderState
-com/wolfsmask/occupant/client/render/LegGait.java:69: error: cannot find symbol
-  symbol:   variable z
-  location: variable state of type OccupantRenderState
-com/wolfsmask/occupant/client/render/LegGait.java:70: error: cannot find symbol
-  symbol:   variable ageInTicks
-  location: variable state of type OccupantRenderState
-com/wolfsmask/occupant/client/render/LegGait.java:75: error: cannot find symbol
-  symbol:   variable bodyRot
-  location: variable state of type OccupantRenderState
-com/wolfsmask/occupant/client/render/LegGait.java:157: error: cannot find symbol
-  symbol:   variable bodyRot
-  location: variable state of type OccupantRenderState
-com/wolfsmask/occupant/client/OccupantClient.java:19: error: method register in class EntityRendererRegistry cannot be applied to given types;
-  required: EntityType<? extends E>,EntityRendererProvider<E>
-  found:    EntityType<OccupantEntity>,OccupantRe[...]::new
-  reason: cannot infer type-variable(s) E
-com/wolfsmask/occupant/client/OccupantClient.java:29: error: cannot find symbol
-  symbol:   variable HudElementRegistry
-  location: class OccupantClient
-com/wolfsmask/occupant/client/OccupantClient.java:34: error: cannot find symbol
-  symbol:   variable HudElementRegistry
-  location: class OccupantClient
-com/wolfsmask/occupant/client/GateScreen.java:59: error: cannot find symbol
-  symbol:   method setScreenAndShow(TitleScreen)
-  location: variable mc of type Minecraft
-com/wolfsmask/occupant/client/GateScreen.java:128: error: cannot find symbol
-  symbol:   method pushMatrix()
-  location: class PoseStack
-com/wolfsmask/occupant/client/GateScreen.java:129: error: no suitable method found for translate(int,int)
-com/wolfsmask/occupant/client/GateScreen.java:130: error: method scale in class PoseStack cannot be applied to given types;
-  required: float,float,float
-  found:    float,float
-  reason: actual and formal argument lists differ in length
-com/wolfsmask/occupant/client/GateScreen.java:143: error: cannot find symbol
-  symbol:   method popMatrix()
-  location: class PoseStack
-com/wolfsmask/occupant/client/GateScreen.java:163: error: method does not override or implement a method from a supertype
-com/wolfsmask/occupant/client/GateScreen.java:183: error: incompatible types: Screen is not a functional interface
-com/wolfsmask/occupant/client/GateScreen.java:185: error: cannot find symbol
-  symbol:   method setScreenAndShow(GateScreen)
-  location: variable mc of type Minecraft
-com/wolfsmask/occupant/client/GateScreen.java:194: error: cannot find symbol
-  symbol:   method setScreenAndShow(TitleScreen)
-  location: variable minecraft of type Minecraft
-com/wolfsmask/occupant/client/test/ForestGallery.java:41: error: cannot find symbol
-  symbol:   class TestSingleplayerContext
-  location: class ForestGallery
-com/wolfsmask/occupant/client/test/ForestGallery.java:47: error: cannot find symbol
-  symbol:   class TestServerContext
-  location: class ForestGallery
-com/wolfsmask/occupant/client/test/ForestGallery.java:95: error: cannot find symbol
-  symbol:   class TestServerContext
-  location: class ForestGallery
-com/wolfsmask/occupant/client/test/ForestGallery.java:135: error: cannot find symbol
-  symbol:   class TestServerContext
-  location: class ForestGallery
-com/wolfsmask/occupant/client/test/ForestGallery.java:315: error: cannot find symbol
-  symbol:   variable PALE_MOSS_BLOCK
-  location: class Blocks
-com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:44: error: method does not override or implement a method from a supertype
-com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:58: error: cannot find symbol
-  symbol:   class TestWorldSave
-  location: class OccupantClientGameTest
-com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:59: error: cannot find symbol
-  symbol:   class TestSingleplayerContext
-  location: class OccupantClientGameTest
-com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:62: error: cannot find symbol
-  symbol:   class TestServerContext
-  location: class OccupantClientGameTest
-com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:172: error: cannot find symbol
-  symbol:   class TestSingleplayerContext
-  location: class OccupantClientGameTest
-com/wolfsmask/occupant/client/TitleAtmosphere.java:58: error: cannot find symbol
-  symbol:   method setScreenAndShow(GateScreen)
-  location: variable client of type Minecraft
-com/wolfsmask/occupant/client/TitleAtmosphere.java:64: error: cannot find symbol
-  symbol:   method afterBackground(Screen)
-  location: class ScreenEvents
-com/wolfsmask/occupant/client/TitleAtmosphere.java:114: error: cannot find symbol
-  symbol:   variable RenderPipelines
-  location: class TitleAtmosphere
-com/wolfsmask/occupant/client/TitleAtmosphere.java:120: error: cannot find symbol
-  symbol:   variable RenderPipelines
-  location: class TitleAtmosphere
-com/wolfsmask/occupant/client/TitleAtmosphere.java:132: error: cannot find symbol
-  symbol:   variable RenderPipelines
-  location: class TitleAtmosphere
-com/wolfsmask/occupant/client/TitleAtmosphere.java:187: error: cannot find symbol
-  symbol:   variable RenderPipelines
-  location: class TitleAtmosphere
-com/wolfsmask/occupant/client/TitleAtmosphere.java:212: error: cannot find symbol
-  symbol:   variable RenderPipelines
-  location: class TitleAtmosphere
-com/wolfsmask/occupant/client/TitleAtmosphere.java:218: error: cannot find symbol
-  symbol:   variable RenderPipelines
-  location: class TitleAtmosphere
-com/wolfsmask/occupant/client/TitleAtmosphere.java:240: error: cannot find symbol
-  symbol:   variable RenderPipelines
-  location: class TitleAtmosphere
-com/wolfsmask/occupant/client/TitleAtmosphere.java:242: error: cannot find symbol
-  symbol:   variable RenderPipelines
-  location: class TitleAtmosphere
+# 1.21.1 on 9b1305d5f828375b0cff3f1d249d0f10a62cb16c: build success, tests success
 > Configure project :
 > Task :versionSourcesMain
 > Task :compileJava
 > Task :processResources
 > Task :classes
 > Task :versionSourcesClient
-> Task :compileClientJava FAILED
-* What went wrong:
-> Compilation failed; see the compiler output below.
-> Check your code and dependencies to fix the compilation error(s)
-> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Task :compileClientJava
+> Task :processClientResources NO-SOURCE
+> Task :jar
+> Task :processIncludeJars
+> Task :clientClasses
+> Task :compileTestJava NO-SOURCE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+> Task :test NO-SOURCE
+> Task :validateAccessWidener NO-SOURCE
+> Task :check UP-TO-DATE
+> Task :remapJar
+> Task :remapSourcesJar SKIPPED
+> Task :assemble
+[00:33:48] [Server thread/INFO] (occupant) [gametest] house test player at BlockPos{x=-2, y=1, z=-4} facing 0.0 / (0.0, -0.0, 1.0)
+[00:33:48] [Server thread/INFO] (occupant) [gametest] house hallway spot: peeking BlockPos{x=8796540, y=-58, z=-10876184} / any BlockPos{x=8796540, y=-58, z=-10876184} (relative to the floor: BlockPos{x=4, y=1, z=0})
+[00:33:48] [Server thread/INFO] (occupant) [gametest] hallway light at the far end: block 0 sky 0, dark true
+[00:33:48] [Server thread/INFO] (occupant) [gametest] that spot: mask 1001001001, block light 0, sky 2, main room middle block light 0 sky 8
+[00:33:48] [Server thread/INFO] (occupant) [gametest] houses: already built false, first true, second false
+[00:33:50] [Server thread/INFO] (occupant) [gametest] field: darkOutside=true skyDarken=7 light=8 skyLight=15 blockLight=0 isDark=true grassInDirtTag=true
+[00:33:50] [Server thread/INFO] (occupant) [gametest] cave: yaw=-90.0 feet=BlockPos{x=8796910, y=60, z=-10876370} underground=true skyVisible=false skyLight=0 topY=69 light=0 look=(1.0, 0.0, 1.2246468525851679E-16) | ahead: standable=55 dark=55 visible=55
+[00:33:50] [Server thread/INFO] (occupant) [gametest] arena failures: []
+[00:33:56] [Server thread/INFO] (occupant) [gametest] events that found a place to happen: [footsteps, familiar, cave_noise, breath, fake_join, sign, whisper, doppel_chat, stalker, flicker, static, wake]
+[00:33:57] [Server thread/INFO] (Minecraft) ========= 9 GAME TESTS COMPLETE IN 10.34 s ======================
