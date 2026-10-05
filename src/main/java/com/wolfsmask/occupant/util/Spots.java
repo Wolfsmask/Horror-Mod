@@ -91,7 +91,7 @@ public final class Spots {
 
 	/** No other player (besides {@code player}) within {@code radius} blocks of {@code pos}. */
 	public static boolean awayFromOthers(ServerPlayer player, Vec3 pos, double radius) {
-		for (ServerPlayer other : player.level().players()) {
+		for (ServerPlayer other : Compat.level(player).players()) {
 			if (other == player || other.isSpectator()) continue;
 			if (other.position().distanceToSqr(pos) < radius * radius) return false;
 		}
@@ -107,7 +107,7 @@ public final class Spots {
 	public static BlockPos aroundPlayer(ServerPlayer player, RandomSource random, double minDist, double maxDist,
 										double minAngle, double maxAngle, boolean surface, int attempts,
 										Predicate<BlockPos> accept) {
-		ServerLevel world = player.level();
+		ServerLevel world = Compat.level(player);
 		Vec3 origin = player.position();
 		Vec3 look = Sight.flatLook(player);
 		for (int i = 0; i < attempts; i++) {
@@ -148,9 +148,7 @@ public final class Spots {
 	/** The player's bed or respawn anchor, if it is in the world they are standing in. */
 	@Nullable
 	public static BlockPos respawnPos(ServerPlayer player) {
-		ServerPlayer.RespawnConfig config = player.getRespawnConfig();
-		if (config == null || config.respawnData() == null) return null;
-		return config.respawnData().dimension() == player.level().dimension() ? config.respawnData().pos() : null;
+		return Compat.respawnPos(player);
 	}
 
 	/** Natural stone that may be carved without ever damaging a build. */

@@ -6,3 +6,24 @@ public void extractBackground(GuiGraphics -> public void renderBackground(GuiGra
 public void extractRenderState(GuiGraphics -> public void render(GuiGraphics
 ScreenEvents.afterExtract( -> ScreenEvents.afterRender(
 g.text(this.font -> g.drawString(this.font
+snapTo( -> moveTo(
+.isDarkOutside() -> .isNight()
+.getUnitVec3i() -> .getNormal()
+Direction.getApproximateNearest( -> Direction.getNearest(
+world.getMinY() -> world.getMinBuildHeight()
+getBlockState(hitPos).isSolidRender() -> getBlockState(hitPos).isSolidRender(player.level(), hitPos)
+.noLootTable() -> 
+EntitySpawnReason.SPAWN_ITEM_USE -> MobSpawnType.SPAWN_EGG
+EntitySpawnReason -> MobSpawnType
+OCCUPANT.create(world, MobSpawnType.COMMAND) -> OCCUPANT.create(world)
+OCCUPANT.create(world, MobSpawnType.EVENT) -> OCCUPANT.create(world)
+public boolean hurtServer(ServerLevel level, DamageSource source, float amount) -> public boolean hurt(DamageSource source, float amount)
+p.hurtServer(p.level(), -> p.hurt(
+e.hurtServer(level, -> e.hurt(
+Commands.hasPermission(Commands.LEVEL_GAMEMASTERS).test(src) -> src.hasPermission(Commands.LEVEL_GAMEMASTERS)
+# Game tests: vanilla's annotation, on Fabric's empty structure.
+import net.fabricmc.fabric.api.gametest.v1.GameTest; -> import net.minecraft.gametest.framework.GameTest;
+@GameTest(maxTicks = -> @GameTest(template = "fabric-gametest-api-v1:empty", timeoutTicks = 
+regex @GameTest$ -> @GameTest(template = "fabric-gametest-api-v1:empty")
+public boolean causeFallDamage(double fallDistance -> public boolean causeFallDamage(float fallDistance
+public boolean canBeCollidedWith(@Nullable Entity entity) -> public boolean canBeCollidedWith()

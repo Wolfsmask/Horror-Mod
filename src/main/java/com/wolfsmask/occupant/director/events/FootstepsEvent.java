@@ -1,5 +1,6 @@
 package com.wolfsmask.occupant.director.events;
 
+import com.wolfsmask.occupant.compat.Compat;
 import com.wolfsmask.occupant.director.EventContext;
 import com.wolfsmask.occupant.director.HorrorEvent;
 import com.wolfsmask.occupant.director.Sequence;
@@ -73,7 +74,7 @@ public final class FootstepsEvent extends HorrorEvent {
 			double dist = toPlayer.length();
 			if (dist < 2.6) return false;
 			Vec3 next = pos.add(toPlayer.normalize().scale(Math.min(0.75, dist - 2.5)));
-			BlockPos ground = Spots.groundNear(p.level(), Mth.floor(next.x), Mth.floor(pos.y), Mth.floor(next.z), 2);
+			BlockPos ground = Spots.groundNear(Compat.level(p), Mth.floor(next.x), Mth.floor(pos.y), Mth.floor(next.z), 2);
 			if (ground == null) return false;
 			pos = new Vec3(next.x, ground.getY(), next.z);
 

@@ -12,6 +12,11 @@ import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.storage.LevelData;
+import org.jetbrains.annotations.Nullable;
+
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
@@ -62,5 +67,24 @@ public final class Compat {
 		mob.setPathfindingMalus(PathType.FIRE, -1.0f);
 		mob.setPathfindingMalus(PathType.FIRE_IN_NEIGHBOR, -1.0f);
 		mob.setPathfindingMalus(PathType.DAMAGING, -1.0f);
+	}
+
+	/** The level a player is in, as a server level. */
+	public static ServerLevel level(ServerPlayer player) {
+		return player.level();
+	}
+
+	/** The player's bed or respawn anchor, if it is in the world they are standing in. */
+	@Nullable
+	public static BlockPos respawnPos(ServerPlayer player) {
+		ServerPlayer.RespawnConfig config = player.getRespawnConfig();
+		if (config == null || config.respawnData() == null) return null;
+		return config.respawnData().dimension() == player.level().dimension() ? config.respawnData().pos() : null;
+	}
+
+	/** Set where the player respawns, in the world they are in, without telling them. */
+	public static void setRespawn(ServerPlayer player, BlockPos pos) {
+		player.setRespawnPosition(new ServerPlayer.RespawnConfig(
+				LevelData.RespawnData.of(player.level().dimension(), pos, 0.0f, 0.0f), true), false);
 	}
 }

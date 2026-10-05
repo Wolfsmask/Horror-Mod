@@ -1,5 +1,6 @@
 package com.wolfsmask.occupant.director.events;
 
+import com.wolfsmask.occupant.compat.Compat;
 import com.wolfsmask.occupant.director.EventContext;
 import com.wolfsmask.occupant.director.HorrorEvent;
 import com.wolfsmask.occupant.director.Sequence;
@@ -61,7 +62,7 @@ public final class HallwayEvent extends HorrorEvent {
 	 */
 	@Nullable
 	public static BlockPos find(ServerPlayer p, boolean peek) {
-		ServerLevel world = p.level();
+		ServerLevel world = Compat.level(p);
 		BlockPos at = p.blockPosition();
 		BlockPos best = null;
 		double bestScore = Double.MAX_VALUE;
@@ -104,7 +105,7 @@ public final class HallwayEvent extends HorrorEvent {
 
 	/** Which of {@link #find}'s checks rules {@code pos} out, for tests to report; "ok" if none. */
 	public static String explain(ServerPlayer p, BlockPos pos, boolean peek) {
-		ServerLevel world = p.level();
+		ServerLevel world = Compat.level(p);
 		BlockPos at = p.blockPosition();
 		double flat = Math.sqrt(Math.pow(pos.getX() - at.getX(), 2) + Math.pow(pos.getZ() - at.getZ(), 2));
 		if (flat < 3.0 || flat > 14.0) return "distance " + flat;

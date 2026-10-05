@@ -1,5 +1,6 @@
 package com.wolfsmask.occupant.test;
 
+import com.wolfsmask.occupant.compat.Compat;
 import com.wolfsmask.occupant.Occupant;
 import com.wolfsmask.occupant.OccupantConfig;
 import com.wolfsmask.occupant.director.Director;
@@ -22,7 +23,6 @@ import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -158,8 +158,7 @@ public final class ArenaGameTests {
 					world.isDarkOutside(), world.getSkyDarken(), Spots.light(world, field.above()),
 					world.getBrightness(LightLayer.SKY, field.above()), world.getBrightness(LightLayer.BLOCK, field.above()),
 					Spots.isDark(world, field.above()), Blocks.GRASS_BLOCK.defaultBlockState().is(BlockTags.DIRT));
-			player.setRespawnPosition(new ServerPlayer.RespawnConfig(
-					LevelData.RespawnData.of(world.dimension(), field.offset(0, 0, -22), 0.0f, 0.0f), true), false);
+			Compat.setRespawn(player, field.offset(0, 0, -22));
 			expect("field", "watcher", "stalker", "hunt", "behind_you", "footsteps", "sign", "intruder");
 
 			// Cave, facing east (+X) down the corridor.

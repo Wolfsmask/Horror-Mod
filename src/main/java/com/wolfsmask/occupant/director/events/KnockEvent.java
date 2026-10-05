@@ -1,5 +1,6 @@
 package com.wolfsmask.occupant.director.events;
 
+import com.wolfsmask.occupant.compat.Compat;
 import com.wolfsmask.occupant.director.EventContext;
 import com.wolfsmask.occupant.director.Haunt;
 import com.wolfsmask.occupant.director.HorrorEvent;
@@ -77,7 +78,7 @@ public final class KnockEvent extends HorrorEvent {
 		@Override
 		public boolean tick(ServerPlayer p) {
 			if (reveal != null) return reveal.tick(p);
-			ServerLevel world = p.level();
+			ServerLevel world = Compat.level(p);
 			age++;
 
 			if (age == 1) knock(p, 1.0f);

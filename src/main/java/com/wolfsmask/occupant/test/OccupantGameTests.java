@@ -162,6 +162,12 @@ public final class OccupantGameTests {
 		helper.runAtTickTime(5, () -> {
 			helper.assertTrue(House.isInside(level, inside), "Standing inside the house should count as inside it");
 			helper.assertTrue(!House.isInside(level, inside.offset(0, 0, -3)), "Outside the front door is not inside");
+			// Stood just inside the door, facing into the house. Set again here: a mock player is not
+			// held still between ticks on every version.
+			player.snapTo(inside.getX() + 0.5, inside.getY(), inside.getZ() + 0.5, 0.0f, 0.0f);
+			player.setYHeadRot(0.0f);
+			Occupant.LOGGER.info("[gametest] house test player at {} facing {} / {}", player.blockPosition().subtract(floor),
+					player.getYRot(), player.getViewVector(1.0f));
 			BlockPos peek = HallwayEvent.find(player, true);
 			BlockPos any = peek != null ? peek : HallwayEvent.find(player, false);
 			Occupant.LOGGER.info("[gametest] house hallway spot: peeking {} / any {} (relative to the floor: {})", peek, any,

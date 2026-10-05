@@ -1,5 +1,6 @@
 package com.wolfsmask.occupant.director;
 
+import com.wolfsmask.occupant.compat.Compat;
 import com.wolfsmask.occupant.OccupantConfig;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -19,7 +20,7 @@ public final class EventContext {
 
 	public EventContext(ServerPlayer player, Haunt haunt, Situation situation, boolean forced) {
 		this.player = player;
-		this.world = player.level();
+		this.world = Compat.level(player);
 		this.haunt = haunt;
 		this.data = haunt.data;
 		this.situation = situation;

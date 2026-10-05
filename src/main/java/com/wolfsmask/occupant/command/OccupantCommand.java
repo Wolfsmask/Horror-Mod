@@ -1,5 +1,6 @@
 package com.wolfsmask.occupant.command;
 
+import com.wolfsmask.occupant.compat.Compat;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -136,7 +137,7 @@ public final class OccupantCommand {
 			return 0;
 		}
 		ServerPlayer p = src.getPlayerOrException();
-		ServerLevel world = p.level();
+		ServerLevel world = Compat.level(p);
 		Vec3 look = Sight.flatLook(p);
 		Vec3 want = p.position().add(look.scale(distance));
 		BlockPos feet = Spots.groundNear(world, (int) Math.floor(want.x), (int) Math.floor(want.y),

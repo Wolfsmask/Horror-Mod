@@ -1,5 +1,6 @@
 package com.wolfsmask.occupant.director;
 
+import com.wolfsmask.occupant.compat.Compat;
 import com.wolfsmask.occupant.OccupantConfig;
 import com.wolfsmask.occupant.entity.OccupantEntity;
 import com.wolfsmask.occupant.registry.ModEntities;
@@ -68,7 +69,7 @@ public final class Haunt {
 	}
 
 	Situation capture(ServerPlayer player) {
-		ServerLevel world = player.level();
+		ServerLevel world = Compat.level(player);
 		Vec3 pos = player.position();
 		if (lastPos != null) {
 			lastSpeed = pos.distanceTo(lastPos) / 20.0;
@@ -115,7 +116,7 @@ public final class Haunt {
 	@Nullable
 	public OccupantEntity spawnOccupant(ServerPlayer player, BlockPos feet, OccupantEntity.Mode mode,
 										OccupantEntity.Form form) {
-		ServerLevel world = player.level();
+		ServerLevel world = Compat.level(player);
 		if (!Spots.canStand(world, feet)) return null;
 		OccupantEntity e = ModEntities.OCCUPANT.create(world, EntitySpawnReason.EVENT);
 		if (e == null) return null;

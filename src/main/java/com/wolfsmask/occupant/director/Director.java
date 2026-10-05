@@ -1,5 +1,6 @@
 package com.wolfsmask.occupant.director;
 
+import com.wolfsmask.occupant.compat.Compat;
 import com.wolfsmask.occupant.Occupant;
 import com.wolfsmask.occupant.OccupantConfig;
 import com.wolfsmask.occupant.director.events.Events;
@@ -186,7 +187,7 @@ public final class Director {
 	 */
 	private boolean enteredHouse(Haunt h, ServerPlayer player) {
 		BlockPos feet = player.blockPosition();
-		if (!House.isInside(player.level(), feet)) return false;
+		if (!House.isInside(Compat.level(player), feet)) return false;
 		long now = server.getTickCount();
 		boolean sameHouse = h.lastHouse != null && h.lastHouse.closerThan(feet, 20.0);
 		if (sameHouse && now - h.lastHouseTick < 20L * 60 * 20) return false;   // twenty minutes
