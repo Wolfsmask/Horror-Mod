@@ -263,8 +263,13 @@ public final class House {
 		new Builder(level, floor, rotation, random).build();
 	}
 
-	/** For the game tests: a ruin, camp, graves, well or cottage with its middle at {@code base}. */
+	/** For the game tests: a house, a village, a ruin, camp, graves, well or cottage, its middle at {@code base}. */
 	public static void buildPlaceForTest(String kind, WorldGenLevel level, BlockPos base, RandomSource random) {
+		if (kind.equals("village") || kind.equals("house")) {
+			build(level, base, Rotation.NONE, random);
+			if (kind.equals("village")) Places.village(level, random, base, Rotation.NONE);
+			return;
+		}
 		Places.buildForTest(kind, level, base, random);
 	}
 

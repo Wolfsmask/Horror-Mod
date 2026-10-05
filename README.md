@@ -35,22 +35,45 @@ water, in daylight in open fields, or close enough to touch (unless that is the 
 
 | Act | Roughly when | What happens |
 |---|---|---|
-| 0 | First ~15 min | Nothing. Let the player get comfortable. |
-| 1: Signs | ~15-65 min | Deniable things. Footsteps behind you that stop when you turn. A sound you know perfectly, coming from somewhere it cannot be: a creeper's fuse at your back at night, a door in a house with no door. Something standing on a ridge a hundred blocks away that you cannot quite resolve. |
-| 2: Presence | then ~40-70 min | It is closer and it is not hiding as well. A figure in the dark at the edge of your vision. Knocking at night. Breathing behind you. A sign you did not place. A fresh tunnel. Someone with a name *almost* like yours joins the game. You can't sleep: "there are monsters nearby". There aren't. |
-| 3: Closer | then ~45-80 min | It follows you, moving only when you are not looking. You say things in chat you never typed. The lights flicker and it is standing in front of you. It is by your bed when you get home. It is behind you, and the screen goes quietly out. |
+| 0 | First ~3 min | Nothing. Let the player get comfortable. The first time in a world opens on black: *there is something in this world with you.* |
+| 1: Signs | ~3-18 min | Deniable things. Footsteps behind you that stop when you turn. A sound you know perfectly, coming from somewhere it cannot be: a creeper's fuse at your back at night, a door in a house with no door. Something standing on a ridge a hundred blocks away that you cannot quite resolve. |
+| 2: Presence | then ~12-22 min | It is closer and it is not hiding as well. A figure in the dark at the edge of your vision. Knocking at night. Breathing behind you. A sign you did not place. A fresh tunnel. Someone with a name *almost* like yours joins the game. You can't sleep: "there are monsters nearby". There aren't. |
+| 3: Closer | then ~15-30 min | It follows you, moving only when you are not looking. You say things in chat you never typed. The lights flicker and it is standing in front of you. It is by your bed when you get home. It is behind you, and the screen goes quietly out. |
 | 4: Hunt | from then on | The music stops. It is out there, looking at you. Then it runs. |
 
 Acts need **both** time and experiences to advance, so you can't skip the story by hiding in a
 lit base, and you can't get stuck in it forever either.
 
-After every big scare there is a **long calm** of 12-20 minutes with only small, deniable things.
+Something happens every minute or three; the first thing it tries is to be seen, far off. After
+every big scare there is a **calm** of a few minutes with only small, deniable things.
 And the Director builds on absence: the longer nothing has happened, the more it favours
 something real, so the next thing lands once you have stopped listening for it.
 
 There are **no pop-out scares with a loud noise**. A bang makes you jump and then laugh, which
 discharges exactly the tension the rest of the mod spent an hour building. When it finally gets
 to you, the sound drops away instead.
+
+If it stands in plain view for **ten seconds and your crosshair never comes near it**, you are
+told: *something is watching you.* Never the same words twice running, and never quite the
+same way (a line on the screen, a thought, your own name in chat saying it), and less patient
+the further the story has gone and the more often you have ignored it.
+
+### The places
+
+As you explore, you come across places people used to be, all empty:
+
+- **The house**, alone or in an **abandoned village** of cottages, a well and worn paths. Its
+  side hallway has no windows. The first time you step inside, it is standing in it. Houses
+  keep turning up, away from spawn and from each other, until anyone comes within a chunk of
+  one; after that, no more are built.
+- **Ruined keeps**: a walled yard with corner towers, half fallen, a cold fire inside.
+- **Abandoned camps**: a tent, logs round a dead fire, and a sign left for whoever came next.
+- **Graveyards**: two rows of graves, one of them dug open.
+
+Their chests and barrels hold what was left behind, and the first time each is opened, the
+next page of a **survivor's log** is in it: always the next page for you, whichever you open,
+so it reads in order. It does not end well, and when it runs out, the pages that are left are
+not in the same hand.
 
 ### The entity
 
@@ -123,7 +146,7 @@ need rebuilding for the next.
 | Setting | Default | |
 |---|---|---|
 | `enabled` | `true` | Master switch |
-| `graceMinutes` | `15` | Minutes of play before anything happens |
+| `graceMinutes` | `3` | Minutes of play before anything happens (configs from 0.13 that still had the old `15` are moved to `3` once) |
 | `storyPace` | `1.0` | How long each act lasts. `2.0` = slow burn, `0.5` = fast |
 | `eventFrequency` | `1.0` | How often things happen |
 | `worldChanges` | `true` | Doors, torches, tunnels, signs |

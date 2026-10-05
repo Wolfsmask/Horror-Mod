@@ -12,7 +12,10 @@ import net.fabricmc.fabric.api.client.gametest.v1.world.TestWorldSave;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.levelgen.Heightmap;
+import com.wolfsmask.occupant.world.House;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -65,7 +68,7 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 		context.waitTicks(100);
 		shoot(context, "occupant-quick-world");
 		// And out again, the way a player leaves.
-		context.getInput().pressKey(KEY_ESCAPE);
+		context.runOnClient(mc -> mc.pauseGame(false));
 		context.waitTicks(10);
 		context.clickScreenButton("menu.returnToMenu");
 		context.waitFor(mc -> mc.level == null, 20 * 60 * 2);
@@ -168,6 +171,30 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 			shoot(context, "occupant-night-close");
 			server.runCommand("kill " + ALL);
 
+			// The places it haunts, each built in turn and photographed from above and to one side
+			// at midday, so what they look like is a matter of record.
+			server.runCommand("time set noon");
+			BlockPos here = server.computeOnServer(s -> s.getPlayerList().getPlayers().get(0).blockPosition());
+			String[] kinds = {"village", "ruin", "camp", "graves", "cottage"};
+			for (int i = 0; i < kinds.length; i++) {
+				String kind = kinds[i];
+				int cx = here.getX() + 80 + i * 70;
+				int cz = here.getZ() + 60;
+				server.runCommand("tp @p " + cx + " " + (here.getY() + 40) + " " + (cz - 30));
+				context.waitTicks(60);
+				int top = server.computeOnServer(s -> {
+					ServerLevel lvl = s.overworld();
+					int y = lvl.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, cx, cz);
+					House.buildPlaceForTest(kind, lvl, new BlockPos(cx, y - 1, cz), lvl.getRandom());
+					return y;
+				});
+				int far = kind.equals("village") ? 30 : 16;
+				server.runCommand("tp @p " + (cx + far * 2 / 3) + " " + (top + far / 2) + " " + (cz - far)
+						+ " facing " + cx + " " + (top + 1) + " " + cz);
+				context.waitTicks(40);
+				shoot(context, "place-" + kind);
+			}
+
 			// The way the user was locked out: going to sleep, quitting, and coming back. The game
 			// wakes a sleeper while it is placing them into the world, which once threw out of the
 			// mod and ended the join with "Invalid player data".
@@ -259,8 +286,6 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 		if (mc.level == null || mc.player == null) return 0;
 		return mc.level.getEntitiesOfClass(OccupantEntity.class, mc.player.getBoundingBox().inflate(48)).size();
 	}
-
-	private static final int KEY_ESCAPE = 256;
 
 	/** Moves the real mouse onto one of the gate's two choices and clicks it. */
 	private static void clickGate(ClientGameTestContext context, boolean enter) {
