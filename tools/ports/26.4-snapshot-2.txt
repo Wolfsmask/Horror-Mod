@@ -1,11 +1,6 @@
-# 26.4-snapshot-2 on 9510ba7017a4c843eda90eef4affffd83e232f5c: build success, tests failure
+# 26.4-snapshot-2 on a6c965b1db1697f31e534cd203431b50fa48c2b9: build success, tests failure
 > Configure project :
 > Task :compileJava
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/ArenaGameTests.java:104: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:60: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:92: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:158: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:222: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
 > Task :processResources
 > Task :classes
 > Task :compileClientJava
@@ -13,21 +8,23 @@
 > Task :processIncludeJars
 > Task :clientClasses
 > Task :compileTestJava NO-SOURCE
-> Task :jar
 > Task :processTestResources NO-SOURCE
-> Task :assemble
 > Task :testClasses UP-TO-DATE
+> Task :jar
 > Task :test NO-SOURCE
+> Task :assemble
 > Task :validateAccessWidener NO-SOURCE
 > Task :check UP-TO-DATE
 > Task :build
-[00:20:26] [Server thread/INFO] (occupant) [gametest] houses: already built false, first true, second false
-[00:20:27] [Server thread/INFO] (occupant) [gametest] house hallway spot: peeking null / any null (relative to the floor: -)
-[00:20:27] [Server thread/INFO] (occupant) [gametest] hallway light at the far end: block 0 sky 0, dark true
-[00:20:28] [Server thread/INFO] (occupant) [gametest] field: darkOutside=true skyDarken=7 light=8 skyLight=15 blockLight=0 isDark=true grassInDirtTag=false
-[00:20:28] [Server thread/INFO] (occupant) [gametest] cave: yaw=-90.0 feet=BlockPos{x=13376510, y=60, z=8333023} underground=true skyVisible=false skyLight=0 topY=69 light=0 look=(1.0, 0.0, 0.0) | ahead: standable=55 dark=55 visible=55
-[00:20:28] [Server thread/INFO] (occupant) [gametest] arena failures: []
-[00:20:31] [Server thread/INFO] (occupant) [gametest] events that found a place to happen: [familiar, cave_noise, breath, fake_join, whisper, doppel_chat, stalker, flicker, static, wake]
-[00:20:31] [Server thread/INFO] (Minecraft) ========= 10 GAME TESTS COMPLETE IN 9.021 s ======================
-[00:20:31] [Server thread/INFO] (Minecraft) 1 required tests failed :(
-[00:20:31] [Server thread/INFO] (Minecraft)    - occupant:occupant_game_tests_it_waits_in_the_house_hallway: There should be somewhere in the dark hallway for it to stand on tick 5
+[00:23:08] [Server thread/INFO] (occupant) [gametest] houses: already built false, first true, second false
+[00:23:09] [Server thread/INFO] (occupant) [gametest] house hallway spot: peeking BlockPos{x=-3623495, y=8, z=-9470137} / any BlockPos{x=-3623495, y=8, z=-9470137} (relative to the floor: BlockPos{x=1, y=1, z=4})
+[00:23:09] [Server thread/INFO] (occupant) [gametest] hallway light at the far end: block 0 sky 0, dark true
+[00:23:09] [Server thread/INFO] (occupant) [gametest] that spot: mask 110110110010, block light 0, sky 3, main room middle block light 0 sky 8
+[00:23:09] [Server thread/INFO] (occupant) [gametest] hallway spots: (8,1) can't stand (9,1) angle 145 (10,1) angle 145 (8,2) angle 131 (9,2) angle 133 (10,2) angle 135 (8,3) angle 118 (9,3) angle 123 (10,3) angle 126 (8,4) can't stand (9,4) angle 114 (10,4) angle 118 (8,5) can't stand (9,5) unseen (10,5) angle 111 (8,6) can't stand (9,6) unseen (10,6) unseen (8,7) can't stand (9,7) unseen (10,7) unseen (8,8) can't stand (9,8) unseen (10,8) unseen (8,9) can't stand (9,9) unseen (10,9) unseen
+[00:23:09] [Server thread/INFO] (occupant) [gametest] field: darkOutside=true skyDarken=7 light=8 skyLight=15 blockLight=0 isDark=true grassInDirtTag=false
+[00:23:09] [Server thread/INFO] (occupant) [gametest] cave: yaw=-90.0 feet=BlockPos{x=-3623162, y=60, z=-9470324} underground=true skyVisible=false skyLight=0 topY=69 light=0 look=(1.0, 0.0, 0.0) | ahead: standable=55 dark=55 visible=55
+[00:23:09] [Server thread/INFO] (occupant) [gametest] arena failures: []
+[00:23:11] [Server thread/INFO] (occupant) [gametest] events that found a place to happen: [familiar, cave_noise, breath, fake_join, whisper, doppel_chat, stalker, flicker, static, wake]
+[00:23:12] [Server thread/INFO] (Minecraft) ========= 10 GAME TESTS COMPLETE IN 6.867 s ======================
+[00:23:12] [Server thread/INFO] (Minecraft) 1 required tests failed :(
+[00:23:12] [Server thread/INFO] (Minecraft)    - occupant:occupant_game_tests_it_waits_in_the_house_hallway: It should be in the side hallway or its doorway, not the main room (got BlockPos{x=-3623495, y=8, z=-9470137}) on tick 5
