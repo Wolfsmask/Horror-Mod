@@ -52,6 +52,16 @@ jobs:
             tools/ci/client-start.sh ${{ matrix.mc }}
           else
             set -o pipefail
+            # If world creation stalls, a thread dump shows where: taken once, 40 s into preparing spawn.
+            ( for i in $(seq 1 180); do
+                if grep -q "Preparing spawn area" client.log 2>/dev/null; then
+                  sleep 40
+                  pid=$(pgrep -f "net.fabricmc.devlaunchinjector.Main" | head -n 1)
+                  [ -n "$pid" ] && jstack "$pid" > threads.txt 2>&1
+                  break
+                fi
+                sleep 5
+              done ) &
             xvfb-run -a -s "-screen 0 1280x720x24" ./gradlew runClientGametest -Pmc=${{ matrix.mc }} --console=plain 2>&1 | tee client.log
           fi
 
@@ -72,6 +82,10 @@ jobs:
               echo "--- tail of $log ---"
               tail -n 25 "$log" || true
             done
+            if [ -f threads.txt ] && [ "${{ steps.client.outcome }}" != "success" ]; then
+              echo "=== threads 40 s into preparing spawn"
+              awk '/^"/{keep = ($0 ~ /Server thread|Worker-Main|Render thread|Test thread|IO-Worker/); n = 0} keep && n < 45 {print; n++}' threads.txt | head -n 400
+            fi
           } > "$OUT/result.txt"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
