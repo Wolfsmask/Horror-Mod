@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Starts the real client for a version that has no client test API (CI only).
 #   1. To the first screen: the gate must be drawn, with no crash.
-#   2. Into a world: a dedicated server makes a flat world (stopped cleanly over RCON), the client
+#   2. Into a world: a dedicated server makes an ordinary world (stopped cleanly over RCON), so world generation, the mod's places included, runs as it would for a player, the client
 #      opens it, and the Occupant is put in front of the player (-Doccupant.smoke=true); it must
 #      be drawn, with no crash.
 # Usage: tools/ci/client-start.sh <mc>. Logs: client.log, server.log, world.log.
@@ -34,7 +34,6 @@ echo "== 2. a world"
 echo "eula=true" > run/eula.txt
 cat > run/server.properties <<PROPS
 online-mode=false
-level-type=minecraft\:flat
 enable-rcon=true
 rcon.password=smoke
 rcon.port=25575
