@@ -1,131 +1,265 @@
-=== net.minecraft.client.gui.screens.Screen (-public)
-public abstract class client.gui.screens.Screen extends client.gui.components.events.AbstractContainerEventHandler implements client.gui.components.Renderable {
-  public final void extractRenderStateWithTooltipAndSubtitles(client.gui.GuiGraphicsExtractor, int, int, float);
-  public void extractRenderState(client.gui.GuiGraphicsExtractor, int, int, float);
-  public void extractBackground(client.gui.GuiGraphicsExtractor, int, int, float);
-  public static void extractMenuBackgroundTexture(client.gui.GuiGraphicsExtractor, resources.Identifier, int, int, float, float, int, int);
-  public void extractTransparentBackground(client.gui.GuiGraphicsExtractor);
-=== net.minecraft.client.gui.components.events.ContainerEventHandler (-public)
-public interface client.gui.components.events.ContainerEventHandler extends client.gui.components.events.GuiEventListener {
-  public default boolean mouseClicked(client.input.MouseButtonEvent, boolean);
-  public default boolean mouseReleased(client.input.MouseButtonEvent);
-  public default boolean mouseDragged(client.input.MouseButtonEvent, double, double);
-  public default boolean mouseScrolled(double, double, double, double);
-=== net.minecraft.client.gui.components.events.GuiEventListener (-public)
-public interface client.gui.components.events.GuiEventListener extends client.gui.components.TabOrderedElement {
-  public default void mouseMoved(double, double);
-  public default boolean mouseClicked(client.input.MouseButtonEvent, boolean);
-  public default boolean mouseReleased(client.input.MouseButtonEvent);
-  public default boolean mouseDragged(client.input.MouseButtonEvent, double, double);
-  public default boolean mouseScrolled(double, double, double, double);
-=== net.minecraft.client.input.MouseButtonEvent (-public)
-public final class client.input.MouseButtonEvent extends Record implements client.input.InputWithModifiers {
-  public client.input.MouseButtonEvent(double, double, client.input.MouseButtonInfo);
+=== net.minecraft.client.input.KeyEvent (-public)
+public final class client.input.KeyEvent extends Record implements client.input.InputWithModifiers {
+  public client.input.KeyEvent(int, int, int);
   public int input();
-  public int button();
-  public int modifiers();
+  public int shortcutKey();
   public final String toString();
   public final int hashCode();
   public final boolean equals(Object);
-  public double x();
-  public double y();
-  public client.input.MouseButtonInfo buttonInfo();
+  public int key();
+  public int keycode();
+  public int modifiers();
 }
-=== net.minecraft.client.gui.screens.worldselection.CreateWorldScreen (-public)
-public class client.gui.screens.worldselection.CreateWorldScreen extends client.gui.screens.Screen {
-  public static final resources.Identifier TAB_HEADER_BACKGROUND;
-  public static void openFresh(client.Minecraft, Runnable);
-  public static void openFresh(client.Minecraft, Runnable, client.gui.screens.worldselection.CreateWorldCallback);
-  public static void testWorld(client.Minecraft, Runnable);
-  public static client.gui.screens.worldselection.CreateWorldScreen createFromExisting(client.Minecraft, Runnable, world.level.LevelSettings, client.gui.screens.worldselection.WorldCreationContext, java.nio.file.Path);
-  public client.gui.screens.worldselection.WorldCreationUiState getUiState();
-  public void repositionElements();
+=== net.minecraft.client.input.MouseButtonInfo (-public)
+public final class client.input.MouseButtonInfo extends Record implements client.input.InputWithModifiers {
+  public client.input.MouseButtonInfo(int, int);
+  public int input();
+  public final String toString();
+  public final int hashCode();
+  public final boolean equals(Object);
+  public int button();
+  public int modifiers();
+}
+=== net.fabricmc.fabric.api.client.gametest.v1.TestInput (-public)
+public interface client.gametest.v1.TestInput {
+  public abstract void holdKey(client.KeyMapping);
+  public abstract void holdKey(Function<client.Options, client.KeyMapping>);
+  public abstract void holdKey(blaze3d.platform.InputConstants$Key);
+  public abstract void holdKey(int);
+  public abstract void holdMouse(int);
+  public abstract void holdControl();
+  public abstract void holdShift();
+  public abstract void holdAlt();
+  public abstract void releaseKey(client.KeyMapping);
+  public abstract void releaseKey(Function<client.Options, client.KeyMapping>);
+  public abstract void releaseKey(blaze3d.platform.InputConstants$Key);
+  public abstract void releaseKey(int);
+  public abstract void releaseMouse(int);
+  public abstract void releaseControl();
+  public abstract void releaseShift();
+  public abstract void releaseAlt();
+  public abstract void pressKey(client.KeyMapping);
+  public abstract void pressKey(Function<client.Options, client.KeyMapping>);
+  public abstract void pressKey(blaze3d.platform.InputConstants$Key);
+  public abstract void pressKey(int);
+  public abstract void pressMouse(int);
+  public abstract void holdKeyFor(client.KeyMapping, int);
+  public abstract void holdKeyFor(Function<client.Options, client.KeyMapping>, int);
+  public abstract void holdKeyFor(blaze3d.platform.InputConstants$Key, int);
+  public abstract void holdKeyFor(int, int);
+  public abstract void holdMouseFor(int, int);
+  public abstract void lookAt(float, float);
+  public abstract void lookAt(core.BlockPos);
+  public abstract void typeChar(int);
+  public abstract void typeChars(String);
+  public abstract void scroll(double);
+  public abstract void scroll(double, double);
+  public abstract void setCursorPos(double, double);
+  public abstract void moveCursor(double, double);
+  public abstract void resizeWindow(int, int);
+}
+=== net.minecraft.world.level.storage.LevelData (-public)
+public interface world.level.storage.LevelData {
+  public abstract world.level.storage.LevelData$RespawnData getRespawnData();
+=== net.minecraft.world.level.storage.LevelData$RespawnData (-public)
+public final class world.level.storage.LevelData$RespawnData extends Record {
+  public static final world.level.storage.LevelData$RespawnData DEFAULT;
+  public static final serialization.MapCodec<world.level.storage.LevelData$RespawnData> MAP_CODEC;
+  public static final serialization.Codec<world.level.storage.LevelData$RespawnData> CODEC;
+  public static final network.codec.StreamCodec<io.netty.buffer.ByteBuf, world.level.storage.LevelData$RespawnData> STREAM_CODEC;
+  public world.level.storage.LevelData$RespawnData(core.GlobalPos, float, float);
+  public static world.level.storage.LevelData$RespawnData of(resources.ResourceKey<world.level.Level>, core.BlockPos, float, float);
+  public resources.ResourceKey<world.level.Level> dimension();
+  public core.BlockPos pos();
+  public final String toString();
+  public final int hashCode();
+  public final boolean equals(Object);
+  public core.GlobalPos globalPos();
+  public float yaw();
+  public float pitch();
+}
+=== net.minecraft.server.level.ServerLevel (-public)
+public class server.level.ServerLevel extends world.level.Level implements world.level.WorldGenLevel,server.level.ServerEntityGetter {
+  public server.level.ServerLevel(server.MinecraftServer, concurrent.Executor, world.level.storage.LevelStorageSource$LevelStorageAccess, world.level.storage.ServerLevelData, resources.ResourceKey<world.level.Level>, world.level.dimension.LevelStem, boolean, long, List<world.level.CustomSpawner>, boolean);
+  public void tickCustomSpawners(boolean);
+  public void addRespawnedPlayer(server.level.ServerPlayer);
+  public void setRespawnData(world.level.storage.LevelData$RespawnData);
+  public world.level.storage.LevelData$RespawnData getRespawnData();
+  public boolean isSpawningMonsters();
+  public boolean anyPlayerCloseEnoughForSpawning(core.BlockPos);
+  public boolean anyPlayerCloseEnoughForSpawning(world.level.ChunkPos);
+  public boolean canSpawnEntitiesInChunk(world.level.ChunkPos);
+  public boolean isSpawnerBlockEnabled();
+=== net.minecraft.world.level.Level (-public)
+public abstract class world.level.Level implements world.level.LevelAccessor,AutoCloseable,attachment.v1.AttachmentTarget,attachment.v1.GlobalAttachmentsProvider {
+  public static boolean isInSpawnableBounds(core.BlockPos);
+  public void setSpawnSettings(boolean);
+  public abstract void setRespawnData(world.level.storage.LevelData$RespawnData);
+  public abstract world.level.storage.LevelData$RespawnData getRespawnData();
+  public world.level.storage.LevelData$RespawnData getWorldBorderAdjustedRespawnData(world.level.storage.LevelData$RespawnData);
+  public world.level.storage.LevelData getLevelData();
+=== net.minecraft.client.gui.components.Button (-public)
+public abstract class client.gui.components.Button extends client.gui.components.AbstractButton {
+  public static client.gui.components.Button$Builder builder(network.chat.Component, client.gui.components.Button$OnPress);
+  public void onPress(client.input.InputWithModifiers);
+=== net.minecraft.client.gui.components.Button$OnPress (-public)
+public interface client.gui.components.Button$OnPress {
+  public abstract void onPress(client.gui.components.Button);
+}
+=== net.minecraft.client.gui.components.Button$Builder (-public)
+public class client.gui.components.Button$Builder {
+  public client.gui.components.Button$Builder(network.chat.Component, client.gui.components.Button$OnPress);
+  public client.gui.components.Button$Builder pos(int, int);
+  public client.gui.components.Button$Builder width(int);
+  public client.gui.components.Button$Builder size(int, int);
+  public client.gui.components.Button$Builder bounds(int, int, int, int);
+  public client.gui.components.Button$Builder tooltip(client.gui.components.Tooltip);
+  public client.gui.components.Button$Builder createNarration(client.gui.components.Button$CreateNarration);
+  public client.gui.components.Button build();
+}
+=== net.minecraft.client.gui.screens.Screen (-protected)
+public abstract class client.gui.screens.Screen extends client.gui.components.events.AbstractContainerEventHandler implements client.gui.components.Renderable {
+  protected <T extends client.gui.components.events.GuiEventListener & client.gui.components.Renderable & client.gui.narration.NarratableEntry> T addRenderableWidget(T);
+  protected <T extends client.gui.components.events.GuiEventListener & client.gui.narration.NarratableEntry> T addWidget(T);
+  protected void clearWidgets();
+=== net.minecraft.client.gui.screens.worldselection.CreateWorldScreen (code: keyPressed)
   public boolean keyPressed(client.input.KeyEvent);
-  public void onClose();
-  public void popScreen();
-  public void extractRenderState(client.gui.GuiGraphicsExtractor, int, int, float);
-  public static java.nio.file.Path createTempDataPackDirFromExistingWorld(java.nio.file.Path, client.Minecraft);
-}
-=== net.minecraft.client.gui.screens.worldselection.CreateWorldScreen (-p)
-public class client.gui.screens.worldselection.CreateWorldScreen extends client.gui.screens.Screen {
-  private boolean recreated;
-  private final client.gui.screens.worldselection.CreateWorldCallback createWorldCallback;
-  public static void openFresh(client.Minecraft, Runnable, client.gui.screens.worldselection.CreateWorldCallback);
-  private static void openCreateWorldScreen(client.Minecraft, Runnable, Function<server.WorldLoader$DataLoadContext, world.level.levelgen.WorldGenSettings>, client.gui.screens.worldselection.WorldCreationContextMapper, resources.ResourceKey<world.level.levelgen.presets.WorldPreset>, client.gui.screens.worldselection.CreateWorldCallback);
-  public static client.gui.screens.worldselection.CreateWorldScreen createFromExisting(client.Minecraft, Runnable, world.level.LevelSettings, client.gui.screens.worldselection.WorldCreationContext, java.nio.file.Path);
-  private client.gui.screens.worldselection.CreateWorldScreen(client.Minecraft, Runnable, client.gui.screens.worldselection.WorldCreationContext, Optional<resources.ResourceKey<world.level.levelgen.presets.WorldPreset>>, OptionalLong, client.gui.screens.worldselection.CreateWorldCallback);
-  private void onCreate();
-  private void createWorldAndCleanup(core.LayeredRegistryAccess<server.RegistryLayer>, world.level.storage.LevelDataAndDimensions$WorldDataAndGenSettings, Optional<world.level.gamerules.GameRules>);
-  private boolean createNewWorld(core.LayeredRegistryAccess<server.RegistryLayer>, world.level.storage.LevelDataAndDimensions$WorldDataAndGenSettings, Optional<world.level.gamerules.GameRules>);
-  private world.level.LevelSettings createLevelSettings(boolean);
-  private java.nio.file.Path getOrCreateTempDataPackDir();
-  private static server.WorldLoader$InitConfig createDefaultLoadConfig(server.packs.repository.PackRepository, world.level.WorldDataConfiguration);
-  private static Optional<world.level.storage.LevelStorageSource$LevelStorageAccess> createNewWorldDirectory(client.Minecraft, String, java.nio.file.Path);
-  public static java.nio.file.Path createTempDataPackDirFromExistingWorld(java.nio.file.Path, client.Minecraft);
-  static client.gui.Font access$000(client.gui.screens.worldselection.CreateWorldScreen);
-  static void access$100(client.gui.screens.worldselection.CreateWorldScreen, client.gui.components.events.GuiEventListener);
-  static client.gui.Font access$200(client.gui.screens.worldselection.CreateWorldScreen);
-  static client.gui.Font access$300(client.gui.screens.worldselection.CreateWorldScreen);
-  static client.gui.Font access$400(client.gui.screens.worldselection.CreateWorldScreen);
-  static client.Minecraft access$500(client.gui.screens.worldselection.CreateWorldScreen);
-  static client.Minecraft access$600(client.gui.screens.worldselection.CreateWorldScreen);
-  static client.Minecraft access$700(client.gui.screens.worldselection.CreateWorldScreen);
-  private static void lambda$createTempDataPackDirFromExistingWorld$1(org.apache.commons.lang3.mutable.MutableObject, java.nio.file.Path, java.nio.file.Path);
-  private static boolean lambda$createTempDataPackDirFromExistingWorld$0(java.nio.file.Path, java.nio.file.Path);
-  private static void lambda$createNewWorldDirectory$1(java.nio.file.Path, java.nio.file.Path, java.nio.file.Path);
-  private static boolean lambda$createNewWorldDirectory$0(java.nio.file.Path, java.nio.file.Path);
-  private void lambda$onCreate$0(core.LayeredRegistryAccess, world.level.storage.LevelDataAndDimensions$WorldDataAndGenSettings, world.level.gamerules.GameRules);
-  private static boolean lambda$createFromExisting$0(client.gui.screens.worldselection.CreateWorldScreen, core.LayeredRegistryAccess, world.level.storage.LevelDataAndDimensions$WorldDataAndGenSettings, Optional, java.nio.file.Path);
-  private static client.gui.screens.worldselection.WorldCreationContext lambda$openCreateWorldScreen$1(client.gui.screens.worldselection.WorldCreationContextMapper, server.packs.resources.CloseableResourceManager, server.ReloadableServerResources, core.LayeredRegistryAccess, client.gui.screens.worldselection.DataPackReloadCookie);
-  private static server.WorldLoader$DataLoadOutput lambda$openCreateWorldScreen$0(Function, server.WorldLoader$DataLoadContext);
-  private static boolean lambda$testWorld$2(client.gui.screens.worldselection.CreateWorldScreen, core.LayeredRegistryAccess, world.level.storage.LevelDataAndDimensions$WorldDataAndGenSettings, Optional, java.nio.file.Path);
-  private static boolean lambda$openFresh$0(client.gui.screens.worldselection.CreateWorldScreen, core.LayeredRegistryAccess, world.level.storage.LevelDataAndDimensions$WorldDataAndGenSettings, Optional, java.nio.file.Path);
-  private static void lambda$tabManager$1(client.gui.screens.worldselection.CreateWorldScreen, client.gui.components.AbstractWidget);
-  private static void lambda$tabManager$0(client.gui.screens.worldselection.CreateWorldScreen, client.gui.components.AbstractWidget);
-=== net.minecraft.client.gui.screens.worldselection.WorldOpenFlows (-public)
-public class client.gui.screens.worldselection.WorldOpenFlows {
-  public client.gui.screens.worldselection.WorldOpenFlows(client.Minecraft, world.level.storage.LevelStorageSource);
-  public void createFreshLevel(String, world.level.LevelSettings, world.level.levelgen.WorldOptions, Function<core.HolderLookup$Provider, world.level.levelgen.WorldDimensions>, client.gui.screens.Screen);
-  public void createLevelFromExistingSettings(world.level.storage.LevelStorageSource$LevelStorageAccess, server.ReloadableServerResources, core.LayeredRegistryAccess<server.RegistryLayer>, world.level.storage.LevelDataAndDimensions$WorldDataAndGenSettings, Optional<world.level.gamerules.GameRules>);
-  public server.WorldStem loadWorldStem(world.level.storage.LevelStorageSource$LevelStorageAccess, serialization.Dynamic<?>, boolean, server.packs.repository.PackRepository) throws Exception;
-  public datafixers.util.Pair<world.level.LevelSettings, client.gui.screens.worldselection.WorldCreationContext> recreateWorldData(world.level.storage.LevelStorageSource$LevelStorageAccess) throws Exception;
-  public static void confirmWorldCreation(client.Minecraft, client.gui.screens.worldselection.CreateWorldScreen, serialization.Lifecycle, Runnable, boolean);
-  public void openWorld(String, Runnable);
-}
-=== net.minecraft.client.gui.screens.worldselection.WorldCreationUiState (-public)
-public class client.gui.screens.worldselection.WorldCreationUiState {
-  public client.gui.screens.worldselection.WorldCreationUiState(java.nio.file.Path, client.gui.screens.worldselection.WorldCreationContext, Optional<resources.ResourceKey<world.level.levelgen.presets.WorldPreset>>, OptionalLong);
-  public void addListener(Consumer<client.gui.screens.worldselection.WorldCreationUiState>);
-  public void onChanged();
-  public void setName(String);
-  public String getName();
-  public String getTargetFolder();
-  public void setGameMode(client.gui.screens.worldselection.WorldCreationUiState$SelectedGameMode);
-  public client.gui.screens.worldselection.WorldCreationUiState$SelectedGameMode getGameMode();
-  public void setDifficulty(world.Difficulty);
-  public world.Difficulty getDifficulty();
-  public boolean isHardcore();
-  public void setAllowCommands(boolean);
-  public boolean isAllowCommands();
-  public void setSeed(String);
-  public String getSeed();
-  public void setGenerateStructures(boolean);
-  public boolean isGenerateStructures();
-  public void setBonusChest(boolean);
-  public boolean isBonusChest();
-  public void setSettings(client.gui.screens.worldselection.WorldCreationContext);
-  public client.gui.screens.worldselection.WorldCreationContext getSettings();
-  public void updateDimensions(client.gui.screens.worldselection.WorldCreationContext$DimensionsUpdater);
-  public boolean isDebug();
-  public void setWorldType(client.gui.screens.worldselection.WorldCreationUiState$WorldTypeEntry);
-  public client.gui.screens.worldselection.WorldCreationUiState$WorldTypeEntry getWorldType();
-  public client.gui.screens.worldselection.PresetEditor getPresetEditor();
-  public List<client.gui.screens.worldselection.WorldCreationUiState$WorldTypeEntry> getNormalPresetList();
-  public List<client.gui.screens.worldselection.WorldCreationUiState$WorldTypeEntry> getAltPresetList();
-  public void setGameRules(world.level.gamerules.GameRules);
-  public world.level.gamerules.GameRules getGameRules();
-}
-=== net.minecraft.client.gui.components.AbstractButton (-public)
-public abstract class client.gui.components.AbstractButton extends client.gui.components.AbstractWidget$WithInactiveMessage {
-  public abstract void onPress(client.input.InputWithModifiers);
-=== net.minecraft.client.gui.screens.Screen (code: mouseClicked)
+    Code:
+         1: getfield      #415                // Field tabNavigationBar:Lnet/minecraft/client/gui/components/tabs/MenuTabBar;
+         5: invokevirtual #730                // Method net/minecraft/client/gui/components/tabs/MenuTabBar.keyPressed:(Lnet/minecraft/client/input/KeyEvent;)Z
+         8: ifeq          13
+        11: iconst_1
+        12: ireturn
+        15: invokespecial #734                // Method net/minecraft/client/gui/screens/Screen.keyPressed:(Lnet/minecraft/client/input/KeyEvent;)Z
+        18: ifeq          23
+        21: iconst_1
+        22: ireturn
+        24: invokevirtual #735                // Method net/minecraft/client/input/KeyEvent.isConfirmation:()Z
+        27: ifeq          36
+        31: invokevirtual #740                // Method onCreate:()V
+        34: iconst_1
+        35: ireturn
+        36: iconst_0
+        37: ireturn
+
+=== net.minecraft.client.MouseHandler (code: onButton|onPress|mouseClicked)
+  public void onButton(long, client.input.MouseButtonInfo, int);
+    Code:
+         1: getfield      #37                 // Field minecraft:Lnet/minecraft/client/Minecraft;
+         4: invokevirtual #48                 // Method net/minecraft/client/Minecraft.getWindow:()Lcom/mojang/blaze3d/platform/Window;
+         9: lload_1
+        10: lconst_0
+        11: lcmp
+        12: ifeq          25
+        15: lload_1
+        18: invokevirtual #56                 // Method com/mojang/blaze3d/platform/Window.handle:()J
+        21: lcmp
+        22: ifeq          26
+        27: getfield      #37                 // Field minecraft:Lnet/minecraft/client/Minecraft;
+        30: invokevirtual #62                 // Method net/minecraft/client/Minecraft.getFramerateLimitTracker:()Lcom/mojang/blaze3d/platform/FramerateLimitTracker;
+        33: invokevirtual #66                 // Method com/mojang/blaze3d/platform/FramerateLimitTracker.onInputReceived:()V
+        37: getfield      #37                 // Field minecraft:Lnet/minecraft/client/Minecraft;
+        40: getfield      #71                 // Field net/minecraft/client/Minecraft.gui:Lnet/minecraft/client/gui/Gui;
+        43: invokevirtual #75                 // Method net/minecraft/client/gui/Gui.screen:()Lnet/minecraft/client/gui/screens/Screen;
+        46: ifnull        59
+        50: getfield      #37                 // Field minecraft:Lnet/minecraft/client/Minecraft;
+        53: getstatic     #81                 // Field net/minecraft/client/InputType.MOUSE:Lnet/minecraft/client/InputType;
+        56: invokevirtual #87                 // Method net/minecraft/client/Minecraft.setLastInputType:(Lnet/minecraft/client/InputType;)V
+        61: iconst_1
+        62: if_icmpne     69
+        65: iconst_1
+        66: goto          70
+        69: iconst_0
+        70: istore        6
+        74: ifeq          92
+        79: putfield      #9                  // Field activeButton:Lnet/minecraft/client/input/MouseButtonInfo;
+        83: invokestatic  #93                 // Method com/mojang/blaze3d/Blaze3D.getTime:()D
+        86: putfield      #99                 // Field mousePressedTime:D
+        89: goto          104
+        93: getfield      #9                  // Field activeButton:Lnet/minecraft/client/input/MouseButtonInfo;
+        96: ifnull        104
+       100: aconst_null
+       101: putfield      #9                  // Field activeButton:Lnet/minecraft/client/input/MouseButtonInfo;
+       105: getfield      #37                 // Field minecraft:Lnet/minecraft/client/Minecraft;
+       108: getfield      #71                 // Field net/minecraft/client/Minecraft.gui:Lnet/minecraft/client/gui/Gui;
+       111: invokevirtual #102                // Method net/minecraft/client/gui/Gui.overlay:()Lnet/minecraft/client/gui/screens/Overlay;
+       114: ifnull        120
+       117: goto          455
+       122: ifeq          150
+       126: getfield      #37                 // Field minecraft:Lnet/minecraft/client/Minecraft;
+       129: getstatic     #106                // Field com/mojang/blaze3d/platform/InputConstants$Type.MOUSE:Lcom/mojang/blaze3d/platform/InputConstants$Type;
+       133: invokevirtual #111                // Method net/minecraft/client/input/MouseButtonInfo.button:()I
+       136: invokevirtual #117                // Method com/mojang/blaze3d/platform/InputConstants$Type.getOrCreate:(I)Lcom/mojang/blaze3d/platform/InputConstants$Key;
+       140: invokevirtual #121                // Method net/minecraft/client/input/MouseButtonInfo.hasControlDownWithQuirk:()Z
+       143: invokevirtual #125                // Method net/minecraft/client/Minecraft.handleGlobalKeyPress:(Lcom/mojang/blaze3d/platform/InputConstants$Key;Z)Z
+       146: ifeq          150
+       151: getfield      #37                 // Field minecraft:Lnet/minecraft/client/Minecraft;
+       154: getfield      #71                 // Field net/minecraft/client/Minecraft.gui:Lnet/minecraft/client/gui/Gui;
+       157: invokevirtual #75                 // Method net/minecraft/client/gui/Gui.screen:()Lnet/minecraft/client/gui/screens/Screen;
+       160: ifnonnull     182
+       164: getfield      #129                // Field mouseGrabbed:Z
+       167: ifne          455
+       172: ifeq          455
+       176: invokevirtual #132                // Method grabMouse:()V
+       179: goto          455
+       185: invokevirtual #135                // Method getScaledXPos:(Lcom/mojang/blaze3d/platform/Window;)D
+       188: dstore        7
+       193: invokevirtual #139                // Method getScaledYPos:(Lcom/mojang/blaze3d/platform/Window;)D
+       196: dstore        9
+       199: getfield      #37                 // Field minecraft:Lnet/minecraft/client/Minecraft;
+       202: getfield      #71                 // Field net/minecraft/client/Minecraft.gui:Lnet/minecraft/client/gui/Gui;
+       205: invokevirtual #75                 // Method net/minecraft/client/gui/Gui.screen:()Lnet/minecraft/client/gui/screens/Screen;
+       210: new           #142                // class net/minecraft/client/input/MouseButtonEvent
+       214: dload         7
+       216: dload         9
+       219: invokespecial #144                // Method net/minecraft/client/input/MouseButtonEvent."<init>":(DDLnet/minecraft/client/input/MouseButtonInfo;)V
+       226: ifeq          387
+       231: invokevirtual #147                // Method net/minecraft/client/gui/screens/Screen.afterMouseAction:()V
+       234: invokestatic  #152                // Method net/minecraft/util/Util.getMillis:()J
+       237: lstore        13
+       240: getfield      #157                // Field lastClick:Lnet/minecraft/client/MouseHandler$LastClick;
+       243: ifnull        291
+       246: lload         13
+       249: getfield      #157                // Field lastClick:Lnet/minecraft/client/MouseHandler$LastClick;
+       252: invokevirtual #161                // Method net/minecraft/client/MouseHandler$LastClick.time:()J
+       255: lsub
+       256: ldc2_w        #166                // long 250l
+       259: lcmp
+       260: ifge          291
+       264: getfield      #157                // Field lastClick:Lnet/minecraft/client/MouseHandler$LastClick;
+       267: invokevirtual #168                // Method net/minecraft/client/MouseHandler$LastClick.screen:()Lnet/minecraft/client/gui/screens/Screen;
+       272: if_acmpne     291
+       276: getfield      #169                // Field lastClickButton:I
+       281: invokevirtual #173                // Method net/minecraft/client/input/MouseButtonEvent.button:()I
+       284: if_icmpne     291
+       287: iconst_1
+       288: goto          292
+       291: iconst_0
+       292: istore        15
+       300: invokevirtual #174                // Method net/minecraft/client/gui/screens/Screen.mouseClicked:(Lnet/minecraft/client/input/MouseButtonEvent;Z)Z
+       303: ifeq          330
+       307: new           #162                // class net/minecraft/client/MouseHandler$LastClick
+       311: lload         13
+       315: invokespecial #178                // Method net/minecraft/client/MouseHandler$LastClick."<init>":(JLnet/minecraft/client/gui/screens/Screen;)V
+       318: putfield      #157                // Field lastClick:Lnet/minecraft/client/MouseHandler$LastClick;
+       323: invokevirtual #111                // Method net/minecraft/client/input/MouseButtonInfo.button:()I
+       326: putfield      #169                // Field lastClickButton:I
+       330: goto          455
+       337: ldc           #183                // String mouseClicked event handler
+       339: invokestatic  #185                // Method net/minecraft/CrashReport.forThrowable:(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/CrashReport;
+       346: ldc           #191                // String Mouse
+       348: invokevirtual #193                // Method net/minecraft/CrashReport.addCategory:(Ljava/lang/String;)Lnet/minecraft/CrashReportCategory;
+       358: invokevirtual #197                // Method fillMousePositionDetails:(Lnet/minecraft/CrashReportCategory;Lcom/mojang/blaze3d/platform/Window;)V
+       363: ldc           #201                // String Button
+       367: invokevirtual #173                // Method net/minecraft/client/input/MouseButtonEvent.button:()I
+       370: invokestatic  #203                // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+       373: invokevirtual #209                // Method net/minecraft/CrashReportCategory.setDetail:(Ljava/lang/String;Ljava/lang/Object;)Lnet/minecraft/CrashReportCategory;
+       377: new           #215                // class net/minecraft/ReportedException
+       383: invokespecial #217                // Method net/minecraft/ReportedException."<init>":(Lnet/minecraft/CrashReport;)V
+       386: athrow
+       391: invokevirtual #220                // Method net/minecraft/client/gui/screens/Screen.mouseReleased:(Lnet/minecraft/client/input/MouseButtonEvent;)Z
+       394: ifeq          398
+       398: goto          455
+       405: ldc           #224                // String mouseReleased event handler
+       407: invokestatic  #185                // Method net/minecraft/CrashReport.forThrowable:(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/CrashReport;
+       414: ldc           #191                // String Mouse
