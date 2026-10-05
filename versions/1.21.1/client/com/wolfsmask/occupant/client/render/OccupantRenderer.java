@@ -35,6 +35,7 @@ public class OccupantRenderer extends CullingRenderer {
 
 	private final OccupantRenderState state = new OccupantRenderState();
 	private int preparedFor = -1;
+	private static boolean drawn;
 
 	public OccupantRenderer(EntityRendererProvider.Context ctx) {
 		super(ctx, new OccupantModel(OccupantGeometry.create().bakeRoot()), 0.4f);
@@ -73,6 +74,10 @@ public class OccupantRenderer extends CullingRenderer {
 					   MultiBufferSource buffers, int light) {
 		prepare(entity, partialTick);
 		super.render(entity, yaw, partialTick, poseStack, buffers, light);
+		if (!drawn) {
+			drawn = true;
+			Occupant.LOGGER.info("[client] the Occupant has been drawn");
+		}
 	}
 
 	/** See the other versions' copy: fold to fit before shrinking, never down to a person's size. */

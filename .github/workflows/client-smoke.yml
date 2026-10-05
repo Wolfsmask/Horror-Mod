@@ -10,6 +10,7 @@ on:
     paths:
       - 'versions/**'
       - 'src/client/**'
+      - 'tools/ci/**'
       - 'build.gradle'
       - '.github/workflows/client-smoke.yml'
 
@@ -47,22 +48,8 @@ jobs:
         run: |
           chmod +x gradlew
           if grep -q '^exclude_sources=.*client/test' "versions/${{ matrix.mc }}.properties"; then
-            # No client test API: start the game, wait for the first screen to be drawn, keep it
-            # up for a while, then close it. Any crash, or never getting that far, is a failure.
-            mkdir -p run
-            # A first start would open the accessibility screen, not the title screen.
-            echo "onboardAccessibility:false" > run/options.txt
-            xvfb-run -a -s "-screen 0 1280x720x24" ./gradlew runClient -Pmc=${{ matrix.mc }} --console=plain > client.log 2>&1 &
-            for i in $(seq 1 180); do
-              grep -q "the gate screen has been drawn" client.log && break
-              grep -qE "Game crashed|#@!@# Game crashed|Failed to start the minecraft server|BUILD FAILED" client.log && break
-              sleep 5
-            done
-            if grep -q "the gate screen has been drawn" client.log; then sleep 30; fi
-            pkill -f "net.fabricmc.devlaunchinjector|KnotClient|net.minecraft.client.main.Main" || true
-            sleep 5
-            grep -q "the gate screen has been drawn" client.log || exit 1
-            if grep -qE "Game crashed|Exception in thread|---- Minecraft Crash Report" client.log; then exit 1; fi
+            # No client test API: started to the first screen, then into a world with it in view.
+            tools/ci/client-start.sh ${{ matrix.mc }}
           else
             set -o pipefail
             xvfb-run -a -s "-screen 0 1280x720x24" ./gradlew runClientGametest -Pmc=${{ matrix.mc }} --console=plain 2>&1 | tee client.log
@@ -75,10 +62,16 @@ jobs:
           mkdir -p "$OUT"
           {
             echo "# ${{ matrix.mc }} client on $GITHUB_SHA: ${{ steps.client.outcome }}"
-            grep -E "\[client\]|client-gametest|Exception|Caused by|Crash|FAILED|What went wrong|occupant" client.log \
-              | grep -vE "DEBUG|Datafixer" | head -n 80 || true
-            echo "--- tail ---"
-            tail -n 40 client.log || true
+            for log in client.log server.log world.log; do
+              [ -f "$log" ] || continue
+              echo "=== $log"
+              grep -E "\[client\]|\[smoke\]|client-gametest|Exception|Caused by|Crash|FAILED|What went wrong|occupant|Done \(|Stopping" "$log" \
+                | grep -vE "DEBUG|Datafixer|flite|OpenAL|Realms|GLX" | head -n 60 || true
+              echo "--- last of the server thread in $log ---"
+              grep -E "Server thread|Worker-Main|Preparing" "$log" | grep -v DEBUG | tail -n 20 || true
+              echo "--- tail of $log ---"
+              tail -n 25 "$log" || true
+            done
           } > "$OUT/result.txt"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

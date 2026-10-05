@@ -58,6 +58,7 @@ public final class Occupant implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
+		if (Boolean.getBoolean("occupant.smoke")) registerSmokeTest();
 		OccupantConfig.load();
 		ModSounds.init();
 		ModEntities.init();
@@ -101,6 +102,26 @@ public final class Occupant implements ModInitializer {
 				guard("registering commands", () -> OccupantCommand.register(dispatcher)));
 
 		LOGGER.info("The Occupant has moved in. Type /occupant check in game to test it.");
+	}
+
+	/**
+	 * Only for CI's check that the game starts on versions with no client test API: once the
+	 * first player has been in the world for five seconds, it is put in front of them, so the
+	 * client has to draw it. Off unless the game was started with -Doccupant.smoke=true.
+	 */
+	private static void registerSmokeTest() {
+		boolean[] done = {false};
+		ServerTickEvents.END_SERVER_TICK.register(server -> {
+			if (done[0]) return;
+			for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+				if (p.tickCount < 100) continue;
+				done[0] = true;
+				LOGGER.info("[smoke] putting it in front of {}", p.getName().getString());
+				server.getCommands().performPrefixedCommand(
+						server.createCommandSourceStack().withEntity(p).withPosition(p.position()), "occupant here 6 stare");
+				return;
+			}
+		});
 	}
 
 	private static Boolean shouldDenySleep(Player player) {
