@@ -1,15 +1,16 @@
 @mc 26.3
-# Round 21: key events, the client test's input, spawn position, the gate's widgets.
-net.minecraft.client.input.KeyEvent
-net.minecraft.client.input.MouseButtonInfo
-net.fabricmc.fabric.api.client.gametest.v1.TestInput
-net.minecraft.world.level.storage.LevelData spawn|Spawn|respawn|Respawn
-net.minecraft.world.level.storage.LevelData$RespawnData
-net.minecraft.server.level.ServerLevel spawn|Spawn|respawn|Respawn
-net.minecraft.world.level.Level spawn|Spawn|respawn|Respawn|getLevelData
-net.minecraft.client.gui.components.Button builder|OnPress|onPress
-net.minecraft.client.gui.components.Button$OnPress
-net.minecraft.client.gui.components.Button$Builder
-@protected net.minecraft.client.gui.screens.Screen addWidget|addRenderableWidget|clearWidgets
-@code net.minecraft.client.gui.screens.worldselection.CreateWorldScreen keyPressed
-@code net.minecraft.client.MouseHandler onButton|onPress|mouseClicked
+# Round 22: written books, opening containers, rotating block states, window scale.
+net.minecraft.world.item.component.WrittenBookContent
+net.minecraft.server.network.Filterable
+net.minecraft.core.component.DataComponents WRITTEN_BOOK|CUSTOM_NAME|LORE
+net.minecraft.world.item.ItemStack set\(|<init>|ItemStack\(
+net.fabricmc.fabric.api.event.player.UseBlockCallback
+net.minecraft.world.level.Level isClientSide
+net.minecraft.world.level.block.state.BlockBehaviour$BlockStateBase rotate|mirror
+net.minecraft.world.Container setItem|getItem|getContainerSize
+net.minecraft.world.level.block.entity.BaseContainerBlockEntity
+net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity
+com.mojang.blaze3d.platform.Window Scale|scale|Width|Height
+net.minecraft.world.level.block.CampfireBlock LIT|SIGNAL
+net.minecraft.world.level.block.FurnaceBlock|AbstractFurnaceBlock FACING
+@find Lantern|Candle|Campfire|Barrel|Chest
