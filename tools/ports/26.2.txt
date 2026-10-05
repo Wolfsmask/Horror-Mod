@@ -1,29 +1,16 @@
-# 26.2 on 30c41ba9441660006eb586277476e8f79a6d72d0: build success, tests success
+# 26.2 on 1d4bd3e49cf488f00f2b370c504dafc1d6d3866c: build failure, tests skipped
+com/wolfsmask/occupant/client/test/Cinematic.java:44: error: cannot find symbol
+  symbol:   variable hideGui
+  location: variable options of type Options
+com/wolfsmask/occupant/client/test/Cinematic.java:74: error: cannot find symbol
+  symbol:   variable hideGui
+  location: variable options of type Options
 > Configure project :
 > Task :compileJava
 > Task :processResources
 > Task :classes
-> Task :compileClientJava
-> Task :processClientResources NO-SOURCE
-> Task :processIncludeJars
-> Task :clientClasses
-> Task :compileTestJava NO-SOURCE
-> Task :processTestResources NO-SOURCE
-> Task :testClasses UP-TO-DATE
-> Task :jar
-> Task :test NO-SOURCE
-> Task :assemble
-> Task :validateAccessWidener NO-SOURCE
-> Task :check UP-TO-DATE
-> Task :build
-[22:10:15] [Server thread/INFO] (occupant) [gametest] houses: found before false, first true, too close false, second true, after finding false
-[22:10:15] [Server thread/INFO] (occupant) [gametest] places without loot: [], page found: true
-[22:10:16] [Server thread/INFO] (occupant) [gametest] house test player at BlockPos{x=-2, y=1, z=-4} facing 0.0 / (0.0, -0.0, 1.0)
-[22:10:16] [Server thread/INFO] (occupant) [gametest] house hallway spot: peeking BlockPos{x=4312124, y=-55, z=11844663} / any BlockPos{x=4312124, y=-55, z=11844663} (relative to the floor: BlockPos{x=4, y=1, z=0})
-[22:10:16] [Server thread/INFO] (occupant) [gametest] hallway light at the far end: block 0 sky 0, dark true
-[22:10:16] [Server thread/INFO] (occupant) [gametest] that spot: mask 1001001001, block light 0, sky 2, main room middle block light 0 sky 8
-[22:10:17] [Server thread/INFO] (occupant) [gametest] field: darkOutside=true skyDarken=8 light=7 skyLight=15 blockLight=0 isDark=true grassInDirtTag=false
-[22:10:17] [Server thread/INFO] (occupant) [gametest] cave: yaw=-90.0 feet=BlockPos{x=4312469, y=60, z=11844480} underground=true skyVisible=false skyLight=0 topY=69 light=0 look=(1.0, 0.0, 1.2246468525851679E-16) | ahead: standable=55 dark=55 visible=55
-[22:10:18] [Server thread/INFO] (occupant) [gametest] arena failures: []
-[22:10:21] [Server thread/INFO] (occupant) [gametest] events that found a place to happen: [familiar, cave_noise, breath, fake_join, sign, whisper, doppel_chat, flicker, static, wake]
-[22:10:21] [Server thread/INFO] (Minecraft) ========= 11 GAME TESTS COMPLETE IN 7.923 s ======================
+> Task :compileClientJava FAILED
+* What went wrong:
+> Compilation failed; see the compiler output below.
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
