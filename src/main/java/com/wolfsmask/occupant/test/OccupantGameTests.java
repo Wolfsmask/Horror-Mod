@@ -170,6 +170,14 @@ public final class OccupantGameTests {
 					level.getBrightness(net.minecraft.world.level.LightLayer.BLOCK, House.local(floor, Rotation.NONE, 10, 2, 7)),
 					level.getBrightness(net.minecraft.world.level.LightLayer.SKY, House.local(floor, Rotation.NONE, 10, 2, 7)),
 					com.wolfsmask.occupant.util.Spots.isDark(level, House.local(floor, Rotation.NONE, 10, 2, 7)));
+			if (any != null) {
+				Occupant.LOGGER.info("[gametest] that spot: mask {}, block light {}, sky {}, main room middle block light {} sky {}",
+						Integer.toBinaryString(com.wolfsmask.occupant.util.Sight.visibleParts(player, net.minecraft.world.phys.Vec3.atBottomCenterOf(any), 4.2)),
+						level.getBrightness(net.minecraft.world.level.LightLayer.BLOCK, any.above()),
+						level.getBrightness(net.minecraft.world.level.LightLayer.SKY, any.above()),
+						level.getBrightness(net.minecraft.world.level.LightLayer.BLOCK, House.local(floor, Rotation.NONE, 4, 2, 5)),
+						level.getBrightness(net.minecraft.world.level.LightLayer.SKY, House.local(floor, Rotation.NONE, 4, 2, 5)));
+			}
 			helper.assertTrue(any != null, "There should be somewhere in the dark hallway for it to stand");
 			BlockPos hallStart = House.local(floor, Rotation.NONE, 9, 1, 1);
 			helper.assertTrue(any.getX() >= hallStart.getX() - 1 && any.getX() <= hallStart.getX() + 1,
