@@ -1,16 +1,20 @@
-@mc 26.3
-# Round 22: written books, opening containers, rotating block states, window scale.
-net.minecraft.world.item.component.WrittenBookContent
-net.minecraft.server.network.Filterable
-net.minecraft.core.component.DataComponents WRITTEN_BOOK|CUSTOM_NAME|LORE
-net.minecraft.world.item.ItemStack set\(|<init>|ItemStack\(
-net.fabricmc.fabric.api.event.player.UseBlockCallback
-net.minecraft.world.level.Level isClientSide
-net.minecraft.world.level.block.state.BlockBehaviour$BlockStateBase rotate|mirror
-net.minecraft.world.Container setItem|getItem|getContainerSize
-net.minecraft.world.level.block.entity.BaseContainerBlockEntity
-net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity
-com.mojang.blaze3d.platform.Window Scale|scale|Width|Height
-net.minecraft.world.level.block.CampfireBlock LIT|SIGNAL
-net.minecraft.world.level.block.FurnaceBlock|AbstractFurnaceBlock FACING
-@find Lantern|Candle|Campfire|Barrel|Chest
+@mc 1.20.1 1.21.1 1.21.11 26.2 26.3
+# Round 23: fog, client sound, view distance, sleeping, mob looking.
+@find [Ff]og
+@private net.minecraft.client.renderer.FogRenderer
+@private net.minecraft.client.renderer.fog.FogRenderer
+net.minecraft.client.renderer.fog.FogData
+@private net.minecraft.client.renderer.fog.environment.AtmosphericFogEnvironment
+net.minecraft.client.renderer.fog.environment.FogEnvironment
+@code net.minecraft.client.renderer.fog.FogRenderer setupFog
+@code net.minecraft.client.renderer.FogRenderer setupFog
+com.mojang.blaze3d.systems.RenderSystem [Ff]og
+net.minecraft.client.sounds.SoundManager stop|pause|resume|play
+net.minecraft.client.Options renderDistance|EffectiveRenderDistance|simulationDistance
+net.minecraft.client.Minecraft options|getSoundManager|gameRenderer
+net.minecraft.server.level.ServerPlayer requestedViewDistance|clientInformation|ViewDistance
+net.minecraft.server.level.ClientInformation viewDistance
+net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents
+net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents$AllowSleeping
+net.minecraft.world.entity.player.Player$BedSleepingProblem
+net.minecraft.world.entity.ai.control.LookControl setLookAt

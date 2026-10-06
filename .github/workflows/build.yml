@@ -2,6 +2,11 @@ name: Build & Test
 
 on:
   push:
+    paths-ignore:
+      - 'docs/**'
+      - 'tools/api-probe/**'
+      - 'tools/marketing/**'
+      - 'tools/ports/**'
   pull_request:
   workflow_dispatch:
 
