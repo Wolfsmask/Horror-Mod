@@ -1,4 +1,4 @@
-# 26.3 on f84730d1bd12f56b493bd82f780a4d358295ddef: build failure, tests skipped, jar skipped
+# 26.3 on 804f7922340aa6ef2831a6f741058df76fb6aae9: build failure, tests skipped, jar skipped
 com/wolfsmask/occupant/client/SettingsScreen.java:42: error: cannot find symbol
   symbol:   method getButtons(Screen)
   location: class Screens
@@ -18,6 +18,7 @@ com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:207: error: canno
 > Task :compileJava
 > Task :processResources
 > Task :classes
+> Task :compileClientJava
 > Task :compileClientJava FAILED
 * What went wrong:
 > Compilation failed; see the compiler output below.
