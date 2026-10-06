@@ -21,8 +21,8 @@ final class Lighthouse extends Build {
 	}
 
 	private BlockState band(int y) {
-		return (y / 3) % 2 == 0 ? old(Blocks.WHITE_TERRACOTTA.defaultBlockState(), Blocks.CRACKED_STONE_BRICKS.defaultBlockState(), 0.15f)
-				: Blocks.RED_TERRACOTTA.defaultBlockState();
+		return (y / 3) % 2 == 0 ? old(Blocks.CALCITE.defaultBlockState(), Blocks.CRACKED_STONE_BRICKS.defaultBlockState(), 0.15f)
+				: Blocks.BRICKS.defaultBlockState();
 	}
 
 	@Override

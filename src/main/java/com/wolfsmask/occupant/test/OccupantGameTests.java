@@ -329,9 +329,7 @@ public final class OccupantGameTests {
 	@GameTest(maxTicks = 60)
 	public void theLairGoesAllTheWayDown(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
-		BlockPos at = helper.absolutePos(new BlockPos(0, 1, 0)).offset(0, 0, 700);
-		int top = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, at.getX(), at.getZ());
-		BlockPos base = new BlockPos(at.getX(), top - 1, at.getZ());
+		BlockPos base = lairSite(level, helper.absolutePos(new BlockPos(0, 1, 0)).offset(0, 0, 700));
 		House.buildPlaceForTest("lair", level, base, level.getRandom());
 		int ladders = 0;
 		for (int y = 0; y >= -26; y--) {
@@ -353,6 +351,18 @@ public final class OccupantGameTests {
 		helper.assertTrue(director.totalErrors() == errors, "Going into the lair must not throw");
 		Occupant.LOGGER.info("[gametest] lair under {}: {} rungs, going in: {}", base, ladders, result);
 		helper.succeed();
+	}
+
+	/**
+	 * The test world is flat, a few blocks above its floor: no room under it for a lair. So, a
+	 * block of stone up in the air to dig it into, its top at y 0. Returns the middle of that top.
+	 */
+	private static BlockPos lairSite(ServerLevel level, BlockPos at) {
+		BlockPos top = new BlockPos(at.getX(), 0, at.getZ());
+		for (BlockPos p : BlockPos.betweenClosed(top.offset(-9, -30, -9), top.offset(9, 0, 9))) {
+			level.setBlock(p, net.minecraft.world.level.block.Blocks.STONE.defaultBlockState(), net.minecraft.world.level.block.Block.UPDATE_CLIENTS);
+		}
+		return top;
 	}
 
 	/** The fog comes in as the story goes on: eight chunks or so at first, six or so by the end. */
@@ -455,7 +465,7 @@ public final class OccupantGameTests {
 		for (int i = 0; i < kinds.length; i++) {
 			BlockPos at = start.offset(i * 40, 0, 0);
 			int top = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, at.getX(), at.getZ());
-			BlockPos base = new BlockPos(at.getX(), top - 1, at.getZ());
+			BlockPos base = kinds[i].equals("lair") ? lairSite(level, at) : new BlockPos(at.getX(), top - 1, at.getZ());
 			House.buildPlaceForTest(kinds[i], level, base, level.getRandom());
 			BlockPos box = null;
 			for (BlockPos p : BlockPos.betweenClosed(base.offset(-8, -28, -8), base.offset(8, 22, 8))) {

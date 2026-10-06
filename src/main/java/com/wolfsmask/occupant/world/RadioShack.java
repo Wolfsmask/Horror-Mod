@@ -39,8 +39,7 @@ final class RadioShack extends Build {
 		put(-1, 1, 1, Blocks.JUKEBOX.defaultBlockState());
 		put(0, 1, 1, Blocks.NOTE_BLOCK.defaultBlockState());
 		put(1, 1, 1, Blocks.LEVER.defaultBlockState());
-		for (int y = 5; y <= 9; y++) put(-1, y, 1, Blocks.IRON_BARS.defaultBlockState());
-		put(-1, 10, 1, Blocks.LIGHTNING_ROD.defaultBlockState());
+		for (int y = 5; y <= 10; y++) put(-1, y, 1, Blocks.IRON_BARS.defaultBlockState());
 		container(1, 1, -1, facing(Blocks.CHEST.defaultBlockState(), Direction.WEST), Loot.Kind.CAMP);
 		put(1, 1, -3, Blocks.OAK_SIGN.defaultBlockState().setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.ROTATION_16, 8));
 		Places.sign(level, at(1, 1, -3), SIGNS[random.nextInt(SIGNS.length)]);
