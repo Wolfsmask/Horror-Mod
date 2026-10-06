@@ -69,7 +69,7 @@ final class Cinematic {
 			hud(context, false);
 			// As it is played: the story's fog over everything. The camera is a spectator, whom the
 			// story leaves alone, so the fog is set here as the server would set it in the second act.
-			context.runOnClient(mc -> com.wolfsmask.occupant.client.ClientFog.set(120.0f, 1));
+			context.runOnClient(mc -> com.wolfsmask.occupant.client.ClientFog.set(84.0f, 1));
 			context.getInput().resizeWindow(1920, 1080);
 			context.waitTicks(20);
 
@@ -118,9 +118,8 @@ final class Cinematic {
 		clearView(server, it.offset(-1, 0, -3), cam.offset(1, 0, 3), Math.min(it.getY(), cam.getY()) + 1, 14);
 		Vec3 eye = new Vec3(cam.getX() + 0.5, cam.getY() + 1.6 + EYE, cam.getZ() + 0.5);
 		camera(context, game, eye, new Vec3(it.getX() + 0.5, it.getY() + 3.0, it.getZ() + 0.5), 12700);
-		place(server, it, eye, new Look(true, 75f));      // in profile, head down: it has not looked round. Yet.
-		context.waitTicks(20);
-		server.runCommand("execute as @p at @s run tp @s ~ ~ ~ ~9 ~");      // it in the left third, as if half-turned to it
+		place(server, it, eye, new Look(true, 35f));      // half turned, head down: it has not looked round. Yet.
+		context.waitTicks(20);      // it in the left third, as if half-turned to it
 		still(context, game, "cinematic-treeline");
 
 		// And close: its face, from a little below, with the last of the sky behind it.
