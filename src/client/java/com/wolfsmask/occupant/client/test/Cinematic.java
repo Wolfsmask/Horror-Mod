@@ -233,7 +233,11 @@ final class Cinematic {
 			Vec3 eye = findCamera(level, player(s), it, 1.0, 0.0, new double[]{away}, 1.7, 0);
 			return new Shot(it, eye, Vec3.atBottomCenterOf(it).add(0, 2.4, 0));
 		});
-		take(context, game, shot, 12900, "cinematic-fog");
+		// A long lens: it is a long way off, and the fog piles up behind it.
+		int fov = context.computeOnClient(mc -> mc.options.fov().get());
+		context.runOnClient(mc -> mc.options.fov().set(34));
+		take(context, game, shot, 12950, "cinematic-fog");
+		context.runOnClient(mc -> mc.options.fov().set(fov));
 	}
 
 	// ---------------------------------------------------------------- the set (server side)
@@ -279,9 +283,9 @@ final class Cinematic {
 		for (int i = 0; i < trunk.length; i++) {
 			if (!trunk[i]) continue;
 			int tx = i / size, tz = i % size;
-			for (int x = Math.max(0, tx - 5); x <= Math.min(size - 1, tx + 5); x++) {
-				for (int z = Math.max(0, tz - 5); z <= Math.min(size - 1, tz + 5); z++) {
-					if ((x - tx) * (x - tx) + (z - tz) * (z - tz) <= 30) near[x * size + z] = true;
+			for (int x = Math.max(0, tx - 7); x <= Math.min(size - 1, tx + 7); x++) {
+				for (int z = Math.max(0, tz - 7); z <= Math.min(size - 1, tz + 7); z++) {
+					if ((x - tx) * (x - tx) + (z - tz) * (z - tz) <= 50) near[x * size + z] = true;
 				}
 			}
 		}
