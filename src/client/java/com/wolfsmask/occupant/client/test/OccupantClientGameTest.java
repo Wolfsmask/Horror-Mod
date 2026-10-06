@@ -98,7 +98,18 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 			TestServerContext server = game.getServer();
 			int errorsBefore = server.computeOnServer(s -> Director.get() == null ? -1 : Director.get().totalErrors());
 
-			// The rules, once the story has started: try creative, and it puts you back.
+			// The rules, once the story has started (in survival, past the opening): try creative,
+			// and it puts you back.
+			server.runCommand("gamemode survival @p");
+			boolean introduced = false;
+			for (int i = 0; i < 30 && !introduced; i++) {
+				context.waitTicks(20);
+				introduced = server.computeOnServer(s -> {
+					var players = s.getPlayerList().getPlayers();
+					return !players.isEmpty() && Director.get() != null && Director.get().data(players.get(0)).introduced;
+				});
+			}
+			Occupant.LOGGER.info("[client-gametest] the story has begun: {}", introduced);
 			server.runCommand("gamemode creative @p");
 			context.waitTicks(30);
 			boolean fair = context.computeOnClient(mc -> mc.player != null && !mc.player.isCreative());
