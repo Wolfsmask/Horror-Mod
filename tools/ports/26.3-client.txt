@@ -1,4 +1,4 @@
-# 26.3 client on f84730d1bd12f56b493bd82f780a4d358295ddef: failure
+# 26.3 client on 804f7922340aa6ef2831a6f741058df76fb6aae9: failure
 === client.log
 /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/ArenaGameTests.java:107: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
 /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:64: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
@@ -29,7 +29,7 @@ Note: /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occu
   /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:204: error: cannot find symbol
   			context.runOnClient(mc -> mc.setScreen(new com.wolfsmask.occupant.client.SettingsScreen(null)));
   /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:207: error: cannot find symbol
-BUILD FAILED in 25s
+BUILD FAILED in 28s
 --- last of the server thread in client.log ---
 --- tail of client.log ---
     symbol:   method setScreen(SettingsScreen)
@@ -55,5 +55,5 @@ BUILD FAILED in 25s
 > Check your code and dependencies to fix the compilation error(s)
 > Run with --scan to get full insights from a Build Scan (powered by Develocity).
 
-BUILD FAILED in 25s
+BUILD FAILED in 28s
 3 actionable tasks: 3 executed
