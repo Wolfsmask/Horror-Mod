@@ -1,198 +1,198 @@
-=== classes matching [Ff]og
-net.minecraft.world.level.material.FogType
-net.minecraft.client.renderer.fog.FogData
-net.minecraft.client.renderer.fog.environment.BlindnessFogEnvironment
-net.minecraft.client.renderer.fog.environment.FogEnvironment
-net.minecraft.client.renderer.fog.environment.DarknessFogEnvironment
-net.minecraft.client.renderer.fog.environment.MobEffectFogEnvironment
-net.minecraft.client.renderer.fog.environment.LavaFogEnvironment
-net.minecraft.client.renderer.fog.environment.AtmosphericFogEnvironment
-net.minecraft.client.renderer.fog.environment.package-info
-net.minecraft.client.renderer.fog.environment.WaterFogEnvironment
-net.minecraft.client.renderer.fog.package-info
-net.minecraft.client.renderer.fog.environment.PowderedSnowFogEnvironment
-net.minecraft.client.renderer.fog.FogRenderer
-=== net.minecraft.client.renderer.FogRenderer (-p)
-Error: class not found: client.renderer.FogRenderer
-=== net.minecraft.client.renderer.fog.FogRenderer (-p)
-public class client.renderer.fog.FogRenderer implements AutoCloseable {
-  public static final int FOG_UBO_SIZE;
-  private static final List<client.renderer.fog.environment.FogEnvironment> FOG_ENVIRONMENTS;
-  private static boolean fogEnabled;
-  private final blaze3d.buffers.GpuBuffer emptyBuffer;
-  private final client.renderer.MappableRingBuffer regularBuffer;
-  public client.renderer.fog.FogRenderer();
-  public void close();
-  public void endFrame();
-  public blaze3d.buffers.GpuBufferSlice getBuffer(client.renderer.fog.FogRenderer$FogMode);
-  private org.joml.Vector4f computeFogColor(client.Camera, float, client.multiplayer.ClientLevel, int, float);
-  public static boolean toggleFog();
-  public org.joml.Vector4f setupFog(client.Camera, int, client.DeltaTracker, float, client.multiplayer.ClientLevel);
-  private world.level.material.FogType getFogType(client.Camera);
-  private void updateBuffer(java.nio.ByteBuffer, int, org.joml.Vector4f, float, float, float, float, float, float);
-  private static String method_71111();
-  private static String method_71308();
-  static {};
-}
-=== net.minecraft.client.renderer.fog.FogData (-public)
-public class client.renderer.fog.FogData {
-  public float environmentalStart;
-  public float renderDistanceStart;
-  public float environmentalEnd;
-  public float renderDistanceEnd;
-  public float skyEnd;
-  public float cloudEnd;
-  public client.renderer.fog.FogData();
-}
-=== net.minecraft.client.renderer.fog.environment.AtmosphericFogEnvironment (-p)
-public class client.renderer.fog.environment.AtmosphericFogEnvironment extends client.renderer.fog.environment.FogEnvironment {
-  private static final int MIN_RAIN_FOG_SKY_LIGHT;
-  private static final float RAIN_FOG_START_OFFSET;
-  private static final float RAIN_FOG_END_OFFSET;
-  private float rainFogMultiplier;
-  public client.renderer.fog.environment.AtmosphericFogEnvironment();
-  public int getBaseColor(client.multiplayer.ClientLevel, client.Camera, int, float);
-  private static int applyWeatherDarken(int, float, float);
-  public void setupFog(client.renderer.fog.FogData, client.Camera, client.multiplayer.ClientLevel, float, client.DeltaTracker);
-  private void updateRainFogState(client.Camera, client.multiplayer.ClientLevel, client.DeltaTracker);
-  public boolean isApplicable(world.level.material.FogType, world.entity.Entity);
-}
-=== net.minecraft.client.renderer.fog.environment.FogEnvironment (-public)
-public abstract class client.renderer.fog.environment.FogEnvironment {
-  public client.renderer.fog.environment.FogEnvironment();
-  public abstract void setupFog(client.renderer.fog.FogData, client.Camera, client.multiplayer.ClientLevel, float, client.DeltaTracker);
-  public boolean providesColor();
-  public int getBaseColor(client.multiplayer.ClientLevel, client.Camera, int, float);
-  public boolean modifiesDarkness();
-  public float getModifiedDarkness(world.entity.LivingEntity, float, float);
-  public abstract boolean isApplicable(world.level.material.FogType, world.entity.Entity);
-}
-=== net.minecraft.client.renderer.fog.FogRenderer (code: setupFog)
-  public org.joml.Vector4f setupFog(client.Camera, int, client.DeltaTracker, float, client.multiplayer.ClientLevel);
-    Code:
-         1: iconst_0
-         2: invokeinterface #358,  2          // InterfaceMethod net/minecraft/client/DeltaTracker.getGameTimeDeltaPartialTick:(Z)F
-        18: invokevirtual #360                // Method computeFogColor:(Lnet/minecraft/client/Camera;FLnet/minecraft/client/multiplayer/ClientLevel;IF)Lorg/joml/Vector4f;
-        24: bipush        16
-        26: imul
-        27: i2f
-        32: invokevirtual #181                // Method getFogType:(Lnet/minecraft/client/Camera;)Lnet/minecraft/world/level/material/FogType;
-        38: invokevirtual #187                // Method net/minecraft/client/Camera.entity:()Lnet/minecraft/world/entity/Entity;
-        43: new           #362                // class net/minecraft/client/renderer/fog/FogData
-        47: invokespecial #363                // Method net/minecraft/client/renderer/fog/FogData."<init>":()V
-        52: getstatic     #189                // Field FOG_ENVIRONMENTS:Ljava/util/List;
-        55: invokeinterface #195,  1          // InterfaceMethod java/util/List.iterator:()Ljava/util/Iterator;
-        64: invokeinterface #207,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
-        69: ifeq          115
-        74: invokeinterface #210,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
-        79: checkcast     #201                // class net/minecraft/client/renderer/fog/environment/FogEnvironment
-        90: invokevirtual #214                // Method net/minecraft/client/renderer/fog/environment/FogEnvironment.isApplicable:(Lnet/minecraft/world/level/material/FogType;Lnet/minecraft/world/entity/Entity;)Z
-        93: ifeq          112
-       106: invokevirtual #366                // Method net/minecraft/client/renderer/fog/environment/FogEnvironment.setupFog:(Lnet/minecraft/client/renderer/fog/FogData;Lnet/minecraft/client/Camera;Lnet/minecraft/client/multiplayer/ClientLevel;FLnet/minecraft/client/DeltaTracker;)V
-       109: goto          115
-       112: goto          62
-       117: ldc_w         #367                // float 10.0f
-       120: fdiv
-       121: ldc_w         #368                // float 4.0f
-       124: ldc_w         #369                // float 64.0f
-       127: invokestatic  #258                // Method net/minecraft/util/Mth.clamp:(FFF)F
-       138: fsub
-       139: putfield      #372                // Field net/minecraft/client/renderer/fog/FogData.renderDistanceStart:F
-       146: putfield      #375                // Field net/minecraft/client/renderer/fog/FogData.renderDistanceEnd:F
-       149: invokestatic  #48                 // Method com/mojang/blaze3d/systems/RenderSystem.getDevice:()Lcom/mojang/blaze3d/systems/GpuDevice;
-       152: invokeinterface #379,  1          // InterfaceMethod com/mojang/blaze3d/systems/GpuDevice.createCommandEncoder:()Lcom/mojang/blaze3d/systems/CommandEncoder;
-       158: getfield      #76                 // Field regularBuffer:Lnet/minecraft/client/renderer/MappableRingBuffer;
-       161: invokevirtual #168                // Method net/minecraft/client/renderer/MappableRingBuffer.currentBuffer:()Lcom/mojang/blaze3d/buffers/GpuBuffer;
-       164: iconst_0
-       165: iconst_1
-       166: invokeinterface #385,  4          // InterfaceMethod com/mojang/blaze3d/systems/CommandEncoder.mapBuffer:(Lcom/mojang/blaze3d/buffers/GpuBuffer;ZZ)Lcom/mojang/blaze3d/buffers/GpuBuffer$MappedView;
-       176: invokeinterface #388,  1          // InterfaceMethod com/mojang/blaze3d/buffers/GpuBuffer$MappedView.data:()Ljava/nio/ByteBuffer;
-       181: iconst_0
-       186: getfield      #391                // Field net/minecraft/client/renderer/fog/FogData.environmentalStart:F
-       191: getfield      #394                // Field net/minecraft/client/renderer/fog/FogData.environmentalEnd:F
-       196: getfield      #372                // Field net/minecraft/client/renderer/fog/FogData.renderDistanceStart:F
-       201: getfield      #375                // Field net/minecraft/client/renderer/fog/FogData.renderDistanceEnd:F
-       206: getfield      #397                // Field net/minecraft/client/renderer/fog/FogData.skyEnd:F
-       211: getfield      #400                // Field net/minecraft/client/renderer/fog/FogData.cloudEnd:F
-       214: invokevirtual #96                 // Method updateBuffer:(Ljava/nio/ByteBuffer;ILorg/joml/Vector4f;FFFFFF)V
-       219: ifnull        261
-       224: invokeinterface #401,  1          // InterfaceMethod com/mojang/blaze3d/buffers/GpuBuffer$MappedView.close:()V
-       229: goto          261
-       236: ifnull        258
-       241: invokeinterface #401,  1          // InterfaceMethod com/mojang/blaze3d/buffers/GpuBuffer$MappedView.close:()V
-       246: goto          258
-       255: invokevirtual #122                // Method java/lang/Throwable.addSuppressed:(Ljava/lang/Throwable;)V
-       260: athrow
-       263: areturn
-      Exception table:
-         from    to  target type
-           173   217   232   Class java/lang/Throwable
-           239   246   249   Class java/lang/Throwable
-
-=== net.minecraft.client.renderer.FogRenderer (code: setupFog)
-=== com.mojang.blaze3d.systems.RenderSystem (-public)
-public class blaze3d.systems.RenderSystem {
-  public static void setShaderFog(blaze3d.buffers.GpuBufferSlice);
-  public static blaze3d.buffers.GpuBufferSlice getShaderFog();
-=== net.minecraft.client.sounds.SoundManager (-public)
-public class client.sounds.SoundManager extends server.packs.resources.SimplePreparableReloadListener<client.sounds.SoundManager$Preparations> {
-  public client.sounds.SoundEngine$PlayResult play(client.resources.sounds.SoundInstance);
-  public void playDelayed(client.resources.sounds.SoundInstance, int);
-  public void pauseAllExcept(sounds.SoundSource...);
+=== org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel (-public)
+public class org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel extends Enum<org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel> {
+  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_6;
+  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_7;
+  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_8;
+  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_9;
+  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_10;
+  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_11;
+  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_12;
+  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_13;
+  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_14;
+  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_15;
+  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_16;
+  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_17;
+  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_18;
+  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_19;
+  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_20;
+  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_21;
+  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_22;
+  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_23;
+  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_24;
+  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_25;
+=== jars matching mixinextras
+--- mixinextras-fabric-0.5.5.jar
+com.llamalad7.mixinextras.platform.fabric.MixinExtrasConfigPlugin
+com.llamalad7.mixinextras.MixinExtrasBootstrap
+com.llamalad7.mixinextras.ap.MixinExtrasAP
+com.llamalad7.mixinextras.ap.StdoutMessager
+com.llamalad7.mixinextras.ap.expressions.DefinitionInfo
+com.llamalad7.mixinextras.config.MixinExtrasConfig
+com.llamalad7.mixinextras.expression.Definition
+com.llamalad7.mixinextras.expression.Definitions
+com.llamalad7.mixinextras.expression.Expression
+com.llamalad7.mixinextras.expression.Expressions
+com.llamalad7.mixinextras.expression.impl.ExpressionParserFacade
+com.llamalad7.mixinextras.expression.impl.ExpressionService
+com.llamalad7.mixinextras.expression.impl.ExpressionSource
+com.llamalad7.mixinextras.expression.impl.ast.expressions.ArrayAccessExpression
+com.llamalad7.mixinextras.expression.impl.ast.expressions.ArrayLiteralExpression
+com.llamalad7.mixinextras.expression.impl.ast.expressions.ArrayStoreExpression
+com.llamalad7.mixinextras.expression.impl.ast.expressions.BinaryExpression
+com.llamalad7.mixinextras.expression.impl.ast.expressions.BooleanLiteralExpression
+com.llamalad7.mixinextras.expression.impl.ast.expressions.BoundMethodReferenceExpression
+com.llamalad7.mixinextras.expression.impl.ast.expressions.CapturingExpression
+com.llamalad7.mixinextras.expression.impl.ast.expressions.CastExpression
+com.llamalad7.mixinextras.expression.impl.ast.expressions.ClassConstantExpression
+com.llamalad7.mixinextras.expression.impl.ast.expressions.ComparisonExpression
+com.llamalad7.mixinextras.expression.impl.ast.expressions.ConstructorReferenceExpression
+com.llamalad7.mixinextras.expression.impl.ast.expressions.DecimalLiteralExpression
+com.llamalad7.mixinextras.expression.impl.ast.expressions.Expression
+com.llamalad7.mixinextras.expression.impl.ast.expressions.FreeMethodReferenceExpression
+com.llamalad7.mixinextras.expression.impl.ast.expressions.IdentifierAssignmentExpression
+com.llamalad7.mixinextras.expression.impl.ast.expressions.IdentifierExpression
+com.llamalad7.mixinextras.expression.impl.ast.expressions.InstanceofExpression
+com.llamalad7.mixinextras.expression.impl.ast.expressions.InstantiationExpression
+com.llamalad7.mixinextras.expression.impl.ast.expressions.IntLiteralExpression
+com.llamalad7.mixinextras.expression.impl.ast.expressions.MemberAccessExpression
+com.llamalad7.mixinextras.expression.impl.ast.expressions.MemberAssignmentExpression
+com.llamalad7.mixinextras.expression.impl.ast.expressions.MethodCallExpression
+com.llamalad7.mixinextras.expression.impl.ast.expressions.NewArrayExpression
+com.llamalad7.mixinextras.expression.impl.ast.expressions.NullLiteralExpression
+com.llamalad7.mixinextras.expression.impl.ast.expressions.ReturnExpression
+com.llamalad7.mixinextras.expression.impl.ast.expressions.SimpleExpression
+com.llamalad7.mixinextras.expression.impl.ast.expressions.StaticMethodCallExpression
+com.llamalad7.mixinextras.expression.impl.ast.expressions.StringLiteralExpression
+com.llamalad7.mixinextras.expression.impl.ast.expressions.SuperCallExpression
+com.llamalad7.mixinextras.expression.impl.ast.expressions.ThisExpression
+com.llamalad7.mixinextras.expression.impl.ast.expressions.ThrowExpression
+com.llamalad7.mixinextras.expression.impl.ast.expressions.UnaryExpression
+com.llamalad7.mixinextras.expression.impl.ast.expressions.WildcardExpression
+com.llamalad7.mixinextras.expression.impl.ast.identifiers.ArrayTypeIdentifier
+com.llamalad7.mixinextras.expression.impl.ast.identifiers.DefinedMemberIdentifier
+com.llamalad7.mixinextras.expression.impl.ast.identifiers.DefinedTypeIdentifier
+com.llamalad7.mixinextras.expression.impl.ast.identifiers.MemberIdentifier
+com.llamalad7.mixinextras.expression.impl.ast.identifiers.TypeIdentifier
+com.llamalad7.mixinextras.expression.impl.ast.identifiers.WildcardIdentifier
+com.llamalad7.mixinextras.expression.impl.flow.Boxing
+com.llamalad7.mixinextras.expression.impl.flow.ComplexDataException
+com.llamalad7.mixinextras.expression.impl.flow.ComplexFlowValue
+com.llamalad7.mixinextras.expression.impl.flow.ComputedFlowValue
+com.llamalad7.mixinextras.expression.impl.flow.DummyFlowValue
+com.llamalad7.mixinextras.expression.impl.flow.FlowContext
+com.llamalad7.mixinextras.expression.impl.flow.FlowInterpreter
+com.llamalad7.mixinextras.expression.impl.flow.FlowValue
+com.llamalad7.mixinextras.expression.impl.flow.LocalsCalculator
+com.llamalad7.mixinextras.expression.impl.flow.expansion.IincExpander
+com.llamalad7.mixinextras.expression.impl.flow.expansion.InsnExpander
+com.llamalad7.mixinextras.expression.impl.flow.expansion.StringConcatFactoryExpander
+com.llamalad7.mixinextras.expression.impl.flow.expansion.UnaryComparisonExpander
+com.llamalad7.mixinextras.expression.impl.flow.postprocessing.ArrayCreationInfo
+com.llamalad7.mixinextras.expression.impl.flow.postprocessing.CallTaggingPostProcessor
+com.llamalad7.mixinextras.expression.impl.flow.postprocessing.FlowPostProcessor
+com.llamalad7.mixinextras.expression.impl.flow.postprocessing.InstantiationInfo
+com.llamalad7.mixinextras.expression.impl.flow.postprocessing.InstantiationPostProcessor
+com.llamalad7.mixinextras.expression.impl.flow.postprocessing.LMFInfo
+com.llamalad7.mixinextras.expression.impl.flow.postprocessing.LMFPostProcessor
+com.llamalad7.mixinextras.expression.impl.flow.postprocessing.MethodCallType
+com.llamalad7.mixinextras.expression.impl.flow.postprocessing.NewArrayPostProcessor
+com.llamalad7.mixinextras.expression.impl.flow.postprocessing.SplitNodeRemovalPostProcessor
+com.llamalad7.mixinextras.expression.impl.flow.postprocessing.StringConcatInfo
+com.llamalad7.mixinextras.expression.impl.flow.postprocessing.StringConcatPostProcessor
+com.llamalad7.mixinextras.expression.impl.flow.utils.InsnReference
+com.llamalad7.mixinextras.expression.impl.point.ExpressionContext
+com.llamalad7.mixinextras.expression.impl.point.ExpressionInjectionPoint
+=== jars matching sponge-mixin
+--- sponge-mixin-0.17.4+mixin.0.8.7.jar
+org.spongepowered.tools.agent.MixinAgentClassLoader
+org.spongepowered.tools.agent.MixinAgent
+org.spongepowered.tools.obfuscation.interfaces.IObfuscationManager
+org.spongepowered.tools.obfuscation.interfaces.IObfuscationDataProvider
+org.spongepowered.tools.obfuscation.interfaces.IObfuscationEnvironment
+org.spongepowered.tools.obfuscation.interfaces.IMixinAnnotationProcessor
+org.spongepowered.tools.obfuscation.interfaces.IMessagerSuppressible
+org.spongepowered.tools.obfuscation.interfaces.IOptionProvider
+org.spongepowered.tools.obfuscation.interfaces.IMixinValidator
+org.spongepowered.tools.obfuscation.interfaces.IJavadocProvider
+org.spongepowered.tools.obfuscation.interfaces.IReferenceManager
+org.spongepowered.tools.obfuscation.interfaces.ITypeHandleProvider
+org.spongepowered.tools.obfuscation.interfaces.IMessagerEx
+org.spongepowered.tools.obfuscation.fg3.ObfuscationEnvironmentFG3
+org.spongepowered.tools.obfuscation.fg3.ObfuscationServiceFG3
+org.spongepowered.tools.obfuscation.ObfuscationType
+org.spongepowered.tools.obfuscation.service.IObfuscationService
+org.spongepowered.tools.obfuscation.service.ObfuscationTypeDescriptor
+org.spongepowered.tools.obfuscation.service.ObfuscationServices
+org.spongepowered.tools.obfuscation.AnnotatedMixinElementHandlerShadow
+org.spongepowered.tools.obfuscation.AnnotatedMixin
+org.spongepowered.tools.obfuscation.ext.SpecialPackages
+org.spongepowered.tools.obfuscation.AnnotatedMixinElementHandler
+org.spongepowered.tools.obfuscation.mcp.ObfuscationServiceMCP
+org.spongepowered.tools.obfuscation.mcp.ObfuscationEnvironmentMCP
+org.spongepowered.tools.obfuscation.MixinObfuscationProcessorTargets
+org.spongepowered.tools.obfuscation.MixinObfuscationProcessorInjection
+org.spongepowered.tools.obfuscation.SupportedOptions
+org.spongepowered.tools.obfuscation.mapping.fg3.MappingProviderTSrg
+org.spongepowered.tools.obfuscation.mapping.fg3.MappingMethodLazy
+org.spongepowered.tools.obfuscation.mapping.fg3.MappingWriterTSrg
+org.spongepowered.tools.obfuscation.mapping.IMappingWriter
+org.spongepowered.tools.obfuscation.mapping.mcp.MappingProviderSrg
+org.spongepowered.tools.obfuscation.mapping.mcp.MappingWriterSrg
+org.spongepowered.tools.obfuscation.mapping.IMappingProvider
+org.spongepowered.tools.obfuscation.mapping.common.MappingWriter
+org.spongepowered.tools.obfuscation.mapping.common.MappingProvider
+org.spongepowered.tools.obfuscation.mapping.IMappingConsumer
+org.spongepowered.tools.obfuscation.ObfuscationDataProvider
+org.spongepowered.tools.obfuscation.TargetMap
+org.spongepowered.tools.obfuscation.AnnotatedMixinElementHandlerSoftImplements
+org.spongepowered.tools.obfuscation.AnnotatedMixinElementHandlerAccessor
+org.spongepowered.tools.obfuscation.MixinValidator
+org.spongepowered.tools.obfuscation.validation.ParentValidator
+org.spongepowered.tools.obfuscation.validation.TargetValidator
+org.spongepowered.tools.obfuscation.AnnotatedMixins
+org.spongepowered.tools.obfuscation.ObfuscationEnvironment
+org.spongepowered.tools.obfuscation.struct.Message
+org.spongepowered.tools.obfuscation.struct.InjectorRemap
+org.spongepowered.tools.obfuscation.MixinObfuscationProcessor
+org.spongepowered.tools.obfuscation.Mappings
+org.spongepowered.tools.obfuscation.AnnotatedMixinElementHandlerOverwrite
+org.spongepowered.tools.obfuscation.ObfuscationData
+org.spongepowered.tools.obfuscation.SuppressedBy
+org.spongepowered.tools.obfuscation.mirror.TypeHandleASM
+org.spongepowered.tools.obfuscation.mirror.AnnotationHandle
+org.spongepowered.tools.obfuscation.mirror.MemberHandle
+org.spongepowered.tools.obfuscation.mirror.MethodHandle
+org.spongepowered.tools.obfuscation.mirror.TypeHandleSimulated
+org.spongepowered.tools.obfuscation.mirror.mapping.MappingMethodResolvable
+org.spongepowered.tools.obfuscation.mirror.MethodHandleASM
+org.spongepowered.tools.obfuscation.mirror.FieldHandleASM
+org.spongepowered.tools.obfuscation.mirror.TypeUtils
+org.spongepowered.tools.obfuscation.mirror.TypeReference
+org.spongepowered.tools.obfuscation.mirror.FieldHandle
+org.spongepowered.tools.obfuscation.mirror.TypeHandle
+org.spongepowered.tools.obfuscation.ReferenceManager
+org.spongepowered.tools.obfuscation.AnnotatedMixinElementHandlerInjector
+org.spongepowered.tools.obfuscation.ObfuscationManager
+org.spongepowered.asm.bridge.RemapperAdapterFML
+org.spongepowered.asm.bridge.RemapperAdapter
+org.spongepowered.asm.mixin.transformer.debug.RuntimeDecompiler
+org.spongepowered.asm.mixin.transformer.debug.RuntimeDecompilerAsync
+org.spongepowered.asm.service.mojang.MixinServiceLaunchWrapperBootstrap
+org.spongepowered.asm.service.mojang.LaunchClassLoaderUtil
+org.spongepowered.asm.service.mojang.Blackboard
+org.spongepowered.asm.service.mojang.LegacyTransformerHandle
+org.spongepowered.asm.service.mojang.MixinServiceLaunchWrapper
+org.spongepowered.asm.service.mojang.LoggerAdapterLog4j2
+org.spongepowered.asm.launch.MixinTweaker
+=== net.minecraft.world.entity.MobCategory (-public)
+public final class world.entity.MobCategory extends Enum<world.entity.MobCategory> implements util.StringRepresentable {
+  public static final world.entity.MobCategory CREATURE;
+  public static final world.entity.MobCategory UNDERGROUND_WATER_CREATURE;
+  public static final world.entity.MobCategory WATER_CREATURE;
+=== net.minecraft.world.entity.Mob (-public)
+public abstract class world.entity.Mob extends world.entity.LivingEntity implements world.entity.EquipmentUser,world.entity.Leashable,world.entity.Targeting {
+  public world.entity.ai.control.LookControl getLookControl();
+  public world.entity.ai.navigation.PathNavigation getNavigation();
+=== net.minecraft.world.entity.ai.navigation.PathNavigation (-public)
+public abstract class world.entity.ai.navigation.PathNavigation {
   public void stop();
-  public void resume();
-  public void stop(client.resources.sounds.SoundInstance);
-  public void stop(resources.Identifier, sounds.SoundSource);
-=== net.minecraft.client.Options (-public)
-public class client.Options {
-  public client.OptionInstance<Integer> renderDistance();
-  public client.OptionInstance<Integer> simulationDistance();
-  public int getEffectiveRenderDistance();
-=== net.minecraft.client.Minecraft (-public)
-public class client.Minecraft extends util.thread.ReentrantBlockableEventLoop<Runnable> implements blaze3d.platform.WindowEventHandler {
-  public final client.renderer.GameRenderer gameRenderer;
-  public final client.Options options;
-  public client.sounds.SoundManager getSoundManager();
-=== net.minecraft.server.level.ServerPlayer (-public)
-public class server.level.ServerPlayer extends world.entity.player.Player {
-  public server.level.ClientInformation clientInformation();
-  public int requestedViewDistance();
-=== net.minecraft.server.level.ClientInformation (-public)
-public final class server.level.ClientInformation extends Record {
-  public int viewDistance();
-=== net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents (-public)
-public final class entity.event.v1.EntitySleepEvents {
-  public static final event.Event<entity.event.v1.EntitySleepEvents$AllowSleeping> ALLOW_SLEEPING;
-  public static final event.Event<entity.event.v1.EntitySleepEvents$StartSleeping> START_SLEEPING;
-  public static final event.Event<entity.event.v1.EntitySleepEvents$StopSleeping> STOP_SLEEPING;
-  public static final event.Event<entity.event.v1.EntitySleepEvents$AllowBed> ALLOW_BED;
-  public static final event.Event<entity.event.v1.EntitySleepEvents$AllowNearbyMonsters> ALLOW_NEARBY_MONSTERS;
-  public static final event.Event<entity.event.v1.EntitySleepEvents$AllowResettingTime> ALLOW_RESETTING_TIME;
-  public static final event.Event<entity.event.v1.EntitySleepEvents$ModifySleepingDirection> MODIFY_SLEEPING_DIRECTION;
-  public static final event.Event<entity.event.v1.EntitySleepEvents$AllowSettingSpawn> ALLOW_SETTING_SPAWN;
-  public static final event.Event<entity.event.v1.EntitySleepEvents$SetBedOccupationState> SET_BED_OCCUPATION_STATE;
-  public static final event.Event<entity.event.v1.EntitySleepEvents$ModifyWakeUpPosition> MODIFY_WAKE_UP_POSITION;
-}
-=== net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents$AllowSleeping (-public)
-public interface entity.event.v1.EntitySleepEvents$AllowSleeping {
-  public abstract world.entity.player.Player$BedSleepingProblem allowSleep(world.entity.player.Player, core.BlockPos);
-}
-=== net.minecraft.world.entity.player.Player$BedSleepingProblem (-public)
-public final class world.entity.player.Player$BedSleepingProblem extends Record {
-  public static final world.entity.player.Player$BedSleepingProblem TOO_FAR_AWAY;
-  public static final world.entity.player.Player$BedSleepingProblem OBSTRUCTED;
-  public static final world.entity.player.Player$BedSleepingProblem OTHER_PROBLEM;
-  public static final world.entity.player.Player$BedSleepingProblem NOT_SAFE;
-  public world.entity.player.Player$BedSleepingProblem(network.chat.Component);
-  public final String toString();
-  public final int hashCode();
-  public final boolean equals(Object);
-  public network.chat.Component message();
-}
-=== net.minecraft.world.entity.ai.control.LookControl (-public)
-public class world.entity.ai.control.LookControl implements world.entity.ai.control.Control {
-  public void setLookAt(world.phys.Vec3);
-  public void setLookAt(world.entity.Entity);
-  public void setLookAt(world.entity.Entity, float, float);
-  public void setLookAt(double, double, double);
-  public void setLookAt(double, double, double, float, float);
