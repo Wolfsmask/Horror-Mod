@@ -36,8 +36,8 @@ water, in daylight in open fields, or close enough to touch (unless that is the 
 | Act | Roughly when | What happens |
 |---|---|---|
 | 0 | First ~3 min | Nothing. Let the player get comfortable. The first time in a world opens on black: *there is something in this world with you.* |
-| 1: Signs | ~3-18 min | Deniable things. Footsteps behind you that stop when you turn. A sound you know perfectly, coming from somewhere it cannot be: a creeper's fuse at your back at night, a door in a house with no door. Something standing on a ridge a hundred blocks away that you cannot quite resolve. |
-| 2: Presence | then ~12-22 min | It is closer and it is not hiding as well. A figure in the dark at the edge of your vision. A face at your window at night, a step back from the glass. Footsteps across your roof that stop right above you. Knocking at night. Breathing behind you. A sign you did not place. A fresh tunnel. Every animal in sight stops and stares at you. Someone with a name *almost* like yours joins the game; you make an advancement called *[Not Alone]*. You can't sleep: "there are monsters nearby". There aren't. |
+| 1: Signs | ~3-18 min | Deniable things. Footsteps behind you that stop when you turn. A sound you know perfectly, coming from somewhere it cannot be: a creeper's fuse at your back at night, a door in a house with no door. Something standing at the very edge of the fog that you cannot quite resolve. One roll of thunder from a clear night sky. |
+| 2: Presence | then ~12-22 min | It is closer and it is not hiding as well. A figure in the dark at the edge of your vision. A face at your window at night, a step back from the glass. Footsteps across your roof that stop right above you. The campfire goes out while your back is turned. Knocking at night. Breathing behind you. A sign you did not place. A fresh tunnel. Every animal in sight stops and stares at you. Someone with a name *almost* like yours joins the game; you make an advancement called *[Not Alone]*. You can't sleep: "there are monsters nearby". There aren't. |
 | 3: Closer | then ~15-30 min | It follows you, moving only when you are not looking. You say things in chat you never typed. The lights flicker and it is standing in front of you. It is by your bed when you get home. It is behind you, and the screen goes quietly out. |
 | 4: Hunt | from then on | The music stops. It is out there, looking at you. Then it runs. And once, on **the last night**, the fog closes right in and it is standing at the edge of it; every time you look away it is closer when you look back, until it is right in front of you. Then black, and a line, as on the first night. When the picture comes back the fog has lifted, and the story begins again, quieter. |
 
@@ -211,8 +211,8 @@ For testing, and for recording your own videos:
 /occupant reload                     reload config/occupant.json
 ```
 
-Events: `footsteps`, `familiar`, `distant`, `cave_noise`, `distant_mining`, `door`, `chest`, `torch_gone`, `breath`,
-`knock`, `fake_join`, `sign`, `marker_torch`, `tunnel`, `watcher`, `window`, `roof`, `stare`, `advancement`, `whisper`,
+Events: `footsteps`, `familiar`, `thunder`, `distant`, `cave_noise`, `distant_mining`, `door`, `chest`, `torch_gone`, `breath`,
+`knock`, `fake_join`, `sign`, `marker_torch`, `tunnel`, `watcher`, `window`, `roof`, `fire_out`, `stare`, `advancement`, `whisper`,
 `doppel_chat`, `stalker`, `flicker`, `static`, `intruder`, `behind_you`, `wake`, `hunt`, `last_night`.
 
 If you just installed it and want to see something **immediately**: `/occupant here`. That one

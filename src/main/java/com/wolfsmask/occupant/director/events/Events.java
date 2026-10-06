@@ -21,6 +21,7 @@ public final class Events {
 			new ChestEvent(),
 			new TorchEvent(),
 			new HallwayEvent(),
+			new ThunderEvent(),
 			// Act 2+: something is here
 			new CloseSoundEvent("breath", 2, 5, 12, () -> ModSounds.BREATH, true, 0.5f),
 			new KnockEvent(),
@@ -32,6 +33,7 @@ public final class Events {
 			new WatcherEvent(),
 			new WindowEvent(),
 			new RoofEvent(),
+			new FireOutEvent(),
 			new StareEvent(),
 			new FakeAdvancementEvent(),
 			// Act 3+: it is getting closer
