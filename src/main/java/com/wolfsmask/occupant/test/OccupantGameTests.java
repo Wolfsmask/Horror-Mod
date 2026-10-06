@@ -422,17 +422,25 @@ public final class OccupantGameTests {
 	@GameTest(maxTicks = 60)
 	public void theLandIsALittleWrong(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
-		BlockPos at = helper.absolutePos(new BlockPos(0, 1, 0)).offset(-700, 0, 700);
+		// Its own meadow, up in the air: the test world's ground is not the same on every version.
+		BlockPos corner = helper.absolutePos(BlockPos.ZERO).offset(-700, 0, 700);
+		BlockPos at = new BlockPos(corner.getX() & ~15, 40, corner.getZ() & ~15);
 		int changed = 0;
 		int leaves = 0;
 		for (int cx = 0; cx < 8; cx++) {
 			for (int cz = 0; cz < 8; cz++) {
 				BlockPos origin = at.offset(cx * 16, 0, cz * 16);
 				level.getChunk(origin.getX() >> 4, origin.getZ() >> 4);
+				for (BlockPos p : BlockPos.betweenClosed(origin.offset(0, -1, 0), origin.offset(15, -1, 15))) {
+					level.setBlock(p, net.minecraft.world.level.block.Blocks.DIRT.defaultBlockState(), net.minecraft.world.level.block.Block.UPDATE_CLIENTS);
+				}
+				for (BlockPos p : BlockPos.betweenClosed(origin, origin.offset(15, 0, 15))) {
+					level.setBlock(p, net.minecraft.world.level.block.Blocks.GRASS_BLOCK.defaultBlockState(), net.minecraft.world.level.block.Block.UPDATE_CLIENTS);
+				}
 				House.blightForTest(level, level.getRandom(), origin);
 			}
 		}
-		for (BlockPos p : BlockPos.betweenClosed(at.offset(0, -6, 0), at.offset(8 * 16, 12, 8 * 16))) {
+		for (BlockPos p : BlockPos.betweenClosed(at.offset(0, -2, 0), at.offset(8 * 16, 12, 8 * 16))) {
 			net.minecraft.world.level.block.state.BlockState s = level.getBlockState(p);
 			if (s.is(net.minecraft.tags.BlockTags.LOGS) || s.is(net.minecraft.world.level.block.Blocks.COARSE_DIRT)
 					|| s.is(net.minecraft.world.level.block.Blocks.BONE_BLOCK)) changed++;

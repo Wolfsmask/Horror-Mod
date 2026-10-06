@@ -10,16 +10,15 @@ MC="$1"
 GRADLE="./gradlew -Pmc=$MC --console=plain"
 crashed() { grep -qE "Game crashed|---- Minecraft Crash Report|Exception in thread \"(Render|Server) thread\"" "$1"; }
 stop_game() { pkill -f "net.fabricmc.devlaunchinjector.Main" || true; sleep 5; pkill -9 -f "net.fabricmc.devlaunchinjector.Main" || true; }
-# A photograph, for a person to look at (the fog, mostly): shot-<name>.png. Taken by the game itself
-# (F2), since the window is drawn with OpenGL and a grab of the X screen comes out black.
+# The photograph the game takes of itself in the smoke run (the window is drawn with OpenGL, so a grab
+# of the X screen comes out black): copied out as shot-<name>.png, for a person to look at.
 shot() {
-	local w
-	w=$(DISPLAY=:99 xdotool search --name "Minecraft" 2>/dev/null | head -n 1)
-	[ -n "$w" ] && DISPLAY=:99 xdotool windowfocus "$w" 2>/dev/null
-	DISPLAY=:99 xdotool key F2 2>/dev/null
-	sleep 4
-	local f
-	f=$(ls -t run/screenshots/*.png 2>/dev/null | head -n 1)
+	local f=""
+	for _ in $(seq 1 12); do
+		f=$(ls -t run/screenshots/*.png 2>/dev/null | head -n 1)
+		[ -n "$f" ] && break
+		sleep 2
+	done
 	if [ -n "$f" ]; then cp "$f" "shot-$1.png"; else echo "(no photograph: $1)"; fi
 }
 wait_for() {   # wait_for <log> <pattern> <seconds>
@@ -39,7 +38,6 @@ echo "== 1. the first screen"
 xvfb-run -n 99 -s "-screen 0 1280x720x24 -ac" $GRADLE runClient > client.log 2>&1 &
 if ! wait_for client.log "the mode screen has been drawn" 900; then stop_game; echo "the first screen was never drawn"; exit 1; fi
 sleep 30
-shot first-screen
 stop_game
 if crashed client.log; then echo "crashed on the first screen"; exit 1; fi
 

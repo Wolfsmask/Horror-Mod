@@ -65,7 +65,24 @@ public class OccupantRenderer extends CullingRenderer {
 		if (!drawn) {
 			drawn = true;
 			Occupant.LOGGER.info("[client] the Occupant has been drawn");
+			if (Boolean.getBoolean("occupant.smoke")) photograph();
 		}
+	}
+
+	/** In the smoke run only: a photograph, a few seconds on, once the fog has rolled in (screenshots/). */
+	private static void photograph() {
+		Thread t = new Thread(() -> {
+			try {
+				Thread.sleep(8000);
+			} catch (InterruptedException e) {
+				return;
+			}
+			net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+			mc.execute(() -> net.minecraft.client.Screenshot.grab(mc.gameDirectory, mc.getMainRenderTarget(),
+					message -> Occupant.LOGGER.info("[client] photograph: {}", message.getString())));
+		}, "occupant-photograph");
+		t.setDaemon(true);
+		t.start();
 	}
 
 	@Override

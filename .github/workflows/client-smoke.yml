@@ -39,7 +39,7 @@ jobs:
       - name: Virtual display and software rendering
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq xvfb mesa-utils libgl1-mesa-dri mesa-vulkan-drivers xdotool > /dev/null
+          sudo apt-get install -y -qq xvfb mesa-utils libgl1-mesa-dri mesa-vulkan-drivers > /dev/null
 
       - name: Start the client
         id: client
