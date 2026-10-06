@@ -236,6 +236,13 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 			check(fogged && fogEnd <= 112, "the fog should have come in by the last act (" + fogEnd + ")");
 			shoot(context, "occupant-fog");
 
+			// The end of the last night, as the player sees it: black, and the line.
+			server.runOnServer(s -> com.wolfsmask.occupant.util.Cues.effect(s.getPlayerList().getPlayers().get(0),
+					com.wolfsmask.occupant.network.ScreenEffectPayload.FINALE, 240, 1.0f));
+			context.waitTicks(90);
+			shoot(context, "occupant-ending");
+			context.waitTicks(170);
+
 			// The way the user was locked out: going to sleep, quitting, and coming back. The game
 			// wakes a sleeper while it is placing them into the world, which once threw out of the
 			// mod and ended the join with "Invalid player data".
