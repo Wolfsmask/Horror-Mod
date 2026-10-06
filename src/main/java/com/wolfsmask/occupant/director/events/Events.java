@@ -30,6 +30,9 @@ public final class Events {
 			new MarkerTorchEvent(),
 			new TunnelEvent(),
 			new WatcherEvent(),
+			new WindowEvent(),
+			new StareEvent(),
+			new FakeAdvancementEvent(),
 			// Act 3+: it is getting closer
 			new CloseSoundEvent("whisper", 3, 4, 15, () -> ModSounds.WHISPER, false, 0.4f),
 			new DoppelChatEvent(),

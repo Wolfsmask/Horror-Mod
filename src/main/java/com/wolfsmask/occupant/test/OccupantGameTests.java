@@ -316,6 +316,11 @@ public final class OccupantGameTests {
 		int chunksBefore = cfg.fogChunks;
 		cfg.fogChunks = 6;
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		// Something far off is only put where the server still runs the world: this server's own
+		// setting may be too short for the fog's edge to be inside it.
+		net.minecraft.server.players.PlayerList list = level.getServer().getPlayerList();
+		int simulationBefore = list.getSimulationDistance();
+		if (simulationBefore < 8) list.setSimulationDistance(10);
 		try {
 			BlockPos centre = helper.absolutePos(BlockPos.ZERO).offset(0, 0, 900).atY(200);
 			director.data(player).setAct(1);
@@ -339,7 +344,8 @@ public final class OccupantGameTests {
 			Director.TriggerResult result = director.trigger(player, DistantEvent.ID, true);
 			List<OccupantEntity> found = level.getEntitiesOfClass(OccupantEntity.class, new AABB(centre).inflate(r + 8),
 					e -> e.isHaunting(player));
-			helper.assertTrue(result == Director.TriggerResult.STARTED, "It should find the ridge: " + result);
+			helper.assertTrue(result == Director.TriggerResult.STARTED, "It should find the ridge: " + result
+					+ " (simulation distance " + simulationBefore + ", fog begins at " + start + ")");
 			helper.assertTrue(!found.isEmpty(), "It should be standing somewhere");
 			OccupantEntity e = found.get(0);
 			double dist = Math.hypot(e.getX() - player.getX(), e.getZ() - player.getZ());
@@ -350,6 +356,7 @@ public final class OccupantGameTests {
 		} finally {
 			director.stopCurrent(player);
 			cfg.fogChunks = chunksBefore;
+			if (list.getSimulationDistance() != simulationBefore) list.setSimulationDistance(simulationBefore);
 		}
 	}
 

@@ -44,10 +44,13 @@ public final class Sight {
 		return Math.toDegrees(Math.acos(dot));
 	}
 
-	/** True if nothing solid is between the player's eyes and the point. */
+	/**
+	 * True if nothing the player cannot see through is between their eyes and the point. Glass,
+	 * panes and bars are seen through, as a player sees through them; leaves and walls are not.
+	 */
 	public static boolean hasLineOfSight(ServerPlayer player, Vec3 point) {
 		BlockHitResult hit = player.level().clip(new ClipContext(
-				player.getEyePosition(), point, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
+				player.getEyePosition(), point, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, player));
 		return hit.getType() == HitResult.Type.MISS;
 	}
 

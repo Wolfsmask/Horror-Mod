@@ -132,7 +132,9 @@ public final class ArenaGameTests {
 			fill(cave.offset(-20, -6, -20), cave.offset(20, 8, 20), Blocks.STONE.defaultBlockState());
 			fill(cave.offset(-18, 0, -2), cave.offset(18, 2, 2), Blocks.AIR.defaultBlockState());
 
-			// House: a plank box with a door behind the player and a chest in the corner.
+			// House: a plank box with a door behind the player, a chest in the corner and a window
+			// in the east wall, on a patch of ground so there is somewhere outside to stand.
+			fill(house.offset(-12, -1, -12), house.offset(12, -1, 12), Blocks.GRASS_BLOCK.defaultBlockState());
 			fill(house.offset(-5, -1, -5), house.offset(5, 4, 5), Blocks.OAK_PLANKS.defaultBlockState());
 			fill(house.offset(-4, 0, -4), house.offset(4, 3, 4), Blocks.AIR.defaultBlockState());
 			BlockPos door = house.offset(0, 0, -5);
@@ -141,6 +143,8 @@ public final class ArenaGameTests {
 			world.setBlock(door, lower, Block.UPDATE_ALL);
 			world.setBlock(door.above(), lower.setValue(DoorBlock.HALF, DoubleBlockHalf.UPPER), Block.UPDATE_ALL);
 			world.setBlock(house.offset(3, 0, -3), Blocks.CHEST.defaultBlockState(), Block.UPDATE_ALL);
+			world.setBlock(house.offset(5, 1, 1), Blocks.GLASS.defaultBlockState(), Block.UPDATE_ALL);
+			world.setBlock(house.offset(5, 2, 1), Blocks.GLASS.defaultBlockState(), Block.UPDATE_ALL);
 		}
 
 		private void fill(BlockPos from, BlockPos to, BlockState state) {
@@ -160,6 +164,13 @@ public final class ArenaGameTests {
 					Spots.isDark(world, field.above()), Blocks.GRASS_BLOCK.defaultBlockState().is(BlockTags.DIRT));
 			Compat.setRespawn(player, field.offset(0, 0, -22));
 			expect("field", "watcher", "stalker", "hunt", "behind_you", "footsteps", "sign", "intruder");
+			// A few cows in front of the player: all of them will turn and stare.
+			for (int i = 0; i < 3; i++) {
+				command("summon minecraft:cow " + (field.getX() - 2 + i * 2) + " " + field.getY() + " " + (field.getZ() + 7)
+						+ " {Tags:[\"occupant_arena\"]}");
+			}
+			expect("field", "stare");
+			command("kill @e[tag=occupant_arena]");
 
 			// Cave, facing east (+X) down the corridor.
 			place(cave, -90.0f);
@@ -171,7 +182,7 @@ public final class ArenaGameTests {
 
 			// House, facing away from the door.
 			place(house, 0.0f);
-			expect("house", "knock", "chest", "door");
+			expect("house", "knock", "chest", "door", "window");
 		}
 
 		/** Logs what the cave looks like to the spot checks, so a failure here is easy to understand. */
@@ -194,6 +205,10 @@ public final class ArenaGameTests {
 					player.getYRot(), feet, Spots.isUnderground(world, feet), world.canSeeSky(feet), world.getBrightness(LightLayer.SKY, feet),
 					world.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, feet.getX(), feet.getZ()), Spots.light(world, feet.above()),
 					Sight.flatLook(player), stand, dark, seen);
+		}
+
+		private void command(String command) {
+			world.getServer().getCommands().performPrefixedCommand(world.getServer().createCommandSourceStack(), command);
 		}
 
 		private void place(BlockPos pos, float yaw) {
