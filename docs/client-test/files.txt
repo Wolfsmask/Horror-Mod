@@ -1,3 +1,4 @@
+build/clientGametest/occupant-shots/cinematic-fog.png
 build/clientGametest/occupant-shots/occupant-photo-1-sighting-dusk.png
 build/clientGametest/occupant-shots/occupant-corridor.png
 build/clientGametest/occupant-shots/occupant-three-quarter.png
@@ -19,6 +20,7 @@ build/clientGametest/occupant-shots/place-village.png
 build/clientGametest/occupant-shots/occupant-after-rejoin.png
 build/clientGametest/occupant-shots/cinematic-village.png
 build/clientGametest/occupant-shots/occupant-photo-6-house-dusk-turned.png
+build/clientGametest/occupant-shots/occupant-ending.png
 build/clientGametest/occupant-shots/occupant-shove.png
 build/clientGametest/occupant-shots/occupant-gate.png
 build/clientGametest/occupant-shots/occupant-looking-up.png
@@ -31,10 +33,8 @@ build/clientGametest/occupant-shots/occupant-fog-edge.png
 build/clientGametest/occupant-shots/cinematic-hallway.png
 build/clientGametest/occupant-shots/occupant-night-distant.png
 build/clientGametest/occupant-shots/place-graves.png
+build/clientGametest/occupant-shots/occupant-photo-2-sighting-night.png
 build/clientGametest/occupant-shots/occupant-loom.png
 build/clientGametest/occupant-shots/occupant-photo-3-far-off-dusk.png
 build/clientGametest/occupant-shots/occupant-stare.png
 build/clientGametest/occupant-shots/occupant-title.png
-build/clientGametest/occupant-shots/place-ruin.png
-build/clientGametest/occupant-shots/cinematic-treeline.png
-build/clientGametest/occupant-shots/occupant-fog.png
