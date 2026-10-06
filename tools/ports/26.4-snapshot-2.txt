@@ -1,47 +1,20 @@
-# 26.4-snapshot-2 on 8b24356d055ce3b710d7a3355461a5fa446f8be9: build success, tests success, jar success
+# 26.4-snapshot-2 on d621ef09e7d447d83e073f84fc834e6330e18a42: build failure, tests skipped, jar skipped
+com/wolfsmask/occupant/director/events/PetsEvent.java:69: error: cannot find symbol
+  symbol:   variable CAT
+  location: class EntityType
+com/wolfsmask/occupant/director/events/PetsEvent.java:70: error: cannot find symbol
+  symbol:   variable CAT_HISS
+  location: class SoundEvents
+com/wolfsmask/occupant/director/events/TurnedEvent.java:51: error: cannot find symbol
+  symbol:   variable ARMOR_STAND
+  location: class EntityType
+com/wolfsmask/occupant/Occupant.java:164: error: cannot find symbol
+  symbol:   variable VILLAGER
+  location: class EntityType
 > Configure project :
 > Task :compileJava
-> Task :processResources
-> Task :classes
-> Task :compileClientJava
-> Task :processClientResources NO-SOURCE
-> Task :processIncludeJars
-> Task :clientClasses
-> Task :compileTestJava NO-SOURCE
-> Task :jar
-> Task :processTestResources NO-SOURCE
-> Task :assemble
-> Task :testClasses UP-TO-DATE
-> Task :test NO-SOURCE
-> Task :validateAccessWidener NO-SOURCE
-> Task :check UP-TO-DATE
-> Task :build
-=== jar
-jar: build/libs/occupant-0.15.0+mc26.4-snapshot-2.jar
-{
-  "required": true,
-  "minVersion": "0.8",
-  "package": "com.wolfsmask.occupant.mixin.client",
-  "compatibilityLevel": "JAVA_25",
-  "client": [
-    "FogRendererMixin"
-  ],
-  "injectors": {
-    "defaultRequire": 1
-  }
-}
-unobfuscated version: the game's own names are the real ones
-[20:54:48] [Server thread/INFO] (occupant) [gametest] fog: first act 128.0, last act 104.0
-[20:54:50] [Server thread/INFO] (occupant) [gametest] fog thick at 96.0, begins at 62.400001525878906; it stands 57.48912940721924 away
-[20:54:51] [Server thread/INFO] (occupant) [gametest] houses: found before false, first true, too close false, second true, after finding false
-[20:54:51] [Server thread/INFO] (occupant) [gametest] places without loot: [], page found: true
-[20:54:52] [Server thread/INFO] (occupant) [gametest] house test player at BlockPos{x=-2, y=1, z=-4} facing 0.0 / (0.0, -0.0, 1.0)
-[20:54:52] [Server thread/INFO] (occupant) [gametest] house hallway spot: peeking BlockPos{x=-8584667, y=8, z=14827896} / any BlockPos{x=-8584667, y=8, z=14827896} (relative to the floor: BlockPos{x=4, y=1, z=0})
-[20:54:52] [Server thread/INFO] (occupant) [gametest] hallway light at the far end: block 0 sky 0, dark true
-[20:54:52] [Server thread/INFO] (occupant) [gametest] that spot: mask 1001001001, block light 0, sky 2, main room middle block light 0 sky 8
-[20:54:54] [Server thread/INFO] (occupant) [gametest] field: darkOutside=true skyDarken=7 light=8 skyLight=15 blockLight=0 isDark=true grassInDirtTag=false
-[20:54:54] [Server thread/INFO] (occupant) [gametest] cave: yaw=-90.0 feet=BlockPos{x=-8584277, y=60, z=14827713} underground=true skyVisible=false skyLight=0 topY=69 light=0 look=(1.0, 0.0, 0.0) | ahead: standable=55 dark=55 visible=55
-[20:54:54] [Server thread/INFO] (occupant) [gametest] arena failures: []
-[20:54:55] [Server thread/INFO] (occupant) [gametest] unnoticed: age 240, seen -1, nearby 1, alive true, concealed false, noticed false, in sight true, angle 176, ray MISS at -8584751, 56, 14827600 Block{minecraft:air}, ignored 1, same story true
-[20:55:00] [Server thread/INFO] (occupant) [gametest] events that found a place to happen: [familiar, cave_noise, thunder, breath, fake_join, roof, advancement, whisper, doppel_chat, stalker, flicker, static, wake]
-[20:55:00] [Server thread/INFO] (Minecraft) ========= 14 GAME TESTS COMPLETE IN 15.33 s ======================
+> Task :compileJava FAILED
+* What went wrong:
+> Compilation failed; see the compiler output below.
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
