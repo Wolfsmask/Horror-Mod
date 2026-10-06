@@ -32,12 +32,12 @@ rng = np.random.default_rng(1666)
 # focus (0 top .. 1 bottom)
 SHOTS_LIST = [
     ("cinematic-treeline", "01-treeline", "It was standing there the whole time.", (0.62, 0.15, 1.0), 0.45),
-    ("cinematic-hallway", "02-hallway", "Don't go down the hallway.", (0.55, 0.05, 1.8), 0.5),
+    ("cinematic-hallway", "02-hallway", "Don't go down the hallway.", (0.55, 0.05, 2.4), 0.5),
     ("cinematic-village", "03-village", "Everyone left. Something stayed.", (0.6, 0.25, 1.1), 0.5),
     ("cinematic-ruin", "04-ruin", "Somebody held out here. For a while.", (0.7, 0.45, 1.0), 0.5),
     ("cinematic-camp", "05-camp", "WE WERE FOUR. THEN THREE.", (0.8, 0.55, 1.1), 0.55),
     ("cinematic-graves", "06-graves", "It took the rest.", (0.5, -0.1, 1.25), 0.55),
-    ("cinematic-face", "07-face", "It is learning how to be you.", (0.6, 0.3, 1.0), 0.35),
+    ("cinematic-face", "07-face", "It is learning how to be you.", (0.6, 0.3, 1.0), 0.5),
     ("occupant-gate", "08-the-first-screen", "There is only one way in.", (0.9, 0.0, 1.0), 0.5),
 ]
 
@@ -113,10 +113,10 @@ def featured(src):
     return img
 
 
-def icon(src, centre):
+def icon(src, centre, size=0.5):
     """512 x 512 from the close-up of its face; {centre} is where the face is, as fractions."""
     img = src.convert("RGB")
-    side = int(min(img.size) * 0.62)
+    side = int(min(img.size) * size)
     cx, cy = int(centre[0] * img.width), int(centre[1] * img.height)
     box = (max(0, cx - side // 2), max(0, cy - side // 2))
     box = (min(box[0], img.width - side), min(box[1], img.height - side))
@@ -124,7 +124,7 @@ def icon(src, centre):
     return grade(sq, 0.55, 0.2, vignette=0.9)
 
 
-def main(face_centre=(0.5, 0.4)):
+def main(face_centre=(0.5, 0.45)):
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "gallery").mkdir(exist_ok=True)
     made = []
