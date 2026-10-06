@@ -10,6 +10,10 @@ knock comes when you are inside at night. The Occupant tries to do the same thin
 every player, without a script**. Nobody gets the same story, but everybody gets a story that
 feels directed.
 
+> **All in one.** Fog, colour, sound, music, places, story and its own title screen are built in.
+> You need Fabric API and nothing else: no shaders, no resource packs. See
+> [Compatibility](#compatibility) for the few mods that get in its way.
+
 > **Recording it?** The first screen asks how you're playing: answer **RECORDING**, then start
 > recording on the title screen after it. The whole story, ending included, in about forty minutes. Everything else a creator needs (what to expect and when,
 > recording tips, commands for B-roll, thumbnails) is in **[the Creator Pack](docs/CREATORS.md)**.
@@ -109,6 +113,17 @@ Not What I Said*, *Saving World...*, *Bad Reception*, *Footprints*, *Somebody's 
 Diary*, *Every Word*, *Don't Go Down There*, *The Last Night*, and one for each ending (hidden
 until you get it). None of them are for killing anything.
 
+### The land itself
+
+It is a little wrong, everywhere: the grass and the leaves have had some of the colour drained
+out of them, and the woods have **dead trees** standing in them with not a leaf left, **fallen
+trunks** going soft under moss, **bare patches** where nothing grows, and now and then a bone in
+the earth. Nothing big: a walk passes one or two. As the story goes on, the colour goes out of
+the picture a little more each act, and late at night something drifts in the air, like ash.
+
+(The grass and leaf colours come from the mod's own colormaps. A resource pack with the game's
+original `colormap/grass.png` and `foliage.png` puts them back, if you want.)
+
 ### The places
 
 As you explore, you come across places people used to be, all empty:
@@ -176,6 +191,22 @@ not in the same hand.
   - it cannot be hurt, removes itself when nothing controls it, and story progress survives a save and load.
 
 ---
+
+## Compatibility
+
+**The Occupant is all in one.** Its fog, its colour, its sounds and music, its places, its
+story and its own title screen are all built in. You do not need shaders, a resource pack, a
+sound pack or anything else to make it look and feel like the videos: just Fabric API.
+
+| | |
+|---|---|
+| **Fine** | Performance mods: Sodium, Lithium, ImmediatelyFast, Nvidium, FerriteCore, ModernFix, Entity Culling, C2ME, Chunky (pre-generating), and so on. Mod Menu, minimaps, JEI/EMI/REI. |
+| **Not recommended, but works** | **Shaders** (Iris / Oculus): most shader packs draw their own fog instead of the mod's, so the fog it stands at the edge of is lost, along with the mod's colour. Play without them for the intended look. |
+| **Breaks things** | **World generation overhauls**: Terralith, Tectonic, Biomes O' Plenty, Oh The Biomes You'll Go, Regions Unexplored, William Wythers' Overhauled Overworld, Continents and the like. The house, the old places and its lair are built for the game's own terrain and may not appear, or appear buried or floating. **Distant Horizons / Voxy**: they draw land far past the fog, so the fog's edge, where it stands, means nothing. **Other horror mods** (The Man From The Fog, Cave Dweller, From The Fog...): two of them will step on each other's moments. |
+| **Changes the opening** | Menu mods like FancyMenu can hide the mod's first screens. |
+
+If you have any of these installed, the mod tells you once, before its first screen, which ones
+and why (and writes it in the log on servers). It still runs; it just may not be at its best.
 
 ## Install
 

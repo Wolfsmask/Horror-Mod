@@ -59,6 +59,9 @@ final class Cinematic {
 			server.runCommand("gamemode spectator @p");
 			server.runCommand("weather clear");
 			hud(context, false);
+			// As it is played: the story's fog over everything. The camera is a spectator, whom the
+			// story leaves alone, so the fog is set here as the server would set it in the second act.
+			context.runOnClient(mc -> com.wolfsmask.occupant.client.ClientFog.set(112.0f, 1));
 			context.getInput().resizeWindow(1920, 1080);
 			context.waitTicks(20);
 
@@ -217,16 +220,20 @@ final class Cinematic {
 	private static void fogEdge(ClientGameTestContext context, TestSingleplayerContext game, BlockPos floor) {
 		TestServerContext server = game.getServer();
 		server.runCommand("time set 12900");
-		double away = server.computeOnServer(s -> {
+		double[] fog = server.computeOnServer(s -> {
 			ServerPlayer p = player(s);
 			Director.get().data(p).setAct(1);
 			double start = com.wolfsmask.occupant.director.Fog.startFor(p, Director.get().haunt(p));
+			double end = com.wolfsmask.occupant.director.Fog.endFor(p, Director.get().haunt(p));
 			double d = Math.max(16.0, Math.min(90.0, start - 4.0));
 			fellTrees(s.overworld(), floor, (int) d + 8);     // nothing between the camera and it
 			Occupant.LOGGER.info("[client-gametest] fog begins {} off; the camera will be {} off", start, d);
-			return d;
+			return new double[]{d, end};
 		});
-		context.waitTicks(240);                                 // the fog settles where the story puts it
+		double away = fog[0];
+		// The fog where the story puts it in the first act (the camera, a spectator, is not told).
+		context.runOnClient(mc -> com.wolfsmask.occupant.client.ClientFog.set((float) fog[1], 1));
+		context.waitTicks(240);
 		Shot shot = server.computeOnServer(s -> {
 			ServerLevel level = s.overworld();
 			BlockPos it = standNear(level, floor, 0, 0);

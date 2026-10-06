@@ -67,6 +67,7 @@ public final class Occupant implements ModInitializer {
 	public void onInitialize() {
 		if (Boolean.getBoolean("occupant.smoke")) registerSmokeTest();
 		OccupantConfig.load();
+		Compatibility.report();
 		ModSounds.init();
 		ModEntities.init();
 		ModWorld.init();
@@ -201,6 +202,9 @@ public final class Occupant implements ModInitializer {
 				if (p.tickCount < 100) continue;
 				done[0] = true;
 				LOGGER.info("[smoke] putting it in front of {}", p.getName().getString());
+				// Into the story, so the fog is there in the photograph too.
+				Director director = Director.get();
+				if (director != null) director.data(p).setAct(2);
 				server.getCommands().performPrefixedCommand(
 						server.createCommandSourceStack().withEntity(p).withPosition(p.position()), "occupant here 6 stare");
 				return;

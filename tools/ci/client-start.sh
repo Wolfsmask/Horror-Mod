@@ -10,8 +10,18 @@ MC="$1"
 GRADLE="./gradlew -Pmc=$MC --console=plain"
 crashed() { grep -qE "Game crashed|---- Minecraft Crash Report|Exception in thread \"(Render|Server) thread\"" "$1"; }
 stop_game() { pkill -f "net.fabricmc.devlaunchinjector.Main" || true; sleep 5; pkill -9 -f "net.fabricmc.devlaunchinjector.Main" || true; }
-# A photograph of the whole virtual screen, for a person to look at (the fog, mostly): shot-<name>.png.
-shot() { DISPLAY=:99 import -window root "shot-$1.png" 2>/dev/null || echo "(no photograph: $1)"; }
+# A photograph, for a person to look at (the fog, mostly): shot-<name>.png. Taken by the game itself
+# (F2), since the window is drawn with OpenGL and a grab of the X screen comes out black.
+shot() {
+	local w
+	w=$(DISPLAY=:99 xdotool search --name "Minecraft" 2>/dev/null | head -n 1)
+	[ -n "$w" ] && DISPLAY=:99 xdotool windowfocus "$w" 2>/dev/null
+	DISPLAY=:99 xdotool key F2 2>/dev/null
+	sleep 4
+	local f
+	f=$(ls -t run/screenshots/*.png 2>/dev/null | head -n 1)
+	if [ -n "$f" ]; then cp "$f" "shot-$1.png"; else echo "(no photograph: $1)"; fi
+}
 wait_for() {   # wait_for <log> <pattern> <seconds>
 	for _ in $(seq 1 $(($3 / 5))); do
 		grep -q "$2" "$1" 2>/dev/null && return 0

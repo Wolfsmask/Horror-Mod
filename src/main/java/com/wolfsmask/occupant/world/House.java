@@ -206,6 +206,9 @@ public final class House {
 				&& level.getBlockState(feet.below()).is(Blocks.DARK_OAK_PLANKS);
 	}
 
+	/** Of the chunks world generation offers (one in four), how many get a build: one in six, so one in 24 overall. */
+	private static final int BUILD_ONE_IN = 6;
+
 	/**
 	 * World generation's chance at a place around {@code origin}'s chunk. While no house has been
 	 * found, often a house, and then often a village round it; otherwise a ruin, a camp or a
@@ -213,6 +216,11 @@ public final class House {
 	 * version's own feature class calls this.
 	 */
 	public static boolean tryPlace(WorldGenLevel level, RandomSource random, BlockPos origin) {
+		// The land itself, a little wrong, in one chunk in four (placed_feature/house.json): dead
+		// trees, fallen trunks, bare ground.
+		Blight.tryPlace(level, random, origin);
+		// Something built, in one chunk in every BUILD_ONE_IN of those.
+		if (random.nextInt(BUILD_ONE_IN) != 0) return false;
 		BlockPos from = spawn;
 		if (from == null) return false;                       // the world is not open yet
 		// The middle of the chunk: from there a build can reach furthest in every direction.
@@ -266,6 +274,11 @@ public final class House {
 	 */
 	public static void build(WorldGenLevel level, BlockPos floor, Rotation rotation, RandomSource random) {
 		new Builder(level, floor, rotation, random).build();
+	}
+
+	/** For the game tests: one chance at the blight (dead trees, bare ground) in the chunk at {@code origin}. */
+	public static void blightForTest(WorldGenLevel level, RandomSource random, BlockPos origin) {
+		Blight.tryPlace(level, random, origin);
 	}
 
 	/** For the game tests: a house, a village, a ruin, camp, graves, well or cottage, its middle at {@code base}. */

@@ -159,12 +159,19 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 			server.runCommand("execute at @p run fill ~-2 ~ ~2 ~2 ~4 ~14 minecraft:air");
 
 			// Among tree trunks: legs on the trunks, not on the ground.
-			for (String log : List.of("~-2 ~ ~6 ~-2 ~4 ~6", "~2 ~ ~8 ~2 ~4 ~8", "~-1 ~ ~9 ~-1 ~4 ~9", "~2 ~ ~5 ~2 ~3 ~5")) {
-				server.runCommand("execute at @p run fill " + log + " minecraft:oak_log");
+			// Real trees, crowns and all, high enough that it stands under them.
+			for (int[] t : new int[][]{{-2, 6}, {2, 8}, {-1, 9}, {2, 5}}) {
+				server.runCommand(String.format("execute at @p run fill ~%d ~6 ~%d ~%d ~7 ~%d minecraft:oak_leaves[persistent=true]",
+						t[0] - 2, t[1] - 2, t[0] + 2, t[1] + 2));
+				server.runCommand(String.format("execute at @p run fill ~%d ~8 ~%d ~%d ~8 ~%d minecraft:oak_leaves[persistent=true]",
+						t[0] - 1, t[1] - 1, t[0] + 1, t[1] + 1));
+			}
+			for (int[] t : new int[][]{{-2, 6}, {2, 8}, {-1, 9}, {2, 5}}) {
+				server.runCommand(String.format("execute at @p run fill ~%d ~ ~%d ~%d ~7 ~%d minecraft:oak_log", t[0], t[1], t[0], t[1]));
 			}
 			spawn(context, server, 7, "stare");
 			shoot(context, "occupant-trees");
-			server.runCommand("execute at @p run fill ~-3 ~ ~4 ~3 ~4 ~10 minecraft:air");
+			server.runCommand("execute at @p run fill ~-5 ~ ~2 ~5 ~9 ~12 minecraft:air");
 
 			// Indoors, under a two-block ceiling: it has to stoop rather than stand through the roof.
 			server.runCommand("execute as @p at @s run tp @s ~ ~ ~ 0 0");

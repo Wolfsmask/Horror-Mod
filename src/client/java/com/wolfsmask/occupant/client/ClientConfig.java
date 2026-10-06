@@ -45,6 +45,9 @@ public final class ClientConfig {
 	/** The last answer: recording (the Creator Cut) or not. */
 	public boolean recording = false;
 
+	/** The set of conflicting mods the player has already been warned about. */
+	public String compatSeen = "";
+
 	public static ClientConfig get() {
 		return instance;
 	}

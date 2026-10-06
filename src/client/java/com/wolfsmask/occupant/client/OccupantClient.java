@@ -39,6 +39,7 @@ public final class OccupantClient implements ClientModInitializer {
 		TitleAtmosphere.register();
 		PauseLines.register();
 		SettingsScreen.register();
+		CompatScreen.register();
 		QuickWorld.register();
 	}
 }

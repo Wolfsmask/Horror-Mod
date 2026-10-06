@@ -1,5 +1,9 @@
 # There is something in this world with you.
 
+> **All in one.** Fog, colour, sound, music, places, a story with three endings, and its own
+> title screen, all built in. You need **Fabric API and nothing else**: no shaders, no resource
+> packs, no twenty other mods to make it look like the videos.
+
 **The Occupant** is a slow-burn psychological horror mod. No loud jumpscares, no screaming mob
 chasing you on day one. Just a world that slowly stops feeling like yours, and a seventeen-foot
 thing on ten long legs that is learning how to be you.
@@ -28,6 +32,12 @@ happen at all.** Nobody gets the same story. Everybody gets one that feels direc
 - 🏆 **Advancements** for the small things: *You're Not Alone*, *Who's There?*, *Bad Reception*... and one for each ending. None for killing anything.
 - 💓 **Small things.** Your heartbeat when it is close behind you. Footsteps underground that come back one step too many. Doors open in the morning that you shut at night. Footprints in the snow, up to your door. *Saving world...* when you didn't. Villagers who won't open up after dark.
 - 🎻 **A score that listens.** A low drone once the story starts, bowed glass when it is near, and silence when it gets to you.
+
+## The land is a little wrong
+
+The grass and leaves have lost some of their colour. The woods have dead trees in them with no
+leaves left, fallen trunks under moss, bare patches where nothing grows. As the story goes on,
+the colour drains from everything a little more, and late at night something drifts in the air.
 
 ## Places people used to be
 
@@ -67,6 +77,16 @@ There is a full **Creator Pack** with the mod's source: what to expect and when,
 settings, commands for B-roll (`/occupant here 60` puts it at the edge of the fog), ready-made
 YouTube thumbnails and Shorts covers, and title ideas. Monetise your videos, no need to ask.
 **Reduce flashing** in the settings makes it safe for photosensitive viewers.
+
+## ⚠️ Compatibility
+
+- ✅ **Fine:** Sodium, Lithium, ImmediatelyFast, Nvidium, FerriteCore, ModernFix, Entity Culling, C2ME, Chunky, Mod Menu, minimaps, JEI/EMI/REI and other performance or utility mods.
+- 🟡 **Shaders (Iris/Oculus): not recommended, but they work.** Most shader packs replace the mod's fog and colour with their own, and the fog is half the experience.
+- ❌ **World generation overhauls break things:** Terralith, Tectonic, Biomes O' Plenty, Oh The Biomes You'll Go, Regions Unexplored, WWOO, Continents and the like. The house, the places and its lair are built for vanilla terrain.
+- ❌ **Distant Horizons / Voxy:** they draw land past the fog, and it stands at the fog's edge.
+- ❌ **Other horror mods:** two directors will step on each other's moments. Play them separately.
+
+If you have any of these, the mod tells you once, before its first screen, which and why.
 
 ## Good to know
 

@@ -56,7 +56,10 @@ public final class TitleAtmosphere {
 			// Before that, off camera, whether this is for playing or for recording.
 			if (!GateScreen.passed()) {
 				boolean ask = !ModeScreen.chosen() && !ModeScreen.skip();
-				client.execute(() -> client.setScreenAndShow(ask ? new ModeScreen() : new GateScreen()));
+				Runnable onward = () -> client.setScreenAndShow(ask ? new ModeScreen() : new GateScreen());
+				// And before even that, once, if another mod gets in the way of this one.
+				Screen warning = CompatScreen.ifNeeded(onward);
+				client.execute(warning != null ? () -> client.setScreenAndShow(warning) : onward);
 				return;
 			}
 			// Said no at the gate: the game's own title screen, untouched.

@@ -121,6 +121,9 @@ public final class ScreenEffects {
 		if (a < 0.01f) return;
 
 		ctx.fill(0, 0, w, h, ((int) (a * 34f) << 24) | 0x0A1420);              // cold
+		// As the story goes on, the colour drains out of everything, a little each act.
+		int act = Math.max(0, Math.min(4, PauseLines.act));
+		if (act > 0) ctx.fill(0, 0, w, h, ((act * 7) << 24) | 0x3A3F44);
 		float beat = 0f;
 		if (nearness > 0.05f && !cfg.reduceFlashing) {
 			Minecraft mc = Minecraft.getInstance();

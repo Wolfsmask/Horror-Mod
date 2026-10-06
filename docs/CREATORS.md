@@ -8,6 +8,14 @@ go looking for it. You get the whole story, ending included, in about forty minu
 
 ---
 
+## 0. You need nothing else
+
+The mod is **all in one**: its fog, colour, sound, music and places are built in. Don't add
+shaders or resource packs to make it look like other videos; it already does. **Avoid** world
+generation mods (Terralith, Tectonic, Biomes O' Plenty...), Distant Horizons, and other horror
+mods for the recording; the mod warns you about them on start-up. Performance mods like Sodium
+are fine.
+
 ## 1. Start a Creator Cut world
 
 1. Install [Fabric Loader](https://fabricmc.net/use/), [Fabric API](https://modrinth.com/mod/fabric-api),
@@ -87,8 +95,8 @@ killing anything. The ending ones are hidden until you get them.
   just visible in real darkness, so your viewers will still see it.
 - **Render distance 8 or more.** The fog covers the edge, so the mod looks the same whatever
   your render distance, but it needs about eight chunks to stand at the edge of.
-- **Shaders** work (it draws like any other mob), but most shader packs draw their own fog
-  instead of the game's, so you lose the mod's fog. Try it without first.
+- **No shaders.** They work, but most shader packs draw their own fog instead of the mod's, and
+  the fog and the mod's colour are half of it. It is built to look right without them.
 - **Photosensitive viewers:** set `reduceFlashing` to `true` (Options → The Occupant, or
   `config/occupant-client.json`). Every hard flash and flicker becomes a slow fade.
 - **Streaming?** Nothing in the mod reads your chat or does anything your viewers can trigger.

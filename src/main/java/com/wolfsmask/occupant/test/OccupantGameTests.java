@@ -418,6 +418,32 @@ public final class OccupantGameTests {
 		helper.succeed();
 	}
 
+	/** The land is a little wrong: over a few chunks, dead trees and bare ground, and not a leaf. */
+	@GameTest(maxTicks = 60)
+	public void theLandIsALittleWrong(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos at = helper.absolutePos(new BlockPos(0, 1, 0)).offset(-700, 0, 700);
+		int changed = 0;
+		int leaves = 0;
+		for (int cx = 0; cx < 8; cx++) {
+			for (int cz = 0; cz < 8; cz++) {
+				BlockPos origin = at.offset(cx * 16, 0, cz * 16);
+				level.getChunk(origin.getX() >> 4, origin.getZ() >> 4);
+				House.blightForTest(level, level.getRandom(), origin);
+			}
+		}
+		for (BlockPos p : BlockPos.betweenClosed(at.offset(0, -6, 0), at.offset(8 * 16, 12, 8 * 16))) {
+			net.minecraft.world.level.block.state.BlockState s = level.getBlockState(p);
+			if (s.is(net.minecraft.tags.BlockTags.LOGS) || s.is(net.minecraft.world.level.block.Blocks.COARSE_DIRT)
+					|| s.is(net.minecraft.world.level.block.Blocks.BONE_BLOCK)) changed++;
+			if (s.is(net.minecraft.tags.BlockTags.LEAVES)) leaves++;
+		}
+		Occupant.LOGGER.info("[gametest] blight over 64 chunks: {} blocks changed, {} leaves", changed, leaves);
+		helper.assertTrue(changed > 0, "Something in 64 chunks should have gone a little wrong");
+		helper.assertTrue(leaves == 0, "Dead trees have no leaves");
+		helper.succeed();
+	}
+
 	/** Every one of its advancements loads, in whichever layout this version reads. */
 	@GameTest
 	public void theAdvancementsLoad(GameTestHelper helper) {

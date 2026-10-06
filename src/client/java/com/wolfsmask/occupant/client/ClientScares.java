@@ -59,6 +59,15 @@ public final class ClientScares {
 		if (nearest < 16.0 && !cfg.reduceFlashing && holdingLight(player) && player.getRandom().nextFloat() < 0.015f) {
 			ScreenEffects.flicker(6);
 		}
+		// Later in the story, at night, something drifts in the air round you: ash, or like it.
+		if (cfg.atmosphere && PauseLines.act >= 2 && player.getRandom().nextFloat() < 0.15f + 0.1f * PauseLines.act) {
+			long time = com.wolfsmask.occupant.compat.Compat.dayTime(mc.level) % 24000L;
+			if (time > 13000L && time < 23000L) {
+				net.minecraft.util.RandomSource r = player.getRandom();
+				mc.level.addParticle(ParticleTypes.WHITE_ASH, player.getX() + (r.nextDouble() - 0.5) * 24.0,
+						player.getY() + r.nextDouble() * 4.0, player.getZ() + (r.nextDouble() - 0.5) * 24.0, 0.0, -0.01, 0.0);
+			}
+		}
 	}
 
 	/** In cold air, now and then, its breath. */
