@@ -111,8 +111,8 @@ final class Cinematic {
 		still(context, game, "cinematic-treeline");
 
 		// And close: its face, from a little below, with the last of the sky behind it.
-		Vec3 near = server.computeOnServer(s -> inAir(s.overworld(), new Vec3(it.getX() + 4.5, it.getY() + 2.6, it.getZ() + 0.5)));
-		take(context, game, new Shot(it, near, new Vec3(it.getX() + 0.5, it.getY() + 3.4, it.getZ() + 0.5)), 12600, "cinematic-face");
+		Vec3 near = server.computeOnServer(s -> inAir(s.overworld(), new Vec3(it.getX() + 3.7, it.getY() + 2.2, it.getZ() + 0.5)));
+		take(context, game, new Shot(it, near, new Vec3(it.getX() + 0.5, it.getY() + 2.8, it.getZ() + 0.5)), 12600, "cinematic-face");
 	}
 
 	/** The village from above at dusk, and it, small, standing in the path between the houses. */
@@ -307,7 +307,9 @@ final class Cinematic {
 			double a = toward + Math.toRadians(turn);
 			for (double d : dists) {
 				double x = feet.x + Math.cos(a) * d, z = feet.z + Math.sin(a) * d;
-				Vec3 eye = new Vec3(x, Math.max(ground(level, Mth.floor(x), Mth.floor(z)) + low, minY), z);
+				int g = ground(level, Mth.floor(x), Mth.floor(z));
+				if (Math.abs(g - it.getY()) > 5) continue;                  // up a cliff, or down in a hole
+				Vec3 eye = new Vec3(x, Math.max(g + low, minY), z);
 				BlockPos at = BlockPos.containing(eye);
 				if (!level.getBlockState(at).getCollisionShape(level, at).isEmpty() || !level.getFluidState(at).isEmpty()) continue;
 				int body = 0, place = 0;
