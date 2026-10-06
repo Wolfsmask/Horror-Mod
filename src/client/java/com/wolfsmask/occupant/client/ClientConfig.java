@@ -36,6 +36,9 @@ public final class ClientConfig {
 	/** Your own heartbeat, loud, when it is close and you are not looking at it. */
 	public boolean heartbeat = true;
 
+	/** The mod's own score, rising and falling with the story (under the Music volume). */
+	public boolean score = true;
+
 	public static ClientConfig get() {
 		return instance;
 	}

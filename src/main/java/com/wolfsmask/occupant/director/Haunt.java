@@ -28,6 +28,8 @@ public final class Haunt {
 	float fogSent = -1.0f;
 	/** The act this player's client was last told, or -1 before the first time. */
 	int actSent = -1;
+	/** Not again in the lair before this server tick. */
+	long lairAgainAt;
 	/** While above 0, the fog is no further than this (blocks): something is bringing it in. */
 	private float fogCloses;
 	/** Until this server tick, no fog at all. */

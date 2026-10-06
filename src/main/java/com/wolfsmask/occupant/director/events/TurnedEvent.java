@@ -10,7 +10,6 @@ import com.wolfsmask.occupant.util.Spots;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -48,7 +47,7 @@ public final class TurnedEvent extends HorrorEvent {
 			if (e instanceof ItemFrame frame && !frame.getItem().isEmpty()) {
 				frame.setRotation((frame.getRotation() + 4) % 8);
 				turned++;
-			} else if (e.getType() == EntityType.ARMOR_STAND) {
+			} else if (com.wolfsmask.occupant.util.Kinds.is(e, "armor_stand")) {
 				float yaw = Sight.yawBetween(e.position(), face);
 				e.setYRot(yaw);
 				e.setYHeadRot(yaw);

@@ -51,6 +51,11 @@ public final class PauseLines {
 		GuiCompat.text(g, mc.font, line, x, screen.height - 18, (a << 24) | 0x8A1C1C);
 	}
 
+	/** How far the story has gone for this player, as far as their game knows. */
+	public static int act() {
+		return act;
+	}
+
 	static void reset() {
 		act = 0;
 		line = null;

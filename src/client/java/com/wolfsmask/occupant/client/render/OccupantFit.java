@@ -43,6 +43,8 @@ final class OccupantFit {
 		float distance = (float) Math.sqrt(state.distanceToCameraSq);
 		float far = Mth.clamp((distance - NEAR_DISTANCE) / (FAR_DISTANCE - NEAR_DISTANCE), 0.0f, 1.0f);
 		float blocks = Mth.lerp(far, NEAR_BLOCKS, FAR_BLOCKS);
+		// It grows a little with every act: by the end it is a head taller than when it was first seen.
+		blocks *= 1.0f + 0.045f * Mth.clamp(com.wolfsmask.occupant.client.PauseLines.act() - 1, 0, 3);
 		float room = state.headroom - 0.15f;
 		double yaw = Math.toRadians(state.bodyRot);
 

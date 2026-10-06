@@ -145,6 +145,8 @@ public final class ArenaGameTests {
 			world.setBlock(house.offset(3, 0, -3), Blocks.CHEST.defaultBlockState(), Block.UPDATE_ALL);
 			world.setBlock(house.offset(5, 1, 1), Blocks.GLASS.defaultBlockState(), Block.UPDATE_ALL);
 			world.setBlock(house.offset(5, 2, 1), Blocks.GLASS.defaultBlockState(), Block.UPDATE_ALL);
+			// An old radio set on the side.
+			world.setBlock(house.offset(-3, 0, 3), Blocks.JUKEBOX.defaultBlockState(), Block.UPDATE_ALL);
 		}
 
 		private void fill(BlockPos from, BlockPos to, BlockState state) {
@@ -182,7 +184,7 @@ public final class ArenaGameTests {
 
 			// House, facing away from the door.
 			place(house, 0.0f);
-			expect("house", "knock", "chest", "door", "window", "roof");
+			expect("house", "knock", "chest", "door", "window", "roof", "radio");
 			// A fire behind them: it goes out.
 			world.setBlock(house.offset(-3, 0, -3), Blocks.CAMPFIRE.defaultBlockState(), Block.UPDATE_ALL);
 			expect("house", "fire_out");

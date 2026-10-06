@@ -179,6 +179,15 @@ public final class ScreenEffects {
 		ClientFog.reset();
 		PauseLines.reset();
 		ClientScares.reset();
+		Score.stop();
+	}
+
+	static float atmosphere() {
+		return atmosphere;
+	}
+
+	static float nearness() {
+		return nearness;
 	}
 
 	/** A short stutter of the light, as if the torch guttered. */
@@ -191,6 +200,7 @@ public final class ScreenEffects {
 	public static void tick(Minecraft client) {
 		ClientFog.tick();
 		ClientScares.tick(client);
+		Score.tick(client);
 		if (blackoutAge < blackoutLength) blackoutAge++;
 		if (flickerAge >= 0 && ++flickerAge >= flickerLength) flickerAge = -1;
 		if (staticAge < staticLength) staticAge++;

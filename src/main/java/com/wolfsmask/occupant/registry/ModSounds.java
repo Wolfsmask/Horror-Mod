@@ -21,6 +21,10 @@ public final class ModSounds {
 	public static final Holder<SoundEvent> KNOCK = register("knock");
 	/** A burst of radio static. */
 	public static final Holder<SoundEvent> STATIC = register("static");
+	/** The score, three loops mixed live: a low drone, high bowed glass, and a pulse when it is close. */
+	public static final Holder<SoundEvent> DREAD_LOW = register("dread_low");
+	public static final Holder<SoundEvent> DREAD_HIGH = register("dread_high");
+	public static final Holder<SoundEvent> DREAD_PULSE = register("dread_pulse");
 
 	private ModSounds() {
 	}

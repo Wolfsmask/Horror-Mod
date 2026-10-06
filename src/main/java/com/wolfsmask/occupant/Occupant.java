@@ -76,6 +76,7 @@ public final class Occupant implements ModInitializer {
 		// Before any of the world is generated: which houses exist, and whether one has been found.
 		ServerLifecycleEvents.SERVER_STARTING.register(server -> guard("opening the world", () -> {
 			WorldMode.open(server);
+			com.wolfsmask.occupant.world.Lairs.open(server);
 			House.open(server);
 			Loot.open(server);
 		}));
@@ -85,6 +86,7 @@ public final class Occupant implements ModInitializer {
 			House.close();
 			Loot.close();
 			WorldMode.close();
+			com.wolfsmask.occupant.world.Lairs.close();
 		}));
 		ServerLifecycleEvents.SERVER_STARTED.register(server -> guard("start-up", () -> Director.start(server)));
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> guard("shutdown", Director::stop));
@@ -161,7 +163,7 @@ public final class Occupant implements ModInitializer {
 
 		// Villagers will not open up after dark, once it is about.
 		net.fabricmc.fabric.api.event.player.UseEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
-			if (world.isClientSide() || !(player instanceof ServerPlayer sp) || entity.getType() != net.minecraft.world.entity.EntityType.VILLAGER) {
+			if (world.isClientSide() || !(player instanceof ServerPlayer sp) || !com.wolfsmask.occupant.util.Kinds.is(entity, "villager")) {
 				return InteractionResult.PASS;
 			}
 			Boolean refuse = guard("a villager", () -> {

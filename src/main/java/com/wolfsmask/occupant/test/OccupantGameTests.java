@@ -322,6 +322,39 @@ public final class OccupantGameTests {
 		helper.succeed();
 	}
 
+	/**
+	 * Its lair: a hole with a ladder all the way down, and a hollow at the bottom that is known as
+	 * one, so going in is noticed, and somewhere outside it is not.
+	 */
+	@GameTest(maxTicks = 60)
+	public void theLairGoesAllTheWayDown(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos at = helper.absolutePos(new BlockPos(0, 1, 0)).offset(0, 0, 700);
+		int top = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, at.getX(), at.getZ());
+		BlockPos base = new BlockPos(at.getX(), top - 1, at.getZ());
+		House.buildPlaceForTest("lair", level, base, level.getRandom());
+		int ladders = 0;
+		for (int y = 0; y >= -26; y--) {
+			if (level.getBlockState(base.offset(0, y, 0)).is(net.minecraft.world.level.block.Blocks.LADDER)) ladders++;
+		}
+		helper.assertTrue(ladders >= 20, "The ladder should go all the way down, but there were only " + ladders + " rungs");
+		BlockPos inside = base.offset(3, -22, 0);
+		helper.assertTrue(com.wolfsmask.occupant.world.Lairs.hollowAt(inside) != null, "The hollow should be known as its lair");
+		helper.assertTrue(level.getBlockState(inside).isAir(), "The hollow should be dug out");
+		helper.assertTrue(com.wolfsmask.occupant.world.Lairs.hollowAt(base.offset(0, 0, 40)) == null, "Outside it is not its lair");
+		// Going in: whatever it does, it must not throw.
+		Director director = Director.get();
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		director.data(player).setAct(3);
+		int errors = director.totalErrors();
+		player.snapTo(inside.getX() + 0.5, inside.getY() - 1, inside.getZ() + 0.5, 90.0f, 0.0f);
+		Director.TriggerResult result = director.trigger(player, "lair", true);
+		director.stopCurrent(player);
+		helper.assertTrue(director.totalErrors() == errors, "Going into the lair must not throw");
+		Occupant.LOGGER.info("[gametest] lair under {}: {} rungs, going in: {}", base, ladders, result);
+		helper.succeed();
+	}
+
 	/** The fog comes in as the story goes on: eight chunks or so at first, six or so by the end. */
 	@GameTest
 	public void fogThickensWithTheStory(GameTestHelper helper) {
@@ -405,7 +438,7 @@ public final class OccupantGameTests {
 	public void placesHoldLootAndTheLog(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		BlockPos start = helper.absolutePos(new BlockPos(0, 1, 0)).offset(-640, 0, 0);
-		String[] kinds = {"ruin", "camp", "graves", "cottage"};
+		String[] kinds = {"ruin", "camp", "graves", "cottage", "watchtower", "chapel", "radio", "lighthouse", "lair"};
 		List<BlockPos> chunks = new java.util.ArrayList<>();
 		for (int i = 0; i < kinds.length; i++) {
 			BlockPos at = start.offset(i * 40, 0, 0);
@@ -425,7 +458,7 @@ public final class OccupantGameTests {
 			BlockPos base = new BlockPos(at.getX(), top - 1, at.getZ());
 			House.buildPlaceForTest(kinds[i], level, base, level.getRandom());
 			BlockPos box = null;
-			for (BlockPos p : BlockPos.betweenClosed(base.offset(-8, -3, -8), base.offset(8, 10, 8))) {
+			for (BlockPos p : BlockPos.betweenClosed(base.offset(-8, -28, -8), base.offset(8, 22, 8))) {
 				if (level.getBlockEntity(p) instanceof net.minecraft.world.Container && com.wolfsmask.occupant.world.Loot.unopened(p)) {
 					box = p.immutable();
 					break;

@@ -108,6 +108,8 @@ final class OccupantPose {
 		} else if (tilt < -0.75f) {
 			lean = -0.42f;                          // well over to one side, and held there
 		}
+		// The further the story has gone, the further over its head goes: it no longer pretends.
+		lean *= 1.0f + 0.3f * Math.max(0, Math.min(3, com.wolfsmask.occupant.client.PauseLines.act() - 1));
 		neck.zRot = lean * 0.35f;
 		skull.zRot = lean * 0.65f;
 		if (veiled) {

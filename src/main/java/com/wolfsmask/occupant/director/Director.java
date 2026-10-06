@@ -221,6 +221,7 @@ public final class Director {
 
 		if (h.active != null || h.data.act == 0) return;
 		if (enteredHouse(h, player)) return;
+		if (enteredLair(h, player)) return;
 		h.nextEventIn -= 20;
 		if (h.nextEventIn > 0) return;
 
@@ -248,6 +249,19 @@ public final class Director {
 		}
 		h.lastHouse = feet;
 		h.lastHouseTick = now;
+		return true;
+	}
+
+	/** Going down into one of its lairs is a moment of its own, once in a long while. */
+	private boolean enteredLair(Haunt h, ServerPlayer player) {
+		if (com.wolfsmask.occupant.world.Lairs.hollowAt(player.blockPosition()) == null) return false;
+		long now = server.getTickCount();
+		if (now < h.lairAgainAt) return false;
+		if (trigger(player, com.wolfsmask.occupant.director.events.LairEvent.ID, false) != TriggerResult.STARTED) {
+			h.lairAgainAt = now + 100;
+			return false;
+		}
+		h.lairAgainAt = now + 20L * 60 * 15;
 		return true;
 	}
 

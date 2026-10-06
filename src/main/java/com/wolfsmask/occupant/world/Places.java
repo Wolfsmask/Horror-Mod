@@ -112,18 +112,40 @@ final class Places {
 		return true;
 	}
 
-	/** World generation's chance at a ruin, a camp or a graveyard around {@code centre}. */
+	/** World generation's chance at one of the old places around {@code centre}. */
 	static boolean tryPlace(WorldGenLevel level, RandomSource random, BlockPos centre, double fromSpawn) {
 		if (fromSpawn < MIN_FROM_SPAWN) return false;
-		float roll = random.nextFloat();
-		int half = roll < 0.35f ? 7 : roll < 0.75f ? 5 : 6;
+		float kind = random.nextFloat();
+		// How far out from its middle each kind reaches, so the ground under all of it is checked.
+		int half = kind < 0.06f ? Lair.RADIUS : kind < 0.12f ? 4 : kind < 0.30f ? 7 : kind < 0.52f ? 5
+				: kind < 0.66f ? 6 : kind < 0.78f ? 4 : kind < 0.90f ? 7 : 5;
 		BlockPos base = flatGround(level, centre, half, 3);
 		if (base == null || !level.ensureCanWrite(base)) return false;
+		if (kind < 0.06f && !solidBelow(level, base, Lair.DEPTH + 4)) kind = 0.20f;
+		if (kind >= 0.06f && kind < 0.12f && !nearWater(level, base)) kind = 0.20f;
 		if (!claim(base)) return false;
 		Rotation rotation = Rotation.getRandom(random);
-		Build build = roll < 0.35f ? new Ruin(level, base, rotation, random)
-				: roll < 0.75f ? new Camp(level, base, rotation, random)
-				: new Graves(level, base, rotation, random);
+		Build build;
+		if (kind < 0.06f) {
+			Lair lair = new Lair(level, base, rotation, random);
+			lair.build();
+			Lairs.add(lair.hollow());
+			return true;
+		} else if (kind < 0.12f) {
+			build = new Lighthouse(level, base, rotation, random);
+		} else if (kind < 0.30f) {
+			build = new Ruin(level, base, rotation, random);
+		} else if (kind < 0.52f) {
+			build = new Camp(level, base, rotation, random);
+		} else if (kind < 0.66f) {
+			build = new Graves(level, base, rotation, random);
+		} else if (kind < 0.78f) {
+			build = new Watchtower(level, base, rotation, random);
+		} else if (kind < 0.90f) {
+			build = new Chapel(level, base, rotation, random);
+		} else {
+			build = new RadioShack(level, base, rotation, random);
+		}
 		build.build();
 		return true;
 	}
@@ -191,9 +213,38 @@ final class Places {
 		return new BlockPos(centre.getX(), highest - 1, centre.getZ());
 	}
 
+	/** Solid stone all the way down this far: somewhere a hollow can be dug. */
+	private static boolean solidBelow(WorldGenLevel level, BlockPos base, int depth) {
+		for (int d = 6; d <= depth; d += 4) {
+			BlockState s = level.getBlockState(base.below(d));
+			if (s.isAir() || !s.getFluidState().isEmpty()) return false;
+		}
+		return true;
+	}
+
+	/** Water within a few blocks of the ground here: the shore. */
+	private static boolean nearWater(WorldGenLevel level, BlockPos base) {
+		for (int[] c : new int[][]{{8, 0}, {-8, 0}, {0, 8}, {0, -8}, {6, 6}, {-6, 6}, {6, -6}, {-6, -6}}) {
+			int x = base.getX() + c[0], z = base.getZ() + c[1];
+			BlockPos top = new BlockPos(x, level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z) - 1, z);
+			if (!level.getFluidState(top).isEmpty()) return true;
+		}
+		return false;
+	}
+
 	/** For the game tests: one build of the named kind, with its middle at {@code base}. */
 	static void buildForTest(String kind, WorldGenLevel level, BlockPos base, RandomSource random) {
+		if (kind.equals("lair")) {
+			Lair lair = new Lair(level, base, Rotation.NONE, random);
+			lair.build();
+			Lairs.add(lair.hollow());
+			return;
+		}
 		Build build = switch (kind) {
+			case "watchtower" -> new Watchtower(level, base, Rotation.NONE, random);
+			case "chapel" -> new Chapel(level, base, Rotation.NONE, random);
+			case "radio" -> new RadioShack(level, base, Rotation.NONE, random);
+			case "lighthouse" -> new Lighthouse(level, base, Rotation.NONE, random);
 			case "ruin" -> new Ruin(level, base, Rotation.NONE, random);
 			case "camp" -> new Camp(level, base, Rotation.NONE, random);
 			case "graves" -> new Graves(level, base, Rotation.NONE, random);

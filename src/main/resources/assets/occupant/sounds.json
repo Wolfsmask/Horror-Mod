@@ -4,5 +4,8 @@
   "breath":  { "sounds": ["occupant:breath"],  "subtitle": "subtitles.occupant.breath" },
   "whisper": { "sounds": ["occupant:whisper"], "subtitle": "subtitles.occupant.whisper" },
   "knock":   { "sounds": ["occupant:knock"],   "subtitle": "subtitles.occupant.knock" },
-  "static":  { "sounds": ["occupant:static"],  "subtitle": "subtitles.occupant.static" }
+  "static":  { "sounds": ["occupant:static"],  "subtitle": "subtitles.occupant.static" },
+  "dread_low":   { "sounds": [{ "name": "occupant:dread_low", "stream": true }] },
+  "dread_high":  { "sounds": [{ "name": "occupant:dread_high", "stream": true }] },
+  "dread_pulse": { "sounds": [{ "name": "occupant:dread_pulse", "stream": true }] }
 }

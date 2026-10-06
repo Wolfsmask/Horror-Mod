@@ -42,6 +42,8 @@ public final class Events {
 			new TeammateEvent(),
 			new CorridorEvent(),
 			new MorningEvent(),
+			new RadioEvent(),
+			new LairEvent(),
 			new StareEvent(),
 			new FakeAdvancementEvent(),
 			// Act 3+: it is getting closer
