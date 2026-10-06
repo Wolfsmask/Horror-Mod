@@ -198,8 +198,8 @@ For testing, and for recording your own videos:
 ```
 
 Events: `footsteps`, `familiar`, `distant`, `cave_noise`, `distant_mining`, `door`, `chest`, `torch_gone`, `breath`,
-`knock`, `fake_join`, `sign`, `marker_torch`, `tunnel`, `watcher`, `whisper`, `doppel_chat`,
-`stalker`, `flicker`, `static`, `intruder`, `behind_you`, `wake`, `hunt`.
+`knock`, `fake_join`, `sign`, `marker_torch`, `tunnel`, `watcher`, `window`, `stare`, `advancement`, `whisper`,
+`doppel_chat`, `stalker`, `flicker`, `static`, `intruder`, `behind_you`, `wake`, `hunt`.
 
 If you just installed it and want to see something **immediately**: `/occupant here`. That one
 never refuses. `/summon occupant:occupant` works too; it will haunt whoever is nearest for a

@@ -97,10 +97,10 @@ public final class Occupant implements ModInitializer {
 			if (director != null) director.onChat(sender, message.signedContent());
 		}));
 
-		// "You may not rest now, there are monsters nearby." There are none you can see.
+		// "You may not rest now, there are monsters nearby." There are none you can see. Later on,
+		// sometimes, "This bed is occupied." There is nobody in it.
 		EntitySleepEvents.ALLOW_SLEEPING.register((player, sleepingPos) ->
-				guard("a sleep attempt", () -> shouldDenySleep(player), false)
-						? Player.BedSleepingProblem.NOT_SAFE : null);
+				guard("a sleep attempt", () -> sleepProblem(player), null));
 
 		// Waking up is not always a relief.
 		//
@@ -156,21 +156,26 @@ public final class Occupant implements ModInitializer {
 		});
 	}
 
-	private static Boolean shouldDenySleep(Player player) {
+	@org.jetbrains.annotations.Nullable
+	private static Player.BedSleepingProblem sleepProblem(Player player) {
 		OccupantConfig cfg = OccupantConfig.get();
 		Director director = Director.get();
-		if (!cfg.enabled || !cfg.interruptSleep || director == null) return false;
-		if (!(player instanceof ServerPlayer sp) || sp.isCreative() && !cfg.hauntCreative) return false;
+		if (!cfg.enabled || !cfg.interruptSleep || director == null) return null;
+		if (!(player instanceof ServerPlayer sp) || sp.isCreative() && !cfg.hauntCreative) return null;
 
 		HauntData data = director.data(sp);
-		if (data.paused || data.act < 2) return false;
+		if (data.paused || data.act < 2) return null;
 		long day = Compat.dayTime(sp.level()) / 24000L;
-		if (data.sleepDenyDay == day) return false;
-		if (sp.getRandom().nextFloat() >= 0.35f) return false;
+		if (data.sleepDenyDay == day) return null;
+		if (sp.getRandom().nextFloat() >= 0.35f) return null;
 
 		data.sleepDenyDay = day;
 		data.addDread(5f);
 		director.markDirty();
-		return true;
+		if (data.act >= 3 && sp.getRandom().nextBoolean()) {
+			sp.sendSystemMessage(net.minecraft.network.chat.Component.translatable("block.minecraft.bed.occupied"), true);
+			return Player.BedSleepingProblem.OTHER_PROBLEM;
+		}
+		return Player.BedSleepingProblem.NOT_SAFE;
 	}
 }
