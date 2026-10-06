@@ -52,12 +52,19 @@ final class Unnoticed {
 	private final Deque<String> recent = new ArrayDeque<>();
 	private List<OccupantEntity> nearby = List.of();
 	private int age;
+	/** For the game tests: watch only this one, instead of looking round for them. */
+	@org.jetbrains.annotations.Nullable
+	private OccupantEntity only;
+
+	void watchOnly(OccupantEntity e) {
+		only = e;
+	}
 
 	void tick(ServerPlayer player, Haunt haunt) {
 		age++;
 		if (age % 20 == 0) {
 			// Every second: what is standing round this player, for them.
-			nearby = new ArrayList<>(Compat.level(player).getEntitiesOfClass(OccupantEntity.class,
+			nearby = only != null ? List.of(only) : new ArrayList<>(Compat.level(player).getEntitiesOfClass(OccupantEntity.class,
 					player.getBoundingBox().inflate(128.0), e -> e.isAlive() && e.isHaunting(player)));
 			watching.keySet().removeIf(id -> nearby.stream().noneMatch(e -> e.getId() == id));
 		}

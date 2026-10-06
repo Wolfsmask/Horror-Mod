@@ -1,5 +1,6 @@
 package com.wolfsmask.occupant.director;
 
+import com.wolfsmask.occupant.entity.OccupantEntity;
 import com.wolfsmask.occupant.network.ScreenEffectPayload;
 import com.wolfsmask.occupant.util.Cues;
 import com.wolfsmask.occupant.compat.Compat;
@@ -98,9 +99,10 @@ public final class Director {
 		return haunts.computeIfAbsent(player.getUUID(), u -> new Haunt(u, save.forPlayer(u), player.getRandom()));
 	}
 
-	/** For the game tests: one tick of watching whether this player has noticed it. */
-	public void watchForTest(ServerPlayer player) {
+	/** For the game tests: one tick of watching whether this player has noticed {@code standing}. */
+	public void watchForTest(ServerPlayer player, OccupantEntity standing) {
 		Haunt h = haunt(player);
+		h.unnoticed.watchOnly(standing);
 		h.unnoticed.tick(player, h);
 	}
 

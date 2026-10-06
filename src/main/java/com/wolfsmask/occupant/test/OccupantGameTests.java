@@ -261,16 +261,16 @@ public final class OccupantGameTests {
 		OccupantEntity e = ModEntities.OCCUPANT.create(world, EntitySpawnReason.COMMAND);
 		helper.assertTrue(e != null, "Could not create the entity");
 		e.standAlone(player);
-		e.snapTo(stand.getX() + 0.5, stand.getY(), stand.getZ() + 9.5, 180.0f, 0.0f);       // nine blocks south, behind
-		world.addFreshEntity(e);
+		// Six blocks south, behind. Never added to the world: a mock player is not in the player
+		// list, so a real one would leave at once; the watching only needs where it stands.
+		e.snapTo(stand.getX() + 0.5, stand.getY(), stand.getZ() + 6.5, 180.0f, 0.0f);
 		int before = director.data(player).ignored;
 		helper.onEachTick(() -> {
 			player.snapTo(stand.getX() + 0.5, stand.getY(), stand.getZ() + 0.5, 180.0f, 0.0f);
-			director.watchForTest(player);
+			director.watchForTest(player, e);
 		});
 		helper.runAtTickTime(240, () -> {
 			int after = director.data(player).ignored;
-			e.discard();
 			helper.assertTrue(after == before + 1, "Ignored for ten seconds, it should have been pointed out once (" + (after - before) + ")");
 			helper.succeed();
 		});
