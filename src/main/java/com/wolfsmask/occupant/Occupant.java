@@ -124,8 +124,24 @@ public final class Occupant implements ModInitializer {
 					Director director = Director.get();
 					if (director != null && world.getBlockEntity(pos) instanceof Container box) {
 						HauntData data = director.data(sp);
-						data.logsFound++;
-						Loot.opening(sp, pos, box, data.logsFound);
+						String name = sp.getName().getString();
+						net.minecraft.world.item.ItemStack page;
+						if (com.wolfsmask.occupant.world.LastCamp.isTheirs(data, pos)) {
+							// Their last camp: their last page.
+							data.lastCamp = 2;
+							page = com.wolfsmask.occupant.world.SurvivorLog.finalEntry(name);
+						} else if (data.lastNight && !data.pageAfter) {
+							data.pageAfter = true;
+							page = com.wolfsmask.occupant.world.SurvivorLog.pageAfter(name);
+						} else {
+							data.logsFound++;
+							if (data.logsFound == com.wolfsmask.occupant.world.SurvivorLog.CAMP_PAGE && data.lastCamp == 0) {
+								com.wolfsmask.occupant.world.LastCamp.build(sp, data);
+							}
+							page = com.wolfsmask.occupant.world.SurvivorLog.page(data.logsFound, name,
+									data.lastCamp > 0 ? new int[]{data.lastCampX, data.lastCampZ} : null);
+						}
+						Loot.opening(sp, pos, box, page);
 						director.markDirty();
 					}
 				});

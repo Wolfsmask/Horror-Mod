@@ -102,9 +102,13 @@ public final class Loot {
 	 * log goes in first. Called as they open it, so it is there when it opens.
 	 */
 	public static void opening(ServerPlayer player, BlockPos pos, Container box, int page) {
+		opening(player, pos, box, SurvivorLog.page(page, player.getName().getString()));
+	}
+
+	/** The first time a container is opened, {@code log} is put in it. */
+	public static void opening(ServerPlayer player, BlockPos pos, Container box, ItemStack log) {
 		if (!UNOPENED.remove(pos)) return;
 		save();
-		ItemStack log = SurvivorLog.page(page, player.getName().getString());
 		for (int i = 0; i < box.getContainerSize(); i++) {
 			if (box.getItem(i).isEmpty()) {
 				box.setItem(i, log);

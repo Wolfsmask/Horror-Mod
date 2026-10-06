@@ -204,6 +204,10 @@ public final class Director {
 		h.quietSeconds++;
 
 		Situation s = h.capture(player);
+		if (h.data.act > 0) {
+			if (s.sheltered()) h.data.insideSeconds++;
+			else h.data.outsideSeconds++;
+		}
 		House.noticeNear(player.blockPosition());
 		updateDread(h.data, s);
 		int actBefore = h.data.act;

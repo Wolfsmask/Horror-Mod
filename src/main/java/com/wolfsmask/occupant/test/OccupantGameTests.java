@@ -132,6 +132,10 @@ public final class OccupantGameTests {
 		d.ignored = 3;
 		d.introduced = true;
 		d.lastNight = true;
+		d.lastCamp = 1;
+		d.lastCampX = -1234;
+		d.lastCampZ = 5678;
+		d.insideSeconds = 300;
 		d.recordEvent("watcher", 2400);
 		d.rememberChat("hello there");
 		Tag saved = HauntData.CODEC.encodeStart(NbtOps.INSTANCE, d).getOrThrow();
@@ -140,6 +144,8 @@ public final class OccupantGameTests {
 		helper.assertTrue(copy.sightings == 7 && copy.encounters == 2, "Counters should round-trip");
 		helper.assertTrue(copy.logsFound == 5 && copy.ignored == 3 && copy.introduced && copy.lastNight,
 				"The story so far should round-trip");
+		helper.assertTrue(copy.lastCamp == 1 && copy.lastCampX == -1234 && copy.lastCampZ == 5678 && copy.insideSeconds == 300,
+				"Where the last camp is, and how the story was lived, should round-trip");
 		helper.assertTrue(copy.isOnCooldown("watcher") && copy.recency("watcher") == 0, "Cooldowns and history should round-trip");
 		helper.assertTrue("hello there".equals(copy.heardChat.peekFirst()), "Remembered chat should round-trip");
 		helper.succeed();
@@ -285,6 +291,35 @@ public final class OccupantGameTests {
 					+ (after - before) + "; " + state + ")");
 			helper.succeed();
 		});
+	}
+
+	/**
+	 * The survivor's last camp: built where the log says, with what is left of them and a chest
+	 * that holds their last page; and the page that says where it is gives the real place.
+	 */
+	@GameTest(maxTicks = 60)
+	public void theSurvivorsLastCampIsWhereTheLogSays(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		BlockPos at = helper.absolutePos(new BlockPos(0, 1, 0)).offset(0, 0, -700);
+		int top = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, at.getX(), at.getZ());
+		BlockPos base = new BlockPos(at.getX(), top - 1, at.getZ());
+		com.wolfsmask.occupant.world.LastCamp.build(level, base, level.getRandom());
+		HauntData d = new HauntData();
+		d.lastCamp = 1;
+		d.lastCampX = base.getX();
+		d.lastCampZ = base.getZ();
+		BlockPos box = null;
+		boolean skull = false;
+		for (BlockPos p : BlockPos.betweenClosed(base.offset(-7, -3, -7), base.offset(7, 8, 7))) {
+			if (box == null && com.wolfsmask.occupant.world.Loot.unopened(p)) box = p.immutable();
+			skull |= level.getBlockState(p).is(net.minecraft.world.level.block.Blocks.SKELETON_SKULL);
+		}
+		helper.assertTrue(box != null, "The last camp should have a chest nobody has opened");
+		helper.assertTrue(com.wolfsmask.occupant.world.LastCamp.isTheirs(d, box), "That chest should be known as theirs");
+		helper.assertTrue(skull, "What is left of them should be there");
+		Occupant.LOGGER.info("[gametest] last camp at {}, chest at {}", base, box);
+		helper.succeed();
 	}
 
 	/** The fog comes in as the story goes on: eight chunks or so at first, six or so by the end. */

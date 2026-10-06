@@ -75,19 +75,28 @@ public final class ScreenEffects {
 
 	/** The first time in a world: longer, in black, and it tells you. */
 	/** The end of the last night: the same black as the first time, and what it has become. */
+	/** Found their last camp. */
+	private static final String[][] ENDING_FOUND = {
+			{"You found what was left of them.", "Now it has someone new to leave behind."},
+			{"You read every word they left.", "It was reading over your shoulder."}};
+	/** Hid from it, the whole story. */
+	private static final String[][] ENDING_HID = {
+			{"You kept the doors shut and the lights on.", "It liked that you stayed home, {player}."},
+			{"You never went out to meet it.", "So it came in."}};
 	private static final String[][] ENDING_LINES = {
 			{"It knows how to be you now, {player}.", "It will be patient."},
 			{"You let it come all the way.", "Next time it will not need to ask."},
 			{"It was never going to let you leave.", "It is still here."}};
 
-	private static void ended() {
-		String[] lines = ENDING_LINES[ThreadLocalRandom.current().nextInt(ENDING_LINES.length)];
+	private static void ended(int which) {
+		String[][] set = which == 1 ? ENDING_FOUND : which == 2 ? ENDING_HID : ENDING_LINES;
+		String[] lines = set[ThreadLocalRandom.current().nextInt(set.length)];
 		Minecraft mc = Minecraft.getInstance();
 		String name = mc.player != null ? mc.player.getName().getString() : "";
 		introAge = 0;
 		introLength = ARRIVAL_TICKS;
 		introLine = lines[0].replace(", {player}", name.isEmpty() ? "" : ", " + name);
-		introSub = lines[1];
+		introSub = lines[1].replace(", {player}", name.isEmpty() ? "" : ", " + name);
 	}
 
 	private static void arrived() {
@@ -141,7 +150,7 @@ public final class ScreenEffects {
 			}
 			case ScreenEffectPayload.SILENCE -> client.getMusicManager().stopPlaying();
 			case ScreenEffectPayload.FIRST_ARRIVAL -> arrived();
-			case ScreenEffectPayload.FINALE -> ended();
+			case ScreenEffectPayload.FINALE -> ended(Math.round(payload.intensity()));
 			case ScreenEffectPayload.FOG -> ClientFog.set(payload.intensity(), payload.duration());
 			case ScreenEffectPayload.ACT -> PauseLines.act = Math.round(payload.intensity());
 			default -> {

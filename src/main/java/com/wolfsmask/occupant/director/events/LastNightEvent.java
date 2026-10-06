@@ -104,8 +104,8 @@ public final class LastNightEvent extends HorrorEvent {
 				Vec3 to = entity.position().subtract(player.position());
 				if (to.x * to.x + to.z * to.z > 1.0E-4) towards = new Vec3(to.x, 0, to.z).normalize();
 				if (stage == CLOSER.length - 1 && seenFor >= 14) {
-					// Face to face. Black, and the line.
-					Cues.effect(player, ScreenEffectPayload.FINALE, 240, 1.0f);
+					// Face to face. Black, and the line: which line depends on how the story was lived.
+					Cues.effect(player, ScreenEffectPayload.FINALE, 240, ending(haunt.data));
 					endAt = age + 4;
 					finish(player);
 				}
@@ -139,6 +139,13 @@ public final class LastNightEvent extends HorrorEvent {
 				return true;
 			}
 			return false;
+		}
+
+		/** 1: found the survivor's last camp. 2: hid from it, indoors, most of the story. 0: anything else. */
+		static int ending(HauntData d) {
+			if (d.lastCamp == 2) return 1;
+			if (d.insideSeconds > 2 * Math.max(120, d.outsideSeconds)) return 2;
+			return 0;
 		}
 
 		private void finish(ServerPlayer player) {

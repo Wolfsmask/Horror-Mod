@@ -27,8 +27,15 @@ public final class HauntData {
 			Codec.INT.optionalFieldOf("logsFound", 0).forGetter(a -> a[0]),
 			Codec.INT.optionalFieldOf("ignored", 0).forGetter(a -> a[1]),
 			Codec.BOOL.optionalFieldOf("introduced", false).forGetter(a -> a[2] != 0),
-			Codec.BOOL.optionalFieldOf("lastNight", false).forGetter(a -> a.length > 3 && a[3] != 0)
-	).apply(i, (logs, ignored, introduced, lastNight) -> new int[]{logs, ignored, introduced ? 1 : 0, lastNight ? 1 : 0}));
+			Codec.BOOL.optionalFieldOf("lastNight", false).forGetter(a -> a[3] != 0),
+			Codec.INT.optionalFieldOf("lastCamp", 0).forGetter(a -> a[4]),
+			Codec.INT.optionalFieldOf("lastCampX", 0).forGetter(a -> a[5]),
+			Codec.INT.optionalFieldOf("lastCampZ", 0).forGetter(a -> a[6]),
+			Codec.BOOL.optionalFieldOf("pageAfter", false).forGetter(a -> a[7] != 0),
+			Codec.INT.optionalFieldOf("insideSeconds", 0).forGetter(a -> a[8]),
+			Codec.INT.optionalFieldOf("outsideSeconds", 0).forGetter(a -> a[9])
+	).apply(i, (logs, ignored, introduced, lastNight, camp, campX, campZ, after, inside, outside) -> new int[]{
+			logs, ignored, introduced ? 1 : 0, lastNight ? 1 : 0, camp, campX, campZ, after ? 1 : 0, inside, outside}));
 
 	/** Every field is optional with a default, so old or partial saves always load. */
 	public static final Codec<HauntData> CODEC = RecordCodecBuilder.create(i -> i.group(
@@ -47,8 +54,8 @@ public final class HauntData {
 			Codec.unboundedMap(Codec.STRING, Codec.LONG).optionalFieldOf("cooldowns", Map.of()).forGetter(HauntData::activeCooldowns),
 			Codec.STRING.listOf().optionalFieldOf("history", List.of()).forGetter(d -> new ArrayList<>(d.history)),
 			Codec.STRING.listOf().optionalFieldOf("heardChat", List.of()).forGetter(d -> new ArrayList<>(d.heardChat)),
-			STORY.optionalFieldOf("story", new int[4]).forGetter(d -> new int[]{d.logsFound, d.ignored, d.introduced ? 1 : 0,
-					d.lastNight ? 1 : 0})
+			STORY.optionalFieldOf("story", new int[10]).forGetter(d -> new int[]{d.logsFound, d.ignored, d.introduced ? 1 : 0,
+					d.lastNight ? 1 : 0, d.lastCamp, d.lastCampX, d.lastCampZ, d.pageAfter ? 1 : 0, d.insideSeconds, d.outsideSeconds})
 	).apply(i, HauntData::fromCodec));
 
 	/** 0 = nothing yet, 1 = signs, 2 = presence, 3 = closer, 4 = hunt. */
@@ -83,6 +90,15 @@ public final class HauntData {
 	public boolean introduced = false;
 	/** The last night has happened: it came all the way, and the story began again, quieter. */
 	public boolean lastNight = false;
+	/** The survivor's last camp: 0 not yet, 1 built and written down, 2 found. */
+	public int lastCamp = 0;
+	public int lastCampX;
+	public int lastCampZ;
+	/** The page that turns up after the last night has been found. */
+	public boolean pageAfter = false;
+	/** How the story was lived: seconds spent under a roof, and out under the sky. */
+	public int insideSeconds;
+	public int outsideSeconds;
 
 	/** Paused by an operator with /occupant pause. */
 	public boolean paused = false;
@@ -119,7 +135,15 @@ public final class HauntData {
 			d.ignored = Math.max(0, story[1]);
 			d.introduced = story[2] != 0;
 		}
-		if (story.length >= 4) d.lastNight = story[3] != 0;
+		if (story.length >= 10) {
+			d.lastNight = story[3] != 0;
+			d.lastCamp = story[4];
+			d.lastCampX = story[5];
+			d.lastCampZ = story[6];
+			d.pageAfter = story[7] != 0;
+			d.insideSeconds = story[8];
+			d.outsideSeconds = story[9];
+		}
 		return d;
 	}
 
