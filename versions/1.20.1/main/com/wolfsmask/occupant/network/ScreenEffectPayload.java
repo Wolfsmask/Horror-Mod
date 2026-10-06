@@ -28,6 +28,8 @@ public record ScreenEffectPayload(int effect, int duration, float intensity) imp
 	public static final int FOG = 5;
 	/** Where the story is: {@code intensity} is the act (0 while the haunting is off). */
 	public static final int ACT = 6;
+	/** The end of the last night: black, and a line, like the first time. */
+	public static final int FINALE = 7;
 
 	public static final PacketType<ScreenEffectPayload> TYPE = PacketType.create(Occupant.id("screen_effect"),
 			buf -> new ScreenEffectPayload(buf.readVarInt(), buf.readVarInt(), buf.readFloat()));

@@ -131,13 +131,15 @@ public final class OccupantGameTests {
 		d.logsFound = 5;
 		d.ignored = 3;
 		d.introduced = true;
+		d.lastNight = true;
 		d.recordEvent("watcher", 2400);
 		d.rememberChat("hello there");
 		Tag saved = HauntData.CODEC.encodeStart(NbtOps.INSTANCE, d).getOrThrow();
 		HauntData copy = HauntData.CODEC.parse(NbtOps.INSTANCE, saved).getOrThrow();
 		helper.assertTrue(copy.act == 3 && copy.dread == 42.5f && copy.playTicks == 123456, "Core values should round-trip");
 		helper.assertTrue(copy.sightings == 7 && copy.encounters == 2, "Counters should round-trip");
-		helper.assertTrue(copy.logsFound == 5 && copy.ignored == 3 && copy.introduced, "The story so far should round-trip");
+		helper.assertTrue(copy.logsFound == 5 && copy.ignored == 3 && copy.introduced && copy.lastNight,
+				"The story so far should round-trip");
 		helper.assertTrue(copy.isOnCooldown("watcher") && copy.recency("watcher") == 0, "Cooldowns and history should round-trip");
 		helper.assertTrue("hello there".equals(copy.heardChat.peekFirst()), "Remembered chat should round-trip");
 		helper.succeed();

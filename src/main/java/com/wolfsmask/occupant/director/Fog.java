@@ -39,7 +39,8 @@ public final class Fog {
 		if (cfg.fogClosesIn && closeBy(player, haunt)) end = Math.min(end, ROLLED_IN);
 		int view = Compat.viewDistance(player);
 		if (view > 2) end = Math.min(end, view * 16.0f);
-		return Math.max(FogLine.NEAREST, end);
+		end = haunt.fogAfterEvents(end, Compat.level(player).getServer().getTickCount());
+		return end <= 0 ? 0.0f : Math.max(FogLine.NEAREST, end);
 	}
 
 	/** Where the fog begins for this player now, or a long way off if there is none. */

@@ -26,8 +26,9 @@ public final class HauntData {
 	private static final Codec<int[]> STORY = RecordCodecBuilder.create(i -> i.group(
 			Codec.INT.optionalFieldOf("logsFound", 0).forGetter(a -> a[0]),
 			Codec.INT.optionalFieldOf("ignored", 0).forGetter(a -> a[1]),
-			Codec.BOOL.optionalFieldOf("introduced", false).forGetter(a -> a[2] != 0)
-	).apply(i, (logs, ignored, introduced) -> new int[]{logs, ignored, introduced ? 1 : 0}));
+			Codec.BOOL.optionalFieldOf("introduced", false).forGetter(a -> a[2] != 0),
+			Codec.BOOL.optionalFieldOf("lastNight", false).forGetter(a -> a.length > 3 && a[3] != 0)
+	).apply(i, (logs, ignored, introduced, lastNight) -> new int[]{logs, ignored, introduced ? 1 : 0, lastNight ? 1 : 0}));
 
 	/** Every field is optional with a default, so old or partial saves always load. */
 	public static final Codec<HauntData> CODEC = RecordCodecBuilder.create(i -> i.group(
@@ -46,7 +47,8 @@ public final class HauntData {
 			Codec.unboundedMap(Codec.STRING, Codec.LONG).optionalFieldOf("cooldowns", Map.of()).forGetter(HauntData::activeCooldowns),
 			Codec.STRING.listOf().optionalFieldOf("history", List.of()).forGetter(d -> new ArrayList<>(d.history)),
 			Codec.STRING.listOf().optionalFieldOf("heardChat", List.of()).forGetter(d -> new ArrayList<>(d.heardChat)),
-			STORY.optionalFieldOf("story", new int[3]).forGetter(d -> new int[]{d.logsFound, d.ignored, d.introduced ? 1 : 0})
+			STORY.optionalFieldOf("story", new int[4]).forGetter(d -> new int[]{d.logsFound, d.ignored, d.introduced ? 1 : 0,
+					d.lastNight ? 1 : 0})
 	).apply(i, HauntData::fromCodec));
 
 	/** 0 = nothing yet, 1 = signs, 2 = presence, 3 = closer, 4 = hunt. */
@@ -79,6 +81,8 @@ public final class HauntData {
 	public int ignored = 0;
 	/** Whether the player has had the black screen that tells them, on first arriving. */
 	public boolean introduced = false;
+	/** The last night has happened: it came all the way, and the story began again, quieter. */
+	public boolean lastNight = false;
 
 	/** Paused by an operator with /occupant pause. */
 	public boolean paused = false;
@@ -115,6 +119,7 @@ public final class HauntData {
 			d.ignored = Math.max(0, story[1]);
 			d.introduced = story[2] != 0;
 		}
+		if (story.length >= 4) d.lastNight = story[3] != 0;
 		return d;
 	}
 

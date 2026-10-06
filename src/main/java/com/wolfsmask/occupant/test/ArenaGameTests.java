@@ -169,7 +169,7 @@ public final class ArenaGameTests {
 				command("summon minecraft:cow " + (field.getX() - 2 + i * 2) + " " + field.getY() + " " + (field.getZ() + 7)
 						+ " {Tags:[\"occupant_arena\"]}");
 			}
-			expect("field", "stare");
+			expect("field", "stare", "last_night");
 			command("kill @e[tag=occupant_arena]");
 
 			// Cave, facing east (+X) down the corridor.

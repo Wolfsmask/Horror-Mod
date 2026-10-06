@@ -28,6 +28,8 @@ public record ScreenEffectPayload(int effect, int duration, float intensity) imp
 	public static final int FOG = 5;
 	/** Where the story is: {@code intensity} is the act (0 while the haunting is off). */
 	public static final int ACT = 6;
+	/** The end of the last night: black, and a line, like the first time. */
+	public static final int FINALE = 7;
 
 	public static final CustomPacketPayload.Type<ScreenEffectPayload> TYPE =
 			new CustomPacketPayload.Type<>(Occupant.id("screen_effect"));

@@ -28,6 +28,10 @@ public final class Haunt {
 	float fogSent = -1.0f;
 	/** The act this player's client was last told, or -1 before the first time. */
 	int actSent = -1;
+	/** While above 0, the fog is no further than this (blocks): something is bringing it in. */
+	private float fogCloses;
+	/** Until this server tick, no fog at all. */
+	private long fogLiftedUntil;
 	@Nullable
 	String activeId;
 	/** Ticks until the next once-per-second evaluation. */
@@ -143,6 +147,26 @@ public final class Haunt {
 		e.setConcealed(Sight.couldBeSeen(player, e));
 		if (!world.addFreshEntity(e)) return null;
 		return e;
+	}
+
+	/** Brings the fog in to {@code blocks}, until {@link #releaseFog}. */
+	public void closeFog(float blocks) {
+		fogCloses = blocks;
+	}
+
+	public void releaseFog() {
+		fogCloses = 0;
+	}
+
+	/** No fog at all, for a while. */
+	public void liftFog(long untilTick) {
+		fogLiftedUntil = untilTick;
+	}
+
+	/** The fog's end once anything bringing it in or lifting it is taken into account. */
+	float fogAfterEvents(float end, long now) {
+		if (now < fogLiftedUntil) return 0.0f;
+		return fogCloses > 0 ? Math.min(end, fogCloses) : end;
 	}
 
 	/** True if this player is somewhere the Occupant is allowed to be. */

@@ -43,8 +43,9 @@ public final class Events {
 			new IntruderEvent(),
 			new BehindYouEvent(),
 			new WakeEvent(),
-			// Act 4: it hunts
-			new HuntEvent()
+			// Act 4: it hunts, and once, the last night
+			new HuntEvent(),
+			new LastNightEvent()
 	);
 
 	private static final Map<String, HorrorEvent> BY_ID = new LinkedHashMap<>();
