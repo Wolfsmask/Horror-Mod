@@ -11,6 +11,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayDeque;
@@ -85,6 +87,16 @@ final class Unnoticed {
 				watching.put(e.getId(), seen);
 			}
 		}
+	}
+
+	/** For the game tests: what it makes of this one, right now. */
+	String describe(ServerPlayer player, OccupantEntity e) {
+		BlockHitResult ray = player.level().clip(new ClipContext(player.getEyePosition(), e.position().add(0, 1.0, 0),
+				ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
+		return "age " + age + ", seen " + watching.get(e.getId()) + ", nearby " + nearby.size() + ", alive " + e.isAlive()
+				+ ", concealed " + e.isConcealed() + ", noticed " + noticed(player, e) + ", in sight " + Sight.canSeeAnyPart(player, e)
+				+ ", angle " + Math.round(Sight.angleTo(player, e.position().add(0, 2.0, 0))) + ", ray " + ray.getType()
+				+ " at " + ray.getBlockPos().toShortString() + " " + player.level().getBlockState(ray.getBlockPos());
 	}
 
 	/** Their crosshair is on it, or near it. */

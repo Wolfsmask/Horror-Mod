@@ -256,7 +256,8 @@ public final class OccupantGameTests {
 		helper.assertTrue(director != null, "Director should be running");
 		ServerLevel world = helper.getLevel();
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
-		BlockPos stand = helper.absolutePos(new BlockPos(1, 1, 1));
+		// High in open air, so nothing anywhere near the test can stand between them.
+		BlockPos stand = helper.absolutePos(new BlockPos(1, 1, 1)).above(48);
 		player.snapTo(stand.getX() + 0.5, stand.getY(), stand.getZ() + 0.5, 180.0f, 0.0f);   // facing north
 		OccupantEntity e = ModEntities.OCCUPANT.create(world, EntitySpawnReason.COMMAND);
 		helper.assertTrue(e != null, "Could not create the entity");
@@ -271,7 +272,10 @@ public final class OccupantGameTests {
 		});
 		helper.runAtTickTime(240, () -> {
 			int after = director.data(player).ignored;
-			helper.assertTrue(after == before + 1, "Ignored for ten seconds, it should have been pointed out once (" + (after - before) + ")");
+			String state = director.describeForTest(player, e);
+			Occupant.LOGGER.info("[gametest] unnoticed: {}", state);
+			helper.assertTrue(after == before + 1, "Ignored for ten seconds, it should have been pointed out once ("
+					+ (after - before) + "; " + state + ")");
 			helper.succeed();
 		});
 	}

@@ -112,6 +112,14 @@ public final class Director {
 		h.unnoticed.tick(player, h);
 	}
 
+	/** For the game tests: how the watching of {@code standing} is going. */
+	public String describeForTest(ServerPlayer player, OccupantEntity standing) {
+		Haunt h = watchedForTest.get(player.getUUID());
+		if (h == null) return "never watched";
+		return h.unnoticed.describe(player, standing) + ", ignored " + h.data.ignored
+				+ ", same story " + (h.data == save.forPlayer(player.getUUID()));
+	}
+
 	public void markDirty() {
 		save.setDirty();
 	}
