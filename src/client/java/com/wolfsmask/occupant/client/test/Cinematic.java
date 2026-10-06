@@ -67,7 +67,6 @@ final class Cinematic {
 			if (ruin != null) ruin(context, game, ruin);
 			if (camp != null) camp(context, game, camp);
 			if (graves != null) graves(context, game, graves);
-			face(context, game, spawn);
 		} catch (RuntimeException | AssertionError e) {
 			Occupant.LOGGER.warn("[client-gametest] cinematic stills stopped early", e);
 		} finally {
@@ -78,30 +77,35 @@ final class Cinematic {
 		}
 	}
 
-	/** Dusk in the wood: it, between the trunks, a way off, looking back. */
+	/** Sunset in the wood: it, between the trunks, against the last of the light, looking back. */
 	private static void treeline(ClientGameTestContext context, TestSingleplayerContext game, BlockPos[] woods) {
 		TestServerContext server = game.getServer();
-		BlockPos stand = server.computeOnServer(s -> ForestGallery.standSpot(s.overworld(), woods[0], 7));
-		if (stand == null) return;
-		int[] yaws = server.computeOnServer(s -> ForestGallery.openestYaws(s.overworld(), stand));
-		double r = Math.toRadians(yaws[0]);
-		int ox = stand.getX() + (int) Math.round(-Math.sin(r) * 15);
-		int oz = stand.getZ() + (int) Math.round(Math.cos(r) * 15);
-		BlockPos it = server.computeOnServer(s -> new BlockPos(ox, surface(s.overworld(), ox, oz), oz));
+		BlockPos it = server.computeOnServer(s -> ForestGallery.standSpot(s.overworld(), woods[0], 7));
+		if (it == null) return;
+		// The camera to the east of it, looking west into the sunset; the trees between cleared.
+		BlockPos cam = server.computeOnServer(s -> ground(s.overworld(), it.getX() + 13, it.getZ()));
+		clearView(server, it.offset(-1, 0, -3), cam.offset(1, 0, 3), Math.min(it.getY(), cam.getY()) + 1, 14);
 		place(server, it);
-		camera(context, game, stand.getX() + 0.5, stand.getY() + 1.4, stand.getZ() + 0.5, it.getX() + 0.5, it.getY() + 3.2, it.getZ() + 0.5, 12900);
-		server.runCommand("execute as @p at @s run tp @s ~ ~ ~ ~11 ~");     // off centre, as if half-turned to it
+		camera(context, game, cam.getX() + 0.5, cam.getY() + 1.6, cam.getZ() + 0.5, it.getX() + 0.5, it.getY() + 3.0, it.getZ() + 0.5, 12700);
+		server.runCommand("execute as @p at @s run tp @s ~ ~ ~ ~9 ~");      // it in the left third, as if half-turned to it
 		still(context, game, "cinematic-treeline");
+
+		// And close, from below: its face against the sky.
+		BlockPos near = server.computeOnServer(s -> ground(s.overworld(), it.getX() + 2, it.getZ() + 1));
+		clearView(server, it.offset(-4, 0, -4), it.offset(4, 0, 4), it.getY() + 2, 16);
+		place(server, it);
+		camera(context, game, near.getX() + 0.5, near.getY() + 1.6, near.getZ() + 0.5, it.getX() + 0.5, it.getY() + 4.3, it.getZ() + 0.5, 12600);
+		still(context, game, "cinematic-face");
 	}
 
 	/** The village from above at dusk, and it, small, standing in the path between the houses. */
 	private static void village(ClientGameTestContext context, TestSingleplayerContext game, BlockPos floor) {
 		TestServerContext server = game.getServer();
 		server.runOnServer(s -> House.buildPlaceForTest("village", s.overworld(), floor, s.overworld().getRandom()));
-		BlockPos path = floor.offset(-1, 0, -10);
-		BlockPos it = server.computeOnServer(s -> new BlockPos(path.getX(), surface(s.overworld(), path.getX(), path.getZ()), path.getZ()));
+		BlockPos it = server.computeOnServer(s -> ground(s.overworld(), floor.getX() - 1, floor.getZ() - 10));
+		clearView(server, floor.offset(-20, 0, -30), floor.offset(22, 0, 12), floor.getY() + 2, 20);
 		place(server, it);
-		camera(context, game, floor.getX() + 16.5, floor.getY() + 15, floor.getZ() - 30.5, floor.getX(), floor.getY() + 1, floor.getZ() - 6, 13100);
+		camera(context, game, floor.getX() + 16.5, floor.getY() + 11, floor.getZ() - 26.5, floor.getX(), floor.getY() + 1, floor.getZ() - 5, 13000);
 		still(context, game, "cinematic-village");
 
 		// And inside the house, at dusk: the real event, looking towards the dark hallway.
@@ -135,16 +139,20 @@ final class Cinematic {
 		server.runCommand("gamemode spectator @p");
 	}
 
-	/** The ruined keep at sunset, from outside the gate: it is standing in the yard. */
+	/** The ruined keep at sunset, and it, standing outside the gate as if it has been waiting. */
 	private static void ruin(ClientGameTestContext context, TestSingleplayerContext game, BlockPos floor) {
 		TestServerContext server = game.getServer();
 		server.runOnServer(s -> House.buildPlaceForTest("ruin", s.overworld(), floor, s.overworld().getRandom()));
-		place(server, floor.offset(1, 1, 2));
-		camera(context, game, floor.getX() + 4.5, floor.getY() + 3, floor.getZ() - 19.5, floor.getX() + 0.5, floor.getY() + 3.5, floor.getZ(), 12350);
+		// Only outside the walls (the keep reaches z - 7): nothing built is ever cleared.
+		clearView(server, floor.offset(-11, 0, -25), floor.offset(8, 0, -8), floor.getY() + 1, 16);
+		BlockPos it = server.computeOnServer(s -> ground(s.overworld(), floor.getX() + 3, floor.getZ() - 10));
+		place(server, it);
+		BlockPos cam = server.computeOnServer(s -> ground(s.overworld(), floor.getX() - 7, floor.getZ() - 22));
+		camera(context, game, cam.getX() + 0.5, cam.getY() + 2.2, cam.getZ() + 0.5, floor.getX() + 0.5, floor.getY() + 4.0, floor.getZ() - 6.5, 12500);
 		still(context, game, "cinematic-ruin");
 	}
 
-	/** A camp at night, its fire lit again, and it behind the tent where the light just reaches. */
+	/** A camp at night, its fire lit again, and it beside the tent where the light just reaches. */
 	private static void camp(ClientGameTestContext context, TestSingleplayerContext game, BlockPos floor) {
 		TestServerContext server = game.getServer();
 		server.runOnServer(s -> {
@@ -152,10 +160,11 @@ final class Cinematic {
 			House.buildPlaceForTest("camp", level, floor, level.getRandom());
 			light(level, floor, 2, Blocks.CAMPFIRE.defaultBlockState());
 		});
-		BlockPos back = floor.offset(4, 0, 4);
-		BlockPos it = server.computeOnServer(s -> new BlockPos(back.getX(), surface(s.overworld(), back.getX(), back.getZ()), back.getZ()));
+		clearView(server, floor.offset(-9, 0, -10), floor.offset(8, 0, 8), floor.getY() + 2, 16);
+		BlockPos it = server.computeOnServer(s -> ground(s.overworld(), floor.getX() + 6, floor.getZ() + 4));
 		place(server, it);
-		camera(context, game, floor.getX() - 6.5, floor.getY() + 2.6, floor.getZ() - 7.5, floor.getX() + 1.5, floor.getY() + 1.8, floor.getZ() + 1.5, 18000);
+		BlockPos cam = server.computeOnServer(s -> ground(s.overworld(), floor.getX() - 6, floor.getZ() - 7));
+		camera(context, game, cam.getX() + 0.5, cam.getY() + 2.0, cam.getZ() + 0.5, floor.getX() + 2.5, floor.getY() + 2.0, floor.getZ() + 1.5, 18000);
 		still(context, game, "cinematic-camp");
 	}
 
@@ -167,22 +176,34 @@ final class Cinematic {
 			House.buildPlaceForTest("graves", level, floor, level.getRandom());
 			light(level, floor, 7, Blocks.CANDLE.defaultBlockState());
 		});
-		BlockPos back = floor.offset(1, 0, 8);
-		BlockPos it = server.computeOnServer(s -> new BlockPos(back.getX(), surface(s.overworld(), back.getX(), back.getZ()), back.getZ()));
+		clearView(server, floor.offset(-8, 0, -13), floor.offset(8, 0, 11), floor.getY() + 2, 16);
+		BlockPos it = server.computeOnServer(s -> ground(s.overworld(), floor.getX() + 1, floor.getZ() + 8));
 		place(server, it);
-		camera(context, game, floor.getX() - 2.5, floor.getY() + 2.4, floor.getZ() - 10.5, floor.getX() + 0.5, floor.getY() + 2.6, floor.getZ() + 5.5, 17800);
+		BlockPos cam = server.computeOnServer(s -> ground(s.overworld(), floor.getX() - 2, floor.getZ() - 11));
+		camera(context, game, cam.getX() + 0.5, cam.getY() + 2.2, cam.getZ() + 0.5, floor.getX() + 0.5, floor.getY() + 2.6, floor.getZ() + 5.5, 17800);
 		still(context, game, "cinematic-graves");
 	}
 
-	/** Its face, close, from below, against the last of the light. */
-	private static void face(ClientGameTestContext context, TestSingleplayerContext game, BlockPos spawn) {
-		TestServerContext server = game.getServer();
-		BlockPos ground = server.computeOnServer(s -> new BlockPos(spawn.getX(), surface(s.overworld(), spawn.getX(), spawn.getZ()), spawn.getZ()));
-		BlockPos it = ground.offset(0, 0, 4);
-		BlockPos at = server.computeOnServer(s -> new BlockPos(it.getX(), surface(s.overworld(), it.getX(), it.getZ()), it.getZ()));
-		place(server, at);
-		camera(context, game, ground.getX() + 0.8, ground.getY() + 1.5, ground.getZ() + 0.5, at.getX() + 0.5, at.getY() + 4.6, at.getZ() + 0.5, 12450);
-		still(context, game, "cinematic-face");
+	/**
+	 * Clears the trees out of a shot: leaves, vines and natural trunks only, from {@code fromY} up
+	 * {@code height} blocks, so nothing anyone built (planks, stone, stripped logs) is ever touched.
+	 */
+	private static void clearView(TestServerContext server, BlockPos a, BlockPos b, int fromY, int height) {
+		int x0 = Math.min(a.getX(), b.getX()), x1 = Math.max(a.getX(), b.getX());
+		int z0 = Math.min(a.getZ(), b.getZ()), z1 = Math.max(a.getZ(), b.getZ());
+		for (String what : new String[]{"#minecraft:leaves", "minecraft:vine", "minecraft:oak_log", "minecraft:birch_log",
+				"minecraft:spruce_log", "minecraft:dark_oak_log", "minecraft:jungle_log", "minecraft:acacia_log"}) {
+			// In slices, to stay inside what one fill may change.
+			for (int x = x0; x <= x1; x += 12) {
+				server.runCommand(String.format(Locale.ROOT, "fill %d %d %d %d %d %d minecraft:air replace %s",
+						x, fromY, z0, Math.min(x + 11, x1), fromY + height, z1, what));
+			}
+		}
+	}
+
+	/** Where to stand at a column: the ground under any canopy. */
+	private static BlockPos ground(ServerLevel level, int x, int z) {
+		return new BlockPos(x, surface(level, x, z), z);
 	}
 
 	/**
