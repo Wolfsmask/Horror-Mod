@@ -1,4 +1,4 @@
-# 26.1.2 on 04d164b4ce3e7bebb7d556ed6e274843edad4f66: build success, tests success, jar success
+# 26.1.2 on 321c9cb42f3eb7650280f2c796a94c3659f19807: build success, tests success, jar success
 > Configure project :
 > Task :compileJava
 > Task :processResources
@@ -8,10 +8,10 @@
 > Task :processIncludeJars
 > Task :clientClasses
 > Task :compileTestJava NO-SOURCE
-> Task :jar
 > Task :processTestResources NO-SOURCE
-> Task :assemble
 > Task :testClasses UP-TO-DATE
+> Task :jar
+> Task :assemble
 > Task :test NO-SOURCE
 > Task :validateAccessWidener NO-SOURCE
 > Task :check UP-TO-DATE
@@ -31,17 +31,17 @@ jar: build/libs/occupant-0.15.0+mc26.1.2.jar
   }
 }
 unobfuscated version: the game's own names are the real ones
-[14:15:49] [Server thread/INFO] (occupant) [gametest] houses: found before false, first true, too close false, second true, after finding false
-[14:15:50] [Server thread/INFO] (occupant) [gametest] fog: first act 128.0, last act 104.0
-[14:15:51] [Server thread/INFO] (occupant) [gametest] fog thick at 96.0, begins at 62.400001525878906; it stands 54.08326913195984 away
-[14:15:51] [Server thread/INFO] (occupant) [gametest] places without loot: [], page found: true
-[14:15:52] [Server thread/INFO] (occupant) [gametest] house test player at BlockPos{x=-2, y=1, z=-4} facing 0.0 / (0.0, -0.0, 1.0)
-[14:15:52] [Server thread/INFO] (occupant) [gametest] house hallway spot: peeking BlockPos{x=-794480, y=-55, z=8385980} / any BlockPos{x=-794480, y=-55, z=8385980} (relative to the floor: BlockPos{x=4, y=1, z=0})
-[14:15:52] [Server thread/INFO] (occupant) [gametest] hallway light at the far end: block 0 sky 0, dark true
-[14:15:52] [Server thread/INFO] (occupant) [gametest] that spot: mask 1001001001, block light 0, sky 2, main room middle block light 0 sky 8
-[14:15:53] [Server thread/INFO] (occupant) [gametest] field: darkOutside=true skyDarken=7 light=8 skyLight=15 blockLight=0 isDark=true grassInDirtTag=false
-[14:15:53] [Server thread/INFO] (occupant) [gametest] cave: yaw=-90.0 feet=BlockPos{x=-794090, y=60, z=8385797} underground=true skyVisible=false skyLight=0 topY=69 light=0 look=(1.0, 0.0, 1.2246468525851679E-16) | ahead: standable=55 dark=55 visible=55
-[14:15:53] [Server thread/INFO] (occupant) [gametest] arena failures: []
-[14:15:54] [Server thread/INFO] (occupant) [gametest] unnoticed: age 241, seen -1, nearby 1, alive true, concealed false, noticed false, in sight true, angle 176, ray MISS at -794564, -7, 8385684 Block{minecraft:air}, ignored 1, same story true
-[14:15:59] [Server thread/INFO] (occupant) [gametest] events that found a place to happen: [cave_noise, thunder, breath, fake_join, sign, roof, advancement, whisper, doppel_chat, stalker, flicker, static, wake]
-[14:15:59] [Server thread/INFO] (Minecraft) ========= 14 GAME TESTS COMPLETE IN 11.86 s ======================
+[14:19:11] [Server thread/INFO] (occupant) [gametest] houses: found before false, first true, too close false, second true, after finding false
+[14:19:11] [Server thread/INFO] (occupant) [gametest] fog: first act 120.0, last act 96.0
+[14:19:13] [Server thread/INFO] (occupant) [gametest] fog thick at 88.0, begins at 57.20000076293945; it stands 51.088159097779204 away
+[14:19:13] [Server thread/INFO] (occupant) [gametest] places without loot: [], page found: true
+[14:19:14] [Server thread/INFO] (occupant) [gametest] house test player at BlockPos{x=-2, y=1, z=-4} facing 0.0 / (0.0, -0.0, 1.0)
+[14:19:14] [Server thread/INFO] (occupant) [gametest] house hallway spot: peeking BlockPos{x=1778459, y=-55, z=11028226} / any BlockPos{x=1778459, y=-55, z=11028226} (relative to the floor: BlockPos{x=4, y=1, z=0})
+[14:19:14] [Server thread/INFO] (occupant) [gametest] hallway light at the far end: block 0 sky 0, dark true
+[14:19:14] [Server thread/INFO] (occupant) [gametest] that spot: mask 1001001001, block light 0, sky 2, main room middle block light 0 sky 8
+[14:19:16] [Server thread/INFO] (occupant) [gametest] field: darkOutside=true skyDarken=7 light=8 skyLight=15 blockLight=0 isDark=true grassInDirtTag=false
+[14:19:16] [Server thread/INFO] (occupant) [gametest] cave: yaw=-90.0 feet=BlockPos{x=1778849, y=60, z=11028043} underground=true skyVisible=false skyLight=0 topY=69 light=0 look=(1.0, 0.0, 1.2246468525851679E-16) | ahead: standable=55 dark=55 visible=55
+[14:19:16] [Server thread/INFO] (occupant) [gametest] arena failures: []
+[14:19:17] [Server thread/INFO] (occupant) [gametest] unnoticed: age 241, seen -1, nearby 1, alive true, concealed false, noticed false, in sight true, angle 176, ray MISS at 1778375, -7, 11027930 Block{minecraft:air}, ignored 1, same story true
+[14:19:23] [Server thread/INFO] (occupant) [gametest] events that found a place to happen: [cave_noise, thunder, breath, fake_join, sign, roof, advancement, whisper, doppel_chat, stalker, flicker, static, wake]
+[14:19:23] [Server thread/INFO] (Minecraft) ========= 14 GAME TESTS COMPLETE IN 14.44 s ======================
