@@ -259,6 +259,7 @@ public final class OccupantGameTests {
 		// High in open air, so nothing anywhere near the test can stand between them.
 		BlockPos stand = helper.absolutePos(new BlockPos(1, 1, 1)).above(48);
 		player.snapTo(stand.getX() + 0.5, stand.getY(), stand.getZ() + 0.5, 180.0f, 0.0f);   // facing north
+		player.setYHeadRot(180.0f);                     // where a player looks is where their head points
 		OccupantEntity e = ModEntities.OCCUPANT.create(world, EntitySpawnReason.COMMAND);
 		helper.assertTrue(e != null, "Could not create the entity");
 		e.standAlone(player);
@@ -268,6 +269,7 @@ public final class OccupantGameTests {
 		int before = director.data(player).ignored;
 		helper.onEachTick(() -> {
 			player.snapTo(stand.getX() + 0.5, stand.getY(), stand.getZ() + 0.5, 180.0f, 0.0f);
+			player.setYHeadRot(180.0f);
 			director.watchForTest(player, e);
 		});
 		helper.runAtTickTime(240, () -> {
