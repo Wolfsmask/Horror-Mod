@@ -24,6 +24,8 @@ public record ScreenEffectPayload(int effect, int duration, float intensity) imp
 	public static final int SILENCE = 3;
 	/** The first time a player is in a world: a long black, and it tells them they are not alone. */
 	public static final int FIRST_ARRIVAL = 4;
+	/** The fog: {@code intensity} is where it is thick, in blocks (0 = none), reached over {@code duration} ticks. */
+	public static final int FOG = 5;
 
 	public static final CustomPacketPayload.Type<ScreenEffectPayload> TYPE =
 			new CustomPacketPayload.Type<>(Occupant.id("screen_effect"));

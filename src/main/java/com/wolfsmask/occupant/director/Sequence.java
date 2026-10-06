@@ -1,6 +1,8 @@
 package com.wolfsmask.occupant.director;
 
+import com.wolfsmask.occupant.entity.OccupantEntity;
 import net.minecraft.server.level.ServerPlayer;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Something that is happening to a player over time. Only one runs per player at once.
@@ -18,5 +20,11 @@ public interface Sequence {
 
 	/** Called exactly once when the sequence ends, however it ends. Remove anything temporary here. */
 	default void end() {
+	}
+
+	/** The Occupant this has put in the world, if any. */
+	@Nullable
+	default OccupantEntity occupant() {
+		return null;
 	}
 }

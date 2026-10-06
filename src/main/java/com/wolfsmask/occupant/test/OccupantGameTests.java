@@ -3,12 +3,15 @@ package com.wolfsmask.occupant.test;
 import com.wolfsmask.occupant.Occupant;
 import com.wolfsmask.occupant.OccupantConfig;
 import com.wolfsmask.occupant.director.Director;
+import com.wolfsmask.occupant.director.Fog;
 import com.wolfsmask.occupant.director.HauntData;
 import com.wolfsmask.occupant.director.HorrorEvent;
+import com.wolfsmask.occupant.director.events.DistantEvent;
 import com.wolfsmask.occupant.director.events.Events;
 import com.wolfsmask.occupant.director.events.HallwayEvent;
 import com.wolfsmask.occupant.entity.OccupantEntity;
 import com.wolfsmask.occupant.registry.ModEntities;
+import com.wolfsmask.occupant.util.FogLine;
 import net.minecraft.world.entity.EntitySpawnReason;
 import com.wolfsmask.occupant.world.House;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
@@ -280,6 +283,74 @@ public final class OccupantGameTests {
 					+ (after - before) + "; " + state + ")");
 			helper.succeed();
 		});
+	}
+
+	/** The fog comes in as the story goes on: eight chunks or so at first, six or so by the end. */
+	@GameTest
+	public void fogThickensWithTheStory(GameTestHelper helper) {
+		Director director = Director.get();
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		HauntData data = director.data(player);
+		data.setAct(1);
+		float first = Fog.endFor(player, director.haunt(player));
+		data.setAct(HauntData.MAX_ACT);
+		float last = Fog.endFor(player, director.haunt(player));
+		Occupant.LOGGER.info("[gametest] fog: first act {}, last act {}", first, last);
+		helper.assertTrue(first >= 112 && first <= 128, "About eight chunks of fog at first, not " + first);
+		helper.assertTrue(last >= 88 && last <= first - 24, "About six chunks by the end, not " + last);
+		helper.assertTrue(FogLine.edgeFar(last) < FogLine.start(last) && FogLine.edgeNear(last) > 36,
+				"The band it stands in is short of the fog, and further than it ever stays");
+		helper.succeed();
+	}
+
+	/**
+	 * In fog, the figure far off stands just this side of where the fog begins: the furthest thing
+	 * that can be seen, seen whole, and never in it. A ridge is built right across the fog line,
+	 * high in the air, so there is somewhere for it to stand.
+	 */
+	@GameTest(maxTicks = 100)
+	public void distantStandsAtTheEdgeOfTheFog(GameTestHelper helper) {
+		Director director = Director.get();
+		ServerLevel level = helper.getLevel();
+		OccupantConfig cfg = OccupantConfig.get();
+		int chunksBefore = cfg.fogChunks;
+		cfg.fogChunks = 6;
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		try {
+			BlockPos centre = helper.absolutePos(BlockPos.ZERO).offset(0, 0, 900).atY(200);
+			director.data(player).setAct(1);
+			float end = Fog.endFor(player, director.haunt(player));
+			double start = FogLine.start(end);
+			helper.assertTrue(end >= 84 && end <= 96, "Six chunks of fog in the first act, not " + end);
+			int r = (int) start + 10;
+			net.minecraft.world.level.block.state.BlockState stone = net.minecraft.world.level.block.Blocks.STONE.defaultBlockState();
+			for (int dx = -r; dx <= r; dx++) {
+				for (int dz = -r; dz <= r; dz++) {
+					double d = Math.sqrt(dx * dx + dz * dz);
+					if (d > r) continue;
+					int top = d >= start - 12 && d <= start + 3 ? 5 : 0;
+					for (int y = 0; y <= top; y++) {
+						level.setBlock(centre.offset(dx, y, dz), stone, net.minecraft.world.level.block.Block.UPDATE_CLIENTS);
+					}
+				}
+			}
+			player.snapTo(centre.getX() + 0.5, centre.getY() + 1, centre.getZ() + 0.5, 0.0f, 0.0f);
+			player.setYHeadRot(0.0f);
+			Director.TriggerResult result = director.trigger(player, DistantEvent.ID, true);
+			List<OccupantEntity> found = level.getEntitiesOfClass(OccupantEntity.class, new AABB(centre).inflate(r + 8),
+					e -> e.isHaunting(player));
+			helper.assertTrue(result == Director.TriggerResult.STARTED, "It should find the ridge: " + result);
+			helper.assertTrue(!found.isEmpty(), "It should be standing somewhere");
+			OccupantEntity e = found.get(0);
+			double dist = Math.hypot(e.getX() - player.getX(), e.getZ() - player.getZ());
+			Occupant.LOGGER.info("[gametest] fog thick at {}, begins at {}; it stands {} away", end, start, dist);
+			helper.assertTrue(dist >= FogLine.edgeNear(end) - 1.0 && dist <= start,
+					"It should stand just short of the fog (" + FogLine.edgeNear(end) + " to " + start + "), not " + dist);
+			helper.succeed();
+		} finally {
+			director.stopCurrent(player);
+			cfg.fogChunks = chunksBefore;
+		}
 	}
 
 	/**

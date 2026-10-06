@@ -1,11 +1,13 @@
 package com.wolfsmask.occupant.director.events;
 
 import com.wolfsmask.occupant.director.EventContext;
+import com.wolfsmask.occupant.director.Fog;
 import com.wolfsmask.occupant.director.Haunt;
 import com.wolfsmask.occupant.director.HorrorEvent;
 import com.wolfsmask.occupant.director.Sequence;
 import com.wolfsmask.occupant.director.Situation;
 import com.wolfsmask.occupant.entity.OccupantEntity;
+import com.wolfsmask.occupant.util.FogLine;
 import com.wolfsmask.occupant.util.Sight;
 import com.wolfsmask.occupant.util.Spots;
 import net.minecraft.core.BlockPos;
@@ -56,6 +58,13 @@ public final class DistantEvent extends HorrorEvent {
 		double reach = Math.max(0.0, (simChunks - 2) * 16.0);
 		double max = Math.min(104.0, reach);
 		double min = 48.0;
+		// In fog: just this side of where it begins. The furthest thing that can be seen at all,
+		// seen whole, and never lost in it.
+		float fogEnd = Fog.endFor(p, ctx.haunt);
+		if (fogEnd > 0) {
+			min = Math.max(36.0, FogLine.edgeNear(fogEnd));
+			max = Math.min(reach, FogLine.edgeFar(fogEnd));
+		}
 		if (max < min + 8.0) return null;
 
 		// Somewhere ahead of the player, but off to one side: found, not presented.

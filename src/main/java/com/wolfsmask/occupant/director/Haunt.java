@@ -24,6 +24,8 @@ public final class Haunt {
 
 	@Nullable
 	Sequence active;
+	/** The fog this player's client was last told to show (blocks; 0 = none), or -1 before the first time. */
+	float fogSent = -1.0f;
 	@Nullable
 	String activeId;
 	/** Ticks until the next once-per-second evaluation. */
@@ -121,6 +123,8 @@ public final class Haunt {
 										OccupantEntity.Form form) {
 		ServerLevel world = Compat.level(player);
 		if (!Spots.canStand(world, feet)) return null;
+		// Never in the fog: anything there could not be seen whole, and would only be a smudge.
+		if (Vec3.atBottomCenterOf(feet).distanceTo(player.position()) > Fog.startFor(player, this)) return null;
 		OccupantEntity e = ModEntities.OCCUPANT.create(world, EntitySpawnReason.EVENT);
 		if (e == null) return null;
 		e.bindTo(player);

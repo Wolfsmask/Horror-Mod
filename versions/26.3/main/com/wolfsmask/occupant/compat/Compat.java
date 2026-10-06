@@ -80,6 +80,11 @@ public final class Compat {
 		return player.level();
 	}
 
+	/** How many chunks this player's game draws, as their client last said; 0 if it never says. */
+	public static int viewDistance(ServerPlayer player) {
+		return player.requestedViewDistance();
+	}
+
 	/** The player's bed or respawn anchor, if it is in the world they are standing in. */
 	@Nullable
 	public static BlockPos respawnPos(ServerPlayer player) {

@@ -142,6 +142,11 @@ processResources {
 	filesMatching("fabric.mod.json") {
 		expand "version": version, "minecraft_dep": minecraftDep, "java_dep": javaDep
 	}
+	def mixinJava = "JAVA_${javaRelease}"
+	inputs.property "mixin_java", mixinJava
+	filesMatching("*.mixins.json") {
+		expand "mixin_java": mixinJava
+	}
 }
 
 tasks.withType(JavaCompile).configureEach {

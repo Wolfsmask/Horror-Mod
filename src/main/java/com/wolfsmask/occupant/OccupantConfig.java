@@ -66,6 +66,15 @@ public final class OccupantConfig {
 	/** Also haunt players in creative mode (useful for recording). */
 	public boolean hauntCreative = false;
 
+	/** A fog over the world, so you never see very far: it is always just past where the fog begins. */
+	public boolean fog = true;
+
+	/** How far you can see at first, in chunks, before the story starts bringing the fog in. */
+	public int fogChunks = 8;
+
+	/** The fog comes in as the story goes on (to six chunks by the end), at night, and when it is close. */
+	public boolean fogClosesIn = true;
+
 	/** Only haunt players in the Overworld. */
 	public boolean overworldOnly = true;
 
@@ -173,6 +182,7 @@ public final class OccupantConfig {
 		eventFrequency = clamp(eventFrequency, 0.1, 10.0);
 		chaseDamage = (float) clamp(chaseDamage, 0.0, 40.0);
 		aloneRadius = (int) clamp(aloneRadius, 0, 256);
+		fogChunks = (int) clamp(fogChunks, 0, 32);
 		if (signMessages == null || signMessages.isEmpty()) signMessages = new OccupantConfig().signMessages;
 		if (chatLines == null || chatLines.isEmpty()) chatLines = new OccupantConfig().chatLines;
 		if (whisperLines == null || whisperLines.isEmpty()) whisperLines = new OccupantConfig().whisperLines;

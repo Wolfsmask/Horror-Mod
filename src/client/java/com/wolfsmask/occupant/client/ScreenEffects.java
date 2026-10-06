@@ -125,6 +125,7 @@ public final class ScreenEffects {
 			}
 			case ScreenEffectPayload.SILENCE -> client.getMusicManager().stopPlaying();
 			case ScreenEffectPayload.FIRST_ARRIVAL -> arrived();
+			case ScreenEffectPayload.FOG -> ClientFog.set(payload.intensity(), payload.duration());
 			default -> {
 			}
 		}
@@ -147,9 +148,11 @@ public final class ScreenEffects {
 		whisperAge = whisperLength = 0;
 		introAge = -1;
 		atmosphere = nearness = 0f;
+		ClientFog.reset();
 	}
 
 	public static void tick(Minecraft client) {
+		ClientFog.tick();
 		if (blackoutAge < blackoutLength) blackoutAge++;
 		if (flickerAge >= 0 && ++flickerAge >= flickerLength) flickerAge = -1;
 		if (staticAge < staticLength) staticAge++;

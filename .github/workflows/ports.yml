@@ -41,6 +41,14 @@ jobs:
           set -o pipefail
           ./gradlew build -Pmc=${{ matrix.mc }} --console=plain 2>&1 | tee build.log
 
+      - name: Check the jar players get
+        id: jar
+        if: steps.build.outcome == 'success'
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          bash tools/ci/check-jar.sh ${{ matrix.mc }} 2>&1 | tee jar.log
+
       - name: Game tests for ${{ matrix.mc }}
         id: tests
         if: steps.build.outcome == 'success'
@@ -57,14 +65,15 @@ jobs:
           OUT="$RUNNER_TEMP/port"
           mkdir -p "$OUT"
           {
-            echo "# ${{ matrix.mc }} on $GITHUB_SHA: build ${{ steps.build.outcome }}, tests ${{ steps.tests.outcome }}"
+            echo "# ${{ matrix.mc }} on $GITHUB_SHA: build ${{ steps.build.outcome }}, tests ${{ steps.tests.outcome }}, jar ${{ steps.jar.outcome }}"
             # Each compiler error with its "symbol:" / "location:" lines, once (Gradle repeats them).
             awk '/What went wrong/{exit} /error:/{print; n=6; next} n>0 {n--; if (/symbol:|location:|required:|found:|reason:/) print}' build.log \
               | sed -E 's#^.*/(build/versioned|src)/[a-z]+/(java/)?##' | head -n 1200 || true
             grep -E "What went wrong|Could not|^> " build.log | head -n 20 || true
+            if [ -f jar.log ]; then echo "=== jar"; tail -n 25 jar.log; fi
             if [ -f test.log ]; then grep -E "GAME TESTS COMPLETE|required tests failed|  - occupant|\[gametest\]" test.log | head -n 30; fi
           } > "$OUT/result.txt"
-          if [ "${{ steps.tests.outcome }}" = "success" ]; then
+          if [ "${{ steps.tests.outcome }}" = "success" ] && [ "${{ steps.jar.outcome }}" = "success" ]; then
             cp build/libs/occupant-*.jar "$OUT/" 2>/dev/null || true
             rm -f "$OUT"/*-sources.jar
           fi

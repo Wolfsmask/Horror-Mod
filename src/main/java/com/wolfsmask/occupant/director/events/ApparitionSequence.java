@@ -52,4 +52,9 @@ public abstract class ApparitionSequence implements Sequence {
 	public void end() {
 		entity.vanish();
 	}
+
+	@Override
+	public OccupantEntity occupant() {
+		return entity;
+	}
 }

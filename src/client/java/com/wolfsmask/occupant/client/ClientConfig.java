@@ -30,6 +30,9 @@ public final class ClientConfig {
 	/** The dark at the edges of the screen, the grain, the cold: stronger in the dark and when it is near. */
 	public boolean atmosphere = true;
 
+	/** The fog the story brings in (the server decides how thick; this only switches it off for you). */
+	public boolean fog = true;
+
 	public static ClientConfig get() {
 		return instance;
 	}

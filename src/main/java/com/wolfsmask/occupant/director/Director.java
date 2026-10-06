@@ -177,6 +177,9 @@ public final class Director {
 			}
 		}
 
+		// The fog, once a second; cleared while they are not being haunted.
+		if (player.tickCount % 20 == 7) Fog.update(player, h, eligible);
+
 		if (!eligible) return;
 		h.data.playTicks++;
 

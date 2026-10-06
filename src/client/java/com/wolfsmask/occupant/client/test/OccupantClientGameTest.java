@@ -1,8 +1,11 @@
 package com.wolfsmask.occupant.client.test;
 
+import com.wolfsmask.occupant.client.ClientFog;
+
 import com.wolfsmask.occupant.Occupant;
 import com.wolfsmask.occupant.client.GateScreen;
 import com.wolfsmask.occupant.director.Director;
+import com.wolfsmask.occupant.director.HauntData;
 import com.wolfsmask.occupant.entity.OccupantEntity;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
@@ -200,6 +203,17 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 			server.runCommand("gamemode survival @p");
 			server.runCommand("time set midnight");             // nobody sleeps at noon: the game wakes them
 			context.waitTicks(40);
+
+			// The fog: the server decides how close it is, the client draws it. Late in the story,
+			// at night, it is close.
+			server.runOnServer(s -> Director.get().data(s.getPlayerList().getPlayers().get(0)).setAct(HauntData.MAX_ACT));
+			context.waitTicks(260);                             // a second to be told, ten to roll in
+			boolean fogged = context.computeOnClient(mc -> ClientFog.active());
+			float fogEnd = context.computeOnClient(mc -> ClientFog.end());
+			Occupant.LOGGER.info("[client-gametest] fog: drawn {}, thick at {} blocks, begins at {}", fogged, fogEnd,
+					context.computeOnClient(mc -> ClientFog.start()));
+			check(fogged && fogEnd <= 112, "the fog should have come in by the last act (" + fogEnd + ")");
+			shoot(context, "occupant-fog");
 
 			// The way the user was locked out: going to sleep, quitting, and coming back. The game
 			// wakes a sleeper while it is placing them into the world, which once threw out of the
