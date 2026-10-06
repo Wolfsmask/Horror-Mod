@@ -1,50 +1,25 @@
-# 26.3 on b81e63868faf19ca4a4760c78d5b216fec4a7b44: build success, tests failure, jar success
+# 26.3 on f84730d1bd12f56b493bd82f780a4d358295ddef: build failure, tests skipped, jar skipped
+com/wolfsmask/occupant/client/SettingsScreen.java:42: error: cannot find symbol
+  symbol:   method getButtons(Screen)
+  location: class Screens
+com/wolfsmask/occupant/client/SettingsScreen.java:43: error: cannot find symbol
+  symbol:   method setScreen(SettingsScreen)
+  location: variable client of type Minecraft
+com/wolfsmask/occupant/client/SettingsScreen.java:142: error: cannot find symbol
+  symbol:   method setScreen(Screen)
+  location: class Minecraft
+com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:204: error: cannot find symbol
+  symbol:   method setScreen(SettingsScreen)
+  location: variable mc of type Minecraft
+com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:207: error: cannot find symbol
+  symbol:   method setScreen(<null>)
+  location: variable mc of type Minecraft
 > Configure project :
 > Task :compileJava
 > Task :processResources
 > Task :classes
-> Task :compileClientJava
-> Task :processClientResources NO-SOURCE
-> Task :processIncludeJars
-> Task :clientClasses
-> Task :compileTestJava NO-SOURCE
-> Task :processTestResources NO-SOURCE
-> Task :testClasses UP-TO-DATE
-> Task :test NO-SOURCE
-> Task :validateAccessWidener NO-SOURCE
-> Task :check UP-TO-DATE
-> Task :jar
-> Task :assemble
-> Task :build
-=== jar
-jar: build/libs/occupant-0.15.0+mc26.3.jar
-{
-  "required": true,
-  "minVersion": "0.8",
-  "package": "com.wolfsmask.occupant.mixin.client",
-  "compatibilityLevel": "JAVA_25",
-  "client": [
-    "FogRendererMixin"
-  ],
-  "injectors": {
-    "defaultRequire": 1
-  }
-}
-unobfuscated version: the game's own names are the real ones
-[21:13:43] [Server thread/INFO] (occupant) [gametest] houses: found before false, first true, too close false, second true, after finding false
-[21:13:43] [Server thread/INFO] (occupant) [gametest] lair under BlockPos{x=-12452187, y=0, z=-1175701}: 22 rungs, going in: STARTED
-[21:13:43] [Server thread/INFO] (occupant) [gametest] fog: first act 120.0, last act 96.0
-[21:13:45] [Server thread/INFO] (occupant) [gametest] fog thick at 88.0, begins at 57.20000076293945; it stands 50.99019513592785 away
-[21:13:45] [Server thread/INFO] (occupant) [gametest] places without loot: [], page found: true
-[21:13:46] [Server thread/INFO] (occupant) [gametest] house test player at BlockPos{x=-2, y=1, z=-4} facing 0.0 / (0.0, -0.0, 1.0)
-[21:13:46] [Server thread/INFO] (occupant) [gametest] house hallway spot: peeking BlockPos{x=-12452132, y=8, z=-1176098} / any BlockPos{x=-12452132, y=8, z=-1176098} (relative to the floor: BlockPos{x=4, y=1, z=0})
-[21:13:46] [Server thread/INFO] (occupant) [gametest] hallway light at the far end: block 0 sky 0, dark true
-[21:13:46] [Server thread/INFO] (occupant) [gametest] that spot: mask 1001001001, block light 0, sky 2, main room middle block light 0 sky 8
-[21:13:48] [Server thread/INFO] (occupant) [gametest] field: darkOutside=true skyDarken=7 light=8 skyLight=15 blockLight=0 isDark=true grassInDirtTag=false
-[21:13:48] [Server thread/INFO] (occupant) [gametest] cave: yaw=-90.0 feet=BlockPos{x=-12451712, y=60, z=-1176281} underground=true skyVisible=false skyLight=0 topY=69 light=0 look=(1.0, 0.0, 1.2246468525851679E-16) | ahead: standable=55 dark=55 visible=55
-[21:13:48] [Server thread/INFO] (occupant) [gametest] arena failures: []
-[21:13:48] [Server thread/INFO] (occupant) [gametest] unnoticed: age 241, seen -1, nearby 1, alive true, concealed false, noticed false, in sight true, angle 176, ray MISS at -12452216, 56, -1176394 Block{minecraft:air}, ignored 1, same story true
-[21:13:56] [Server thread/INFO] (occupant) [gametest] events that found a place to happen: [familiar, cave_noise, thunder, echo, breath, fake_join, roof, saving, teammate, advancement, whisper, doppel_chat, stalker, flicker, static, wake]
-[21:13:56] [Server thread/INFO] (Minecraft) ========= 16 GAME TESTS COMPLETE IN 18.45 s ======================
-[21:13:56] [Server thread/INFO] (Minecraft) 1 required tests failed :(
-[21:13:56] [Server thread/INFO] (Minecraft)    - occupant:occupant_game_tests_the_survivors_last_camp_is_where_the_log_says: The last camp should have a chest nobody has opened on tick 0
+> Task :compileClientJava FAILED
+* What went wrong:
+> Compilation failed; see the compiler output below.
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
