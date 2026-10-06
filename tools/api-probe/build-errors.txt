@@ -1,57 +1,45 @@
-# Build failed at 2026-10-06T21:00:09Z on d621ef09e7d447d83e073f84fc834e6330e18a42
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/PetsEvent.java:69: error: cannot find symbol
-  symbol:   variable CAT
-  location: class EntityType
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/PetsEvent.java:70: error: cannot find symbol
-  symbol:   variable CAT_HISS
-  location: class SoundEvents
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/TurnedEvent.java:51: error: cannot find symbol
-  symbol:   variable ARMOR_STAND
-  location: class EntityType
+# Build failed at 2026-10-06T21:08:55Z on fc2f05f3383b08600e24e45a6114544bdb553571
 /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/ArenaGameTests.java:104: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
 /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:64: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
 /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:96: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
 /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:175: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
 /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:269: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
 /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:303: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:329: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:355: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:419: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:463: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/Occupant.java:164: error: cannot find symbol
-  symbol:   variable VILLAGER
-  location: class EntityType
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/PetsEvent.java:69: error: cannot find symbol
-    symbol:   variable CAT
-    location: class EntityType
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/PetsEvent.java:70: error: cannot find symbol
-    symbol:   variable CAT_HISS
-    location: class SoundEvents
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/events/TurnedEvent.java:51: error: cannot find symbol
-    symbol:   variable ARMOR_STAND
-    location: class EntityType
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/Occupant.java:164: error: cannot find symbol
-    symbol:   variable VILLAGER
-    location: class EntityType
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:347: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:362: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:388: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:452: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:496: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/world/RadioShack.java:43: error: cannot find symbol
+  symbol:   method defaultBlockState()
+  location: variable LIGHTNING_ROD of type WeatheringCopperCollection<Block>
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/world/Lighthouse.java:24: error: cannot find symbol
+  symbol:   variable WHITE_TERRACOTTA
+  location: class Blocks
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/world/Lighthouse.java:25: error: cannot find symbol
+  symbol:   variable RED_TERRACOTTA
+  location: class Blocks
+  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/world/Lighthouse.java:24: error: cannot find symbol
+    symbol:   variable WHITE_TERRACOTTA
+    location: class Blocks
+  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/world/Lighthouse.java:25: error: cannot find symbol
+    symbol:   variable RED_TERRACOTTA
+    location: class Blocks
   /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/ArenaGameTests.java:104: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
   /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:64: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
   /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:96: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
   /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:175: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
   /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:269: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
   /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:303: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:329: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:355: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:419: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:463: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:347: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:362: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:388: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:452: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:496: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/world/RadioShack.java:43: error: cannot find symbol
+    symbol:   method defaultBlockState()
+    location: variable LIGHTNING_ROD of type WeatheringCopperCollection<Block>
 --- tail ---
-    location: class EntityType
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/ArenaGameTests.java:104: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  			player = helper.makeMockServerPlayerInLevel();
-  			               ^
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:64: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  		ServerPlayer player = helper.makeMockServerPlayerInLevel();
-  		                            ^
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:96: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
   		ServerPlayer player = helper.makeMockServerPlayerInLevel();
   		                            ^
   /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:175: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
@@ -63,24 +51,32 @@
   /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:303: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
   		ServerPlayer player = helper.makeMockServerPlayerInLevel();
   		                            ^
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:329: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:347: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
   		ServerPlayer player = helper.makeMockServerPlayerInLevel();
   		                            ^
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:355: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:362: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
   		ServerPlayer player = helper.makeMockServerPlayerInLevel();
   		                            ^
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:419: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:388: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
   		ServerPlayer player = helper.makeMockServerPlayerInLevel();
   		                            ^
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:463: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:452: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
   		ServerPlayer player = helper.makeMockServerPlayerInLevel();
   		                            ^
-  4 errors
-  10 warnings
+  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:496: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+  		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+  		                            ^
+  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/world/RadioShack.java:43: error: cannot find symbol
+  		put(-1, 10, 1, Blocks.LIGHTNING_ROD.defaultBlockState());
+  		                                   ^
+    symbol:   method defaultBlockState()
+    location: variable LIGHTNING_ROD of type WeatheringCopperCollection<Block>
+  3 errors
+  11 warnings
 
 * Try:
 > Check your code and dependencies to fix the compilation error(s)
 > Run with --scan to get full insights from a Build Scan (powered by Develocity).
 
-BUILD FAILED in 15s
+BUILD FAILED in 19s
 1 actionable task: 1 executed
