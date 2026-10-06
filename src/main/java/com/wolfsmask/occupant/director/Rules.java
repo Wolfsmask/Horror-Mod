@@ -53,7 +53,7 @@ final class Rules {
 		}
 
 		if ((player.isCreative() && !cfg.hauntCreative) || player.isSpectator()) {
-			run(server, "gamemode survival " + player.getStringUUID());
+			player.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
 			say(player, CHEATING);
 			Occupant.LOGGER.info("{} tried to leave survival; put back", player.getName().getString());
 		}
@@ -71,7 +71,7 @@ final class Rules {
 
 	private static void run(MinecraftServer server, String command) {
 		try {
-			server.getCommands().performPrefixedCommand(server.createCommandSourceStack().withSuppressedOutput(), command);
+			server.getCommands().performPrefixedCommand(server.createCommandSourceStack(), command);
 		} catch (RuntimeException e) {
 			Occupant.LOGGER.warn("Could not run {}", command, e);
 		}
