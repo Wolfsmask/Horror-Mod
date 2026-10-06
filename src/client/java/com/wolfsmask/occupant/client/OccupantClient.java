@@ -28,7 +28,10 @@ public final class OccupantClient implements ClientModInitializer {
 		// Drawn last, on top of everything else on the HUD (so a blackout really is black).
 		HudElementRegistry.addLast(Occupant.id("screen_effects"), (graphics, deltaTracker) ->
 				ScreenEffects.render(graphics, deltaTracker.getGameTimeDeltaPartialTick(false)));
-		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> ScreenEffects.reset());
+		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+			PauseLines.leaving();
+			ScreenEffects.reset();
+		});
 		ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> client.execute(ScreenEffects::joined));
 		// Under everything else on the HUD: it belongs to the world, not to the hotbar.
 		HudElementRegistry.addFirst(Occupant.id("atmosphere"), (graphics, deltaTracker) ->
