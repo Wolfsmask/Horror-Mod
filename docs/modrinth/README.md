@@ -68,17 +68,17 @@ For each file in `dist/`, open **Versions → Create a version** (or drag the ja
 
 | File | Version number | Minecraft versions | Channel |
 |---|---|---|---|
-| `occupant-0.14.0+mc26.3.jar` | `0.14.0+mc26.3` | 26.3 | Release |
-| `occupant-0.14.0+mc26.2.jar` | `0.14.0+mc26.2` | 26.2 | Release |
-| `occupant-0.14.0+mc26.1.2.jar` | `0.14.0+mc26.1.2` | 26.1.2 | Release |
-| `occupant-0.14.0+mc1.21.11.jar` | `0.14.0+mc1.21.11` | 1.21.11 | Release |
-| `occupant-0.14.0+mc1.21.1.jar` | `0.14.0+mc1.21.1` | 1.21.1 | Release |
-| `occupant-0.14.0+mc1.20.1.jar` | `0.14.0+mc1.20.1` | 1.20.1 | Release |
-| `occupant-0.14.0+mc26.4-snapshot-2.jar` | `0.14.0+mc26.4-snapshot-2` | 26.4-snapshot-2 | **Alpha** |
+| `occupant-0.15.0+mc26.3.jar` | `0.15.0+mc26.3` | 26.3 | Release |
+| `occupant-0.15.0+mc26.2.jar` | `0.15.0+mc26.2` | 26.2 | Release |
+| `occupant-0.15.0+mc26.1.2.jar` | `0.15.0+mc26.1.2` | 26.1.2 | Release |
+| `occupant-0.15.0+mc1.21.11.jar` | `0.15.0+mc1.21.11` | 1.21.11 | Release |
+| `occupant-0.15.0+mc1.21.1.jar` | `0.15.0+mc1.21.1` | 1.21.1 | Release |
+| `occupant-0.15.0+mc1.20.1.jar` | `0.15.0+mc1.20.1` | 1.20.1 | Release |
+| `occupant-0.15.0+mc26.4-snapshot-2.jar` | `0.15.0+mc26.4-snapshot-2` | 26.4-snapshot-2 | **Alpha** |
 
 For every version:
 
-- **Version name:** `0.14.0 for <Minecraft version>`, for example `0.14.0 for 1.21.1`.
+- **Version name:** `0.15.0 for <Minecraft version>`, for example `0.15.0 for 1.21.1`.
 - **Loaders:** Fabric.
 - **Dependencies:** add **Fabric API** as **Required**.
 - **Changelog** (the same for all of them):
@@ -86,11 +86,12 @@ For every version:
   ```
   First public release.
 
-  - A slow-burn psychological horror story in four acts, directed live for every player.
+  - A slow-burn psychological horror story in four acts, directed live for every player, with an ending: the last night.
   - The Occupant: seventeen feet tall, ten legs, never where you are looking. Only you can see it.
+  - A fog that closes in as the story goes on. It stands at the very edge of it.
   - Abandoned villages, a house with a hallway, ruined keeps, campsites and graveyards.
   - A survivor's log, a page in every chest nobody has opened, always read in order.
-  - It notices when you don't notice it.
+  - A face at your window. Footsteps on your roof. Animals that stare. It notices when you don't notice it.
   - Its own start screen: Create World takes you straight in.
   ```
 

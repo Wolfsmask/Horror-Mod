@@ -23,7 +23,8 @@ happen at all.** Nobody gets the same story. Everybody gets one that feels direc
 - 👥 **Only you can see it.** Your friend standing right next to you sees nothing at all.
 - 🌫️ **The fog comes in.** Eight chunks at first, six by the end, and all the way in when it is close. It stands at the very edge of it, the furthest thing you can see.
 - 🐄 **The animals know first.** When it is out there, they stop grazing and turn to look at it. Sometimes they all turn and look at *you*.
-- 🪟 **Check the windows.** At night, from inside, there may be a face a step back from the glass.
+- 🪟 **Check the windows.** At night, from inside, there may be a face a step back from the glass. Or footsteps crossing the roof, stopping right above you.
+- 🌒 **It has an ending.** Once, on the last night, the fog closes right in. Every time you look away, it is closer when you look back.
 
 ## Places people used to be
 
