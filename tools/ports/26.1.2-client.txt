@@ -1,4 +1,4 @@
-# 26.1.2 client on f84730d1bd12f56b493bd82f780a4d358295ddef: failure
+# 26.1.2 client on 804f7922340aa6ef2831a6f741058df76fb6aae9: failure
 === client.log
 /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/ArenaGameTests.java:107: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
 /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:64: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
@@ -19,11 +19,11 @@ Note: /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occu
   Note: /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/OccupantClient.java uses or overrides a deprecated API.
   /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/SettingsScreen.java:42: error: cannot find symbol
   				Screens.getButtons(screen).add(Button.builder(Component.translatable("occupant.settings.open"),
-BUILD FAILED in 30s
+BUILD FAILED in 15s
 --- last of the server thread in client.log ---
 --- tail of client.log ---
 1 error
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/client-1791321489226.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/client-1791321566999.json
 
 [Incubating] Problems report is available at: file:///home/runner/work/Horror-Mod/Horror-Mod/build/reports/problems/problems-report.html
 
@@ -45,5 +45,5 @@ Execution failed for task ':compileClientJava' (registered by plugin class 'org.
 > Check your code and dependencies to fix the compilation error(s)
 > Run with --scan to get full insights from a Build Scan (powered by Develocity).
 
-BUILD FAILED in 30s
+BUILD FAILED in 15s
 3 actionable tasks: 3 executed
