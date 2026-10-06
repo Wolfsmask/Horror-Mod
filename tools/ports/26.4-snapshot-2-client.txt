@@ -1,110 +1,56 @@
-# 26.4-snapshot-2 client on 9f2baa2838c5bad8f90e08288272222e36eae939: cancelled
+# 26.4-snapshot-2 client on d211e1ae3e3f6160166fb945ed3a156e08efd837: failure
 === client.log
 /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/ArenaGameTests.java:104: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:60: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:92: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:163: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:267: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:311: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:64: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:96: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:167: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:261: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:292: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:318: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:375: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:419: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
 Note: /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/OccupantClient.java uses or overrides a deprecated API.
 	- fabric-client-gametest-api-v1 6.0.8+4be74c3f04
 	- occupant 0.14.0+mc26.4-snapshot-2
-[23:27:58] [Render thread/INFO] (occupant) The Occupant has moved in. Type /occupant check in game to test it.
-[23:28:01] [Render thread/INFO] (Minecraft) Reloading ResourceManager: vanilla, vanilla, fabric-advancement-api-v1, fabric-api, fabric-api-base, fabric-api-lookup-api-v1, fabric-biome-api-v1, fabric-block-api-v1, fabric-block-getter-api-v2, fabric-client-gametest-api-v1, fabric-command-api-v2, fabric-content-registries-v0, fabric-convention-tags-v2, fabric-crash-report-info-v1, fabric-creative-tab-api-v1, fabric-data-attachment-api-v1, fabric-data-generation-api-v1, fabric-debug-api-v1, fabric-dimensions-v1, fabric-entity-events-v1, fabric-events-interaction-v0, fabric-game-rule-api-v1, fabric-gametest-api-v1, fabric-item-api-v1, fabric-key-mapping-api-v1, fabric-lifecycle-events-v1, fabric-loot-api-v3, fabric-menu-api-v1, fabric-message-api-v1, fabric-model-loading-api-v1, fabric-networking-api-v1, fabric-object-builder-api-v1, fabric-particles-v1, fabric-permission-api-v1, fabric-recipe-api-v1, fabric-registry-sync-v0, fabric-renderer-api-v1, fabric-renderer-indigo, fabric-rendering-fluids-v1, fabric-rendering-v1, fabric-resource-conditions-api-v1, fabric-resource-loader-v0, fabric-resource-loader-v1, fabric-screen-api-v1, fabric-serialization-api-v1, fabric-sound-api-v1, fabric-tag-api-v1, fabric-transfer-api-v1, fabric-transitive-access-wideners-v1, fabricloader, occupant
-	at knot//net.minecraft.client.Minecraft.wrapMethod$bep000$fabric-client-gametest-api-v1$onRun(Minecraft.java:6723)
-[23:28:08] [Render thread/INFO] (occupant) [client] the gate screen has been drawn
-[23:28:12] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-gate -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0000_occupant-gate.png
-[23:28:26] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-gate-later -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0001_occupant-gate-later.png
-[23:28:26] [Render thread/INFO] (occupant) [client] gate clicked at 213, 223: leave it alone
-[23:28:27] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-left-alone -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0002_occupant-left-alone.png
-[23:28:29] [Render thread/INFO] (occupant) [client] gate clicked at 213, 148: create world
-[23:28:31] [Render thread/INFO] (occupant) [client] creating the world straight away
-net.minecraft.ReportedException: Feature placement
-Caused by: java.lang.NullPointerException: Cannot invoke "net.minecraft.world.level.Level.sendBlockUpdated(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.block.state.BlockState, int)" because "this.level" is null
-	at knot//com.wolfsmask.occupant.compat.Compat.writeSign(Compat.java:51)
-	at knot//com.wolfsmask.occupant.world.Graves.build(Graves.java:79)
-	at knot//com.wolfsmask.occupant.world.Places.tryPlace(Places.java:93)
-	at knot//com.wolfsmask.occupant.world.House.tryPlace(House.java:217)
-	at knot//com.wolfsmask.occupant.world.HouseFeature.place(HouseFeature.java:21)
-net.minecraft.ReportedException: Feature placement
-	at knot//net.minecraft.util.thread.BlockableEventLoop.throwDelayedException(BlockableEventLoop.java:203)
-	at knot//net.minecraft.client.Minecraft.wrapMethod$bep000$fabric-client-gametest-api-v1$onRun(Minecraft.java:6723)
-Caused by: java.lang.NullPointerException: Cannot invoke "net.minecraft.world.level.Level.sendBlockUpdated(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.block.state.BlockState, int)" because "this.level" is null
-	at knot//com.wolfsmask.occupant.compat.Compat.writeSign(Compat.java:51)
-	at knot//com.wolfsmask.occupant.world.Graves.build(Graves.java:79)
-	at knot//com.wolfsmask.occupant.world.Places.tryPlace(Places.java:93)
-	at knot//com.wolfsmask.occupant.world.House.tryPlace(House.java:217)
-	at knot//com.wolfsmask.occupant.world.HouseFeature.place(HouseFeature.java:21)
+[13:27:00] [Render thread/INFO] (occupant) The Occupant has moved in. Type /occupant check in game to test it.
+[13:27:03] [Render thread/ERROR] (FabricLoader/Mixin) Mixin apply for mod occupant failed occupant.client.mixins.json:FogRendererMixin from mod occupant -> net.minecraft.client.renderer.fog.FogRenderer: org.spongepowered.asm.mixin.injection.throwables.InvalidInjectionException Invalid descriptor on occupant.client.mixins.json:FogRendererMixin from mod occupant->@Inject::occupant$closeIn(Lnet/minecraft/client/Camera;ILnet/minecraft/client/DeltaTracker;FLnet/minecraft/client/multiplayer/ClientLevel;Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable;)V! Expected (Lnet/minecraft/client/Camera;ILnet/minecraft/client/DeltaTracker;FLnet/minecraft/client/multiplayer/ClientLevel;ZLorg/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable;)V but found (Lnet/minecraft/client/Camera;ILnet/minecraft/client/DeltaTracker;FLnet/minecraft/client/multiplayer/ClientLevel;Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable;)V [INJECT_APPLY Applicator Phase -> occupant.client.mixins.json:FogRendererMixin from mod occupant -> Apply Injections ->  -> Inject -> occupant.client.mixins.json:FogRendererMixin from mod occupant->@Inject::occupant$closeIn(Lnet/minecraft/client/Camera;ILnet/minecraft/client/DeltaTracker;FLnet/minecraft/client/multiplayer/ClientLevel;Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable;)V]
+org.spongepowered.asm.mixin.injection.throwables.InvalidInjectionException: Invalid descriptor on occupant.client.mixins.json:FogRendererMixin from mod occupant->@Inject::occupant$closeIn(Lnet/minecraft/client/Camera;ILnet/minecraft/client/DeltaTracker;FLnet/minecraft/client/multiplayer/ClientLevel;Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable;)V! Expected (Lnet/minecraft/client/Camera;ILnet/minecraft/client/DeltaTracker;FLnet/minecraft/client/multiplayer/ClientLevel;ZLorg/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable;)V but found (Lnet/minecraft/client/Camera;ILnet/minecraft/client/DeltaTracker;FLnet/minecraft/client/multiplayer/ClientLevel;Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable;)V [INJECT_APPLY Applicator Phase -> occupant.client.mixins.json:FogRendererMixin from mod occupant -> Apply Injections ->  -> Inject -> occupant.client.mixins.json:FogRendererMixin from mod occupant->@Inject::occupant$closeIn(Lnet/minecraft/client/Camera;ILnet/minecraft/client/DeltaTracker;FLnet/minecraft/client/multiplayer/ClientLevel;Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable;)V]
 ---- Minecraft Crash Report ----
-java.lang.NullPointerException: Cannot invoke "net.minecraft.world.level.Level.sendBlockUpdated(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.block.state.BlockState, int)" because "this.level" is null
-	at knot//com.wolfsmask.occupant.compat.Compat.writeSign(Compat.java:51)
-	at knot//com.wolfsmask.occupant.world.Graves.build(Graves.java:79)
-	at knot//com.wolfsmask.occupant.world.Places.tryPlace(Places.java:93)
-	at knot//com.wolfsmask.occupant.world.House.tryPlace(House.java:217)
-	at knot//com.wolfsmask.occupant.world.HouseFeature.place(HouseFeature.java:21)
-	at knot//com.wolfsmask.occupant.compat.Compat.writeSign(Compat.java:51)
-	at knot//com.wolfsmask.occupant.world.Graves.build(Graves.java:79)
-	at knot//com.wolfsmask.occupant.world.Places.tryPlace(Places.java:93)
-	at knot//com.wolfsmask.occupant.world.House.tryPlace(House.java:217)
-	at knot//com.wolfsmask.occupant.world.HouseFeature.place(HouseFeature.java:21)
-	Description: ResourceKey[minecraft:worldgen/placed_feature / occupant:house]
-	at knot//net.minecraft.util.Util.onThreadException(Util.java:310)
-	at java.base/java.util.concurrent.ForkJoinTask$RunnableExecuteAction.onAuxExceptionSet(ForkJoinTask.java:1760)
-	at java.base/java.util.concurrent.ForkJoinTask.trySetException(ForkJoinTask.java:384)
-	Packs: vanilla, vanilla, fabric-advancement-api-v1, fabric-api, fabric-api-base, fabric-api-lookup-api-v1, fabric-biome-api-v1, fabric-block-api-v1, fabric-block-getter-api-v2, fabric-client-gametest-api-v1, fabric-command-api-v2, fabric-content-registries-v0, fabric-convention-tags-v2, fabric-crash-report-info-v1, fabric-creative-tab-api-v1, fabric-data-attachment-api-v1, fabric-data-generation-api-v1, fabric-debug-api-v1, fabric-dimensions-v1, fabric-entity-events-v1, fabric-events-interaction-v0, fabric-game-rule-api-v1, fabric-gametest-api-v1, fabric-item-api-v1, fabric-key-mapping-api-v1, fabric-lifecycle-events-v1, fabric-loot-api-v3, fabric-menu-api-v1, fabric-message-api-v1, fabric-model-loading-api-v1, fabric-networking-api-v1, fabric-object-builder-api-v1, fabric-particles-v1, fabric-permission-api-v1, fabric-recipe-api-v1, fabric-registry-sync-v0, fabric-renderer-api-v1, fabric-renderer-indigo, fabric-rendering-fluids-v1, fabric-rendering-v1, fabric-resource-conditions-api-v1, fabric-resource-loader-v0, fabric-resource-loader-v1, fabric-screen-api-v1, fabric-serialization-api-v1, fabric-sound-api-v1, fabric-tag-api-v1, fabric-transfer-api-v1, fabric-transitive-access-wideners-v1, fabricloader, occupant
+java.lang.RuntimeException: Mixin transformation of net.minecraft.client.renderer.fog.FogRenderer failed
+Caused by: org.spongepowered.asm.mixin.transformer.throwables.MixinTransformerError: An unexpected critical error was encountered
+Caused by: org.spongepowered.asm.mixin.throwables.MixinApplyError: Mixin [occupant.client.mixins.json:FogRendererMixin from mod occupant] from phase [DEFAULT] in config [occupant.client.mixins.json] FAILED during APPLY
+Caused by: org.spongepowered.asm.mixin.injection.throwables.InvalidInjectionException: Invalid descriptor on occupant.client.mixins.json:FogRendererMixin from mod occupant->@Inject::occupant$closeIn(Lnet/minecraft/client/Camera;ILnet/minecraft/client/DeltaTracker;FLnet/minecraft/client/multiplayer/ClientLevel;Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable;)V! Expected (Lnet/minecraft/client/Camera;ILnet/minecraft/client/DeltaTracker;FLnet/minecraft/client/multiplayer/ClientLevel;ZLorg/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable;)V but found (Lnet/minecraft/client/Camera;ILnet/minecraft/client/DeltaTracker;FLnet/minecraft/client/multiplayer/ClientLevel;Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable;)V [INJECT_APPLY Applicator Phase -> occupant.client.mixins.json:FogRendererMixin from mod occupant -> Apply Injections ->  -> Inject -> occupant.client.mixins.json:FogRendererMixin from mod occupant->@Inject::occupant$closeIn(Lnet/minecraft/client/Camera;ILnet/minecraft/client/DeltaTracker;FLnet/minecraft/client/multiplayer/ClientLevel;Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable;)V]
 		fabric-client-gametest-api-v1: Fabric Client Game Test API (v1) 6.0.8+4be74c3f04
 		fabric-crash-report-info-v1: Fabric Crash Report Info (v1) 1.0.7+fcdff87f04
 		occupant: The Occupant 0.14.0+mc26.4-snapshot-2
-	Resource Packs: vanilla, fabric-advancement-api-v1, fabric-api, fabric-api-base, fabric-api-lookup-api-v1, fabric-biome-api-v1, fabric-block-api-v1, fabric-block-getter-api-v2, fabric-client-gametest-api-v1, fabric-command-api-v2, fabric-content-registries-v0, fabric-convention-tags-v2, fabric-crash-report-info-v1, fabric-creative-tab-api-v1, fabric-data-attachment-api-v1, fabric-data-generation-api-v1, fabric-debug-api-v1, fabric-dimensions-v1, fabric-entity-events-v1, fabric-events-interaction-v0, fabric-game-rule-api-v1, fabric-gametest-api-v1, fabric-item-api-v1, fabric-key-mapping-api-v1, fabric-lifecycle-events-v1, fabric-loot-api-v3, fabric-menu-api-v1, fabric-message-api-v1, fabric-model-loading-api-v1, fabric-networking-api-v1, fabric-object-builder-api-v1, fabric-particles-v1, fabric-permission-api-v1, fabric-recipe-api-v1, fabric-registry-sync-v0, fabric-renderer-api-v1, fabric-renderer-indigo, fabric-rendering-fluids-v1, fabric-rendering-v1, fabric-resource-conditions-api-v1, fabric-resource-loader-v0, fabric-resource-loader-v1, fabric-screen-api-v1, fabric-serialization-api-v1, fabric-sound-api-v1, fabric-tag-api-v1, fabric-transfer-api-v1, fabric-transitive-access-wideners-v1, fabricloader, occupant
-	Active Data Packs: vanilla, fabric-convention-tags-v2, fabric-gametest-api-v1, occupant
-	Available Data Packs: fabric-convention-tags-v2, fabric-gametest-api-v1, minecart_improvements, occupant, redstone_experiments, trade_rebalance, vanilla
-	Suppressed Exceptions: ~~NONE~~
-#@!@# Game crashed! Crash report saved to: #@!@# /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/crash-reports/crash-2026-10-05_23.28.45-client.txt
+#@!@# Game crashed! Crash report saved to: #@!@# /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/crash-reports/crash-2026-10-06_13.27.03-client.txt
+> Task :runClientGametest FAILED
+* What went wrong:
+BUILD FAILED in 49s
 --- last of the server thread in client.log ---
-[23:28:35] [Server thread/INFO] (Minecraft) Preparing spawn area: 16%
-[23:28:36] [Server thread/INFO] (Minecraft) Preparing spawn area: 16%
-[23:28:36] [Server thread/INFO] (Minecraft) Preparing spawn area: 16%
-[23:28:36] [Server thread/INFO] (Minecraft) Preparing spawn area: 16%
-[23:28:36] [Server thread/INFO] (Minecraft) Preparing spawn area: 18%
-[23:28:36] [Server thread/INFO] (Minecraft) Preparing spawn area: 25%
-[23:28:36] [Server thread/INFO] (Minecraft) Preparing spawn area: 29%
-[23:28:37] [Server thread/INFO] (Minecraft) Preparing spawn area: 29%
-[23:28:37] [Server thread/INFO] (Minecraft) Preparing spawn area: 29%
-[23:28:37] [Server thread/WARN] (Minecraft) Can't keep up! Is the server overloaded? Running 2048ms or 40 ticks behind
-[23:28:37] [Server thread/INFO] (Minecraft) Preparing spawn area: 57%
-[23:28:38] [Server thread/INFO] (Minecraft) Preparing spawn area: 57%
-[23:28:38] [Server thread/INFO] (Minecraft) Preparing spawn area: 84%
-[23:28:38] [Server thread/INFO] (Minecraft) Time elapsed: 7131 ms
-[23:28:39] [Server thread/INFO] (Minecraft) Player768[local:E:b1c1c486] logged in with entity id 49 at (-5.5, 69.0, -4.5)
-[23:28:39] [Server thread/INFO] (Minecraft) System chat: Player768 joined the game
-[23:28:39] [Server thread/INFO] (Minecraft) Changing view distance to 5, from 10
-[23:28:39] [Server thread/INFO] (Minecraft) Changing simulation distance to 12, from 0
-[23:28:44] [Worker-Main-1/ERROR] (Minecraft) Caught exception in thread Thread[#49,Worker-Main-1,5,main]
-	Name: Worker-Main-1
 --- tail of client.log ---
-	Universe: 400921fb54442d18
-	Type: Client
-	Transparency: regular
-	Render Distance: 5/5 chunks
-	Narrator config: OFF
-	Narrator status: false
-	Resource Packs: vanilla, fabric-advancement-api-v1, fabric-api, fabric-api-base, fabric-api-lookup-api-v1, fabric-biome-api-v1, fabric-block-api-v1, fabric-block-getter-api-v2, fabric-client-gametest-api-v1, fabric-command-api-v2, fabric-content-registries-v0, fabric-convention-tags-v2, fabric-crash-report-info-v1, fabric-creative-tab-api-v1, fabric-data-attachment-api-v1, fabric-data-generation-api-v1, fabric-debug-api-v1, fabric-dimensions-v1, fabric-entity-events-v1, fabric-events-interaction-v0, fabric-game-rule-api-v1, fabric-gametest-api-v1, fabric-item-api-v1, fabric-key-mapping-api-v1, fabric-lifecycle-events-v1, fabric-loot-api-v3, fabric-menu-api-v1, fabric-message-api-v1, fabric-model-loading-api-v1, fabric-networking-api-v1, fabric-object-builder-api-v1, fabric-particles-v1, fabric-permission-api-v1, fabric-recipe-api-v1, fabric-registry-sync-v0, fabric-renderer-api-v1, fabric-renderer-indigo, fabric-rendering-fluids-v1, fabric-rendering-v1, fabric-resource-conditions-api-v1, fabric-resource-loader-v0, fabric-resource-loader-v1, fabric-screen-api-v1, fabric-serialization-api-v1, fabric-sound-api-v1, fabric-tag-api-v1, fabric-transfer-api-v1, fabric-transitive-access-wideners-v1, fabricloader, occupant
-	Sound Cache: 0 bytes in 0 buffers
-	Current Language: en_us
 	Locale: en
 	System encoding: UTF-8
 	File encoding: UTF-8
-	CPU: 4x AMD EPYC 9V74 80-Core Processor
-	Server Running: true
-	All players: 1 / 8; ServerPlayer{name=Player768, id=49, pos=[-5.50,69.00,-4.50], mode=SURVIVAL, permission=none, level=ServerLevel[The Occupant], debug=fabric(0 mods)}
-	Active Data Packs: vanilla, fabric-convention-tags-v2, fabric-gametest-api-v1, occupant
-	Available Data Packs: fabric-convention-tags-v2, fabric-gametest-api-v1, minecart_improvements, occupant, redstone_experiments, trade_rebalance, vanilla
-	Enabled Feature Flags: minecraft:vanilla
-	World Generation: Stable
-	World Seed: -8068040742414484665
-	Suppressed Exceptions: ~~NONE~~
-	Type: Integrated Server
-	Is Modded: Definitely; Client brand changed to 'fabric'; Server brand changed to 'fabric'
-	Launched Version: Fabric
-#@!@# Game crashed! Crash report saved to: #@!@# /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/crash-reports/crash-2026-10-05_23.28.45-client.txt
-=== threads 40 s into preparing spawn
+	CPU: 4x AMD EPYC 7763 64-Core Processor
+#@!@# Game crashed! Crash report saved to: #@!@# /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/crash-reports/crash-2026-10-06_13.27.03-client.txt
+
+> Task :runClientGametest FAILED
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/client-1791293180393.json
+
+[Incubating] Problems report is available at: file:///home/runner/work/Horror-Mod/Horror-Mod/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':runClientGametest' (registered by plugin 'fabric-loom').
+> Process 'command 'xvfb-run'' finished with non-zero exit value 255
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 49s
+7 actionable tasks: 7 executed
