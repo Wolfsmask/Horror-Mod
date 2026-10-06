@@ -28,16 +28,17 @@ BONE = (216, 204, 188)
 BLOOD = (150, 28, 22)
 rng = np.random.default_rng(1666)
 
-# name in docs/client-test, file out, the line under it, grade (saturation, warmth), focus (0 top .. 1 bottom)
+# name in docs/client-test, file out, the line under it, grade (saturation, warmth, exposure),
+# focus (0 top .. 1 bottom)
 SHOTS_LIST = [
-    ("cinematic-treeline", "01-treeline", "It was standing there the whole time.", (0.62, 0.15), 0.45),
-    ("cinematic-hallway", "02-hallway", "Don't go down the hallway.", (0.55, 0.05), 0.5),
-    ("cinematic-village", "03-village", "Everyone left. Something stayed.", (0.6, 0.25), 0.5),
-    ("cinematic-ruin", "04-ruin", "Somebody held out here. For a while.", (0.7, 0.45), 0.5),
-    ("cinematic-camp", "05-camp", "WE WERE FOUR. THEN THREE.", (0.8, 0.55), 0.55),
-    ("cinematic-graves", "06-graves", "It took the rest.", (0.5, -0.1), 0.5),
-    ("cinematic-face", "07-face", "It is learning how to be you.", (0.6, 0.3), 0.35),
-    ("occupant-gate", "08-the-first-screen", "There is only one way in.", (0.9, 0.0), 0.5),
+    ("cinematic-treeline", "01-treeline", "It was standing there the whole time.", (0.62, 0.15, 1.0), 0.45),
+    ("cinematic-hallway", "02-hallway", "Don't go down the hallway.", (0.55, 0.05, 1.8), 0.5),
+    ("cinematic-village", "03-village", "Everyone left. Something stayed.", (0.6, 0.25, 1.1), 0.5),
+    ("cinematic-ruin", "04-ruin", "Somebody held out here. For a while.", (0.7, 0.45, 1.0), 0.5),
+    ("cinematic-camp", "05-camp", "WE WERE FOUR. THEN THREE.", (0.8, 0.55, 1.1), 0.55),
+    ("cinematic-graves", "06-graves", "It took the rest.", (0.5, -0.1, 1.25), 0.55),
+    ("cinematic-face", "07-face", "It is learning how to be you.", (0.6, 0.3, 1.0), 0.35),
+    ("occupant-gate", "08-the-first-screen", "There is only one way in.", (0.9, 0.0, 1.0), 0.5),
 ]
 
 
@@ -45,8 +46,11 @@ def font(name, size):
     return ImageFont.truetype(str(FONTS / name), size)
 
 
-def grade(img, saturation, warmth, vignette=0.55):
+def grade(img, saturation, warmth, vignette=0.55, exposure=1.0):
     a = np.asarray(img.convert("RGB")).astype(np.float32) / 255.0
+    if exposure != 1.0:
+        # Brought up out of the dark, shadows most, so a night shot reads on a phone screen.
+        a = np.clip(a, 0, 1) ** (1.0 / exposure)
     # Crush the blacks a little, so the dark is dark.
     a = np.clip((a - 0.025) / 0.975, 0.0, 1.0) ** 1.12
     lum = (a @ np.array([0.299, 0.587, 0.114], np.float32))[..., None]
@@ -124,13 +128,13 @@ def main(face_centre=(0.5, 0.4)):
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "gallery").mkdir(exist_ok=True)
     made = []
-    for name, out, line, (sat, warm), focus in SHOTS_LIST:
+    for name, out, line, (sat, warm, exposure), focus in SHOTS_LIST:
         path = SHOTS / (name + ".png")
         if not path.exists():
             print("missing", path.name)
             continue
         src = Image.open(path)
-        img = caption(grade(frame(src, focus), sat, warm), line)
+        img = caption(grade(frame(src, focus), sat, warm, exposure=exposure), line)
         img.save(OUT / "gallery" / (out + ".png"))
         made.append(out)
     tree = SHOTS / "cinematic-treeline.png"

@@ -62,7 +62,7 @@ final class Unnoticed {
 
 	void tick(ServerPlayer player, Haunt haunt) {
 		age++;
-		if (age % 20 == 0) {
+		if (age % 20 == 1) {
 			// Every second: what is standing round this player, for them.
 			nearby = only != null ? List.of(only) : new ArrayList<>(Compat.level(player).getEntitiesOfClass(OccupantEntity.class,
 					player.getBoundingBox().inflate(128.0), e -> e.isAlive() && e.isHaunting(player)));

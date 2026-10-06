@@ -47,6 +47,7 @@ public final class Director {
 	private final MinecraftServer server;
 	private final OccupantSaveData save;
 	private final Map<UUID, Haunt> haunts = new HashMap<>();
+	private final Map<UUID, Haunt> watchedForTest = new HashMap<>();
 	private final Map<String, Integer> failures = new HashMap<>();
 	private final Set<String> disabledEvents = new HashSet<>();
 	/** Players who woke up since the last tick. Acted on there, never where the game told us. */
@@ -68,6 +69,7 @@ public final class Director {
 		if (instance != null) {
 			for (Haunt h : instance.haunts.values()) instance.endSequence(h);
 			instance.haunts.clear();
+			instance.watchedForTest.clear();
 		}
 		instance = null;
 	}
@@ -99,9 +101,13 @@ public final class Director {
 		return haunts.computeIfAbsent(player.getUUID(), u -> new Haunt(u, save.forPlayer(u), player.getRandom()));
 	}
 
-	/** For the game tests: one tick of watching whether this player has noticed {@code standing}. */
+	/**
+	 * For the game tests: one tick of watching whether this player has noticed {@code standing}.
+	 * A mock player is never in the player list, so the tick drops its Haunt straight away; the
+	 * watching is kept here instead, over the same saved story.
+	 */
 	public void watchForTest(ServerPlayer player, OccupantEntity standing) {
-		Haunt h = haunt(player);
+		Haunt h = watchedForTest.computeIfAbsent(player.getUUID(), u -> new Haunt(u, save.forPlayer(u), player.getRandom()));
 		h.unnoticed.watchOnly(standing);
 		h.unnoticed.tick(player, h);
 	}
