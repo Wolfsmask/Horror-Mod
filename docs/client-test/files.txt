@@ -27,6 +27,7 @@ build/clientGametest/occupant-shots/occupant-photo-5-house-day-turned.png
 build/clientGametest/occupant-shots/cinematic-ruin.png
 build/clientGametest/occupant-shots/occupant-after-shove.png
 build/clientGametest/occupant-shots/occupant-chase.png
+build/clientGametest/occupant-shots/occupant-fog-edge.png
 build/clientGametest/occupant-shots/cinematic-hallway.png
 build/clientGametest/occupant-shots/occupant-night-distant.png
 build/clientGametest/occupant-shots/place-graves.png
@@ -37,4 +38,3 @@ build/clientGametest/occupant-shots/occupant-stare.png
 build/clientGametest/occupant-shots/occupant-title.png
 build/clientGametest/occupant-shots/place-ruin.png
 build/clientGametest/occupant-shots/cinematic-treeline.png
-build/clientGametest/occupant-shots/occupant-fog.png
