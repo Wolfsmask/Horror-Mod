@@ -10,6 +10,7 @@ on:
       - 'versions/**'
       - 'src/**'
       - 'build.gradle'
+      - 'gradle.properties'
       - '.github/workflows/ports.yml'
 
 permissions:

@@ -12,6 +12,7 @@ on:
       - 'src/client/**'
       - 'tools/ci/**'
       - 'build.gradle'
+      - 'gradle.properties'
       - '.github/workflows/client-smoke.yml'
 
 permissions:
