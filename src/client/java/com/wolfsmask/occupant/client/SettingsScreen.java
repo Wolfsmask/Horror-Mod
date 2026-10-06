@@ -125,11 +125,11 @@ public final class SettingsScreen extends Screen {
 	/** The headings, drawn over the screen once it has drawn itself. */
 	private void labels(GuiGraphicsExtractor g) {
 		centred(g, this.title.getString(), 18, 0xFFE8DECE);
-		centred(g, Component.translatable("occupant.settings.yours").getString(), 34, 0xFF8A8A8A);
+		centred(g, Component.translatable("occupant.settings.yours").getString(), 34, 0xFFCFC6B8);
 		if (Minecraft.getInstance().getSingleplayerServer() != null) {
-			centred(g, Component.translatable("occupant.settings.world").getString(), 46 + 24 * 5 + 8, 0xFF8A8A8A);
+			centred(g, Component.translatable("occupant.settings.world").getString(), 46 + 24 * 5 + 8, 0xFFCFC6B8);
 		} else {
-			centred(g, Component.translatable("occupant.settings.world_remote").getString(), 46 + 24 * 5 + 8, 0xFF6A6A6A);
+			centred(g, Component.translatable("occupant.settings.world_remote").getString(), 46 + 24 * 5 + 8, 0xFFA8A098);
 		}
 	}
 
