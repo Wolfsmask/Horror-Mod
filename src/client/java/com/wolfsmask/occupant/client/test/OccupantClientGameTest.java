@@ -204,6 +204,27 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 			server.runCommand("time set midnight");             // nobody sleeps at noon: the game wakes them
 			context.waitTicks(40);
 
+			// At dusk, early in the story: it stands just this side of where the fog begins.
+			server.runCommand("time set 12700");
+			server.runOnServer(s -> Director.get().data(s.getPlayerList().getPlayers().get(0)).setAct(1));
+			context.waitTicks(260);
+			int edge = server.computeOnServer(s -> {
+				ServerPlayer p = s.getPlayerList().getPlayers().get(0);
+				return (int) Math.floor(com.wolfsmask.occupant.director.Fog.startFor(p, Director.get().haunt(p))) - 4;
+			});
+			server.runCommand("kill " + ALL);
+			server.runCommand("execute as @p at @s run occupant here " + Math.max(8, Math.min(120, edge)) + " stare");
+			context.waitTicks(60);
+			boolean drawnFar = context.computeOnClient(mc -> mc.level != null && mc.player != null && mc.level
+					.getEntitiesOfClass(OccupantEntity.class, mc.player.getBoundingBox().inflate(128.0))
+					.stream().anyMatch(e -> e.shouldRenderAtSqrDistance(100.0 * 100.0)));
+			Occupant.LOGGER.info("[client-gametest] fog at dusk begins at {}; it stands at {}; drawn that far off: {}",
+					edge + 4, edge, drawnFar);
+			check(drawnFar, "it must be drawn as far off as it is put, not only as far as its hitbox says");
+			shoot(context, "occupant-fog-edge");
+			server.runCommand("kill " + ALL);
+			server.runCommand("time set midnight");
+
 			// The fog: the server decides how close it is, the client draws it. Late in the story,
 			// at night, it is close.
 			server.runOnServer(s -> Director.get().data(s.getPlayerList().getPlayers().get(0)).setAct(HauntData.MAX_ACT));

@@ -186,7 +186,7 @@ For testing, and for recording your own videos:
 
 ```
 /occupant check                      why is nothing happening? (works in single-player, cheats or not)
-/occupant here [distance]            put it in front of you right now, anywhere, no conditions
+/occupant here [distance]            put it in front of you right now (up to 128 blocks), no conditions
 /occupant status [player]
 /occupant trigger <player> <event>   start an event now (it still needs a valid place to happen)
 /occupant act <player> <0-4>         jump to a point in the story

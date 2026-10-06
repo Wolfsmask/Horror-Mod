@@ -60,7 +60,7 @@ public final class OccupantCommand {
 				.requires(OccupantCommand::mayUse)
 				.then(literal("here")
 						.executes(ctx -> here(ctx.getSource(), 5.0f, "stare"))
-						.then(argument("distance", FloatArgumentType.floatArg(1.0f, 40.0f))
+						.then(argument("distance", FloatArgumentType.floatArg(1.0f, 128.0f))
 								.executes(ctx -> here(ctx.getSource(), FloatArgumentType.getFloat(ctx, "distance"), "stare"))
 								.then(argument("pose", StringArgumentType.word())
 										.suggests((ctx, builder) -> SharedSuggestionProvider.suggest(POSES, builder))
