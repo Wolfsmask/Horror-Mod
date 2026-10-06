@@ -1,16 +1,13 @@
-# 26.4-snapshot-2 on d621ef09e7d447d83e073f84fc834e6330e18a42: build failure, tests skipped, jar skipped
-com/wolfsmask/occupant/director/events/PetsEvent.java:69: error: cannot find symbol
-  symbol:   variable CAT
-  location: class EntityType
-com/wolfsmask/occupant/director/events/PetsEvent.java:70: error: cannot find symbol
-  symbol:   variable CAT_HISS
-  location: class SoundEvents
-com/wolfsmask/occupant/director/events/TurnedEvent.java:51: error: cannot find symbol
-  symbol:   variable ARMOR_STAND
-  location: class EntityType
-com/wolfsmask/occupant/Occupant.java:164: error: cannot find symbol
-  symbol:   variable VILLAGER
-  location: class EntityType
+# 26.4-snapshot-2 on fc2f05f3383b08600e24e45a6114544bdb553571: build failure, tests skipped, jar skipped
+com/wolfsmask/occupant/world/RadioShack.java:43: error: cannot find symbol
+  symbol:   method defaultBlockState()
+  location: variable LIGHTNING_ROD of type WeatheringCopperCollection<Block>
+com/wolfsmask/occupant/world/Lighthouse.java:24: error: cannot find symbol
+  symbol:   variable WHITE_TERRACOTTA
+  location: class Blocks
+com/wolfsmask/occupant/world/Lighthouse.java:25: error: cannot find symbol
+  symbol:   variable RED_TERRACOTTA
+  location: class Blocks
 > Configure project :
 > Task :compileJava
 > Task :compileJava FAILED
