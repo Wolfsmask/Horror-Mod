@@ -10,6 +10,7 @@ build/clientGametest/occupant-shots/occupant-veiled.png
 build/clientGametest/occupant-shots/occupant-gate-later.png
 build/clientGametest/occupant-shots/settings.png
 build/clientGametest/occupant-shots/cinematic-graves.png
+build/clientGametest/occupant-shots/occupant-mode.png
 build/clientGametest/occupant-shots/occupant-photo-4-the-house.png
 build/clientGametest/occupant-shots/place-chapel.png
 build/clientGametest/occupant-shots/occupant-left-alone.png
@@ -37,4 +38,3 @@ build/clientGametest/occupant-shots/occupant-chase.png
 build/clientGametest/occupant-shots/occupant-fog-edge.png
 build/clientGametest/occupant-shots/cinematic-hallway.png
 build/clientGametest/occupant-shots/occupant-night-distant.png
-build/clientGametest/occupant-shots/place-graves.png
