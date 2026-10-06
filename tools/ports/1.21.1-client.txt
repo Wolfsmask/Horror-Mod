@@ -1,4 +1,4 @@
-# 1.21.1 client on 1d4c2f4ac2a00dca135a2549022a3749a1d18071: success
+# 1.21.1 client on 4030fc955514152de761d87389e4f010f032f49c: success
 === client.log
 /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/ArenaGameTests.java:107: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
 /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:64: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
@@ -13,24 +13,24 @@
 /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:561: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
 /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:605: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
 	- occupant 1.0.0+mc1.21.1
-[22:41:29] [Render thread/INFO] (occupant) The Occupant has moved in. Type /occupant check in game to test it.
-[22:41:30] [Render thread/INFO] (Minecraft) Reloading ResourceManager: vanilla, fabric, fabric-api, fabric-api-base, fabric-api-lookup-api-v1, fabric-biome-api-v1, fabric-block-api-v1, fabric-block-view-api-v2, fabric-blockrenderlayer-v1, fabric-client-tags-api-v1, fabric-command-api-v1, fabric-command-api-v2, fabric-commands-v0, fabric-content-registries-v0, fabric-convention-tags-v1, fabric-convention-tags-v2, fabric-crash-report-info-v1, fabric-data-attachment-api-v1, fabric-data-generation-api-v1, fabric-dimensions-v1, fabric-entity-events-v1, fabric-events-interaction-v0, fabric-game-rule-api-v1, fabric-gametest-api-v1, fabric-item-api-v1, fabric-item-group-api-v1, fabric-key-binding-api-v1, fabric-keybindings-v0, fabric-lifecycle-events-v1, fabric-loot-api-v2, fabric-loot-api-v3, fabric-message-api-v1, fabric-model-loading-api-v1, fabric-networking-api-v1, fabric-object-builder-api-v1, fabric-particles-v1, fabric-recipe-api-v1, fabric-registry-sync-v0, fabric-renderer-api-v1, fabric-renderer-indigo, fabric-renderer-registries-v1, fabric-rendering-data-attachment-v1, fabric-rendering-fluids-v1, fabric-rendering-v0, fabric-rendering-v1, fabric-resource-conditions-api-v1, fabric-resource-loader-v0, fabric-screen-api-v1, fabric-screen-handler-api-v1, fabric-sound-api-v1, fabric-tag-api-v1, fabric-transfer-api-v1, fabric-transitive-access-wideners-v1, fabricloader, occupant
-[22:41:34] [Render thread/INFO] (occupant) [client] the mode screen has been drawn
+[22:58:32] [Render thread/INFO] (occupant) The Occupant has moved in. Type /occupant check in game to test it.
+[22:58:35] [Render thread/INFO] (Minecraft) Reloading ResourceManager: vanilla, fabric, fabric-api, fabric-api-base, fabric-api-lookup-api-v1, fabric-biome-api-v1, fabric-block-api-v1, fabric-block-view-api-v2, fabric-blockrenderlayer-v1, fabric-client-tags-api-v1, fabric-command-api-v1, fabric-command-api-v2, fabric-commands-v0, fabric-content-registries-v0, fabric-convention-tags-v1, fabric-convention-tags-v2, fabric-crash-report-info-v1, fabric-data-attachment-api-v1, fabric-data-generation-api-v1, fabric-dimensions-v1, fabric-entity-events-v1, fabric-events-interaction-v0, fabric-game-rule-api-v1, fabric-gametest-api-v1, fabric-item-api-v1, fabric-item-group-api-v1, fabric-key-binding-api-v1, fabric-keybindings-v0, fabric-lifecycle-events-v1, fabric-loot-api-v2, fabric-loot-api-v3, fabric-message-api-v1, fabric-model-loading-api-v1, fabric-networking-api-v1, fabric-object-builder-api-v1, fabric-particles-v1, fabric-recipe-api-v1, fabric-registry-sync-v0, fabric-renderer-api-v1, fabric-renderer-indigo, fabric-renderer-registries-v1, fabric-rendering-data-attachment-v1, fabric-rendering-fluids-v1, fabric-rendering-v0, fabric-rendering-v1, fabric-resource-conditions-api-v1, fabric-resource-loader-v0, fabric-screen-api-v1, fabric-screen-handler-api-v1, fabric-sound-api-v1, fabric-tag-api-v1, fabric-transfer-api-v1, fabric-transitive-access-wideners-v1, fabricloader, occupant
+[22:58:39] [Render thread/INFO] (occupant) [client] the mode screen has been drawn
 > Task :runClient FAILED
 * What went wrong:
-BUILD FAILED in 1m 9s
+BUILD FAILED in 1m 29s
 --- last of the server thread in client.log ---
-[22:41:31] [Worker-Main-1/INFO] (Minecraft) Found unifont_all_no_pua-15.1.05.hex, loading
-[22:41:31] [Worker-Main-3/INFO] (Minecraft) Found unifont_jp_patch-15.1.05.hex, loading
+[22:58:35] [Worker-Main-1/INFO] (Minecraft) Found unifont_all_no_pua-15.1.05.hex, loading
+[22:58:35] [Worker-Main-3/INFO] (Minecraft) Found unifont_jp_patch-15.1.05.hex, loading
 --- tail of client.log ---
-[22:41:32] [Render thread/INFO] (Minecraft) Created: 256x128x0 minecraft:textures/atlas/mob_effects.png-atlas
-[22:41:32] [Render thread/INFO] (Minecraft) Created: 64x64x0 minecraft:textures/atlas/map_decorations.png-atlas
-[22:41:32] [Render thread/INFO] (Minecraft) Created: 1024x512x0 minecraft:textures/atlas/gui.png-atlas
-[22:41:33] [Render thread/WARN] (Minecraft) Shader rendertype_entity_translucent_emissive could not find sampler named Sampler2 in the specified shader program.
-[22:41:34] [Render thread/INFO] (occupant) [client] the mode screen has been drawn
+[22:58:37] [Render thread/INFO] (Minecraft) Created: 256x128x0 minecraft:textures/atlas/mob_effects.png-atlas
+[22:58:37] [Render thread/INFO] (Minecraft) Created: 64x64x0 minecraft:textures/atlas/map_decorations.png-atlas
+[22:58:37] [Render thread/INFO] (Minecraft) Created: 1024x512x0 minecraft:textures/atlas/gui.png-atlas
+[22:58:38] [Render thread/WARN] (Minecraft) Shader rendertype_entity_translucent_emissive could not find sampler named Sampler2 in the specified shader program.
+[22:58:39] [Render thread/INFO] (occupant) [client] the mode screen has been drawn
 
 > Task :runClient FAILED
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/client-1791326463496.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/client-1791327473652.json
 
 [Incubating] Problems report is available at: file:///home/runner/work/Horror-Mod/Horror-Mod/build/reports/problems/problems-report.html
 
@@ -46,98 +46,99 @@ Execution failed for task ':runClient' (registered by plugin 'fabric-loom').
 > Run with --scan to get full insights from a Build Scan (powered by Develocity).
 > Get more help at https://help.gradle.org.
 
-BUILD FAILED in 1m 9s
+BUILD FAILED in 1m 29s
 10 actionable tasks: 10 executed
 === server.log
 	- occupant 1.0.0+mc1.21.1
-[22:42:21] [main/INFO] (occupant) The Occupant has moved in. Type /occupant check in game to test it.
-[22:42:23] [Server thread/INFO] (occupant) This world tells the story as a slow burn
-[22:42:30] [Server thread/INFO] (Minecraft) Done (7.051s)! For help, type "help"
-[22:42:33] [Server thread/INFO] (Minecraft) [Rcon: Stopping the server]
-[22:42:33] [Server thread/INFO] (Minecraft) Stopping server
+[22:59:25] [main/INFO] (occupant) The Occupant has moved in. Type /occupant check in game to test it.
+[22:59:28] [Server thread/INFO] (occupant) This world tells the story as a slow burn
+[22:59:39] [Server thread/INFO] (Minecraft) Done (10.465s)! For help, type "help"
+[22:59:41] [Server thread/INFO] (Minecraft) [Rcon: Stopping the server]
+[22:59:41] [Server thread/INFO] (Minecraft) Stopping server
 --- last of the server thread in server.log ---
-[22:42:29] [Worker-Main-3/INFO] (Minecraft) Preparing spawn area: 18%
-[22:42:29] [Worker-Main-3/INFO] (Minecraft) Preparing spawn area: 51%
-[22:42:30] [Worker-Main-2/INFO] (Minecraft) Preparing spawn area: 51%
-[22:42:30] [Server thread/INFO] (Minecraft) Time elapsed: 3392 ms
-[22:42:30] [Server thread/INFO] (Minecraft) Done (7.051s)! For help, type "help"
-[22:42:30] [Server thread/INFO] (Minecraft) Starting remote control listener
-[22:42:30] [Server thread/INFO] (Minecraft) Thread RCON Listener started
-[22:42:30] [Server thread/INFO] (Minecraft) RCON running on 0.0.0.0:25575
-[22:42:33] [Server thread/INFO] (Minecraft) [Rcon: Stopping the server]
-[22:42:33] [Server thread/INFO] (Minecraft) Stopping server
-[22:42:33] [Server thread/INFO] (Minecraft) Saving players
-[22:42:33] [Server thread/INFO] (Minecraft) Saving worlds
-[22:42:34] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[world]'/minecraft:overworld
-[22:42:34] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[world]'/minecraft:the_nether
-[22:42:34] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[world]'/minecraft:the_end
-[22:42:34] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (world): All chunks are saved
-[22:42:34] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
-[22:42:34] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (DIM1): All chunks are saved
-[22:42:34] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage: All dimensions are saved
-[22:42:34] [Server thread/INFO] (Minecraft) Thread RCON Listener stopped
+[22:59:37] [Worker-Main-1/INFO] (Minecraft) Preparing spawn area: 51%
+[22:59:38] [Worker-Main-3/INFO] (Minecraft) Preparing spawn area: 51%
+[22:59:38] [Worker-Main-2/INFO] (Minecraft) Preparing spawn area: 51%
+[22:59:39] [Server thread/INFO] (Minecraft) Time elapsed: 4779 ms
+[22:59:39] [Server thread/INFO] (Minecraft) Done (10.465s)! For help, type "help"
+[22:59:39] [Server thread/INFO] (Minecraft) Starting remote control listener
+[22:59:39] [Server thread/INFO] (Minecraft) Thread RCON Listener started
+[22:59:39] [Server thread/INFO] (Minecraft) RCON running on 0.0.0.0:25575
+[22:59:41] [Server thread/INFO] (Minecraft) [Rcon: Stopping the server]
+[22:59:41] [Server thread/INFO] (Minecraft) Stopping server
+[22:59:41] [Server thread/INFO] (Minecraft) Saving players
+[22:59:41] [Server thread/INFO] (Minecraft) Saving worlds
+[22:59:42] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[world]'/minecraft:overworld
+[22:59:42] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[world]'/minecraft:the_end
+[22:59:42] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[world]'/minecraft:the_nether
+[22:59:42] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (world): All chunks are saved
+[22:59:42] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[22:59:42] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[22:59:42] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage: All dimensions are saved
+[22:59:42] [Server thread/INFO] (Minecraft) Thread RCON Listener stopped
 --- tail of server.log ---
-[22:42:29] [Worker-Main-3/INFO] (Minecraft) Preparing spawn area: 51%
-[22:42:30] [Worker-Main-2/INFO] (Minecraft) Preparing spawn area: 51%
-[22:42:30] [Server thread/INFO] (Minecraft) Time elapsed: 3392 ms
-[22:42:30] [Server thread/INFO] (Minecraft) Done (7.051s)! For help, type "help"
-[22:42:30] [Server thread/INFO] (Minecraft) Starting remote control listener
-[22:42:30] [Server thread/INFO] (Minecraft) Thread RCON Listener started
-[22:42:30] [Server thread/INFO] (Minecraft) RCON running on 0.0.0.0:25575
-[22:42:33] [RCON Listener #1/INFO] (Minecraft) Thread RCON Client /127.0.0.1 started
-[22:42:33] [Server thread/INFO] (Minecraft) [Rcon: Stopping the server]
-[22:42:33] [RCON Client /127.0.0.1 #2/INFO] (Minecraft) Thread RCON Client /127.0.0.1 shutting down
-[22:42:33] [Server thread/INFO] (Minecraft) Stopping server
-[22:42:33] [Server thread/INFO] (Minecraft) Saving players
-[22:42:33] [Server thread/INFO] (Minecraft) Saving worlds
-[22:42:34] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[world]'/minecraft:overworld
-[22:42:34] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[world]'/minecraft:the_nether
-[22:42:34] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[world]'/minecraft:the_end
-[22:42:34] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (world): All chunks are saved
-[22:42:34] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
-[22:42:34] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (DIM1): All chunks are saved
-[22:42:34] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage: All dimensions are saved
-[22:42:34] [Server thread/INFO] (Minecraft) Thread RCON Listener stopped
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/client-1791326534041.json
+[22:59:38] [Worker-Main-3/INFO] (Minecraft) Preparing spawn area: 51%
+[22:59:38] [Worker-Main-2/INFO] (Minecraft) Preparing spawn area: 51%
+[22:59:39] [Server thread/INFO] (Minecraft) Time elapsed: 4779 ms
+[22:59:39] [Server thread/INFO] (Minecraft) Done (10.465s)! For help, type "help"
+[22:59:39] [Server thread/INFO] (Minecraft) Starting remote control listener
+[22:59:39] [Server thread/INFO] (Minecraft) Thread RCON Listener started
+[22:59:39] [Server thread/INFO] (Minecraft) RCON running on 0.0.0.0:25575
+[22:59:41] [RCON Listener #1/INFO] (Minecraft) Thread RCON Client /127.0.0.1 started
+[22:59:41] [Server thread/INFO] (Minecraft) [Rcon: Stopping the server]
+[22:59:41] [RCON Client /127.0.0.1 #2/INFO] (Minecraft) Thread RCON Client /127.0.0.1 shutting down
+[22:59:41] [Server thread/INFO] (Minecraft) Stopping server
+[22:59:41] [Server thread/INFO] (Minecraft) Saving players
+[22:59:41] [Server thread/INFO] (Minecraft) Saving worlds
+[22:59:42] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[world]'/minecraft:overworld
+[22:59:42] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[world]'/minecraft:the_end
+[22:59:42] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[world]'/minecraft:the_nether
+[22:59:42] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (world): All chunks are saved
+[22:59:42] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[22:59:42] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[22:59:42] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage: All dimensions are saved
+[22:59:42] [Server thread/INFO] (Minecraft) Thread RCON Listener stopped
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/client-1791327557341.json
 
-BUILD SUCCESSFUL in 21s
+BUILD SUCCESSFUL in 26s
 7 actionable tasks: 1 executed, 6 up-to-date
 === world.log
 Picked up JAVA_TOOL_OPTIONS:  -Doccupant.smoke=true
 Picked up JAVA_TOOL_OPTIONS:  -Doccupant.smoke=true
 	- occupant 1.0.0+mc1.21.1
-[22:42:49] [Render thread/INFO] (occupant) The Occupant has moved in. Type /occupant check in game to test it.
-[22:42:50] [Render thread/INFO] (Minecraft) Reloading ResourceManager: vanilla, fabric, fabric-api, fabric-api-base, fabric-api-lookup-api-v1, fabric-biome-api-v1, fabric-block-api-v1, fabric-block-view-api-v2, fabric-blockrenderlayer-v1, fabric-client-tags-api-v1, fabric-command-api-v1, fabric-command-api-v2, fabric-commands-v0, fabric-content-registries-v0, fabric-convention-tags-v1, fabric-convention-tags-v2, fabric-crash-report-info-v1, fabric-data-attachment-api-v1, fabric-data-generation-api-v1, fabric-dimensions-v1, fabric-entity-events-v1, fabric-events-interaction-v0, fabric-game-rule-api-v1, fabric-gametest-api-v1, fabric-item-api-v1, fabric-item-group-api-v1, fabric-key-binding-api-v1, fabric-keybindings-v0, fabric-lifecycle-events-v1, fabric-loot-api-v2, fabric-loot-api-v3, fabric-message-api-v1, fabric-model-loading-api-v1, fabric-networking-api-v1, fabric-object-builder-api-v1, fabric-particles-v1, fabric-recipe-api-v1, fabric-registry-sync-v0, fabric-renderer-api-v1, fabric-renderer-indigo, fabric-renderer-registries-v1, fabric-rendering-data-attachment-v1, fabric-rendering-fluids-v1, fabric-rendering-v0, fabric-rendering-v1, fabric-resource-conditions-api-v1, fabric-resource-loader-v0, fabric-screen-api-v1, fabric-screen-handler-api-v1, fabric-sound-api-v1, fabric-tag-api-v1, fabric-transfer-api-v1, fabric-transitive-access-wideners-v1, fabricloader, occupant
-[22:43:03] [Server thread/INFO] (occupant) [smoke] putting it in front of Player470
-[22:43:03] [Render thread/INFO] (occupant) [client] the Occupant has been drawn
-[22:43:11] [IO-Worker-1/INFO] (occupant) [client] photograph: Saved screenshot as 2026-10-06_22.43.11.png
+[22:59:59] [Render thread/INFO] (occupant) The Occupant has moved in. Type /occupant check in game to test it.
+[23:00:00] [Render thread/INFO] (Minecraft) Reloading ResourceManager: vanilla, fabric, fabric-api, fabric-api-base, fabric-api-lookup-api-v1, fabric-biome-api-v1, fabric-block-api-v1, fabric-block-view-api-v2, fabric-blockrenderlayer-v1, fabric-client-tags-api-v1, fabric-command-api-v1, fabric-command-api-v2, fabric-commands-v0, fabric-content-registries-v0, fabric-convention-tags-v1, fabric-convention-tags-v2, fabric-crash-report-info-v1, fabric-data-attachment-api-v1, fabric-data-generation-api-v1, fabric-dimensions-v1, fabric-entity-events-v1, fabric-events-interaction-v0, fabric-game-rule-api-v1, fabric-gametest-api-v1, fabric-item-api-v1, fabric-item-group-api-v1, fabric-key-binding-api-v1, fabric-keybindings-v0, fabric-lifecycle-events-v1, fabric-loot-api-v2, fabric-loot-api-v3, fabric-message-api-v1, fabric-model-loading-api-v1, fabric-networking-api-v1, fabric-object-builder-api-v1, fabric-particles-v1, fabric-recipe-api-v1, fabric-registry-sync-v0, fabric-renderer-api-v1, fabric-renderer-indigo, fabric-renderer-registries-v1, fabric-rendering-data-attachment-v1, fabric-rendering-fluids-v1, fabric-rendering-v0, fabric-rendering-v1, fabric-resource-conditions-api-v1, fabric-resource-loader-v0, fabric-screen-api-v1, fabric-screen-handler-api-v1, fabric-sound-api-v1, fabric-tag-api-v1, fabric-transfer-api-v1, fabric-transitive-access-wideners-v1, fabricloader, occupant
+[23:00:16] [Server thread/INFO] (occupant) [smoke] putting it in front of Player485
+[23:00:16] [Render thread/INFO] (occupant) [client] the Occupant has been drawn
+[23:00:25] [IO-Worker-5/INFO] (occupant) [client] photograph: Saved screenshot as 2026-10-06_23.00.24.png
 > Task :runClient FAILED
 * What went wrong:
-BUILD FAILED in 57s
+BUILD FAILED in 1m 2s
 --- last of the server thread in world.log ---
-[22:42:50] [Worker-Main-3/INFO] (Minecraft) Found unifont_all_no_pua-15.1.05.hex, loading
-[22:42:50] [Worker-Main-2/INFO] (Minecraft) Found unifont_jp_patch-15.1.05.hex, loading
-[22:42:54] [Server thread/INFO] (Minecraft) Starting integrated minecraft server version 1.21.1
-[22:42:54] [Server thread/INFO] (Minecraft) Generating keypair
-[22:42:57] [Server thread/INFO] (Minecraft) Preparing start region for dimension minecraft:overworld
-[22:42:57] [Render thread/INFO] (Minecraft) Preparing spawn area: 0%
-[22:42:57] [Server thread/INFO] (Minecraft) Changing view distance to 12, from 10
-[22:42:57] [Server thread/INFO] (Minecraft) Changing simulation distance to 12, from 0
-[22:42:58] [Server thread/INFO] (Minecraft) Player470[local:E:98cf3b53] logged in with entity id 16 at (4.5, 63.0, -6.5)
-[22:42:58] [Server thread/INFO] (Minecraft) Player470 joined the game
-[22:43:03] [Server thread/INFO] (occupant) [smoke] putting it in front of Player470
-[22:43:03] [Server thread/INFO] (Minecraft) It is standing behind you... no, in front of you.
+[23:00:00] [Worker-Main-1/INFO] (Minecraft) Found unifont_all_no_pua-15.1.05.hex, loading
+[23:00:01] [Worker-Main-1/INFO] (Minecraft) Found unifont_jp_patch-15.1.05.hex, loading
+[23:00:06] [Server thread/INFO] (Minecraft) Starting integrated minecraft server version 1.21.1
+[23:00:06] [Server thread/INFO] (Minecraft) Generating keypair
+[23:00:09] [Server thread/INFO] (Minecraft) Preparing start region for dimension minecraft:overworld
+[23:00:10] [Render thread/INFO] (Minecraft) Preparing spawn area: 0%
+[23:00:10] [Render thread/INFO] (Minecraft) Preparing spawn area: 0%
+[23:00:10] [Server thread/INFO] (Minecraft) Changing view distance to 12, from 10
+[23:00:10] [Server thread/INFO] (Minecraft) Changing simulation distance to 12, from 0
+[23:00:11] [Server thread/INFO] (Minecraft) Player485[local:E:04be6c9d] logged in with entity id 4 at (-140.5, 65.0, -327.5)
+[23:00:11] [Server thread/INFO] (Minecraft) Player485 joined the game
+[23:00:16] [Server thread/INFO] (occupant) [smoke] putting it in front of Player485
+[23:00:16] [Server thread/INFO] (Minecraft) It is standing behind you... no, in front of you.
 --- tail of world.log ---
-[22:42:58] [Server thread/INFO] (Minecraft) Player470 joined the game
-[22:42:58] [Render thread/INFO] (Minecraft) Loaded 2 advancements
-[22:43:03] [Server thread/INFO] (occupant) [smoke] putting it in front of Player470
-[22:43:03] [Server thread/INFO] (Minecraft) It is standing behind you... no, in front of you.
-[22:43:03] [Render thread/INFO] (occupant) [client] the Occupant has been drawn
-[22:43:11] [IO-Worker-1/INFO] (occupant) [client] photograph: Saved screenshot as 2026-10-06_22.43.11.png
+[23:00:11] [Server thread/INFO] (Minecraft) Player485 joined the game
+[23:00:12] [Render thread/INFO] (Minecraft) Loaded 2 advancements
+[23:00:16] [Server thread/INFO] (occupant) [smoke] putting it in front of Player485
+[23:00:16] [Server thread/INFO] (Minecraft) It is standing behind you... no, in front of you.
+[23:00:16] [Render thread/INFO] (occupant) [client] the Occupant has been drawn
+[23:00:25] [IO-Worker-5/INFO] (occupant) [client] photograph: Saved screenshot as 2026-10-06_23.00.24.png
 WARN StatusConsoleListener Unable to register Log4j shutdown hook because JVM is shutting down. Using SimpleLogger
 
 > Task :runClient FAILED
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/client-1791326561157.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/client-1791327589578.json
 
 FAILURE: Build failed with an exception.
 
@@ -151,5 +152,5 @@ Execution failed for task ':runClient' (registered by plugin 'fabric-loom').
 > Run with --scan to get full insights from a Build Scan (powered by Develocity).
 > Get more help at https://help.gradle.org.
 
-BUILD FAILED in 57s
+BUILD FAILED in 1m 2s
 10 actionable tasks: 1 executed, 9 up-to-date
