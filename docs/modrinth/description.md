@@ -47,6 +47,12 @@ Not ready? *Or leave it alone* takes you to the normal menu with the haunting sw
 
 ---
 
+## Recording it?
+
+Set `storyPace` to `0.5` and the whole story, ending included, fits in about forty minutes.
+`/occupant here 60` puts it at the edge of the fog for a shot; `/occupant trigger <you> last_night`
+brings on the ending. `reduceFlashing` makes it safe for photosensitive viewers.
+
 ## Good to know
 
 - **Fabric**, needs **[Fabric API](https://modrinth.com/mod/fabric-api)**.

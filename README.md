@@ -180,6 +180,20 @@ need rebuilding for the next.
 | `screenText` | `true` | The lines of text that surface on screen |
 | `fog` | `true` | Draw the story's fog (the server decides how thick; this only turns it off for you) |
 
+## Recording a video
+
+The story is paced for a long evening. For a video:
+
+- **Faster story:** set `storyPace` to `0.5` in `config/occupant.json`. The whole story, the last
+  night included, then fits in about forty minutes.
+- **Play in survival.** It leaves creative players alone unless `hauntCreative` is on.
+- **Sound on, headphones, night.** Most of it is heard before it is seen.
+- **A shot at the edge of the fog:** `/occupant here 60` puts it sixty blocks in front of you.
+- **The ending, on cue:** outdoors at night, `/occupant act <you> 4`, then
+  `/occupant trigger <you> last_night`.
+- **Photosensitive viewers:** `reduceFlashing` in `config/occupant-client.json` turns every
+  flash into a slow fade.
+
 ## Commands (operators)
 
 For testing, and for recording your own videos:
