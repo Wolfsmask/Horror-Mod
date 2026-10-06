@@ -31,6 +31,7 @@ public final class Events {
 			new TunnelEvent(),
 			new WatcherEvent(),
 			new WindowEvent(),
+			new RoofEvent(),
 			new StareEvent(),
 			new FakeAdvancementEvent(),
 			// Act 3+: it is getting closer

@@ -182,7 +182,7 @@ public final class ArenaGameTests {
 
 			// House, facing away from the door.
 			place(house, 0.0f);
-			expect("house", "knock", "chest", "door", "window");
+			expect("house", "knock", "chest", "door", "window", "roof");
 		}
 
 		/** Logs what the cave looks like to the spot checks, so a failure here is easy to understand. */
