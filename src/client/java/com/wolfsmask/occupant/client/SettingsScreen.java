@@ -3,7 +3,6 @@ package com.wolfsmask.occupant.client;
 import com.wolfsmask.occupant.OccupantConfig;
 import com.wolfsmask.occupant.director.WorldMode;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.fabricmc.fabric.api.client.screen.v1.Screens;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -39,8 +38,9 @@ public final class SettingsScreen extends Screen {
 	static void register() {
 		ScreenEvents.AFTER_INIT.register((client, screen, width, height) -> {
 			if (screen instanceof PauseScreen) {
-				Screens.getButtons(screen).add(Button.builder(Component.translatable("occupant.settings.open"),
-						b -> client.setScreen(new SettingsScreen(screen))).bounds(4, 4, 98, 20).build());
+				((com.wolfsmask.occupant.mixin.client.ScreenAccess) screen).occupant$addRenderableWidget(Button.builder(
+						Component.translatable("occupant.settings.open"),
+						b -> client.setScreenAndShow(new SettingsScreen(screen))).bounds(4, 4, 98, 20).build());
 			} else if (screen instanceof SettingsScreen settings) {
 				ScreenEvents.afterExtract(screen).register((s, graphics, mouseX, mouseY, delta) -> settings.labels(graphics));
 			}
@@ -139,6 +139,6 @@ public final class SettingsScreen extends Screen {
 	@Override
 	public void onClose() {
 		ClientConfig.save();
-		Minecraft.getInstance().setScreen(parent);
+		Minecraft.getInstance().setScreenAndShow(parent);
 	}
 }

@@ -4,7 +4,8 @@
   "package": "com.wolfsmask.occupant.mixin.client",
   "compatibilityLevel": "${mixin_java}",
   "client": [
-    "FogRendererMixin"
+    "FogRendererMixin",
+    "ScreenAccess"
   ],
   "injectors": {
     "defaultRequire": 1

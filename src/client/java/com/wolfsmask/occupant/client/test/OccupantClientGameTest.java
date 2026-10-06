@@ -201,10 +201,10 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 				shoot(context, "place-" + kind);
 			}
 			// The settings, as a player finds them on the pause menu.
-			context.runOnClient(mc -> mc.setScreen(new com.wolfsmask.occupant.client.SettingsScreen(null)));
+			context.runOnClient(mc -> mc.setScreenAndShow(new com.wolfsmask.occupant.client.SettingsScreen(null)));
 			context.waitTicks(20);
 			shoot(context, "settings");
-			context.runOnClient(mc -> mc.setScreen(null));
+			context.runOnClient(mc -> mc.setScreenAndShow(null));
 			context.waitTicks(10);
 
 			// Back where it all started, on the ground, for what comes next.
