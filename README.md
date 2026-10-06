@@ -37,7 +37,7 @@ water, in daylight in open fields, or close enough to touch (unless that is the 
 |---|---|---|
 | 0 | First ~3 min | Nothing. Let the player get comfortable. The first time in a world opens on black: *there is something in this world with you.* |
 | 1: Signs | ~3-18 min | Deniable things. Footsteps behind you that stop when you turn. A sound you know perfectly, coming from somewhere it cannot be: a creeper's fuse at your back at night, a door in a house with no door. Something standing on a ridge a hundred blocks away that you cannot quite resolve. |
-| 2: Presence | then ~12-22 min | It is closer and it is not hiding as well. A figure in the dark at the edge of your vision. Knocking at night. Breathing behind you. A sign you did not place. A fresh tunnel. Someone with a name *almost* like yours joins the game. You can't sleep: "there are monsters nearby". There aren't. |
+| 2: Presence | then ~12-22 min | It is closer and it is not hiding as well. A figure in the dark at the edge of your vision. A face at your window at night, a step back from the glass. Knocking at night. Breathing behind you. A sign you did not place. A fresh tunnel. Every animal in sight stops and stares at you. Someone with a name *almost* like yours joins the game; you make an advancement called *[Not Alone]*. You can't sleep: "there are monsters nearby". There aren't. |
 | 3: Closer | then ~15-30 min | It follows you, moving only when you are not looking. You say things in chat you never typed. The lights flicker and it is standing in front of you. It is by your bed when you get home. It is behind you, and the screen goes quietly out. |
 | 4: Hunt | from then on | The music stops. It is out there, looking at you. Then it runs. |
 
@@ -52,6 +52,12 @@ something real, so the next thing lands once you have stopped listening for it.
 There are **no pop-out scares with a loud noise**. A bang makes you jump and then laugh, which
 discharges exactly the tension the rest of the mod spent an hour building. When it finally gets
 to you, the sound drops away instead.
+
+There is a **fog**. At first you can see about eight chunks; it comes in half a chunk with each
+act, to about six by the end, a little more at night, and all the way in while it is close, as
+if it brings the fog with it. Far off, it stands **just this side of where the fog begins**: the
+furthest thing you can see, seen whole, never lost in it. And the animals know before you do:
+when it is out there, the cows stop grazing and turn to look at it. Follow their eyes.
 
 If it stands in plain view for **ten seconds and your crosshair never comes near it**, you are
 told: *something is watching you.* Never the same words twice running, and never quite the
@@ -153,7 +159,10 @@ need rebuilding for the next.
 | `jumpscares` | `true` | "Behind you" scares, blackouts, stingers |
 | `chases` | `true` | Act 4 hunts |
 | `chaseDamage` | `0.0` | Damage if a chase catches you. `0` = it only scares you |
-| `fakeMessages` | `true` | Fake chat and fake join messages |
+| `fog` | `true` | The fog over the world |
+| `fogChunks` | `8` | How far you can see at first, in chunks |
+| `fogClosesIn` | `true` | The fog comes in as the story goes on (to about six chunks), at night, and when it is close |
+| `fakeMessages` | `true` | Fake chat, join and advancement messages |
 | `interruptSleep` | `true` | Occasionally "there are monsters nearby" |
 | `requireAlone` | `true` | Visual encounters only when no other player is within `aloneRadius` |
 | `hauntCreative` | `false` | Also haunt creative players (for recording) |
@@ -169,6 +178,7 @@ need rebuilding for the next.
 | `reduceFlashing` | `false` | **Photosensitivity:** turns hard flashes and flicker into slow fades |
 | `screenStatic` | `true` | Analog static when it is near |
 | `screenText` | `true` | The lines of text that surface on screen |
+| `fog` | `true` | Draw the story's fog (the server decides how thick; this only turns it off for you) |
 
 ## Commands (operators)
 

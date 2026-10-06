@@ -21,6 +21,9 @@ happen at all.** Nobody gets the same story. Everybody gets one that feels direc
 - 🦵 **It does not walk.** It braces its ten legs against walls, trees and ceilings and *pushes* itself through the world. Indoors, it folds down to fit.
 - 🔇 **It never appears while you are looking.** You turn round, and it has always been there.
 - 👥 **Only you can see it.** Your friend standing right next to you sees nothing at all.
+- 🌫️ **The fog comes in.** Eight chunks at first, six by the end, and all the way in when it is close. It stands at the very edge of it, the furthest thing you can see.
+- 🐄 **The animals know first.** When it is out there, they stop grazing and turn to look at it. Sometimes they all turn and look at *you*.
+- 🪟 **Check the windows.** At night, from inside, there may be a face a step back from the glass.
 
 ## Places people used to be
 

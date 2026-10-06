@@ -123,8 +123,10 @@ public final class Haunt {
 										OccupantEntity.Form form) {
 		ServerLevel world = Compat.level(player);
 		if (!Spots.canStand(world, feet)) return null;
-		// Never in the fog: anything there could not be seen whole, and would only be a smudge.
-		if (Vec3.atBottomCenterOf(feet).distanceTo(player.position()) > Fog.startFor(player, this)) return null;
+		// Never in the fog where it can be seen: there it would only be a smudge. (Somewhere out of
+		// sight, waiting to be come across, the fog does not matter.)
+		if (Vec3.atBottomCenterOf(feet).distanceTo(player.position()) > Fog.startFor(player, this)
+				&& !Sight.isHidden(player, feet.above())) return null;
 		OccupantEntity e = ModEntities.OCCUPANT.create(world, EntitySpawnReason.EVENT);
 		if (e == null) return null;
 		e.bindTo(player);
