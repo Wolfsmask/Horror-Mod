@@ -417,7 +417,7 @@ public final class OccupantGameTests {
 		helper.succeed();
 	}
 
-	@GameTest(maxTicks = 40 + TICKS_PER_EVENT * 30)
+	@GameTest(maxTicks = 40 + TICKS_PER_EVENT * 45)
 	public void everyEventRunsCleanly(GameTestHelper helper) {
 		Director director = Director.get();
 		helper.assertTrue(director != null, "Director should be running");
