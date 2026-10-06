@@ -37,4 +37,4 @@ build/clientGametest/occupant-shots/occupant-stare.png
 build/clientGametest/occupant-shots/occupant-title.png
 build/clientGametest/occupant-shots/place-ruin.png
 build/clientGametest/occupant-shots/cinematic-treeline.png
-build/clientGametest/occupant-shots/cinematic-face.png
+build/clientGametest/occupant-shots/occupant-fog.png
