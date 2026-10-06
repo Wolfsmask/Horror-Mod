@@ -71,6 +71,8 @@ public final class SignEvent extends HorrorEvent {
 		List<String> options = ctx.config.signMessages;
 		String msg = options.get(ctx.random.nextInt(options.size()));
 		long day = Compat.dayTime(ctx.world) / 24000L + 1;
-		return msg.replace("{player}", ctx.player.getName().getString()).replace("{day}", Long.toString(day));
+		return msg.replace("{player}", ctx.player.getName().getString()).replace("{day}", Long.toString(day))
+				.replace("{x}", Integer.toString(ctx.player.getBlockX())).replace("{y}", Integer.toString(ctx.player.getBlockY()))
+				.replace("{z}", Integer.toString(ctx.player.getBlockZ()));
 	}
 }

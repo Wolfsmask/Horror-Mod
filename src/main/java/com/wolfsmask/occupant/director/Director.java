@@ -162,8 +162,10 @@ public final class Director {
 
 	/** Waking up is not always a relief. Run a tick later, once the player is really in the world. */
 	private void wakeUp(Haunt h, ServerPlayer player) {
-		if (h.isBusy() || player.getRandom().nextFloat() >= 0.3f) return;
-		trigger(player, WakeEvent.ID, false);
+		if (h.isBusy()) return;
+		float roll = player.getRandom().nextFloat();
+		if (roll < 0.3f) trigger(player, WakeEvent.ID, false);
+		else if (roll < 0.55f) trigger(player, com.wolfsmask.occupant.director.events.MorningEvent.ID, false);
 	}
 
 	private void tickPlayer(Haunt h, ServerPlayer player, OccupantConfig cfg) {

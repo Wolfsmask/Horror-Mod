@@ -151,6 +151,7 @@ public final class ScreenEffects {
 			case ScreenEffectPayload.SILENCE -> client.getMusicManager().stopPlaying();
 			case ScreenEffectPayload.FIRST_ARRIVAL -> arrived();
 			case ScreenEffectPayload.FINALE -> ended(Math.round(payload.intensity()));
+			case ScreenEffectPayload.SAVING -> ClientScares.saving(payload.duration(), Math.round(payload.intensity()));
 			case ScreenEffectPayload.FOG -> ClientFog.set(payload.intensity(), payload.duration());
 			case ScreenEffectPayload.ACT -> PauseLines.act = Math.round(payload.intensity());
 			default -> {
@@ -177,10 +178,19 @@ public final class ScreenEffects {
 		atmosphere = nearness = 0f;
 		ClientFog.reset();
 		PauseLines.reset();
+		ClientScares.reset();
+	}
+
+	/** A short stutter of the light, as if the torch guttered. */
+	static void flicker(int ticks) {
+		if (flickerAge >= 0) return;
+		flickerLength = Math.max(1, ticks);
+		flickerAge = 0;
 	}
 
 	public static void tick(Minecraft client) {
 		ClientFog.tick();
+		ClientScares.tick(client);
 		if (blackoutAge < blackoutLength) blackoutAge++;
 		if (flickerAge >= 0 && ++flickerAge >= flickerLength) flickerAge = -1;
 		if (staticAge < staticLength) staticAge++;
@@ -224,6 +234,7 @@ public final class ScreenEffects {
 		ClientConfig cfg = ClientConfig.get();
 		int w = ctx.guiWidth();
 		int h = ctx.guiHeight();
+		ClientScares.render(ctx, w, h);
 
 		float burst = staticAge < staticLength ? staticStrength * (1f - (staticAge + tickDelta) / staticLength) : 0f;
 		float noise = Math.max(proximityStatic, burst);

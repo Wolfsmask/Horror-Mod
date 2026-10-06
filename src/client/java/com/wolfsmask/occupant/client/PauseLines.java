@@ -16,7 +16,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public final class PauseLines {
 	private static final String[] LINES = {"It is still here.", "Pausing does not stop it.", "It can wait.",
 			"It is very patient.", "Don't leave it alone too long.", "It knows you stopped.", "It is still looking at you.",
-			"Take your time."};
+			"Take your time.", "Where are you going?", "Don't leave it here alone.", "It will still be here when you come back."};
 
 	/** How far the story has gone, as the server last said. */
 	static int act;

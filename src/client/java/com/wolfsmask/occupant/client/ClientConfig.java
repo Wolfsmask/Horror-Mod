@@ -33,6 +33,9 @@ public final class ClientConfig {
 	/** The fog the story brings in (the server decides how thick; this only switches it off for you). */
 	public boolean fog = true;
 
+	/** Your own heartbeat, loud, when it is close and you are not looking at it. */
+	public boolean heartbeat = true;
+
 	public static ClientConfig get() {
 		return instance;
 	}

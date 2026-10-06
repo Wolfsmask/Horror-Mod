@@ -149,6 +149,35 @@ public final class Occupant implements ModInitializer {
 			return InteractionResult.PASS;
 		});
 
+		// Dying, late in the story: it was there.
+		net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> guard("a death", () -> {
+			Director director = Director.get();
+			if (director == null || !(entity instanceof ServerPlayer sp) || !OccupantConfig.get().enabled) return;
+			if (director.data(sp).act < 2 || sp.getRandom().nextFloat() > 0.6f) return;
+			String[] lines = {"It was there when you died.", "It watched.", "It stayed with you until the end.", "It will wait for you to come back."};
+			sp.sendSystemMessage(net.minecraft.network.chat.Component.literal(lines[sp.getRandom().nextInt(lines.length)])
+					.withStyle(net.minecraft.ChatFormatting.DARK_GRAY, net.minecraft.ChatFormatting.ITALIC));
+		}));
+
+		// Villagers will not open up after dark, once it is about.
+		net.fabricmc.fabric.api.event.player.UseEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
+			if (world.isClientSide() || !(player instanceof ServerPlayer sp) || entity.getType() != net.minecraft.world.entity.EntityType.VILLAGER) {
+				return InteractionResult.PASS;
+			}
+			Boolean refuse = guard("a villager", () -> {
+				Director director = Director.get();
+				if (director == null || !OccupantConfig.get().enabled || !Compat.level(sp).isDarkOutside()) return false;
+				int act = director.data(sp).act;
+				return act >= 3 || act == 2 && sp.getRandom().nextBoolean();
+			}, false);
+			if (!refuse) return InteractionResult.PASS;
+			com.wolfsmask.occupant.util.Cues.sound(sp, net.minecraft.sounds.SoundEvents.VILLAGER_NO, net.minecraft.sounds.SoundSource.NEUTRAL,
+					entity.position(), 1.0f, 0.8f);
+			sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("Not tonight.")
+					.withStyle(net.minecraft.ChatFormatting.GRAY), true);
+			return InteractionResult.FAIL;
+		});
+
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
 				guard("registering commands", () -> OccupantCommand.register(dispatcher)));
 
