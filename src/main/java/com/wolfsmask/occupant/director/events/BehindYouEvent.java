@@ -35,6 +35,11 @@ public final class BehindYouEvent extends HorrorEvent {
 	}
 
 	@Override
+	public boolean shows() {
+		return true;
+	}
+
+	@Override
 	public boolean fits(EventContext ctx) {
 		Situation s = ctx.situation;
 		return ctx.aloneEnough() && ctx.player.onGround() && !s.sprinting() && !s.inCombat() && !s.busy()

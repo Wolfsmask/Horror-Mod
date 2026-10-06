@@ -12,6 +12,7 @@ import com.wolfsmask.occupant.OccupantConfig;
 import com.wolfsmask.occupant.director.Director;
 import com.wolfsmask.occupant.director.Haunt;
 import com.wolfsmask.occupant.director.HauntData;
+import com.wolfsmask.occupant.director.WorldMode;
 import com.wolfsmask.occupant.director.events.Events;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -115,6 +116,24 @@ public final class OccupantCommand {
 									ctx.getSource().sendSuccess(() -> Component.literal("The story starts over for " + p.getName().getString() + "."), true);
 									return 1;
 								})))
+				.then(literal("creator")
+						.executes(ctx -> {
+							ctx.getSource().sendSuccess(() -> Component.literal(WorldMode.creatorCut()
+									? "This world is the Creator Cut: a tighter story, about forty minutes, ending included."
+									: "This world tells the story as a slow burn. /occupant creator on for the Creator Cut."), false);
+							return 1;
+						})
+						.then(literal("on").executes(ctx -> {
+							WorldMode.set(true);
+							ctx.getSource().sendSuccess(() -> Component.literal(
+									"Creator Cut on for this world: a tighter story, about forty minutes, ending included."), true);
+							return 1;
+						}))
+						.then(literal("off").executes(ctx -> {
+							WorldMode.set(false);
+							ctx.getSource().sendSuccess(() -> Component.literal("Creator Cut off: the story is a slow burn again."), true);
+							return 1;
+						})))
 				.then(literal("reload")
 						.executes(ctx -> {
 							OccupantConfig.load();
@@ -177,6 +196,8 @@ public final class OccupantCommand {
 		src.sendSuccess(() -> Component.literal("The Occupant " + Occupant.VERSION_NOTE).withStyle(ChatFormatting.WHITE), false);
 		line(src, "mod loaded (server side)", true, "");
 		line(src, "director running", dir != null, "restart the world");
+		src.sendSuccess(() -> Component.literal("  this world: " + (WorldMode.creatorCut() ? "Creator Cut" : "slow burn")
+				+ ", intensity " + cfg.intensity + (cfg.soundOnly ? ", sound only" : "")).withStyle(ChatFormatting.GRAY), false);
 		line(src, "enabled in config", cfg.enabled, "set enabled=true in config/occupant.json");
 		line(src, "this player can be haunted", !p.isCreative() || cfg.hauntCreative,
 				"you are in creative: switch to survival, or set hauntCreative=true");
@@ -185,7 +206,7 @@ public final class OccupantCommand {
 		if (dir != null) {
 			HauntData d = dir.data(p);
 			line(src, "story started (act " + d.act + ")", d.act > 0,
-					"it waits " + cfg.graceMinutes + " min before anything happens: /occupant act " + p.getName().getString() + " 2");
+					"it waits " + com.wolfsmask.occupant.director.Pacing.graceMinutes(cfg) + " min before anything happens: /occupant act " + p.getName().getString() + " 2");
 			line(src, "not paused", !d.paused, "/occupant resume " + p.getName().getString());
 		}
 		int near = p.level().getEntitiesOfClass(OccupantEntity.class, new AABB(p.blockPosition()).inflate(64)).size();

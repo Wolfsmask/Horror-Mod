@@ -28,6 +28,11 @@ public final class StalkerEvent extends HorrorEvent {
 	}
 
 	@Override
+	public boolean shows() {
+		return true;
+	}
+
+	@Override
 	public boolean fits(EventContext ctx) {
 		Situation s = ctx.situation;
 		return ctx.aloneEnough() && !s.inCombat() && !s.busy() && !s.inWater() && s.gloomy() && !s.still();

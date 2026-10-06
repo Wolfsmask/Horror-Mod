@@ -271,13 +271,13 @@ public final class Director {
 	 * hours in a lit base does not skip straight to the ending, but nobody gets stuck forever either.
 	 */
 	private void updateAct(HauntData d, OccupantConfig cfg, ServerPlayer player) {
-		double pace = cfg.storyPace;
+		double pace = Pacing.storyPace(cfg);
 		long inAct = d.playTicks - d.actStartedAt;
 		int before = d.act;
 
 		switch (d.act) {
 			case 0 -> {
-				if (d.playTicks >= cfg.graceMinutes * MINUTE) d.setAct(1);
+				if (d.playTicks >= Pacing.graceMinutes(cfg) * MINUTE) d.setAct(1);
 			}
 			case 1 -> {
 				if (inAct >= 8 * MINUTE * pace && d.actEventCount >= 3 || inAct >= 15 * MINUTE * pace) d.setAct(2);
@@ -382,7 +382,7 @@ public final class Director {
 			}
 		}
 
-		HorrorEvent.Tier[] order = pickTierOrder(tierWeights(d.act, h.quietSeconds), byTier.keySet(), random);
+		HorrorEvent.Tier[] order = pickTierOrder(tierWeights(d.act, Pacing.quietSeconds(h.quietSeconds)), byTier.keySet(), random);
 		for (HorrorEvent.Tier tier : order) {
 			List<HorrorEvent> pool = byTier.get(tier);
 			while (pool != null && !pool.isEmpty()) {
@@ -405,6 +405,7 @@ public final class Director {
 		HauntData d = ctx.data;
 		if (e.hookOnly() || disabledEvents.contains(e.id())) return false;
 		if (d.act < e.minAct() || d.isOnCooldown(e.id()) || !e.allowedBy(ctx.config)) return false;
+		if (ctx.config.soundOnly && e.shows()) return false;
 		if (d.recency(e.id()) == 0) return false; // never the same thing twice in a row
 		if (calm && e.tier() != HorrorEvent.Tier.AMBIENT) return false;
 		if (e.tier() == HorrorEvent.Tier.PEAK && !peakReady(d)) return false;
@@ -412,8 +413,8 @@ public final class Director {
 	}
 
 	public static boolean peakReady(HauntData d) {
-		if (d.dread < 55f) return false;
-		return d.lastPeakAt < 0 || d.playTicks - d.lastPeakAt >= 20 * MINUTE;
+		if (d.dread < Pacing.peakDread()) return false;
+		return d.lastPeakAt < 0 || d.playTicks - d.lastPeakAt >= Pacing.minutesBetweenPeaks() * MINUTE;
 	}
 
 	private static HorrorEvent.Tier[] pickTierOrder(Map<HorrorEvent.Tier, Double> weights,
@@ -480,11 +481,11 @@ public final class Director {
 		if (e.tier() == HorrorEvent.Tier.PEAK) {
 			d.lastPeakAt = d.playTicks;
 			d.dread = 15f;
-			d.calmUntil = d.playTicks + (long) ((4 + ctx.random.nextInt(4)) * MINUTE / ctx.config.eventFrequency);
+			d.calmUntil = d.playTicks + (long) ((4 + ctx.random.nextInt(4)) * MINUTE / Pacing.frequency(ctx.config));
 		} else {
 			d.addDread(e.tier().dread);
 			if (e.tier() == HorrorEvent.Tier.MAJOR) {
-				d.calmUntil = Math.max(d.calmUntil, d.playTicks + (long) ((1 + ctx.random.nextInt(2)) * MINUTE / ctx.config.eventFrequency));
+				d.calmUntil = Math.max(d.calmUntil, d.playTicks + (long) ((1 + ctx.random.nextInt(2)) * MINUTE / Pacing.frequency(ctx.config)));
 			}
 		}
 		save.setDirty();
@@ -498,7 +499,7 @@ public final class Director {
 		minutes *= 1.0 - Math.min(0.4, h.data.dread / 250.0); // more dread, faster pace
 		if (h.data.playTicks < h.data.calmUntil) minutes *= 1.6;
 		if (h.lastSituationWasNight) minutes *= 0.75;         // the nights are busier than the days
-		minutes /= cfg.eventFrequency;
+		minutes /= Pacing.frequency(cfg);
 		h.nextEventIn = (int) Math.max(20 * 30, minutes * MINUTE);
 	}
 
@@ -555,6 +556,7 @@ public final class Director {
 		if (!forced) {
 			if (h.active != null || disabledEvents.contains(e.id())) return TriggerResult.BUSY;
 			if (!isEligible(player, h, OccupantConfig.get()) || h.data.act == 0) return TriggerResult.BUSY;
+			if (OccupantConfig.get().soundOnly && e.shows()) return TriggerResult.BUSY;
 		} else {
 			endSequence(h);
 		}

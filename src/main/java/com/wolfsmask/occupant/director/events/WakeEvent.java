@@ -37,6 +37,11 @@ public final class WakeEvent extends HorrorEvent {
 	}
 
 	@Override
+	public boolean shows() {
+		return true;
+	}
+
+	@Override
 	public boolean fits(EventContext ctx) {
 		return ctx.act() >= 3 && ctx.aloneEnough() && Director.peakReady(ctx.data) && !ctx.data.isOnCooldown(ID);
 	}

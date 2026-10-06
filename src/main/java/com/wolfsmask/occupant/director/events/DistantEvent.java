@@ -35,6 +35,11 @@ public final class DistantEvent extends HorrorEvent {
 	}
 
 	@Override
+	public boolean shows() {
+		return true;
+	}
+
+	@Override
 	public boolean fits(EventContext ctx) {
 		Situation s = ctx.situation;
 		// Outdoors, with the sky in view, and dim enough that a pale shape is ambiguous, or in the

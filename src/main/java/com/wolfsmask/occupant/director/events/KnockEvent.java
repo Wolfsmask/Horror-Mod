@@ -31,6 +31,11 @@ public final class KnockEvent extends HorrorEvent {
 	}
 
 	@Override
+	public boolean shows() {
+		return true;
+	}
+
+	@Override
 	public boolean fits(EventContext ctx) {
 		return ctx.situation.sheltered() && ctx.situation.night() && !ctx.situation.inCombat() && !ctx.situation.busy();
 	}

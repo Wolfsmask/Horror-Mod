@@ -37,6 +37,11 @@ public final class WindowEvent extends HorrorEvent {
 	}
 
 	@Override
+	public boolean shows() {
+		return true;
+	}
+
+	@Override
 	public boolean fits(EventContext ctx) {
 		Situation s = ctx.situation;
 		return ctx.aloneEnough() && s.sheltered() && !s.underground() && !s.inCombat() && !s.busy() && s.gloomy();

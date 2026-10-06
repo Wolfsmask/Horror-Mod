@@ -38,6 +38,12 @@ public final class OccupantConfig {
 	/** Multiplies how long each act of the story lasts. 2.0 = slow burn, 0.5 = fast. */
 	public double storyPace = 1.0;
 
+	/** "subtle", "normal" or "relentless": how hard the whole story leans on you, on top of the two below. */
+	public String intensity = "normal";
+
+	/** Only sounds and things in the world: it is never seen. For those who want the dread without the sight of it. */
+	public boolean soundOnly = false;
+
 	/** Multiplies how often things happen. 2.0 = twice as often. */
 	public double eventFrequency = 1.0;
 
@@ -183,6 +189,7 @@ public final class OccupantConfig {
 		chaseDamage = (float) clamp(chaseDamage, 0.0, 40.0);
 		aloneRadius = (int) clamp(aloneRadius, 0, 256);
 		fogChunks = (int) clamp(fogChunks, 0, 32);
+		if (intensity == null || !java.util.List.of("subtle", "normal", "relentless").contains(intensity.toLowerCase(java.util.Locale.ROOT))) intensity = "normal";
 		if (signMessages == null || signMessages.isEmpty()) signMessages = new OccupantConfig().signMessages;
 		if (chatLines == null || chatLines.isEmpty()) chatLines = new OccupantConfig().chatLines;
 		if (whisperLines == null || whisperLines.isEmpty()) whisperLines = new OccupantConfig().whisperLines;

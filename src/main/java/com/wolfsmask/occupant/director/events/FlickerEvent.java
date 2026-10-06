@@ -28,6 +28,11 @@ public final class FlickerEvent extends HorrorEvent {
 	}
 
 	@Override
+	public boolean shows() {
+		return true;
+	}
+
+	@Override
 	public boolean fits(EventContext ctx) {
 		Situation s = ctx.situation;
 		return (s.sheltered() || s.underground() || s.night()) && !s.inCombat() && !s.busy();

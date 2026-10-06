@@ -5,6 +5,8 @@ import com.wolfsmask.occupant.director.EventContext;
 import com.wolfsmask.occupant.director.Haunt;
 import com.wolfsmask.occupant.director.HauntData;
 import com.wolfsmask.occupant.director.HorrorEvent;
+import com.wolfsmask.occupant.director.Pacing;
+import com.wolfsmask.occupant.director.WorldMode;
 import com.wolfsmask.occupant.director.Sequence;
 import com.wolfsmask.occupant.director.Situation;
 import com.wolfsmask.occupant.entity.OccupantEntity;
@@ -41,11 +43,20 @@ public final class LastNightEvent extends HorrorEvent {
 	}
 
 	@Override
+	public boolean shows() {
+		return true;
+	}
+
+	@Override
 	public boolean fits(EventContext ctx) {
 		Situation s = ctx.situation;
 		HauntData d = ctx.data;
 		long inAct = d.playTicks - d.actStartedAt;
-		return !d.lastNight && inAct >= 20L * 60 * 12 * ctx.config.storyPace && d.encounters >= 1 && ctx.aloneEnough()
+		// In the Creator Cut it is always reached: a few minutes into the last act, seen or not.
+		boolean creator = WorldMode.creatorCut();
+		double minutes = creator ? 4.0 : 12.0;
+		return !d.lastNight && inAct >= 20L * 60 * minutes * Pacing.storyPace(ctx.config) && (creator || d.encounters >= 1)
+				&& ctx.aloneEnough()
 				&& s.night() && !s.sheltered() && !s.underground() && !s.inCombat() && !s.busy() && !s.inWater();
 	}
 

@@ -69,6 +69,11 @@ public abstract class HorrorEvent {
 		return true;
 	}
 
+	/** Does it put the Occupant where it can be seen? (Off in sound-only mode.) */
+	public boolean shows() {
+		return false;
+	}
+
 	/** Can only be started by a hook (like waking up), never by the scheduler. */
 	public boolean hookOnly() {
 		return false;

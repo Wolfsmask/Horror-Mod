@@ -63,13 +63,15 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 				"clicking 'or leave it alone' should leave the gate for the game's own menu");
 		shoot(context, "occupant-left-alone");
 
-		// Back to the gate, and a real click on CREATE WORLD: straight into a new world, no settings.
+		// Back to the gate, and a real click on CREATOR CUT: straight into a new world, no settings,
+		// and that world tells the story as the Creator Cut.
 		context.runOnClient(mc -> mc.setScreenAndShow(new GateScreen()));
 		context.waitTicks(20);
-		clickGate(context, true);
+		clickCreatorCut(context);
 		context.waitFor(mc -> mc.level != null, 20 * 60 * 5);
 		context.waitTicks(100);
 		shoot(context, "occupant-quick-world");
+		check(com.wolfsmask.occupant.director.WorldMode.creatorCut(), "the world made from CREATOR CUT should be a Creator Cut");
 		// And out again, the way a player leaves.
 		context.runOnClient(mc -> mc.pauseGame(false));
 		context.waitTicks(10);
@@ -336,6 +338,19 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 	}
 
 	/** Moves the real mouse onto one of the gate's two choices and clicks it. */
+	private static void clickCreatorCut(ClientGameTestContext context) {
+		double[] at = context.computeOnClient(mc -> {
+			GateScreen gate = GateScreen.current();
+			check(gate != null, "the gate should be on screen to click");
+			double[] c = gate.centreOfCreator();
+			double scale = mc.getWindow().getGuiScale();
+			return new double[]{c[0] * scale, c[1] * scale};
+		});
+		context.getInput().setCursorPos(at[0], at[1]);
+		context.waitTicks(5);
+		context.getInput().pressMouse(0);
+	}
+
 	private static void clickGate(ClientGameTestContext context, boolean enter) {
 		double[] at = context.computeOnClient(mc -> {
 			GateScreen gate = GateScreen.current();

@@ -19,6 +19,11 @@ public final class IntruderEvent extends HorrorEvent {
 	}
 
 	@Override
+	public boolean shows() {
+		return true;
+	}
+
+	@Override
 	public boolean fits(EventContext ctx) {
 		Situation s = ctx.situation;
 		if (!ctx.aloneEnough() || !s.night() || s.underground() || s.sheltered() || s.inCombat() || s.busy()) return false;

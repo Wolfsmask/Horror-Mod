@@ -4,6 +4,7 @@ import com.wolfsmask.occupant.compat.Compat;
 import com.wolfsmask.occupant.command.OccupantCommand;
 import com.wolfsmask.occupant.director.Director;
 import com.wolfsmask.occupant.director.HauntData;
+import com.wolfsmask.occupant.director.WorldMode;
 import com.wolfsmask.occupant.network.ScreenEffectPayload;
 import com.wolfsmask.occupant.network.WhisperPayload;
 import com.wolfsmask.occupant.registry.ModEntities;
@@ -74,6 +75,7 @@ public final class Occupant implements ModInitializer {
 
 		// Before any of the world is generated: which houses exist, and whether one has been found.
 		ServerLifecycleEvents.SERVER_STARTING.register(server -> guard("opening the world", () -> {
+			WorldMode.open(server);
 			House.open(server);
 			Loot.open(server);
 		}));
@@ -82,6 +84,7 @@ public final class Occupant implements ModInitializer {
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> guard("closing the world", () -> {
 			House.close();
 			Loot.close();
+			WorldMode.close();
 		}));
 		ServerLifecycleEvents.SERVER_STARTED.register(server -> guard("start-up", () -> Director.start(server)));
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> guard("shutdown", Director::stop));
