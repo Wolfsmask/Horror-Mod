@@ -7,6 +7,7 @@ import com.wolfsmask.occupant.util.Sight;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 
@@ -21,6 +22,8 @@ public abstract class ApparitionSequence implements Sequence {
 	protected int lookTicks;
 	/** The animals near the player, who know it is there. */
 	private List<Mob> animals = List.of();
+	/** The monsters near it, who want nothing to do with it. */
+	private List<Mob> monsters = List.of();
 
 	protected ApparitionSequence(Haunt haunt, OccupantEntity entity) {
 		this.haunt = haunt;
@@ -63,6 +66,20 @@ public abstract class ApparitionSequence implements Sequence {
 			if (!m.isAlive() || m.level() != entity.level()) continue;
 			m.getNavigation().stop();
 			m.getLookControl().setLookAt(entity, 30.0f, 30.0f);
+		}
+		// Even the things that come out at night back away from it.
+		if (age % 20 == 1) {
+			monsters = entity.level().getEntitiesOfClass(Mob.class, entity.getBoundingBox().inflate(16.0),
+					m -> m.isAlive() && m != entity && !(m instanceof OccupantEntity)
+							&& m.getType().getCategory() == MobCategory.MONSTER);
+			for (Mob m : monsters) {
+				Vec3 away = m.position().subtract(entity.position());
+				away = new Vec3(away.x, 0, away.z);
+				if (away.lengthSqr() < 1.0E-4) continue;
+				away = away.normalize().scale(12.0);
+				m.getNavigation().moveTo(m.getX() + away.x, m.getY(), m.getZ() + away.z, 1.25);
+				m.getLookControl().setLookAt(entity, 30.0f, 30.0f);
+			}
 		}
 	}
 

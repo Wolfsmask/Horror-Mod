@@ -126,6 +126,7 @@ public final class ScreenEffects {
 			case ScreenEffectPayload.SILENCE -> client.getMusicManager().stopPlaying();
 			case ScreenEffectPayload.FIRST_ARRIVAL -> arrived();
 			case ScreenEffectPayload.FOG -> ClientFog.set(payload.intensity(), payload.duration());
+			case ScreenEffectPayload.ACT -> PauseLines.act = Math.round(payload.intensity());
 			default -> {
 			}
 		}
@@ -149,6 +150,7 @@ public final class ScreenEffects {
 		introAge = -1;
 		atmosphere = nearness = 0f;
 		ClientFog.reset();
+		PauseLines.reset();
 	}
 
 	public static void tick(Minecraft client) {

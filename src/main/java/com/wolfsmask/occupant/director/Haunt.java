@@ -26,6 +26,8 @@ public final class Haunt {
 	Sequence active;
 	/** The fog this player's client was last told to show (blocks; 0 = none), or -1 before the first time. */
 	float fogSent = -1.0f;
+	/** The act this player's client was last told, or -1 before the first time. */
+	int actSent = -1;
 	@Nullable
 	String activeId;
 	/** Ticks until the next once-per-second evaluation. */

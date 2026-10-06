@@ -177,8 +177,16 @@ public final class Director {
 			}
 		}
 
-		// The fog, once a second; cleared while they are not being haunted.
-		if (player.tickCount % 20 == 7) Fog.update(player, h, eligible);
+		// Once a second, what the client needs to know: the fog (cleared while they are not being
+		// haunted), and how far the story has gone.
+		if (player.tickCount % 20 == 7) {
+			Fog.update(player, h, eligible);
+			int act = eligible ? h.data.act : 0;
+			if (act != h.actSent) {
+				Cues.effect(player, ScreenEffectPayload.ACT, 0, act);
+				h.actSent = act;
+			}
+		}
 
 		if (!eligible) return;
 		h.data.playTicks++;
