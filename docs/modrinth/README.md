@@ -4,6 +4,7 @@ Everything here is ready to use: the icon, the gallery, the description and the 
 
 - `icon.png`: the project icon, 512x512.
 - `gallery/`: the gallery images (`00-featured.png` is the one to feature).
+- `stills/`: the untouched game frames the gallery is made from, if you want to grade them yourself.
 - `description.md`: paste this into the description box.
 - The mod files, one per Minecraft version, are in `dist/` at the top of the repo.
 
@@ -54,13 +55,12 @@ in search, so it decides whether they click.
 |---|---|---|
 | `00-featured.png` | The Occupant | There is something in this world with you. |
 | `01-treeline.png` | The treeline | It was standing there the whole time. |
-| `02-hallway.png` | The hallway | The house has a hallway with no windows. The first time you walk in, it is waiting there. |
-| `03-village.png` | The village | Abandoned villages, empty houses, worn paths. Everyone left. Something stayed. |
-| `04-ruin.png` | The keep | Ruined keeps with chests that still hold what people left behind. |
-| `05-camp.png` | The camp | Cold campsites, and signs for whoever comes next. |
-| `06-graves.png` | The graveyard | Two rows of graves. One of them has been dug open. |
-| `07-face.png` | Its face | Seventeen feet tall. Ten legs. It is learning how to be you. |
-| `08-the-first-screen.png` | The way in | The mod's own start screen. Create World takes you straight in. |
+| `02-village.png` | The village | Abandoned villages, empty houses, a well. Everyone left. Something stayed. |
+| `03-ruin.png` | The keep | Ruined keeps with chests that still hold what people left behind. |
+| `04-camp.png` | The camp | Cold campsites, and signs for whoever comes next. |
+| `05-graves.png` | The graveyard | Two rows of graves. One of them has been dug open. |
+| `06-face.png` | Its face | Seventeen feet tall. Ten legs. It is learning how to be you. |
+| `07-the-first-screen.png` | The way in | The mod's own start screen. Create World takes you straight in. |
 
 ## 5. Versions
 

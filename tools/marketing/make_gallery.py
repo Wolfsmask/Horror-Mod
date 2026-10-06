@@ -5,7 +5,8 @@ Turns the client test's stills into the images for the mod's page.
     pip install numpy pillow
     python3 tools/marketing/make_gallery.py
 
-Reads docs/client-test/*.png (the real game, photographed by the client game test) and writes
+Reads docs/modrinth/stills/*.png (frames of the real game, picked from the client game test's
+photographs in docs/client-test) and writes
 docs/modrinth/: graded, letterboxed gallery images with a line on each, the featured image with
 the title, and a 512x512 icon. Nothing here is painted: every image is a frame of the game, only
 cropped, graded and captioned.
@@ -19,7 +20,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 ROOT = Path(__file__).resolve().parents[2]
-SHOTS = ROOT / "docs/client-test"
+SHOTS = ROOT / "docs/modrinth/stills"
 OUT = ROOT / "docs/modrinth"
 FONTS = Path(__file__).resolve().parent / "fonts"
 W, H = 1920, 1080
@@ -32,13 +33,12 @@ rng = np.random.default_rng(1666)
 # focus (0 top .. 1 bottom)
 SHOTS_LIST = [
     ("cinematic-treeline", "01-treeline", "It was standing there the whole time.", (0.62, 0.15, 1.0), 0.45),
-    ("cinematic-hallway", "02-hallway", "Don't go down the hallway.", (0.55, 0.05, 2.4), 0.5),
-    ("cinematic-village", "03-village", "Everyone left. Something stayed.", (0.6, 0.25, 1.1), 0.5),
-    ("cinematic-ruin", "04-ruin", "Somebody held out here. For a while.", (0.7, 0.45, 1.0), 0.5),
-    ("cinematic-camp", "05-camp", "WE WERE FOUR. THEN THREE.", (0.8, 0.55, 1.1), 0.55),
-    ("cinematic-graves", "06-graves", "It took the rest.", (0.5, -0.1, 1.25), 0.55),
-    ("cinematic-face", "07-face", "It is learning how to be you.", (0.6, 0.3, 1.0), 0.5),
-    ("occupant-gate", "08-the-first-screen", "There is only one way in.", (0.9, 0.0, 1.0), 0.5),
+    ("cinematic-village", "02-village", "Everyone left. Something stayed.", (0.6, 0.25, 1.1), 0.5),
+    ("cinematic-ruin", "03-ruin", "Somebody held out here. For a while.", (0.7, 0.45, 1.0), 0.5),
+    ("cinematic-camp", "04-camp", "WE WERE FOUR. THEN THREE.", (0.8, 0.55, 1.15), 0.5),
+    ("cinematic-graves", "05-graves", "It took the rest.", (0.5, -0.1, 1.25), 0.55),
+    ("cinematic-face", "06-face", "It is learning how to be you.", (0.6, 0.3, 1.0), 0.6),
+    ("occupant-gate", "07-the-first-screen", "There is only one way in.", (0.9, 0.0, 1.0), 0.5),
 ]
 
 
@@ -113,7 +113,7 @@ def featured(src):
     return img
 
 
-def icon(src, centre, size=0.5):
+def icon(src, centre, size=0.32):
     """512 x 512 from the close-up of its face; {centre} is where the face is, as fractions."""
     img = src.convert("RGB")
     side = int(min(img.size) * size)
@@ -124,7 +124,7 @@ def icon(src, centre, size=0.5):
     return grade(sq, 0.55, 0.2, vignette=0.9)
 
 
-def main(face_centre=(0.5, 0.45)):
+def main(face_centre=(0.5, 0.66)):
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "gallery").mkdir(exist_ok=True)
     made = []
