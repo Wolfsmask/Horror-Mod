@@ -1,51 +1,9 @@
-# 26.4-snapshot-2 on 032cc12fe693e31463ec2070a4bc21989b042934: build success, tests success, jar success
+# 26.4-snapshot-2 on 0367bdd9c758fd30ed15808c2b129a6f0a6ee8c5: build failure, tests skipped, jar skipped
+com/wolfsmask/occupant/director/LastNightEnding.java:109: error: no suitable method found for drop(ItemStack,boolean)
 > Configure project :
 > Task :compileJava
-> Task :processResources
-> Task :classes
-> Task :compileClientJava
-> Task :processClientResources NO-SOURCE
-> Task :processIncludeJars
-> Task :clientClasses
-> Task :compileTestJava NO-SOURCE
-> Task :processTestResources NO-SOURCE
-> Task :testClasses UP-TO-DATE
-> Task :jar
-> Task :test NO-SOURCE
-> Task :assemble
-> Task :validateAccessWidener NO-SOURCE
-> Task :check UP-TO-DATE
-> Task :build
-=== jar
-jar: build/libs/occupant-1.0.0+mc26.4-snapshot-2.jar
-{
-  "required": true,
-  "minVersion": "0.8",
-  "package": "com.wolfsmask.occupant.mixin.client",
-  "compatibilityLevel": "JAVA_25",
-  "client": [
-    "FogRendererMixin",
-    "ScreenAccess"
-  ],
-  "injectors": {
-    "defaultRequire": 1
-  }
-}
-unobfuscated version: the game's own names are the real ones
-[21:22:06] [Server thread/INFO] (occupant) [gametest] houses: found before false, first true, too close false, second true, after finding false
-[21:22:07] [Server thread/INFO] (occupant) [gametest] last camp at BlockPos{x=1536300, y=3, z=4715621}, chest at BlockPos{x=1536303, y=4, z=4715621}
-[21:22:07] [Server thread/INFO] (occupant) [gametest] lair under BlockPos{x=1536315, y=0, z=4717021}: 22 rungs, going in: STARTED
-[21:22:07] [Server thread/INFO] (occupant) [gametest] fog: first act 120.0, last act 96.0
-[21:22:09] [Server thread/INFO] (occupant) [gametest] fog thick at 88.0, begins at 57.20000076293945; it stands 47.50789408087881 away
-[21:22:10] [Server thread/INFO] (occupant) [gametest] places without loot: [], page found: true
-[21:22:11] [Server thread/INFO] (occupant) [gametest] house test player at BlockPos{x=-2, y=1, z=-4} facing 0.0 / (0.0, -0.0, 1.0)
-[21:22:11] [Server thread/INFO] (occupant) [gametest] house hallway spot: peeking BlockPos{x=1536370, y=8, z=4716624} / any BlockPos{x=1536370, y=8, z=4716624} (relative to the floor: BlockPos{x=4, y=1, z=0})
-[21:22:11] [Server thread/INFO] (occupant) [gametest] hallway light at the far end: block 0 sky 0, dark true
-[21:22:11] [Server thread/INFO] (occupant) [gametest] that spot: mask 1001001001, block light 0, sky 2, main room middle block light 0 sky 8
-[21:22:12] [Server thread/INFO] (occupant) [gametest] unnoticed: age 240, seen -1, nearby 1, alive true, concealed false, noticed false, in sight true, angle 176, ray MISS at 1536286, 56, 4716328 Block{minecraft:air}, ignored 1, same story true
-[21:22:13] [Server thread/INFO] (occupant) [gametest] field: darkOutside=true skyDarken=8 light=7 skyLight=15 blockLight=0 isDark=true grassInDirtTag=false
-[21:22:13] [Server thread/INFO] (occupant) [gametest] cave: yaw=-90.0 feet=BlockPos{x=1536790, y=60, z=4716441} underground=true skyVisible=false skyLight=0 topY=69 light=0 look=(1.0, 0.0, 0.0) | ahead: standable=55 dark=55 visible=55
-[21:22:13] [Server thread/INFO] (occupant) [gametest] arena failures: []
-[21:22:13] [Server thread/INFO] (occupant) [gametest] slowest event to start: watcher (field) in 16 ms
-[21:22:22] [Server thread/INFO] (occupant) [gametest] events that found a place to happen: [familiar, cave_noise, thunder, echo, breath, fake_join, roof, saving, teammate, advancement, whisper, doppel_chat, stalker, flicker, static, wake]
-[21:22:22] [Server thread/INFO] (Minecraft) ========= 16 GAME TESTS COMPLETE IN 19.91 s ======================
+> Task :compileJava FAILED
+* What went wrong:
+> Compilation failed; see the compiler output below.
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
