@@ -68,7 +68,7 @@ public final class DistantEvent extends HorrorEvent {
 		// seen whole, and never lost in it.
 		float fogEnd = Fog.endFor(p, ctx.haunt);
 		if (fogEnd > 0) {
-			min = Math.max(36.0, FogLine.edgeNear(fogEnd));
+			min = Math.max(16.0, FogLine.edgeNear(fogEnd));
 			max = Math.min(reach, FogLine.edgeFar(fogEnd));
 		}
 		if (max < min + 8.0) return null;

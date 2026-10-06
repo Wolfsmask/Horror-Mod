@@ -184,6 +184,7 @@ public final class Director {
 	}
 
 	private void tickPlayer(Haunt h, ServerPlayer player, OccupantConfig cfg) {
+		Rules.check(player, h, cfg);
 		boolean eligible = isEligible(player, h, cfg);
 
 		if (h.active != null) {

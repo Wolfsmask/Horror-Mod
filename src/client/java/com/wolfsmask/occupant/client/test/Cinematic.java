@@ -50,6 +50,14 @@ final class Cinematic {
 	private record Shot(BlockPos it, Vec3 eye, Vec3 look) {
 	}
 
+	/**
+	 * How it stands for a shot: with its face hidden (head down) or not, and turned how far from
+	 * the camera, in degrees. Most of the shots never give it away: only one or two look back.
+	 */
+	private record Look(boolean veiled, float turn) {
+		static final Look STARING = new Look(false, 0f);
+	}
+
 	private Cinematic() {
 	}
 
@@ -61,7 +69,7 @@ final class Cinematic {
 			hud(context, false);
 			// As it is played: the story's fog over everything. The camera is a spectator, whom the
 			// story leaves alone, so the fog is set here as the server would set it in the second act.
-			context.runOnClient(mc -> com.wolfsmask.occupant.client.ClientFog.set(112.0f, 1));
+			context.runOnClient(mc -> com.wolfsmask.occupant.client.ClientFog.set(120.0f, 1));
 			context.getInput().resizeWindow(1920, 1080);
 			context.waitTicks(20);
 
@@ -110,7 +118,7 @@ final class Cinematic {
 		clearView(server, it.offset(-1, 0, -3), cam.offset(1, 0, 3), Math.min(it.getY(), cam.getY()) + 1, 14);
 		Vec3 eye = new Vec3(cam.getX() + 0.5, cam.getY() + 1.6 + EYE, cam.getZ() + 0.5);
 		camera(context, game, eye, new Vec3(it.getX() + 0.5, it.getY() + 3.0, it.getZ() + 0.5), 12700);
-		place(server, it, eye);
+		place(server, it, eye, new Look(true, 75f));      // in profile, head down: it has not looked round. Yet.
 		context.waitTicks(20);
 		server.runCommand("execute as @p at @s run tp @s ~ ~ ~ ~9 ~");      // it in the left third, as if half-turned to it
 		still(context, game, "cinematic-treeline");
@@ -133,7 +141,7 @@ final class Cinematic {
 			Vec3 eye = findCamera(level, player(s), it, 0.6, -1.0, new double[]{16, 20, 24}, 2.0, floor.getY() + 10.0, door, well);
 			return new Shot(it, eye, door.lerp(chest(it), 0.4));
 		});
-		take(context, game, shot, 13000, "cinematic-village");
+		take(context, game, shot, 13000, "cinematic-village", new Look(true, 160f));   // its back to you, at the house
 
 		// And inside the house, at dusk: the real event, looking towards the dark hallway.
 		server.runCommand("kill " + ALL);
@@ -178,7 +186,7 @@ final class Cinematic {
 			Vec3 eye = findCamera(level, player(s), it, -0.6, -1.0, new double[]{12, 15, 18}, 2.4, 0, gate, yard);
 			return new Shot(it, eye, rel(floor, 0.5, 3.0, -4.0).lerp(chest(it), 0.45));
 		});
-		take(context, game, shot, 12500, "cinematic-ruin");
+		take(context, game, shot, 12500, "cinematic-ruin", new Look(true, 0f));         // facing you, face hidden
 	}
 
 	/** A camp at night, its fire lit again, and it just past the fire, where the light still reaches. */
@@ -210,7 +218,7 @@ final class Cinematic {
 			Vec3 eye = findCamera(level, player(s), it, -0.2, -1.0, new double[]{17, 19, 22}, 2.8, 0, middle, gate);
 			return new Shot(it, eye, rel(floor, 0.5, 1.5, 0.5).lerp(chest(it), 0.5));
 		});
-		take(context, game, shot, 13800, "cinematic-graves");
+		take(context, game, shot, 13800, "cinematic-graves", new Look(true, 180f));    // its back to you, over the open grave
 	}
 
 	/**
@@ -223,9 +231,9 @@ final class Cinematic {
 		double[] fog = server.computeOnServer(s -> {
 			ServerPlayer p = player(s);
 			Director.get().data(p).setAct(1);
-			double start = com.wolfsmask.occupant.director.Fog.startFor(p, Director.get().haunt(p));
+			double start = com.wolfsmask.occupant.director.Fog.seenUpTo(p, Director.get().haunt(p));
 			double end = com.wolfsmask.occupant.director.Fog.endFor(p, Director.get().haunt(p));
-			double d = Math.max(16.0, Math.min(90.0, start - 4.0));
+			double d = Math.max(16.0, Math.min(90.0, start - 2.0));
 			fellTrees(s.overworld(), floor, (int) d + 8);     // nothing between the camera and it
 			Occupant.LOGGER.info("[client-gametest] fog begins {} off; the camera will be {} off", start, d);
 			return new double[]{d, end};
@@ -243,7 +251,7 @@ final class Cinematic {
 		// A long lens: it is a long way off, and the fog piles up behind it.
 		int fov = context.computeOnClient(mc -> mc.options.fov().get());
 		context.runOnClient(mc -> mc.options.fov().set(34));
-		take(context, game, shot, 12950, "cinematic-fog");
+		take(context, game, shot, 12950, "cinematic-fog", new Look(true, 60f));
 		context.runOnClient(mc -> mc.options.fov().set(fov));
 	}
 
@@ -435,6 +443,11 @@ final class Cinematic {
 
 	/** Puts it there, facing the camera, the way /occupant here does. */
 	private static void place(TestServerContext server, BlockPos feet, Vec3 facing) {
+		place(server, feet, facing, Look.STARING);
+	}
+
+	/** Puts it there, stood as {@code look} says. */
+	private static void place(TestServerContext server, BlockPos feet, Vec3 facing, Look look) {
 		server.runCommand("kill " + ALL);
 		server.runOnServer(s -> {
 			ServerLevel level = s.overworld();
@@ -442,12 +455,13 @@ final class Cinematic {
 			if (e == null) return;
 			e.standAlone(player(s));
 			Vec3 at = Vec3.atBottomCenterOf(feet);
-			float yaw = Sight.yawBetween(at, facing);
+			float yaw = Sight.yawBetween(at, facing) + look.turn();
 			e.snapTo(at.x, at.y, at.z, yaw, 0.0f);
 			e.setYHeadRot(yaw);
 			e.setYBodyRot(yaw);
-			e.setMode(OccupantEntity.Mode.STARE);
-			e.setForm(OccupantEntity.Form.REVEALED);
+			e.setMode(look.turn() == 0f ? OccupantEntity.Mode.STARE : OccupantEntity.Mode.IDLE);
+			e.setForm(look.veiled() ? OccupantEntity.Form.VEILED : OccupantEntity.Form.REVEALED);
+			if (look.turn() != 0f) e.setGazeLocked(false);
 			level.addFreshEntity(e);
 		});
 	}
@@ -457,8 +471,12 @@ final class Cinematic {
 	 * anyone to stay.
 	 */
 	private static void take(ClientGameTestContext context, TestSingleplayerContext game, Shot shot, int time, String name) {
+		take(context, game, shot, time, name, Look.STARING);
+	}
+
+	private static void take(ClientGameTestContext context, TestSingleplayerContext game, Shot shot, int time, String name, Look look) {
 		camera(context, game, shot.eye(), shot.look(), time);
-		place(game.getServer(), shot.it(), shot.eye());
+		place(game.getServer(), shot.it(), shot.eye(), look);
 		context.waitTicks(20);
 		Occupant.LOGGER.info("[client-gametest] {}: it at {}, camera at {}, {} in sight", name, shot.it(), shot.eye(),
 				context.computeOnClient(OccupantClientGameTest::seen));

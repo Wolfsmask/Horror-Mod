@@ -61,16 +61,25 @@ There are **no pop-out scares with a loud noise**. A bang makes you jump and the
 discharges exactly the tension the rest of the mod spent an hour building. When it finally gets
 to you, the sound drops away instead.
 
-There is a **fog**. At first you can see about eight chunks; it comes in half a chunk with each
-act, to about six by the end, a little more at night, and all the way in while it is close, as
-if it brings the fog with it. Far off, it stands **just this side of where the fog begins**: the
-furthest thing you can see, seen whole, never lost in it. And the animals know before you do:
+There is a **fog**, a real one: it begins a few blocks from you and thickens all the way out,
+until at about ninety blocks you cannot see anything at all. It comes in ten blocks with each act,
+to about sixty by the end, closer at night, and right round you while it is close, as if it
+brings the fog with it. Far off, it stands **where it can only just be made out**: a grey shape
+in the fog, never so deep in it that you could tell yourself it was a tree. And the animals know before you do:
 when it is out there, the cows stop grazing and turn to look at it. Follow their eyes.
 
 If it stands in plain view for **ten seconds and your crosshair never comes near it**, you are
 told: *something is watching you.* Never the same words twice running, and never quite the
 same way (a line on the screen, a thought, your own name in chat saying it), and less patient
 the further the story has gone and the more often you have ignored it.
+
+### The rules
+
+Once the story has started, you are in its world, and you play it fair. Go through a portal and
+you are back where you were before you stepped in: *It does not want you in there.* Switch to
+creative or spectator and you are put back in survival: *It doesn't want you breaking the
+rules.* (Not while the story is paused, not if you chose to leave it alone at the start, and not
+once it has let you go.)
 
 ### Small things
 
@@ -243,8 +252,9 @@ need rebuilding for the next.
 | `chases` | `true` | Act 4 hunts |
 | `chaseDamage` | `0.0` | Damage if a chase catches you. `0` = it only scares you |
 | `fog` | `true` | The fog over the world |
-| `fogChunks` | `8` | How far you can see at first, in chunks |
-| `fogClosesIn` | `true` | The fog comes in as the story goes on (to about six chunks), at night, and when it is close |
+| `fogChunks` | `8` | How thick the fog is: about twelve blocks of seeing for each (8 = thick at about 96 blocks) |
+| `fogClosesIn` | `true` | The fog comes in as the story goes on (to about 66 blocks), at night, and when it is close |
+| `keepToTheRules` | `true` | Once the story starts, no other dimensions (*It does not want you in there*) and no creative or spectator (*It doesn't want you breaking the rules*). Not while the story is paused |
 | `fakeMessages` | `true` | Fake chat, join and advancement messages |
 | `interruptSleep` | `true` | Occasionally "there are monsters nearby" |
 | `requireAlone` | `true` | Visual encounters only when no other player is within `aloneRadius` |

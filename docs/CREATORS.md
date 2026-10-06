@@ -81,6 +81,8 @@ killing anything. The ending ones are hidden until you get them.
   ground. If you're in a hurry for the last night, `/time set night` is fair game.
 - **Explore.** The houses, the abandoned villages, ruined keeps, camps, chapels, watchtowers,
   radio shacks, lighthouses... and its lair. Read the pages you find out loud.
+- **No creative, no Nether.** Once the story starts, it won't let you: it puts you back in
+  survival, and brings you back out of any portal. That's part of it; play it straight.
 - **Don't fight it.** It can't be hurt. Hit it and it's simply gone.
 - **If nothing seems to be happening**, `/occupant check` tells you why (too bright, not alone,
   still in the quiet start...). It only tells you; nothing in the world changes.
@@ -105,7 +107,8 @@ killing anything. The ending ones are hidden until you get them.
 ## 4. B-roll and pickup shots
 
 Need a clean shot after the fact, for the intro, the thumbnail or a re-take? Turn cheats on
-(or open to LAN with cheats), then:
+(or open to LAN with cheats), then. **Pause the story first** (`/occupant pause @s`) if you want
+creative or spectator for the camera; it won't allow them otherwise:
 
 ```
 /occupant here 60                      put it sixty blocks in front of you, right now

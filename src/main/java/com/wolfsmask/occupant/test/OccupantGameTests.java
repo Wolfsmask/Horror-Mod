@@ -475,10 +475,10 @@ public final class OccupantGameTests {
 		data.setAct(HauntData.MAX_ACT);
 		float last = Fog.endFor(player, director.haunt(player));
 		Occupant.LOGGER.info("[gametest] fog: first act {}, last act {}", first, last);
-		helper.assertTrue(first >= 112 && first <= 128, "About eight chunks of fog at first, not " + first);
-		helper.assertTrue(last >= 88 && last <= first - 24, "About six chunks by the end, not " + last);
-		helper.assertTrue(FogLine.edgeFar(last) < FogLine.start(last) && FogLine.edgeNear(last) > 36,
-				"The band it stands in is short of the fog, and further than it ever stays");
+		helper.assertTrue(first >= 84 && first <= 96, "About ninety blocks of fog at first, not " + first);
+		helper.assertTrue(last >= 50 && last <= first - 24, "About sixty by the end, not " + last);
+		helper.assertTrue(FogLine.start(last) < FogLine.edgeNear(last) && FogLine.edgeFar(last) < last && FogLine.edgeNear(last) >= 20,
+				"The fog begins near, and the band it stands in is inside it, short of where it is thick");
 		helper.succeed();
 	}
 
@@ -504,15 +504,15 @@ public final class OccupantGameTests {
 			BlockPos centre = helper.absolutePos(BlockPos.ZERO).offset(0, 0, 900).atY(200);
 			director.data(player).setAct(1);
 			float end = Fog.endFor(player, director.haunt(player));
-			double start = FogLine.start(end);
-			helper.assertTrue(end >= 84 && end <= 96, "Six chunks of fog in the first act, not " + end);
+			double start = FogLine.edgeFar(end);
+			helper.assertTrue(end >= 60 && end <= 72, "Seventy blocks of fog in the first act, not " + end);
 			int r = (int) start + 10;
 			net.minecraft.world.level.block.state.BlockState stone = net.minecraft.world.level.block.Blocks.STONE.defaultBlockState();
 			for (int dx = -r; dx <= r; dx++) {
 				for (int dz = -r; dz <= r; dz++) {
 					double d = Math.sqrt(dx * dx + dz * dz);
 					if (d > r) continue;
-					int top = d >= start - 12 && d <= start + 3 ? 5 : 0;
+					int top = d >= FogLine.edgeNear(end) - 2 && d <= start + 3 ? 5 : 0;
 					for (int y = 0; y <= top; y++) {
 						level.setBlock(centre.offset(dx, y, dz), stone, net.minecraft.world.level.block.Block.UPDATE_CLIENTS);
 					}
@@ -529,8 +529,8 @@ public final class OccupantGameTests {
 			OccupantEntity e = found.get(0);
 			double dist = Math.hypot(e.getX() - player.getX(), e.getZ() - player.getZ());
 			Occupant.LOGGER.info("[gametest] fog thick at {}, begins at {}; it stands {} away", end, start, dist);
-			helper.assertTrue(dist >= FogLine.edgeNear(end) - 1.0 && dist <= start,
-					"It should stand just short of the fog (" + FogLine.edgeNear(end) + " to " + start + "), not " + dist);
+			helper.assertTrue(dist >= FogLine.edgeNear(end) - 1.0 && dist <= start + 1.0,
+					"It should stand in the fog where it can just be made out (" + FogLine.edgeNear(end) + " to " + start + "), not " + dist);
 			helper.succeed();
 		} finally {
 			director.stopCurrent(player);

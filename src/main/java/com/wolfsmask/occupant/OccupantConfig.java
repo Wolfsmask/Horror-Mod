@@ -41,6 +41,9 @@ public final class OccupantConfig {
 	/** "subtle", "normal" or "relentless": how hard the whole story leans on you, on top of the two below. */
 	public String intensity = "normal";
 
+	/** Once the story starts: no leaving its world through portals, and no creative or spectator. */
+	public boolean keepToTheRules = true;
+
 	/** Only sounds and things in the world: it is never seen. For those who want the dread without the sight of it. */
 	public boolean soundOnly = false;
 

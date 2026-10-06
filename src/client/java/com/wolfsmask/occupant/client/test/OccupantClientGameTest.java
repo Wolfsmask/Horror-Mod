@@ -97,6 +97,15 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 			context.waitTicks(120);   // the way in: a few seconds of black, then the world
 			TestServerContext server = game.getServer();
 			int errorsBefore = server.computeOnServer(s -> Director.get() == null ? -1 : Director.get().totalErrors());
+
+			// The rules, once the story has started: try creative, and it puts you back.
+			server.runCommand("gamemode creative @p");
+			context.waitTicks(30);
+			boolean fair = context.computeOnClient(mc -> mc.player != null && !mc.player.isCreative());
+			Occupant.LOGGER.info("[client-gametest] creative refused: {}", fair);
+			check(fair, "switching to creative should be refused once the story has started");
+			// The photographs below need a free camera.
+			server.runOnServer(s -> com.wolfsmask.occupant.OccupantConfig.get().keepToTheRules = false);
 			check(errorsBefore >= 0, "the Director should be running once a world is open");
 
 			// A clear day with nothing else in shot, the player standing still and facing south.
@@ -233,7 +242,7 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 			context.waitTicks(260);
 			int edge = server.computeOnServer(s -> {
 				ServerPlayer p = s.getPlayerList().getPlayers().get(0);
-				return (int) Math.floor(com.wolfsmask.occupant.director.Fog.startFor(p, Director.get().haunt(p))) - 4;
+				return (int) Math.floor(com.wolfsmask.occupant.director.Fog.seenUpTo(p, Director.get().haunt(p))) - 2;
 			});
 			server.runCommand("kill " + ALL);
 			server.runCommand("execute as @p at @s run occupant here " + Math.max(8, Math.min(120, edge)) + " stare");

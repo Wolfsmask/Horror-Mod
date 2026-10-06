@@ -19,7 +19,7 @@ public final class Fog {
 	/** While it is this close, the fog rolls in round the player. */
 	private static final double ROLLS_IN_WITHIN = 28.0;
 	/** How near the fog comes when it does: still well behind it, so it is never lost in it. */
-	private static final float ROLLED_IN = 64.0f;
+	private static final float ROLLED_IN = 36.0f;
 
 	private Fog() {
 	}
@@ -31,16 +31,23 @@ public final class Fog {
 	public static float endFor(ServerPlayer player, Haunt haunt) {
 		OccupantConfig cfg = OccupantConfig.get();
 		if (!cfg.fog || cfg.fogChunks <= 0) return 0.0f;
-		float end = cfg.fogChunks * 16.0f;
+		// A real fog: about twelve blocks of seeing for each "chunk" of the setting, 96 by default.
+		float end = cfg.fogChunks * 12.0f;
 		int act = haunt.data.act;
-		// Half a chunk nearer with each act after the first: 8, 7.5, 7, 6.5 chunks with the defaults.
-		if (cfg.fogClosesIn) end -= 8.0f * Mth.clamp(act - 1, 0, 3);
-		if (cfg.fogClosesIn && Compat.level(player).isDarkOutside()) end -= 8.0f;
+		// Ten blocks nearer with each act after the first: 96, 86, 76, 66 with the defaults.
+		if (cfg.fogClosesIn) end -= 10.0f * Mth.clamp(act - 1, 0, 3);
+		if (cfg.fogClosesIn && Compat.level(player).isDarkOutside()) end -= 12.0f;
 		if (cfg.fogClosesIn && closeBy(player, haunt)) end = Math.min(end, ROLLED_IN);
 		int view = Compat.viewDistance(player);
 		if (view > 2) end = Math.min(end, view * 16.0f);
 		end = haunt.fogAfterEvents(end, Compat.level(player).getServer().getTickCount());
 		return end <= 0 ? 0.0f : Math.max(FogLine.NEAREST, end);
+	}
+
+	/** How far off it can still be made out through the fog, or a long way if there is none. */
+	public static double seenUpTo(ServerPlayer player, Haunt haunt) {
+		float end = endFor(player, haunt);
+		return end <= 0 ? 4096.0 : FogLine.edgeFar(end);
 	}
 
 	/** Where the fog begins for this player now, or a long way off if there is none. */

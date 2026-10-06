@@ -28,6 +28,9 @@ public final class Haunt {
 	float fogSent = -1.0f;
 	/** The act this player's client was last told, or -1 before the first time. */
 	int actSent = -1;
+	/** Where they last stood in its world, out of any portal: where they are brought back to. */
+	@Nullable
+	net.minecraft.core.BlockPos lastSafe;
 	/** Not again in the lair before this server tick. */
 	long lairAgainAt;
 	/** While above 0, the fog is no further than this (blocks): something is bringing it in. */
@@ -133,7 +136,7 @@ public final class Haunt {
 		if (!Spots.canStand(world, feet)) return null;
 		// Never in the fog where it can be seen: there it would only be a smudge. (Somewhere out of
 		// sight, waiting to be come across, the fog does not matter.)
-		if (Vec3.atBottomCenterOf(feet).distanceTo(player.position()) > Fog.startFor(player, this)
+		if (Vec3.atBottomCenterOf(feet).distanceTo(player.position()) > Fog.seenUpTo(player, this)
 				&& !Sight.isHidden(player, feet.above())) return null;
 		OccupantEntity e = ModEntities.OCCUPANT.create(world, EntitySpawnReason.EVENT);
 		if (e == null) return null;
