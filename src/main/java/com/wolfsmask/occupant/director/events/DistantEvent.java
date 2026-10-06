@@ -37,9 +37,10 @@ public final class DistantEvent extends HorrorEvent {
 	@Override
 	public boolean fits(EventContext ctx) {
 		Situation s = ctx.situation;
-		// Outdoors, with the sky in view, and dim enough that a pale shape is ambiguous.
+		// Outdoors, with the sky in view, and dim enough that a pale shape is ambiguous, or in the
+		// fog, where even by day a dark shape at the very edge of it could be anything.
 		return ctx.aloneEnough() && !s.underground() && !s.sheltered() && !s.inCombat() && !s.busy()
-				&& !s.inWater() && (s.night() || s.light() <= 11);
+				&& !s.inWater() && (s.night() || s.light() <= 11 || Fog.endFor(ctx.player, ctx.haunt) > 0);
 	}
 
 	@Override
