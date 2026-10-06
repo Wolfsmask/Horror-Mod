@@ -1,4 +1,4 @@
-# 26.4-snapshot-2 client on b88c796da14199b4048861a56affd683712a573e: success
+# 26.4-snapshot-2 client on a7141027e72dfb537f6d53fa58b0fe5f01c1e612: success
 === client.log
 /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/ArenaGameTests.java:104: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
 /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:64: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
@@ -12,98 +12,98 @@
 Note: /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/OccupantClient.java uses or overrides a deprecated API.
 	- fabric-client-gametest-api-v1 6.0.8+4be74c3f04
 	- occupant 0.15.0+mc26.4-snapshot-2
-[14:30:30] [Render thread/INFO] (occupant) The Occupant has moved in. Type /occupant check in game to test it.
-[14:30:31] [Render thread/INFO] (Minecraft) Reloading ResourceManager: vanilla, vanilla, fabric-advancement-api-v1, fabric-api, fabric-api-base, fabric-api-lookup-api-v1, fabric-biome-api-v1, fabric-block-api-v1, fabric-block-getter-api-v2, fabric-client-gametest-api-v1, fabric-command-api-v2, fabric-content-registries-v0, fabric-convention-tags-v2, fabric-crash-report-info-v1, fabric-creative-tab-api-v1, fabric-data-attachment-api-v1, fabric-data-generation-api-v1, fabric-debug-api-v1, fabric-dimensions-v1, fabric-entity-events-v1, fabric-events-interaction-v0, fabric-game-rule-api-v1, fabric-gametest-api-v1, fabric-item-api-v1, fabric-key-mapping-api-v1, fabric-lifecycle-events-v1, fabric-loot-api-v3, fabric-menu-api-v1, fabric-message-api-v1, fabric-model-loading-api-v1, fabric-networking-api-v1, fabric-object-builder-api-v1, fabric-particles-v1, fabric-permission-api-v1, fabric-recipe-api-v1, fabric-registry-sync-v0, fabric-renderer-api-v1, fabric-renderer-indigo, fabric-rendering-fluids-v1, fabric-rendering-v1, fabric-resource-conditions-api-v1, fabric-resource-loader-v0, fabric-resource-loader-v1, fabric-screen-api-v1, fabric-serialization-api-v1, fabric-sound-api-v1, fabric-tag-api-v1, fabric-transfer-api-v1, fabric-transitive-access-wideners-v1, fabricloader, occupant
-	at knot//net.minecraft.client.Minecraft.wrapMethod$bbh000$fabric-client-gametest-api-v1$onRun(Minecraft.java:5223)
-[14:30:37] [Render thread/INFO] (occupant) [client] the gate screen has been drawn
-[14:30:41] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-gate -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0000_occupant-gate.png
-[14:30:55] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-gate-later -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0001_occupant-gate-later.png
-[14:30:56] [Render thread/INFO] (occupant) [client] gate clicked at 213, 223: leave it alone
-[14:30:57] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-left-alone -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0002_occupant-left-alone.png
-[14:30:58] [Render thread/INFO] (occupant) [client] gate clicked at 213, 148: create world
-[14:31:00] [Render thread/INFO] (occupant) [client] creating the world straight away
-[14:31:22] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-quick-world -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0003_occupant-quick-world.png
-[14:31:23] [Server thread/INFO] (Minecraft) Stopping singleplayer server as player logged out
-[14:31:23] [Server thread/INFO] (Minecraft) Stopping server
-[14:31:28] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-title -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0004_occupant-title.png
-[14:31:29] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: null screen: net.minecraft.client.gui.screens.GenericMessageScreen@c98afaa
-[14:31:30] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: null screen: net.minecraft.client.gui.screens.LevelLoadingScreen@ef39393
-[14:31:30] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: null screen: net.minecraft.client.gui.screens.LevelLoadingScreen@ef39393
-[14:31:30] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: null screen: net.minecraft.client.gui.screens.LevelLoadingScreen@ef39393
-[14:31:30] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: null screen: net.minecraft.client.gui.screens.LevelLoadingScreen@ef39393
-[14:31:30] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: null screen: net.minecraft.client.gui.screens.LevelLoadingScreen@ef39393
-[14:31:30] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: null screen: net.minecraft.client.gui.screens.LevelLoadingScreen@ef39393
-[14:31:30] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: null screen: net.minecraft.client.gui.screens.LevelLoadingScreen@ef39393
-[14:31:30] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: null screen: net.minecraft.client.gui.screens.LevelLoadingScreen@ef39393
-[14:31:30] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: null screen: net.minecraft.client.gui.screens.LevelLoadingScreen@ef39393
-[14:31:30] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: null screen: net.minecraft.client.gui.screens.LevelLoadingScreen@ef39393
-[14:31:30] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: ClientLevel screen: net.minecraft.client.gui.screens.LevelLoadingScreen@ef39393
-[14:31:31] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: ClientLevel screen: net.minecraft.client.gui.screens.LevelLoadingScreen@ef39393
-[14:31:31] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: ClientLevel screen: net.minecraft.client.gui.screens.LevelLoadingScreen@ef39393
-[14:31:31] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: ClientLevel screen: net.minecraft.client.gui.screens.LevelLoadingScreen@ef39393
-[14:31:31] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: ClientLevel screen: net.minecraft.client.gui.screens.LevelLoadingScreen@ef39393
-[14:31:31] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: ClientLevel screen: net.minecraft.client.gui.screens.LevelLoadingScreen@ef39393
-[14:31:31] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: ClientLevel screen: net.minecraft.client.gui.screens.LevelLoadingScreen@ef39393
-[14:31:31] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: ClientLevel screen: net.minecraft.client.gui.screens.LevelLoadingScreen@ef39393
-[14:31:31] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: ClientLevel screen: net.minecraft.client.gui.screens.LevelLoadingScreen@ef39393
-[14:31:31] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: ClientLevel screen: net.minecraft.client.gui.screens.LevelLoadingScreen@ef39393
-[14:31:31] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: ClientLevel screen: net.minecraft.client.gui.screens.LevelLoadingScreen@ef39393
-[14:31:31] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: ClientLevel screen: null
-[14:31:42] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-stare -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0005_occupant-stare.png
-[14:31:43] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-veiled -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0006_occupant-veiled.png
-[14:31:45] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-loom -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0007_occupant-loom.png
-[14:31:47] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-chase -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0008_occupant-chase.png
-[14:31:49] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-three-quarter -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0009_occupant-three-quarter.png
-[14:31:51] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-face -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0010_occupant-face.png
-[14:31:52] [Test thread/INFO] (occupant) [client-gametest] pale face pixels in the close-up: 1592
-[14:31:54] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-looking-up -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0011_occupant-looking-up.png
-[14:31:54] [Test thread/INFO] (occupant) [client-gametest] pale pixels looking up at it: 2580
-[14:31:56] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-shove -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0012_occupant-shove.png
-[14:31:58] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-after-shove -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0013_occupant-after-shove.png
+[14:38:26] [Render thread/INFO] (occupant) The Occupant has moved in. Type /occupant check in game to test it.
+[14:38:29] [Render thread/INFO] (Minecraft) Reloading ResourceManager: vanilla, vanilla, fabric-advancement-api-v1, fabric-api, fabric-api-base, fabric-api-lookup-api-v1, fabric-biome-api-v1, fabric-block-api-v1, fabric-block-getter-api-v2, fabric-client-gametest-api-v1, fabric-command-api-v2, fabric-content-registries-v0, fabric-convention-tags-v2, fabric-crash-report-info-v1, fabric-creative-tab-api-v1, fabric-data-attachment-api-v1, fabric-data-generation-api-v1, fabric-debug-api-v1, fabric-dimensions-v1, fabric-entity-events-v1, fabric-events-interaction-v0, fabric-game-rule-api-v1, fabric-gametest-api-v1, fabric-item-api-v1, fabric-key-mapping-api-v1, fabric-lifecycle-events-v1, fabric-loot-api-v3, fabric-menu-api-v1, fabric-message-api-v1, fabric-model-loading-api-v1, fabric-networking-api-v1, fabric-object-builder-api-v1, fabric-particles-v1, fabric-permission-api-v1, fabric-recipe-api-v1, fabric-registry-sync-v0, fabric-renderer-api-v1, fabric-renderer-indigo, fabric-rendering-fluids-v1, fabric-rendering-v1, fabric-resource-conditions-api-v1, fabric-resource-loader-v0, fabric-resource-loader-v1, fabric-screen-api-v1, fabric-serialization-api-v1, fabric-sound-api-v1, fabric-tag-api-v1, fabric-transfer-api-v1, fabric-transitive-access-wideners-v1, fabricloader, occupant
+	at knot//net.minecraft.client.Minecraft.wrapMethod$bca000$fabric-client-gametest-api-v1$onRun(Minecraft.java:5723)
+[14:38:35] [Render thread/INFO] (occupant) [client] the gate screen has been drawn
+[14:38:39] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-gate -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0000_occupant-gate.png
+[14:38:53] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-gate-later -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0001_occupant-gate-later.png
+[14:38:53] [Render thread/INFO] (occupant) [client] gate clicked at 213, 223: leave it alone
+[14:38:54] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-left-alone -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0002_occupant-left-alone.png
+[14:38:56] [Render thread/INFO] (occupant) [client] gate clicked at 213, 148: create world
+[14:38:58] [Render thread/INFO] (occupant) [client] creating the world straight away
+[14:39:19] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-quick-world -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0003_occupant-quick-world.png
+[14:39:20] [Server thread/INFO] (Minecraft) Stopping singleplayer server as player logged out
+[14:39:20] [Server thread/INFO] (Minecraft) Stopping server
+[14:39:25] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-title -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0004_occupant-title.png
+[14:39:26] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: null screen: net.minecraft.client.gui.screens.GenericMessageScreen@6ca8b600
+[14:39:27] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: null screen: net.minecraft.client.gui.screens.LevelLoadingScreen@402956d
+[14:39:27] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: null screen: net.minecraft.client.gui.screens.LevelLoadingScreen@402956d
+[14:39:27] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: null screen: net.minecraft.client.gui.screens.LevelLoadingScreen@402956d
+[14:39:27] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: null screen: net.minecraft.client.gui.screens.LevelLoadingScreen@402956d
+[14:39:27] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: null screen: net.minecraft.client.gui.screens.LevelLoadingScreen@402956d
+[14:39:27] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: null screen: net.minecraft.client.gui.screens.LevelLoadingScreen@402956d
+[14:39:27] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: null screen: net.minecraft.client.gui.screens.LevelLoadingScreen@402956d
+[14:39:27] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: null screen: net.minecraft.client.gui.screens.LevelLoadingScreen@402956d
+[14:39:27] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: null screen: net.minecraft.client.gui.screens.LevelLoadingScreen@402956d
+[14:39:27] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: null screen: net.minecraft.client.gui.screens.LevelLoadingScreen@402956d
+[14:39:27] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: ClientLevel screen: net.minecraft.client.gui.screens.LevelLoadingScreen@402956d
+[14:39:27] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: ClientLevel screen: net.minecraft.client.gui.screens.LevelLoadingScreen@402956d
+[14:39:28] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: ClientLevel screen: net.minecraft.client.gui.screens.LevelLoadingScreen@402956d
+[14:39:28] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: ClientLevel screen: net.minecraft.client.gui.screens.LevelLoadingScreen@402956d
+[14:39:28] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: ClientLevel screen: net.minecraft.client.gui.screens.LevelLoadingScreen@402956d
+[14:39:28] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: ClientLevel screen: net.minecraft.client.gui.screens.LevelLoadingScreen@402956d
+[14:39:28] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: ClientLevel screen: net.minecraft.client.gui.screens.LevelLoadingScreen@402956d
+[14:39:28] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: ClientLevel screen: net.minecraft.client.gui.screens.LevelLoadingScreen@402956d
+[14:39:28] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: ClientLevel screen: net.minecraft.client.gui.screens.LevelLoadingScreen@402956d
+[14:39:28] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: ClientLevel screen: net.minecraft.client.gui.screens.LevelLoadingScreen@402956d
+[14:39:28] [Render thread/INFO] (fabric-client-gametest-api-v1) World loading finished: ClientLevel screen: null
+[14:39:39] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-stare -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0005_occupant-stare.png
+[14:39:40] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-veiled -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0006_occupant-veiled.png
+[14:39:42] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-loom -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0007_occupant-loom.png
+[14:39:44] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-chase -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0008_occupant-chase.png
+[14:39:46] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-three-quarter -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0009_occupant-three-quarter.png
+[14:39:48] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-face -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0010_occupant-face.png
+[14:39:49] [Test thread/INFO] (occupant) [client-gametest] pale face pixels in the close-up: 1582
+[14:39:52] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-looking-up -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0011_occupant-looking-up.png
+[14:39:52] [Test thread/INFO] (occupant) [client-gametest] pale pixels looking up at it: 2403
+[14:39:53] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-shove -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0012_occupant-shove.png
+[14:39:56] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-after-shove -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0013_occupant-after-shove.png
+[14:39:57] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-corridor -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0014_occupant-corridor.png
 --- last of the server thread in client.log ---
-[14:35:24] [Server thread/INFO] (Minecraft) System chat: Set minecraft:overworld to 12900 tick(s)
-[14:35:24] [Server thread/INFO] (occupant) [client-gametest] felled 8867 blocks of trees round BlockPos{x=19, y=63, z=100}
-[14:35:24] [Server thread/INFO] (occupant) [client-gametest] fog begins 52.0 off; the camera will be 48.0 off
-[14:35:36] [Server thread/WARN] (Minecraft) Can't keep up! Is the server overloaded? Running 19421ms or 388 ticks behind
-[14:35:52] [Server thread/INFO] (occupant) [client-gametest] camera 48.0 blocks out, turned -60: everything in view
-[14:35:52] [Server thread/INFO] (Minecraft) System chat: Killed The Occupant
-[14:35:52] [Server thread/INFO] (Minecraft) System chat: Set minecraft:overworld to 12900 tick(s)
-[14:35:52] [Server thread/INFO] (Minecraft) System chat: Teleported Player448 to 43.500000, 63.080000, 58.930000
-[14:35:58] [Server thread/INFO] (Minecraft) System chat: No entity was found
-[14:36:01] [Server thread/INFO] (Minecraft) System chat: Killed The Occupant
-[14:36:01] [Server thread/INFO] (Minecraft) System chat: Set Player448's game mode to Survival Mode
-[14:36:01] [Server thread/INFO] (Minecraft) Player448 lost connection: Disconnected
-[14:36:01] [Server thread/INFO] (Minecraft) System chat: Player448 left the game
-[14:36:01] [Server thread/INFO] (Minecraft) Stopping singleplayer server as player logged out
-[14:36:01] [Server thread/INFO] (Minecraft) Stopping server
-[14:36:01] [Server thread/INFO] (Minecraft) Saving players
-[14:36:01] [Server thread/INFO] (Minecraft) Saving worlds
-[14:36:01] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[New World]'/minecraft:overworld
-[14:36:03] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[New World]'/minecraft:the_nether
-[14:36:03] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[New World]'/minecraft:the_end
+[14:43:20] [Server thread/INFO] (Minecraft) System chat: Set minecraft:overworld to 12900 tick(s)
+[14:43:21] [Server thread/INFO] (occupant) [client-gametest] felled 14425 blocks of trees round BlockPos{x=60, y=68, z=85}
+[14:43:21] [Server thread/INFO] (occupant) [client-gametest] fog begins 52.0 off; the camera will be 48.0 off
+[14:43:30] [Server thread/WARN] (Minecraft) Can't keep up! Is the server overloaded? Running 18212ms or 364 ticks behind
+[14:43:50] [Server thread/INFO] (occupant) [client-gametest] camera 48.0 blocks out, turned 0: everything in view
+[14:43:50] [Server thread/INFO] (Minecraft) System chat: Killed The Occupant
+[14:43:50] [Server thread/INFO] (Minecraft) System chat: Set minecraft:overworld to 12950 tick(s)
+[14:43:50] [Server thread/INFO] (Minecraft) System chat: Teleported Player636 to 108.500000, 72.080000, 85.500000
+[14:43:57] [Server thread/INFO] (Minecraft) System chat: No entity was found
+[14:44:00] [Server thread/INFO] (Minecraft) System chat: Killed The Occupant
+[14:44:00] [Server thread/INFO] (Minecraft) System chat: Set Player636's game mode to Survival Mode
+[14:44:00] [Server thread/INFO] (Minecraft) Player636 lost connection: Disconnected
+[14:44:00] [Server thread/INFO] (Minecraft) System chat: Player636 left the game
+[14:44:00] [Server thread/INFO] (Minecraft) Stopping singleplayer server as player logged out
+[14:44:00] [Server thread/INFO] (Minecraft) Stopping server
+[14:44:00] [Server thread/INFO] (Minecraft) Saving players
+[14:44:00] [Server thread/INFO] (Minecraft) Saving worlds
+[14:44:01] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[New World]'/minecraft:overworld
+[14:44:02] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[New World]'/minecraft:the_nether
+[14:44:02] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[New World]'/minecraft:the_end
 --- tail of client.log ---
 	at knot//net.minecraft.client.Minecraft.disconnect(Minecraft.java:2262)
 	at knot//net.minecraft.client.Minecraft.disconnect(Minecraft.java:2219)
-	at knot//net.minecraft.client.Minecraft.mdd09d84$fabric-client-gametest-api-v1$lambda$deferDisconnect$0$0(Minecraft.java:5278)
-	at knot//net.minecraft.client.Minecraft.postRunTasks(Minecraft.java:5316)
-	at knot//net.minecraft.client.Minecraft.handler$bbh000$fabric-client-gametest-api-v1$postRunTasksHook(Minecraft.java:5255)
+	at knot//net.minecraft.client.Minecraft.md904b6f$fabric-client-gametest-api-v1$lambda$deferDisconnect$0$0(Minecraft.java:5778)
+	at knot//net.minecraft.client.Minecraft.postRunTasks(Minecraft.java:5816)
+	at knot//net.minecraft.client.Minecraft.handler$bca000$fabric-client-gametest-api-v1$postRunTasksHook(Minecraft.java:5755)
 	at knot//net.minecraft.client.Minecraft.runTick(Minecraft.java:1239)
 	at knot//net.minecraft.client.Minecraft.run$mixinextras$wrapped$270(Minecraft.java:966)
 	at knot//net.minecraft.client.Minecraft.mixinextras$bridge$run$mixinextras$wrapped$270$271(Minecraft.java)
-	at knot//net.minecraft.client.Minecraft.wrapMethod$bbh000$fabric-client-gametest-api-v1$onRun(Minecraft.java:5223)
+	at knot//net.minecraft.client.Minecraft.wrapMethod$bca000$fabric-client-gametest-api-v1$onRun(Minecraft.java:5723)
 	at knot//net.minecraft.client.Minecraft.run(Minecraft.java)
 	at knot//net.minecraft.client.main.Main.main(Main.java:292)
 	at net.fabricmc.loader.impl.game.minecraft.MinecraftGameProvider.launch(MinecraftGameProvider.java:517)
 	at net.fabricmc.loader.impl.launch.knot.Knot.launch(Knot.java:72)
 	at net.fabricmc.loader.impl.launch.knot.KnotClient.main(KnotClient.java:23)
 	at net.fabricmc.devlaunchinjector.Main.main(Main.java:86)
-[14:36:01] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[New World]'/minecraft:overworld
-[14:36:03] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[New World]'/minecraft:the_nether
-[14:36:03] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[New World]'/minecraft:the_end
-[14:36:03] [Render thread/INFO] (Minecraft) Stopping!
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/client-1791297003123.json
+[14:44:01] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[New World]'/minecraft:overworld
+[14:44:02] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[New World]'/minecraft:the_nether
+[14:44:02] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[New World]'/minecraft:the_end
+[14:44:02] [Render thread/INFO] (Minecraft) Stopping!
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/client-1791297480067.json
 
 [Incubating] Problems report is available at: file:///home/runner/work/Horror-Mod/Horror-Mod/build/reports/problems/problems-report.html
 
-BUILD SUCCESSFUL in 6m 7s
+BUILD SUCCESSFUL in 6m 8s
 7 actionable tasks: 7 executed
