@@ -67,7 +67,7 @@ final class Cinematic {
 			BlockPos[] centres = {woods[0].offset(-110, 0, 80), woods[1].offset(90, 0, -70), woods[0].offset(200, 0, 40),
 					woods[1].offset(-40, 0, 200), spawn.offset(0, 0, 120), spawn};
 			int next = 0;
-			BlockPos ruin = null, camp = null, graves = null, village = null;
+			BlockPos ruin = null, camp = null, graves = null, village = null, fog = null;
 			for (BlockPos c : centres) {
 				BlockPos floor = server.computeOnServer(s -> ForestGallery.clearing(s.overworld(), c));
 				if (floor == null) continue;
@@ -76,15 +76,17 @@ final class Cinematic {
 					case 1 -> ruin = floor;
 					case 2 -> camp = floor;
 					case 3 -> graves = floor;
+					case 4 -> fog = floor;
 					default -> {
 					}
 				}
-				if (next > 3) break;
+				if (next > 4) break;
 			}
 			if (village != null) village(context, game, village);
 			if (ruin != null) ruin(context, game, ruin);
 			if (camp != null) camp(context, game, camp);
 			if (graves != null) graves(context, game, graves);
+			if (fog != null) fogEdge(context, game, fog);
 		} catch (RuntimeException | AssertionError e) {
 			Occupant.LOGGER.warn("[client-gametest] cinematic stills stopped early", e);
 		} finally {
@@ -206,6 +208,32 @@ final class Cinematic {
 			return new Shot(it, eye, rel(floor, 0.5, 1.5, 0.5).lerp(chest(it), 0.5));
 		});
 		take(context, game, shot, 13800, "cinematic-graves");
+	}
+
+	/**
+	 * Dusk, early in the story: the fog over everything, and it standing just this side of where
+	 * the fog begins, the furthest thing in sight, against the last of the light.
+	 */
+	private static void fogEdge(ClientGameTestContext context, TestSingleplayerContext game, BlockPos floor) {
+		TestServerContext server = game.getServer();
+		server.runCommand("time set 12900");
+		double away = server.computeOnServer(s -> {
+			ServerPlayer p = player(s);
+			Director.get().data(p).setAct(1);
+			double start = com.wolfsmask.occupant.director.Fog.startFor(p, Director.get().haunt(p));
+			double d = Math.max(16.0, Math.min(90.0, start - 4.0));
+			fellTrees(s.overworld(), floor, (int) d + 8);     // nothing between the camera and it
+			Occupant.LOGGER.info("[client-gametest] fog begins {} off; the camera will be {} off", start, d);
+			return d;
+		});
+		context.waitTicks(240);                                 // the fog settles where the story puts it
+		Shot shot = server.computeOnServer(s -> {
+			ServerLevel level = s.overworld();
+			BlockPos it = standNear(level, floor, 0, 0);
+			Vec3 eye = findCamera(level, player(s), it, 1.0, 0.0, new double[]{away}, 1.7, 0);
+			return new Shot(it, eye, Vec3.atBottomCenterOf(it).add(0, 2.4, 0));
+		});
+		take(context, game, shot, 12900, "cinematic-fog");
 	}
 
 	// ---------------------------------------------------------------- the set (server side)
