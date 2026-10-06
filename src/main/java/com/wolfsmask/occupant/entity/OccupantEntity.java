@@ -122,6 +122,17 @@ public class OccupantEntity extends PathfinderMob {
 
 	// ------------------------------------------------------------------ state
 
+	/**
+	 * The game stops drawing an entity past a distance worked out from its hitbox, which for this
+	 * one is a quarter of the size it is drawn: about 67 blocks. It is put further off than that
+	 * (at the very edge of the fog), so it is drawn as far off as it is ever put.
+	 */
+	@Override
+	public boolean shouldRenderAtSqrDistance(double distanceSqr) {
+		double range = 160.0 * getViewScale();
+		return distanceSqr < range * range;
+	}
+
 	public boolean isConcealed() {
 		return this.entityData.get(CONCEALED);
 	}
