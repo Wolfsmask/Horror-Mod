@@ -76,15 +76,17 @@ public final class ScreenEffects {
 	/** The first time in a world: longer, in black, and it tells you. */
 	/** The end of the last night: the same black as the first time, and what it has become. */
 	private static final String[][] ENDING_LINES = {
-			{"It knows how to be you now.", "It will be patient."},
+			{"It knows how to be you now, {player}.", "It will be patient."},
 			{"You let it come all the way.", "Next time it will not need to ask."},
 			{"It was never going to let you leave.", "It is still here."}};
 
 	private static void ended() {
 		String[] lines = ENDING_LINES[ThreadLocalRandom.current().nextInt(ENDING_LINES.length)];
+		Minecraft mc = Minecraft.getInstance();
+		String name = mc.player != null ? mc.player.getName().getString() : "";
 		introAge = 0;
 		introLength = ARRIVAL_TICKS;
-		introLine = lines[0];
+		introLine = lines[0].replace(", {player}", name.isEmpty() ? "" : ", " + name);
 		introSub = lines[1];
 	}
 
