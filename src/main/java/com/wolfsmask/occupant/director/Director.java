@@ -53,6 +53,8 @@ public final class Director {
 	/** Players who woke up since the last tick. Acted on there, never where the game told us. */
 	private final Set<UUID> woke = new HashSet<>();
 	private int totalErrors;
+	private double tickCost;
+	private long worstTick;
 
 	private Director(MinecraftServer server) {
 		this.server = server;
@@ -127,6 +129,19 @@ public final class Director {
 	// ------------------------------------------------------------------ main loop
 
 	public void tick() {
+		long started = System.nanoTime();
+		tickInner();
+		long took = System.nanoTime() - started;
+		tickCost = tickCost * 0.99 + took * 0.01;
+		if (took > worstTick || server.getTickCount() % 6000 == 0) worstTick = took;
+	}
+
+	/** What the Director costs the server each tick, on average and at worst lately, in milliseconds. */
+	public double[] cost() {
+		return new double[]{tickCost / 1e6, worstTick / 1e6};
+	}
+
+	private void tickInner() {
 		OccupantConfig cfg = OccupantConfig.get();
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			Haunt h = null;

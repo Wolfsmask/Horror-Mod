@@ -302,6 +302,8 @@ public final class OccupantGameTests {
 		ServerLevel level = helper.getLevel();
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
 		BlockPos at = helper.absolutePos(new BlockPos(0, 1, 0)).offset(0, 0, -700);
+		// Loaded first: the height of a chunk nobody has loaded is the bottom of the world.
+		for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) level.getChunk((at.getX() >> 4) + dx, (at.getZ() >> 4) + dz);
 		int top = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, at.getX(), at.getZ());
 		BlockPos base = new BlockPos(at.getX(), top - 1, at.getZ());
 		com.wolfsmask.occupant.world.LastCamp.build(level, base, level.getRandom());

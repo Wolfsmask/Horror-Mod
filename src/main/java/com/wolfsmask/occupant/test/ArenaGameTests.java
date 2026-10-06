@@ -53,6 +53,9 @@ public final class ArenaGameTests {
 		/** Forced chunks, as {x, z} pairs. */
 		private final List<int[]> chunks = new ArrayList<>();
 		private final List<String> failures = new ArrayList<>();
+		/** The longest any one event took to find its place and start, and which. */
+		private long slowest;
+		private String slowestId = "";
 
 		private int tick;
 		private int phase;
@@ -232,7 +235,13 @@ public final class ArenaGameTests {
 			for (String id : events) {
 				boolean started = false;
 				for (int i = 0; i < TRIES && !started; i++) {
+					long t = System.nanoTime();
 					started = director.trigger(player, id, true) == Director.TriggerResult.STARTED;
+					long took = System.nanoTime() - t;
+					if (took > slowest) {
+						slowest = took;
+						slowestId = id + " (" + where + ")";
+					}
 					director.stopCurrent(player);
 				}
 				if (!started) failures.add(id + " (" + where + ")");
@@ -246,6 +255,9 @@ public final class ArenaGameTests {
 
 			if (fatal != null) failures.add(fatal);
 			Occupant.LOGGER.info("[gametest] arena failures: {}", failures);
+			Occupant.LOGGER.info("[gametest] slowest event to start: {} in {} ms", slowestId, slowest / 1_000_000);
+			// Finding a place happens inside a server tick: it must never be a visible hitch.
+			helper.assertTrue(slowest < 500_000_000L, "Starting " + slowestId + " took " + slowest / 1_000_000 + " ms");
 			helper.assertTrue(director.totalErrors() == errorsBefore, "No event may throw in the arena (see log)");
 			helper.assertTrue(failures.isEmpty(), "Events that could not find their place: " + failures);
 

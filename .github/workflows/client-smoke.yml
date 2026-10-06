@@ -39,7 +39,7 @@ jobs:
       - name: Virtual display and software rendering
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq xvfb mesa-utils libgl1-mesa-dri mesa-vulkan-drivers > /dev/null
+          sudo apt-get install -y -qq xvfb mesa-utils libgl1-mesa-dri mesa-vulkan-drivers imagemagick > /dev/null
 
       - name: Start the client
         id: client
@@ -95,6 +95,7 @@ jobs:
             git reset -q --hard "origin/${GITHUB_REF_NAME}"
             mkdir -p tools/ports
             cp "$OUT/result.txt" "tools/ports/${{ matrix.mc }}-client.txt"
+            for shot in shot-*.png; do if [ -f "$shot" ]; then cp "$shot" "tools/ports/${{ matrix.mc }}-${shot#shot-}"; fi; done
             git add -A tools/ports
             git diff --cached --quiet && break
             git commit -q -m "Client start result for ${{ matrix.mc }} [skip ci]"

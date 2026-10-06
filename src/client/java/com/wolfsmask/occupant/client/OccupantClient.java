@@ -35,6 +35,7 @@ public final class OccupantClient implements ClientModInitializer {
 				ScreenEffects.renderAtmosphere(graphics, deltaTracker.getGameTimeDeltaPartialTick(false)));
 		TitleAtmosphere.register();
 		PauseLines.register();
+		SettingsScreen.register();
 		QuickWorld.register();
 	}
 }

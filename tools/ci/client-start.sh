@@ -10,6 +10,8 @@ MC="$1"
 GRADLE="./gradlew -Pmc=$MC --console=plain"
 crashed() { grep -qE "Game crashed|---- Minecraft Crash Report|Exception in thread \"(Render|Server) thread\"" "$1"; }
 stop_game() { pkill -f "net.fabricmc.devlaunchinjector.Main" || true; sleep 5; pkill -9 -f "net.fabricmc.devlaunchinjector.Main" || true; }
+# A photograph of the whole virtual screen, for a person to look at (the fog, mostly): shot-<name>.png.
+shot() { DISPLAY=:99 import -window root "shot-$1.png" 2>/dev/null || echo "(no photograph: $1)"; }
 wait_for() {   # wait_for <log> <pattern> <seconds>
 	for _ in $(seq 1 $(($3 / 5))); do
 		grep -q "$2" "$1" 2>/dev/null && return 0
@@ -24,9 +26,10 @@ mkdir -p run
 echo "onboardAccessibility:false" > run/options.txt
 
 echo "== 1. the first screen"
-xvfb-run -a -s "-screen 0 1280x720x24" $GRADLE runClient > client.log 2>&1 &
+xvfb-run -n 99 -s "-screen 0 1280x720x24 -ac" $GRADLE runClient > client.log 2>&1 &
 if ! wait_for client.log "the gate screen has been drawn" 900; then stop_game; echo "the gate screen was never drawn"; exit 1; fi
 sleep 30
+shot gate
 stop_game
 if crashed client.log; then echo "crashed on the first screen"; exit 1; fi
 
@@ -60,9 +63,11 @@ rm -rf run/saves/smoke
 mv run/world run/saves/smoke
 
 JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS:-} -Doccupant.smoke=true" \
-	xvfb-run -a -s "-screen 0 1280x720x24" $GRADLE runClient --args="--quickPlaySingleplayer smoke" > world.log 2>&1 &
+	xvfb-run -n 99 -s "-screen 0 1280x720x24 -ac" $GRADLE runClient --args="--quickPlaySingleplayer smoke" > world.log 2>&1 &
 if ! wait_for world.log "the Occupant has been drawn" 1200; then stop_game; echo "the Occupant was never drawn"; exit 1; fi
-sleep 30
+sleep 20
+shot world
+sleep 10
 stop_game
 if crashed world.log; then echo "crashed in the world"; exit 1; fi
 echo "== the client started, opened a world and drew the Occupant"

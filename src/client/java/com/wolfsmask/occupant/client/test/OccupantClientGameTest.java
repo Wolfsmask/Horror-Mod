@@ -181,7 +181,7 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 			server.runCommand("time set noon");
 			server.runCommand("gamemode spectator @p");         // a camera, not a body: it neither falls nor dies
 			BlockPos here = server.computeOnServer(s -> s.getPlayerList().getPlayers().get(0).blockPosition());
-			String[] kinds = {"village", "ruin", "camp", "graves", "cottage"};
+			String[] kinds = {"village", "ruin", "camp", "graves", "cottage", "watchtower", "chapel", "radio", "lighthouse", "lair"};
 			for (int i = 0; i < kinds.length; i++) {
 				String kind = kinds[i];
 				int cx = here.getX() + 80 + i * 70;
@@ -200,6 +200,13 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 				context.waitTicks(40);
 				shoot(context, "place-" + kind);
 			}
+			// The settings, as a player finds them on the pause menu.
+			context.runOnClient(mc -> mc.setScreen(new com.wolfsmask.occupant.client.SettingsScreen(null)));
+			context.waitTicks(20);
+			shoot(context, "settings");
+			context.runOnClient(mc -> mc.setScreen(null));
+			context.waitTicks(10);
+
 			// Back where it all started, on the ground, for what comes next.
 			server.runCommand("tp @p " + (here.getX() + 0.5) + " " + here.getY() + " " + (here.getZ() + 0.5) + " 0 0");
 			server.runCommand("gamemode survival @p");

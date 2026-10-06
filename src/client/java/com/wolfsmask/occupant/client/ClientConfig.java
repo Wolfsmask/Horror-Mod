@@ -43,6 +43,19 @@ public final class ClientConfig {
 		return instance;
 	}
 
+	/** Writes the settings as they are now (after a change from the settings screen). */
+	public static void save() {
+		Path path = FabricLoader.getInstance().getConfigDir().resolve("occupant-client.json");
+		try {
+			Files.createDirectories(path.getParent());
+			try (Writer w = Files.newBufferedWriter(path)) {
+				GSON.toJson(instance, w);
+			}
+		} catch (Exception e) {
+			Occupant.LOGGER.warn("Could not write {}", path, e);
+		}
+	}
+
 	public static void load() {
 		Path path = FabricLoader.getInstance().getConfigDir().resolve("occupant-client.json");
 		try {

@@ -209,6 +209,11 @@ public final class OccupantCommand {
 					"it waits " + com.wolfsmask.occupant.director.Pacing.graceMinutes(cfg) + " min before anything happens: /occupant act " + p.getName().getString() + " 2");
 			line(src, "not paused", !d.paused, "/occupant resume " + p.getName().getString());
 		}
+		if (dir != null) {
+			double[] cost = dir.cost();
+			src.sendSuccess(() -> Component.literal(String.format(java.util.Locale.ROOT, "  costs the server %.2f ms a tick on average, %.1f ms at worst lately",
+					cost[0], cost[1])).withStyle(ChatFormatting.GRAY), false);
+		}
 		int near = p.level().getEntitiesOfClass(OccupantEntity.class, new AABB(p.blockPosition()).inflate(64)).size();
 		src.sendSuccess(() -> Component.literal("  " + near + " Occupant(s) within 64 blocks. Try /occupant here.")
 				.withStyle(ChatFormatting.GRAY), false);

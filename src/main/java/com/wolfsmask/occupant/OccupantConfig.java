@@ -167,6 +167,12 @@ public final class OccupantConfig {
 		save(path);
 	}
 
+	/** Writes the settings as they are now (after a change from the settings screen). */
+	public static void save() {
+		instance = instance.sanitized();
+		save(FabricLoader.getInstance().getConfigDir().resolve(FILE_NAME));
+	}
+
 	private static void save(Path path) {
 		try {
 			Files.createDirectories(path.getParent());

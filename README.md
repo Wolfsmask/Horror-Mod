@@ -10,6 +10,10 @@ knock comes when you are inside at night. The Occupant tries to do the same thin
 every player, without a script**. Nobody gets the same story, but everybody gets a story that
 feels directed.
 
+> **Recording it?** Pick **CREATOR CUT** when you create the world: the whole story, ending
+> included, in about forty minutes. Everything else a creator needs (what to expect and when,
+> recording tips, commands for B-roll, thumbnails) is in **[the Creator Pack](docs/CREATORS.md)**.
+
 ---
 
 ## How it works
@@ -64,6 +68,38 @@ told: *something is watching you.* Never the same words twice running, and never
 same way (a line on the screen, a thought, your own name in chat saying it), and less patient
 the further the story has gone and the more often you have ignored it.
 
+### Small things
+
+- When it is close and you are not looking at it, you can hear **your own heartbeat**.
+- In the cold, **your breath shows**. Underground, **your footsteps come back** a moment late,
+  one step too many. Your **torch gutters** when it is near.
+- Wake up and **the doors are open**, all of them. The item frames in your house have turned;
+  the armour stands are **facing your bed**.
+- In the snow there are **footprints** from the treeline to your door. None going away.
+- Your dog and your cat stop and **stare at a corner behind you**.
+- **Villagers will not open up** after dark once it is about. *Not tonight.*
+- A sign with **your coordinates** on it. A long straight tunnel, and at the end of it, it.
+- *Saving world...* in the corner. You did not save.
+- Near a jukebox, the **radio** picks something up: static, and a voice that knows your name.
+- On a server, **a friend says something in chat** that they never typed. Only you see it.
+- The pause screen says things it should not. When you die, it lets you know it was there.
+- Late in the story, the pause menu is not safe either: it has opinions about you leaving.
+- There is **a score**: a low drone once the story has started, bowed glass in the second act,
+  and late on, a muffled pulse when it is close. It drops away entirely when it gets to you.
+- **It changes as the story goes on**: a little taller each act, leaning further.
+
+### The endings
+
+There are three, and which one you get depends on how you played it:
+
+- **You found the last camp.** One page of the log says where the survivor's last camp is (it
+  really is there, a couple of hundred blocks off), and their final entry is in it. Go and find
+  it before the last night, and the last night ends differently.
+- **You hid.** If you spent the story shut in, it knows.
+- **You did neither.** The plain ending.
+
+After the last night the story starts again, quieter, and there is one more page to find.
+
 ### The places
 
 As you explore, you come across places people used to be, all empty:
@@ -75,6 +111,13 @@ As you explore, you come across places people used to be, all empty:
 - **Ruined keeps**: a walled yard with corner towers, half fallen, a cold fire inside.
 - **Abandoned camps**: a tent, logs round a dead fire, and a sign left for whoever came next.
 - **Graveyards**: two rows of graves, one of them dug open.
+- **Watchtowers**: a ladder up to a platform over the trees, with someone's things still on it.
+- **Chapels**: pews and a bell, and one pew turned round to face the door.
+- **Radio shacks**: a hut with an aerial, a set (a jukebox), a lever, and a note.
+- **Lighthouses**, on the shore, their lamps long out.
+- **Its lair**: a ring of trampled earth, bones, and a hole with a ladder down. Twenty blocks
+  under is a hollow scraped out of the stone, with its things in it. Going down there is a
+  moment of its own.
 
 Their chests and barrels hold what was left behind, and the first time each is opened, the
 next page of a **survivor's log** is in it: always the next page for you, whichever you open,
@@ -166,6 +209,8 @@ need rebuilding for the next.
 | `interruptSleep` | `true` | Occasionally "there are monsters nearby" |
 | `requireAlone` | `true` | Visual encounters only when no other player is within `aloneRadius` |
 | `hauntCreative` | `false` | Also haunt creative players (for recording) |
+| `intensity` | `normal` | `subtle` (slower, fewer events), `normal`, or `relentless` (faster, more) |
+| `soundOnly` | `false` | It is never seen: only heard. Everything visual is left out |
 | `signMessages`, `chatLines` | | What it writes and says. `{player}` and `{day}` work in signs |
 | `screenWhispers` | `true` | Lines of text that surface on the player's screen |
 | `whisperLines` | | What those lines say. `{player}` works |
@@ -179,13 +224,19 @@ need rebuilding for the next.
 | `screenStatic` | `true` | Analog static when it is near |
 | `screenText` | `true` | The lines of text that surface on screen |
 | `fog` | `true` | Draw the story's fog (the server decides how thick; this only turns it off for you) |
+| `heartbeat` | `true` | Your heartbeat when it is close and you are not looking |
+| `score` | `true` | The music (under the game's Music volume) |
+| `atmosphere`, `titleScreen` | `true` | The darkening at night, and the mod's title screen |
+
+All of these can also be changed in game: **Options → The Occupant** on the pause screen.
 
 ## Recording a video
 
-The story is paced for a long evening. For a video:
+See **[the Creator Pack](docs/CREATORS.md)**. In short:
 
-- **Faster story:** set `storyPace` to `0.5` in `config/occupant.json`. The whole story, the last
-  night included, then fits in about forty minutes.
+- **Choose CREATOR CUT** when you create the world. The whole story, the last night included,
+  fits in about forty minutes, with the quiet stretches cut short. (`/occupant creator on`
+  turns it on for a world you already have.)
 - **Play in survival.** It leaves creative players alone unless `hauntCreative` is on.
 - **Sound on, headphones, night.** Most of it is heard before it is seen.
 - **A shot at the edge of the fog:** `/occupant here 60` puts it sixty blocks in front of you.
@@ -208,12 +259,14 @@ For testing, and for recording your own videos:
 /occupant pause <player> / resume <player>
 /occupant stop <player>              end whatever is happening
 /occupant reset <player>             start the story over
+/occupant creator [on|off]           this world's mode: the Creator Cut or the slow burn
 /occupant reload                     reload config/occupant.json
 ```
 
-Events: `footsteps`, `familiar`, `thunder`, `distant`, `cave_noise`, `distant_mining`, `door`, `chest`, `torch_gone`, `breath`,
-`knock`, `fake_join`, `sign`, `marker_torch`, `tunnel`, `watcher`, `window`, `roof`, `fire_out`, `stare`, `advancement`, `whisper`,
-`doppel_chat`, `stalker`, `flicker`, `static`, `intruder`, `behind_you`, `wake`, `hunt`, `last_night`.
+Events: `footsteps`, `familiar`, `thunder`, `distant`, `cave_noise`, `distant_mining`, `echo`, `door`, `chest`, `torch_gone`,
+`breath`, `knock`, `fake_join`, `sign`, `marker_torch`, `tunnel`, `corridor`, `watcher`, `window`, `roof`, `fire_out`, `stare`,
+`pets`, `advancement`, `whisper`, `doppel_chat`, `teammate`, `radio`, `saving`, `footprints`, `turned`, `rearranged`,
+`morning_doors`, `stalker`, `flicker`, `static`, `intruder`, `hallway`, `behind_you`, `wake`, `hunt`, `lair`, `last_night`.
 
 If you just installed it and want to see something **immediately**: `/occupant here`. That one
 never refuses. `/summon occupant:occupant` works too; it will haunt whoever is nearest for a

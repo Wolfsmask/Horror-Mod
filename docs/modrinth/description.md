@@ -24,12 +24,17 @@ happen at all.** Nobody gets the same story. Everybody gets one that feels direc
 - 🌫️ **The fog comes in.** Eight chunks at first, six by the end, and all the way in when it is close. It stands at the very edge of it, the furthest thing you can see.
 - 🐄 **The animals know first.** When it is out there, they stop grazing and turn to look at it. Sometimes they all turn and look at *you*.
 - 🪟 **Check the windows.** At night, from inside, there may be a face a step back from the glass. Or footsteps crossing the roof, stopping right above you.
-- 🌒 **It has an ending.** Once, on the last night, the fog closes right in. Every time you look away, it is closer when you look back.
+- 🌒 **It has endings.** Once, on the last night, the fog closes right in. Every time you look away, it is closer when you look back. How it ends depends on how you played it.
+- 💓 **Small things.** Your heartbeat when it is close behind you. Footsteps underground that come back one step too many. Doors open in the morning that you shut at night. Footprints in the snow, up to your door. *Saving world...* when you didn't. Villagers who won't open up after dark.
+- 🎻 **A score that listens.** A low drone once the story starts, bowed glass when it is near, and silence when it gets to you.
 
 ## Places people used to be
 
 Explore and you will find what is left: **abandoned villages**, a **house with a hallway that has
-no windows**, **ruined keeps**, **cold campsites** and **small graveyards with one grave dug open**.
+no windows**, **ruined keeps**, **cold campsites**, **small graveyards with one grave dug open**,
+**watchtowers**, **chapels** with one pew turned to face the door, **radio shacks** where the set
+still picks something up, **lighthouses** on the shore... and, if you are unlucky, **its lair**:
+a hole in the ground with a ladder going down a long way.
 
 Their chests still hold what people left behind, and **a page of a survivor's log**. Always the
 next page, whichever chest you open first, so the story reads in order wherever you find it.
@@ -37,28 +42,38 @@ next page, whichever chest you open first, so the story reads in order wherever 
 > *Day 7. If you are reading this, you have the same problem I did. Don't look at it for long.
 > It gets braver when you look.*
 
+Read far enough and the log tells you where the survivor made their last camp. It is really
+there. What you find in it changes how the story ends.
+
 ## The way in
 
-The mod opens on its own start screen: a dark wood, a title, and one thing to do. **Create
-World** takes you straight into a new world. The first thing you see there is black, and a line
-telling you that you are not alone.
+The mod opens on its own start screen: a dark wood, a title, and two ways in. **Create World**
+is the slow burn, for a long evening. **Creator Cut** is the same story made for a video: about
+forty minutes, ending included. Either takes you straight into a new world. The first thing you
+see there is black, and a line telling you that you are not alone.
 
 Not ready? *Or leave it alone* takes you to the normal menu with the haunting switched off.
 
 ---
 
-## Recording it?
+## 🎥 Recording it? Pick **Creator Cut**.
 
-Set `storyPace` to `0.5` and the whole story, ending included, fits in about forty minutes.
-`/occupant here 60` puts it at the edge of the fog for a shot; `/occupant trigger <you> last_night`
-brings on the ending. `reduceFlashing` makes it safe for photosensitive viewers.
+When you create the world, choose **CREATOR CUT** (recommended for recording). The waiting is
+cut, nothing is added: the whole story, the ending included, in about forty minutes.
+
+There is a full **Creator Pack** with the mod's source: what to expect and when, recording
+settings, commands for B-roll (`/occupant here 60` puts it at the edge of the fog), ready-made
+YouTube thumbnails and Shorts covers, and title ideas. Monetise your videos, no need to ask.
+**Reduce flashing** in the settings makes it safe for photosensitive viewers.
 
 ## Good to know
 
 - **Fabric**, needs **[Fabric API](https://modrinth.com/mod/fabric-api)**.
 - Needed on **both** the client and the server. Works in multiplayer: everyone gets their own haunting.
 - Supported versions: **1.20.1, 1.21.1, 1.21.11, 26.1.2, 26.2, 26.3** and the **26.4 snapshot**.
-- Nearly everything can be tuned or switched off: `config/occupant.json` for how fast the story moves, how often things happen, chases, damage and fake chat messages; `config/occupant-client.json` for the start screen, screen static and flashing.
+- Nearly everything can be tuned or switched off, in game: **pause menu → The Occupant**. Intensity (*subtle*, *normal*, *relentless*), a **sound-only** mode where it is never seen, music, heartbeat, fog, flashing. More in `config/occupant.json`.
+- Languages: English, Español, Français, Deutsch, Português (Brasil) for the menus.
+- Shaders: it works with them, but most shader packs draw their own fog instead of the mod's.
 - Operators get `/occupant`: check status, trigger events, pause the haunting for a player.
 - **Play it right:** sound on, at night, alone, and give it twenty minutes.
 
