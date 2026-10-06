@@ -106,7 +106,9 @@ public final class LastNightEnding {
 				"You found me.\n\nNobody was meant to. I left the pages for whoever came next, and I am sorry it was you.",
 				"It doesn't want the ones who come looking. It wants the ones who stay home with the door shut and wait for it to go away.\n\nIt won't follow you now.",
 				"Keep the fire going.\n\nIf you ever hear knocking, don't answer. That isn't me."));
-		if (!player.getInventory().add(page)) player.drop(page, false);
+		if (!player.getInventory().add(page)) {
+			world.addFreshEntity(new net.minecraft.world.entity.item.ItemEntity(world, player.getX(), player.getY(), player.getZ(), page));
+		}
 	}
 
 	/** Back at home, by the bed, and every door open. */

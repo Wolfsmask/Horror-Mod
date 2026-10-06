@@ -418,6 +418,18 @@ public final class OccupantGameTests {
 		helper.succeed();
 	}
 
+	/** Every one of its advancements loads, in whichever layout this version reads. */
+	@GameTest
+	public void theAdvancementsLoad(GameTestHelper helper) {
+		int ours = 0;
+		for (Object a : helper.getLevel().getServer().getAdvancements().getAllAdvancements()) {
+			if (String.valueOf(a).contains("occupant:")) ours++;
+		}
+		Occupant.LOGGER.info("[gametest] advancements of ours loaded: {}", ours);
+		helper.assertTrue(ours >= 19, "All 19 advancements should load, but " + ours + " did");
+		helper.succeed();
+	}
+
 	/** The fog comes in as the story goes on: eight chunks or so at first, six or so by the end. */
 	@GameTest
 	public void fogThickensWithTheStory(GameTestHelper helper) {
