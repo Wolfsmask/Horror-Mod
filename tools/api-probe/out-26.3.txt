@@ -1,0 +1,173 @@
+=== classes matching [Ff]og
+net.minecraft.world.level.material.FogType
+net.minecraft.client.renderer.fog.environment.AtmosphericFogEnvironment
+net.minecraft.client.renderer.fog.environment.FogEnvironment
+net.minecraft.client.renderer.fog.FogRenderer
+net.minecraft.client.renderer.fog.environment.MobEffectFogEnvironment
+net.minecraft.client.renderer.fog.environment.BlindnessFogEnvironment
+net.minecraft.client.renderer.fog.environment.package-info
+net.minecraft.client.renderer.fog.environment.PowderedSnowFogEnvironment
+net.minecraft.client.renderer.fog.package-info
+net.minecraft.client.renderer.fog.environment.DarknessFogEnvironment
+net.minecraft.client.renderer.fog.FogData
+net.minecraft.client.renderer.fog.environment.WaterFogEnvironment
+net.minecraft.client.renderer.fog.environment.LavaFogEnvironment
+=== net.minecraft.client.renderer.FogRenderer (-p)
+Error: class not found: client.renderer.FogRenderer
+=== net.minecraft.client.renderer.fog.FogRenderer (-p)
+public class client.renderer.fog.FogRenderer implements AutoCloseable {
+  public static final int FOG_UBO_SIZE;
+  private static final List<client.renderer.fog.environment.FogEnvironment> FOG_ENVIRONMENTS;
+  private static boolean fogEnabled;
+  private final renderpearl.api.buffers.GpuBuffer emptyBuffer;
+  private final client.renderer.MappableRingBuffer regularBuffer;
+  public client.renderer.fog.FogRenderer();
+  public void close();
+  public void endFrame();
+  public renderpearl.api.buffers.GpuBufferSlice getBuffer(client.renderer.fog.FogRenderer$FogMode);
+  private void computeFogColor(client.Camera, float, client.multiplayer.ClientLevel, int, float, org.joml.Vector4f);
+  public static boolean toggleFog();
+  public client.renderer.fog.FogData setupFog(client.Camera, int, client.DeltaTracker, float, client.multiplayer.ClientLevel);
+  public void updateBuffer(client.renderer.fog.FogData);
+  private world.level.material.FogType getFogType(client.Camera);
+  private void updateBuffer(java.nio.ByteBuffer, int, org.joml.Vector4f, float, float, float, float, float, float);
+  private static String lambda$new$1();
+  private static String lambda$new$0();
+  static {};
+}
+=== net.minecraft.client.renderer.fog.FogData (-public)
+public class client.renderer.fog.FogData implements client.rendering.v1.FabricRenderState {
+  public float environmentalStart;
+  public float renderDistanceStart;
+  public float environmentalEnd;
+  public float renderDistanceEnd;
+  public float skyEnd;
+  public float cloudEnd;
+  public org.joml.Vector4f color;
+  public client.renderer.fog.FogData();
+}
+=== net.minecraft.client.renderer.fog.environment.AtmosphericFogEnvironment (-p)
+public class client.renderer.fog.environment.AtmosphericFogEnvironment extends client.renderer.fog.environment.FogEnvironment {
+  private static final int MIN_RAIN_FOG_SKY_LIGHT;
+  private static final float RAIN_FOG_START_OFFSET;
+  private static final float RAIN_FOG_END_OFFSET;
+  private float rainFogMultiplier;
+  public client.renderer.fog.environment.AtmosphericFogEnvironment();
+  public org.joml.Vector3fc getBaseColor(client.multiplayer.ClientLevel, client.Camera, int, float);
+  private static org.joml.Vector3fc applyWeatherDarken(org.joml.Vector3fc, float, float);
+  public void setupFog(client.renderer.fog.FogData, client.Camera, client.multiplayer.ClientLevel, float, client.DeltaTracker);
+  private void updateRainFogState(client.Camera, client.multiplayer.ClientLevel, client.DeltaTracker);
+  public boolean isApplicable(world.level.material.FogType, world.entity.Entity);
+}
+=== net.minecraft.client.renderer.fog.environment.FogEnvironment (-public)
+public abstract class client.renderer.fog.environment.FogEnvironment {
+  public client.renderer.fog.environment.FogEnvironment();
+  public abstract void setupFog(client.renderer.fog.FogData, client.Camera, client.multiplayer.ClientLevel, float, client.DeltaTracker);
+  public boolean providesColor();
+  public org.joml.Vector3fc getBaseColor(client.multiplayer.ClientLevel, client.Camera, int, float);
+  public boolean modifiesDarkness();
+  public float getModifiedDarkness(world.entity.LivingEntity, float, float);
+  public abstract boolean isApplicable(world.level.material.FogType, world.entity.Entity);
+}
+=== net.minecraft.client.renderer.fog.FogRenderer (code: setupFog)
+  public client.renderer.fog.FogData setupFog(client.Camera, int, client.DeltaTracker, float, client.multiplayer.ClientLevel);
+    Code:
+         1: iconst_0
+         2: invokeinterface #277,  2          // InterfaceMethod net/minecraft/client/DeltaTracker.getGameTimeDeltaPartialTick:(Z)F
+        10: bipush        16
+        12: imul
+        13: i2f
+        18: invokevirtual #122                // Method getFogType:(Lnet/minecraft/client/Camera;)Lnet/minecraft/world/level/material/FogType;
+        24: invokevirtual #126                // Method net/minecraft/client/Camera.entity:()Lnet/minecraft/world/entity/Entity;
+        29: new           #285                // class net/minecraft/client/renderer/fog/FogData
+        33: invokespecial #287                // Method net/minecraft/client/renderer/fog/FogData."<init>":()V
+        49: getfield      #288                // Field net/minecraft/client/renderer/fog/FogData.color:Lorg/joml/Vector4f;
+        52: invokevirtual #292                // Method computeFogColor:(Lnet/minecraft/client/Camera;FLnet/minecraft/client/multiplayer/ClientLevel;IFLorg/joml/Vector4f;)V
+        55: getstatic     #132                // Field FOG_ENVIRONMENTS:Ljava/util/List;
+        58: invokeinterface #136,  1          // InterfaceMethod java/util/List.iterator:()Ljava/util/Iterator;
+        67: invokeinterface #142,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+        72: ifeq          118
+        77: invokeinterface #148,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+        82: checkcast     #152                // class net/minecraft/client/renderer/fog/environment/FogEnvironment
+        93: invokevirtual #154                // Method net/minecraft/client/renderer/fog/environment/FogEnvironment.isApplicable:(Lnet/minecraft/world/level/material/FogType;Lnet/minecraft/world/entity/Entity;)Z
+        96: ifeq          115
+       109: invokevirtual #296                // Method net/minecraft/client/renderer/fog/environment/FogEnvironment.setupFog:(Lnet/minecraft/client/renderer/fog/FogData;Lnet/minecraft/client/Camera;Lnet/minecraft/client/multiplayer/ClientLevel;FLnet/minecraft/client/DeltaTracker;)V
+       112: goto          118
+       115: goto          65
+       120: ldc_w         #300                // float 10.0f
+       123: fdiv
+       124: ldc_w         #301                // float 4.0f
+       127: ldc_w         #302                // float 64.0f
+       130: invokestatic  #200                // Method net/minecraft/util/Mth.clamp:(FFF)F
+       141: fsub
+       142: putfield      #303                // Field net/minecraft/client/renderer/fog/FogData.renderDistanceStart:F
+       149: putfield      #307                // Field net/minecraft/client/renderer/fog/FogData.renderDistanceEnd:F
+       154: areturn
+
+=== net.minecraft.client.renderer.FogRenderer (code: setupFog)
+=== com.mojang.blaze3d.systems.RenderSystem (-public)
+public class blaze3d.systems.RenderSystem {
+  public static void setShaderFog(renderpearl.api.buffers.GpuBufferSlice);
+  public static renderpearl.api.buffers.GpuBufferSlice getShaderFog();
+=== net.minecraft.client.sounds.SoundManager (-public)
+public class client.sounds.SoundManager extends server.packs.resources.SimplePreparableReloadListener<client.sounds.SoundManager$Preparations> {
+  public client.sounds.SoundEngine$PlayResult play(client.resources.sounds.SoundInstance);
+  public void playDelayed(client.resources.sounds.SoundInstance, int);
+  public void pauseAllExcept(sounds.SoundSource...);
+  public void stop();
+  public void resume();
+  public void stop(client.resources.sounds.SoundInstance);
+  public void stop(resources.Identifier, sounds.SoundSource);
+=== net.minecraft.client.Options (-public)
+public class client.Options {
+  public client.OptionInstance<Integer> renderDistance();
+  public client.OptionInstance<Integer> simulationDistance();
+  public int getEffectiveRenderDistance();
+=== net.minecraft.client.Minecraft (-public)
+public class client.Minecraft extends util.thread.ReentrantBlockableEventLoop<Runnable> implements blaze3d.platform.WindowEventHandler {
+  public final client.renderer.GameRenderer gameRenderer;
+  public final client.Options options;
+  public client.sounds.SoundManager getSoundManager();
+=== net.minecraft.server.level.ServerPlayer (-public)
+public class server.level.ServerPlayer extends world.entity.player.Player implements networking.v1.context.PacketContextProvider {
+  public server.level.ClientInformation clientInformation();
+  public int requestedViewDistance();
+=== net.minecraft.server.level.ClientInformation (-public)
+public final class server.level.ClientInformation extends Record {
+  public int viewDistance();
+=== net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents (-public)
+public final class entity.event.v1.EntitySleepEvents {
+  public static final event.Event<entity.event.v1.EntitySleepEvents$AllowSleeping> ALLOW_SLEEPING;
+  public static final event.Event<entity.event.v1.EntitySleepEvents$StartSleeping> START_SLEEPING;
+  public static final event.Event<entity.event.v1.EntitySleepEvents$StopSleeping> STOP_SLEEPING;
+  public static final event.Event<entity.event.v1.EntitySleepEvents$AllowBed> ALLOW_BED;
+  public static final event.Event<entity.event.v1.EntitySleepEvents$AllowNearbyMonsters> ALLOW_NEARBY_MONSTERS;
+  public static final event.Event<entity.event.v1.EntitySleepEvents$AllowResettingTime> ALLOW_RESETTING_TIME;
+  public static final event.Event<entity.event.v1.EntitySleepEvents$ModifySleepingDirection> MODIFY_SLEEPING_DIRECTION;
+  public static final event.Event<entity.event.v1.EntitySleepEvents$AllowSettingSpawn> ALLOW_SETTING_SPAWN;
+  public static final event.Event<entity.event.v1.EntitySleepEvents$SetBedOccupationState> SET_BED_OCCUPATION_STATE;
+  public static final event.Event<entity.event.v1.EntitySleepEvents$ModifyWakeUpPosition> MODIFY_WAKE_UP_POSITION;
+}
+=== net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents$AllowSleeping (-public)
+public interface entity.event.v1.EntitySleepEvents$AllowSleeping {
+  public abstract world.entity.player.Player$BedSleepingProblem allowSleep(world.entity.player.Player, core.BlockPos);
+}
+=== net.minecraft.world.entity.player.Player$BedSleepingProblem (-public)
+public final class world.entity.player.Player$BedSleepingProblem extends Record {
+  public static final world.entity.player.Player$BedSleepingProblem TOO_FAR_AWAY;
+  public static final world.entity.player.Player$BedSleepingProblem OBSTRUCTED;
+  public static final world.entity.player.Player$BedSleepingProblem OTHER_PROBLEM;
+  public static final world.entity.player.Player$BedSleepingProblem NOT_SAFE;
+  public world.entity.player.Player$BedSleepingProblem(network.chat.Component);
+  public final String toString();
+  public final int hashCode();
+  public final boolean equals(Object);
+  public network.chat.Component message();
+}
+=== net.minecraft.world.entity.ai.control.LookControl (-public)
+public class world.entity.ai.control.LookControl implements world.entity.ai.control.Control {
+  public void setLookAt(world.phys.Vec3);
+  public void setLookAt(world.entity.Entity);
+  public void setLookAt(world.entity.Entity, float, float);
+  public void setLookAt(double, double, double);
+  public void setLookAt(double, double, double, float, float);
