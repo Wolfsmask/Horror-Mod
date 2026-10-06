@@ -1,0 +1,23 @@
+{
+  "parent": "occupant:root",
+  "display": {
+    "icon": {
+      "id": "minecraft:torch"
+    },
+    "title": {
+      "translate": "advancements.occupant.lights_out.title"
+    },
+    "description": {
+      "translate": "advancements.occupant.lights_out.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "granted": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

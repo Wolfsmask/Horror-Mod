@@ -44,6 +44,7 @@ public abstract class ApparitionSequence implements Sequence {
 			if (!seen) {
 				seen = true;
 				haunt.data.sightings++;
+				com.wolfsmask.occupant.story.Achievements.grant(player, com.wolfsmask.occupant.story.Achievements.NOT_ALONE);
 				onSeen(player);
 			}
 		} else {

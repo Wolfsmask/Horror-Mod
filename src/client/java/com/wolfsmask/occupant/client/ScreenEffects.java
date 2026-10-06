@@ -77,11 +77,11 @@ public final class ScreenEffects {
 	/** The end of the last night: the same black as the first time, and what it has become. */
 	/** Found their last camp. */
 	private static final String[][] ENDING_FOUND = {
-			{"You found what was left of them.", "Now it has someone new to leave behind."},
-			{"You read every word they left.", "It was reading over your shoulder."}};
+			{"You found what was left of them.", "It doesn't want the ones who come looking."},
+			{"You read every word they left.", "Keep the fire going."}};
 	/** Hid from it, the whole story. */
 	private static final String[][] ENDING_HID = {
-			{"You kept the doors shut and the lights on.", "It liked that you stayed home, {player}."},
+			{"You kept the doors shut and the lights on.", "It found another way in, {player}."},
 			{"You never went out to meet it.", "So it came in."}};
 	private static final String[][] ENDING_LINES = {
 			{"It knows how to be you now, {player}.", "It will be patient."},

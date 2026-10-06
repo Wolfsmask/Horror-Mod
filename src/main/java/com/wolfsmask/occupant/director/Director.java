@@ -212,6 +212,7 @@ public final class Director {
 		if (!h.data.introduced && player.tickCount > 60) {
 			h.data.introduced = true;
 			Cues.effect(player, ScreenEffectPayload.FIRST_ARRIVAL, 240, 1.0f);
+			com.wolfsmask.occupant.story.Achievements.grant(player, com.wolfsmask.occupant.story.Achievements.ROOT);
 			save.setDirty();
 		}
 		h.unnoticed.tick(player, h);
@@ -282,6 +283,7 @@ public final class Director {
 
 	private boolean isEligible(ServerPlayer player, Haunt h, OccupantConfig cfg) {
 		if (!cfg.enabled || h.data.paused) return false;
+		if (h.data.ending == LastNightEnding.FOUND) return false;     // it let them go
 		if (player.isSpectator() || player.isDeadOrDying()) return false;
 		if (player.isCreative() && !cfg.hauntCreative) return false;
 		return Haunt.worldAllowed(player);
@@ -525,6 +527,7 @@ public final class Director {
 		}
 		save.setDirty();
 		debug("{}: started {} (act {}, dread {})", ctx.player.getName().getString(), e.id(), d.act, (int) d.dread);
+		com.wolfsmask.occupant.story.Achievements.onEvent(ctx.player, e.id());
 		return true;
 	}
 

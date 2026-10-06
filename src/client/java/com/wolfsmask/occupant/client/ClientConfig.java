@@ -39,6 +39,12 @@ public final class ClientConfig {
 	/** The mod's own score, rising and falling with the story (under the Music volume). */
 	public boolean score = true;
 
+	/** Ask, before the title screen, whether this is for playing or recording. */
+	public boolean askHowPlaying = true;
+
+	/** The last answer: recording (the Creator Cut) or not. */
+	public boolean recording = false;
+
 	public static ClientConfig get() {
 		return instance;
 	}

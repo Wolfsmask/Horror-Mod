@@ -142,6 +142,13 @@ processResources {
 	filesMatching("fabric.mod.json") {
 		expand "version": version, "minecraft_dep": minecraftDep, "java_dep": javaDep
 	}
+	// An advancement tab's background: a texture path until 1.21.5, a texture name since.
+	def advBackground = (mc in ['1.20.1', '1.21.1']) ? "minecraft:textures/gui/advancements/backgrounds/stone.png"
+			: "minecraft:gui/advancements/backgrounds/stone"
+	inputs.property "adv_background", advBackground
+	filesMatching("data/occupant/advancement*/root.json") {
+		expand "adv_background": advBackground
+	}
 	def mixinJava = "JAVA_${javaRelease}"
 	inputs.property "mixin_java", mixinJava
 	filesMatching("*.mixins.json") {

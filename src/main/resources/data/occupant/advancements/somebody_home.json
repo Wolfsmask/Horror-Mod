@@ -1,0 +1,23 @@
+{
+  "parent": "occupant:root",
+  "display": {
+    "icon": {
+      "item": "minecraft:spruce_door"
+    },
+    "title": {
+      "translate": "advancements.occupant.somebody_home.title"
+    },
+    "description": {
+      "translate": "advancements.occupant.somebody_home.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "granted": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

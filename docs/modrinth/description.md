@@ -24,7 +24,8 @@ happen at all.** Nobody gets the same story. Everybody gets one that feels direc
 - 🌫️ **The fog comes in.** Eight chunks at first, six by the end, and all the way in when it is close. It stands at the very edge of it, the furthest thing you can see.
 - 🐄 **The animals know first.** When it is out there, they stop grazing and turn to look at it. Sometimes they all turn and look at *you*.
 - 🪟 **Check the windows.** At night, from inside, there may be a face a step back from the glass. Or footsteps crossing the roof, stopping right above you.
-- 🌒 **It has endings.** Once, on the last night, the fog closes right in. Every time you look away, it is closer when you look back. How it ends depends on how you played it.
+- 🌒 **Three endings.** Once, on the last night, the fog closes right in. Every time you look away, it is closer when you look back. Where you wake up afterwards depends on how you played it.
+- 🏆 **Advancements** for the small things: *You're Not Alone*, *Who's There?*, *Bad Reception*... and one for each ending. None for killing anything.
 - 💓 **Small things.** Your heartbeat when it is close behind you. Footsteps underground that come back one step too many. Doors open in the morning that you shut at night. Footprints in the snow, up to your door. *Saving world...* when you didn't. Villagers who won't open up after dark.
 - 🎻 **A score that listens.** A low drone once the story starts, bowed glass when it is near, and silence when it gets to you.
 
@@ -47,9 +48,10 @@ there. What you find in it changes how the story ends.
 
 ## The way in
 
-The mod opens on its own start screen: a dark wood, a title, and two ways in. **Create World**
-is the slow burn, for a long evening. **Creator Cut** is the same story made for a video: about
-forty minutes, ending included. Either takes you straight into a new world. The first thing you
+First, off camera, it asks how you're playing: **Playing** (the slow burn, for a long evening)
+or **Recording** (the Creator Cut: the same story made for a video, about forty minutes, ending
+included). Then the mod's own title screen: a dark wood, a title, and **Create World**, which
+takes you straight into a new world. The first thing you
 see there is black, and a line telling you that you are not alone.
 
 Not ready? *Or leave it alone* takes you to the normal menu with the haunting switched off.
@@ -58,7 +60,7 @@ Not ready? *Or leave it alone* takes you to the normal menu with the haunting sw
 
 ## 🎥 Recording it? Pick **Creator Cut**.
 
-When you create the world, choose **CREATOR CUT** (recommended for recording). The waiting is
+Answer **RECORDING** on the first screen, then start recording on the title screen. The waiting is
 cut, nothing is added: the whole story, the ending included, in about forty minutes.
 
 There is a full **Creator Pack** with the mod's source: what to expect and when, recording

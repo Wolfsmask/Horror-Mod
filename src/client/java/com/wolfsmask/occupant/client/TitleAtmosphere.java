@@ -53,8 +53,10 @@ public final class TitleAtmosphere {
 		ScreenEvents.AFTER_INIT.register((client, screen, width, height) -> {
 			if (!(screen instanceof TitleScreen) || !ClientConfig.get().titleScreen) return;
 			// The first thing anyone sees is the gate, not the menu.
+			// Before that, off camera, whether this is for playing or for recording.
 			if (!GateScreen.passed()) {
-				client.execute(() -> client.setScreenAndShow(new GateScreen()));
+				boolean ask = !ModeScreen.chosen() && !ModeScreen.skip();
+				client.execute(() -> client.setScreenAndShow(ask ? new ModeScreen() : new GateScreen()));
 				return;
 			}
 			// Said no at the gate: the game's own title screen, untouched.

@@ -2,9 +2,9 @@
 
 Everything you need to make a video of The Occupant, in one place.
 
-**The short version:** install it, pick **CREATOR CUT** when you create the world, play at
-night with headphones, and don't go looking for it. You get the whole story, ending included,
-in about forty minutes.
+**The short version:** install it, answer **RECORDING** on the first screen, start recording on
+the title screen after it, and click **CREATE WORLD**. Play at night with headphones and don't
+go looking for it. You get the whole story, ending included, in about forty minutes.
 
 ---
 
@@ -12,13 +12,17 @@ in about forty minutes.
 
 1. Install [Fabric Loader](https://fabricmc.net/use/), [Fabric API](https://modrinth.com/mod/fabric-api),
    and the Occupant jar for your Minecraft version (see the [README](../README.md#install)).
-2. Start the game. The title screen is the mod's own; under the way in there are two choices:
-   - **CREATE WORLD**: the slow burn, paced for a long evening (or several).
-   - **CREATOR CUT** *(recommended for recording)*: the same story, made for a video. About
-     forty minutes, the ending included.
-3. Pick **CREATOR CUT**. You go straight into a new survival world.
+2. Start the game. Before anything else, a plain screen asks how you're playing:
+   - **PLAYING**: the slow burn, paced for a long evening (or several).
+   - **RECORDING** *(recommended for creators)*: the Creator Cut. The same story, made for a
+     video: about forty minutes, the ending included.
+3. Pick **RECORDING**. **Now start recording**: the next screen is the mod's title screen, a
+   dark wood and the way in, with nothing on it that gives the game away.
+4. Click **CREATE WORLD**. You go straight into a new survival world.
 
 That's it. The mode is saved with the world, so you can stop and carry on in another session.
+The first screen remembers your last answer; if you never want to be asked, turn off *Ask how
+I'm playing* in the settings (pause menu → The Occupant).
 Already have a world? `/occupant creator on` (with cheats on, or as an operator) turns it on for
 that world; `/occupant check` tells you which mode a world is in.
 
@@ -49,10 +53,18 @@ Roughly. It reacts to what you do, so no two videos go the same way, which is th
 | ~20–25 | **4. Hunt** | The music drops away. It's out there, looking at you. Then it runs. |
 | ~25–40 | **The last night** | Out in the open, at night: the fog closes right in, and every time you look away it is closer. |
 
-There are **three endings**, depending on how you played it. The survivor's log (pages turn up
-in chests and barrels in the old places) eventually tells you where their last camp is. Find
-it before the last night and the ending is different. Hide indoors the whole time and it is
-different again.
+There are **three endings**, and they really are different, depending on how you played it
+(no spoilers in the video title, please!):
+
+- The survivor's log (pages turn up in chests and barrels in the old places) eventually tells
+  you where their last camp is. It's really there. **Find it before the last night** and the
+  story ends one way.
+- **Hide indoors** most of the time and it ends another way. It doesn't stay outside.
+- **Anything else**, and it ends a third way.
+
+There are also **advancements** (press L): small things noticed along the way, like
+*You're Not Alone*, *Who's There?* and *Bad Reception*, and one for each ending. Nothing for
+killing anything. The ending ones are hidden until you get them.
 
 **Tips for the story to land:**
 

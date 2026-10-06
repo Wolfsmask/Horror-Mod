@@ -10,12 +10,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 
 /** Small block checks shared by the events that touch the world. */
-final class WorldBlocks {
+public final class WorldBlocks {
 	private WorldBlocks() {
 	}
 
 	/** The bottom half of a closed wooden door (the kind a hand can open). */
-	static boolean isClosedWoodenDoor(ServerLevel world, BlockPos pos) {
+	public static boolean isClosedWoodenDoor(ServerLevel world, BlockPos pos) {
 		BlockState s = world.getBlockState(pos);
 		return s.is(BlockTags.WOODEN_DOORS) && s.getBlock() instanceof DoorBlock
 				&& s.getValue(DoorBlock.HALF) == DoubleBlockHalf.LOWER && !s.getValue(DoorBlock.OPEN);

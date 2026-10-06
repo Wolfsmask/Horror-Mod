@@ -117,6 +117,7 @@ final class Unnoticed {
 				.replace("{where}", where(player, e))
 				.replace("{player}", player.getName().getString());
 		d.ignored++;
+		com.wolfsmask.occupant.story.Achievements.grant(player, com.wolfsmask.occupant.story.Achievements.WATCHED);
 
 		// A different way each time, in turn.
 		OccupantConfig cfg = OccupantConfig.get();

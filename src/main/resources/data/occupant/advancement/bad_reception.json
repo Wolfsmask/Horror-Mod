@@ -1,0 +1,23 @@
+{
+  "parent": "occupant:root",
+  "display": {
+    "icon": {
+      "id": "minecraft:jukebox"
+    },
+    "title": {
+      "translate": "advancements.occupant.bad_reception.title"
+    },
+    "description": {
+      "translate": "advancements.occupant.bad_reception.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "granted": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

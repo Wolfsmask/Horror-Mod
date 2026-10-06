@@ -1,0 +1,23 @@
+{
+  "parent": "occupant:root",
+  "display": {
+    "icon": {
+      "id": "minecraft:snowball"
+    },
+    "title": {
+      "translate": "advancements.occupant.footprints.title"
+    },
+    "description": {
+      "translate": "advancements.occupant.footprints.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "granted": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

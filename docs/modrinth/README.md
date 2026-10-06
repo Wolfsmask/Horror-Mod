@@ -64,7 +64,7 @@ in search, so it decides whether they click.
 | `05-camp.png` | The camp | Cold campsites, and signs for whoever comes next. |
 | `06-graves.png` | The graveyard | Two rows of graves. One of them has been dug open. |
 | `07-face.png` | Its face | Seventeen feet tall. Ten legs. It is learning how to be you. |
-| `08-the-first-screen.png` | The way in | The mod's own start screen. Create World, or the Creator Cut for recording. |
+| `08-the-first-screen.png` | The way in | The mod's own start screen. Create World takes you straight in. |
 
 ## 5. Versions
 
@@ -90,8 +90,10 @@ For every version:
   ```
   1.0: the whole story.
 
-  - Creator Cut: pick it when you create the world. The whole story, ending included, in about forty minutes. Recommended for recording.
-  - Three endings, depending on how you played it. The survivor's log leads to their last camp, and it is really there.
+  - Creator Cut: answer "Recording" on the first screen (before the title, off camera). The whole story, ending included, in about forty minutes.
+  - Three endings that really are different: where you wake up depends on how you played it.
+  - Advancements for the small things it does, and one for each ending. None for killing anything.
+  - The survivor's log leads to their last camp, and it is really there.
   - New places: watchtowers, chapels, radio shacks, lighthouses, and its lair.
   - A live score that follows the story, and goes silent when it gets to you.
   - Small things: your heartbeat, your breath in the cold, footsteps that echo one too many, doors open in the morning, footprints in the snow, pets that stare at nothing, villagers who won't open up, a radio that knows your name, "Saving world...".

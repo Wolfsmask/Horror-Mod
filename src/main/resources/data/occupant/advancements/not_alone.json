@@ -1,0 +1,23 @@
+{
+  "parent": "occupant:root",
+  "display": {
+    "icon": {
+      "item": "minecraft:spyglass"
+    },
+    "title": {
+      "translate": "advancements.occupant.not_alone.title"
+    },
+    "description": {
+      "translate": "advancements.occupant.not_alone.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "granted": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

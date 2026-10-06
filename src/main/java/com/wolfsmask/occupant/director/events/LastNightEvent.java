@@ -4,6 +4,7 @@ import com.wolfsmask.occupant.compat.Compat;
 import com.wolfsmask.occupant.director.EventContext;
 import com.wolfsmask.occupant.director.Haunt;
 import com.wolfsmask.occupant.director.HauntData;
+import com.wolfsmask.occupant.director.LastNightEnding;
 import com.wolfsmask.occupant.director.HorrorEvent;
 import com.wolfsmask.occupant.director.Pacing;
 import com.wolfsmask.occupant.director.WorldMode;
@@ -35,8 +36,6 @@ public final class LastNightEvent extends HorrorEvent {
 	private static final float FOG = 48.0f;
 	/** How close it is each time you look back. */
 	private static final double[] CLOSER = {19.0, 12.0, 7.0, 3.5};
-	/** After it, a quarter of an hour with no fog at all. */
-	private static final long LIFTED_FOR = 20L * 60 * 15;
 
 	public LastNightEvent() {
 		super(ID, Tier.PEAK, 4, 40, 90);
@@ -86,6 +85,7 @@ public final class LastNightEvent extends HorrorEvent {
 		private int seenFor;
 		private int awayFor;
 		private int endAt = -1;
+		private int which;
 		/** Flat, from the player towards it, the last time they saw it. */
 		@Nullable
 		private Vec3 towards;
@@ -96,7 +96,14 @@ public final class LastNightEvent extends HorrorEvent {
 
 		@Override
 		protected boolean update(ServerPlayer player, boolean looking) {
-			if (endAt >= 0) return age < endAt;
+			if (endAt >= 0) {
+				// In the dark, once the screen is black: wherever the story ends.
+				if (age == endAt - 1) {
+					entity.discard();
+					LastNightEnding.play(player, haunt, which);
+				}
+				return age < endAt;
+			}
 			if (age > 20 * 150) return false;               // it gives up, for tonight
 			if (looking) {
 				seenFor++;
@@ -105,9 +112,9 @@ public final class LastNightEvent extends HorrorEvent {
 				if (to.x * to.x + to.z * to.z > 1.0E-4) towards = new Vec3(to.x, 0, to.z).normalize();
 				if (stage == CLOSER.length - 1 && seenFor >= 14) {
 					// Face to face. Black, and the line: which line depends on how the story was lived.
-					Cues.effect(player, ScreenEffectPayload.FINALE, 240, ending(haunt.data));
-					endAt = age + 4;
-					finish(player);
+					which = LastNightEnding.which(haunt.data);
+					Cues.effect(player, ScreenEffectPayload.FINALE, 240, which);
+					endAt = age + 20;
 				}
 				return true;
 			}
@@ -139,22 +146,6 @@ public final class LastNightEvent extends HorrorEvent {
 				return true;
 			}
 			return false;
-		}
-
-		/** 1: found the survivor's last camp. 2: hid from it, indoors, most of the story. 0: anything else. */
-		static int ending(HauntData d) {
-			if (d.lastCamp == 2) return 1;
-			if (d.insideSeconds > 2 * Math.max(120, d.outsideSeconds)) return 2;
-			return 0;
-		}
-
-		private void finish(ServerPlayer player) {
-			HauntData d = haunt.data;
-			d.lastNight = true;
-			d.setAct(2);
-			d.dread = 0f;
-			haunt.releaseFog();
-			haunt.liftFog(Compat.level(player).getServer().getTickCount() + LIFTED_FOR);
 		}
 
 		@Override

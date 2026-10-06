@@ -10,8 +10,8 @@ knock comes when you are inside at night. The Occupant tries to do the same thin
 every player, without a script**. Nobody gets the same story, but everybody gets a story that
 feels directed.
 
-> **Recording it?** Pick **CREATOR CUT** when you create the world: the whole story, ending
-> included, in about forty minutes. Everything else a creator needs (what to expect and when,
+> **Recording it?** The first screen asks how you're playing: answer **RECORDING**, then start
+> recording on the title screen after it. The whole story, ending included, in about forty minutes. Everything else a creator needs (what to expect and when,
 > recording tips, commands for B-roll, thumbnails) is in **[the Creator Pack](docs/CREATORS.md)**.
 
 ---
@@ -90,15 +90,24 @@ the further the story has gone and the more often you have ignored it.
 
 ### The endings
 
-There are three, and which one you get depends on how you played it:
+There are three, and which one you get depends on how you played it. Each is a different place
+to wake up in when the black lifts:
 
-- **You found the last camp.** One page of the log says where the survivor's last camp is (it
-  really is there, a couple of hundred blocks off), and their final entry is in it. Go and find
-  it before the last night, and the last night ends differently.
-- **You hid.** If you spent the story shut in, it knows.
-- **You did neither.** The plain ending.
+- **Left behind** (you found the survivor's last camp: one page of the log says where it is, a
+  couple of hundred blocks off, and it really is there). You wake by their fire, lit again, with
+  their last page in your pocket. The fog is gone, and nothing follows you any more.
+- **So it came in** (you spent the story shut indoors). You wake at home, by your bed, and every
+  door in the house is open. The fog stays. It is inside now, and closer than it has ever been.
+- **It knows how to be you** (anything else). The fog lifts, and the story begins again,
+  quieter. It is still here, and there is one more page to find.
 
-After the last night the story starts again, quieter, and there is one more page to find.
+### Advancements
+
+Small things noticed along the way, in their own tab (press L): *You're Not Alone*, *Something
+Is Watching You*, *Who's There?*, *Check the Windows*, *Lights Out*, *Monsters Nearby*, *That's
+Not What I Said*, *Saving World...*, *Bad Reception*, *Footprints*, *Somebody's Home*, *Dear
+Diary*, *Every Word*, *Don't Go Down There*, *The Last Night*, and one for each ending (hidden
+until you get it). None of them are for killing anything.
 
 ### The places
 
@@ -227,6 +236,7 @@ need rebuilding for the next.
 | `heartbeat` | `true` | Your heartbeat when it is close and you are not looking |
 | `score` | `true` | The music (under the game's Music volume) |
 | `atmosphere`, `titleScreen` | `true` | The darkening at night, and the mod's title screen |
+| `askHowPlaying` | `true` | Ask before the title screen whether you are playing or recording (the Creator Cut) |
 
 All of these can also be changed in game: **Options → The Occupant** on the pause screen.
 
@@ -234,7 +244,7 @@ All of these can also be changed in game: **Options → The Occupant** on the pa
 
 See **[the Creator Pack](docs/CREATORS.md)**. In short:
 
-- **Choose CREATOR CUT** when you create the world. The whole story, the last night included,
+- **Answer RECORDING** on the first screen, before the title screen. The whole story, the last night included,
   fits in about forty minutes, with the quiet stretches cut short. (`/occupant creator on`
   turns it on for a world you already have.)
 - **Play in survival.** It leaves creative players alone unless `hauntCreative` is on.

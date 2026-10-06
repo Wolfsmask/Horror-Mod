@@ -21,6 +21,9 @@ import java.util.concurrent.ThreadLocalRandom;
  * closes in, something whispers, and between the trees it comes forward, and a line writes itself
  * underneath. Click it and you make a world for it to live in.
  * <p>
+ * Whether the world is the Creator Cut was asked before this, off camera ({@link ModeScreen}), so
+ * there is nothing here to give the game away on a recording.
+ * <p>
  * Or, very small at the bottom, you can leave it alone, and get the game's own menu back with the
  * haunting switched off for as long as the game is open.
  */
@@ -28,8 +31,6 @@ public final class GateScreen extends Screen {
 	private static final String ENTER = "CREATE WORLD";
 	private static final String UNDER = "it will be there when you arrive";
 	private static final String LEAVE = "or leave it alone";
-	private static final String CREATOR = "CREATOR CUT";
-	private static final String CREATOR_NOTE = "recommended for recording \u00b7 about forty minutes \u00b7 ending included";
 
 	private static boolean passed;
 	private static boolean showing;
@@ -40,7 +41,6 @@ public final class GateScreen extends Screen {
 
 	private boolean hoverEnter;
 	private boolean hoverLeave;
-	private boolean hoverCreator;
 	private long hoverSince;
 	private boolean whispered;
 
@@ -168,27 +168,6 @@ public final class GateScreen extends Screen {
 			GuiCompat.text(g, this.font, line, (w - lw) / 2, ty + th + 12, 0xFF000000 | v << 16 | (v - 10) << 8 | (v - 14));
 		}
 
-		// The Creator Cut: the same story, tighter, for recording. Smaller, but always explained.
-		int[] cb = creatorBox();
-		hoverCreator = inside(cb, mouseX, mouseY);
-		float cs = creatorScale();
-		int cx = cb[0] + 10;
-		int cy = cb[1] + 5;
-		int ccol = hoverCreator ? blood : 0xB8AC9C;
-		GuiCompat.push(g);
-		GuiCompat.translate(g, cx, cy);
-		GuiCompat.scale(g, cs);
-		int ox = 0;
-		for (int i = 0; i < CREATOR.length(); i++) {
-			String c = String.valueOf(CREATOR.charAt(i));
-			int jx = calm || !hoverCreator ? 0 : (r.nextFloat() < 0.3f ? r.nextInt(3) - 1 : 0);
-			GuiCompat.text(g, this.font, c, ox + jx, 0, 0xFF000000 | ccol);
-			ox += this.font.width(c);
-		}
-		GuiCompat.pop(g);
-		int nw = this.font.width(CREATOR_NOTE);
-		GuiCompat.text(g, this.font, CREATOR_NOTE, (w - nw) / 2, cb[3] + 2, 0xFF000000 | (hoverCreator ? 0x9A8E80 : 0x6A625A));
-
 		// The way out, very small, at the bottom.
 		int lw = this.font.width(LEAVE);
 		int lx = (w - lw) / 2;
@@ -206,12 +185,11 @@ public final class GateScreen extends Screen {
 		double y = event.y();
 		if (event.button() == 0) {
 			boolean onEnter = inside(enterBox(), x, y);
-			boolean onCreator = inside(creatorBox(), x, y);
 			boolean onLeave = inside(leaveBox(), x, y);
 			Occupant.LOGGER.info("[client] gate clicked at {}, {}: {}", Math.round(x), Math.round(y),
-					onEnter ? "create world" : onCreator ? "creator cut" : onLeave ? "leave it alone" : "nothing");
-			if (onEnter || onCreator) {
-				enter(onCreator);
+					onEnter ? "create world" : onLeave ? "leave it alone" : "nothing");
+			if (onEnter) {
+				enter(ModeScreen.recording());
 				return true;
 			}
 			if (onLeave) {
@@ -236,21 +214,6 @@ public final class GateScreen extends Screen {
 		return new int[]{tx - 12, ty - 8, tx + tw + 12, ty + th + 8};
 	}
 
-	private float creatorScale() {
-		return Math.max(1.25f, enterScale() * 0.55f);
-	}
-
-	/** Where CREATOR CUT can be clicked, below the line that writes itself under CREATE WORLD. */
-	private int[] creatorBox() {
-		int[] e = enterBox();
-		float cs = creatorScale();
-		int tw = Math.round(this.font.width(CREATOR) * cs);
-		int th = Math.round(this.font.lineHeight * cs);
-		int tx = (this.width - tw) / 2;
-		int ty = e[3] + this.font.lineHeight + 10;
-		return new int[]{tx - 10, ty - 5, tx + tw + 10, ty + th + 5};
-	}
-
 	/** Where "or leave it alone" can be clicked. */
 	private int[] leaveBox() {
 		int lw = this.font.width(LEAVE);
@@ -266,12 +229,6 @@ public final class GateScreen extends Screen {
 	/** For the automated test: the middle of either choice, in screen coordinates. */
 	public double[] centreOf(boolean enter) {
 		int[] b = enter ? enterBox() : leaveBox();
-		return new double[]{(b[0] + b[2]) / 2.0, (b[1] + b[3]) / 2.0};
-	}
-
-	/** For the automated test: the middle of CREATOR CUT. */
-	public double[] centreOfCreator() {
-		int[] b = creatorBox();
 		return new double[]{(b[0] + b[2]) / 2.0, (b[1] + b[3]) / 2.0};
 	}
 

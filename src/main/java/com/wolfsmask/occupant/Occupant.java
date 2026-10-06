@@ -131,12 +131,14 @@ public final class Occupant implements ModInitializer {
 						if (com.wolfsmask.occupant.world.LastCamp.isTheirs(data, pos)) {
 							// Their last camp: their last page.
 							data.lastCamp = 2;
+							com.wolfsmask.occupant.story.Achievements.grant(sp, com.wolfsmask.occupant.story.Achievements.EVERY_WORD);
 							page = com.wolfsmask.occupant.world.SurvivorLog.finalEntry(name);
 						} else if (data.lastNight && !data.pageAfter) {
 							data.pageAfter = true;
 							page = com.wolfsmask.occupant.world.SurvivorLog.pageAfter(name);
 						} else {
 							data.logsFound++;
+							com.wolfsmask.occupant.story.Achievements.grant(sp, com.wolfsmask.occupant.story.Achievements.DEAR_DIARY);
 							if (data.logsFound == com.wolfsmask.occupant.world.SurvivorLog.CAMP_PAGE && data.lastCamp == 0) {
 								com.wolfsmask.occupant.world.LastCamp.build(sp, data);
 							}
@@ -220,6 +222,7 @@ public final class Occupant implements ModInitializer {
 		if (sp.getRandom().nextFloat() >= 0.35f) return null;
 
 		data.sleepDenyDay = day;
+		com.wolfsmask.occupant.story.Achievements.grant(sp, com.wolfsmask.occupant.story.Achievements.SLEEPLESS);
 		data.addDread(5f);
 		director.markDirty();
 		if (data.act >= 3 && sp.getRandom().nextBoolean()) {

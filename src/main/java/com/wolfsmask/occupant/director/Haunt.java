@@ -167,7 +167,7 @@ public final class Haunt {
 
 	/** The fog's end once anything bringing it in or lifting it is taken into account. */
 	float fogAfterEvents(float end, long now) {
-		if (now < fogLiftedUntil) return 0.0f;
+		if (now < fogLiftedUntil || data.ending == LastNightEnding.FOUND) return 0.0f;
 		return fogCloses > 0 ? Math.min(end, fogCloses) : end;
 	}
 

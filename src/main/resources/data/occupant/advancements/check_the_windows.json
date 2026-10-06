@@ -1,0 +1,23 @@
+{
+  "parent": "occupant:who_is_there",
+  "display": {
+    "icon": {
+      "item": "minecraft:glass_pane"
+    },
+    "title": {
+      "translate": "advancements.occupant.check_the_windows.title"
+    },
+    "description": {
+      "translate": "advancements.occupant.check_the_windows.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "granted": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "parent": "occupant:last_night",
+  "display": {
+    "icon": {
+      "id": "minecraft:white_bed"
+    },
+    "title": {
+      "translate": "advancements.occupant.ending_hid.title"
+    },
+    "description": {
+      "translate": "advancements.occupant.ending_hid.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": true
+  },
+  "criteria": {
+    "granted": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

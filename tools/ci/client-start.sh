@@ -27,9 +27,9 @@ echo "onboardAccessibility:false" > run/options.txt
 
 echo "== 1. the first screen"
 xvfb-run -n 99 -s "-screen 0 1280x720x24 -ac" $GRADLE runClient > client.log 2>&1 &
-if ! wait_for client.log "the gate screen has been drawn" 900; then stop_game; echo "the gate screen was never drawn"; exit 1; fi
+if ! wait_for client.log "the mode screen has been drawn" 900; then stop_game; echo "the first screen was never drawn"; exit 1; fi
 sleep 30
-shot gate
+shot first-screen
 stop_game
 if crashed client.log; then echo "crashed on the first screen"; exit 1; fi
 

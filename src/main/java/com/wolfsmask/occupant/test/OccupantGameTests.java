@@ -136,6 +136,7 @@ public final class OccupantGameTests {
 		d.lastCampX = -1234;
 		d.lastCampZ = 5678;
 		d.insideSeconds = 300;
+		d.ending = 2;
 		d.recordEvent("watcher", 2400);
 		d.rememberChat("hello there");
 		Tag saved = HauntData.CODEC.encodeStart(NbtOps.INSTANCE, d).getOrThrow();
@@ -144,7 +145,8 @@ public final class OccupantGameTests {
 		helper.assertTrue(copy.sightings == 7 && copy.encounters == 2, "Counters should round-trip");
 		helper.assertTrue(copy.logsFound == 5 && copy.ignored == 3 && copy.introduced && copy.lastNight,
 				"The story so far should round-trip");
-		helper.assertTrue(copy.lastCamp == 1 && copy.lastCampX == -1234 && copy.lastCampZ == 5678 && copy.insideSeconds == 300,
+		helper.assertTrue(copy.lastCamp == 1 && copy.lastCampX == -1234 && copy.lastCampZ == 5678 && copy.insideSeconds == 300
+				&& copy.ending == 2,
 				"Where the last camp is, and how the story was lived, should round-trip");
 		helper.assertTrue(copy.isOnCooldown("watcher") && copy.recency("watcher") == 0, "Cooldowns and history should round-trip");
 		helper.assertTrue("hello there".equals(copy.heardChat.peekFirst()), "Remembered chat should round-trip");
@@ -365,6 +367,55 @@ public final class OccupantGameTests {
 			level.setBlock(p, net.minecraft.world.level.block.Blocks.STONE.defaultBlockState(), net.minecraft.world.level.block.Block.UPDATE_CLIENTS);
 		}
 		return top;
+	}
+
+	/**
+	 * The endings are different places to wake up in. Found the survivor's camp: by their fire,
+	 * lit again, with one more page, and let go. Hid all story long: it came in, and it is closer.
+	 */
+	@GameTest(maxTicks = 60)
+	public void theEndingsAreDifferent(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		Director director = Director.get();
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		BlockPos at = helper.absolutePos(new BlockPos(0, 1, 0)).offset(700, 0, 700);
+		for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) level.getChunk((at.getX() >> 4) + dx, (at.getZ() >> 4) + dz);
+		int top = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, at.getX(), at.getZ());
+		BlockPos base = new BlockPos(at.getX(), top - 1, at.getZ());
+		com.wolfsmask.occupant.world.LastCamp.build(level, base, level.getRandom());
+
+		HauntData d = director.data(player);
+		d.setAct(HauntData.MAX_ACT);
+		d.lastCamp = 2;
+		d.lastCampX = base.getX();
+		d.lastCampZ = base.getZ();
+		helper.assertTrue(com.wolfsmask.occupant.director.LastNightEnding.which(d) == com.wolfsmask.occupant.director.LastNightEnding.FOUND,
+				"Having found their camp should be the ending that lets you go");
+		com.wolfsmask.occupant.director.LastNightEnding.play(player, director.haunt(player), com.wolfsmask.occupant.director.LastNightEnding.FOUND);
+		boolean book = false;
+		for (int s = 0; s < player.getInventory().getContainerSize(); s++) {
+			book |= player.getInventory().getItem(s).is(net.minecraft.world.item.Items.WRITTEN_BOOK);
+		}
+		boolean lit = false;
+		for (BlockPos p : BlockPos.betweenClosed(base.offset(-7, -3, -7), base.offset(7, 6, 7))) {
+			net.minecraft.world.level.block.state.BlockState s = level.getBlockState(p);
+			lit |= s.is(net.minecraft.world.level.block.Blocks.CAMPFIRE) && s.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT);
+		}
+		helper.assertTrue(d.lastNight && d.ending == 1, "The story should be over, and remember how");
+		helper.assertTrue(book, "Their last page should be in your pocket");
+		helper.assertTrue(lit, "Their fire should be lit again");
+
+		HauntData hid = new HauntData();
+		hid.insideSeconds = 3000;
+		hid.outsideSeconds = 200;
+		helper.assertTrue(com.wolfsmask.occupant.director.LastNightEnding.which(hid) == com.wolfsmask.occupant.director.LastNightEnding.HID,
+				"Hiding indoors all story should be the ending where it comes in");
+		d.ending = -1;
+		d.lastNight = false;
+		d.setAct(HauntData.MAX_ACT);
+		com.wolfsmask.occupant.director.LastNightEnding.play(player, director.haunt(player), com.wolfsmask.occupant.director.LastNightEnding.HID);
+		helper.assertTrue(d.ending == 2 && d.act == HauntData.MAX_ACT - 1, "After it comes in, it should still be close (act " + d.act + ")");
+		helper.succeed();
 	}
 
 	/** The fog comes in as the story goes on: eight chunks or so at first, six or so by the end. */

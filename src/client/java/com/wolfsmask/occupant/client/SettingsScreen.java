@@ -64,6 +64,8 @@ public final class SettingsScreen extends Screen {
 		y += 24;
 		toggle(left, y, "flashing", () -> c.reduceFlashing, v -> c.reduceFlashing = v);
 		toggle(right, y, "title_screen", () -> c.titleScreen, v -> c.titleScreen = v);
+		y += 24;
+		toggle(left, y, "ask", () -> c.askHowPlaying, v -> c.askHowPlaying = v);
 
 		y += 44;
 		IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();
@@ -125,9 +127,9 @@ public final class SettingsScreen extends Screen {
 		centred(g, this.title.getString(), 18, 0xFFE8DECE);
 		centred(g, Component.translatable("occupant.settings.yours").getString(), 34, 0xFF8A8A8A);
 		if (Minecraft.getInstance().getSingleplayerServer() != null) {
-			centred(g, Component.translatable("occupant.settings.world").getString(), 46 + 24 * 4 + 8, 0xFF8A8A8A);
+			centred(g, Component.translatable("occupant.settings.world").getString(), 46 + 24 * 5 + 8, 0xFF8A8A8A);
 		} else {
-			centred(g, Component.translatable("occupant.settings.world_remote").getString(), 46 + 24 * 4 + 8, 0xFF6A6A6A);
+			centred(g, Component.translatable("occupant.settings.world_remote").getString(), 46 + 24 * 5 + 8, 0xFF6A6A6A);
 		}
 	}
 
