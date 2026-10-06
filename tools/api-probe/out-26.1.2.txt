@@ -1,0 +1,31 @@
+=== net.minecraft.client.renderer.fog.FogRenderer (-p)
+public class client.renderer.fog.FogRenderer implements AutoCloseable {
+  public client.renderer.fog.FogData setupFog(client.Camera, int, client.DeltaTracker, float, client.multiplayer.ClientLevel);
+  public void updateBuffer(client.renderer.fog.FogData);
+  private void updateBuffer(java.nio.ByteBuffer, int, org.joml.Vector4f, float, float, float, float, float, float);
+=== net.minecraft.client.renderer.fog.FogData (-public)
+public class client.renderer.fog.FogData implements client.rendering.v1.FabricRenderState {
+  public float environmentalStart;
+  public float renderDistanceStart;
+  public float environmentalEnd;
+  public float renderDistanceEnd;
+  public float skyEnd;
+  public float cloudEnd;
+  public org.joml.Vector4f color;
+  public client.renderer.fog.FogData();
+}
+=== net.minecraft.world.entity.player.Player$BedSleepingProblem (-public)
+public final class world.entity.player.Player$BedSleepingProblem extends Record {
+  public static final world.entity.player.Player$BedSleepingProblem TOO_FAR_AWAY;
+  public static final world.entity.player.Player$BedSleepingProblem OBSTRUCTED;
+  public static final world.entity.player.Player$BedSleepingProblem OTHER_PROBLEM;
+  public static final world.entity.player.Player$BedSleepingProblem NOT_SAFE;
+  public world.entity.player.Player$BedSleepingProblem(network.chat.Component);
+  public final String toString();
+  public final int hashCode();
+  public final boolean equals(Object);
+  public network.chat.Component message();
+}
+=== net.minecraft.server.level.ServerPlayer (-public)
+public class server.level.ServerPlayer extends world.entity.player.Player implements networking.v1.context.PacketContextProvider {
+  public int requestedViewDistance();
