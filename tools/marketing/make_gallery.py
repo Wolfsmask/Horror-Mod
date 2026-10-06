@@ -33,12 +33,13 @@ rng = np.random.default_rng(1666)
 # focus (0 top .. 1 bottom)
 SHOTS_LIST = [
     ("cinematic-treeline", "01-treeline", "It was standing there the whole time.", (0.62, 0.15, 1.0), 0.45),
-    ("cinematic-village", "02-village", "Everyone left. Something stayed.", (0.6, 0.25, 1.1), 0.5),
-    ("cinematic-ruin", "03-ruin", "Somebody held out here. For a while.", (0.7, 0.45, 1.0), 0.5),
-    ("cinematic-camp", "04-camp", "WE WERE FOUR. THEN THREE.", (0.8, 0.55, 1.15), 0.5),
-    ("cinematic-graves", "05-graves", "It took the rest.", (0.5, -0.1, 1.25), 0.55),
-    ("cinematic-face", "06-face", "It is learning how to be you.", (0.6, 0.3, 1.0), 0.6),
-    ("occupant-gate", "07-the-first-screen", "There is only one way in.", (0.9, 0.0, 1.0), 0.5),
+    ("cinematic-fog", "02-fog", "It waits at the edge of what you can see.", (0.6, 0.2, 1.05), 0.5),
+    ("cinematic-village", "03-village", "Everyone left. Something stayed.", (0.6, 0.25, 1.1), 0.5),
+    ("cinematic-ruin", "04-ruin", "Somebody held out here. For a while.", (0.7, 0.45, 1.0), 0.5),
+    ("cinematic-camp", "05-camp", "WE WERE FOUR. THEN THREE.", (0.8, 0.55, 1.15), 0.5),
+    ("cinematic-graves", "06-graves", "It took the rest.", (0.5, -0.1, 1.25), 0.55),
+    ("cinematic-face", "07-face", "It is learning how to be you.", (0.6, 0.3, 1.0), 0.6),
+    ("occupant-gate", "08-the-first-screen", "There is only one way in.", (0.9, 0.0, 1.0), 0.5),
 ]
 
 
