@@ -77,6 +77,11 @@ public final class HuntEvent extends HorrorEvent {
 	}
 
 	private static final class Hunt extends ApparitionSequence {
+		@Override
+		protected int stareLimit() {
+			return Integer.MAX_VALUE;                      // being looked at is how the hunt begins
+		}
+
 		private final int stareTicks;
 		private boolean chasing;
 		private int chaseTicks;

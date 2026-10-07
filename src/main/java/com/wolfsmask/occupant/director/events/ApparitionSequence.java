@@ -3,6 +3,7 @@ package com.wolfsmask.occupant.director.events;
 import com.wolfsmask.occupant.director.Haunt;
 import com.wolfsmask.occupant.director.Sequence;
 import com.wolfsmask.occupant.entity.OccupantEntity;
+import com.wolfsmask.occupant.util.Cues;
 import com.wolfsmask.occupant.util.Sight;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Mob;
@@ -22,6 +23,10 @@ public abstract class ApparitionSequence implements Sequence {
 	protected int lookTicks;
 	/** The animals near the player, who know it is there. */
 	private List<Mob> animals = List.of();
+	/** Ticks it was there, and on their screen, without their ever looking at it. */
+	private int watchedUnaware;
+	@org.jetbrains.annotations.Nullable
+	private ServerPlayer watching;
 	/** The monsters near it, who want nothing to do with it. */
 	private List<Mob> monsters = List.of();
 
@@ -39,9 +44,20 @@ public abstract class ApparitionSequence implements Sequence {
 
 		// Nothing is there to see until it has been revealed.
 		boolean looking = !entity.isConcealed() && Sight.isLookingAt(player, entity);
-		if (age % 5 == 0 && !entity.isConcealed() && (looking || Sight.isOnScreen(player, entity))) haunt.markShown();
+		watching = player;
+		if (age % 5 == 0 && !entity.isConcealed() && (looking || Sight.isOnScreen(player, entity))) {
+			haunt.markShown();
+			if (!seen) watchedUnaware += 5;
+		}
 		if (looking) {
 			lookTicks++;
+			// What it cannot stand is being looked at. Stared at, it is gone, and sooner the better
+			// they know it: it is most frightening when they do not know it is there.
+			if (lookTicks > stareLimit()) {
+				// Gone in a stutter of the light, so it is never seen simply blinking out.
+				Cues.effect(player, com.wolfsmask.occupant.network.ScreenEffectPayload.FLICKER, 5, 1f);
+				return false;
+			}
 			if (!seen) {
 				seen = true;
 				haunt.data.sightings++;
@@ -85,6 +101,15 @@ public abstract class ApparitionSequence implements Sequence {
 		}
 	}
 
+	/**
+	 * Ticks of being looked straight at before it goes: a little over three seconds the first
+	 * times, barely more than one once it has been seen often. Sequences that need to be watched
+	 * (the hunt's stare, the last night) give more.
+	 */
+	protected int stareLimit() {
+		return Math.max(24, 70 - haunt.data.sightings * 3);
+	}
+
 	/** @return false to end (the entity then vanishes) */
 	protected abstract boolean update(ServerPlayer player, boolean looking);
 
@@ -94,6 +119,15 @@ public abstract class ApparitionSequence implements Sequence {
 	@Override
 	public void end() {
 		entity.vanish();
+		// Gone without their ever noticing, after watching them a good while: now and then, they
+		// are told, afterwards, when there is nothing left to look at.
+		ServerPlayer p = watching;
+		if (p != null && !seen && watchedUnaware >= 20 * 12 && p.isAlive() && p.getRandom().nextFloat() < 0.45f) {
+			int seconds = watchedUnaware / 20;
+			String[] lines = {"It watched you for " + seconds + " seconds.", "You didn't see it. It saw you.",
+					"It was there the whole time.", "It stood there for " + seconds + " seconds. You never looked."};
+			Cues.whisper(p, lines[p.getRandom().nextInt(lines.length)], 100);
+		}
 	}
 
 	@Override

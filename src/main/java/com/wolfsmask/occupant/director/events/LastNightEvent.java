@@ -86,6 +86,11 @@ public final class LastNightEvent extends HorrorEvent {
 	}
 
 	private static final class LastNight extends ApparitionSequence {
+		@Override
+		protected int stareLimit() {
+			return Integer.MAX_VALUE;                      // it has to be looked at, to come closer
+		}
+
 		private int stage = -1;
 		private int seenFor;
 		private int awayFor;
