@@ -1,61 +1,15 @@
-# 1.21.11 on e7c70faf4d70911d258f879675515307b37eb865: build success, tests failure, jar success
+# 1.21.11 on e23a75c9aae6a94cc6ef9579c2d9077d41ae3f58: build failure, tests skipped, jar skipped
+com/wolfsmask/occupant/client/ClientScares.java:111: error: cannot find symbol
+  symbol:   method sendSystemMessage(MutableComponent)
+  location: variable player of type LocalPlayer
 > Configure project :
 > Task :versionSourcesMain
 > Task :compileJava
 > Task :processResources
 > Task :classes
 > Task :versionSourcesClient
-> Task :compileClientJava
-> Task :processClientResources NO-SOURCE
-> Task :jar
-> Task :processIncludeJars
-> Task :clientClasses
-> Task :compileTestJava NO-SOURCE
-> Task :processTestResources NO-SOURCE
-> Task :testClasses UP-TO-DATE
-> Task :test NO-SOURCE
-> Task :validateAccessWidener NO-SOURCE
-> Task :check UP-TO-DATE
-> Task :remapJar
-> Task :remapSourcesJar SKIPPED
-> Task :assemble
-=== jar
-jar: build/libs/occupant-1.0.0+mc1.21.11.jar
-{
-  "required": true,
-  "minVersion": "0.8",
-  "package": "com.wolfsmask.occupant.mixin.client",
-  "compatibilityLevel": "JAVA_21",
-  "client": [
-    "CreateWorldAccess",
-    "FogRendererMixin",
-    "ScreenAccess",
-    "SkyRendererMixin"
-  ],
-  "injectors": {
-    "defaultRequire": 1
-  }
-}
-the mixin class itself was remapped
-[20:38:42] [Server thread/INFO] (occupant) [gametest] houses: found before false, first true, too close false, second true, after finding false
-[20:38:42] [Server thread/INFO] (occupant) [gametest] last camp at BlockPos{x=-594127, y=-61, z=9264125}, chest at BlockPos{x=-594124, y=-60, z=9264125}
-[20:38:42] [Server thread/INFO] (occupant) [gametest] lair under BlockPos{x=-594114, y=0, z=9265525}: 22 rungs, going in: STARTED
-[20:38:43] [Server thread/INFO] (occupant) [gametest] blight over 64 chunks: 519 blocks changed, 0 leaves
-[20:38:43] [Server thread/INFO] (occupant) [gametest] advancements of ours loaded: 19
-[20:38:43] [Server thread/INFO] (occupant) [gametest] fog: first act 80.0, last act 50.0
-[20:38:43] [Server thread/INFO] (occupant) [gametest] fog thick at 60.0, begins at 34.8; it stands 26.870057685088806 away
-[20:38:44] [Server thread/INFO] (occupant) [gametest] places without loot: [], page found: true
-[20:38:44] [Server thread/INFO] (occupant) [gametest] ways of building a place that lost their things: []
-[20:38:45] [Server thread/INFO] (occupant) [gametest] house test player at BlockPos{x=-2, y=1, z=-4} facing 0.0 / (0.0, -0.0, 1.0)
-[20:38:45] [Server thread/INFO] (occupant) [gametest] house hallway spot: peeking BlockPos{x=-594065, y=-56, z=9265130} / any BlockPos{x=-594065, y=-56, z=9265130} (relative to the floor: BlockPos{x=4, y=1, z=0})
-[20:38:45] [Server thread/INFO] (occupant) [gametest] hallway light at the far end: block 0 sky 0, dark true
-[20:38:45] [Server thread/INFO] (occupant) [gametest] that spot: mask 1001001001, block light 0, sky 2, main room middle block light 0 sky 8
-[20:38:46] [Server thread/INFO] (occupant) [gametest] field: darkOutside=true skyDarken=7 light=8 skyLight=15 blockLight=0 isDark=true grassInDirtTag=true
-[20:38:46] [Server thread/INFO] (occupant) [gametest] cave: yaw=-90.0 feet=BlockPos{x=-593662, y=60, z=9264960} underground=true skyVisible=false skyLight=0 topY=69 light=0 look=(1.0, 0.0, 1.2246468525851679E-16) | ahead: standable=55 dark=55 visible=55
-[20:38:46] [Server thread/INFO] (occupant) [gametest] arena failures: []
-[20:38:46] [Server thread/INFO] (occupant) [gametest] slowest event to start: watcher (field) in 10 ms
-[20:38:47] [Server thread/INFO] (occupant) [gametest] unnoticed: age 241, seen -1, nearby 1, alive true, concealed false, noticed false, in sight true, angle 176, ray MISS at -594139, -8, 9264832 Block{minecraft:air}, ignored 1, same story true
-[20:38:54] [Server thread/INFO] (occupant) [gametest] events that found a place to happen: [familiar, cave_noise, thunder, echo, breath, fake_join, sign, roof, saving, teammate, advancement, whisper, doppel_chat, stalker, flicker, static, wake]
-[20:38:54] [Server thread/INFO] (Minecraft) ========= 23 GAME TESTS COMPLETE IN 14.49 s ======================
-[20:38:54] [Server thread/INFO] (Minecraft) 1 required tests failed :(
-[20:38:54] [Server thread/INFO] (Minecraft)    - occupant:occupant_game_tests_it_does_not_let_them_die: A fatal fall should be caught (true, 1.0) on tick 0
+> Task :compileClientJava FAILED
+* What went wrong:
+> Compilation failed; see the compiler output below.
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
