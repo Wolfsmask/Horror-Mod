@@ -13,8 +13,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * clouds drawn into it too, so there is no clear horizon above a fogged world; and the colour
  * drained towards grey. Only the result is used, not the arguments: they differ between 26.x
  * releases (26.4 added one).
+ * <p>
+ * Early, before the default: other renderers take their copy of the fog from setupFog as it
+ * returns too (Sodium draws the land with the copy it takes there), and they must take it with
+ * this fog already in it.
  */
-@Mixin(FogRenderer.class)
+@Mixin(value = FogRenderer.class, priority = 500)
 public abstract class FogRendererMixin {
 	@Inject(method = "setupFog", at = @At("RETURN"))
 	private void occupant$closeIn(CallbackInfoReturnable<?> cir) {
