@@ -49,7 +49,8 @@ public final class CorridorEvent extends HorrorEvent {
 				if (!Spots.isLoaded(world, feet)) break;
 				if (!world.getBlockState(feet).getCollisionShape(world, feet).isEmpty()
 						|| !world.getBlockState(feet.above()).getCollisionShape(world, feet.above()).isEmpty()) break;
-				if (d >= 18 && Spots.canStand(world, feet) && Spots.isDark(world, feet.above())) far = feet.immutable();
+				// The far end of what can be seen down it: never so far the fog has swallowed it.
+				if (d >= 18 && Spots.canStand(world, feet) && Spots.isDark(world, feet.above()) && ctx.throughFog(feet)) far = feet.immutable();
 			}
 			if (far == null) continue;
 			OccupantEntity e = ctx.haunt.spawnOccupant(p, far, OccupantEntity.Mode.STARE, ctx.haunt.pickForm(ctx.random));
