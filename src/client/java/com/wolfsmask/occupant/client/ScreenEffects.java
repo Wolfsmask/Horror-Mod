@@ -73,8 +73,6 @@ public final class ScreenEffects {
 		introLine = INTRO_LINES[ThreadLocalRandom.current().nextInt(INTRO_LINES.length)];
 	}
 
-	/** The first time in a world: longer, in black, and it tells you. */
-	/** The end of the last night: the same black as the first time, and what it has become. */
 	/** Found their last camp. */
 	private static final String[][] ENDING_FOUND = {
 			{"You found what was left of them.", "It doesn't want the ones who come looking."},
@@ -88,6 +86,7 @@ public final class ScreenEffects {
 			{"You let it come all the way.", "Next time it will not need to ask."},
 			{"It was never going to let you leave.", "It is still here."}};
 
+	/** The end of the last night: the same black as the first time, and what it has become. */
 	private static void ended(int which) {
 		String[][] set = which == 1 ? ENDING_FOUND : which == 2 ? ENDING_HID : ENDING_LINES;
 		String[] lines = set[ThreadLocalRandom.current().nextInt(set.length)];
@@ -99,6 +98,7 @@ public final class ScreenEffects {
 		introSub = lines[1].replace(", {player}", name.isEmpty() ? "" : ", " + name);
 	}
 
+	/** The first time in a world: longer, in black, and it tells you. */
 	private static void arrived() {
 		String[] lines = ARRIVAL_LINES[ThreadLocalRandom.current().nextInt(ARRIVAL_LINES.length)];
 		introAge = 0;
@@ -201,42 +201,37 @@ public final class ScreenEffects {
 	}
 
 	public static void tick(Minecraft client) {
+		LocalPlayer player = client.player;
+		List<OccupantEntity> around = player == null || client.level == null ? List.of()
+				: client.level.getEntitiesOfClass(OccupantEntity.class, player.getBoundingBox().inflate(40.0), e -> !e.isRemoved());
 		ClientFog.tick();
-		ClientScares.tick(client);
+		ClientScares.tick(client, around);
 		Score.tick(client);
 		if (blackoutAge < blackoutLength) blackoutAge++;
 		if (flickerAge >= 0 && ++flickerAge >= flickerLength) flickerAge = -1;
 		if (staticAge < staticLength) staticAge++;
 		if (whisperAge < whisperLength) whisperAge++;
 
+		// Static from how near it is; and the atmosphere: how dark it is where the player is
+		// standing, and how near it is.
 		float target = 0f;
-		LocalPlayer player = client.player;
-		if (player != null && client.level != null) {
-			List<OccupantEntity> near = client.level.getEntitiesOfClass(OccupantEntity.class,
-					player.getBoundingBox().inflate(24.0), e -> !e.isRemoved());
-			for (OccupantEntity e : near) {
-				double d = e.distanceTo(player);
-				float t = switch (e.getMode()) {
-					case CHASE -> (float) Mth.clamp(1.0 - d / 24.0, 0.05, 1.0) * 0.45f;
-					case STARE, STALK -> d < 14 ? (float) (1.0 - d / 14.0) * 0.22f : 0f;
-					default -> 0f; // an ambush must give nothing away
-				};
-				target = Math.max(target, t);
-			}
-		}
-		proximityStatic += (target - proximityStatic) * 0.2f;
-
-		// The atmosphere: how dark it is where the player is standing, and how near it is.
 		float near = 0f;
 		float dark = 0f;
 		if (player != null && client.level != null) {
 			int light = client.level.getMaxLocalRawBrightness(player.blockPosition());
 			dark = 1f - light / 15f;
-			for (OccupantEntity e : client.level.getEntitiesOfClass(OccupantEntity.class,
-					player.getBoundingBox().inflate(40.0), e -> !e.isRemoved() && !e.isConcealed())) {
-				near = Math.max(near, (float) Mth.clamp(1.0 - e.distanceTo(player) / 40.0, 0.0, 1.0));
+			for (OccupantEntity e : around) {
+				double d = e.distanceTo(player);
+				float t = d > 24.0 ? 0f : switch (e.getMode()) {
+					case CHASE -> (float) Mth.clamp(1.0 - d / 24.0, 0.05, 1.0) * 0.45f;
+					case STARE, STALK -> d < 14 ? (float) (1.0 - d / 14.0) * 0.22f : 0f;
+					default -> 0f; // an ambush must give nothing away
+				};
+				target = Math.max(target, t);
+				if (!e.isConcealed()) near = Math.max(near, (float) Mth.clamp(1.0 - d / 40.0, 0.0, 1.0));
 			}
 		}
+		proximityStatic += (target - proximityStatic) * 0.2f;
 		float want = Mth.clamp(0.15f + dark * 0.45f + near * 0.5f, 0f, 1f);
 		atmosphere += (want - atmosphere) * 0.05f;
 		nearness += (near - nearness) * 0.08f;

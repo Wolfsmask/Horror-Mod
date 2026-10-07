@@ -25,7 +25,8 @@ public final class ClientScares {
 	private ClientScares() {
 	}
 
-	static void tick(Minecraft mc) {
+	/** {@code around}: every Occupant within forty blocks of the player, from the caller. */
+	static void tick(Minecraft mc, java.util.List<OccupantEntity> around) {
 		if (savingAge >= 0 && ++savingAge > savingLength) savingAge = -1;
 		LocalPlayer player = mc.player;
 		if (player == null || mc.level == null || mc.isPaused()) return;
@@ -33,8 +34,8 @@ public final class ClientScares {
 		double nearest = Double.MAX_VALUE;
 		boolean seen = false;
 		Vec3 look = player.getViewVector(1.0f);
-		for (OccupantEntity e : mc.level.getEntitiesOfClass(OccupantEntity.class, player.getBoundingBox().inflate(40.0),
-				e -> !e.isRemoved() && !e.isConcealed())) {
+		for (OccupantEntity e : around) {
+			if (e.isConcealed()) continue;
 			double d = e.distanceTo(player);
 			Vec3 to = e.position().add(0, 2.0, 0).subtract(player.getEyePosition()).normalize();
 			boolean inView = look.dot(to) > 0.7;
