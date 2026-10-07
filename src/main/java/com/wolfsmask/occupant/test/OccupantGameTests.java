@@ -475,6 +475,37 @@ public final class OccupantGameTests {
 		helper.succeed();
 	}
 
+	/**
+	 * It does not let them die like that: a fatal fall is caught, and a monster's killing blow is
+	 * stopped and the monster taken, but not twice within ten minutes.
+	 */
+	@GameTest(maxTicks = 40)
+	public void itDoesNotLetThemDie(GameTestHelper helper) {
+		Director director = Director.get();
+		ServerLevel level = helper.getLevel();
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		HauntData data = director.data(player);
+		data.introduced = true;
+		data.setAct(2);
+		player.setHealth(1.0f);
+		boolean fall = com.wolfsmask.occupant.director.Mercy.allowDeath(player, player.damageSources().fall());
+		helper.assertTrue(!fall && player.getHealth() > 1.0f, "A fatal fall should be caught (" + fall + ", " + player.getHealth() + ")");
+
+		net.minecraft.world.entity.Mob zombie = net.minecraft.world.entity.EntityType.ZOMBIE.create(level, EntitySpawnReason.COMMAND);
+		helper.assertTrue(zombie != null, "Could not create a zombie");
+		zombie.snapTo(player.getX() + 2, player.getY(), player.getZ(), 0.0f, 0.0f);
+		level.addFreshEntity(zombie);
+		player.setHealth(1.0f);
+		boolean first = com.wolfsmask.occupant.director.Mercy.allowDeath(player, player.damageSources().mobAttack(zombie));
+		helper.assertTrue(!first && zombie.isNoAi(), "A zombie's killing blow should be stopped and the zombie taken");
+		director.stopCurrent(player);
+		helper.assertTrue(!zombie.isNoAi(), "Whatever it did not finish with should be let go again");
+		boolean again = com.wolfsmask.occupant.director.Mercy.allowDeath(player, player.damageSources().mobAttack(zombie));
+		helper.assertTrue(again, "Not saved from monsters twice in ten minutes");
+		zombie.discard();
+		helper.succeed();
+	}
+
 	/** What comes after an event is always an event there is: a misspelt one would never come. */
 	@GameTest
 	public void followUpsAreRealEvents(GameTestHelper helper) {
