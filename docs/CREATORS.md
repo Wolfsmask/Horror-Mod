@@ -24,9 +24,9 @@ are fine.
    - **PLAYING**: the slow burn, paced for a long evening (or several).
    - **RECORDING** *(recommended for creators)*: the Creator Cut. The same story, made for a
      video: about forty minutes, the ending included.
-3. Pick **RECORDING**. **Now start recording**: the next screen is the mod's title screen, a
-   dark wood and the way in, with nothing on it that gives the game away.
-4. Click **CREATE WORLD**. You go straight into a new survival world.
+3. Pick **RECORDING** (click it, or press **2**). **Now start recording**: the next screen is
+   the mod's title screen, a dark wood and the way in, with nothing on it that gives the game away.
+4. Click **CREATE WORLD** (or press **Enter**). You go straight into a new survival world.
 
 That's it. The mode is saved with the world, so you can stop and carry on in another session.
 The first screen remembers your last answer; if you never want to be asked, turn off *Ask how

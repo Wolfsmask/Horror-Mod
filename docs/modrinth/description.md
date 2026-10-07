@@ -25,7 +25,8 @@ happen at all.** Nobody gets the same story. Everybody gets one that feels direc
 - 🦵 **It does not walk.** It braces its ten legs against walls, trees and ceilings and *pushes* itself through the world. Indoors, it folds down to fit.
 - 🔇 **It never appears while you are looking.** You turn round, and it has always been there.
 - 👥 **Only you can see it.** Your friend standing right next to you sees nothing at all.
-- 🌫️ **A real fog.** Not a short render distance: a fog you can't see through, thicker every act, closing right in when it is near. It stands in it, a grey shape you can only just make out.
+- 🌫️ **A real fog.** Not a short render distance: a fog you can't see through, eighty blocks at first and fifty by the end, closing right in when it is near. The sky goes into it too, and the colour drains out of everything. It stands in it, a grey shape you can only just make out.
+- 🔁 **One thing leads to another.** The lights stutter, and when they settle something breathes behind you. It knocks, and then it is at the window. It is seen far off, and a minute later, closer.
 - 🚫 **It has rules.** Try the Nether: *It does not want you in there.* Try creative: *It doesn't want you breaking the rules.*
 - 🐄 **The animals know first.** When it is out there, they stop grazing and turn to look at it. Sometimes they all turn and look at *you*.
 - 🪟 **Check the windows.** At night, from inside, there may be a face a step back from the glass. Or footsteps crossing the roof, stopping right above you.
@@ -46,10 +47,13 @@ Explore and you will find what is left: **abandoned villages**, a **house with a
 no windows**, **ruined keeps**, **cold campsites**, **small graveyards with one grave dug open**,
 **watchtowers**, **chapels** with one pew turned to face the door, **radio shacks** where the set
 still picks something up, **lighthouses** on the shore... and, if you are unlucky, **its lair**:
-a hole in the ground with a ladder going down a long way.
+a hole in the ground with a ladder going down a long way. No two are built the same: each in the
+wood that grows where it stands, in different sizes and shapes, some fallen in, and never two of
+a kind close together. Climb the towers: you can see right to the edge of the fog from up there.
 
 Their chests still hold what people left behind, and **a page of a survivor's log**. Always the
-next page, whichever chest you open first, so the story reads in order wherever you find it.
+next page, whichever chest you open first, so the story reads in order wherever you find it, and
+in step with the story, so you never read the ending first.
 
 > *Day 7. If you are reading this, you have the same problem I did. Don't look at it for long.
 > It gets braver when you look.*

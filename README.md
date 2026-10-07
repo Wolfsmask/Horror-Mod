@@ -14,8 +14,8 @@ feels directed.
 > You need Fabric API and nothing else: no shaders, no resource packs. See
 > [Compatibility](#compatibility) for the few mods that get in its way.
 
-> **Recording it?** The first screen asks how you're playing: answer **RECORDING**, then start
-> recording on the title screen after it. The whole story, ending included, in about forty minutes. Everything else a creator needs (what to expect and when,
+> **Recording it?** The first screen asks how you're playing: answer **RECORDING** (click it, or
+> press 2), then start recording on the title screen after it (click the way in, or press Enter). The whole story, ending included, in about forty minutes. Everything else a creator needs (what to expect and when,
 > recording tips, commands for B-roll, thumbnails) is in **[the Creator Pack](docs/CREATORS.md)**.
 
 ---
@@ -52,8 +52,12 @@ water, in daylight in open fields, or close enough to touch (unless that is the 
 Acts need **both** time and experiences to advance, so you can't skip the story by hiding in a
 lit base, and you can't get stuck in it forever either.
 
-Something happens every minute or three; the first thing it tries is to be seen, far off. After
-every big scare there is a **calm** of a few minutes with only small, deniable things.
+Something happens every minute or three; the first thing it tries is to be seen, far off, and
+it is never long before it is seen again: every five minutes or so early on, every three by the
+end. Things **follow on** from each other: the lights stutter, and when they settle something
+breathes behind you; it knocks, and then it is at the window; it is seen far off, and a minute
+later, closer. After every big scare there is a **calm** of a few minutes with only small,
+deniable things.
 And the Director builds on absence: the longer nothing has happened, the more it favours
 something real, so the next thing lands once you have stopped listening for it.
 
@@ -64,7 +68,8 @@ to you, the sound drops away instead.
 There is a **fog**, a real one: it begins a few blocks from you and thickens all the way out,
 until at about eighty blocks you cannot see anything at all. It comes in ten blocks with each act,
 to about fifty by the end, closer at night, and right round you while it is close, as if it
-brings the fog with it. Far off, it stands **where it can only just be made out**: a grey shape
+brings the fog with it. The sky goes into it too, so there is no clear horizon over a fogged
+world, and the colour drains out towards grey; sunset and sunrise are only a dull glow through it. Far off, it stands **where it can only just be made out**: a grey shape
 in the fog, never so deep in it that you could tell yourself it was a tree. And the animals know before you do:
 when it is out there, the cows stop grazing and turn to look at it. Follow their eyes.
 
@@ -141,21 +146,31 @@ As you explore, you come across places people used to be, all empty:
   side hallway has no windows. The first time you step inside, it is standing in it. Houses
   keep turning up, away from spawn and from each other, until anyone comes within a chunk of
   one; after that, no more are built.
-- **Ruined keeps**: a walled yard with corner towers, half fallen, a cold fire inside.
-- **Abandoned camps**: a tent, logs round a dead fire, and a sign left for whoever came next.
-- **Graveyards**: two rows of graves, one of them dug open.
-- **Watchtowers**: a ladder up to a platform over the trees, with someone's things still on it.
-- **Chapels**: pews and a bell, and one pew turned round to face the door.
+- **Ruined keeps**: a walled yard, towers on some of its corners, half fallen, a cold fire
+  inside. Steps go up to the wall-walk, and the towers still standing have a ladder to the top.
+- **Abandoned camps**: a tent (or what is left of one), logs round a dead fire, and a sign left
+  for whoever came next.
+- **Graveyards**: rows of graves behind a broken fence, one of them dug open.
+- **Watchtowers**: a ladder from the ground up through a hatch to a roofed lookout over the
+  trees, with someone's things still on it.
+- **Chapels**: pews and an altar, one pew turned round to face the door; some with a bell tower,
+  some with the roof fallen in.
 - **Radio shacks**: a hut with an aerial, a set (a jukebox), a lever, and a note.
-- **Lighthouses**, on the shore, their lamps long out.
+- **Lighthouses**, on the shore, their lamps long out: a door at the foot, a ladder up the
+  inside, and a gallery round the top to step out onto.
+
+None of them is built the same way twice. Each is put up in the wood that grows where it stands
+(spruce in the north, oak and birch and dark oak in the woods) and weathered more or less; each
+kind comes in different sizes and shapes; and the same kind is never found close to another.
 - **Its lair**: a ring of trampled earth, bones, and a hole with a ladder down. Twenty blocks
   under is a hollow scraped out of the stone, with its things in it. Going down there is a
   moment of its own.
 
 Their chests and barrels hold what was left behind, and the first time each is opened, the
 next page of a **survivor's log** is in it: always the next page for you, whichever you open,
-so it reads in order. It does not end well, and when it runs out, the pages that are left are
-not in the same hand.
+so it reads in order. The log keeps pace with the story: a few pages early on, a little while
+between pages, and the last of them not until late, so you never read the ending first. It does
+not end well, and when it runs out, the pages that are left are not in the same hand.
 
 ### The entity
 
