@@ -62,6 +62,12 @@ public abstract class ApparitionSequence implements Sequence {
 				seen = true;
 				haunt.data.sightings++;
 				com.wolfsmask.occupant.story.Achievements.grant(player, com.wolfsmask.occupant.story.Achievements.NOT_ALONE);
+				// It had been watching them a long while before they saw it: the first thing they
+				// know of it is its breath, at their ear, however far off it stands.
+				if (watchedUnaware >= 20 * 10) {
+					Cues.soundAtEars(player, com.wolfsmask.occupant.registry.ModSounds.BREATH,
+							net.minecraft.sounds.SoundSource.HOSTILE, 0.55f, 0.85f);
+				}
 				onSeen(player);
 			}
 		} else {
