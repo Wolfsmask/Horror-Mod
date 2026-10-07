@@ -1,6 +1,6 @@
-# 26.3 with Sodium mc26.3-0.9.3-alpha.1-fabric on f5454f2ba0255bc6254cead73ad9b0a382e902a5: failure
+# 26.3 with Sodium mc26.3-0.9.3-alpha.1-fabric on 6db84ad7f749349c2f201c98e3254b27016b9957: failure
 > Task :compileClientJava FAILED
-BUILD FAILED in 37s
+BUILD FAILED in 33s
 --- tail ---
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
 		                            ^
@@ -18,7 +18,7 @@ BUILD FAILED in 37s
 Note: /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/OccupantClient.java uses or overrides a deprecated API.
 Note: Recompile with -Xlint:deprecation for details.
 1 error
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/run-1791342776270.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/run-1791342803483.json
 
 [Incubating] Problems report is available at: file:///home/runner/work/Horror-Mod/Horror-Mod/build/reports/problems/problems-report.html
 
@@ -40,5 +40,5 @@ Execution failed for task ':compileClientJava' (registered by plugin class 'org.
 > Check your code and dependencies to fix the compilation error(s)
 > Run with --scan to get full insights from a Build Scan (powered by Develocity).
 
-BUILD FAILED in 37s
+BUILD FAILED in 33s
 3 actionable tasks: 3 executed
