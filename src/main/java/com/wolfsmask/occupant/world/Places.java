@@ -156,6 +156,12 @@ final class Places {
 	/** World generation's chance at one of the old places around {@code centre}. */
 	static boolean tryPlace(WorldGenLevel level, RandomSource random, BlockPos centre, double fromSpawn) {
 		if (fromSpawn < MIN_FROM_SPAWN) return false;
+		// Most chunks are near a place already: cheap to tell, before looking at the ground.
+		for (BlockPos p : PLACES) {
+			long dx = p.getX() - centre.getX();
+			long dz = p.getZ() - centre.getZ();
+			if (dx * dx + dz * dz < (long) MIN_APART * MIN_APART) return false;
+		}
 		// Fairly flat ground for the widest of them, so any kind can go here.
 		BlockPos base = flatGround(level, centre, 7, 3);
 		if (base == null || !level.ensureCanWrite(base)) return false;

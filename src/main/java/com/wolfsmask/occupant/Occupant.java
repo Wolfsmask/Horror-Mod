@@ -11,7 +11,6 @@ import com.wolfsmask.occupant.registry.ModEntities;
 import com.wolfsmask.occupant.registry.ModSounds;
 import com.wolfsmask.occupant.world.House;
 import com.wolfsmask.occupant.world.ModWorld;
-import com.wolfsmask.occupant.director.HauntData;
 import com.wolfsmask.occupant.world.Loot;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.core.BlockPos;

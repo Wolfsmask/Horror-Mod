@@ -12,28 +12,34 @@ import java.util.List;
  */
 public final class SurvivorLog {
 	private static final String AUTHOR = "unknown";
+	/**
+	 * The pages, in order. A page may run over more than one leaf of the book ({@code \f} between
+	 * them). The survivor's own hand runs out at the page that says where their last camp is, so
+	 * the last thing they wrote, which is at that camp, is always read after everything else in
+	 * their hand; what comes after that is in another hand.
+	 */
 	private static final List<String> PAGES = List.of(
 			"Day 1.\n\nFound this place empty. Door open, food still on the table. Whoever lived here left in a hurry.\n\nI'll stay a night or two.",
 			"Day 3.\n\nThere is someone at the treeline in the evenings. Tall. Too tall.\n\nIt doesn't move when I wave.\n\nI stopped waving.",
 			"Day 4.\n\nTried to count its legs through the window. Lost count.\n\nI keep the light low now.",
 			"Day 6.\n\nIt was closer this morning. Same place it stood yesterday, only closer. As if I had walked towards it in my sleep.",
 			"Day 7.\n\nIf you are reading this, you have the same problem I did.\n\nDon't look at it for long. It gets braver when you look.",
-			"Day 9.\n\nHeard my own footsteps on the path behind me.\n\nI was standing still.",
-			"Day 11.\n\nThe torches by the door were gone when I woke. Set out in a line towards the trees.\n\nPointing at me.",
+			"Day 9.\n\nHeard my own footsteps on the path behind me.\n\nI was standing still.\f"
+					+ "Day 11.\n\nThe torches by the door were gone when I woke. Set out in a line towards the trees.\n\nPointing at me.",
 			"Day 12.\n\nIt has a face like ours. Mostly.\n\nThe mouth doesn't stop.",
 			"Day 14.\n\nSomeone knocked tonight. Three times, then three more.\n\nNobody else lives within a day's walk of here.",
 			"Day 15.\n\nI tried to leave. Every path came back round to here.\n\nIt is always standing at the edge of what I can see.",
-			"Day 16.\n\nI've moved everything I have left to a camp of my own, out where it can't stand behind the trees.\n\n{camp}\n\nIf I don't come back, that's where I'll be.",
-			"Day 17.\n\nI don't think it wants to kill me.\n\nI think it wants to BE me. It practises my walk at night.",
-			"Day 18.\n\nDon't sleep in the dark rooms. Don't go down the hallway.\n\nIf it is in the hallway, it has already seen you.",
-			"Day ??\n\nIt's watching me write this. I can see it in the window glass.\n\nIt's smiling.\n\nIt's coming.",
+			"Day 16.\n\nI don't think it wants to kill me.\n\nI think it wants to BE me. It practises my walk at night.",
+			"Day 17.\n\nDon't sleep in the dark rooms. Don't go down the hallway.\n\nIf it is in the hallway, it has already seen you.\f"
+					+ "Later.\n\nIt's watching me write this. I can see it in the window glass.\n\nIt's smiling.",
+			"Day 18.\n\nI'm going. I've moved everything I have left to a camp of my own, out where it can't stand behind the trees.\n\n{camp}\n\nIf I don't come back, that's where I'll be.",
 			"it is coming it is coming it is coming it is coming it is coming\n\nit is already here\n\nit is reading this with you");
 
 	private SurvivorLog() {
 	}
 
-	/** The page that says where the last camp is. */
-	public static final int CAMP_PAGE = 11;
+	/** The page that says where the last camp is: the last in the survivor's own hand. */
+	public static final int CAMP_PAGE = 12;
 
 	/**
 	 * Whether the next page can be found yet. The log keeps pace with the story rather than with
@@ -71,7 +77,7 @@ public final class SurvivorLog {
 			String text = PAGES.get(n - 1).replace("{camp}", camp != null
 					? "It's at x " + camp[0] + ", z " + camp[1] + ". I scratched the numbers into the table so I'd remember."
 					: "Out past the fog. I don't remember how far any more.");
-			return Compat.writtenBook("Survivor's log, page " + n, AUTHOR, List.of(text));
+			return Compat.writtenBook("Survivor's log, page " + n, AUTHOR, List.of(text.split("\f")));
 		}
 		// The log has run out. What is left is not in the same hand.
 		return Compat.writtenBook("A torn page", AUTHOR, List.of(

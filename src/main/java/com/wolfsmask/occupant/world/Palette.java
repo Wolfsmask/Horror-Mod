@@ -48,9 +48,12 @@ final class Palette {
 	BlockState apply(BlockState state, RandomSource random) {
 		Block to = swaps.get(state.getBlock());
 		if (to != null) state = copy(state, to);
-		if (moss > 0 && random.nextFloat() < moss) {
-			if (state.is(Blocks.COBBLESTONE)) return Blocks.MOSSY_COBBLESTONE.defaultBlockState();
-			if (state.is(Blocks.STONE_BRICKS)) return (random.nextBoolean() ? Blocks.MOSSY_STONE_BRICKS : Blocks.CRACKED_STONE_BRICKS).defaultBlockState();
+		if (moss <= 0) return state;
+		if (state.is(Blocks.COBBLESTONE)) {
+			return random.nextFloat() < moss ? Blocks.MOSSY_COBBLESTONE.defaultBlockState() : state;
+		}
+		if (state.is(Blocks.STONE_BRICKS) && random.nextFloat() < moss) {
+			return (random.nextBoolean() ? Blocks.MOSSY_STONE_BRICKS : Blocks.CRACKED_STONE_BRICKS).defaultBlockState();
 		}
 		return state;
 	}
