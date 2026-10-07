@@ -301,6 +301,7 @@ final class Places {
 			case "well" -> new Well(level, base, Rotation.NONE, random);
 			default -> new Cottage(level, base, Rotation.NONE, random);
 		};
+		build.palette = Palette.pick(level, base, random);
 		build.build();
 	}
 }

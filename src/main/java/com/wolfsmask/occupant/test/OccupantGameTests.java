@@ -626,6 +626,56 @@ public final class OccupantGameTests {
 		helper.succeed();
 	}
 
+	/**
+	 * Every kind of place, built six different ways (a seed each: size, shape, wood, what has
+	 * fallen in): however it comes out, its chest or barrel is still there to be found.
+	 */
+	@GameTest(maxTicks = 100)
+	public void everyWayAPlaceIsBuiltKeepsItsThings(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		String[] kinds = {"ruin", "camp", "graves", "cottage", "watchtower", "chapel", "radio", "lighthouse"};
+		int ways = 6;
+		int apart = 28;
+		BlockPos start = helper.absolutePos(new BlockPos(0, 1, 0)).offset(-1400, 0, -1400);
+		java.util.Set<Long> chunks = new java.util.HashSet<>();
+		for (int i = 0; i < kinds.length; i++) {
+			for (int k = 0; k < ways; k++) {
+				BlockPos at = start.offset(i * apart, 0, k * apart);
+				for (int dx = -1; dx <= 1; dx++) {
+					for (int dz = -1; dz <= 1; dz++) {
+						int cx = (at.getX() >> 4) + dx;
+						int cz = (at.getZ() >> 4) + dz;
+						if (chunks.add(((long) cx << 32) | (cz & 0xFFFFFFFFL))) level.setChunkForced(cx, cz, true);
+					}
+				}
+			}
+		}
+		List<String> missing = new ArrayList<>();
+		try {
+			for (int i = 0; i < kinds.length; i++) {
+				for (int k = 0; k < ways; k++) {
+					BlockPos at = start.offset(i * apart, 0, k * apart);
+					int top = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, at.getX(), at.getZ());
+					BlockPos base = new BlockPos(at.getX(), top - 1, at.getZ());
+					House.buildPlaceForTest(kinds[i], level, base, net.minecraft.util.RandomSource.create(1000L * i + k));
+					boolean found = false;
+					for (BlockPos p : BlockPos.betweenClosed(base.offset(-9, -4, -9), base.offset(9, 22, 9))) {
+						if (level.getBlockEntity(p) instanceof net.minecraft.world.Container && com.wolfsmask.occupant.world.Loot.unopened(p)) {
+							found = true;
+							break;
+						}
+					}
+					if (!found) missing.add(kinds[i] + " #" + k);
+				}
+			}
+		} finally {
+			for (long c : chunks) level.setChunkForced((int) (c >> 32), (int) c, false);
+		}
+		Occupant.LOGGER.info("[gametest] ways of building a place that lost their things: {}", missing);
+		helper.assertTrue(missing.isEmpty(), "Every way of building a place should keep its chest or barrel: missing " + missing);
+		helper.succeed();
+	}
+
 	@GameTest(maxTicks = 40 + TICKS_PER_EVENT * 45)
 	public void everyEventRunsCleanly(GameTestHelper helper) {
 		Director director = Director.get();
