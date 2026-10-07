@@ -201,6 +201,16 @@ public final class House {
 		return true;
 	}
 
+	/** Is there a house (and so perhaps its village) within {@code r} blocks of {@code at}? */
+	static boolean near(BlockPos at, int r) {
+		for (BlockPos h : HOUSES) {
+			long dx = h.getX() - at.getX();
+			long dz = h.getZ() - at.getZ();
+			if (dx * dx + dz * dz < (long) r * r) return true;
+		}
+		return false;
+	}
+
 	/** Is the player standing on the floor of one of these houses? */
 	public static boolean isInside(ServerLevel level, BlockPos feet) {
 		return level.getBlockState(feet.below(2)).is(Blocks.STRUCTURE_VOID)
@@ -243,6 +253,7 @@ public final class House {
 		long sx = origin.getX() - from.getX();
 		long sz = origin.getZ() - from.getZ();
 		if (sx * sx + sz * sz < (long) MIN_FROM_SPAWN * MIN_FROM_SPAWN) return false;
+		if (Places.near(origin, Places.CLEAR_OF_OTHERS)) return false;   // not on top of an old place
 		Rotation rotation = Rotation.getRandom(random);
 
 		// Somewhere fairly flat and dry, or nowhere at all.

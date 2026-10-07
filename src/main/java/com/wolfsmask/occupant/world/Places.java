@@ -32,6 +32,8 @@ final class Places {
 	private static final int MIN_APART = 260;
 	/** And never the same kind of place twice in a walk: two camps are this far apart at least. */
 	private static final int SAME_KIND_APART = 600;
+	/** Never this close to a house, whose village reaches twenty-odd blocks round it, or a house to them. */
+	static final int CLEAR_OF_OTHERS = 80;
 
 	/** The kinds of place, how often each comes up, and how far each reaches from its middle. */
 	private static final String[] KINDS = {"lair", "lighthouse", "ruin", "camp", "graves", "watchtower", "chapel", "radio"};
@@ -105,6 +107,16 @@ final class Places {
 		}
 	}
 
+	/** Is there an old place within {@code r} blocks of {@code at}? */
+	static boolean near(BlockPos at, int r) {
+		for (BlockPos p : PLACES) {
+			long dx = p.getX() - at.getX();
+			long dz = p.getZ() - at.getZ();
+			if (dx * dx + dz * dz < (long) r * r) return true;
+		}
+		return false;
+	}
+
 	private static synchronized boolean claim(BlockPos at, String kind) {
 		for (BlockPos p : PLACES) {
 			long dx = p.getX() - at.getX();
@@ -157,11 +169,7 @@ final class Places {
 	static boolean tryPlace(WorldGenLevel level, RandomSource random, BlockPos centre, double fromSpawn) {
 		if (fromSpawn < MIN_FROM_SPAWN) return false;
 		// Most chunks are near a place already: cheap to tell, before looking at the ground.
-		for (BlockPos p : PLACES) {
-			long dx = p.getX() - centre.getX();
-			long dz = p.getZ() - centre.getZ();
-			if (dx * dx + dz * dz < (long) MIN_APART * MIN_APART) return false;
-		}
+		if (near(centre, MIN_APART) || House.near(centre, CLEAR_OF_OTHERS)) return false;
 		// Fairly flat ground for the widest of them, so any kind can go here.
 		BlockPos base = flatGround(level, centre, 7, 3);
 		if (base == null || !level.ensureCanWrite(base)) return false;
