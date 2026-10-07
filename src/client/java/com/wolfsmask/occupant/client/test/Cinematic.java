@@ -54,8 +54,20 @@ final class Cinematic {
 	 * How it stands for a shot: with its face hidden (head down) or not, and turned how far from
 	 * the camera, in degrees. Most of the shots never give it away: only one or two look back.
 	 */
-	private record Look(boolean veiled, float turn) {
-		static final Look STARING = new Look(false, 0f);
+	private record Look(boolean veiled, float turn, OccupantEntity.Mode mode, int fov) {
+		/** Facing the camera, face showing, at the game's own lens. */
+		static final Look STARING = new Look(false, 0f, OccupantEntity.Mode.STARE, 0);
+		/** Facing the camera through a long lens, which stacks the world up behind it and makes it vast. */
+		static Look towering(int fov) {
+			return new Look(false, 0f, OccupantEntity.Mode.STARE, fov);
+		}
+		/** Bent down over the camera, the mouth open. */
+		static Look looming(int fov) {
+			return new Look(false, 0f, OccupantEntity.Mode.AMBUSH, fov);
+		}
+		static Look turned(boolean veiled, float turn) {
+			return new Look(veiled, turn, OccupantEntity.Mode.IDLE, 0);
+		}
 	}
 
 	private Cinematic() {
@@ -116,15 +128,15 @@ final class Cinematic {
 		// The camera to the east of it, looking west into the sunset; the trees between cleared.
 		BlockPos cam = server.computeOnServer(s -> new BlockPos(it.getX() + 13, surface(s.overworld(), it.getX() + 13, it.getZ()), it.getZ()));
 		clearView(server, it.offset(-1, 0, -3), cam.offset(1, 0, 3), Math.min(it.getY(), cam.getY()) + 1, 14);
-		Vec3 eye = new Vec3(cam.getX() + 0.5, cam.getY() + 1.6 + EYE, cam.getZ() + 0.5);
-		camera(context, game, eye, new Vec3(it.getX() + 0.5, it.getY() + 3.0, it.getZ() + 0.5), 12700);
-		place(server, it, eye, new Look(true, 35f));      // half turned, head down: it has not looked round. Yet.
-		context.waitTicks(20);      // it in the left third, as if half-turned to it
-		still(context, game, "cinematic-treeline");
+		// From down in the snow, looking up: it stands against the sun, and over everything.
+		Vec3 eye = new Vec3(cam.getX() + 0.5, cam.getY() + 0.7, cam.getZ() + 0.5);
+		take(context, game, new Shot(it, eye, new Vec3(it.getX() + 0.5, it.getY() + 3.6, it.getZ() + 0.5)), 12700,
+				"cinematic-treeline", Look.towering(50));
 
-		// And close: its face, from a little below, with the last of the sky behind it.
-		Vec3 near = server.computeOnServer(s -> inAir(s.overworld(), new Vec3(it.getX() + 3.7, it.getY() + 2.2, it.getZ() + 0.5)));
-		take(context, game, new Shot(it, near, new Vec3(it.getX() + 0.5, it.getY() + 2.8, it.getZ() + 0.5)), 12600, "cinematic-face");
+		// And close: it has bent right down over the camera, and its mouth is open.
+		Vec3 near = server.computeOnServer(s -> inAir(s.overworld(), new Vec3(it.getX() + 3.4, it.getY() + 0.9, it.getZ() + 0.5)));
+		take(context, game, new Shot(it, near, new Vec3(it.getX() + 0.5, it.getY() + 3.1, it.getZ() + 0.5)), 12600,
+				"cinematic-face", Look.looming(62));
 	}
 
 	/** The village from above at dusk, and it, small, standing in the path between the houses. */
@@ -137,10 +149,10 @@ final class Cinematic {
 			BlockPos it = standNear(level, floor, -1, -9);
 			Vec3 door = rel(floor, -1.5, 2.5, -6.5);
 			Vec3 well = rel(floor, -1.5, 5.5, -12.5);
-			Vec3 eye = findCamera(level, player(s), it, 0.6, -1.0, new double[]{16, 20, 24}, 2.0, floor.getY() + 10.0, door, well);
-			return new Shot(it, eye, door.lerp(chest(it), 0.4));
+			Vec3 eye = findCamera(level, player(s), it, 0.6, -1.0, new double[]{11, 14, 17}, 0.8, 0, door);
+			return new Shot(it, eye, Vec3.atBottomCenterOf(it).add(0, 3.2, 0).lerp(door, 0.25));
 		});
-		take(context, game, shot, 13000, "cinematic-village", new Look(true, 160f));   // its back to you, at the house
+		take(context, game, shot, 13000, "cinematic-village", Look.towering(50));   // in the path between the houses, waiting
 
 		// And inside the house, at dusk: the real event, looking towards the dark hallway.
 		server.runCommand("kill " + ALL);
@@ -179,13 +191,12 @@ final class Cinematic {
 			ServerLevel level = s.overworld();
 			fellTrees(level, floor, 28);
 			House.buildPlaceForTest("ruin", level, floor, level.getRandom());
-			BlockPos it = standNear(level, floor, 2, -10);
+			BlockPos it = standNear(level, floor, 0, -8);
 			Vec3 gate = rel(floor, 0.5, 2.0, -6.6);
-			Vec3 yard = rel(floor, 0.5, 6.5, 0.5);
-			Vec3 eye = findCamera(level, player(s), it, -0.6, -1.0, new double[]{12, 15, 18}, 2.4, 0, gate, yard);
-			return new Shot(it, eye, rel(floor, 0.5, 3.0, -4.0).lerp(chest(it), 0.45));
+			Vec3 eye = findCamera(level, player(s), it, 0.0, -1.0, new double[]{9, 11, 13}, 0.7, 0, gate);
+			return new Shot(it, eye, Vec3.atBottomCenterOf(it).add(0, 3.4, 0));
 		});
-		take(context, game, shot, 12500, "cinematic-ruin", new Look(true, 0f));         // facing you, face hidden
+		take(context, game, shot, 12500, "cinematic-ruin", Look.towering(48));          // come out through the gate
 	}
 
 	/** A camp at night, its fire lit again, and it just past the fire, where the light still reaches. */
@@ -198,10 +209,10 @@ final class Cinematic {
 			BlockPos it = standNear(level, floor, 1, 5);
 			Vec3 fire = rel(floor, 0.5, 1.9, 0.5);
 			Vec3 chest = rel(floor, -2.5, 1.9, 2.5);
-			Vec3 eye = findCamera(level, player(s), it, -0.15, -1.0, new double[]{13, 15, 17}, 2.2, 0, fire, chest);
-			return new Shot(it, eye, fire.lerp(chest(it), 0.5));
+			Vec3 eye = findCamera(level, player(s), it, -0.15, -1.0, new double[]{9, 11, 13}, 0.8, 0, fire);
+			return new Shot(it, eye, fire.lerp(Vec3.atBottomCenterOf(it).add(0, 3.4, 0), 0.6));
 		});
-		take(context, game, shot, 18000, "cinematic-camp");
+		take(context, game, shot, 18000, "cinematic-camp", Look.towering(50));
 	}
 
 	/** The graveyard at nightfall, candles lit, and it standing past the last row. */
@@ -214,10 +225,10 @@ final class Cinematic {
 			BlockPos it = standNear(level, floor, 1, 7);
 			Vec3 middle = rel(floor, 0.5, 2.2, -0.5);
 			Vec3 gate = rel(floor, 0.5, 1.8, -3.5);
-			Vec3 eye = findCamera(level, player(s), it, -0.2, -1.0, new double[]{17, 19, 22}, 2.8, 0, middle, gate);
-			return new Shot(it, eye, rel(floor, 0.5, 1.5, 0.5).lerp(chest(it), 0.5));
+			Vec3 eye = findCamera(level, player(s), it, -0.2, -1.0, new double[]{8, 10, 12}, 0.6, 0, middle);
+			return new Shot(it, eye, Vec3.atBottomCenterOf(it).add(0, 2.8, 0));
 		});
-		take(context, game, shot, 13800, "cinematic-graves", new Look(true, 180f));    // its back to you, over the open grave
+		take(context, game, shot, 13800, "cinematic-graves", Look.looming(55));         // bent over the graves, towards you
 	}
 
 	/**
@@ -250,7 +261,7 @@ final class Cinematic {
 		// A long lens: it is a long way off, and the fog piles up behind it.
 		int fov = context.computeOnClient(mc -> mc.options.fov().get());
 		context.runOnClient(mc -> mc.options.fov().set(34));
-		take(context, game, shot, 12950, "cinematic-fog", new Look(true, 60f));
+		take(context, game, shot, 12950, "cinematic-fog", Look.turned(true, 60f));
 		context.runOnClient(mc -> mc.options.fov().set(fov));
 	}
 
@@ -458,7 +469,7 @@ final class Cinematic {
 			e.snapTo(at.x, at.y, at.z, yaw, 0.0f);
 			e.setYHeadRot(yaw);
 			e.setYBodyRot(yaw);
-			e.setMode(look.turn() == 0f ? OccupantEntity.Mode.STARE : OccupantEntity.Mode.IDLE);
+			e.setMode(look.turn() == 0f ? look.mode() : OccupantEntity.Mode.IDLE);
 			e.setForm(look.veiled() ? OccupantEntity.Form.VEILED : OccupantEntity.Form.REVEALED);
 			if (look.turn() != 0f) e.setGazeLocked(false);
 			level.addFreshEntity(e);
@@ -474,6 +485,16 @@ final class Cinematic {
 	}
 
 	private static void take(ClientGameTestContext context, TestSingleplayerContext game, Shot shot, int time, String name, Look look) {
+		int fov = context.computeOnClient(mc -> mc.options.fov().get());
+		if (look.fov() > 0) context.runOnClient(mc -> mc.options.fov().set(look.fov()));
+		try {
+			takeAt(context, game, shot, time, name, look);
+		} finally {
+			context.runOnClient(mc -> mc.options.fov().set(fov));
+		}
+	}
+
+	private static void takeAt(ClientGameTestContext context, TestSingleplayerContext game, Shot shot, int time, String name, Look look) {
 		camera(context, game, shot.eye(), shot.look(), time);
 		place(game.getServer(), shot.it(), shot.eye(), look);
 		context.waitTicks(20);
