@@ -16,8 +16,8 @@ import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
  * environmental start and end, render-distance start and end, then the sky and the clouds,
  * which are drawn into it too so there is no clear horizon above a fogged world.
  * <p>
- * And in the fog's own record as well, as setupFog returns: other renderers take their copy from
- * there (Sodium draws the land with it), not from the buffer. The colour is greyed where it
+ * And in the fog's own record as well: other renderers take their copy from there as setupFog
+ * returns (Sodium draws the land with it), not from the buffer. The colour is greyed where it
  * is, so the one setupFog hands back is the same.
  */
 @Mixin(value = FogRenderer.class, priority = 500)
@@ -43,8 +43,12 @@ public abstract class FogRendererMixin {
 		args.set(8, Math.min(args.<Float>get(8), end));
 	}
 
-	/** As setupFog returns: early (priority 500), so before anyone else takes their copy there. */
-	@ModifyVariable(method = "setupFog", at = @At("RETURN"))
+	/**
+	 * Where the distances are written into the buffer: the record is certainly complete there
+	 * (and setupFog may return earlier, before there is one), and it is before anyone else takes
+	 * their copy as setupFog returns.
+	 */
+	@ModifyVariable(method = "setupFog", at = @At(value = "INVOKE", target = UPDATE_BUFFER))
 	private FogData occupant$closeInRecord(FogData fog) {
 		if (fog == null || !ClientFog.active()) return fog;
 		float start = ClientFog.start(), end = ClientFog.end();
