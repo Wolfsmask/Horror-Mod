@@ -438,8 +438,9 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 		context.runOnClient(mc -> mc.pauseGame(false));
 		context.waitTicks(10);
 		context.clickScreenButton("menu.returnToMenu");
-		context.waitFor(mc -> mc.level == null && mc.getSingleplayerServer() == null
-				&& mc.screen instanceof net.minecraft.client.gui.screens.TitleScreen, 20 * 60 * 2);
+		context.waitFor(mc -> mc.level == null && mc.getSingleplayerServer() == null, 20 * 60 * 2);
+		context.waitTicks(20);
+		context.runOnClient(GateScreen::passForTest);
 		context.waitTicks(20);
 	}
 
