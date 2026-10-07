@@ -7,7 +7,9 @@ import com.wolfsmask.occupant.registry.ModSounds;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
@@ -80,7 +82,33 @@ public final class GateScreen extends Screen {
 		showing = true;
 		current = this;
 		TitleAtmosphere.opened();
+		// The game's own buttons as well, unseen, over the two choices: a second way in that
+		// works wherever the game's menus do, and with Tab and Enter.
+		int[] in = enterBox();
+		Button enter = Button.builder(Component.literal(ENTER), b -> enter(ModeScreen.recording()))
+				.bounds(in[0], in[1], in[2] - in[0], in[3] - in[1]).build();
+		enter.setAlpha(0.0f);
+		addRenderableWidget(enter);
+		int[] out = leaveBox();
+		Button leave = Button.builder(Component.literal(LEAVE), b -> leave())
+				.bounds(out[0], out[1], out[2] - out[0], out[3] - out[1]).build();
+		leave.setAlpha(0.0f);
+		addRenderableWidget(leave);
 	}
+
+	/** And from the keyboard: Enter makes the world. */
+	@Override
+	public boolean keyPressed(KeyEvent event) {
+		int key = event.input();
+		if (key == KEY_ENTER || key == KEY_KP_ENTER) {
+			enter(ModeScreen.recording());
+			return true;
+		}
+		return super.keyPressed(event);
+	}
+
+	private static final int KEY_ENTER = 257;
+	private static final int KEY_KP_ENTER = 335;
 
 	@Override
 	public void tick() {

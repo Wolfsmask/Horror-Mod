@@ -38,3 +38,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry; -> im
 regex HudElementRegistry\.add(First|Last)\(Occupant\.id\("\w+"\), -> HudRenderCallback.EVENT.register(
 double x = event.x(); -> double x = mouseX;
 double y = event.y(); -> double y = mouseY;
+import net.minecraft.client.input.KeyEvent; -> 
+public boolean keyPressed(KeyEvent event) { -> public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+int key = event.input(); -> int key = keyCode;
+super.keyPressed(event) -> super.keyPressed(keyCode, scanCode, modifiers)

@@ -3,7 +3,9 @@ package com.wolfsmask.occupant.client;
 import com.wolfsmask.occupant.Occupant;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 
@@ -20,7 +22,7 @@ public final class ModeScreen extends Screen {
 	private static final String RECORD = "RECORDING";
 	private static final String RECORD_NOTE = "the Creator Cut · about forty minutes · ending included";
 	private static final String RECOMMENDED = "recommended for creators";
-	private static final String FOOTER = "Pick one, and start recording on the next screen: it is the title.";
+	private static final String FOOTER = "Pick one (or press 1 or 2), and start recording on the next screen: it is the title.";
 
 	/** What was chosen, this time the game has been open: null until then. */
 	private static Boolean recording;
@@ -62,7 +64,36 @@ public final class ModeScreen extends Screen {
 	protected void init() {
 		showing = true;
 		current = this;
+		// The game's own buttons as well, unseen, over the two choices: a second way in that
+		// works wherever the game's menus do, and with Tab and Enter.
+		for (boolean record : new boolean[]{false, true}) {
+			int[] b = box(record);
+			Button button = Button.builder(Component.literal(record ? RECORD : PLAY), x -> choose(record))
+					.bounds(b[0], b[1], b[2] - b[0], b[3] - b[1]).build();
+			button.setAlpha(0.0f);
+			addRenderableWidget(button);
+		}
 	}
+
+	/** And from the keyboard: 1 for playing, 2 for recording. */
+	@Override
+	public boolean keyPressed(KeyEvent event) {
+		int key = event.input();
+		if (key == KEY_1 || key == KEY_KP_1) {
+			choose(false);
+			return true;
+		}
+		if (key == KEY_2 || key == KEY_KP_2) {
+			choose(true);
+			return true;
+		}
+		return super.keyPressed(event);
+	}
+
+	private static final int KEY_1 = 49;
+	private static final int KEY_2 = 50;
+	private static final int KEY_KP_1 = 321;
+	private static final int KEY_KP_2 = 322;
 
 	@Override
 	public void removed() {
