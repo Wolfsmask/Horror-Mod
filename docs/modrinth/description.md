@@ -24,6 +24,8 @@ happen at all.** Nobody gets the same story. Everybody gets one that feels direc
 - 👁️ **It notices when you don't notice it.** Stand there long enough without looking, and you will be told. Politely, at first.
 - 🦵 **It does not walk.** It braces its ten legs against walls, trees and ceilings and *pushes* itself through the world. Indoors, it folds down to fit.
 - 🔇 **It never appears while you are looking.** You turn round, and it has always been there.
+- 🧍 **It does not move while you watch it.** Look at it and it is perfectly still. Look away and back, and its head is at a different angle. You never see it happen. The longer it watched you before you noticed, the worse it is when you do; the longer you stare back, the sooner it is gone.
+- 🩸 **It will not let you die.** Not like that. Jump from a pillar and the world goes black, and you wake in your bed with a note: *It doesn't like that.* About to die to a zombie? It is suddenly behind the zombie, lifts it off the ground, and tells you why. *I can't have you dying like that.* Then it walks away into the fog.
 - 👥 **Only you can see it.** Your friend standing right next to you sees nothing at all.
 - 🌫️ **A real fog.** Not a short render distance: a fog you can't see through, eighty blocks at first and fifty by the end, closing right in when it is near. The sky goes into it too, and the colour drains out of everything. It stands in it, a grey shape you can only just make out.
 - 🔁 **One thing leads to another.** The lights stutter, and when they settle something breathes behind you. It knocks, and then it is at the window. It is seen far off, and a minute later, closer.
@@ -32,7 +34,9 @@ happen at all.** Nobody gets the same story. Everybody gets one that feels direc
 - 🪟 **Check the windows.** At night, from inside, there may be a face a step back from the glass. Or footsteps crossing the roof, stopping right above you.
 - 🌒 **Three endings.** Once, on the last night, the fog closes right in. Every time you look away, it is closer when you look back. Where you wake up afterwards depends on how you played it.
 - 🏆 **Advancements** for the small things: *You're Not Alone*, *Who's There?*, *Bad Reception*... and one for each ending. None for killing anything.
-- 💓 **Small things.** Your heartbeat when it is close behind you. Footsteps underground that come back one step too many. Doors open in the morning that you shut at night. Footprints in the snow, up to your door. *Saving world...* when you didn't. Villagers who won't open up after dark.
+- 🏠 **Hide too long and it notices.** Spend too long in a house, a hole or a cave, and it wants to know why you left it out there.
+- 🧭 **Late on, you stop getting to know where you are.** Open the debug screen for your coordinates: *why would you need to know?*
+- 💓 **Small things.** Your heartbeat when it is close behind you. Footsteps underground that come back one step too many. Doors open in the morning that you shut at night. Footprints in the snow, up to your door. *Saving world...* when you didn't. Villagers who won't open up after dark. Something you typed an hour ago, said again in your name. An item in your hotbar called something it isn't, for a few seconds. A skull beside your bed when you come home. A sign by your bed with one more mark on it for every day you have lived. Ring a bell, and something far off answers. A flower where you died.
 - 🎻 **A score that listens.** A low drone once the story starts, bowed glass when it is near, and silence when it gets to you.
 
 ## The land is a little wrong
@@ -58,6 +62,8 @@ in step with the story, so you never read the ending first.
 > *Day 7. If you are reading this, you have the same problem I did. Don't look at it for long.
 > It gets braver when you look.*
 
+Deep underground, in chests nobody built for the story, there is **another log**: a miner's, who read the first one and thought the survivor had it wrong.
+
 Read far enough and the log tells you where the survivor made their last camp. It is really
 there. What you find in it changes how the story ends.
 
@@ -78,9 +84,8 @@ Not ready? *Or leave it alone* takes you to the normal menu with the haunting sw
 Answer **RECORDING** on the first screen, then start recording on the title screen. The waiting is
 cut, nothing is added: the whole story, the ending included, in about forty minutes.
 
-There is a full **Creator Pack** with the mod's source: what to expect and when, recording
-settings, commands for B-roll (`/occupant here 60` puts it at the edge of the fog), ready-made
-YouTube thumbnails and Shorts covers, and title ideas. Monetise your videos, no need to ask.
+For B-roll, `/occupant here 60` puts it at the edge of the fog. Monetise your videos, no need
+to ask.
 **Reduce flashing** in the settings makes it safe for photosensitive viewers.
 
 ## ⚠️ Compatibility
@@ -97,6 +102,8 @@ If you have any of these, the mod tells you once, before its first screen, which
 
 - **Fabric**, needs **[Fabric API](https://modrinth.com/mod/fabric-api)**.
 - Needed on **both** the client and the server. Works in multiplayer: everyone gets their own haunting.
+- **Playing with a friend?** Open your world to LAN; **e4mc** or **e4all** on the host gives your friend an address to join. Your friend needs The Occupant and Fabric API too.
+- **Die late in the story with others around, and you lose your voice** for a few minutes: nothing you type reaches anyone. Server owners can have it time you out in their Discord too (off unless set up).
 - Supported versions: **1.20.1, 1.21.1, 1.21.11, 26.1.2, 26.2, 26.3** and the **26.4 snapshot**.
 - Nearly everything can be tuned or switched off, in game: **pause menu → The Occupant**. Intensity (*subtle*, *normal*, *relentless*), a **sound-only** mode where it is never seen, music, heartbeat, fog, flashing. More in `config/occupant.json`.
 - Languages: English, Español, Français, Deutsch, Português (Brasil) for the menus.

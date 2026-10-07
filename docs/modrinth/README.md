@@ -6,9 +6,8 @@ Everything here is ready to use: the icon, the gallery, the description and the 
 - `gallery/`: the gallery images (`00-featured.png` is the one to feature).
 - `stills/`: the untouched game frames the gallery is made from, if you want to grade them yourself.
 - `description.md`: paste this into the description box.
-- `../CREATORS.md` and `../creators/`: the **Creator Pack** (guide, thumbnails, Shorts covers).
-  Link to it from the description if the repository is public, or attach the pictures to a
-  post for creators.
+- `../CREATORS.md` and `../creators/`: the **Creator Pack** (guide, thumbnails, Shorts covers),
+  to share with creators directly while the repository is private.
 - The mod files, one per Minecraft version, are in `dist/` at the top of the repo.
 
 Every gallery picture is a frame of the real game with the real mod, photographed by the
@@ -72,34 +71,30 @@ For each file in `dist/`, open **Versions → Create a version** (or drag the ja
 
 | File | Version number | Minecraft versions | Channel |
 |---|---|---|---|
-| `occupant-1.0.0+mc26.3.jar` | `1.0.0+mc26.3` | 26.3 | Release |
-| `occupant-1.0.0+mc26.2.jar` | `1.0.0+mc26.2` | 26.2 | Release |
-| `occupant-1.0.0+mc26.1.2.jar` | `1.0.0+mc26.1.2` | 26.1.2 | Release |
-| `occupant-1.0.0+mc1.21.11.jar` | `1.0.0+mc1.21.11` | 1.21.11 | Release |
-| `occupant-1.0.0+mc1.21.1.jar` | `1.0.0+mc1.21.1` | 1.21.1 | Release |
-| `occupant-1.0.0+mc1.20.1.jar` | `1.0.0+mc1.20.1` | 1.20.1 | Release |
-| `occupant-1.0.0+mc26.4-snapshot-2.jar` | `1.0.0+mc26.4-snapshot-2` | 26.4-snapshot-2 | **Alpha** |
+| `occupant-0.1.0+mc26.3.jar` | `0.1.0+mc26.3` | 26.3 | Release |
+| `occupant-0.1.0+mc26.2.jar` | `0.1.0+mc26.2` | 26.2 | Release |
+| `occupant-0.1.0+mc26.1.2.jar` | `0.1.0+mc26.1.2` | 26.1.2 | Release |
+| `occupant-0.1.0+mc1.21.11.jar` | `0.1.0+mc1.21.11` | 1.21.11 | Release |
+| `occupant-0.1.0+mc1.21.1.jar` | `0.1.0+mc1.21.1` | 1.21.1 | Release |
+| `occupant-0.1.0+mc1.20.1.jar` | `0.1.0+mc1.20.1` | 1.20.1 | Release |
+| `occupant-0.1.0+mc26.4-snapshot-2.jar` | `0.1.0+mc26.4-snapshot-2` | 26.4-snapshot-2 | **Alpha** |
 
 For every version:
 
-- **Version name:** `1.0.0 for <Minecraft version>`, for example `1.0.0 for 1.21.1`.
+- **Version name:** `0.1.0 for <Minecraft version>`, for example `0.1.0 for 1.21.1`.
 - **Loaders:** Fabric.
 - **Dependencies:** add **Fabric API** as **Required**.
 - **Changelog** (the same for all of them):
 
   ```
-  1.0: the whole story.
+  0.1: the first release.
 
-  - Creator Cut: answer "Recording" on the first screen (before the title, off camera). The whole story, ending included, in about forty minutes.
-  - Three endings that really are different: where you wake up depends on how you played it.
-  - Advancements for the small things it does, and one for each ending. None for killing anything.
-  - The survivor's log leads to their last camp, and it is really there.
-  - New places: watchtowers, chapels, radio shacks, lighthouses, and its lair.
-  - A live score that follows the story, and goes silent when it gets to you.
-  - Small things: your heartbeat, your breath in the cold, footsteps that echo one too many, doors open in the morning, footprints in the snow, pets that stare at nothing, villagers who won't open up, a radio that knows your name, "Saving world...".
-  - It changes as the story goes on.
-  - Settings in game (pause menu → The Occupant): intensity presets, a sound-only mode, music, heartbeat, fog, reduce flashing.
-  - Menus in English, Español, Français, Deutsch and Português (Brasil).
+  - A story in four acts, three endings, and a survivor's log that leads to their last camp.
+  - It never moves while you watch it, and it will not let you die (not like that).
+  - Places people used to be: villages, a house, keeps, camps, graveyards, watchtowers, chapels, radio shacks, lighthouses, and its lair.
+  - A real fog, a score that listens, and a lot of small wrong things.
+  - Creator Cut for recording: the whole story in about forty minutes.
+  - Settings in game (pause menu → The Occupant). Menus in English, Español, Français, Deutsch and Português (Brasil).
   ```
 
 Upload the newest Minecraft version last: Modrinth shows the most recently added version first.
