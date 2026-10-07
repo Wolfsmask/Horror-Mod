@@ -1,61 +1,130 @@
-=== net.minecraft.client.gui.components.DebugScreenOverlay (-p)
-public class client.gui.components.DebugScreenOverlay {
-  private boolean renderProfilerChart;
-  private boolean renderFpsCharts;
-  private boolean renderNetworkCharts;
-  public void render(client.gui.GuiGraphics);
-  private void renderLines(client.gui.GuiGraphics, List<String>, boolean);
-  public boolean showDebugScreen();
-  public void render3dCrosshair(client.Camera);
-=== net.minecraft.client.player.LocalPlayer (-public)
-public class client.player.LocalPlayer extends client.player.AbstractClientPlayer {
-  public void setReducedDebugInfo(boolean);
-=== net.minecraft.world.entity.player.Player (-public)
-public abstract class world.entity.player.Player extends world.entity.Avatar implements world.entity.ContainerUser {
-  public boolean isReducedDebugInfo();
-  public void setReducedDebugInfo(boolean);
-=== net.minecraft.client.Minecraft (-public)
-public class client.Minecraft extends util.thread.ReentrantBlockableEventLoop<Runnable> implements blaze3d.platform.WindowEventHandler {
-  public final client.gui.components.debug.DebugScreenEntryList debugEntries;
-  public boolean debugClientMetricsStart(Consumer<network.chat.Component>);
-  public client.gui.components.DebugScreenOverlay getDebugOverlay();
-=== classes matching debug\.(DebugEntryPosition|DebugScreenEntries|DebugScreenEntryList|DebugEntry.*Pos.*)
-net.minecraft.client.gui.components.debug.DebugEntrySectionPosition
-net.minecraft.client.gui.components.debug.DebugEntryPosition
-net.minecraft.client.gui.components.debug.DebugEntryPostEffect
-net.minecraft.client.gui.components.debug.DebugScreenEntries
-net.minecraft.client.gui.components.debug.DebugScreenEntryList
-=== classes matching gui\.components\.debug\.
-net.minecraft.client.gui.components.debug.DebugEntryBiome
-net.minecraft.client.gui.components.debug.DebugEntryChunkGeneration
-net.minecraft.client.gui.components.debug.DebugEntryChunkRenderStats
-net.minecraft.client.gui.components.debug.DebugEntryEntityRenderStats
-net.minecraft.client.gui.components.debug.DebugEntryCategory
-net.minecraft.client.gui.components.debug.DebugEntryChunkSourceStats
-net.minecraft.client.gui.components.debug.DebugEntryGpuUtilization
-net.minecraft.client.gui.components.debug.DebugEntryFps
-net.minecraft.client.gui.components.debug.DebugEntryLight
-net.minecraft.client.gui.components.debug.DebugEntryHeightmap
-net.minecraft.client.gui.components.debug.DebugEntryLocalDifficulty
-net.minecraft.client.gui.components.debug.DebugEntryLookingAtBlock
-net.minecraft.client.gui.components.debug.DebugEntryLookingAtEntity
-net.minecraft.client.gui.components.debug.DebugEntryNoop
-net.minecraft.client.gui.components.debug.DebugEntryLookingAtFluid
-net.minecraft.client.gui.components.debug.DebugEntryParticleRenderStats
-net.minecraft.client.gui.components.debug.DebugEntryMemory
-net.minecraft.client.gui.components.debug.DebugEntrySectionPosition
-net.minecraft.client.gui.components.debug.DebugEntryPosition
-net.minecraft.client.gui.components.debug.DebugEntryPostEffect
-net.minecraft.client.gui.components.debug.DebugEntrySoundMood
-net.minecraft.client.gui.components.debug.DebugEntryVersion
-net.minecraft.client.gui.components.debug.DebugEntrySystemSpecs
-net.minecraft.client.gui.components.debug.DebugEntrySimplePerformanceImpactors
-net.minecraft.client.gui.components.debug.DebugEntrySpawnCounts
-net.minecraft.client.gui.components.debug.DebugScreenDisplayer
-net.minecraft.client.gui.components.debug.DebugEntryTps
-net.minecraft.client.gui.components.debug.DebugScreenEntry
-net.minecraft.client.gui.components.debug.package-info
-net.minecraft.client.gui.components.debug.DebugScreenEntryStatus
-net.minecraft.client.gui.components.debug.DebugScreenEntries
-net.minecraft.client.gui.components.debug.DebugScreenProfile
-net.minecraft.client.gui.components.debug.DebugScreenEntryList
+=== net.minecraft.client.gui.components.debug.DebugScreenEntry (code: isAllowed)
+  public default boolean isAllowed(boolean);
+    Code:
+         1: ifne          8
+         4: iconst_1
+         5: goto          9
+         8: iconst_0
+         9: ireturn
+
+=== net.minecraft.client.gui.components.debug.DebugEntryPosition (code: isAllowed|display)
+  public void display(client.gui.components.debug.DebugScreenDisplayer, world.level.Level, world.level.chunk.LevelChunk, world.level.chunk.LevelChunk);
+    Code:
+         0: invokestatic  #40                 // Method net/minecraft/client/Minecraft.getInstance:()Lnet/minecraft/client/Minecraft;
+         7: invokevirtual #44                 // Method net/minecraft/client/Minecraft.getCameraEntity:()Lnet/minecraft/world/entity/Entity;
+        14: ifnonnull     18
+        20: invokevirtual #44                 // Method net/minecraft/client/Minecraft.getCameraEntity:()Lnet/minecraft/world/entity/Entity;
+        23: invokevirtual #54                 // Method net/minecraft/world/entity/Entity.blockPosition:()Lnet/minecraft/core/BlockPos;
+        28: new           #56                 // class net/minecraft/world/level/ChunkPos
+        34: invokespecial #59                 // Method net/minecraft/world/level/ChunkPos."<init>":(Lnet/minecraft/core/BlockPos;)V
+        41: invokevirtual #63                 // Method net/minecraft/world/entity/Entity.getDirection:()Lnet/minecraft/core/Direction;
+        46: getstatic     #67                 // Field net/minecraft/client/gui/components/debug/DebugEntryPosition$1.$SwitchMap$net$minecraft$core$Direction:[I
+        51: invokevirtual #73                 // Method net/minecraft/core/Direction.ordinal:()I
+        54: iaload
+        55: tableswitch   { // 1 to 4
+                       1: 84
+                       2: 89
+                       3: 94
+                       4: 99
+                 default: 104
+            }
+        84: ldc           #77                 // String Towards negative Z
+        86: goto          106
+        89: ldc           #79                 // String Towards positive Z
+        91: goto          106
+        94: ldc           #81                 // String Towards negative X
+        96: goto          106
+        99: ldc           #83                 // String Towards positive X
+       101: goto          106
+       104: ldc           #85                 // String Invalid
+       109: instanceof    #89                 // class net/minecraft/server/level/ServerLevel
+       112: ifeq          125
+       116: checkcast     #89                 // class net/minecraft/server/level/ServerLevel
+       119: invokevirtual #93                 // Method net/minecraft/server/level/ServerLevel.getForceLoadedChunks:()Lit/unimi/dsi/fastutil/longs/LongSet;
+       122: goto          128
+       125: getstatic     #97                 // Field it/unimi/dsi/fastutil/longs/LongSets.EMPTY_SET:Lit/unimi/dsi/fastutil/longs/LongSets$EmptySet;
+       131: getstatic     #101                // Field GROUP:Lnet/minecraft/resources/Identifier;
+       134: getstatic     #107                // Field java/util/Locale.ROOT:Ljava/util/Locale;
+       137: ldc           #109                // String XYZ: %.3f / %.5f / %.3f
+       139: iconst_3
+       140: anewarray     #4                  // class java/lang/Object
+       144: iconst_0
+       147: invokevirtual #44                 // Method net/minecraft/client/Minecraft.getCameraEntity:()Lnet/minecraft/world/entity/Entity;
+       150: invokevirtual #113                // Method net/minecraft/world/entity/Entity.getX:()D
+       153: invokestatic  #119                // Method java/lang/Double.valueOf:(D)Ljava/lang/Double;
+       156: aastore
+       158: iconst_1
+       161: invokevirtual #44                 // Method net/minecraft/client/Minecraft.getCameraEntity:()Lnet/minecraft/world/entity/Entity;
+       164: invokevirtual #122                // Method net/minecraft/world/entity/Entity.getY:()D
+       167: invokestatic  #119                // Method java/lang/Double.valueOf:(D)Ljava/lang/Double;
+       170: aastore
+       172: iconst_2
+       175: invokevirtual #44                 // Method net/minecraft/client/Minecraft.getCameraEntity:()Lnet/minecraft/world/entity/Entity;
+       178: invokevirtual #125                // Method net/minecraft/world/entity/Entity.getZ:()D
+       181: invokestatic  #119                // Method java/lang/Double.valueOf:(D)Ljava/lang/Double;
+       184: aastore
+       185: invokestatic  #129                // Method java/lang/String.format:(Ljava/util/Locale;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;
+       188: getstatic     #107                // Field java/util/Locale.ROOT:Ljava/util/Locale;
+       191: ldc           #131                // String Block: %d %d %d
+       193: iconst_3
+       194: anewarray     #4                  // class java/lang/Object
+       198: iconst_0
+       201: invokevirtual #133                // Method net/minecraft/core/BlockPos.getX:()I
+       204: invokestatic  #138                // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+       207: aastore
+       209: iconst_1
+       212: invokevirtual #140                // Method net/minecraft/core/BlockPos.getY:()I
+       215: invokestatic  #138                // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+       218: aastore
+       220: iconst_2
+       223: invokevirtual #142                // Method net/minecraft/core/BlockPos.getZ:()I
+       226: invokestatic  #138                // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+       229: aastore
+       230: invokestatic  #129                // Method java/lang/String.format:(Ljava/util/Locale;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;
+       233: getstatic     #107                // Field java/util/Locale.ROOT:Ljava/util/Locale;
+       236: ldc           #144                // String Chunk: %d %d %d [%d %d in r.%d.%d.mca]
+       238: bipush        7
+       240: anewarray     #4                  // class java/lang/Object
+       244: iconst_0
+       247: getfield      #148                // Field net/minecraft/world/level/ChunkPos.x:I
+       250: invokestatic  #138                // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+       253: aastore
+       255: iconst_1
+       258: invokevirtual #140                // Method net/minecraft/core/BlockPos.getY:()I
+       261: invokestatic  #154                // Method net/minecraft/core/SectionPos.blockToSectionCoord:(I)I
+       264: invokestatic  #138                // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+       267: aastore
+       269: iconst_2
+       272: getfield      #157                // Field net/minecraft/world/level/ChunkPos.z:I
+       275: invokestatic  #138                // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+       278: aastore
+       280: iconst_3
+       283: invokevirtual #160                // Method net/minecraft/world/level/ChunkPos.getRegionLocalX:()I
+       286: invokestatic  #138                // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+       289: aastore
+       291: iconst_4
+       294: invokevirtual #163                // Method net/minecraft/world/level/ChunkPos.getRegionLocalZ:()I
+       297: invokestatic  #138                // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+       300: aastore
+       302: iconst_5
+       305: invokevirtual #166                // Method net/minecraft/world/level/ChunkPos.getRegionX:()I
+       308: invokestatic  #138                // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+       311: aastore
+       313: bipush        6
+       317: invokevirtual #169                // Method net/minecraft/world/level/ChunkPos.getRegionZ:()I
+       320: invokestatic  #138                // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+       323: aastore
+       324: invokestatic  #129                // Method java/lang/String.format:(Ljava/util/Locale;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;
+       327: getstatic     #107                // Field java/util/Locale.ROOT:Ljava/util/Locale;
+       330: ldc           #171                // String Facing: %s (%s) (%.1f / %.1f)
+       332: iconst_4
+       333: anewarray     #4                  // class java/lang/Object
+       337: iconst_0
+       340: aastore
+       342: iconst_1
+       345: aastore
+       347: iconst_2
+       350: invokevirtual #175                // Method net/minecraft/world/entity/Entity.getYRot:()F
+       353: invokestatic  #181                // Method net/minecraft/util/Mth.wrapDegrees:(F)F
+       356: invokestatic  #186                // Method java/lang/Float.valueOf:(F)Ljava/lang/Float;
+       359: aastore
