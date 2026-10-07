@@ -100,17 +100,17 @@ def main(face_centre=(0.5, 0.42)):
         if not path.exists():
             print("missing", path.name)
             continue
-        src = Image.open(path)
+        src = film.still(SHOTS, name)
         graded = film.grade(src, exposure=exposure) if name.startswith("cinematic") else src.convert("RGB")
         lettered(frame(graded, focus), line).save(OUT / "gallery" / (out + ".png"))
         made.append(out)
     tree = SHOTS / "cinematic-treeline.png"
     if tree.exists():
-        featured(Image.open(tree)).save(OUT / "gallery" / "00-featured.png")
+        featured(film.still(SHOTS, "cinematic-treeline")).save(OUT / "gallery" / "00-featured.png")
         made.append("00-featured")
     face = SHOTS / "cinematic-face.png"
     if face.exists():
-        icon(Image.open(face), face_centre).save(OUT / "icon.png")
+        icon(film.still(SHOTS, "cinematic-face"), face_centre).save(OUT / "icon.png")
         made.append("icon")
     print("made", made)
 

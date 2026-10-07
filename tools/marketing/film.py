@@ -119,3 +119,77 @@ def darken_side(img, side, strength=0.65):
         g = np.clip((y - 0.45) / 0.55, 0, 1)
     a *= 1 - strength * g ** 1.3
     return Image.fromarray(np.clip(a, 0, 255).astype(np.uint8))
+
+
+def _largest_part(mask, keep=0.25):
+    """The biggest joined-up shape in a small boolean mask, and anything near its size (its legs,
+    which can come apart from it at a distance). Specks (smoke, a bird, a flicker) are dropped."""
+    h, w = mask.shape
+    label = np.zeros((h, w), np.int32)
+    sizes = [0]
+    for y in range(h):
+        for x in range(w):
+            if not mask[y, x] or label[y, x]:
+                continue
+            n = len(sizes)
+            stack = [(y, x)]
+            label[y, x] = n
+            count = 0
+            while stack:
+                cy, cx = stack.pop()
+                count += 1
+                for ny, nx in ((cy + 1, cx), (cy - 1, cx), (cy, cx + 1), (cy, cx - 1)):
+                    if 0 <= ny < h and 0 <= nx < w and mask[ny, nx] and not label[ny, nx]:
+                        label[ny, nx] = n
+                        stack.append((ny, nx))
+            sizes.append(count)
+    if len(sizes) == 1:
+        return mask
+    biggest = max(sizes)
+    keepers = [i for i, c in enumerate(sizes) if i and c >= biggest * keep]
+    return np.isin(label, keepers)
+
+
+def composite(still, plate, depth_blur=None, fog=0.3, darken=0.82):
+    """
+    A film still from two frames of the game taken from the same camera, one with it and one
+    without (the plate). The difference between them is exactly where it is; the world behind it
+    is taken from the plate, softened as a long lens would (shallow focus), darkened and pushed
+    back into the fog, and a little shadow gathers round it, so it stands out from everything.
+    """
+    s = np.asarray(still.convert("RGB")).astype(np.float32) / 255.0
+    p = np.asarray(plate.convert("RGB").resize(still.size)).astype(np.float32) / 255.0
+    h, w = s.shape[:2]
+    diff = np.abs(s - p).sum(axis=2)
+    small_w = 480
+    small_h = int(h * small_w / w)
+    d = Image.fromarray((np.clip(diff * 4, 0, 1) * 255).astype(np.uint8)).resize((small_w, small_h), Image.BILINEAR)
+    m = np.asarray(d) > 40
+    # Close the gaps between thin legs and body, then keep only it.
+    mi = Image.fromarray((m * 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(5)).filter(ImageFilter.MinFilter(3))
+    m = _largest_part(np.asarray(mi) > 127)
+    mask = Image.fromarray((m * 255).astype(np.uint8)).resize((w, h), Image.BILINEAR)
+    # Only where it really changed, at full size; softened at the edge.
+    fine = Image.fromarray((np.clip(diff * 6, 0, 1) * 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(3))
+    mask = Image.fromarray(np.minimum(np.asarray(mask), np.asarray(fine))).filter(ImageFilter.GaussianBlur(1.2))
+    m = np.asarray(mask).astype(np.float32)[..., None] / 255.0
+    if m.max() < 0.5:
+        return still.convert("RGB")                          # it is not in the picture: nothing to do
+    # The world behind: soft, darker, further into the fog.
+    blur = depth_blur if depth_blur is not None else max(3, w // 300)
+    bg = np.asarray(Image.fromarray((p * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(blur))).astype(np.float32) / 255.0
+    horizon = p[int(h * 0.35):int(h * 0.55)].reshape(-1, 3).mean(axis=0)
+    bg = bg * (1 - fog) + horizon * fog
+    bg *= darken
+    # A shadow gathering round it.
+    halo = np.asarray(mask.filter(ImageFilter.MaxFilter(9)).filter(ImageFilter.GaussianBlur(max(8, w // 70)))).astype(np.float32)[..., None] / 255.0
+    bg *= 1 - 0.35 * halo
+    out = bg * (1 - m) + s * m
+    return Image.fromarray((np.clip(out, 0, 1) * 255).astype(np.uint8))
+
+
+def still(folder, name):
+    """A still by name from {folder}, finished against its plate if it has one."""
+    shot = Image.open(Path(folder) / (name + ".png"))
+    plate = Path(folder) / (name + "-plate.png")
+    return composite(shot, Image.open(plate)) if plate.exists() else shot.convert("RGB")

@@ -79,7 +79,7 @@ def main():
         if not path.exists():
             print("missing", path.name)
             continue
-        src = film.grade(Image.open(path), exposure=exposure, vignette=0.6)
+        src = film.grade(film.still(SHOTS, name), exposure=exposure, vignette=0.6)
         # Cut so that it stands two thirds of the way across, clear of the words on the left.
         centre = (at[0] - (0.73 - 0.5) / ZOOM, at[1])
         base = film.cover(src, (1280, 720), centre, ZOOM)
