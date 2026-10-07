@@ -10,6 +10,7 @@ on:
     paths:
       - 'versions/**'
       - 'src/client/**'
+      - 'src/main/**'
       - 'tools/ci/**'
       - 'build.gradle'
       - 'gradle.properties'
