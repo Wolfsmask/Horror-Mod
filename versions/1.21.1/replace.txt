@@ -16,7 +16,6 @@ EntitySpawnReason.SPAWN_ITEM_USE -> MobSpawnType.SPAWN_EGG
 EntitySpawnReason -> MobSpawnType
 OCCUPANT.create(world, MobSpawnType.COMMAND) -> OCCUPANT.create(world)
 OCCUPANT.create(world, MobSpawnType.EVENT) -> OCCUPANT.create(world)
-EntityType.ZOMBIE.create(level, MobSpawnType.COMMAND) -> EntityType.ZOMBIE.create(level)
 public boolean hurtServer(ServerLevel level, DamageSource source, float amount) -> public boolean hurt(DamageSource source, float amount)
 p.hurtServer(p.level(), -> p.hurt(
 e.hurtServer(level, -> e.hurt(

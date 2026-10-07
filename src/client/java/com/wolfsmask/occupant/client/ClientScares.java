@@ -108,7 +108,7 @@ public final class ClientScares {
 		if (screenshotLineIn > 0 && --screenshotLineIn == 0) {
 			String[] lines = {"There are two of you in it.", "It is in this one too.", "Look behind you in it.",
 					"You were not alone in that one."};
-			mc.gui.getChat().addMessage(net.minecraft.network.chat.Component.literal(lines[mc.player.getRandom().nextInt(lines.length)])
+			mc.player.sendSystemMessage(net.minecraft.network.chat.Component.literal(lines[mc.player.getRandom().nextInt(lines.length)])
 					.withStyle(net.minecraft.ChatFormatting.DARK_GRAY, net.minecraft.ChatFormatting.ITALIC));
 		}
 	}

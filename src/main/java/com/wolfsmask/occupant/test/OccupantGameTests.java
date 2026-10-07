@@ -484,6 +484,7 @@ public final class OccupantGameTests {
 		Director director = Director.get();
 		ServerLevel level = helper.getLevel();
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		player.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
 		HauntData data = director.data(player);
 		data.introduced = true;
 		data.setAct(2);
@@ -491,10 +492,13 @@ public final class OccupantGameTests {
 		boolean fall = com.wolfsmask.occupant.director.Mercy.allowDeath(player, player.damageSources().fall());
 		helper.assertTrue(!fall && player.getHealth() > 1.0f, "A fatal fall should be caught (" + fall + ", " + player.getHealth() + ")");
 
-		net.minecraft.world.entity.Mob zombie = net.minecraft.world.entity.EntityType.ZOMBIE.create(level, EntitySpawnReason.COMMAND);
-		helper.assertTrue(zombie != null, "Could not create a zombie");
-		zombie.snapTo(player.getX() + 2, player.getY(), player.getZ(), 0.0f, 0.0f);
-		level.addFreshEntity(zombie);
+		// By the game's own command: the zombie's entity type is not reachable by name on every version.
+		level.getServer().getCommands().performPrefixedCommand(level.getServer().createCommandSourceStack().withSuppressedOutput(),
+				String.format(java.util.Locale.ROOT, "summon minecraft:zombie %.1f %.1f %.1f {Tags:[\"occupant_mercy\"],PersistenceRequired:1b}",
+						player.getX() + 2, player.getY(), player.getZ()));
+		net.minecraft.world.entity.Mob zombie = level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class,
+				player.getBoundingBox().inflate(6.0), m -> m.getTags().contains("occupant_mercy")).stream().findFirst().orElse(null);
+		helper.assertTrue(zombie != null, "Could not summon a zombie");
 		player.setHealth(1.0f);
 		boolean first = com.wolfsmask.occupant.director.Mercy.allowDeath(player, player.damageSources().mobAttack(zombie));
 		helper.assertTrue(!first && zombie.isNoAi(), "A zombie's killing blow should be stopped and the zombie taken");
