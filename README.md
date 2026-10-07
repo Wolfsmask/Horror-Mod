@@ -280,6 +280,8 @@ need rebuilding for the next.
 | `signMessages`, `chatLines` | | What it writes and says. `{player}` and `{day}` work in signs |
 | `screenWhispers` | `true` | Lines of text that surface on the player's screen |
 | `whisperLines` | | What those lines say. `{player}` works |
+| `silenceMinutes` | `5` | With other players online, someone who dies late in the story loses their voice for this long: nothing they type reaches anyone (0 = off) |
+| `discordBotToken`, `discordServerId`, `discordPlayers` | empty | Optional: the same silence in your Discord server, as a timeout (no messages, no speaking in voice), which lifts by itself. See below. |
 | `debug` | `false` | Log the Director's decisions |
 
 `config/occupant-client.json` (each player):
@@ -296,6 +298,23 @@ need rebuilding for the next.
 | `askHowPlaying` | `true` | Ask before the title screen whether you are playing or recording (the Creator Cut) |
 
 All of these can also be changed in game: **Options → The Occupant** on the pause screen.
+
+### Losing your voice in Discord too (optional)
+
+Off unless the server's owner sets it up, and everyone playing should know it is on. Make a bot
+at discord.com/developers, invite it to your Discord server with the **Timeout Members**
+permission, and drag its role above the players' roles. Then in `config/occupant.json` on the
+server:
+
+```json
+"discordBotToken": "the bot's token",
+"discordServerId": "your Discord server's id",
+"discordPlayers": { "MinecraftName": "their Discord user id" }
+```
+
+When one of them dies late in the story, the bot times them out in your Discord server for as
+long as `silenceMinutes`: they cannot send messages or speak in voice until it lifts by itself.
+The token is only ever sent to Discord. Server owners and admins cannot be timed out.
 
 ## Recording a video
 

@@ -402,8 +402,21 @@ public final class Director {
 		if (d.act != before) {
 			debug("{} entered act {}", player.getName().getString(), d.act);
 			save.setDirty();
+			// Each turn of the story is marked, once, quietly: what it has learned about them.
+			String[] beat = d.act >= 2 && d.act - 2 < ACT_BEATS.length ? ACT_BEATS[d.act - 2] : null;
+			if (beat != null && player.isAlive()) {
+				Cues.whisper(player, beat[player.getRandom().nextInt(beat.length)]
+						.replace("{player}", player.getName().getString()), 140);
+			}
 		}
 	}
+
+	/** Said once as each act begins, from the second: how much closer it has come. */
+	private static final String[][] ACT_BEATS = {
+			{"It has learned the way you walk.", "It knows where you sleep now.", "It followed you home today."},
+			{"It has started to wear your shape.", "It practised your voice while you were away.",
+					"It knows your name now, {player}."},
+			{"It is done watching.", "It doesn't need to hide from you any more.", "Tonight it stops pretending."}};
 
 	/** Tried first, in this order, until the player has seen it once. */
 	private static final List<String> FIRST_SIGHTINGS = List.of("distant", "hallway", "watcher");

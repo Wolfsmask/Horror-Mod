@@ -137,6 +137,23 @@ public final class OccupantConfig {
 			"IT WAS NEVER THE DARK"
 	));
 
+	/**
+	 * In a world with other players, a player who dies late in the story loses their voice for
+	 * this many minutes: nothing they say in chat reaches anyone. 0 turns it off.
+	 */
+	public double silenceMinutes = 5.0;
+
+	/**
+	 * Optional, off unless filled in: a Discord bot of the server owner's, in their own Discord
+	 * server, that times out the same player there while they are silenced (no messages, no
+	 * speaking in voice). Needs the bot's token, the Discord server's id, and each player's
+	 * Minecraft name against their Discord user id. The bot needs "Timeout Members", and its role
+	 * must be above theirs. Everyone playing should know it is on.
+	 */
+	public String discordBotToken = "";
+	public String discordServerId = "";
+	public java.util.Map<String, String> discordPlayers = new java.util.LinkedHashMap<>();
+
 	/** Log director decisions to the console. */
 	public boolean debug = false;
 
@@ -200,6 +217,10 @@ public final class OccupantConfig {
 		chaseDamage = (float) clamp(chaseDamage, 0.0, 40.0);
 		aloneRadius = (int) clamp(aloneRadius, 0, 256);
 		fogChunks = (int) clamp(fogChunks, 0, 32);
+		silenceMinutes = clamp(silenceMinutes, 0.0, 60.0);
+		if (discordBotToken == null) discordBotToken = "";
+		if (discordServerId == null) discordServerId = "";
+		if (discordPlayers == null) discordPlayers = new java.util.LinkedHashMap<>();
 		if (intensity == null || !java.util.List.of("subtle", "normal", "relentless").contains(intensity.toLowerCase(java.util.Locale.ROOT))) intensity = "normal";
 		if (signMessages == null || signMessages.isEmpty()) signMessages = new OccupantConfig().signMessages;
 		if (chatLines == null || chatLines.isEmpty()) chatLines = new OccupantConfig().chatLines;

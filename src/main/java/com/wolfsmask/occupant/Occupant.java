@@ -85,6 +85,7 @@ public final class Occupant implements ModInitializer {
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> guard("closing the world", () -> {
 			House.close();
 			Loot.close();
+			com.wolfsmask.occupant.story.Silence.clear();
 			WorldMode.close();
 			com.wolfsmask.occupant.world.Lairs.close();
 		}));
@@ -97,6 +98,19 @@ public final class Occupant implements ModInitializer {
 		}));
 
 		// It listens.
+		// The dead lose their voice for a while (see Silence): nothing they say goes anywhere.
+		ServerMessageEvents.ALLOW_CHAT_MESSAGE.register((message, sender, params) ->
+				guard("a chat message", () -> {
+					if (!com.wolfsmask.occupant.story.Silence.silenced(sender)) return true;
+					com.wolfsmask.occupant.story.Silence.swallowed(sender);
+					return false;
+				}, true));
+		ServerMessageEvents.ALLOW_COMMAND_MESSAGE.register((message, source, params) ->
+				guard("a command message", () -> {
+					if (!(source.getEntity() instanceof ServerPlayer sp) || !com.wolfsmask.occupant.story.Silence.silenced(sp)) return true;
+					com.wolfsmask.occupant.story.Silence.swallowed(sp);
+					return false;
+				}, true));
 		ServerMessageEvents.CHAT_MESSAGE.register((message, sender, params) -> guard("a chat message", () -> {
 			Director director = Director.get();
 			if (director != null) director.onChat(sender, message.signedContent());
@@ -163,6 +177,7 @@ public final class Occupant implements ModInitializer {
 		net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> guard("a death", () -> {
 			Director director = Director.get();
 			if (director == null || !(entity instanceof ServerPlayer sp) || !OccupantConfig.get().enabled) return;
+			com.wolfsmask.occupant.story.Silence.died(sp);
 			if (director.data(sp).act < 2 || sp.getRandom().nextFloat() > 0.6f) return;
 			String[] lines = {"It was there when you died.", "It watched.", "It stayed with you until the end.", "It will wait for you to come back."};
 			sp.sendSystemMessage(net.minecraft.network.chat.Component.literal(lines[sp.getRandom().nextInt(lines.length)])
