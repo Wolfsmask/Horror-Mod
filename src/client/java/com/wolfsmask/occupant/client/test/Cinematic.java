@@ -65,6 +65,10 @@ final class Cinematic {
 		static Look looming(int fov) {
 			return new Look(false, 0f, OccupantEntity.Mode.AMBUSH, fov);
 		}
+		/** Its body turned away, its head come round to look at the camera; bent, if it looms. */
+		static Look glancing(float turn, OccupantEntity.Mode mode, int fov) {
+			return new Look(false, turn, mode, fov);
+		}
 		static Look turned(boolean veiled, float turn) {
 			return new Look(veiled, turn, OccupantEntity.Mode.IDLE, 0);
 		}
@@ -136,7 +140,7 @@ final class Cinematic {
 		// And close: it has bent right down over the camera, and its mouth is open.
 		Vec3 near = server.computeOnServer(s -> inAir(s.overworld(), new Vec3(it.getX() + 3.4, it.getY() + 0.9, it.getZ() + 0.5)));
 		take(context, game, new Shot(it, near, new Vec3(it.getX() + 0.5, it.getY() + 3.1, it.getZ() + 0.5)), 12600,
-				"cinematic-face", Look.looming(62));
+				"cinematic-face", Look.glancing(-38f, OccupantEntity.Mode.AMBUSH, 62));
 	}
 
 	/** The village from above at dusk, and it, small, standing in the path between the houses. */
@@ -152,7 +156,7 @@ final class Cinematic {
 			Vec3 eye = findCamera(level, player(s), it, 0.6, -1.0, new double[]{11, 14, 17}, 0.8, 0, door);
 			return new Shot(it, eye, Vec3.atBottomCenterOf(it).add(0, 3.2, 0).lerp(door, 0.25));
 		});
-		take(context, game, shot, 13000, "cinematic-village", Look.towering(50));   // in the path between the houses, waiting
+		take(context, game, shot, 13000, "cinematic-village", Look.glancing(40f, OccupantEntity.Mode.STARE, 50));   // in the path between the houses, waiting
 
 		// And inside the house, at dusk: the real event, looking towards the dark hallway.
 		server.runCommand("kill " + ALL);
@@ -228,7 +232,7 @@ final class Cinematic {
 			Vec3 eye = findCamera(level, player(s), it, -0.2, -1.0, new double[]{8, 10, 12}, 0.6, 0, middle);
 			return new Shot(it, eye, Vec3.atBottomCenterOf(it).add(0, 2.8, 0));
 		});
-		take(context, game, shot, 13800, "cinematic-graves", Look.looming(55));         // bent over the graves, towards you
+		take(context, game, shot, 13800, "cinematic-graves", Look.glancing(-35f, OccupantEntity.Mode.AMBUSH, 55));         // bent over the graves, towards you
 	}
 
 	/**
@@ -465,13 +469,19 @@ final class Cinematic {
 			if (e == null) return;
 			e.standAlone(player(s));
 			Vec3 at = Vec3.atBottomCenterOf(feet);
-			float yaw = Sight.yawBetween(at, facing) + look.turn();
-			e.snapTo(at.x, at.y, at.z, yaw, 0.0f);
-			e.setYHeadRot(yaw);
-			e.setYBodyRot(yaw);
-			e.setMode(look.turn() == 0f ? look.mode() : OccupantEntity.Mode.IDLE);
+			// The body turned away by {@code turn}; the head, unless it is idle, round to the camera.
+			float toward = Sight.yawBetween(at, facing);
+			float body = toward + look.turn();
+			float head = look.mode() == OccupantEntity.Mode.IDLE ? body : toward;
+			e.snapTo(at.x, at.y, at.z, body, 0.0f);
+			e.setYBodyRot(body);
+			e.setYHeadRot(head);
+			e.setMode(look.mode());
 			e.setForm(look.veiled() ? OccupantEntity.Form.VEILED : OccupantEntity.Form.REVEALED);
-			if (look.turn() != 0f) e.setGazeLocked(false);
+			if (look.turn() != 0f) {
+				e.setGazeLocked(false);
+				e.setNoAi(true);                                // held as it is put, body and head
+			}
 			level.addFreshEntity(e);
 		});
 	}
@@ -501,6 +511,11 @@ final class Cinematic {
 		Occupant.LOGGER.info("[client-gametest] {}: it at {}, camera at {}, {} in sight", name, shot.it(), shot.eye(),
 				context.computeOnClient(OccupantClientGameTest::seen));
 		still(context, game, name);
+		// The same frame without it: a plate, so the picture can be finished like a film still,
+		// the world behind it soft and dark, and it sharp.
+		game.getServer().runCommand("kill " + ALL);
+		context.waitTicks(8);
+		OccupantClientGameTest.shoot(context, name + "-plate");
 	}
 
 	private static void camera(ClientGameTestContext context, TestSingleplayerContext game, Vec3 eye, Vec3 look, int time) {
