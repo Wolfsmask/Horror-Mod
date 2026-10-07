@@ -83,6 +83,7 @@ public final class WakeEvent extends HorrorEvent {
 			if (entity.hasVanished() || p.level() != entity.level()) return false;
 			entity.keepAlive();
 			lookTicks = Sight.isLookingAt(p, entity) ? lookTicks + 1 : 0;
+			if (lookTicks > 0) haunt.markShown();
 			if (lookTicks >= 8) {
 				haunt.data.encounters++;
 				Cues.soundAtEars(p, ModSounds.DRONE, SoundSource.AMBIENT, 0.7f, 1.2f);

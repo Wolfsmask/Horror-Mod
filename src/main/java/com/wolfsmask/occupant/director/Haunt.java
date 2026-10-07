@@ -37,7 +37,7 @@ public final class Haunt {
 	long pendingAt;
 	/** How many follow-ups in a row there have been. */
 	int chain;
-	/** When it was last something to be seen, in ticks of play. */
+	/** When it was last on the player's screen, in ticks of play. */
 	long lastShownAt;
 	/** Not again in the lair before this server tick. */
 	long lairAgainAt;
@@ -86,6 +86,11 @@ public final class Haunt {
 
 	public boolean isBusy() {
 		return active != null;
+	}
+
+	/** It is on their screen now: whether or not they look straight at it, it has been seen. */
+	public void markShown() {
+		lastShownAt = data.playTicks;
 	}
 
 	@Nullable

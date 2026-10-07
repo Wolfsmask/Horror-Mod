@@ -39,6 +39,7 @@ public abstract class ApparitionSequence implements Sequence {
 
 		// Nothing is there to see until it has been revealed.
 		boolean looking = !entity.isConcealed() && Sight.isLookingAt(player, entity);
+		if (age % 5 == 0 && !entity.isConcealed() && (looking || Sight.isOnScreen(player, entity))) haunt.markShown();
 		if (looking) {
 			lookTicks++;
 			if (!seen) {

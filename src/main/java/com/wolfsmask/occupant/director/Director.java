@@ -330,9 +330,10 @@ public final class Director {
 	}
 
 	/**
-	 * Has it been too long since it was last something to see? Sounds and signs keep a story
+	 * Has it been too long since it was last on their screen? Sounds and signs keep a story
 	 * going, but it is being seen that people remember: every five minutes or so early on, every
-	 * three by the end.
+	 * three by the end. Only being on screen counts: a knock that never shows it, or a figure put
+	 * where they never turn to look, does not.
 	 */
 	private static boolean sightingDue(Haunt h, OccupantConfig cfg) {
 		double minutes = switch (h.data.act) {
@@ -596,7 +597,6 @@ public final class Director {
 		HauntData d = h.data;
 		h.active = seq;
 		h.activeId = e.id();
-		if (e.shows()) h.lastShownAt = d.playTicks;
 		d.recordEvent(e.id(), e.cooldownTicks());
 		if (e.tier() == HorrorEvent.Tier.PEAK) {
 			d.lastPeakAt = d.playTicks;
