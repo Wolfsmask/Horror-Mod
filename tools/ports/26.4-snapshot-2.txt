@@ -1,6 +1,9 @@
-# 26.4-snapshot-2 on 8fb88950ba9484997b07b3e04848cb0bd3a8809a: build failure, tests skipped, jar skipped
+# 26.4-snapshot-2 on 57eb157e65eb5b41e1f1904ccbbc1e4dc8aba404: build failure, tests skipped, jar skipped
 com/wolfsmask/occupant/director/Mercy.java:90: error: invulnerableTime has private access in Entity
 com/wolfsmask/occupant/director/Mercy.java:105: error: invulnerableTime has private access in Entity
+com/wolfsmask/occupant/test/OccupantGameTests.java:494: error: cannot find symbol
+  symbol:   variable ZOMBIE
+  location: class EntityType
 > Configure project :
 > Task :compileJava
 > Task :compileJava FAILED
