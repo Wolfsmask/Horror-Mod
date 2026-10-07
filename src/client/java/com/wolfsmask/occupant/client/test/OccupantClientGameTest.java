@@ -434,10 +434,13 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 		Occupant.LOGGER.info("[sodium] the fog is thick at {}; Sodium draws the land with it thick at {}", fog[0], fog[1]);
 		check(fog[1] > 0.0f && fog[1] <= fog[0] + 1.0f,
 				"Sodium should draw the land with this fog (thick at " + fog[0] + "), not at " + fog[1]);
+		// Out again, and all the way back to the title, with the world saved and its server stopped.
 		context.runOnClient(mc -> mc.pauseGame(false));
 		context.waitTicks(10);
 		context.clickScreenButton("menu.returnToMenu");
-		context.waitFor(mc -> mc.level == null, 20 * 60 * 2);
+		context.waitFor(mc -> mc.level == null && mc.getSingleplayerServer() == null
+				&& mc.screen instanceof net.minecraft.client.gui.screens.TitleScreen, 20 * 60 * 2);
+		context.waitTicks(20);
 	}
 
 	/** The nearest of the fog ends in Sodium's own copy of the fog, found by name. */
