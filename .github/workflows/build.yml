@@ -183,3 +183,82 @@ jobs:
             git push origin "HEAD:${GITHUB_REF_NAME}" && break
             sleep $((attempt * 3))
           done
+
+  # The client again, with Sodium, which most players have: Sodium draws the land itself, with its
+  # own copy of the fog, and that copy must be this mod's fog. The latest Sodium for the version is
+  # fetched from Modrinth; if there is none, there is nothing to check.
+  sodium:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        mc: ['26.2', '1.21.11']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 25
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Virtual display and software rendering
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb mesa-utils libgl1-mesa-dri mesa-vulkan-drivers > /dev/null
+
+      - name: Fetch Sodium
+        id: fetch
+        run: |
+          api="https://api.modrinth.com/v2/project/sodium/version?loaders=%5B%22fabric%22%5D&game_versions=%5B%22${{ matrix.mc }}%22%5D"
+          read -r version url < <(curl -fsS "$api" | python3 -c "import json,sys; d=json.load(sys.stdin); v=d[0] if d else None; f=v and next((f for f in v['files'] if f.get('primary')), v['files'][0]); print((v['version_number'] + ' ' + f['url']) if v else '- -')")
+          echo "Sodium for ${{ matrix.mc }}: $version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if [ "$url" != "-" ]; then
+            mkdir -p build/clientGametest/mods
+            curl -fsSL "$url" -o build/clientGametest/mods/sodium.jar
+          fi
+
+      - name: Run the client with Sodium
+        id: run
+        if: steps.fetch.outputs.version != '-'
+        continue-on-error: true
+        env:
+          LIBGL_ALWAYS_SOFTWARE: "1"
+          JAVA_TOOL_OPTIONS: "-Doccupant.sodium=true"
+        run: |
+          chmod +x gradlew
+          set -o pipefail
+          xvfb-run -a -s "-screen 0 1280x720x24" ./gradlew runClientGametest -Pmc=${{ matrix.mc }} --console=plain 2>&1 | tee sodium.log
+
+      - name: Record the result
+        if: always()
+        run: |
+          OUT="$RUNNER_TEMP/sodium.txt"
+          {
+            echo "# ${{ matrix.mc }} with Sodium ${{ steps.fetch.outputs.version }} on $GITHUB_SHA: ${{ steps.run.outcome }}"
+            grep -E "\[sodium\]|AssertionError|Exception|Caused by|Crash|FAILED|Mixin|mixin" sodium.log 2>/dev/null | grep -v DEBUG | head -n 60
+            echo "--- tail ---"
+            tail -n 40 sodium.log 2>/dev/null
+          } > "$OUT"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for attempt in 1 2 3 4 5; do
+            git fetch -q origin "${GITHUB_REF_NAME}"
+            git reset -q --hard "origin/${GITHUB_REF_NAME}"
+            mkdir -p tools/ports
+            cp "$OUT" "tools/ports/sodium-${{ matrix.mc }}.txt"
+            git add -f "tools/ports/sodium-${{ matrix.mc }}.txt"
+            git diff --cached --quiet && break
+            git commit -q -m "Sodium result for ${{ matrix.mc }} [skip ci]"
+            git push origin "HEAD:${GITHUB_REF_NAME}" && break
+            sleep $((attempt * 3))
+          done
+
+      - name: Fail if the fog did not reach Sodium
+        if: steps.run.outcome == 'failure'
+        run: exit 1

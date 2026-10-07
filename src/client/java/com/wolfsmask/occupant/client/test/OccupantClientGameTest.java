@@ -49,6 +49,10 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 
 	@Override
 	public void runTest(ClientGameTestContext context) {
+		if (Boolean.getBoolean("occupant.sodium")) {
+			sodiumDrawsTheFog(context);
+			return;
+		}
 		// The title screen, as it first opens and then a while later, when it may be standing there.
 		// The gate comes first: the wood, the title, and one thing to do.
 		// Before it, off camera: playing, or recording? A real click on RECORDING.
@@ -404,6 +408,54 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 		context.getInput().setCursorPos(at[0], at[1]);
 		context.waitTicks(5);
 		context.getInput().pressMouse(0);
+	}
+
+	/**
+	 * CI's second client run, with Sodium installed, as most players have it: Sodium draws the
+	 * land with its own copy of the fog, taken as the game works the fog out, and that copy must
+	 * have this mod's fog in it, not only the game's own.
+	 */
+	private static void sodiumDrawsTheFog(ClientGameTestContext context) {
+		check(FabricLoader.getInstance().isModLoaded("sodium"), "Sodium should be installed for this run");
+		context.waitTicks(60);
+		context.runOnClient(GateScreen::passForTest);
+		context.waitTicks(20);
+		try (TestSingleplayerContext game = context.worldBuilder().create()) {
+			TestCompat.waitForWorld(game);
+			context.waitFor(mc -> ClientFog.active() && ClientFog.end() < 100.0f, 20 * 60);
+			context.waitTicks(10);
+			float[] fog = context.computeOnClient(mc -> new float[]{ClientFog.end(), sodiumFogEnd(mc)});
+			Occupant.LOGGER.info("[sodium] the fog is thick at {}; Sodium draws the land with it thick at {}", fog[0], fog[1]);
+			check(fog[1] > 0.0f && fog[1] <= fog[0] + 1.0f,
+					"Sodium should draw the land with this fog (thick at " + fog[0] + "), not at " + fog[1]);
+		}
+	}
+
+	/** The nearest of the fog ends in Sodium's own copy of the fog, found by name. */
+	private static float sodiumFogEnd(Minecraft mc) {
+		try {
+			Object renderer = null;
+			for (java.lang.reflect.Field f : mc.gameRenderer.getClass().getDeclaredFields()) {
+				if (f.getType().getSimpleName().equals("FogRenderer")) {
+					f.setAccessible(true);
+					renderer = f.get(mc.gameRenderer);
+					break;
+				}
+			}
+			check(renderer != null, "the game renderer should have a fog renderer");
+			Object params = renderer.getClass().getMethod("sodium$getFogParameters").invoke(renderer);
+			float nearest = Float.MAX_VALUE;
+			StringBuilder all = new StringBuilder();
+			for (java.lang.reflect.RecordComponent c : params.getClass().getRecordComponents()) {
+				Object v = c.getAccessor().invoke(params);
+				all.append(c.getName()).append('=').append(v).append(' ');
+				if (c.getName().endsWith("End") && v instanceof Float end) nearest = Math.min(nearest, end);
+			}
+			Occupant.LOGGER.info("[sodium] Sodium's fog: {}", all);
+			return nearest;
+		} catch (ReflectiveOperationException e) {
+			throw new AssertionError("could not read Sodium's fog", e);
+		}
 	}
 
 	private static void check(boolean ok, String what) {
