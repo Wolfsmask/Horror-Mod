@@ -83,6 +83,8 @@ final class ForestGallery {
 
 			// And the stills for the mod's page, in the same world.
 			Cinematic.run(context, game, woods, spawn);
+			// And the ones that look like a player's own screenshots.
+			FoundFootage.run(context, game, woods, spawn);
 		} catch (RuntimeException | AssertionError e) {
 			Occupant.LOGGER.warn("[client-gametest] forest gallery stopped early", e);
 		}

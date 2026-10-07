@@ -41,10 +41,10 @@ import java.util.Locale;
  * Not a check: if any of this goes wrong it is logged and the run carries on.
  */
 final class Cinematic {
-	private static final String ALL = "@e[type=occupant:occupant]";
+	static final String ALL = "@e[type=occupant:occupant]";
 	private static final int KEY_F1 = 290;
 	/** How far above where a player is put their eyes are: the camera. */
-	private static final double EYE = 1.62;
+	static final double EYE = 1.62;
 
 	/** A shot, worked out on the server: where it stands, where the camera is, what it looks at. */
 	private record Shot(BlockPos it, Vec3 eye, Vec3 look) {
@@ -54,7 +54,7 @@ final class Cinematic {
 	 * How it stands for a shot: with its face hidden (head down) or not, and turned how far from
 	 * the camera, in degrees. Most of the shots never give it away: only one or two look back.
 	 */
-	private record Look(boolean veiled, float turn, OccupantEntity.Mode mode, int fov) {
+	record Look(boolean veiled, float turn, OccupantEntity.Mode mode, int fov) {
 		/** Facing the camera, face showing, at the game's own lens. */
 		static final Look STARING = new Look(false, 0f, OccupantEntity.Mode.STARE, 0);
 		/** Facing the camera through a long lens, which stacks the world up behind it and makes it vast. */
@@ -272,7 +272,7 @@ final class Cinematic {
 	// ---------------------------------------------------------------- the set (server side)
 
 	/** Wood, leaves and the like that grew there: never anything anyone built. */
-	private static boolean grown(BlockState state) {
+	static boolean grown(BlockState state) {
 		if (state.is(BlockTags.LEAVES)) return !state.hasProperty(LeavesBlock.PERSISTENT) || !state.getValue(LeavesBlock.PERSISTENT);
 		if (state.is(Blocks.VINE) || state.is(Blocks.COCOA) || state.is(Blocks.BEE_NEST)) return true;
 		if (state.is(Blocks.BROWN_MUSHROOM_BLOCK) || state.is(Blocks.RED_MUSHROOM_BLOCK) || state.is(Blocks.MUSHROOM_STEM)) return true;
@@ -280,7 +280,7 @@ final class Cinematic {
 	}
 
 	/** Where something would stand at a column: on the ground, under any tree, out of any water. */
-	private static int ground(ServerLevel level, int x, int z) {
+	static int ground(ServerLevel level, int x, int z) {
 		level.getChunk(x >> 4, z >> 4);
 		BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos(x, level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z) - 1, z);
 		while (p.getY() > level.getMinY()) {
@@ -296,7 +296,7 @@ final class Cinematic {
 	 * Fells the trees in a circle, whole, so a shot has room and nothing is left floating: every
 	 * trunk standing inside it, its branches, and the leaves round it. Done before anything is built.
 	 */
-	private static void fellTrees(ServerLevel level, BlockPos centre, int radius) {
+	static void fellTrees(ServerLevel level, BlockPos centre, int radius) {
 		int r = radius + 6, size = 2 * r + 1;
 		int[] base = new int[size * size];
 		boolean[] trunk = new boolean[size * size];
@@ -338,7 +338,7 @@ final class Cinematic {
 	}
 
 	/** Where it can stand nearest to (x, z) from {@code floor}. */
-	private static BlockPos standNear(ServerLevel level, BlockPos floor, int x, int z) {
+	static BlockPos standNear(ServerLevel level, BlockPos floor, int x, int z) {
 		for (int ring = 0; ring <= 4; ring++) {
 			for (int dx = -ring; dx <= ring; dx++) {
 				for (int dz = -ring; dz <= ring; dz++) {
@@ -358,7 +358,7 @@ final class Cinematic {
 	 * can be seen from there with nothing in the way. At least {@code low} above the ground there,
 	 * and never below {@code minY}. Failing that, wherever the most of it can be seen.
 	 */
-	private static Vec3 findCamera(ServerLevel level, Entity viewer, BlockPos it, double dx, double dz, double[] dists,
+	static Vec3 findCamera(ServerLevel level, Entity viewer, BlockPos it, double dx, double dz, double[] dists,
 								   double low, double minY, Vec3... see) {
 		double toward = Math.atan2(dz, dx);
 		Vec3 feet = Vec3.atBottomCenterOf(it);
@@ -396,7 +396,7 @@ final class Cinematic {
 	}
 
 	/** Up out of the ground, if {@code eye} is in it. */
-	private static Vec3 inAir(ServerLevel level, Vec3 eye) {
+	static Vec3 inAir(ServerLevel level, Vec3 eye) {
 		for (int up = 0; up < 6; up++) {
 			BlockPos at = BlockPos.containing(eye.add(0, up, 0));
 			if (level.getBlockState(at).getCollisionShape(level, at).isEmpty()) return eye.add(0, up, 0);
@@ -404,7 +404,7 @@ final class Cinematic {
 		return eye;
 	}
 
-	private static Vec3 rel(BlockPos floor, double x, double y, double z) {
+	static Vec3 rel(BlockPos floor, double x, double y, double z) {
 		return new Vec3(floor.getX() + x, floor.getY() + y, floor.getZ() + z);
 	}
 
@@ -412,7 +412,7 @@ final class Cinematic {
 		return Vec3.atBottomCenterOf(feet).add(0, 2.6, 0);
 	}
 
-	private static ServerPlayer player(MinecraftServer server) {
+	static ServerPlayer player(MinecraftServer server) {
 		return server.getPlayerList().getPlayers().get(0);
 	}
 
@@ -420,7 +420,7 @@ final class Cinematic {
 	 * Clears the trees out of a shot: leaves, vines and natural trunks only, from {@code fromY} up
 	 * {@code height} blocks, so nothing anyone built (planks, stone, stripped logs) is ever touched.
 	 */
-	private static void clearView(TestServerContext server, BlockPos a, BlockPos b, int fromY, int height) {
+	static void clearView(TestServerContext server, BlockPos a, BlockPos b, int fromY, int height) {
 		int x0 = Math.min(a.getX(), b.getX()), x1 = Math.max(a.getX(), b.getX());
 		int z0 = Math.min(a.getZ(), b.getZ()), z1 = Math.max(a.getZ(), b.getZ());
 		for (String what : new String[]{"#minecraft:leaves", "minecraft:vine", "minecraft:oak_log", "minecraft:birch_log",
@@ -437,7 +437,7 @@ final class Cinematic {
 	 * The HUD on or off. The option has had more than one name, so it is found by what it is
 	 * called; failing that, F1, as a player would.
 	 */
-	private static void hud(ClientGameTestContext context, boolean shown) {
+	static void hud(ClientGameTestContext context, boolean shown) {
 		boolean set = context.computeOnClient(mc -> {
 			for (java.lang.reflect.Field f : mc.options.getClass().getFields()) {
 				String n = f.getName().toLowerCase(Locale.ROOT);
@@ -456,12 +456,12 @@ final class Cinematic {
 	}
 
 	/** Puts it there, facing the camera, the way /occupant here does. */
-	private static void place(TestServerContext server, BlockPos feet, Vec3 facing) {
+	static void place(TestServerContext server, BlockPos feet, Vec3 facing) {
 		place(server, feet, facing, Look.STARING);
 	}
 
 	/** Puts it there, stood as {@code look} says. */
-	private static void place(TestServerContext server, BlockPos feet, Vec3 facing, Look look) {
+	static void place(TestServerContext server, BlockPos feet, Vec3 facing, Look look) {
 		server.runCommand("kill " + ALL);
 		server.runOnServer(s -> {
 			ServerLevel level = s.overworld();
@@ -518,7 +518,7 @@ final class Cinematic {
 		OccupantClientGameTest.shoot(context, name + "-plate");
 	}
 
-	private static void camera(ClientGameTestContext context, TestSingleplayerContext game, Vec3 eye, Vec3 look, int time) {
+	static void camera(ClientGameTestContext context, TestSingleplayerContext game, Vec3 eye, Vec3 look, int time) {
 		TestServerContext server = game.getServer();
 		server.runCommand("kill " + ALL);
 		server.runCommand("time set " + time);
@@ -535,7 +535,7 @@ final class Cinematic {
 	}
 
 	/** Lights every unlit {@code kind} (a campfire, candles) within {@code reach} of {@code centre}. */
-	private static void light(ServerLevel level, BlockPos centre, int reach, BlockState kind) {
+	static void light(ServerLevel level, BlockPos centre, int reach, BlockState kind) {
 		for (BlockPos p : BlockPos.betweenClosed(centre.offset(-reach, -3, -reach), centre.offset(reach, 4, reach))) {
 			BlockState state = level.getBlockState(p);
 			if (state.is(kind.getBlock()) && state.hasProperty(BlockStateProperties.LIT)) {
@@ -544,7 +544,7 @@ final class Cinematic {
 		}
 	}
 
-	private static int surface(ServerLevel level, int x, int z) {
+	static int surface(ServerLevel level, int x, int z) {
 		level.getChunk(x >> 4, z >> 4);
 		return level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
 	}
