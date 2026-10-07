@@ -137,14 +137,10 @@ final class FoundFootage {
 			for (int x = -1; x <= 1; x++) {
 				for (int y = 2; y <= 3; y++) set(level, o.offset(x, y, -3), Blocks.GLASS_PANE.defaultBlockState());
 			}
-			// One torch, on the wall behind you; a bed against the side; nothing else.
+			// One torch, on the wall behind you; a table and a barrel against the side; nothing else.
 			set(level, o.offset(2, 2, 2), Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, Direction.WEST));
-			set(level, o.offset(-2, 1, 1), Blocks.RED_BED.defaultBlockState()
-					.setValue(net.minecraft.world.level.block.BedBlock.FACING, Direction.SOUTH)
-					.setValue(net.minecraft.world.level.block.BedBlock.PART, net.minecraft.world.level.block.state.properties.BedPart.FOOT));
-			set(level, o.offset(-2, 1, 2), Blocks.RED_BED.defaultBlockState()
-					.setValue(net.minecraft.world.level.block.BedBlock.FACING, Direction.SOUTH)
-					.setValue(net.minecraft.world.level.block.BedBlock.PART, net.minecraft.world.level.block.state.properties.BedPart.HEAD));
+			set(level, o.offset(-2, 1, 1), Blocks.CRAFTING_TABLE.defaultBlockState());
+			set(level, o.offset(-2, 1, 2), Blocks.BARREL.defaultBlockState());
 			// Outside the window, clear ground, and no light.
 			for (int x = -2; x <= 2; x++) {
 				for (int z = -7; z <= -4; z++) {
