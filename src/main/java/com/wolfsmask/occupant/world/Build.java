@@ -23,6 +23,8 @@ abstract class Build {
 	final BlockPos base;
 	final Rotation rotation;
 	final RandomSource random;
+	/** What it is built of: the builders write spruce and cobblestone, and this swaps them. */
+	Palette palette = Palette.AS_BUILT;
 
 	Build(WorldGenLevel level, BlockPos base, Rotation rotation, RandomSource random) {
 		this.level = level;
@@ -40,7 +42,7 @@ abstract class Build {
 
 	void put(int x, int y, int z, BlockState state) {
 		BlockPos pos = at(x, y, z);
-		if (level.ensureCanWrite(pos)) level.setBlock(pos, state.rotate(rotation), Block.UPDATE_CLIENTS);
+		if (level.ensureCanWrite(pos)) level.setBlock(pos, palette.apply(state, random).rotate(rotation), Block.UPDATE_CLIENTS);
 	}
 
 	void fill(int x0, int y0, int z0, int x1, int y1, int z1, BlockState state) {

@@ -29,9 +29,17 @@ final class Places {
 	/** Not right where players first appear. */
 	private static final int MIN_FROM_SPAWN = 120;
 	/** And well apart from each other. */
-	private static final int MIN_APART = 200;
+	private static final int MIN_APART = 260;
+	/** And never the same kind of place twice in a walk: two camps are this far apart at least. */
+	private static final int SAME_KIND_APART = 600;
+
+	/** The kinds of place, how often each comes up, and how far each reaches from its middle. */
+	private static final String[] KINDS = {"lair", "lighthouse", "ruin", "camp", "graves", "watchtower", "chapel", "radio"};
+	private static final float[] SHARES = {0.06f, 0.07f, 0.14f, 0.19f, 0.14f, 0.14f, 0.14f, 0.12f};
 
 	private static final List<BlockPos> PLACES = new CopyOnWriteArrayList<>();
+	/** Which kind each place is, where known (worlds from before this was kept have none). */
+	private static final java.util.Map<BlockPos, String> KIND_AT = new java.util.concurrent.ConcurrentHashMap<>();
 	@Nullable
 	private static volatile Path record;
 
@@ -42,11 +50,15 @@ final class Places {
 		Path file = server.getWorldPath(LevelResource.ROOT).resolve("occupant_places.txt");
 		record = file;
 		PLACES.clear();
+		KIND_AT.clear();
 		if (!Files.exists(file)) return;
 		try {
 			for (String line : Files.readAllLines(file)) {
 				String[] p = line.trim().split("\\s+");
-				if (p.length == 3) PLACES.add(new BlockPos(Integer.parseInt(p[0]), Integer.parseInt(p[1]), Integer.parseInt(p[2])));
+				if (p.length < 3) continue;
+				BlockPos at = new BlockPos(Integer.parseInt(p[0]), Integer.parseInt(p[1]), Integer.parseInt(p[2]));
+				PLACES.add(at);
+				if (p.length >= 4) KIND_AT.put(at, p[3]);
 			}
 		} catch (IOException | RuntimeException e) {
 			Occupant.LOGGER.warn("Could not read where the old places are", e);
@@ -56,6 +68,7 @@ final class Places {
 	static void close() {
 		record = null;
 		PLACES.clear();
+		KIND_AT.clear();
 		SIGNS.clear();
 	}
 
@@ -92,17 +105,24 @@ final class Places {
 		}
 	}
 
-	private static synchronized boolean claim(BlockPos at) {
+	private static synchronized boolean claim(BlockPos at, String kind) {
 		for (BlockPos p : PLACES) {
 			long dx = p.getX() - at.getX();
 			long dz = p.getZ() - at.getZ();
-			if (dx * dx + dz * dz < (long) MIN_APART * MIN_APART) return false;
+			long apart = kind.equals(KIND_AT.get(p)) ? SAME_KIND_APART : MIN_APART;
+			if (dx * dx + dz * dz < apart * apart) return false;
 		}
 		PLACES.add(at);
+		KIND_AT.put(at, kind);
 		Path file = record;
 		if (file != null) {
 			StringBuilder out = new StringBuilder();
-			for (BlockPos p : PLACES) out.append(p.getX()).append(' ').append(p.getY()).append(' ').append(p.getZ()).append('\n');
+			for (BlockPos p : PLACES) {
+				out.append(p.getX()).append(' ').append(p.getY()).append(' ').append(p.getZ());
+				String k = KIND_AT.get(p);
+				if (k != null) out.append(' ').append(k);
+				out.append('\n');
+			}
 			try {
 				Files.writeString(file, out.toString());
 			} catch (IOException e) {
@@ -112,40 +132,63 @@ final class Places {
 		return true;
 	}
 
+	/** Which kind of place to try, by its share. */
+	private static int roll(RandomSource random) {
+		float r = random.nextFloat() * 0.999f;
+		for (int i = 0; i < SHARES.length; i++) {
+			r -= SHARES[i];
+			if (r < 0) return i;
+		}
+		return 3;
+	}
+
+	/** Is there a place of this kind too near {@code at} already? */
+	private static boolean sameKindNear(String kind, BlockPos at) {
+		for (java.util.Map.Entry<BlockPos, String> e : KIND_AT.entrySet()) {
+			if (!e.getValue().equals(kind)) continue;
+			long dx = e.getKey().getX() - at.getX();
+			long dz = e.getKey().getZ() - at.getZ();
+			if (dx * dx + dz * dz < (long) SAME_KIND_APART * SAME_KIND_APART) return true;
+		}
+		return false;
+	}
+
 	/** World generation's chance at one of the old places around {@code centre}. */
 	static boolean tryPlace(WorldGenLevel level, RandomSource random, BlockPos centre, double fromSpawn) {
 		if (fromSpawn < MIN_FROM_SPAWN) return false;
-		float kind = random.nextFloat();
-		// How far out from its middle each kind reaches, so the ground under all of it is checked.
-		int half = kind < 0.06f ? Lair.RADIUS : kind < 0.12f ? 4 : kind < 0.30f ? 7 : kind < 0.52f ? 5
-				: kind < 0.66f ? 6 : kind < 0.78f ? 4 : kind < 0.90f ? 7 : 5;
-		BlockPos base = flatGround(level, centre, half, 3);
+		// Fairly flat ground for the widest of them, so any kind can go here.
+		BlockPos base = flatGround(level, centre, 7, 3);
 		if (base == null || !level.ensureCanWrite(base)) return false;
-		if (kind < 0.06f && !solidBelow(level, base, Lair.DEPTH + 4)) kind = 0.20f;
-		if (kind >= 0.06f && kind < 0.12f && !nearWater(level, base)) kind = 0.20f;
-		if (!claim(base)) return false;
+		// A kind that suits the ground, and is not one passed a little way back.
+		int kind = -1;
+		for (int tries = 0; tries < 5 && kind < 0; tries++) {
+			int k = roll(random);
+			boolean suits = switch (k) {
+				case 0 -> solidBelow(level, base, Lair.DEPTH + 4);
+				case 1 -> nearWater(level, base);
+				default -> true;
+			};
+			if (suits && !sameKindNear(KINDS[k], base)) kind = k;
+		}
+		if (kind < 0 || !claim(base, KINDS[kind])) return false;
 		Rotation rotation = Rotation.getRandom(random);
 		Build build;
-		if (kind < 0.06f) {
-			Lair lair = new Lair(level, base, rotation, random);
-			lair.build();
-			Lairs.add(lair.hollow());
-			return true;
-		} else if (kind < 0.12f) {
-			build = new Lighthouse(level, base, rotation, random);
-		} else if (kind < 0.30f) {
-			build = new Ruin(level, base, rotation, random);
-		} else if (kind < 0.52f) {
-			build = new Camp(level, base, rotation, random);
-		} else if (kind < 0.66f) {
-			build = new Graves(level, base, rotation, random);
-		} else if (kind < 0.78f) {
-			build = new Watchtower(level, base, rotation, random);
-		} else if (kind < 0.90f) {
-			build = new Chapel(level, base, rotation, random);
-		} else {
-			build = new RadioShack(level, base, rotation, random);
+		switch (kind) {
+			case 0 -> {
+				Lair lair = new Lair(level, base, rotation, random);
+				lair.build();
+				Lairs.add(lair.hollow());
+				return true;
+			}
+			case 1 -> build = new Lighthouse(level, base, rotation, random);
+			case 2 -> build = new Ruin(level, base, rotation, random);
+			case 3 -> build = new Camp(level, base, rotation, random);
+			case 4 -> build = new Graves(level, base, rotation, random);
+			case 5 -> build = new Watchtower(level, base, rotation, random);
+			case 6 -> build = new Chapel(level, base, rotation, random);
+			default -> build = new RadioShack(level, base, rotation, random);
 		}
+		build.palette = Palette.pick(level, base, random);
 		build.build();
 		return true;
 	}
@@ -154,6 +197,7 @@ final class Places {
 	static void village(WorldGenLevel level, RandomSource random, BlockPos house, Rotation rotation) {
 		// Spots around the house, in its own frame: to its left, behind it to the right, and in front.
 		int[][] spots = {{-15, -3}, {15, 6}, {-2, -13}, {13, -12}};
+		Palette palette = Palette.pick(level, house, random);          // one village, one wood
 		Rotation[] turns = {Rotation.CLOCKWISE_90, Rotation.COUNTERCLOCKWISE_90, Rotation.NONE, Rotation.CLOCKWISE_180};
 		for (int i = 0; i < spots.length; i++) {
 			BlockPos column = house.offset(new BlockPos(spots[i][0], 0, spots[i][1]).rotate(rotation));
@@ -163,6 +207,7 @@ final class Places {
 			if (i == 3 && random.nextFloat() < 0.5f) continue;              // not every village is the same size
 			Rotation turned = rotation.getRotated(turns[i]);
 			Build build = well ? new Well(level, base, turned, random) : new Cottage(level, base, turned, random);
+			build.palette = palette;
 			build.build();
 			path(level, random, house, base);
 		}

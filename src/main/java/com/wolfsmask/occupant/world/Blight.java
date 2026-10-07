@@ -59,28 +59,22 @@ final class Blight {
 		return random.nextFloat() < 0.5f ? Blocks.DARK_OAK_LOG : Blocks.OAK_LOG;
 	}
 
-	/** A trunk, five or six high, with a few bare branches. Not a leaf on it. */
+	/**
+	 * A tree that died standing: a bare trunk, four to six high, with a stub or two of branch
+	 * near the top. Plain, so it reads as a dead tree and not as something built.
+	 */
 	private static void deadTree(WorldGenLevel level, RandomSource random, BlockPos ground) {
 		Block log = log(level, ground, random);
-		int height = 4 + random.nextInt(4);
+		int height = 4 + random.nextInt(3);
 		for (int y = 1; y <= height + 1; y++) if (!open(level, ground.above(y))) return;
 		for (int y = 1; y <= height; y++) set(level, ground.above(y), log.defaultBlockState());
-		int branches = 1 + random.nextInt(3);
-		for (int i = 0; i < branches; i++) {
-			Direction d = Direction.Plane.HORIZONTAL.getRandomDirection(random);
-			int from = 2 + random.nextInt(Math.max(1, height - 2));
-			int length = 1 + random.nextInt(2);
-			BlockPos p = ground.above(from);
-			for (int k = 1; k <= length; k++) {
-				BlockPos b = p.relative(d, k);
-				if (!open(level, b)) break;
-				set(level, b, log.defaultBlockState().setValue(RotatedPillarBlock.AXIS, d.getAxis()));
-			}
-			// The end of a long branch turns up, like a hand.
-			if (length == 2 && open(level, p.relative(d, 2).above())) set(level, p.relative(d, 2).above(), log.defaultBlockState());
-		}
-		if (random.nextFloat() < 0.3f && open(level, ground.above(height).relative(Direction.Plane.HORIZONTAL.getRandomDirection(random)))) {
-			set(level, ground.above(height).relative(Direction.Plane.HORIZONTAL.getRandomDirection(random)), Blocks.COBWEB.defaultBlockState());
+		// One or two short stubs, high up, on different sides.
+		Direction first = Direction.Plane.HORIZONTAL.getRandomDirection(random);
+		int stubs = 1 + random.nextInt(2);
+		for (int i = 0; i < stubs; i++) {
+			Direction d = i == 0 ? first : first.getOpposite();
+			BlockPos b = ground.above(height - 1 - random.nextInt(2)).relative(d);
+			if (open(level, b)) set(level, b, log.defaultBlockState().setValue(RotatedPillarBlock.AXIS, d.getAxis()));
 		}
 	}
 

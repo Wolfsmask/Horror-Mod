@@ -62,17 +62,18 @@ public final class WatcherEvent extends HorrorEvent {
 			max = band[1];
 		}
 
+		final double minDist = min;
 		// Half the time only just visible, its head past the edge of something; half the time
 		// simply standing there, all of it, in the open, which is worse.
 		boolean peek = ctx.random.nextBoolean();
 		BlockPos spot = Spots.aroundPlayer(p, ctx.random, min, max, minAngle, maxAngle, !underground, peek ? 120 : 60,
-				pos -> peek ? peekSpot(ctx, pos, min) : goodSpot(ctx, pos, min));
+				pos -> peek ? peekSpot(ctx, pos, minDist) : goodSpot(ctx, pos, minDist));
 		if (spot == null) {
 			spot = Spots.aroundPlayer(p, ctx.random, min, max, minAngle, maxAngle, !underground, peek ? 40 : 120,
-					pos -> peek ? goodSpot(ctx, pos, min) : peekSpot(ctx, pos, min));
+					pos -> peek ? goodSpot(ctx, pos, minDist) : peekSpot(ctx, pos, minDist));
 		}
 		if (spot == null && !underground) {
-			spot = Spots.aroundPlayer(p, ctx.random, min, max, 0, 20, true, 25, pos -> goodSpot(ctx, pos, min));
+			spot = Spots.aroundPlayer(p, ctx.random, min, max, 0, 20, true, 25, pos -> goodSpot(ctx, pos, minDist));
 		}
 		if (spot == null) return null;
 
