@@ -417,18 +417,27 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 	 */
 	private static void sodiumDrawsTheFog(ClientGameTestContext context) {
 		check(FabricLoader.getInstance().isModLoaded("sodium"), "Sodium should be installed for this run");
+		// The way in, clicked as a player clicks it: with Sodium too, the first screens answer.
 		context.waitTicks(60);
-		context.runOnClient(GateScreen::passForTest);
-		context.waitTicks(20);
-		try (TestSingleplayerContext game = context.worldBuilder().create()) {
-			TestCompat.waitForWorld(game);
-			context.waitFor(mc -> ClientFog.active() && ClientFog.end() < 100.0f, 20 * 60);
-			context.waitTicks(10);
-			float[] fog = context.computeOnClient(mc -> new float[]{ClientFog.end(), sodiumFogEnd(mc)});
-			Occupant.LOGGER.info("[sodium] the fog is thick at {}; Sodium draws the land with it thick at {}", fog[0], fog[1]);
-			check(fog[1] > 0.0f && fog[1] <= fog[0] + 1.0f,
-					"Sodium should draw the land with this fog (thick at " + fog[0] + "), not at " + fog[1]);
-		}
+		check(context.computeOnClient(mc -> com.wolfsmask.occupant.client.ModeScreen.showing()),
+				"the first screen should ask how you are playing");
+		clickMode(context, false);
+		context.waitTicks(40);
+		check(context.computeOnClient(mc -> GateScreen.showing()), "after choosing PLAYING, the gate should be on screen");
+		clickGate(context, true);
+		context.waitFor(mc -> mc.level != null, 20 * 60 * 5);
+		Occupant.LOGGER.info("[sodium] through the first screens and into a world");
+		// The fog, in the copy of it Sodium draws the land with.
+		context.waitFor(mc -> ClientFog.active() && ClientFog.end() < 100.0f, 20 * 60);
+		context.waitTicks(10);
+		float[] fog = context.computeOnClient(mc -> new float[]{ClientFog.end(), sodiumFogEnd(mc)});
+		Occupant.LOGGER.info("[sodium] the fog is thick at {}; Sodium draws the land with it thick at {}", fog[0], fog[1]);
+		check(fog[1] > 0.0f && fog[1] <= fog[0] + 1.0f,
+				"Sodium should draw the land with this fog (thick at " + fog[0] + "), not at " + fog[1]);
+		context.runOnClient(mc -> mc.pauseGame(false));
+		context.waitTicks(10);
+		context.clickScreenButton("menu.returnToMenu");
+		context.waitFor(mc -> mc.level == null, 20 * 60 * 2);
 	}
 
 	/** The nearest of the fog ends in Sodium's own copy of the fog, found by name. */
