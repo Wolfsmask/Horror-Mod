@@ -79,6 +79,7 @@ final class Unnoticed {
 				continue;
 			}
 			if (age % CHECK != 0 || !Sight.canSeeAnyPart(player, e)) continue;
+			if (e.distanceTo(player) > Fog.seenUpTo(player, haunt)) continue;     // lost in the fog: nothing to notice
 			seen += CHECK;
 			if (seen >= PATIENCE) {
 				warn(player, haunt, e);
