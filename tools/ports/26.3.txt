@@ -1,7 +1,7 @@
-# 26.3 on e7c70faf4d70911d258f879675515307b37eb865: build failure, tests skipped, jar skipped
-com/wolfsmask/occupant/test/OccupantGameTests.java:494: error: cannot find symbol
-  symbol:   variable ZOMBIE
-  location: class EntityType
+# 26.3 on e23a75c9aae6a94cc6ef9579c2d9077d41ae3f58: build failure, tests skipped, jar skipped
+com/wolfsmask/occupant/test/OccupantGameTests.java:500: error: cannot find symbol
+  symbol:   method getTags()
+  location: variable m of type Mob
 > Configure project :
 > Task :compileJava
 > Task :compileJava FAILED
