@@ -65,6 +65,11 @@ public final class FlickerEvent extends HorrorEvent {
 		@Override
 		protected boolean update(ServerPlayer p, boolean looking) {
 			if (age == 1) Cues.effect(p, ScreenEffectPayload.FLICKER, 30, 1f);
+			// It comes while the screen is black, so it is simply there when the light comes back.
+			if (age == 2 && entity.isConcealed()) {
+				entity.faceTowards(p.getEyePosition());
+				entity.setConcealed(false);
+			}
 			return age < FINAL_DARK_TICK;
 		}
 	}
