@@ -1,53 +1,13 @@
-# 26.3 on c2038c8db1834740c3fb88ee23862bfdbd89fa95: build success, tests success, jar success
+# 26.3 on 34d132612977991dc89dbfd040a2022bfdba6701: build failure, tests skipped, jar skipped
+com/wolfsmask/occupant/director/events/WatcherEvent.java:69: error: local variables referenced from a lambda expression must be final or effectively final
+com/wolfsmask/occupant/director/events/WatcherEvent.java:69: error: local variables referenced from a lambda expression must be final or effectively final
+com/wolfsmask/occupant/director/events/WatcherEvent.java:72: error: local variables referenced from a lambda expression must be final or effectively final
+com/wolfsmask/occupant/director/events/WatcherEvent.java:72: error: local variables referenced from a lambda expression must be final or effectively final
+com/wolfsmask/occupant/director/events/WatcherEvent.java:75: error: local variables referenced from a lambda expression must be final or effectively final
 > Configure project :
 > Task :compileJava
-> Task :processResources
-> Task :classes
-> Task :compileClientJava
-> Task :processClientResources NO-SOURCE
-> Task :processIncludeJars
-> Task :clientClasses
-> Task :compileTestJava NO-SOURCE
-> Task :jar
-> Task :assemble
-> Task :processTestResources NO-SOURCE
-> Task :testClasses UP-TO-DATE
-> Task :test NO-SOURCE
-> Task :validateAccessWidener NO-SOURCE
-> Task :check UP-TO-DATE
-> Task :build
-=== jar
-jar: build/libs/occupant-1.0.0+mc26.3.jar
-{
-  "required": true,
-  "minVersion": "0.8",
-  "package": "com.wolfsmask.occupant.mixin.client",
-  "compatibilityLevel": "JAVA_25",
-  "client": [
-    "FogRendererMixin",
-    "ScreenAccess"
-  ],
-  "injectors": {
-    "defaultRequire": 1
-  }
-}
-unobfuscated version: the game's own names are the real ones
-[02:13:55] [Server thread/INFO] (occupant) [gametest] places without loot: [], page found: true
-[02:13:57] [Server thread/INFO] (occupant) [gametest] houses: found before false, first true, too close false, second true, after finding false
-[02:13:57] [Server thread/INFO] (occupant) [gametest] advancements of ours loaded: 19
-[02:13:57] [Server thread/INFO] (occupant) [gametest] fog: first act 84.0, last act 54.0
-[02:13:58] [Server thread/INFO] (occupant) [gametest] fog thick at 60.0, begins at 34.8; it stands 32.64965543462902 away
-[02:14:00] [Server thread/INFO] (occupant) [gametest] last camp at BlockPos{x=11844941, y=3, z=3005987}, chest at BlockPos{x=11844944, y=4, z=3005987}
-[02:14:00] [Server thread/INFO] (occupant) [gametest] lair under BlockPos{x=11844956, y=0, z=3007387}: 22 rungs, going in: STARTED
-[02:14:01] [Server thread/INFO] (occupant) [gametest] blight over 64 chunks: 581 blocks changed, 0 leaves
-[02:14:02] [Server thread/INFO] (occupant) [gametest] house test player at BlockPos{x=-2, y=1, z=-4} facing 0.0 / (0.0, -0.0, 1.0)
-[02:14:02] [Server thread/INFO] (occupant) [gametest] house hallway spot: peeking BlockPos{x=11844900, y=8, z=3007007} / any BlockPos{x=11844900, y=8, z=3007007} (relative to the floor: BlockPos{x=4, y=1, z=0})
-[02:14:02] [Server thread/INFO] (occupant) [gametest] hallway light at the far end: block 0 sky 0, dark true
-[02:14:02] [Server thread/INFO] (occupant) [gametest] that spot: mask 1001001001, block light 0, sky 2, main room middle block light 0 sky 8
-[02:14:03] [Server thread/INFO] (occupant) [gametest] field: darkOutside=true skyDarken=7 light=8 skyLight=15 blockLight=0 isDark=true grassInDirtTag=false
-[02:14:03] [Server thread/INFO] (occupant) [gametest] cave: yaw=-90.0 feet=BlockPos{x=11845341, y=60, z=3006824} underground=true skyVisible=false skyLight=0 topY=69 light=0 look=(1.0, 0.0, 1.2246468525851679E-16) | ahead: standable=55 dark=55 visible=55
-[02:14:03] [Server thread/INFO] (occupant) [gametest] arena failures: []
-[02:14:03] [Server thread/INFO] (occupant) [gametest] slowest event to start: torch_gone (cave) in 7 ms
-[02:14:04] [Server thread/INFO] (occupant) [gametest] unnoticed: age 240, seen -1, nearby 1, alive true, concealed false, noticed false, in sight true, angle 176, ray MISS at 11844927, 56, 3006694 Block{minecraft:air}, ignored 1, same story true
-[02:14:14] [Server thread/INFO] (occupant) [gametest] events that found a place to happen: [familiar, cave_noise, thunder, echo, breath, fake_join, roof, saving, teammate, advancement, whisper, doppel_chat, stalker, flicker, static, wake]
-[02:14:15] [Server thread/INFO] (Minecraft) ========= 20 GAME TESTS COMPLETE IN 23.38 s ======================
+> Task :compileJava FAILED
+* What went wrong:
+> Compilation failed; see the compiler output below.
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
