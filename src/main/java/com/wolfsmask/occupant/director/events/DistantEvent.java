@@ -114,6 +114,8 @@ public final class DistantEvent extends HorrorEvent {
 	private static final class Distant extends ApparitionSequence {
 		private final int maxLife;
 		private int unseenFor;
+		/** How far off it stood when it began. */
+		private double startDistance = -1;
 
 		Distant(Haunt haunt, OccupantEntity entity, int maxLife) {
 			super(haunt, entity);
@@ -134,8 +136,11 @@ public final class DistantEvent extends HorrorEvent {
 			} else if (seen && ++unseenFor > 60) {
 				return false;                       // gone the moment you turn away for long enough
 			}
-			// Coming to find out what it is never works.
-			if (entity.distanceTo(player) < 34.0) return false;
+			// Coming to find out what it is never works: a few steps towards it and it is gone. (In
+			// the thickest fog it stands nearer than that from the start.)
+			double dist = entity.distanceTo(player);
+			if (startDistance < 0) startDistance = dist;
+			if (dist < Math.min(34.0, startDistance * 0.7)) return false;
 			return age < maxLife;
 		}
 	}
