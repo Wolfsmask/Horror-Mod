@@ -1,55 +1,13 @@
-# 26.3 on 7b6e236c8f93e3ef51ec1a8c8a05bc8966220055: build success, tests success, jar success
+# 26.3 on f5454f2ba0255bc6254cead73ad9b0a382e902a5: build failure, tests skipped, jar skipped
+com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:442: error: cannot find symbol
+  symbol:   variable screen
+  location: variable mc of type Minecraft
 > Configure project :
 > Task :compileJava
 > Task :processResources
 > Task :classes
-> Task :compileClientJava
-> Task :processClientResources NO-SOURCE
-> Task :processIncludeJars
-> Task :clientClasses
-> Task :compileTestJava NO-SOURCE
-> Task :processTestResources NO-SOURCE
-> Task :testClasses UP-TO-DATE
-> Task :test NO-SOURCE
-> Task :jar
-> Task :validateAccessWidener NO-SOURCE
-> Task :assemble
-> Task :check UP-TO-DATE
-> Task :build
-=== jar
-jar: build/libs/occupant-1.0.0+mc26.3.jar
-{
-  "required": true,
-  "minVersion": "0.8",
-  "package": "com.wolfsmask.occupant.mixin.client",
-  "compatibilityLevel": "JAVA_25",
-  "client": [
-    "FogRendererMixin",
-    "ScreenAccess",
-    "SkyRendererMixin"
-  ],
-  "injectors": {
-    "defaultRequire": 1
-  }
-}
-unobfuscated version: the game's own names are the real ones
-[03:02:14] [Server thread/INFO] (occupant) [gametest] last camp at BlockPos{x=-11589449, y=3, z=-13740527}, chest at BlockPos{x=-11589446, y=4, z=-13740529}
-[03:02:14] [Server thread/INFO] (occupant) [gametest] lair under BlockPos{x=-11589434, y=0, z=-13739127}: 22 rungs, going in: STARTED
-[03:02:15] [Server thread/INFO] (occupant) [gametest] blight over 64 chunks: 433 blocks changed, 0 leaves
-[03:02:16] [Server thread/INFO] (occupant) [gametest] houses: found before false, first true, too close false, second true, after finding false
-[03:02:16] [Server thread/INFO] (occupant) [gametest] advancements of ours loaded: 19
-[03:02:16] [Server thread/INFO] (occupant) [gametest] fog: first act 80.0, last act 50.0
-[03:02:16] [Server thread/INFO] (occupant) [gametest] fog thick at 60.0, begins at 34.8; it stands 29.732137494637012 away
-[03:02:17] [Server thread/INFO] (occupant) [gametest] places without loot: [], page found: true
-[03:02:18] [Server thread/INFO] (occupant) [gametest] ways of building a place that lost their things: []
-[03:02:19] [Server thread/INFO] (occupant) [gametest] house test player at BlockPos{x=-2, y=1, z=-4} facing 0.0 / (0.0, -0.0, 1.0)
-[03:02:19] [Server thread/INFO] (occupant) [gametest] house hallway spot: peeking BlockPos{x=-11589379, y=8, z=-13739524} / any BlockPos{x=-11589379, y=8, z=-13739524} (relative to the floor: BlockPos{x=4, y=1, z=0})
-[03:02:19] [Server thread/INFO] (occupant) [gametest] hallway light at the far end: block 0 sky 0, dark true
-[03:02:19] [Server thread/INFO] (occupant) [gametest] that spot: mask 1001001001, block light 0, sky 2, main room middle block light 0 sky 8
-[03:02:20] [Server thread/INFO] (occupant) [gametest] field: darkOutside=true skyDarken=7 light=8 skyLight=15 blockLight=0 isDark=true grassInDirtTag=false
-[03:02:20] [Server thread/INFO] (occupant) [gametest] cave: yaw=-90.0 feet=BlockPos{x=-11588989, y=60, z=-13739690} underground=true skyVisible=false skyLight=0 topY=69 light=0 look=(1.0, 0.0, 1.2246468525851679E-16) | ahead: standable=55 dark=55 visible=55
-[03:02:20] [Server thread/INFO] (occupant) [gametest] arena failures: []
-[03:02:20] [Server thread/INFO] (occupant) [gametest] slowest event to start: watcher (field) in 8 ms
-[03:02:20] [Server thread/INFO] (occupant) [gametest] unnoticed: age 240, seen -1, nearby 1, alive true, concealed false, noticed false, in sight true, angle 176, ray MISS at -11589463, 56, -13739820 Block{minecraft:air}, ignored 1, same story true
-[03:02:28] [Server thread/INFO] (occupant) [gametest] events that found a place to happen: [familiar, cave_noise, thunder, echo, breath, fake_join, roof, saving, teammate, advancement, whisper, doppel_chat, stalker, flicker, static, wake]
-[03:02:28] [Server thread/INFO] (Minecraft) ========= 22 GAME TESTS COMPLETE IN 15.96 s ======================
+> Task :compileClientJava FAILED
+* What went wrong:
+> Compilation failed; see the compiler output below.
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
