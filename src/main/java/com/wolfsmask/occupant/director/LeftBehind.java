@@ -18,7 +18,7 @@ final class LeftBehind {
 					"It doesn't know why you went in without it."},
 			{"Why did you leave it?", "It doesn't like it when you hide.", "Come back out. It is lonely out there.",
 					"It is waiting where you went in.", "Why won't you come out, {player}?"},
-			{"WHY DID YOU LEAVE IT", "Come out, {player}.", "It knows where you went in.",
+			{"why did you leave it", "Come out, {player}.", "It knows where you went in.",
 					"You can't stay in there forever.", "It is tired of waiting, {player}."}};
 	/** Not asked again for this long, in ticks of play. */
 	private static final long AGAIN_AFTER = 20L * 60 * 12;

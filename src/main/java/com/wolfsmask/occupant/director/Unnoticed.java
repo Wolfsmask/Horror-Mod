@@ -43,8 +43,8 @@ final class Unnoticed {
 			{"It has been watching you for a while now.", "Why won't you look at it?", "It is closer than it was a moment ago.",
 					"Turn around.", "It knows you saw it. It knows you're pretending you didn't.",
 					"Every time you look away, it gets a little closer.", "It's {where}. It has been the whole time."},
-			{"LOOK AT IT.", "It is done waiting for you to notice.", "You can't ignore it forever, {player}.",
-					"It's right there. It's RIGHT THERE.", "Stop pretending. It can hear you breathing.", "IT SEES YOU, {player}.",
+			{"Look at it.", "It is done waiting for you to notice.", "You can't ignore it forever, {player}.",
+					"It's right there. It's right there.", "Stop pretending. It can hear you breathing.", "It sees you, {player}.",
 					"{where}. {where}. {where}."}};
 	private static final String[] THOUGHTS = {"You get the feeling", "A thought that is not yours:", "Somewhere in your head",
 			"Very quietly, close by:"};

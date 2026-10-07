@@ -90,7 +90,7 @@ public final class BehindYouEvent extends HorrorEvent {
 				Cues.sound(p, ModSounds.BREATH, SoundSource.HOSTILE, entity.getEyePosition(), 0.55f, 0.8f);
 				Cues.effect(p, ScreenEffectPayload.STATIC, 22, 0.35f);
 				Cues.effect(p, ScreenEffectPayload.BLACKOUT, 34, 1f);
-				Cues.whisper(p, "IT WAS ALWAYS BEHIND YOU", 60);
+				Cues.whisper(p, "it was behind you the whole time", 60);
 				haunt.data.encounters++;
 				scaredAt = age;
 				return true;

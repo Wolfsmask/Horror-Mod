@@ -21,8 +21,8 @@ import java.util.List;
 public final class OccupantConfig {
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 	private static final String FILE_NAME = "occupant.json";
-	/** 2: a three-minute grace instead of fifteen. */
-	private static final int CURRENT_VERSION = 2;
+	/** 2: a three-minute grace instead of fifteen. 3: the lines on the screen spoken quietly. */
+	private static final int CURRENT_VERSION = 3;
 
 	private static OccupantConfig instance = new OccupantConfig();
 
@@ -122,19 +122,19 @@ public final class OccupantConfig {
 	 */
 	public boolean screenWhispers = true;
 	public List<String> whisperLines = new ArrayList<>(List.of(
-			"IT KNOWS YOU",
-			"IT IS NOT IN YOUR HEAD",
-			"IT REMEMBERS EVERYTHING",
-			"IT FEELS LIKE HOME",
-			"YOU CANNOT LEAVE IT BEHIND",
-			"IT IS ALWAYS WATCHING",
-			"WE HAVE ALWAYS KNOWN",
-			"IT IS YOU AND IT IS NOT YOU",
-			"YOU LET IT IN",
-			"THERE IS ROOM FOR {player}",
-			"{player} IS ALREADY HERE",
-			"STOP LOOKING AT IT",
-			"IT WAS NEVER THE DARK"
+			"it knows you",
+			"it is not in your head",
+			"it remembers where you have been",
+			"it likes it here",
+			"you can't leave it behind",
+			"it was here before you",
+			"it is learning your face",
+			"it is you and it is not you",
+			"you let it in",
+			"there is room for {player}",
+			"{player} is already here",
+			"it stood where you are standing",
+			"it was never the dark"
 	));
 
 	/**
@@ -210,6 +210,14 @@ public final class OccupantConfig {
 			// The old default kept the first quarter of an hour empty. Only an untouched value moves.
 			if (graceMinutes == 15.0) graceMinutes = 3.0;
 			configVersion = 2;
+		}
+		if (configVersion < 3) {
+			// The old default lines on the screen were shouted. Only an untouched list moves.
+			if (whisperLines != null && whisperLines.stream().allMatch(l -> l != null
+					&& l.replace("{player}", "").equals(l.replace("{player}", "").toUpperCase(java.util.Locale.ROOT)))) {
+				whisperLines = new OccupantConfig().whisperLines;
+			}
+			configVersion = 3;
 		}
 		graceMinutes = clamp(graceMinutes, 0.0, 600.0);
 		storyPace = clamp(storyPace, 0.1, 20.0);
