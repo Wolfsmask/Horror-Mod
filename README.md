@@ -105,6 +105,16 @@ once it has let you go.)
 - A sign with **your coordinates** on it. A long straight tunnel, and at the end of it, it.
 - *Saving world...* in the corner. You did not save.
 - Near a jukebox, the **radio** picks something up: static, and a voice that knows your name.
+- What you typed an hour ago comes back in chat, in your name. One more footstep after you stop.
+  Something in your pack goes by another name for a moment.
+- Home is not quite as you left it: a skull by the bed after a night away, things in a chest moved
+  about, a door already open when you come back. A sign by the bed keeps a tally of your days.
+  Once, a line of trees going away from home, each with its bark torn off at the height of a face.
+- Your pets will not come out with you after dark. Fire will not catch while it is near. Ring a
+  bell or play a note, and sometimes something out in the fog answers. Some days there is no sun.
+- Afterwards, the animals that watched it stand in a ring where it stood. Where you died, a flower.
+- Deep underground there is another log: a miner's, who read the survivor's pages and thought they
+  had it wrong. And its lair moves closer to your home as the story goes on.
 - On a server, **a friend says something in chat** that they never typed. Only you see it.
 - The pause screen says things it should not. When you die, it lets you know it was there.
 - Late in the story, the pause menu is not safe either: it has opinions about you leaving.
