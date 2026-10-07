@@ -498,8 +498,8 @@ public final class OccupantGameTests {
 		data.setAct(HauntData.MAX_ACT);
 		float last = Fog.endFor(player, director.haunt(player));
 		Occupant.LOGGER.info("[gametest] fog: first act {}, last act {}", first, last);
-		helper.assertTrue(first >= 84 && first <= 96, "About ninety blocks of fog at first, not " + first);
-		helper.assertTrue(last >= 50 && last <= first - 24, "About sixty by the end, not " + last);
+		helper.assertTrue(first >= 66 && first <= 80, "About eighty blocks of fog at first, not " + first);
+		helper.assertTrue(last >= 36 && last <= first - 24, "About fifty by the end, not " + last);
 		helper.assertTrue(FogLine.start(last) < FogLine.edgeNear(last) && FogLine.edgeFar(last) < last && FogLine.edgeNear(last) >= 20,
 				"The fog begins near, and the band it stands in is inside it, short of where it is thick");
 		helper.succeed();
@@ -528,7 +528,7 @@ public final class OccupantGameTests {
 			director.data(player).setAct(1);
 			float end = Fog.endFor(player, director.haunt(player));
 			double start = FogLine.edgeFar(end);
-			helper.assertTrue(end >= 60 && end <= 72, "Seventy blocks of fog in the first act, not " + end);
+			helper.assertTrue(end >= 48 && end <= 60, "Sixty blocks of fog in the first act, not " + end);
 			int r = (int) start + 10;
 			net.minecraft.world.level.block.state.BlockState stone = net.minecraft.world.level.block.Blocks.STONE.defaultBlockState();
 			for (int dx = -r; dx <= r; dx++) {

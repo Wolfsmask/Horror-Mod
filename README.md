@@ -62,8 +62,8 @@ discharges exactly the tension the rest of the mod spent an hour building. When 
 to you, the sound drops away instead.
 
 There is a **fog**, a real one: it begins a few blocks from you and thickens all the way out,
-until at about ninety blocks you cannot see anything at all. It comes in ten blocks with each act,
-to about sixty by the end, closer at night, and right round you while it is close, as if it
+until at about eighty blocks you cannot see anything at all. It comes in ten blocks with each act,
+to about fifty by the end, closer at night, and right round you while it is close, as if it
 brings the fog with it. Far off, it stands **where it can only just be made out**: a grey shape
 in the fog, never so deep in it that you could tell yourself it was a tree. And the animals know before you do:
 when it is out there, the cows stop grazing and turn to look at it. Follow their eyes.
@@ -252,8 +252,8 @@ need rebuilding for the next.
 | `chases` | `true` | Act 4 hunts |
 | `chaseDamage` | `0.0` | Damage if a chase catches you. `0` = it only scares you |
 | `fog` | `true` | The fog over the world |
-| `fogChunks` | `8` | How thick the fog is: about twelve blocks of seeing for each (8 = thick at about 96 blocks) |
-| `fogClosesIn` | `true` | The fog comes in as the story goes on (to about 66 blocks), at night, and when it is close |
+| `fogChunks` | `8` | How thick the fog is: about ten blocks of seeing for each (8 = thick at about 80 blocks) |
+| `fogClosesIn` | `true` | The fog comes in as the story goes on (to about 50 blocks), at night, and when it is close |
 | `keepToTheRules` | `true` | Once the story starts, no other dimensions (*It does not want you in there*) and no creative or spectator (*It doesn't want you breaking the rules*). Not while the story is paused |
 | `fakeMessages` | `true` | Fake chat, join and advancement messages |
 | `interruptSleep` | `true` | Occasionally "there are monsters nearby" |

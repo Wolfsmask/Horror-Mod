@@ -9,8 +9,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * The story's fog, wherever it is nearer than the game's own. The sky and clouds are left be.
- * Only the result is used, not the arguments: they differ between 26.x releases (26.4 added one).
+ * The story's fog, wherever it is nearer than the game's own: over the land, and the sky and
+ * clouds drawn into it too, so there is no clear horizon above a fogged world; and the colour
+ * drained towards grey. Only the result is used, not the arguments: they differ between 26.x
+ * releases (26.4 added one).
  */
 @Mixin(FogRenderer.class)
 public abstract class FogRendererMixin {
@@ -22,5 +24,12 @@ public abstract class FogRendererMixin {
 		fog.renderDistanceEnd = Math.min(fog.renderDistanceEnd, end);
 		fog.environmentalStart = Math.min(fog.environmentalStart, start);
 		fog.environmentalEnd = Math.min(fog.environmentalEnd, end);
+		fog.skyEnd = Math.min(fog.skyEnd, ClientFog.skyEnd());
+		fog.cloudEnd = Math.min(fog.cloudEnd, end);
+		if (fog.color != null) {
+			float[] rgb = {fog.color.x(), fog.color.y(), fog.color.z()};
+			ClientFog.grey(rgb);
+			fog.color.set(rgb[0], rgb[1], rgb[2], fog.color.w());
+		}
 	}
 }

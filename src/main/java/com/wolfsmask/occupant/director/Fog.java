@@ -31,10 +31,10 @@ public final class Fog {
 	public static float endFor(ServerPlayer player, Haunt haunt) {
 		OccupantConfig cfg = OccupantConfig.get();
 		if (!cfg.fog || cfg.fogChunks <= 0) return 0.0f;
-		// A real fog: about twelve blocks of seeing for each "chunk" of the setting, 96 by default.
-		float end = cfg.fogChunks * 12.0f;
+		// A real fog: about ten blocks of seeing for each "chunk" of the setting, 80 by default.
+		float end = cfg.fogChunks * 10.0f;
 		int act = haunt.data.act;
-		// Ten blocks nearer with each act after the first: 96, 86, 76, 66 with the defaults.
+		// Ten blocks nearer with each act after the first: 80, 70, 60, 50 with the defaults.
 		if (cfg.fogClosesIn) end -= 10.0f * Mth.clamp(act - 1, 0, 3);
 		if (cfg.fogClosesIn && Compat.level(player).isDarkOutside()) end -= 12.0f;
 		if (cfg.fogClosesIn && closeBy(player, haunt)) end = Math.min(end, ROLLED_IN);
@@ -42,6 +42,19 @@ public final class Fog {
 		if (view > 2) end = Math.min(end, view * 16.0f);
 		end = haunt.fogAfterEvents(end, Compat.level(player).getServer().getTickCount());
 		return end <= 0 ? 0.0f : Math.max(FogLine.NEAREST, end);
+	}
+
+	/**
+	 * A band of distances fitted inside what can be seen through the fog now: {@code min} to
+	 * {@code max} as asked, brought in if the fog would hide the far end, keeping at least
+	 * {@code span} between the two and never nearer than {@code nearest}.
+	 */
+	public static double[] fit(ServerPlayer player, Haunt haunt, double min, double max, double span, double nearest) {
+		double seen = seenUpTo(player, haunt) - 1.0;
+		if (max <= seen) return new double[]{min, max};
+		max = Math.max(nearest + span, seen);
+		min = Math.max(nearest, Math.min(min, max - span));
+		return new double[]{min, max};
 	}
 
 	/** How far off it can still be made out through the fog, or a long way if there is none. */

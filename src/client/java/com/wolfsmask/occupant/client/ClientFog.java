@@ -52,4 +52,36 @@ public final class ClientFog {
 	public static float start() {
 		return FogLine.start(current);
 	}
+
+	/**
+	 * How heavy it is, 0 (none, or far off) to 1 (close round you): how far the sky is drawn into
+	 * it, how grey it is, and how little of a sunset gets through.
+	 */
+	public static float strength() {
+		if (!active()) return 0.0f;
+		return Math.max(0.0f, Math.min(1.0f, (240.0f - current) / (240.0f - FogLine.NEAREST)));
+	}
+
+	/** Where the sky is lost in it: a little further than the land, so overhead stays sky. */
+	public static float skyEnd() {
+		return current * 1.6f;
+	}
+
+	/**
+	 * A fog colour made into fog: the game's own colour for the sky at this moment, drained
+	 * towards a cold grey as the fog gets heavier. Daylight fog is no longer blue haze, and at
+	 * sunset it is not a band of orange over grey land. In place, on {@code rgb} (0 to 1).
+	 */
+	public static void grey(float[] rgb) {
+		float s = strength() * 0.7f;
+		if (s <= 0) return;
+		float lum = 0.299f * rgb[0] + 0.587f * rgb[1] + 0.114f * rgb[2];
+		float[] cold = {lum * 0.94f, lum * 0.97f, lum * 1.02f};
+		for (int i = 0; i < 3; i++) rgb[i] = Math.min(1.0f, rgb[i] + (cold[i] - rgb[i]) * s);
+	}
+
+	/** How much of the sunrise and sunset glow comes through, 0 to 1. */
+	public static float sunsetLeft() {
+		return 1.0f - 0.85f * strength();
+	}
 }

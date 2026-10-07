@@ -56,8 +56,9 @@ public final class HuntEvent extends HorrorEvent {
 	public Sequence begin(EventContext ctx) {
 		ServerPlayer p = ctx.player;
 		boolean underground = ctx.situation.underground();
-		double min = underground ? 14 : 22;
-		double max = underground ? 22 : 32;
+		double[] band = com.wolfsmask.occupant.director.Fog.fit(p, ctx.haunt, underground ? 14 : 22, underground ? 22 : 32, 8, 12);
+		double min = band[0];
+		double max = band[1];
 		BlockPos spot = Spots.aroundPlayer(p, ctx.random, min, max, 0, 35, !underground, 40, pos -> {
 			Vec3 base = Vec3.atBottomCenterOf(pos);
 			return Math.abs(pos.getY() - p.getBlockY()) <= 6

@@ -56,6 +56,10 @@ public final class WatcherEvent extends HorrorEvent {
 			max = min + 18;
 			minAngle = 20;
 			maxAngle = 55;
+			// Never further than it can be made out through the fog.
+			double[] band = com.wolfsmask.occupant.director.Fog.fit(p, ctx.haunt, min, max, 10, 12);
+			min = band[0];
+			max = band[1];
 		}
 
 		// Half the time only just visible, its head past the edge of something; half the time

@@ -43,7 +43,8 @@ public final class StalkerEvent extends HorrorEvent {
 	public Sequence begin(EventContext ctx) {
 		ServerPlayer p = ctx.player;
 		boolean underground = ctx.situation.underground();
-		BlockPos spot = Spots.aroundPlayer(p, ctx.random, 16, 26, 120, 180, !underground, 40, pos -> {
+		double[] band = com.wolfsmask.occupant.director.Fog.fit(p, ctx.haunt, 16, 26, 6, 10);
+		BlockPos spot = Spots.aroundPlayer(p, ctx.random, band[0], band[1], 120, 180, !underground, 40, pos -> {
 			Vec3 base = Vec3.atBottomCenterOf(pos);
 			return Math.abs(pos.getY() - p.getBlockY()) <= 5
 					&& Spots.isDark(ctx.world, pos.above())

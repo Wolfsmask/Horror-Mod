@@ -71,7 +71,9 @@ public final class DistantEvent extends HorrorEvent {
 			min = Math.max(16.0, FogLine.edgeNear(fogEnd));
 			max = Math.min(reach, FogLine.edgeFar(fogEnd));
 		}
-		if (max < min + 8.0) return null;
+		// In the thickest fog the band is narrow: closer, but still at the edge of seeing.
+		if (max < min + 8.0) min = Math.max(12.0, max - 8.0);
+		if (max < min + 4.0) return null;
 
 		// Somewhere ahead of the player, but off to one side: found, not presented.
 		// Best: only its head and shoulders over a crest or past the trees.
