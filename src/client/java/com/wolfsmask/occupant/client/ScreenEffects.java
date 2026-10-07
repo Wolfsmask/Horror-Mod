@@ -162,6 +162,14 @@ public final class ScreenEffects {
 		}
 	}
 
+	/** A line of our own on the screen, from the client itself: {@code corner} as for a whisper. */
+	static void line(String text, int ticks, int corner) {
+		whisperText = text;
+		whisperLength = Math.max(20, ticks);
+		whisperAge = 0;
+		whisperCorner = Math.floorMod(corner, WhisperPayload.CORNERS);
+	}
+
 	/** Show a line of text. It is never written to the chat log: there is nothing to check. */
 	public static void whisper(WhisperPayload payload) {
 		whisperText = payload.text();

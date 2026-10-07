@@ -490,6 +490,8 @@ public final class OccupantGameTests {
 		data.setAct(2);
 		player.setHealth(1.0f);
 		boolean fall = com.wolfsmask.occupant.director.Mercy.allowDeath(player, player.damageSources().fall());
+		Occupant.LOGGER.info("[gametest] mercy: fall allowed {}, health {}, creative {}, introduced {}", fall, player.getHealth(),
+				player.isCreative(), director.haunt(player).data.introduced);
 		helper.assertTrue(!fall && player.getHealth() > 1.0f, "A fatal fall should be caught (" + fall + ", " + player.getHealth() + ")");
 
 		// By the game's own command: the zombie's entity type is not reachable by name on every version.
@@ -497,10 +499,11 @@ public final class OccupantGameTests {
 				String.format(java.util.Locale.ROOT, "summon minecraft:zombie %.1f %.1f %.1f {Tags:[\"occupant_mercy\"],PersistenceRequired:1b}",
 						player.getX() + 2, player.getY(), player.getZ()));
 		net.minecraft.world.entity.Mob zombie = level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class,
-				player.getBoundingBox().inflate(6.0), m -> m.getTags().contains("occupant_mercy")).stream().findFirst().orElse(null);
+				player.getBoundingBox().inflate(6.0), m -> com.wolfsmask.occupant.util.Kinds.is(m, "zombie")).stream().findFirst().orElse(null);
 		helper.assertTrue(zombie != null, "Could not summon a zombie");
 		player.setHealth(1.0f);
 		boolean first = com.wolfsmask.occupant.director.Mercy.allowDeath(player, player.damageSources().mobAttack(zombie));
+		Occupant.LOGGER.info("[gametest] mercy: zombie allowed {}, held {}", first, zombie.isNoAi());
 		helper.assertTrue(!first && zombie.isNoAi(), "A zombie's killing blow should be stopped and the zombie taken");
 		director.stopCurrent(player);
 		helper.assertTrue(!zombie.isNoAi(), "Whatever it did not finish with should be let go again");
