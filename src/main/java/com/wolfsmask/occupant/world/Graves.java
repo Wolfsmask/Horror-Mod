@@ -87,6 +87,7 @@ final class Graves extends Build {
 			}
 		}
 
+		unsettle(x0 + 1, z0 + 1, x1 - 1, z1 - 1, Integer.MIN_VALUE, 2);
 		// A sign at the gate, facing whoever comes.
 		int sy = floor(0, z0 - 1);
 		put(0, sy, z0 - 1, Blocks.OAK_SIGN.defaultBlockState().setValue(BlockStateProperties.ROTATION_16, 8));

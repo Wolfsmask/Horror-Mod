@@ -78,6 +78,7 @@ final class Camp extends Build {
 		}
 		container(3, t, back - 1, Blocks.BARREL.defaultBlockState().setValue(BarrelBlock.FACING, Direction.UP), Loot.Kind.CAMP);
 
+		unsettle(-4, -4, 0, 4, Integer.MIN_VALUE, 2);
 		// Supplies by the fire, and a sign at the edge of the camp, facing whoever comes.
 		container(-3, floor(-3, 2), 2, facing(Blocks.CHEST.defaultBlockState(), Direction.EAST), Loot.Kind.CAMP);
 		if (chance(0.7f)) {

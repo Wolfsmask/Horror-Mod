@@ -110,6 +110,7 @@ final class RadioShack extends Build {
 				foundation(side, 1, z, Blocks.COBBLESTONE.defaultBlockState());
 			}
 		}
+		unsettle(-1, front + 1, 1, back - 1, 1, 1);
 		steps(0, porch ? front - 1 : front, Direction.NORTH, Blocks.SPRUCE_STAIRS, Blocks.COBBLESTONE.defaultBlockState());
 	}
 }

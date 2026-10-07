@@ -418,6 +418,8 @@ public final class House {
 			put(9, 3, 4, web);
 			put(10, 3, 7, web);
 			put(10, 1, 9, web);
+			// And about the main room (never the hallway: that is where it stands), the little wrong things.
+			unsettle(1, 2, 7, 8, 1, 3);
 
 			// However the ground falls away, there is a way up to the door.
 			steps(4, 0, Direction.NORTH, Blocks.COBBLESTONE_STAIRS, cobble);

@@ -119,6 +119,7 @@ final class Ruin extends Build {
 		for (int[] c : new int[][]{{r - 1, 1, -2}, {r - 1, 3, 2}, {-r + 1, 1, r - 3}}) {
 			if (random.nextFloat() < 0.6f) put(c[0], c[1], c[2], Blocks.COBWEB.defaultBlockState());
 		}
+		unsettle(-r + 2, -r + 2, r - 2, r - 2, 1, 3);
 		steps(0, -r, Direction.NORTH, Blocks.STONE_BRICK_STAIRS, Blocks.COBBLESTONE.defaultBlockState());
 	}
 

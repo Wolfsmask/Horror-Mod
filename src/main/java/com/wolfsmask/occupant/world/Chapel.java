@@ -136,6 +136,7 @@ final class Chapel extends Build {
 			if (chance(0.6f)) put(c[0], c[1], c[2], Blocks.COBWEB.defaultBlockState());
 		}
 
+		unsettle(-2, FRONT + 1, 2, back - 3, 1, 3);
 		if (tower) {
 			belfry();
 			steps(0, FRONT - 2, Direction.NORTH, Blocks.STONE_BRICK_STAIRS, Blocks.COBBLESTONE.defaultBlockState());

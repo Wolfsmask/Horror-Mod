@@ -129,6 +129,7 @@ final class Cottage extends Build {
 		put(2, 2, -1, Blocks.SPRUCE_PRESSURE_PLATE.defaultBlockState());
 		put(-2, 3, back - 1, Blocks.COBWEB.defaultBlockState());
 		if (chance(0.5f)) put(2, 3, -2, Blocks.COBWEB.defaultBlockState());
+		unsettle(-2, -2, 2, back - 1, 1, 2);
 		steps(0, -3, Direction.NORTH, Blocks.COBBLESTONE_STAIRS, cobble);
 	}
 }

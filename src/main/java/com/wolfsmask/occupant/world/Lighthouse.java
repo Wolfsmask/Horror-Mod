@@ -92,6 +92,7 @@ final class Lighthouse extends Build {
 		put(0, gallery + 1, 0, Blocks.REDSTONE_LAMP.defaultBlockState());
 		container(1, gallery + 1, -1, facing(Blocks.CHEST.defaultBlockState(), Direction.WEST), Loot.Kind.RUIN);
 		if (chance(0.7f)) put(-1, gallery + 3, -1, Blocks.COBWEB.defaultBlockState());
+		unsettle(-1, -1, 1, 0, 1, 1);
 
 		// The cap: a stepped dome, and an iron spike where the vane was.
 		int cap = gallery + 4;

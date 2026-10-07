@@ -143,6 +143,57 @@ abstract class Build {
 		return out;
 	}
 
+	/** Words scrawled on a sign and left on the floor. */
+	private static final String[][] SCRAWLS = {{"", "IT SAW ME", "", ""}, {"", "DONT TURN", "AROUND", ""},
+			{"I CAN HEAR", "IT", "BREATHING", ""}, {"", "IT KNOWS", "YOUR NAME", ""}, {"", "COUNT", "THE LEGS", ""},
+			{"", "IT WAS HERE", "", ""}, {"WHY DID", "YOU LEAVE", "IT OUT", "THERE"}, {"", "NOT ALONE", "NOT ALONE", "NOT ALONE"}};
+
+	/**
+	 * The little things that are wrong, left about the floor between ({@code x0}, {@code z0}) and
+	 * ({@code x1}, {@code z1}): a dried trail across it, a skull on its side, a dead plant in its
+	 * pot, candles burnt down to nothing, a chair turned to face the wall, words on a sign. Only
+	 * ever on empty floor. With {@code y} at {@link Integer#MIN_VALUE}, on the ground wherever it is.
+	 */
+	void unsettle(int x0, int z0, int x1, int z1, int y, int count) {
+		for (int placed = 0, tries = 0; placed < count && tries < count * 10; tries++) {
+			int x = x0 + random.nextInt(x1 - x0 + 1);
+			int z = z0 + random.nextInt(z1 - z0 + 1);
+			int fy = y == Integer.MIN_VALUE ? ground(x, z) + 1 : y;
+			if (!emptyFloor(x, fy, z)) continue;
+			switch (random.nextInt(7)) {
+				case 0 -> {
+					// A trail, dried dark, a few steps long.
+					Direction d = Direction.Plane.HORIZONTAL.getRandomDirection(random);
+					int length = 3 + random.nextInt(3);
+					for (int k = 0; k < length; k++) {
+						int tx = x + d.getStepX() * k, tz = z + d.getStepZ() * k;
+						if (!emptyFloor(tx, fy, tz)) break;
+						put(tx, fy, tz, Blocks.REDSTONE_WIRE.defaultBlockState());
+					}
+				}
+				case 1 -> put(x, fy, z, Blocks.SKELETON_SKULL.defaultBlockState()
+						.setValue(BlockStateProperties.ROTATION_16, random.nextInt(16)));
+				case 2 -> put(x, fy, z, Blocks.POTTED_DEAD_BUSH.defaultBlockState());
+				case 3 -> put(x, fy, z, Blocks.CANDLE.defaultBlockState().setValue(BlockStateProperties.CANDLES, 1 + random.nextInt(4)));
+				case 4 -> put(x, fy, z, stairs(Blocks.SPRUCE_STAIRS, Direction.Plane.HORIZONTAL.getRandomDirection(random)));
+				case 5 -> put(x, fy, z, Blocks.COBWEB.defaultBlockState());
+				default -> {
+					put(x, fy, z, Blocks.OAK_SIGN.defaultBlockState().setValue(BlockStateProperties.ROTATION_16, random.nextInt(16)));
+					Places.sign(level, at(x, fy, z), SCRAWLS[random.nextInt(SCRAWLS.length)]);
+				}
+			}
+			placed++;
+		}
+	}
+
+	/** Air at ({@code x}, {@code y}, {@code z}), on something solid. */
+	private boolean emptyFloor(int x, int y, int z) {
+		BlockPos p = at(x, y, z);
+		if (!level.ensureCanWrite(p) || !level.getBlockState(p).isAir()) return false;
+		BlockPos below = p.below();
+		return level.getBlockState(below).isFaceSturdy(level, below, Direction.UP);
+	}
+
 	private static long key(int x, int z) {
 		return ((long) x << 32) ^ (z & 0xFFFFFFFFL);
 	}
