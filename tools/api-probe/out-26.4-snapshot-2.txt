@@ -1,10 +1,74 @@
-=== net.minecraft.client.gui.screens.worldselection.CreateWorldScreen (-p)
-public class client.gui.screens.worldselection.CreateWorldScreen extends client.gui.screens.Screen {
-  public static void openFresh(client.Minecraft, Runnable);
-  public static void openFresh(client.Minecraft, Runnable, client.gui.screens.worldselection.CreateWorldCallback);
-  private void onCreate();
-  public boolean keyPressed(client.input.KeyEvent);
-  private void lambda$onCreate$0(core.LayeredRegistryAccess, world.level.storage.LevelDataAndDimensions$WorldDataAndGenSettings, world.level.gamerules.GameRules);
-  private static world.level.levelgen.WorldGenSettings lambda$openFresh$2(server.WorldLoader$DataLoadContext);
-  private static client.gui.screens.worldselection.WorldCreationContext lambda$openFresh$1(server.ReloadableServerResources, core.LayeredRegistryAccess, client.gui.screens.worldselection.DataPackReloadCookie);
-  private static boolean lambda$openFresh$0(client.gui.screens.worldselection.CreateWorldScreen, core.LayeredRegistryAccess, world.level.storage.LevelDataAndDimensions$WorldDataAndGenSettings, Optional, java.nio.file.Path);
+=== net.minecraft.client.gui.components.DebugScreenOverlay (-p)
+public class client.gui.components.DebugScreenOverlay {
+  private boolean renderProfilerChart;
+  private boolean renderFpsCharts;
+  private boolean renderNetworkCharts;
+  private boolean renderLightmapTexture;
+  private long lastDebugEntriesVersion;
+  public void extractRenderState(client.gui.GuiGraphicsExtractor);
+  public boolean showDebugScreen();
+  private static boolean lambda$extractRenderState$0(client.gui.components.debug.DebugGroupContents);
+=== net.minecraft.client.player.LocalPlayer (-public)
+public class client.player.LocalPlayer extends client.player.AbstractClientPlayer implements networking.v1.context.PacketContextProvider {
+  public void setReducedDebugInfo(boolean);
+=== net.minecraft.world.entity.player.Player (-public)
+public abstract class world.entity.player.Player extends world.entity.Avatar implements world.entity.ContainerUser {
+  public boolean isReducedDebugInfo();
+  public void setReducedDebugInfo(boolean);
+=== net.minecraft.client.Minecraft (-public)
+public class client.Minecraft extends util.thread.ReentrantBlockableEventLoop<Runnable> implements blaze3d.platform.WindowEventHandler {
+  public final client.gui.components.debug.DebugScreenEntryList debugEntries;
+  public boolean debugClientMetricsStart(Consumer<network.chat.Component>);
+  public client.gui.components.DebugScreenOverlay getDebugOverlay();
+  public void showDebugChat(network.chat.Component);
+=== classes matching debug\.(DebugEntryPosition|DebugScreenEntries|DebugScreenEntryList|DebugEntry.*Pos.*)
+net.minecraft.client.gui.components.debug.DebugEntryPostEffects
+net.minecraft.client.gui.components.debug.DebugScreenEntryList
+net.minecraft.client.gui.components.debug.DebugEntryPosition
+net.minecraft.client.gui.components.debug.DebugEntrySectionPosition
+net.minecraft.client.gui.components.debug.DebugScreenEntries
+=== classes matching gui\.components\.debug\.
+net.minecraft.client.gui.components.debug.DebugEntryNoop
+net.minecraft.client.gui.components.debug.DebugGroupContents
+net.minecraft.client.gui.components.debug.DebugEntryBiome
+net.minecraft.client.gui.components.debug.DebugGroups
+net.minecraft.client.gui.components.debug.DebugEntryChunkSourceStats
+net.minecraft.client.gui.components.debug.DebugEntryChunkGeneration
+net.minecraft.client.gui.components.debug.DebugEntryMemory
+net.minecraft.client.gui.components.debug.DebugScreenDisplayer
+net.minecraft.client.gui.components.debug.DebugEntryDetailedMemory
+net.minecraft.client.gui.components.debug.DebugEntryPostEffects
+net.minecraft.client.gui.components.debug.DebugEntryGpuUtilization
+net.minecraft.client.gui.components.debug.DebugEntryCategory
+net.minecraft.client.gui.components.debug.DebugEntryVersion
+net.minecraft.client.gui.components.debug.DebugEntryChunkRenderStats
+net.minecraft.client.gui.components.debug.DebugGroup
+net.minecraft.client.gui.components.debug.DebugEntryFps
+net.minecraft.client.gui.components.debug.DebugEntryLight
+net.minecraft.client.gui.components.debug.DebugEntrySimplePerformanceImpactors
+net.minecraft.client.gui.components.debug.DebugEntryTps
+net.minecraft.client.gui.components.debug.DebugScreenEntryStatus
+net.minecraft.client.gui.components.debug.DebugEntrySoundCache
+net.minecraft.client.gui.components.debug.DebugEntryLookingAtEntity
+net.minecraft.client.gui.components.debug.DebugEntryLookingAtEntityTags
+net.minecraft.client.gui.components.debug.DebugEntryLocalDifficulty
+net.minecraft.client.gui.components.debug.DebugEntryHeightmap
+net.minecraft.client.gui.components.debug.DebugScreenEntry
+net.minecraft.client.gui.components.debug.DebugEntryLookingAt
+net.minecraft.client.gui.components.debug.DebugFact
+net.minecraft.client.gui.components.debug.DebugScreenEntryList
+net.minecraft.client.gui.components.debug.DebugEntryPlayerSpeed
+net.minecraft.client.gui.components.debug.DebugEntrySoundMood
+net.minecraft.client.gui.components.debug.DebugEntrySpawnCounts
+net.minecraft.client.gui.components.debug.DebugEntrySystemSpecs
+net.minecraft.client.gui.components.debug.DebugEntryParticleRenderStats
+net.minecraft.client.gui.components.debug.DebugEntryPosition
+net.minecraft.client.gui.components.debug.DebugColumn
+net.minecraft.client.gui.components.debug.DebugFacts
+net.minecraft.client.gui.components.debug.DebugCustomRenderer
+net.minecraft.client.gui.components.debug.DebugEntryEntityRenderStats
+net.minecraft.client.gui.components.debug.DebugEntrySectionPosition
+net.minecraft.client.gui.components.debug.DebugScreenEntries
+net.minecraft.client.gui.components.debug.DebugEntryDayCount
+net.minecraft.client.gui.components.debug.DebugScreenProfile
+net.minecraft.client.gui.components.debug.package-info
