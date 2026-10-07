@@ -22,6 +22,9 @@ import java.util.WeakHashMap;
  * Nothing about it is rhythmic, and the body never drops low and scuttles, so it never reads as
  * a spider. It reads as something pushing itself through the world against the grain.
  * <p>
+ * Nothing it does jumps: every leg's point and every knee is eased to where it is going. And
+ * nothing it does by itself is ever seen: while it is being looked at, it is perfectly still.
+ * <p>
  * All of this is client-side and cosmetic: the entity itself moves exactly as the server says,
  * and nothing here touches the world beyond reading which blocks are solid.
  */
@@ -49,6 +52,25 @@ final class LegGait {
 	private float leanForward;
 	private float leanSide;
 	private int salt;
+	/** Where each leg was last drawn, so a leg that changes what it is doing never jumps. */
+	private final Vec3[] drawn = new Vec3[LEGS];
+	/** Which way each knee was last bent, in the world, eased towards where it should go. */
+	private final Vec3[] bendNow = new Vec3[LEGS];
+	/**
+	 * Its own clock: it runs while they are looking away and stops while they look at it, so
+	 * everything it does by itself (the slow sway, the hair, a leg feeling about) is done unseen,
+	 * and what they see is a thing standing perfectly still.
+	 */
+	private float clock;
+	private float clockRate = 1.0f;
+	/** How long they have been looking away, in ticks. */
+	private float unseenFor;
+	/** The angle its head is held at; it only ever changes while they are looking away. */
+	private float tilt;
+	private float nextTilt;
+	/** Its size and how far it is folded, eased, so it never changes shape from one frame to the next. */
+	private float fitScale = Float.NaN;
+	private float fitCrouch;
 
 	static LegGait of(OccupantEntity entity) {
 		return GAITS.computeIfAbsent(entity, e -> new LegGait(e.getId()));
@@ -71,17 +93,54 @@ final class LegGait {
 		float dt = Float.isNaN(lastTime) ? 0.0f : Mth.clamp(now - lastTime, 0.0f, 5.0f);
 		lastTime = now;
 
+		// Folding down into somewhere low happens quickly, so it is never drawn through the ceiling;
+		// getting up again, and growing back to its full height, slowly.
+		boolean fresh = body == null || body.distanceTo(real) > SNAP || Math.abs(body.y - real.y) > 1.5;
+		if (fresh || Float.isNaN(fitScale)) {
+			fitScale = state.occupantScale;
+			fitCrouch = state.crouch;
+		} else {
+			float down = (float) (1.0 - Math.exp(-0.6 * dt));
+			float up = (float) (1.0 - Math.exp(-0.06 * dt));
+			fitCrouch += (state.crouch - fitCrouch) * (state.crouch > fitCrouch ? down : up);
+			fitScale += (state.occupantScale - fitScale) * (state.occupantScale < fitScale ? down : up);
+		}
+		state.crouch = fitCrouch;
+		state.occupantScale = fitScale;
+		scale = fitScale;
+		dropPx = OccupantFit.CROUCH_DROP * fitCrouch;
+
 		double px = scale / 16.0;                             // model pixels to blocks
 		double yaw = Math.toRadians(state.bodyRot);
-		if (body == null || body.distanceTo(real) > SNAP || Math.abs(body.y - real.y) > 1.5) {
+		boolean arrived = false;
+		if (fresh) {
 			// Arrived from nowhere: already standing, every leg already braced.
+			arrived = true;
 			body = real;
 			for (int i = 0; i < LEGS; i++) {
 				foot[i] = findHold(i, level, yaw, OccupantGeometry.LEG_LENGTH[i] * px, rootY(i, px, dropPx));
 				swingStart[i] = -1.0f;
+				drawn[i] = null;
+				bendNow[i] = null;
 			}
 			nextFidget = now + 60.0f + rand(3, (int) now) * 120.0f;
+			tilt = rand(21, (int) now) * 2.0f - 1.0f;
+			nextTilt = now + 80.0f + rand(23, (int) now) * 200.0f;
 		}
+
+		// Whether they are looking at it. Its own movements wind down to nothing while they do,
+		// and come back only once they look away; its head is never seen changing its angle.
+		boolean watched = watched(real, state.occupantScale);
+		unseenFor = watched ? 0.0f : unseenFor + dt;
+		float wantRate = watched ? 0.0f : 1.0f;
+		clockRate += (wantRate - clockRate) * (float) (1.0 - Math.exp(-0.12 * dt));
+		clock += dt * clockRate;
+		if (unseenFor > 8.0f && now >= nextTilt) {
+			tilt = rand(21, (int) now) * 2.0f - 1.0f;
+			nextTilt = now + 80.0f + rand(23, (int) now) * 200.0f;
+		}
+		state.clock = clock;
+		state.tilt = tilt;
 
 		boolean chasing = state.mode == OccupantEntity.Mode.CHASE;
 		// The body: dragged slowly, then shoved. Height always follows exactly, so it never sinks.
@@ -100,10 +159,20 @@ final class LegGait {
 			bx += gap.x * (1.0 - k) * pull;
 			bz += gap.z * (1.0 - k) * pull;
 		}
-		// Never drawn inside anything: if the trailing body would be in a wall, it is where the real one is.
+		// Never drawn inside anything: if the trailing body would be in a wall, it is brought only as
+		// far towards the real one as it takes to be clear, not all the way at once.
 		if (!columnClear(level, bx, real.y, bz)) {
-			bx = real.x;
-			bz = real.z;
+			double cx = real.x, cz = real.z;
+			for (double f = 0.25; f < 1.0; f += 0.25) {
+				double tx = Mth.lerp(f, bx, real.x), tz = Mth.lerp(f, bz, real.z);
+				if (columnClear(level, tx, real.y, tz)) {
+					cx = tx;
+					cz = tz;
+					break;
+				}
+			}
+			bx = cx;
+			bz = cz;
 		}
 		body = new Vec3(bx, real.y, bz);
 
@@ -151,7 +220,7 @@ final class LegGait {
 		int maxSwinging = chasing ? 3 : 2;
 		if (worst >= 0 && worstScore > 0.0 && swinging < maxSwinging) {
 			replant(worst, level, yaw, px, rootY(worst, px, dropPx), chasing ? 2.0f : 3.0f);
-		} else if (now >= nextFidget && swinging == 0 && lag < 0.1) {
+		} else if (now >= nextFidget && swinging == 0 && lag < 0.1 && !watched) {
 			// Standing still, every so often one leg lets go and takes a new grip, slowly.
 			int i = (int) (rand(5, (int) now) * LEGS) % LEGS;
 			replant(i, level, yaw, px, rootY(i, px, dropPx), 9.0f);
@@ -175,22 +244,39 @@ final class LegGait {
 			}
 			double reach = OccupantGeometry.LEG_LENGTH[i] * px;
 			Vec3 hip = new Vec3(body.x, rootY(i, px, dropPx), body.z);
-			if (at == null) at = dangle(i, level, yaw, reach, hip, now);
+			if (at == null) at = dangle(i, level, yaw, reach, hip, clock);
 			if (at == null) {
 				state.legPlanted[i] = false;
 				state.legBendSet[i] = false;
+				drawn[i] = null;
 				continue;
 			}
-			// Which way the knee goes: the first way that keeps the whole leg out of the blocks.
-			Vec3 bend = kneeBend(i, level, yaw, px, hip, at);
-			state.legBendSet[i] = bend != null;
-			if (bend != null) {
-				double bx2 = bend.x * c - bend.z * sn;
-				double bz2 = bend.x * sn + bend.z * c;
-				state.legBend[i * 3] = (float) -bx2;
-				state.legBend[i * 3 + 1] = (float) -bend.y;
-				state.legBend[i * 3 + 2] = (float) bz2;
+			// Whatever the leg's point is doing, it gets there smoothly: a hold lost, a free leg
+			// finding one, the floor under a hanging leg stepping down. Never a jump.
+			if (drawn[i] == null || arrived) {
+				drawn[i] = at;
+			} else {
+				double follow = 1.0 - Math.exp(-0.7 * dt);
+				drawn[i] = drawn[i].lerp(at, follow);
 			}
+			at = drawn[i];
+			// Which way the knee goes: the first way that keeps the whole leg out of the blocks,
+			// eased round to it, so a knee never flips from one side to the other in a frame.
+			Vec3 want = kneeBend(i, level, yaw, px, hip, at);
+			if (want == null) want = bendNow[i] != null ? bendNow[i] : outward(i, yaw).add(0.0, 0.3, 0.0);
+			if (bendNow[i] == null || arrived) {
+				bendNow[i] = want;
+			} else {
+				Vec3 eased = bendNow[i].lerp(want, 1.0 - Math.exp(-0.5 * dt));
+				bendNow[i] = eased.lengthSqr() > 1.0e-4 ? eased : want;
+			}
+			Vec3 bend = bendNow[i];
+			state.legBendSet[i] = true;
+			double bx2 = bend.x * c - bend.z * sn;
+			double bz2 = bend.x * sn + bend.z * c;
+			state.legBend[i * 3] = (float) -bx2;
+			state.legBend[i * 3 + 1] = (float) -bend.y;
+			state.legBend[i * 3 + 2] = (float) bz2;
 			// World to model: undo the renderer's translate, rotation, flip and scale.
 			double wx = at.x - body.x, wy = at.y - body.y, wz = at.z - body.z;
 			double ax = wx * c - wz * sn;
@@ -206,6 +292,25 @@ final class LegGait {
 		}
 	}
 
+	/**
+	 * Whether the player is looking its way: anywhere on their screen, worked out from their own
+	 * field of view and window shape, with a margin for its size.
+	 */
+	private static boolean watched(Vec3 at, float scale) {
+		net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+		if (mc.player == null) return false;
+		Vec3 eye = mc.player.getEyePosition();
+		Vec3 to = at.add(0.0, 1.4 * scale, 0.0).subtract(eye);
+		double dist = to.length();
+		if (dist < 1.0e-3) return true;
+		double aspect = Math.max(1.0, (double) mc.getWindow().getWidth() / Math.max(1, mc.getWindow().getHeight()));
+		double halfV = Math.toRadians(mc.options.fov().get() * 0.5);
+		double halfDiagonal = Math.atan(Math.tan(halfV) * Math.sqrt(1.0 + aspect * aspect));
+		double margin = Math.atan(2.0 * scale / dist) + Math.toRadians(8.0);
+		double cos = to.scale(1.0 / dist).dot(mc.player.getViewVector(1.0f));
+		return cos > Math.cos(Math.min(Math.PI, halfDiagonal + margin));
+	}
+
 	/** Where leg i leaves the body, as a height in the world. */
 	private double rootY(int i, double px, float dropPx) {
 		return body.y + (OccupantGeometry.LEG_ROOT_HEIGHT[i] - dropPx) * px;
@@ -219,7 +324,8 @@ final class LegGait {
 			foot[i] = null;
 			return;
 		}
-		from[i] = foot[i] != null ? foot[i] : new Vec3(body.x, hipY - reach * 0.5, body.z);
+		// From wherever the leg is drawn now, so it never starts its reach from somewhere else.
+		from[i] = drawn[i] != null ? drawn[i] : foot[i] != null ? foot[i] : new Vec3(body.x, hipY - reach * 0.5, body.z);
 		foot[i] = hold;
 		swingStart[i] = lastTime;
 		swingTime[i] = duration;

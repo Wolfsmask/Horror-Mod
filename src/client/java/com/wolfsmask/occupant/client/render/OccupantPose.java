@@ -14,8 +14,10 @@ import net.minecraft.util.Mth;
  *     here is solved so that each point lands exactly there. The legs do not swing; they hold,
  *     and push.</li>
  *     <li>The body is shoved along between them and leans into each shove, then hangs.</li>
- *     <li>What movement there is of its own arrives between frames. It holds a pose, then it is
- *     in the next one, the way a thing looks in photographs taken a second apart.</li>
+ *     <li>What movement there is of its own happens only while you are looking away. Look at it
+ *     and it is perfectly still, winding down to nothing rather than stopping dead; look away and
+ *     back, and its head is at a different angle, and you never saw it move.</li>
+ *     <li>Nothing ever jumps or stutters: what it does, it does smoothly.</li>
  *     <li>Its mouth is always open. When it is close, it opens further than a mouth goes.</li>
  * </ul>
  * VEILED is early in the story, when it keeps its head down and is harder to make out at a
@@ -61,9 +63,8 @@ final class OccupantPose {
 	void apply(OccupantRenderState state, float lookX, float lookY) {
 		boolean veiled = state.form == OccupantEntity.Form.VEILED;
 
-		// Poses hold and then change. Nothing eases: easing is what living things do.
-		float step = state.mode == OccupantEntity.Mode.CHASE ? 2.0f : 8.0f;
-		float t = Mth.floor(state.ageInTicks / step) * step;
+		// Its own clock, which stands still while it is watched. Coming for you, it no longer cares.
+		float t = state.mode == OccupantEntity.Mode.CHASE ? state.ageInTicks : state.clock;
 
 		// A drift so slow you cannot tell whether it moved or you did.
 		float drift = Mth.sin(t * 0.013f);
@@ -86,22 +87,21 @@ final class OccupantPose {
 		switch (state.mode) {
 			case CHASE -> chase(t, lookX, lookY);
 			case AMBUSH -> loom(lookX, lookY);
-			default -> stand(state.seed, t, lookX, lookY, veiled);
+			default -> stand(state.tilt, lookX, lookY, veiled);
 		}
 		legs(state, t);
 	}
 
 	/** Standing. The head follows you a beat late and a little too far. */
-	private void stand(int seed, float t, float lookX, float lookY, boolean veiled) {
+	private void stand(float tilt, float lookX, float lookY, boolean veiled) {
 		// The neck carries most of the turn, so the body stays squarely facing wherever it was.
 		neck.yRot = lookY * 0.45f;
 		skull.yRot = lookY * 0.55f;
 		neck.xRot += lookX * 0.3f - 0.05f;
 		skull.xRot = lookX * 0.6f;
 
-		// Every so often the head is simply somewhere else, tilted, and stays there a while.
-		// The neck takes some of it, so the whole face goes over together, as a head does.
-		float tilt = hold(seed, t, 240, 3);
+		// Every so often, while you were not looking, the head has gone somewhere else, tilted,
+		// and stays there. The neck takes some of it, so the whole face goes over together.
 		float lean = 0.0f;
 		if (tilt > 0.45f) {
 			lean = 0.34f * (tilt - 0.45f) / 0.55f;
@@ -252,14 +252,5 @@ final class OccupantPose {
 		lower[i].yRot = y2;
 		lower[i].zRot = 0.0f;
 		return true;
-	}
-
-	/** A value in [-1, 1] that holds still for {@code period} ticks, then jumps somewhere else. */
-	private static float hold(int seed, float t, int period, int salt) {
-		int h = seed * 0x9E3779B1 ^ Mth.floor(t / period) * 0x85EBCA6B ^ salt * 0xC2B2AE35;
-		h ^= h >>> 15;
-		h *= 0x2C1B3C6D;
-		h ^= h >>> 12;
-		return (h & 0xFFFF) / 32767.5f - 1.0f;
 	}
 }

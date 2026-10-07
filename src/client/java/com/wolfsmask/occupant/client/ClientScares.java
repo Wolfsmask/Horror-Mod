@@ -112,6 +112,41 @@ public final class ClientScares {
 		}
 	}
 
+	/** Whether it is this mod, not the world's own rule, that took their coordinates away. */
+	private static boolean tookCoordinates;
+	private static boolean debugWasOpen;
+
+	/**
+	 * Late in the story (from the third act) they no longer get to know where they are: the
+	 * debug screen keeps its coordinates to itself, the game's own way, and the first time they
+	 * look it asks them why they want to know.
+	 */
+	static void coordinates(Minecraft mc) {
+		if (mc.player == null) {
+			tookCoordinates = false;
+			debugWasOpen = false;
+			return;
+		}
+		boolean hide = PauseLines.act >= 3;
+		if (hide) {
+			// Set again whenever the game puts it back (on dying, or going through a portal).
+			if (!mc.player.isReducedDebugInfo()) {
+				mc.player.setReducedDebugInfo(true);
+				tookCoordinates = true;
+			}
+		} else if (tookCoordinates) {
+			mc.player.setReducedDebugInfo(false);
+			tookCoordinates = false;
+		}
+		boolean open = mc.getDebugOverlay().showDebugScreen();
+		if (open && !debugWasOpen && hide && ClientConfig.get().screenText) {
+			String[] lines = {"why would you need to know", "you don't need to know where you are",
+					"you're not going anywhere", "it knows where you are. that's enough", "you're here. with it."};
+			ScreenEffects.line(lines[mc.player.getRandom().nextInt(lines.length)], 90, 4);
+		}
+		debugWasOpen = open;
+	}
+
 	/** "Saving world..." for {@code ticks}; {@code which} picks what it says it is saving. */
 	static void saving(int ticks, int which) {
 		savingAge = 0;

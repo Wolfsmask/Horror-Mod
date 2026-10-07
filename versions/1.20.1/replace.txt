@@ -8,6 +8,7 @@ builder.define( -> this.entityData.define(
 MobSpawnType reason, @Nullable SpawnGroupData data) { -> MobSpawnType reason, @Nullable SpawnGroupData data, @Nullable net.minecraft.nbt.CompoundTag tag) {
 super.finalizeSpawn(level, difficulty, reason, data); -> super.finalizeSpawn(level, difficulty, reason, data, tag);
 # Client
+mc.getDebugOverlay().showDebugScreen() -> mc.options.renderDebug
 deltaTracker.getGameTimeDeltaPartialTick(false) -> deltaTracker
 (payload, context) -> (payload, player, sender)
 context.client() -> net.minecraft.client.Minecraft.getInstance()

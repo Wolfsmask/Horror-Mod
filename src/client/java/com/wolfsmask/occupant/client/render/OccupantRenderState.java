@@ -26,6 +26,10 @@ public class OccupantRenderState extends HumanoidRenderState {
 	/** Which way each knee bends to stay out of the blocks, in model space; used where set. */
 	public final float[] legBend = new float[OccupantGeometry.LEGS * 3];
 	public final boolean[] legBendSet = new boolean[OccupantGeometry.LEGS];
+	/** Its own clock, in ticks, which stands still while it is being looked at. */
+	public float clock;
+	/** The angle its head is held at, -1 to 1; changed only while it is not being looked at. */
+	public float tilt;
 	/** Model pixels to blocks, worked out once per frame. */
 	public float occupantScale = 1.0f;
 }
