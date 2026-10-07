@@ -87,7 +87,6 @@ public final class Mercy {
 				m -> m.isAlive() && m instanceof Enemy && !(m instanceof OccupantEntity) && m.getMaxHealth() <= 100));
 		if (attacker.isAlive() && !monsters.contains(attacker)) monsters.add(attacker);
 		player.setHealth(Math.max(4.0f, player.getMaxHealth() * 0.3f));
-		player.invulnerableTime = 60;
 		if (monsters.isEmpty()) {
 			// Nothing left to take it out on (it blew itself up): only the words.
 			say(player, ONE[player.getRandom().nextInt(ONE.length)]);
@@ -102,7 +101,6 @@ public final class Mercy {
 		player.setHealth(Math.max(2.0f, player.getMaxHealth() * 0.25f));
 		player.resetFallDistance();
 		player.setDeltaMovement(Vec3.ZERO);
-		player.invulnerableTime = 60;
 		Cues.effect(player, ScreenEffectPayload.BLACKOUT, 70, 1f);
 		Cues.effect(player, ScreenEffectPayload.SILENCE, 0, 1f);
 		ServerLevel overworld = Compat.level(player).getServer().overworld();
