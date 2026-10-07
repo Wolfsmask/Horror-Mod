@@ -41,6 +41,9 @@ public final class Haunt {
 	long lastShownAt;
 	/** When something that could show it last began, in ticks of play. */
 	long lastShowTriedAt = -1;
+	/** Seconds in a row under a roof or underground, and when it last asked why (ticks of play). */
+	int confinedSeconds;
+	long leftBehindAt = -1;
 	/** Not again in the lair before this server tick. */
 	long lairAgainAt;
 	/** While above 0, the fog is no further than this (blocks): something is bringing it in. */
@@ -164,8 +167,9 @@ public final class Haunt {
 		e.setYBodyRot(yaw);
 		e.setMode(mode);
 		e.setForm(form);
-		// If that spot is in front of the player right now, it waits, unseen, for them to look away.
-		e.setConcealed(Sight.couldBeSeen(player, e));
+		// It always arrives unseen, and is only there once they have been looking away for a
+		// moment: what the server knows of where they look is a moment behind their screen.
+		e.setConcealed(true);
 		if (!world.addFreshEntity(e)) return null;
 		return e;
 	}

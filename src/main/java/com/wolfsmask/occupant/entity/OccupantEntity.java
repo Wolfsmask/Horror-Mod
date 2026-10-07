@@ -60,6 +60,8 @@ public class OccupantEntity extends PathfinderMob {
 	 */
 	private static final EntityDataAccessor<Boolean> CONCEALED = SynchedEntityData.defineId(OccupantEntity.class, EntityDataSerializers.BOOLEAN);
 
+	/** Ticks out of their sight before it is there: long enough for their screen to catch up. */
+	private static final int REVEAL_AFTER = 6;
 	/** Removed if no sequence has touched it for this long (orphan protection). */
 	private static final int ORPHAN_TICKS = 40;
 	/** How far away a summoned Occupant will look for someone to haunt. */
@@ -78,6 +80,11 @@ public class OccupantEntity extends PathfinderMob {
 	private boolean footsteps = true;
 	private double stepAccumulator;
 	private boolean vanished;
+	/** Ticks in a row it has been out of the haunted player's sight, while not yet there. */
+	private int unseenFor;
+	/** How fast they have been turning lately (degrees a tick, fading), and where they faced. */
+	private float turning;
+	private float lastTargetYaw = Float.NaN;
 	/** True when nothing is driving this one: summoned by a command or a spawn egg. */
 	private boolean summoned;
 	/**
@@ -257,7 +264,14 @@ public class OccupantEntity extends PathfinderMob {
 	@Override
 	public void tick() {
 		super.tick();
-		if (this.level().isClientSide() || this.isRemoved()) return;
+		if (this.level().isClientSide()) {
+			// Its body never lags behind where it looks, so it is never seen turning to face you:
+			// wherever its head is, the rest of it already is.
+			this.yBodyRot = this.yHeadRot;
+			this.yBodyRotO = this.yHeadRotO;
+			return;
+		}
+		if (this.isRemoved()) return;
 
 		// Put here by hand, with nothing driving it: it adopts whoever is closest and haunts them
 		// by itself. Without this it would delete itself on its first tick and never be seen.
@@ -274,13 +288,25 @@ public class OccupantEntity extends PathfinderMob {
 			return;
 		}
 
-		// Revealed the moment the player is not looking: it is never seen arriving.
-		if (isConcealed() && !Sight.couldBeSeen(target, this)) setConcealed(false);
-
 		if (gazeLocked && !isPathing()) {
 			faceTowards(target.getEyePosition());
-		} else if (gazeLocked) {
+		} else if (gazeLocked || isConcealed()) {
 			this.getLookControl().setLookAt(target, 60.0f, 60.0f);
+		}
+		if (isConcealed()) {
+			// Not there until it is already facing them and they have been looking away for a
+			// moment. While they spin round, the cone it must be out of is wider, so a fast turn
+			// never catches it arriving.
+			float yaw = target.getYRot();
+			float turn = Float.isNaN(lastTargetYaw) ? 0.0f : Math.abs(Mth.wrapDegrees(yaw - lastTargetYaw));
+			lastTargetYaw = yaw;
+			turning = Math.max(turning * 0.85f, turn);
+			double cone = Sight.OUT_OF_VIEW_DEGREES + Math.min(70.0, turning * 3.0);
+			unseenFor = Sight.couldBeSeen(target, this, cone) ? 0 : unseenFor + 1;
+			if (unseenFor >= REVEAL_AFTER) {
+				faceTowards(target.getEyePosition());
+				setConcealed(false);
+			}
 		}
 
 		if (footsteps) tickFootsteps(target);

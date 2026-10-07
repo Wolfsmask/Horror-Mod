@@ -122,11 +122,16 @@ public final class Sight {
 	 * Deliberately generous: this decides whether it is safe for something to appear.
 	 */
 	public static boolean couldBeSeen(ServerPlayer player, Entity entity) {
+		return couldBeSeen(player, entity, OUT_OF_VIEW_DEGREES);
+	}
+
+	/** As {@link #couldBeSeen(ServerPlayer, Entity)}, with a wider cone: {@code degrees} either side. */
+	public static boolean couldBeSeen(ServerPlayer player, Entity entity, double degrees) {
 		double h = entity.getBbHeight() * DRAWN_HEIGHT_FACTOR;
 		Vec3 base = entity.position();
-		boolean inCone = angleTo(player, base.add(0, h * 0.5, 0)) < OUT_OF_VIEW_DEGREES
-				|| angleTo(player, base.add(0, h * 0.9, 0)) < OUT_OF_VIEW_DEGREES
-				|| angleTo(player, base.add(0, h * 0.1, 0)) < OUT_OF_VIEW_DEGREES;
+		boolean inCone = angleTo(player, base.add(0, h * 0.5, 0)) < degrees
+				|| angleTo(player, base.add(0, h * 0.9, 0)) < degrees
+				|| angleTo(player, base.add(0, h * 0.1, 0)) < degrees;
 		return inCone && canSeeAnyPart(player, entity);
 	}
 

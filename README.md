@@ -57,7 +57,8 @@ it is never long before it is seen again: every five minutes or so early on, eve
 end. Things **follow on** from each other: the lights stutter, and when they settle something
 breathes behind you; it knocks, and then it is at the window; it is seen far off, and a minute
 later, closer. After every big scare there is a **calm** of a few minutes with only small,
-deniable things.
+deniable things. And stay in too long, in a house or a hole or a cave, and it wants to know
+why you left it out there.
 And the Director builds on absence: the longer nothing has happened, the more it favours
 something real, so the next thing lands once you have stopped listening for it.
 

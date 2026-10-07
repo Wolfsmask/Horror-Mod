@@ -230,6 +230,7 @@ public final class Director {
 			else h.data.outsideSeconds++;
 		}
 		House.noticeNear(player.blockPosition());
+		LeftBehind.tick(player, h, s, cfg);
 		updateDread(h.data, s);
 		int actBefore = h.data.act;
 		updateAct(h.data, cfg, player);
