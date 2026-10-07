@@ -191,7 +191,9 @@ public final class Director {
 			if (!eligible || !player.isAlive()) {
 				endSequence(h);
 			} else if (!h.active.tick(player)) {
+				String done = h.activeId;
 				endSequence(h);
+				planFollowUp(h, done, player);
 			}
 		}
 
@@ -237,6 +239,11 @@ public final class Director {
 		}
 
 		if (h.active != null || h.data.act == 0) return;
+		if (h.pending != null && server.getTickCount() >= h.pendingAt) {
+			FollowUps.Plan plan = h.pending;
+			h.pending = null;
+			if (followUp(h, player, s, cfg, plan)) return;
+		}
 		if (enteredHouse(h, player)) return;
 		if (enteredLair(h, player)) return;
 		h.nextEventIn -= 20;
@@ -280,6 +287,61 @@ public final class Director {
 		}
 		h.lairAgainAt = now + 20L * 60 * 15;
 		return true;
+	}
+
+	/** An event has run its course: what, if anything, comes after it. */
+	private void planFollowUp(Haunt h, @org.jetbrains.annotations.Nullable String done, ServerPlayer player) {
+		h.pending = null;
+		if (done == null || h.chain >= FollowUps.MAX_CHAIN) {
+			h.chain = 0;
+			return;
+		}
+		FollowUps.Plan plan = FollowUps.plan(done, player.getRandom());
+		if (plan.events().isEmpty()) {
+			h.chain = 0;
+			return;
+		}
+		h.pending = plan;
+		h.pendingAt = server.getTickCount() + 20L * plan.seconds();
+		debug("{}: after {}, perhaps {} in {}s", player.getName().getString(), done, plan.events(), plan.seconds());
+	}
+
+	/** The first of the follow-ups that fits where the player is now; false if none does. */
+	private boolean followUp(Haunt h, ServerPlayer player, Situation s, OccupantConfig cfg, FollowUps.Plan plan) {
+		HauntData d = h.data;
+		if (s.afk() || s.busy()) return false;
+		EventContext ctx = new EventContext(player, h, s, false);
+		for (String id : plan.events()) {
+			HorrorEvent e = Events.byId(id);
+			if (e == null || e.hookOnly() || disabledEvents.contains(id)) continue;
+			if (d.act < e.minAct() || d.isOnCooldown(id) || !e.allowedBy(cfg)) continue;
+			if (cfg.soundOnly && e.shows()) continue;
+			if (e.tier() == HorrorEvent.Tier.PEAK && !peakReady(d)) continue;
+			if (!e.fits(ctx)) continue;
+			if (tryBegin(h, e, ctx)) {
+				h.chain++;
+				if (e.tier() != HorrorEvent.Tier.AMBIENT) h.quietSeconds = 0;
+				h.nextEventIn = Math.max(h.nextEventIn, 20 * 30);
+				return true;
+			}
+		}
+		h.chain = 0;
+		return false;
+	}
+
+	/**
+	 * Has it been too long since it was last something to see? Sounds and signs keep a story
+	 * going, but it is being seen that people remember: every five minutes or so early on, every
+	 * three by the end.
+	 */
+	private static boolean sightingDue(Haunt h, OccupantConfig cfg) {
+		double minutes = switch (h.data.act) {
+			case 1 -> 5.0;
+			case 2 -> 4.0;
+			case 3 -> 3.5;
+			default -> 3.0;
+		};
+		return h.data.playTicks - h.lastShownAt >= minutes * MINUTE / Pacing.frequency(cfg);
 	}
 
 	private boolean isEligible(ServerPlayer player, Haunt h, OccupantConfig cfg) {
@@ -420,6 +482,24 @@ public final class Director {
 			}
 		}
 
+		// Too long since it was seen: something it can be seen in comes first, if anything fits.
+		if (sightingDue(h, cfg)) {
+			List<HorrorEvent> visible = new ArrayList<>();
+			for (List<HorrorEvent> pool : byTier.values()) {
+				for (HorrorEvent e : pool) if (e.shows() && e.tier() != HorrorEvent.Tier.PEAK) visible.add(e);
+			}
+			while (!visible.isEmpty()) {
+				HorrorEvent e = pickWeighted(visible, ctx, random);
+				visible.remove(e);
+				if (tryBegin(h, e, ctx)) {
+					h.quietSeconds = 0;
+					h.chain = 0;
+					scheduleAfter(h, e, random, cfg);
+					return;
+				}
+			}
+		}
+
 		HorrorEvent.Tier[] order = pickTierOrder(tierWeights(d.act, Pacing.quietSeconds(h.quietSeconds)), byTier.keySet(), random);
 		for (HorrorEvent.Tier tier : order) {
 			List<HorrorEvent> pool = byTier.get(tier);
@@ -429,6 +509,7 @@ public final class Director {
 				if (tryBegin(h, e, ctx)) {
 					// Background noise does not relieve the pressure; it is part of the waiting.
 					if (e.tier() != HorrorEvent.Tier.AMBIENT) h.quietSeconds = 0;
+					h.chain = 0;
 					scheduleAfter(h, e, random, cfg);
 					return;
 				}
@@ -515,6 +596,7 @@ public final class Director {
 		HauntData d = h.data;
 		h.active = seq;
 		h.activeId = e.id();
+		if (e.shows()) h.lastShownAt = d.playTicks;
 		d.recordEvent(e.id(), e.cooldownTicks());
 		if (e.tier() == HorrorEvent.Tier.PEAK) {
 			d.lastPeakAt = d.playTicks;

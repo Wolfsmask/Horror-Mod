@@ -41,7 +41,7 @@ public final class FlickerEvent extends HorrorEvent {
 	@Override
 	public Sequence begin(EventContext ctx) {
 		ServerPlayer p = ctx.player;
-		if (ctx.aloneEnough() && ctx.random.nextFloat() < 0.45f) {
+		if (ctx.aloneEnough() && ctx.random.nextFloat() < 0.65f) {
 			BlockPos spot = Spots.aroundPlayer(p, ctx.random, 5, 9, 0, 22, false, 20, pos -> {
 				Vec3 base = Vec3.atBottomCenterOf(pos);
 				return Math.abs(pos.getY() - p.getBlockY()) <= 2

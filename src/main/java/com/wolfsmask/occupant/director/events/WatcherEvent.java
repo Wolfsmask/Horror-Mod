@@ -19,7 +19,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public final class WatcherEvent extends HorrorEvent {
 	public WatcherEvent() {
-		super("watcher", Tier.MAJOR, 2, 12, 10);
+		super("watcher", Tier.MAJOR, 1, 12, 7);
 	}
 
 	@Override
@@ -30,7 +30,9 @@ public final class WatcherEvent extends HorrorEvent {
 	@Override
 	public boolean fits(EventContext ctx) {
 		Situation s = ctx.situation;
-		return ctx.aloneEnough() && !s.inCombat() && !s.busy() && !s.inWater() && s.gloomy();
+		// In the dark; or, from the second act, in the daytime fog, which hides it just as well.
+		boolean hidden = s.gloomy() || ctx.act() >= 2 && com.wolfsmask.occupant.director.Fog.endFor(ctx.player, ctx.haunt) > 0;
+		return ctx.aloneEnough() && !s.inCombat() && !s.busy() && !s.inWater() && hidden;
 	}
 
 	@Override
@@ -56,12 +58,14 @@ public final class WatcherEvent extends HorrorEvent {
 			maxAngle = 55;
 		}
 
-		// Best of all: only just visible, its head past the edge of something.
-		BlockPos spot = Spots.aroundPlayer(p, ctx.random, min, max, minAngle, maxAngle, !underground, 120,
-				pos -> peekSpot(ctx, pos, min));
+		// Half the time only just visible, its head past the edge of something; half the time
+		// simply standing there, all of it, in the open, which is worse.
+		boolean peek = ctx.random.nextBoolean();
+		BlockPos spot = Spots.aroundPlayer(p, ctx.random, min, max, minAngle, maxAngle, !underground, peek ? 120 : 60,
+				pos -> peek ? peekSpot(ctx, pos, min) : goodSpot(ctx, pos, min));
 		if (spot == null) {
-			spot = Spots.aroundPlayer(p, ctx.random, min, max, minAngle, maxAngle, !underground, 40,
-					pos -> goodSpot(ctx, pos, min));
+			spot = Spots.aroundPlayer(p, ctx.random, min, max, minAngle, maxAngle, !underground, peek ? 40 : 120,
+					pos -> peek ? goodSpot(ctx, pos, min) : peekSpot(ctx, pos, min));
 		}
 		if (spot == null && !underground) {
 			spot = Spots.aroundPlayer(p, ctx.random, min, max, 0, 20, true, 25, pos -> goodSpot(ctx, pos, min));
@@ -82,7 +86,7 @@ public final class WatcherEvent extends HorrorEvent {
 		ServerPlayer p = ctx.player;
 		Vec3 base = Vec3.atBottomCenterOf(pos);
 		if (base.distanceTo(p.position()) < minDist * 0.8) return false;
-		if (!Spots.isDark(ctx.world, pos.above())) return false;
+		if (!concealed(ctx, pos, base)) return false;
 		if (!Spots.awayFromOthers(p, base, 24)) return false;
 		return Sight.onlyJustVisible(p, base, 4.2);
 	}
@@ -91,8 +95,15 @@ public final class WatcherEvent extends HorrorEvent {
 		ServerPlayer p = ctx.player;
 		Vec3 base = Vec3.atBottomCenterOf(pos);
 		if (base.distanceTo(p.position()) < minDist * 0.8) return false;
-		if (!Spots.isDark(ctx.world, pos.above())) return false;
+		if (!concealed(ctx, pos, base)) return false;
 		if (!Spots.awayFromOthers(p, base, 24)) return false;
 		return Sight.hasLineOfSight(p, base.add(0, 1.6, 0)) && Sight.hasLineOfSight(p, base.add(0, 0.9, 0));
+	}
+
+	/** In the dark, or far enough into the fog that the fog half hides it. */
+	private static boolean concealed(EventContext ctx, BlockPos pos, Vec3 base) {
+		if (Spots.isDark(ctx.world, pos.above())) return true;
+		float fog = com.wolfsmask.occupant.director.Fog.endFor(ctx.player, ctx.haunt);
+		return fog > 0 && base.distanceTo(ctx.player.position()) >= com.wolfsmask.occupant.util.FogLine.edgeNear(fog) * 0.9;
 	}
 }

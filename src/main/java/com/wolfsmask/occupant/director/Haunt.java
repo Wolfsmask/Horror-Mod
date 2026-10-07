@@ -31,6 +31,14 @@ public final class Haunt {
 	/** Where they last stood in its world, out of any portal: where they are brought back to. */
 	@Nullable
 	net.minecraft.core.BlockPos lastSafe;
+	/** What was left to come after the last event, and the server tick it is due. */
+	@Nullable
+	FollowUps.Plan pending;
+	long pendingAt;
+	/** How many follow-ups in a row there have been. */
+	int chain;
+	/** When it was last something to be seen, in ticks of play. */
+	long lastShownAt;
 	/** Not again in the lair before this server tick. */
 	long lairAgainAt;
 	/** While above 0, the fog is no further than this (blocks): something is bringing it in. */
@@ -69,6 +77,7 @@ public final class Haunt {
 	private double lastSpeed;
 
 	Haunt(UUID uuid, HauntData data, RandomSource random) {
+		this.lastShownAt = data.playTicks;
 		this.uuid = uuid;
 		this.data = data;
 		// After logging in, let the player settle before anything happens.

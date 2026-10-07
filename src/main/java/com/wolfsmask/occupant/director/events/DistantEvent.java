@@ -31,7 +31,7 @@ public final class DistantEvent extends HorrorEvent {
 	private static final int MIN_RISE = 4;
 
 	public DistantEvent() {
-		super(ID, Tier.MINOR, 1, 14, 9);
+		super(ID, Tier.MINOR, 1, 14, 6);
 	}
 
 	@Override
