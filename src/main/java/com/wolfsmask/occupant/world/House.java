@@ -201,6 +201,11 @@ public final class House {
 		return true;
 	}
 
+	/** It moves closer: a new lair, out in the fog, 60 to 100 blocks from {@code home}. */
+	public static boolean lairNear(net.minecraft.server.level.ServerLevel level, BlockPos home, RandomSource random) {
+		return Places.lairNear(level, home, random);
+	}
+
 	/** Is there a house (and so perhaps its village) within {@code r} blocks of {@code at}? */
 	static boolean near(BlockPos at, int r) {
 		for (BlockPos h : HOUSES) {

@@ -86,6 +86,7 @@ public final class Occupant implements ModInitializer {
 			House.close();
 			Loot.close();
 			com.wolfsmask.occupant.story.Silence.clear();
+			com.wolfsmask.occupant.story.DeepLog.clear();
 			WorldMode.close();
 			com.wolfsmask.occupant.world.Lairs.close();
 		}));
@@ -178,6 +179,10 @@ public final class Occupant implements ModInitializer {
 						director.markDirty();
 					}
 				});
+				else if (world.getBlockEntity(pos) instanceof Container box) {
+					// Deep underground, the other log: somebody else, who saw it differently.
+					guard("a deep container", () -> com.wolfsmask.occupant.story.DeepLog.opening(sp, pos, box));
+				}
 			}
 			return InteractionResult.PASS;
 		});

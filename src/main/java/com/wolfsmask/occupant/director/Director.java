@@ -404,6 +404,16 @@ public final class Director {
 		if (d.act != before) {
 			debug("{} entered act {}", player.getName().getString(), d.act);
 			save.setDirty();
+			// From the third act its lair moves closer: dug anew, out in the fog, nearer their home.
+			if (d.act >= 3 && OccupantConfig.get().worldChanges) {
+				BlockPos home = Compat.respawnPos(player);
+				if (home == null) home = player.blockPosition();
+				try {
+					com.wolfsmask.occupant.world.House.lairNear(Compat.level(player).getServer().overworld(), home, player.getRandom());
+				} catch (RuntimeException e) {
+					Occupant.LOGGER.warn("Could not dig its lair closer", e);
+				}
+			}
 			// Each turn of the story is marked, once, quietly: what it has learned about them.
 			String[] beat = d.act >= 2 && d.act - 2 < ACT_BEATS.length ? ACT_BEATS[d.act - 2] : null;
 			if (beat != null && player.isAlive()) {

@@ -107,6 +107,31 @@ final class Places {
 		}
 	}
 
+	/**
+	 * A new lair, dug while the world runs, 60 to 100 blocks from {@code home}, somewhere loaded,
+	 * flat and solid underneath: it is moving closer. False if nowhere suited.
+	 */
+	static boolean lairNear(ServerLevel level, BlockPos home, RandomSource random) {
+		for (int tries = 0; tries < 16; tries++) {
+			double angle = random.nextDouble() * Math.PI * 2;
+			int r = 60 + random.nextInt(40);
+			int x = home.getX() + (int) Math.round(Math.cos(angle) * r);
+			int z = home.getZ() + (int) Math.round(Math.sin(angle) * r);
+			boolean loaded = true;
+			for (int dx = -1; dx <= 1 && loaded; dx++) {
+				for (int dz = -1; dz <= 1 && loaded; dz++) loaded = level.hasChunk((x >> 4) + dx, (z >> 4) + dz);
+			}
+			if (!loaded) continue;
+			BlockPos base = flatGround(level, new BlockPos(x, home.getY(), z), 4, 2);
+			if (base == null || !solidBelow(level, base, Lair.DEPTH + 4)) continue;
+			Lair lair = new Lair(level, base, Rotation.getRandom(random), random);
+			lair.build();
+			Lairs.add(lair.hollow());
+			return true;
+		}
+		return false;
+	}
+
 	/** Is there an old place within {@code r} blocks of {@code at}? */
 	static boolean near(BlockPos at, int r) {
 		for (BlockPos p : PLACES) {
