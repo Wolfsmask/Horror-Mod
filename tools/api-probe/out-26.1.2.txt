@@ -1,9 +1,4 @@
-=== net.minecraft.client.renderer.fog.FogRenderer (-p)
-public class client.renderer.fog.FogRenderer implements AutoCloseable {
-  public client.renderer.fog.FogData setupFog(client.Camera, int, client.DeltaTracker, float, client.multiplayer.ClientLevel);
-  public void updateBuffer(client.renderer.fog.FogData);
-  private void updateBuffer(java.nio.ByteBuffer, int, org.joml.Vector4f, float, float, float, float, float, float);
-=== net.minecraft.client.renderer.fog.FogData (-public)
+=== net.minecraft.client.renderer.fog.FogData (-p)
 public class client.renderer.fog.FogData implements client.rendering.v1.FabricRenderState {
   public float environmentalStart;
   public float renderDistanceStart;
@@ -14,18 +9,176 @@ public class client.renderer.fog.FogData implements client.rendering.v1.FabricRe
   public org.joml.Vector4f color;
   public client.renderer.fog.FogData();
 }
-=== net.minecraft.world.entity.player.Player$BedSleepingProblem (-public)
-public final class world.entity.player.Player$BedSleepingProblem extends Record {
-  public static final world.entity.player.Player$BedSleepingProblem TOO_FAR_AWAY;
-  public static final world.entity.player.Player$BedSleepingProblem OBSTRUCTED;
-  public static final world.entity.player.Player$BedSleepingProblem OTHER_PROBLEM;
-  public static final world.entity.player.Player$BedSleepingProblem NOT_SAFE;
-  public world.entity.player.Player$BedSleepingProblem(network.chat.Component);
+=== net.minecraft.client.renderer.fog.FogRenderer (-p)
+public class client.renderer.fog.FogRenderer implements AutoCloseable {
+  private void computeFogColor(client.Camera, float, client.multiplayer.ClientLevel, int, float, org.joml.Vector4f);
+  public client.renderer.fog.FogData setupFog(client.Camera, int, client.DeltaTracker, float, client.multiplayer.ClientLevel);
+  public void updateBuffer(client.renderer.fog.FogData);
+  private void updateBuffer(java.nio.ByteBuffer, int, org.joml.Vector4f, float, float, float, float, float, float);
+=== net.minecraft.client.renderer.SkyRenderer (-p)
+public class client.renderer.SkyRenderer implements AutoCloseable {
+  private static final resources.Identifier SUN_SPRITE;
+  private static final resources.Identifier END_FLASH_SPRITE;
+  private static final resources.Identifier END_SKY_LOCATION;
+  private static final float SKY_DISC_RADIUS;
+  private static final int SKY_VERTICES;
+  private static final int STAR_COUNT;
+  private static final float SUN_SIZE;
+  private static final float SUN_HEIGHT;
+  private static final float MOON_SIZE;
+  private static final float MOON_HEIGHT;
+  private static final int SUNRISE_STEPS;
+  private static final int END_SKY_QUAD_COUNT;
+  private static final float END_FLASH_HEIGHT;
+  private static final float END_FLASH_SCALE;
+  private final client.renderer.texture.TextureAtlas celestialsAtlas;
+  private final blaze3d.buffers.GpuBuffer starBuffer;
+  private final blaze3d.buffers.GpuBuffer topSkyBuffer;
+  private final blaze3d.buffers.GpuBuffer bottomSkyBuffer;
+  private final blaze3d.buffers.GpuBuffer endSkyBuffer;
+  private final blaze3d.buffers.GpuBuffer sunBuffer;
+  private final blaze3d.buffers.GpuBuffer moonBuffer;
+  private final blaze3d.buffers.GpuBuffer sunriseBuffer;
+  private final blaze3d.buffers.GpuBuffer endFlashBuffer;
+  private final blaze3d.systems.RenderSystem$AutoStorageIndexBuffer quadIndices;
+  private final client.renderer.texture.AbstractTexture endSkyTexture;
+  private int starIndexCount;
+  public client.renderer.SkyRenderer(client.renderer.texture.TextureManager, client.resources.model.sprite.AtlasManager);
+  private client.renderer.texture.AbstractTexture getTexture(client.renderer.texture.TextureManager, resources.Identifier);
+  private blaze3d.buffers.GpuBuffer buildSunriseFan();
+  private static blaze3d.buffers.GpuBuffer buildSunQuad(client.renderer.texture.TextureAtlas);
+  private static blaze3d.buffers.GpuBuffer buildEndFlashQuad(client.renderer.texture.TextureAtlas);
+  private static blaze3d.buffers.GpuBuffer buildCelestialQuad(String, client.renderer.texture.TextureAtlasSprite);
+  private static blaze3d.buffers.GpuBuffer buildMoonPhases(client.renderer.texture.TextureAtlas);
+  private blaze3d.buffers.GpuBuffer buildStars();
+  private void buildSkyDisc(blaze3d.vertex.VertexConsumer, float);
+  private static blaze3d.buffers.GpuBuffer buildEndSky();
+  public void renderSkyDisc(int);
+  public void extractRenderState(client.multiplayer.ClientLevel, float, client.Camera, client.renderer.state.level.SkyRenderState);
+  private boolean shouldRenderDarkDisc(float, client.multiplayer.ClientLevel);
+  public void renderDarkDisc();
+  public void renderSunMoonAndStars(blaze3d.vertex.PoseStack, float, float, float, world.level.MoonPhase, float, float);
+  private void renderSun(float, blaze3d.vertex.PoseStack);
+  private void renderMoon(world.level.MoonPhase, float, blaze3d.vertex.PoseStack);
+  private void renderStars(float, blaze3d.vertex.PoseStack);
+  public void renderSunriseAndSunset(blaze3d.vertex.PoseStack, float, int);
+  public void renderEndSky();
+  public void renderEndFlash(blaze3d.vertex.PoseStack, float, float, float);
+  public void close();
+  private static String lambda$renderEndFlash$0();
+  private static String lambda$renderEndSky$0();
+  private static String lambda$renderSunriseAndSunset$0();
+  private static String lambda$renderStars$0();
+  private static String lambda$renderMoon$0();
+  private static String lambda$renderSun$0();
+  private static String lambda$renderDarkDisc$0();
+  private static String lambda$renderSkyDisc$0();
+  private static String lambda$buildEndSky$0();
+  private static String lambda$buildStars$0();
+  private static String lambda$buildMoonPhases$0();
+  private static String lambda$buildCelestialQuad$0(String);
+  private static String lambda$buildSunriseFan$0();
+  private static String lambda$new$1();
+  private static String lambda$new$0();
+  static {};
+}
+=== net.minecraft.client.renderer.FogRenderer (-p)
+Error: class not found: client.renderer.FogRenderer
+=== net.minecraft.client.renderer.DimensionSpecialEffects (-p)
+Error: class not found: client.renderer.DimensionSpecialEffects
+=== net.minecraft.client.renderer.LevelRenderer (code: addSkyPass|renderSky)
+  private void addSkyPass(com.mojang.blaze3d.framegraph.FrameGraphBuilder, client.renderer.state.level.CameraRenderState, com.mojang.blaze3d.buffers.GpuBufferSlice);
+    Code:
+         1: getfield      #1742               // Field net/minecraft/client/renderer/state/level/CameraRenderState.fogType:Lnet/minecraft/world/level/material/FogType;
+         8: getstatic     #1746               // Field net/minecraft/world/level/material/FogType.POWDER_SNOW:Lnet/minecraft/world/level/material/FogType;
+        11: if_acmpeq     32
+        16: getstatic     #1751               // Field net/minecraft/world/level/material/FogType.LAVA:Lnet/minecraft/world/level/material/FogType;
+        19: if_acmpeq     32
+        23: getfield      #1754               // Field net/minecraft/client/renderer/state/level/CameraRenderState.entityRenderState:Lnet/minecraft/client/renderer/state/level/CameraEntityRenderState;
+        26: getfield      #1758               // Field net/minecraft/client/renderer/state/level/CameraEntityRenderState.doesMobEffectBlockSky:Z
+        29: ifeq          33
+        34: getfield      #184                // Field levelRenderState:Lnet/minecraft/client/renderer/state/level/LevelRenderState;
+        37: getfield      #964                // Field net/minecraft/client/renderer/state/level/LevelRenderState.skyRenderState:Lnet/minecraft/client/renderer/state/level/SkyRenderState;
+        44: getfield      #1763               // Field net/minecraft/client/renderer/state/level/SkyRenderState.skybox:Lnet/minecraft/world/level/dimension/DimensionType$Skybox;
+        47: getstatic     #1769               // Field net/minecraft/world/level/dimension/DimensionType$Skybox.NONE:Lnet/minecraft/world/level/dimension/DimensionType$Skybox;
+        50: if_acmpne     54
+        55: getfield      #198                // Field skyRenderer:Lnet/minecraft/client/renderer/SkyRenderer;
+        62: ifnonnull     66
+        67: ldc_w         #962                // String sky
+        70: invokevirtual #794                // Method com/mojang/blaze3d/framegraph/FrameGraphBuilder.addPass:(Ljava/lang/String;)Lcom/mojang/blaze3d/framegraph/FramePass;
+        76: getfield      #84                 // Field targets:Lnet/minecraft/client/renderer/LevelTargetBundle;
+        82: getfield      #84                 // Field targets:Lnet/minecraft/client/renderer/LevelTargetBundle;
+        85: getfield      #749                // Field net/minecraft/client/renderer/LevelTargetBundle.main:Lcom/mojang/blaze3d/resource/ResourceHandle;
+        88: invokeinterface #798,  2          // InterfaceMethod com/mojang/blaze3d/framegraph/FramePass.readsAndWrites:(Lcom/mojang/blaze3d/resource/ResourceHandle;)Lcom/mojang/blaze3d/resource/ResourceHandle;
+        93: putfield      #749                // Field net/minecraft/client/renderer/LevelTargetBundle.main:Lcom/mojang/blaze3d/resource/ResourceHandle;
+       103: invokedynamic #1774,  0           // InvokeDynamic #9:run:(Lcom/mojang/blaze3d/buffers/GpuBufferSlice;Lnet/minecraft/client/renderer/state/level/SkyRenderState;Lnet/minecraft/client/renderer/SkyRenderer;)Ljava/lang/Runnable;
+       108: invokeinterface #808,  2          // InterfaceMethod com/mojang/blaze3d/framegraph/FramePass.executes:(Ljava/lang/Runnable;)V
+
+  private static void lambda$addSkyPass$0(com.mojang.blaze3d.buffers.GpuBufferSlice, client.renderer.state.level.SkyRenderState, client.renderer.SkyRenderer);
+    Code:
+         1: invokestatic  #2047               // Method com/mojang/blaze3d/systems/RenderSystem.setShaderFog:(Lcom/mojang/blaze3d/buffers/GpuBufferSlice;)V
+         5: getfield      #1763               // Field net/minecraft/client/renderer/state/level/SkyRenderState.skybox:Lnet/minecraft/world/level/dimension/DimensionType$Skybox;
+         8: getstatic     #2051               // Field net/minecraft/world/level/dimension/DimensionType$Skybox.END:Lnet/minecraft/world/level/dimension/DimensionType$Skybox;
+        11: if_acmpne     55
+        15: invokevirtual #2054               // Method net/minecraft/client/renderer/SkyRenderer.renderEndSky:()V
+        19: getfield      #2057               // Field net/minecraft/client/renderer/state/level/SkyRenderState.endFlashIntensity:F
+        22: ldc_w         #2060               // float 1.0E-5f
+        25: fcmpl
+        26: ifle          54
+        29: new           #1185               // class com/mojang/blaze3d/vertex/PoseStack
+        33: invokespecial #1187               // Method com/mojang/blaze3d/vertex/PoseStack."<init>":()V
+        40: getfield      #2057               // Field net/minecraft/client/renderer/state/level/SkyRenderState.endFlashIntensity:F
+        44: getfield      #2061               // Field net/minecraft/client/renderer/state/level/SkyRenderState.endFlashXAngle:F
+        48: getfield      #2064               // Field net/minecraft/client/renderer/state/level/SkyRenderState.endFlashYAngle:F
+        51: invokevirtual #2067               // Method net/minecraft/client/renderer/SkyRenderer.renderEndFlash:(Lcom/mojang/blaze3d/vertex/PoseStack;FFF)V
+        55: new           #1185               // class com/mojang/blaze3d/vertex/PoseStack
+        59: invokespecial #1187               // Method com/mojang/blaze3d/vertex/PoseStack."<init>":()V
+        65: getfield      #2071               // Field net/minecraft/client/renderer/state/level/SkyRenderState.skyColor:I
+        68: invokevirtual #2074               // Method net/minecraft/client/renderer/SkyRenderer.renderSkyDisc:(I)V
+        74: getfield      #2077               // Field net/minecraft/client/renderer/state/level/SkyRenderState.sunAngle:F
+        78: getfield      #2080               // Field net/minecraft/client/renderer/state/level/SkyRenderState.sunriseAndSunsetColor:I
+        81: invokevirtual #2083               // Method net/minecraft/client/renderer/SkyRenderer.renderSunriseAndSunset:(Lcom/mojang/blaze3d/vertex/PoseStack;FI)V
+        87: getfield      #2077               // Field net/minecraft/client/renderer/state/level/SkyRenderState.sunAngle:F
+        91: getfield      #2087               // Field net/minecraft/client/renderer/state/level/SkyRenderState.moonAngle:F
+        95: getfield      #2090               // Field net/minecraft/client/renderer/state/level/SkyRenderState.starAngle:F
+        99: getfield      #2093               // Field net/minecraft/client/renderer/state/level/SkyRenderState.moonPhase:Lnet/minecraft/world/level/MoonPhase;
+       103: getfield      #2097               // Field net/minecraft/client/renderer/state/level/SkyRenderState.rainBrightness:F
+       107: getfield      #2100               // Field net/minecraft/client/renderer/state/level/SkyRenderState.starBrightness:F
+       110: invokevirtual #2103               // Method net/minecraft/client/renderer/SkyRenderer.renderSunMoonAndStars:(Lcom/mojang/blaze3d/vertex/PoseStack;FFFLnet/minecraft/world/level/MoonPhase;FF)V
+       114: getfield      #2107               // Field net/minecraft/client/renderer/state/level/SkyRenderState.shouldRenderDarkDisc:Z
+       117: ifeq          124
+       121: invokevirtual #2110               // Method net/minecraft/client/renderer/SkyRenderer.renderDarkDisc:()V
+
+=== classes matching SkyRenderer|Sunrise|Sunset|FogEnvironment
+net.minecraft.client.renderer.fog.environment.AtmosphericFogEnvironment
+net.minecraft.client.renderer.fog.environment.FogEnvironment
+net.minecraft.client.renderer.SkyRenderer
+net.minecraft.client.renderer.fog.environment.MobEffectFogEnvironment
+net.minecraft.client.renderer.fog.environment.BlindnessFogEnvironment
+net.minecraft.client.renderer.fog.environment.PowderedSnowFogEnvironment
+net.minecraft.client.renderer.fog.environment.DarknessFogEnvironment
+net.minecraft.client.renderer.fog.environment.WaterFogEnvironment
+net.minecraft.client.renderer.fog.environment.LavaFogEnvironment
+=== net.minecraft.client.gui.screens.Screen (-p)
+public abstract class client.gui.screens.Screen extends client.gui.components.events.AbstractContainerEventHandler implements client.gui.components.Renderable {
+  public final void extractRenderStateWithTooltipAndSubtitles(client.gui.GuiGraphicsExtractor, int, int, float);
+  public void extractRenderState(client.gui.GuiGraphicsExtractor, int, int, float);
+  public boolean keyPressed(client.input.KeyEvent);
+  public void extractBackground(client.gui.GuiGraphicsExtractor, int, int, float);
+  public void afterMouseAction();
+=== net.minecraft.client.gui.components.AbstractWidget (-public)
+public abstract class client.gui.components.AbstractWidget implements client.gui.layouts.LayoutElement,client.gui.components.Renderable,client.gui.components.events.GuiEventListener,client.gui.narration.NarratableEntry {
+  public boolean active;
+  public boolean visible;
+  public void setAlpha(float);
+=== net.minecraft.client.input.KeyEvent (-public)
+public final class client.input.KeyEvent extends Record implements client.input.InputWithModifiers {
+  public client.input.KeyEvent(int, int, int);
+  public int input();
   public final String toString();
   public final int hashCode();
   public final boolean equals(Object);
-  public network.chat.Component message();
+  public int key();
+  public int scancode();
+  public int modifiers();
 }
-=== net.minecraft.server.level.ServerPlayer (-public)
-public class server.level.ServerPlayer extends world.entity.player.Player implements networking.v1.context.PacketContextProvider {
-  public int requestedViewDistance();

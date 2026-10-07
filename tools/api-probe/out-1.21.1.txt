@@ -1,229 +1,155 @@
-=== classes matching [Ff]og
-net.minecraft.world.level.material.FogType
-com.mojang.blaze3d.shaders.FogShape
-net.minecraft.client.renderer.FogRenderer
+=== net.minecraft.client.renderer.fog.FogData (-p)
+Error: class not found: client.renderer.fog.FogData
+=== net.minecraft.client.renderer.fog.FogRenderer (-p)
+Error: class not found: client.renderer.fog.FogRenderer
+=== net.minecraft.client.renderer.SkyRenderer (-p)
+Error: class not found: client.renderer.SkyRenderer
 === net.minecraft.client.renderer.FogRenderer (-p)
 public class client.renderer.FogRenderer {
-  private static final int WATER_FOG_DISTANCE;
-  private static final List<client.renderer.FogRenderer$MobEffectFogFunction> MOB_EFFECT_FOG;
-  public static final float BIOME_FOG_TRANSITION_TIME;
   private static float fogRed;
   private static float fogGreen;
   private static float fogBlue;
-  private static int targetBiomeFog;
-  private static int previousBiomeFog;
   private static long biomeChangedTime;
-  public client.renderer.FogRenderer();
   public static void setupColor(client.Camera, float, client.multiplayer.ClientLevel, int, float);
-  public static void setupNoFog();
-  private static client.renderer.FogRenderer$MobEffectFogFunction getPriorityFogFunction(world.entity.Entity, float);
   public static void setupFog(client.Camera, client.renderer.FogRenderer$FogMode, float, boolean, float);
   public static void levelFogColor();
-  private static boolean method_42589(world.entity.LivingEntity, float, client.renderer.FogRenderer$MobEffectFogFunction);
-  private static world.phys.Vec3 method_24873(client.multiplayer.ClientLevel, world.level.biome.BiomeManager, float, int, int, int);
-  static {};
-}
-=== net.minecraft.client.renderer.fog.FogRenderer (-p)
-Error: class not found: client.renderer.fog.FogRenderer
-=== net.minecraft.client.renderer.fog.FogData (-public)
-Error: class not found: client.renderer.fog.FogData
-=== net.minecraft.client.renderer.fog.environment.AtmosphericFogEnvironment (-p)
-Error: class not found: client.renderer.fog.environment.AtmosphericFogEnvironment
-=== net.minecraft.client.renderer.fog.environment.FogEnvironment (-public)
-Error: class not found: client.renderer.fog.environment.FogEnvironment
-=== net.minecraft.client.renderer.fog.FogRenderer (code: setupFog)
-=== net.minecraft.client.renderer.FogRenderer (code: setupFog)
-  public static void setupFog(client.Camera, client.renderer.FogRenderer$FogMode, float, boolean, float);
+=== net.minecraft.client.renderer.DimensionSpecialEffects (-p)
+public abstract class client.renderer.DimensionSpecialEffects {
+  private final float[] sunriseCol;
+  private final client.renderer.DimensionSpecialEffects$SkyType skyType;
+  public client.renderer.DimensionSpecialEffects(float, boolean, client.renderer.DimensionSpecialEffects$SkyType, boolean, boolean);
+  public float[] getSunriseColor(float, float);
+  public client.renderer.DimensionSpecialEffects$SkyType skyType();
+=== net.minecraft.client.renderer.LevelRenderer (code: addSkyPass|renderSky)
+  public void renderSky(org.joml.Matrix4f, org.joml.Matrix4f, float, client.Camera, boolean, java.lang.Runnable);
     Code:
-         1: invokevirtual #70                 // Method net/minecraft/client/Camera.getFluidInCamera:()Lnet/minecraft/world/level/material/FogType;
-         7: invokevirtual #74                 // Method net/minecraft/client/Camera.getEntity:()Lnet/minecraft/world/entity/Entity;
-        12: new           #13                 // class net/minecraft/client/renderer/FogRenderer$FogData
-        17: invokespecial #419                // Method net/minecraft/client/renderer/FogRenderer$FogData."<init>":(Lnet/minecraft/client/renderer/FogRenderer$FogMode;)V
-        26: invokestatic  #290                // Method getPriorityFogFunction:(Lnet/minecraft/world/entity/Entity;F)Lnet/minecraft/client/renderer/FogRenderer$MobEffectFogFunction;
-        33: getstatic     #143                // Field net/minecraft/world/level/material/FogType.LAVA:Lnet/minecraft/world/level/material/FogType;
-        36: if_acmpne     122
-        41: invokevirtual #423                // Method net/minecraft/world/entity/Entity.isSpectator:()Z
-        44: ifeq          67
-        49: ldc_w         #424                // float -8.0f
-        52: putfield      #427                // Field net/minecraft/client/renderer/FogRenderer$FogData.start:F
-        58: ldc           #195                // float 0.5f
-        60: fmul
-        61: putfield      #430                // Field net/minecraft/client/renderer/FogRenderer$FogData.end:F
-        64: goto          451
-        69: instanceof    #292                // class net/minecraft/world/entity/LivingEntity
-        72: ifeq          106
-        77: checkcast     #292                // class net/minecraft/world/entity/LivingEntity
-        80: getstatic     #433                // Field net/minecraft/world/effect/MobEffects.FIRE_RESISTANCE:Lnet/minecraft/core/Holder;
-        83: invokevirtual #320                // Method net/minecraft/world/entity/LivingEntity.hasEffect:(Lnet/minecraft/core/Holder;)Z
-        86: ifeq          106
-        91: fconst_0
-        92: putfield      #427                // Field net/minecraft/client/renderer/FogRenderer$FogData.start:F
-        97: ldc_w         #434                // float 5.0f
-       100: putfield      #430                // Field net/minecraft/client/renderer/FogRenderer$FogData.end:F
-       103: goto          451
-       108: ldc           #160                // float 0.25f
-       110: putfield      #427                // Field net/minecraft/client/renderer/FogRenderer$FogData.start:F
-       115: fconst_1
-       116: putfield      #430                // Field net/minecraft/client/renderer/FogRenderer$FogData.end:F
-       119: goto          451
-       124: getstatic     #150                // Field net/minecraft/world/level/material/FogType.POWDER_SNOW:Lnet/minecraft/world/level/material/FogType;
-       127: if_acmpne     173
-       132: invokevirtual #423                // Method net/minecraft/world/entity/Entity.isSpectator:()Z
-       135: ifeq          158
-       140: ldc_w         #424                // float -8.0f
-       143: putfield      #427                // Field net/minecraft/client/renderer/FogRenderer$FogData.start:F
-       149: ldc           #195                // float 0.5f
-       151: fmul
-       152: putfield      #430                // Field net/minecraft/client/renderer/FogRenderer$FogData.end:F
-       155: goto          451
-       160: fconst_0
-       161: putfield      #427                // Field net/minecraft/client/renderer/FogRenderer$FogData.start:F
-       166: fconst_2
-       167: putfield      #430                // Field net/minecraft/client/renderer/FogRenderer$FogData.end:F
-       170: goto          451
-       175: ifnull        223
-       180: checkcast     #292                // class net/minecraft/world/entity/LivingEntity
-       189: invokeinterface #296,  1          // InterfaceMethod net/minecraft/client/renderer/FogRenderer$MobEffectFogFunction.getMobEffect:()Lnet/minecraft/core/Holder;
-       194: invokevirtual #300                // Method net/minecraft/world/entity/LivingEntity.getEffect:(Lnet/minecraft/core/Holder;)Lnet/minecraft/world/effect/MobEffectInstance;
-       201: ifnull        220
-       215: invokeinterface #437,  6          // InterfaceMethod net/minecraft/client/renderer/FogRenderer$MobEffectFogFunction.setupFog:(Lnet/minecraft/client/renderer/FogRenderer$FogData;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/effect/MobEffectInstance;FF)V
-       220: goto          451
-       225: getstatic     #80                 // Field net/minecraft/world/level/material/FogType.WATER:Lnet/minecraft/world/level/material/FogType;
-       228: if_acmpne     350
-       233: ldc_w         #424                // float -8.0f
-       236: putfield      #427                // Field net/minecraft/client/renderer/FogRenderer$FogData.start:F
-       241: ldc_w         #438                // float 96.0f
-       244: putfield      #430                // Field net/minecraft/client/renderer/FogRenderer$FogData.end:F
-       249: instanceof    #307                // class net/minecraft/client/player/LocalPlayer
-       252: ifeq          323
-       257: checkcast     #307                // class net/minecraft/client/player/LocalPlayer
-       265: getfield      #430                // Field net/minecraft/client/renderer/FogRenderer$FogData.end:F
-       268: ldc           #160                // float 0.25f
-       272: invokevirtual #310                // Method net/minecraft/client/player/LocalPlayer.getWaterVision:()F
-       275: invokestatic  #441                // Method java/lang/Math.max:(FF)F
-       278: fmul
-       279: putfield      #430                // Field net/minecraft/client/renderer/FogRenderer$FogData.end:F
-       284: invokevirtual #445                // Method net/minecraft/client/player/LocalPlayer.level:()Lnet/minecraft/world/level/Level;
-       289: invokevirtual #449                // Method net/minecraft/client/player/LocalPlayer.blockPosition:()Lnet/minecraft/core/BlockPos;
-       292: invokevirtual #452                // Method net/minecraft/world/level/Level.getBiome:(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/core/Holder;
-       299: getstatic     #458                // Field net/minecraft/tags/BiomeTags.HAS_CLOSER_WATER_FOG:Lnet/minecraft/tags/TagKey;
-       302: invokeinterface #462,  2          // InterfaceMethod net/minecraft/core/Holder.is:(Lnet/minecraft/tags/TagKey;)Z
-       307: ifeq          323
-       313: getfield      #430                // Field net/minecraft/client/renderer/FogRenderer$FogData.end:F
-       316: ldc_w         #463                // float 0.85f
-       319: fmul
-       320: putfield      #430                // Field net/minecraft/client/renderer/FogRenderer$FogData.end:F
-       325: getfield      #430                // Field net/minecraft/client/renderer/FogRenderer$FogData.end:F
-       329: fcmpl
-       330: ifle          451
-       336: putfield      #430                // Field net/minecraft/client/renderer/FogRenderer$FogData.end:F
-       341: getstatic     #469                // Field com/mojang/blaze3d/shaders/FogShape.CYLINDER:Lcom/mojang/blaze3d/shaders/FogShape;
-       344: putfield      #472                // Field net/minecraft/client/renderer/FogRenderer$FogData.shape:Lcom/mojang/blaze3d/shaders/FogShape;
-       347: goto          451
-       351: ifeq          382
-       357: ldc_w         #473                // float 0.05f
-       360: fmul
-       361: putfield      #427                // Field net/minecraft/client/renderer/FogRenderer$FogData.start:F
-       367: ldc_w         #474                // float 192.0f
-       370: invokestatic  #333                // Method java/lang/Math.min:(FF)F
-       373: ldc           #195                // float 0.5f
-       375: fmul
-       376: putfield      #430                // Field net/minecraft/client/renderer/FogRenderer$FogData.end:F
-       379: goto          451
-       383: getstatic     #478                // Field net/minecraft/client/renderer/FogRenderer$FogMode.FOG_SKY:Lnet/minecraft/client/renderer/FogRenderer$FogMode;
-       386: if_acmpne     412
-       391: fconst_0
-       392: putfield      #427                // Field net/minecraft/client/renderer/FogRenderer$FogData.start:F
-       398: putfield      #430                // Field net/minecraft/client/renderer/FogRenderer$FogData.end:F
-       403: getstatic     #469                // Field com/mojang/blaze3d/shaders/FogShape.CYLINDER:Lcom/mojang/blaze3d/shaders/FogShape;
-       406: putfield      #472                // Field net/minecraft/client/renderer/FogRenderer$FogData.shape:Lcom/mojang/blaze3d/shaders/FogShape;
-       409: goto          451
-       413: ldc_w         #479                // float 10.0f
-       416: fdiv
-       417: ldc_w         #480                // float 4.0f
-       420: ldc_w         #481                // float 64.0f
-       423: invokestatic  #126                // Method net/minecraft/util/Mth.clamp:(FFF)F
-       433: fsub
-       434: putfield      #427                // Field net/minecraft/client/renderer/FogRenderer$FogData.start:F
-       440: putfield      #430                // Field net/minecraft/client/renderer/FogRenderer$FogData.end:F
-       445: getstatic     #469                // Field com/mojang/blaze3d/shaders/FogShape.CYLINDER:Lcom/mojang/blaze3d/shaders/FogShape;
-       448: putfield      #472                // Field net/minecraft/client/renderer/FogRenderer$FogData.shape:Lcom/mojang/blaze3d/shaders/FogShape;
-       453: getfield      #427                // Field net/minecraft/client/renderer/FogRenderer$FogData.start:F
-       456: invokestatic  #374                // Method com/mojang/blaze3d/systems/RenderSystem.setShaderFogStart:(F)V
-       461: getfield      #430                // Field net/minecraft/client/renderer/FogRenderer$FogData.end:F
-       464: invokestatic  #484                // Method com/mojang/blaze3d/systems/RenderSystem.setShaderFogEnd:(F)V
-       469: getfield      #472                // Field net/minecraft/client/renderer/FogRenderer$FogData.shape:Lcom/mojang/blaze3d/shaders/FogShape;
-=== com.mojang.blaze3d.systems.RenderSystem (-public)
-public class blaze3d.systems.RenderSystem {
-  public static void setShaderFogStart(float);
-  public static float getShaderFogStart();
-  public static void setShaderFogEnd(float);
-  public static float getShaderFogEnd();
-  public static void setShaderFogColor(float, float, float, float);
-  public static void setShaderFogColor(float, float, float);
-  public static float[] getShaderFogColor();
-  public static void setShaderFogShape(blaze3d.shaders.FogShape);
-  public static blaze3d.shaders.FogShape getShaderFogShape();
-=== net.minecraft.client.sounds.SoundManager (-public)
-public class client.sounds.SoundManager extends server.packs.resources.SimplePreparableReloadListener<client.sounds.SoundManager$Preparations> {
-  public void play(client.resources.sounds.SoundInstance);
-  public void playDelayed(client.resources.sounds.SoundInstance, int);
-  public void pause();
-  public void stop();
-  public void resume();
-  public void stop(client.resources.sounds.SoundInstance);
-  public void stop(resources.ResourceLocation, sounds.SoundSource);
-=== net.minecraft.client.Options (-public)
-public class client.Options {
-  public client.OptionInstance<Integer> renderDistance();
-  public client.OptionInstance<Integer> simulationDistance();
-  public int getEffectiveRenderDistance();
-=== net.minecraft.client.Minecraft (-public)
-public class client.Minecraft extends util.thread.ReentrantBlockableEventLoop<Runnable> implements blaze3d.platform.WindowEventHandler {
-  public final client.renderer.GameRenderer gameRenderer;
-  public final client.Options options;
-  public client.sounds.SoundManager getSoundManager();
-=== net.minecraft.server.level.ServerPlayer (-public)
-public class server.level.ServerPlayer extends world.entity.player.Player {
-  public server.level.ClientInformation clientInformation();
-  public int requestedViewDistance();
-=== net.minecraft.server.level.ClientInformation (-public)
-public final class server.level.ClientInformation extends Record {
-  public int viewDistance();
-=== net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents (-public)
-public final class entity.event.v1.EntitySleepEvents {
-  public static final event.Event<entity.event.v1.EntitySleepEvents$AllowSleeping> ALLOW_SLEEPING;
-  public static final event.Event<entity.event.v1.EntitySleepEvents$StartSleeping> START_SLEEPING;
-  public static final event.Event<entity.event.v1.EntitySleepEvents$StopSleeping> STOP_SLEEPING;
-  public static final event.Event<entity.event.v1.EntitySleepEvents$AllowBed> ALLOW_BED;
-  public static final event.Event<entity.event.v1.EntitySleepEvents$AllowSleepTime> ALLOW_SLEEP_TIME;
-  public static final event.Event<entity.event.v1.EntitySleepEvents$AllowNearbyMonsters> ALLOW_NEARBY_MONSTERS;
-  public static final event.Event<entity.event.v1.EntitySleepEvents$AllowResettingTime> ALLOW_RESETTING_TIME;
-  public static final event.Event<entity.event.v1.EntitySleepEvents$ModifySleepingDirection> MODIFY_SLEEPING_DIRECTION;
-  public static final event.Event<entity.event.v1.EntitySleepEvents$AllowSettingSpawn> ALLOW_SETTING_SPAWN;
-  public static final event.Event<entity.event.v1.EntitySleepEvents$SetBedOccupationState> SET_BED_OCCUPATION_STATE;
-  public static final event.Event<entity.event.v1.EntitySleepEvents$ModifyWakeUpPosition> MODIFY_WAKE_UP_POSITION;
-}
-=== net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents$AllowSleeping (-public)
-public interface entity.event.v1.EntitySleepEvents$AllowSleeping {
-  public abstract world.entity.player.Player$BedSleepingProblem allowSleep(world.entity.player.Player, core.BlockPos);
-}
-=== net.minecraft.world.entity.player.Player$BedSleepingProblem (-public)
-public final class world.entity.player.Player$BedSleepingProblem extends Enum<world.entity.player.Player$BedSleepingProblem> {
-  public static final world.entity.player.Player$BedSleepingProblem NOT_POSSIBLE_HERE;
-  public static final world.entity.player.Player$BedSleepingProblem NOT_POSSIBLE_NOW;
-  public static final world.entity.player.Player$BedSleepingProblem TOO_FAR_AWAY;
-  public static final world.entity.player.Player$BedSleepingProblem OBSTRUCTED;
-  public static final world.entity.player.Player$BedSleepingProblem OTHER_PROBLEM;
-  public static final world.entity.player.Player$BedSleepingProblem NOT_SAFE;
-  public static world.entity.player.Player$BedSleepingProblem[] values();
-  public static world.entity.player.Player$BedSleepingProblem valueOf(String);
-  public network.chat.Component getMessage();
-}
-=== net.minecraft.world.entity.ai.control.LookControl (-public)
-public class world.entity.ai.control.LookControl implements world.entity.ai.control.Control {
-  public void setLookAt(world.phys.Vec3);
-  public void setLookAt(world.entity.Entity);
-  public void setLookAt(world.entity.Entity, float, float);
-  public void setLookAt(double, double, double);
-  public void setLookAt(double, double, double, float, float);
+         2: invokeinterface #2492,  1         // InterfaceMethod java/lang/Runnable.run:()V
+         9: ifeq          13
+        15: invokevirtual #2496               // Method net/minecraft/client/Camera.getFluidInCamera:()Lnet/minecraft/world/level/material/FogType;
+        22: getstatic     #2502               // Field net/minecraft/world/level/material/FogType.POWDER_SNOW:Lnet/minecraft/world/level/material/FogType;
+        25: if_acmpeq     45
+        30: getstatic     #2504               // Field net/minecraft/world/level/material/FogType.LAVA:Lnet/minecraft/world/level/material/FogType;
+        33: if_acmpeq     45
+        39: invokevirtual #2508               // Method doesMobEffectBlockSky:(Lnet/minecraft/client/Camera;)Z
+        42: ifeq          46
+        46: new           #84                 // class com/mojang/blaze3d/vertex/PoseStack
+        50: invokespecial #1794               // Method com/mojang/blaze3d/vertex/PoseStack."<init>":()V
+        58: invokevirtual #2511               // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Matrix4f;)V
+        62: getfield      #353                // Field minecraft:Lnet/minecraft/client/Minecraft;
+        65: getfield      #388                // Field net/minecraft/client/Minecraft.level:Lnet/minecraft/client/multiplayer/ClientLevel;
+        68: invokevirtual #1675               // Method net/minecraft/client/multiplayer/ClientLevel.effects:()Lnet/minecraft/client/renderer/DimensionSpecialEffects;
+        71: invokevirtual #2515               // Method net/minecraft/client/renderer/DimensionSpecialEffects.skyType:()Lnet/minecraft/client/renderer/DimensionSpecialEffects$SkyType;
+        74: getstatic     #2519               // Field net/minecraft/client/renderer/DimensionSpecialEffects$SkyType.END:Lnet/minecraft/client/renderer/DimensionSpecialEffects$SkyType;
+        77: if_acmpne     87
+        83: invokevirtual #2521               // Method renderEndSky:(Lcom/mojang/blaze3d/vertex/PoseStack;)V
+        88: getfield      #353                // Field minecraft:Lnet/minecraft/client/Minecraft;
+        91: getfield      #388                // Field net/minecraft/client/Minecraft.level:Lnet/minecraft/client/multiplayer/ClientLevel;
+        94: invokevirtual #1675               // Method net/minecraft/client/multiplayer/ClientLevel.effects:()Lnet/minecraft/client/renderer/DimensionSpecialEffects;
+        97: invokevirtual #2515               // Method net/minecraft/client/renderer/DimensionSpecialEffects.skyType:()Lnet/minecraft/client/renderer/DimensionSpecialEffects$SkyType;
+       100: getstatic     #2524               // Field net/minecraft/client/renderer/DimensionSpecialEffects$SkyType.NORMAL:Lnet/minecraft/client/renderer/DimensionSpecialEffects$SkyType;
+       103: if_acmpeq     107
+       108: getfield      #1216               // Field level:Lnet/minecraft/client/multiplayer/ClientLevel;
+       112: getfield      #353                // Field minecraft:Lnet/minecraft/client/Minecraft;
+       115: getfield      #1103               // Field net/minecraft/client/Minecraft.gameRenderer:Lnet/minecraft/client/renderer/GameRenderer;
+       118: invokevirtual #2528               // Method net/minecraft/client/renderer/GameRenderer.getMainCamera:()Lnet/minecraft/client/Camera;
+       121: invokevirtual #656                // Method net/minecraft/client/Camera.getPosition:()Lnet/minecraft/world/phys/Vec3;
+       125: invokevirtual #2532               // Method net/minecraft/client/multiplayer/ClientLevel.getSkyColor:(Lnet/minecraft/world/phys/Vec3;F)Lnet/minecraft/world/phys/Vec3;
+       132: getfield      #1430               // Field net/minecraft/world/phys/Vec3.x:D
+       135: d2f
+       140: getfield      #1436               // Field net/minecraft/world/phys/Vec3.y:D
+       143: d2f
+       148: getfield      #1438               // Field net/minecraft/world/phys/Vec3.z:D
+       151: d2f
+       154: invokestatic  #1662               // Method net/minecraft/client/renderer/FogRenderer.levelFogColor:()V
+       157: invokestatic  #406                // Method com/mojang/blaze3d/vertex/Tesselator.getInstance:()Lcom/mojang/blaze3d/vertex/Tesselator;
+       162: iconst_0
+       163: invokestatic  #428                // Method com/mojang/blaze3d/systems/RenderSystem.depthMask:(Z)V
+       172: fconst_1
+       173: invokestatic  #2535               // Method com/mojang/blaze3d/systems/RenderSystem.setShaderColor:(FFFF)V
+       176: invokestatic  #2285               // Method com/mojang/blaze3d/systems/RenderSystem.getShader:()Lnet/minecraft/client/renderer/ShaderInstance;
+       182: getfield      #1136               // Field skyBuffer:Lcom/mojang/blaze3d/vertex/VertexBuffer;
+       185: invokevirtual #1123               // Method com/mojang/blaze3d/vertex/VertexBuffer.bind:()V
+       189: getfield      #1136               // Field skyBuffer:Lcom/mojang/blaze3d/vertex/VertexBuffer;
+       194: invokevirtual #1955               // Method com/mojang/blaze3d/vertex/PoseStack.last:()Lcom/mojang/blaze3d/vertex/PoseStack$Pose;
+       197: invokevirtual #2346               // Method com/mojang/blaze3d/vertex/PoseStack$Pose.pose:()Lorg/joml/Matrix4f;
+       203: invokevirtual #2538               // Method com/mojang/blaze3d/vertex/VertexBuffer.drawWithShader:(Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;Lnet/minecraft/client/renderer/ShaderInstance;)V
+       206: invokestatic  #1134               // Method com/mojang/blaze3d/vertex/VertexBuffer.unbind:()V
+       209: invokestatic  #414                // Method com/mojang/blaze3d/systems/RenderSystem.enableBlend:()V
+       213: getfield      #1216               // Field level:Lnet/minecraft/client/multiplayer/ClientLevel;
+       216: invokevirtual #1675               // Method net/minecraft/client/multiplayer/ClientLevel.effects:()Lnet/minecraft/client/renderer/DimensionSpecialEffects;
+       220: getfield      #1216               // Field level:Lnet/minecraft/client/multiplayer/ClientLevel;
+       224: invokevirtual #2541               // Method net/minecraft/client/multiplayer/ClientLevel.getTimeOfDay:(F)F
+       228: invokevirtual #2545               // Method net/minecraft/client/renderer/DimensionSpecialEffects.getSunriseColor:(FF)[F
+       235: ifnull        509
+       238: invokedynamic #2550,  0           // InvokeDynamic #10:get:()Ljava/util/function/Supplier;
+       243: invokestatic  #455                // Method com/mojang/blaze3d/systems/RenderSystem.setShader:(Ljava/util/function/Supplier;)V
+       246: fconst_1
+       247: fconst_1
+       248: fconst_1
+       249: fconst_1
+       250: invokestatic  #2535               // Method com/mojang/blaze3d/systems/RenderSystem.setShaderColor:(FFFF)V
+       255: invokevirtual #1932               // Method com/mojang/blaze3d/vertex/PoseStack.pushPose:()V
+       260: getstatic     #2468               // Field com/mojang/math/Axis.XP:Lcom/mojang/math/Axis;
+       263: ldc_w         #2469               // float 90.0f
+       266: invokeinterface #2472,  2         // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       271: invokevirtual #2476               // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionf;)V
+       275: getfield      #1216               // Field level:Lnet/minecraft/client/multiplayer/ClientLevel;
+       279: invokevirtual #2553               // Method net/minecraft/client/multiplayer/ClientLevel.getSunAngle:(F)F
+       282: invokestatic  #1153               // Method net/minecraft/util/Mth.sin:(F)F
+       285: fconst_0
+       286: fcmpg
+       287: ifge          296
+       290: ldc_w         #2478               // float 180.0f
+       293: goto          297
+       296: fconst_0
+       301: getstatic     #2481               // Field com/mojang/math/Axis.ZP:Lcom/mojang/math/Axis;
+       306: invokeinterface #2472,  2         // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       311: invokevirtual #2476               // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionf;)V
+       316: getstatic     #2481               // Field com/mojang/math/Axis.ZP:Lcom/mojang/math/Axis;
+       319: ldc_w         #2469               // float 90.0f
+       322: invokeinterface #2472,  2         // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       327: invokevirtual #2476               // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionf;)V
+       332: iconst_0
+       333: faload
+       338: iconst_1
+       339: faload
+       344: iconst_2
+       345: faload
+       350: invokevirtual #1955               // Method com/mojang/blaze3d/vertex/PoseStack.last:()Lcom/mojang/blaze3d/vertex/PoseStack$Pose;
+       353: invokevirtual #2346               // Method com/mojang/blaze3d/vertex/PoseStack$Pose.pose:()Lorg/joml/Matrix4f;
+       360: getstatic     #1143               // Field com/mojang/blaze3d/vertex/VertexFormat$Mode.TRIANGLE_FAN:Lcom/mojang/blaze3d/vertex/VertexFormat$Mode;
+       363: getstatic     #2557               // Field com/mojang/blaze3d/vertex/DefaultVertexFormat.POSITION_COLOR:Lcom/mojang/blaze3d/vertex/VertexFormat;
+       366: invokevirtual #533                // Method com/mojang/blaze3d/vertex/Tesselator.begin:(Lcom/mojang/blaze3d/vertex/VertexFormat$Mode;Lcom/mojang/blaze3d/vertex/VertexFormat;)Lcom/mojang/blaze3d/vertex/BufferBuilder;
+       375: fconst_0
+       376: ldc_w         #661                // float 100.0f
+       379: fconst_0
+       380: invokevirtual #2486               // Method com/mojang/blaze3d/vertex/BufferBuilder.addVertex:(Lorg/joml/Matrix4f;FFF)Lcom/mojang/blaze3d/vertex/VertexConsumer;
+       391: iconst_3
+       392: faload
+       393: invokeinterface #565,  5          // InterfaceMethod com/mojang/blaze3d/vertex/VertexConsumer.setColor:(FFFF)Lcom/mojang/blaze3d/vertex/VertexConsumer;
+       399: bipush        16
+       401: istore        22
+       403: iconst_0
+       404: istore        23
+       408: bipush        16
+       410: if_icmpgt     496
+       415: i2f
+       416: ldc_w         #2558               // float 6.2831855f
+       419: fmul
+       420: ldc_w         #1137               // float 16.0f
+       423: fdiv
+       428: invokestatic  #1153               // Method net/minecraft/util/Mth.sin:(F)F
+       435: invokestatic  #1150               // Method net/minecraft/util/Mth.cos:(F)F
+       446: ldc_w         #2559               // float 120.0f
+=== classes matching SkyRenderer|Sunrise|Sunset|FogEnvironment
+=== net.minecraft.client.gui.screens.Screen (-p)
+public abstract class client.gui.screens.Screen extends client.gui.components.events.AbstractContainerEventHandler implements client.gui.components.Renderable {
+  public boolean keyPressed(int, int, int);
+  public void afterMouseAction();
+=== net.minecraft.client.gui.components.AbstractWidget (-public)
+public abstract class client.gui.components.AbstractWidget implements client.gui.components.Renderable,client.gui.components.events.GuiEventListener,client.gui.layouts.LayoutElement,client.gui.narration.NarratableEntry {
+  public boolean active;
+  public boolean visible;
+  public void setAlpha(float);
+=== net.minecraft.client.input.KeyEvent (-public)
+Error: class not found: client.input.KeyEvent
