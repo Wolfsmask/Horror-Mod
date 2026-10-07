@@ -38,6 +38,8 @@ public final class Loot {
 	private static final Set<BlockPos> UNOPENED = ConcurrentHashMap.newKeySet();
 	@Nullable
 	private static volatile Path record;
+	/** Containers have been built since the file was last written. */
+	private static volatile boolean dirty;
 
 	private Loot() {
 	}
@@ -63,7 +65,13 @@ public final class Loot {
 		UNOPENED.clear();
 	}
 
+	/** Every second: writes down any containers built since the last time. */
+	static void flush() {
+		if (dirty) save();
+	}
+
 	private static synchronized void save() {
+		dirty = false;
 		Path file = record;
 		if (file == null) return;
 		StringBuilder out = new StringBuilder();
@@ -94,7 +102,7 @@ public final class Loot {
 			box.setItem(random.nextInt(size), new ItemStack(rare[random.nextInt(rare.length)], 1));
 		}
 		UNOPENED.add(pos.immutable());
-		save();
+		dirty = true;                       // written within the second, not from world generation itself
 	}
 
 	/**

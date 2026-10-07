@@ -142,6 +142,7 @@ public final class House {
 	/** Called every second by the server: finishes what world generation could not. */
 	public static void tick(MinecraftServer server) {
 		Places.tick(server);
+		Loot.flush();
 	}
 
 	/** Has anyone found a house in this world yet? */
