@@ -23,16 +23,18 @@ ROOT = Path(__file__).resolve().parents[2]
 SHOTS = ROOT / "docs/modrinth/stills"
 OUT = ROOT / "docs/creators"
 
-# still, file out, words (one line each), which line is red, exposure, zoom, focus (x, y), which side the words go
+# still, file out, words (one line each), which line is red, exposure, where it stands in the still
+# (x, y as fractions); the words go down the left, and the frame is cut so it stands to the right of them
 THUMBS = [
-    ("cinematic-treeline", "01-it-was-there-the-whole-time", ("IT WAS THERE", "THE WHOLE TIME"), 1, 1.35, 1.15, (0.5, 0.45), "left"),
-    ("cinematic-face", "02-dont-look-at-it", ("DON'T", "LOOK UP"), 1, 1.2, 1.1, (0.5, 0.4), "left"),
-    ("cinematic-fog", "03-something-in-my-world", ("SOMETHING IS", "IN MY WORLD"), 1, 1.25, 1.3, (0.5, 0.45), "left"),
-    ("cinematic-village", "04-everyone-left", ("EVERYONE LEFT.", "IT STAYED."), 1, 1.5, 1.15, (0.5, 0.45), "left"),
-    ("cinematic-camp", "05-we-were-four", ("WE WERE FOUR.", "THEN THREE."), 1, 1.45, 1.15, (0.5, 0.45), "left"),
-    ("cinematic-graves", "06-it-took-the-rest", ("IT TOOK", "THE REST"), 1, 1.7, 1.15, (0.5, 0.45), "left"),
-    ("cinematic-ruin", "07-17-feet-tall", ("17 FEET", "TALL"), 0, 1.35, 1.15, (0.5, 0.45), "left"),
+    ("cinematic-treeline", "01-it-was-there-the-whole-time", ("IT WAS THERE", "THE WHOLE TIME"), 1, 1.35, (0.5, 0.55)),
+    ("cinematic-face", "02-dont-look-up", ("DON'T", "LOOK UP"), 1, 1.2, (0.5, 0.45)),
+    ("cinematic-fog", "03-something-in-my-world", ("SOMETHING IS", "IN MY WORLD"), 1, 1.3, (0.5, 0.58)),
+    ("cinematic-village", "04-everyone-left", ("EVERYONE LEFT.", "IT STAYED."), 1, 1.45, (0.49, 0.55)),
+    ("cinematic-camp", "05-we-were-four", ("WE WERE FOUR.", "THEN THREE."), 1, 1.5, (0.61, 0.5)),
+    ("cinematic-graves", "06-it-took-the-rest", ("IT TOOK", "THE REST"), 1, 1.8, (0.48, 0.55)),
+    ("cinematic-ruin", "07-17-feet-tall", ("17 FEET", "TALL"), 0, 1.3, (0.5, 0.55)),
 ]
+ZOOM = 1.6
 
 
 def words(img, lines, red, side):
@@ -44,7 +46,7 @@ def words(img, lines, red, side):
     size = int(w * 0.17) if portrait else int(h * 0.24)
     f = film.title_font(size)
     longest = max(film.tracked_width(d, t, f, size * 0.02) for t in lines)
-    limit = w * (0.86 if portrait else 0.55)
+    limit = w * (0.86 if portrait else 0.47)
     if longest > limit:
         size = int(size * limit / longest)
         f = film.title_font(size)
@@ -72,19 +74,19 @@ def main():
     for sub in ("thumbnails", "blank", "vertical"):
         (OUT / sub).mkdir(parents=True, exist_ok=True)
     made = 0
-    for name, out, lines, red, exposure, zoom, focus, side in THUMBS:
+    for name, out, lines, red, exposure, at in THUMBS:
         path = SHOTS / (name + ".png")
         if not path.exists():
             print("missing", path.name)
             continue
         src = film.grade(Image.open(path), exposure=exposure, vignette=0.6)
-        # The words go on one side, so it goes to the other.
-        shifted = (min(0.85, focus[0] - 0.14), focus[1]) if side == "left" else (max(0.15, focus[0] + 0.14), focus[1])
-        base = film.cover(src, (1280, 720), shifted, zoom)
+        # Cut so that it stands two thirds of the way across, clear of the words on the left.
+        centre = (at[0] - (0.73 - 0.5) / ZOOM, at[1])
+        base = film.cover(src, (1280, 720), centre, ZOOM)
         base.save(OUT / "blank" / (out + ".jpg"), quality=92)
-        words(base.copy(), lines, red, side).save(OUT / "thumbnails" / (out + ".jpg"), quality=92)
-        tall = film.cover(src, (1080, 1920), focus)
-        words(tall, lines, red, side).save(OUT / "vertical" / (out + ".jpg"), quality=92)
+        words(base.copy(), lines, red, "left").save(OUT / "thumbnails" / (out + ".jpg"), quality=92)
+        tall = film.cover(src, (1080, 1920), (at[0], min(0.7, at[1] + 0.1)))
+        words(tall, lines, red, "left").save(OUT / "vertical" / (out + ".jpg"), quality=92)
         made += 1
     print("made", made, "sets in", OUT)
 

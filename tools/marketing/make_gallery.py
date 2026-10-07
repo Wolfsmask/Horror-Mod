@@ -65,14 +65,14 @@ def featured(src):
     """The first image anyone sees: the title over the treeline."""
     inner = H - 2 * BAR
     picture = film.grade(film.cover(src, (W, inner), (0.5, 0.42)), exposure=1.3, vignette=0.85)
-    picture = film.darken_side(picture, "bottom", 0.55)
+    picture = film.darken_side(picture, "top", 0.45)
     img = Image.new("RGB", (W, H), (0, 0, 0))
     img.paste(picture, (0, BAR))
     title = "THE OCCUPANT"
     f = film.title_font(200)
     d = ImageDraw.Draw(img)
     tw = film.tracked_width(d, title, f, 26)
-    film.shadowed(img, ((W - tw) / 2, BAR + inner * 0.56), title, f, film.WHITE, tracking=26, shadow=0.85)
+    film.shadowed(img, ((W - tw) / 2, BAR + inner * 0.07), title, f, film.WHITE, tracking=26, shadow=0.85)
     sub = "THERE IS SOMETHING IN THIS WORLD WITH YOU"
     fs = film.line_font(30)
     sw = film.tracked_width(d, sub, fs, 11)

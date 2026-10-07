@@ -129,7 +129,7 @@ final class Cinematic {
 		BlockPos cam = server.computeOnServer(s -> new BlockPos(it.getX() + 13, surface(s.overworld(), it.getX() + 13, it.getZ()), it.getZ()));
 		clearView(server, it.offset(-1, 0, -3), cam.offset(1, 0, 3), Math.min(it.getY(), cam.getY()) + 1, 14);
 		// From down in the snow, looking up: it stands against the sun, and over everything.
-		Vec3 eye = new Vec3(cam.getX() + 0.5, cam.getY() + 0.7, cam.getZ() + 0.5);
+		Vec3 eye = server.computeOnServer(s -> findCamera(s.overworld(), player(s), it, 1.0, 0.0, new double[]{13, 16, 19}, 0.9, 0));
 		take(context, game, new Shot(it, eye, new Vec3(it.getX() + 0.5, it.getY() + 3.6, it.getZ() + 0.5)), 12700,
 				"cinematic-treeline", Look.towering(50));
 
