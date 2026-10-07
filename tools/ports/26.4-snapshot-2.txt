@@ -1,13 +1,57 @@
-# 26.4-snapshot-2 on 34d132612977991dc89dbfd040a2022bfdba6701: build failure, tests skipped, jar skipped
-com/wolfsmask/occupant/director/events/WatcherEvent.java:69: error: local variables referenced from a lambda expression must be final or effectively final
-com/wolfsmask/occupant/director/events/WatcherEvent.java:69: error: local variables referenced from a lambda expression must be final or effectively final
-com/wolfsmask/occupant/director/events/WatcherEvent.java:72: error: local variables referenced from a lambda expression must be final or effectively final
-com/wolfsmask/occupant/director/events/WatcherEvent.java:72: error: local variables referenced from a lambda expression must be final or effectively final
-com/wolfsmask/occupant/director/events/WatcherEvent.java:75: error: local variables referenced from a lambda expression must be final or effectively final
+# 26.4-snapshot-2 on b17d007697bbc9f8cca07f217270ec1ca170862b: build success, tests failure, jar success
 > Configure project :
 > Task :compileJava
-> Task :compileJava FAILED
-* What went wrong:
-> Compilation failed; see the compiler output below.
-> Check your code and dependencies to fix the compilation error(s)
-> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Task :processResources
+> Task :classes
+> Task :compileClientJava
+> Task :processClientResources NO-SOURCE
+> Task :processIncludeJars
+> Task :clientClasses
+> Task :compileTestJava NO-SOURCE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+> Task :test NO-SOURCE
+> Task :validateAccessWidener NO-SOURCE
+> Task :check UP-TO-DATE
+> Task :jar
+> Task :assemble
+> Task :build
+=== jar
+jar: build/libs/occupant-1.0.0+mc26.4-snapshot-2.jar
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.wolfsmask.occupant.mixin.client",
+  "compatibilityLevel": "JAVA_25",
+  "client": [
+    "FogRendererMixin",
+    "ScreenAccess",
+    "SkyRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
+unobfuscated version: the game's own names are the real ones
+[02:20:45] [Server thread/INFO] (occupant) [gametest] last camp at BlockPos{x=-5395664, y=3, z=1722092}, chest at BlockPos{x=-5395661, y=4, z=1722092}
+[02:20:46] [Server thread/INFO] (occupant) [gametest] lair under BlockPos{x=-5395649, y=0, z=1723492}: 22 rungs, going in: STARTED
+[02:20:46] [Server thread/INFO] (occupant) [gametest] houses: found before false, first true, too close false, second true, after finding false
+[02:20:48] [Server thread/INFO] (occupant) [gametest] blight over 64 chunks: 473 blocks changed, 0 leaves
+[02:20:48] [Server thread/INFO] (occupant) [gametest] advancements of ours loaded: 19
+[02:20:48] [Server thread/INFO] (occupant) [gametest] fog: first act 68.0, last act 38.0
+[02:20:49] [Server thread/INFO] (occupant) [gametest] fog thick at 48.0, begins at 27.839999999999996; it stands 20.615528128088304 away
+[02:20:49] [Server thread/INFO] (occupant) [gametest] places without loot: [], page found: true
+[02:20:51] [Server thread/INFO] (occupant) [gametest] house test player at BlockPos{x=-2, y=1, z=-4} facing 0.0 / (0.0, -0.0, 1.0)
+[02:20:51] [Server thread/INFO] (occupant) [gametest] house hallway spot: peeking BlockPos{x=-5395594, y=8, z=1723095} / any BlockPos{x=-5395594, y=8, z=1723095} (relative to the floor: BlockPos{x=4, y=1, z=0})
+[02:20:51] [Server thread/INFO] (occupant) [gametest] hallway light at the far end: block 0 sky 0, dark true
+[02:20:51] [Server thread/INFO] (occupant) [gametest] that spot: mask 1001001001, block light 0, sky 2, main room middle block light 0 sky 8
+[02:20:53] [Server thread/INFO] (occupant) [gametest] field: darkOutside=true skyDarken=7 light=8 skyLight=15 blockLight=0 isDark=true grassInDirtTag=false
+[02:20:53] [Server thread/INFO] (occupant) [gametest] cave: yaw=-90.0 feet=BlockPos{x=-5395234, y=60, z=1722929} underground=true skyVisible=false skyLight=0 topY=69 light=0 look=(1.0, 0.0, 0.0) | ahead: standable=55 dark=55 visible=55
+[02:20:53] [Server thread/INFO] (occupant) [gametest] arena failures: [last_night (field)]
+[02:20:53] [Server thread/INFO] (occupant) [gametest] slowest event to start: torch_gone (cave) in 11 ms
+[02:20:53] [Server thread/INFO] (occupant) [gametest] unnoticed: age 241, seen -1, nearby 1, alive true, concealed false, noticed false, in sight true, angle 176, ray MISS at -5395678, 56, 1722799 Block{minecraft:air}, ignored 1, same story true
+[02:21:02] [Server thread/INFO] (occupant) [gametest] events that found a place to happen: [familiar, cave_noise, thunder, echo, breath, fake_join, roof, saving, teammate, advancement, whisper, doppel_chat, stalker, flicker, static, wake]
+[02:21:02] [Server thread/INFO] (Minecraft) ========= 20 GAME TESTS COMPLETE IN 20.44 s ======================
+[02:21:02] [Server thread/INFO] (Minecraft) 2 required tests failed :(
+[02:21:02] [Server thread/INFO] (Minecraft)    - occupant:occupant_game_tests_fog_thickens_with_the_story: The fog begins near, and the band it stands in is inside it, short of where it is thick on tick 0
+[02:21:02] [Server thread/INFO] (Minecraft)    - occupant:arena_game_tests_events_find_their_place: Events that could not find their place: [last_night (field)] on tick 102
