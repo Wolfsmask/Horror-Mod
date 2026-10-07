@@ -15,7 +15,7 @@ import java.util.Map;
  * Each follow-up is tried in turn, and only if it fits where the player is now (a knock needs a
  * door, a face at the window needs them inside), so it is never forced.
  */
-final class FollowUps {
+public final class FollowUps {
 	/** One thing that may come after: which event, how likely, and after how many seconds. */
 	record Next(String event, float chance, int minSeconds, int maxSeconds) {
 	}
@@ -59,6 +59,13 @@ final class FollowUps {
 			Map.entry("saving", List.of(new Next("whisper", 0.3f, 5, 12))));
 
 	private FollowUps() {
+	}
+
+	/** Every event named here, before or after: for the test that they all exist. */
+	public static java.util.Set<String> named() {
+		java.util.Set<String> all = new java.util.TreeSet<>(AFTER.keySet());
+		for (List<Next> options : AFTER.values()) for (Next n : options) all.add(n.event());
+		return all;
 	}
 
 	/**

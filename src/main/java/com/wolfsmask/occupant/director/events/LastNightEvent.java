@@ -71,6 +71,7 @@ public final class LastNightEvent extends HorrorEvent {
 		double far = FogLine.edgeFar(fog) - 1.0;
 		BlockPos spot = Spots.aroundPlayer(p, ctx.random, far - 5.0, far, 0, 50, true, 60,
 				pos -> Math.abs(pos.getY() - p.getBlockY()) <= 8
+						&& Vec3.atBottomCenterOf(pos).distanceTo(p.position()) <= far + 1.0
 						&& Sight.hasLineOfSight(p, Vec3.atBottomCenterOf(pos).add(0, 2.5, 0)));
 		OccupantEntity e = spot == null ? null
 				: ctx.haunt.spawnOccupant(p, spot, OccupantEntity.Mode.STARE, OccupantEntity.Form.REVEALED);

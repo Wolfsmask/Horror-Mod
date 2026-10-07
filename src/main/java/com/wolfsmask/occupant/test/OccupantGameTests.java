@@ -475,6 +475,15 @@ public final class OccupantGameTests {
 		helper.succeed();
 	}
 
+	/** What comes after an event is always an event there is: a misspelt one would never come. */
+	@GameTest
+	public void followUpsAreRealEvents(GameTestHelper helper) {
+		List<String> unknown = new ArrayList<>();
+		for (String id : com.wolfsmask.occupant.director.FollowUps.named()) if (Events.byId(id) == null) unknown.add(id);
+		helper.assertTrue(unknown.isEmpty(), "Follow-ups that are not events: " + unknown);
+		helper.succeed();
+	}
+
 	/** Every one of its advancements loads, in whichever layout this version reads. */
 	@GameTest
 	public void theAdvancementsLoad(GameTestHelper helper) {

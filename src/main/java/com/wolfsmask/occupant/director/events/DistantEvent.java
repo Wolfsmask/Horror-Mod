@@ -69,7 +69,7 @@ public final class DistantEvent extends HorrorEvent {
 		float fogEnd = Fog.endFor(p, ctx.haunt);
 		if (fogEnd > 0) {
 			min = Math.max(16.0, FogLine.edgeNear(fogEnd));
-			max = Math.min(reach, FogLine.edgeFar(fogEnd));
+			max = Math.min(reach, FogLine.edgeFar(fogEnd) - 1.0);
 		}
 		// In the thickest fog the band is narrow: closer, but still at the edge of seeing.
 		if (max < min + 8.0) min = Math.max(12.0, max - 8.0);
@@ -78,10 +78,10 @@ public final class DistantEvent extends HorrorEvent {
 		// Somewhere ahead of the player, but off to one side: found, not presented.
 		// Best: only its head and shoulders over a crest or past the trees.
 		BlockPos spot = Spots.aroundPlayer(p, ctx.random, min, max, 12, 60, true, 120,
-				pos -> Math.abs(pos.getY() - p.getBlockY()) <= 40 && ctx.world.canSeeSky(pos.above())
+				pos -> Math.abs(pos.getY() - p.getBlockY()) <= 40 && ctx.throughFog(pos) && ctx.world.canSeeSky(pos.above())
 						&& Sight.onlyJustVisible(p, Vec3.atBottomCenterOf(pos), 5.0));
 		if (spot == null) {
-			spot = Spots.aroundPlayer(p, ctx.random, min, max, 12, 60, true, 60, pos -> standsAbove(ctx, pos));
+			spot = Spots.aroundPlayer(p, ctx.random, min, max, 12, 60, true, 60, pos -> ctx.throughFog(pos) && standsAbove(ctx, pos));
 		}
 		if (spot == null) return null;
 
