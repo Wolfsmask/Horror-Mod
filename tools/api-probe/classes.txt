@@ -1,4 +1,8 @@
 @mc 26.1.2 26.2 26.3 26.4-snapshot-2 1.21.11 1.21.1 1.20.1
-# Round 31: world creation's own "Create New World", to be called through a remapped invoker on
-# every version (the Enter key is the fallback today on the obfuscated ones).
-@private net.minecraft.client.gui.screens.worldselection.CreateWorldScreen onCreate|keyPressed|openFresh
+# Round 32: the debug screen (F3): how to tell it is open, how to draw on it, and reduced debug info.
+@private net.minecraft.client.gui.components.DebugScreenOverlay render|extract|showDebugScreen|getGameInformation|drawGameInformation|Visible|Entries
+net.minecraft.client.player.LocalPlayer ReducedDebug
+net.minecraft.world.entity.player.Player ReducedDebug
+net.minecraft.client.Minecraft debug|Debug
+@find debug\.(DebugEntryPosition|DebugScreenEntries|DebugScreenEntryList|DebugEntry.*Pos.*)
+@find gui\.components\.debug\.
