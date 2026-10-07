@@ -84,7 +84,7 @@ public final class BehindYouEvent extends HorrorEvent {
 				Cues.sound(p, ModSounds.BREATH, SoundSource.HOSTILE, entity.getEyePosition(), 0.8f, 0.9f);
 			}
 
-			if (Sight.angleTo(p, entity.getEyePosition()) <= 55.0 && Sight.canSeeAnyPart(p, entity)) {
+			if (!entity.isConcealed() && Sight.angleTo(p, entity.getEyePosition()) <= 55.0 && Sight.canSeeAnyPart(p, entity)) {
 				// No stinger. A loud noise makes you jump and then laugh; this should make you
 				// stand very still instead. One breath at your ear, and the screen goes quietly out.
 				Cues.sound(p, ModSounds.BREATH, SoundSource.HOSTILE, entity.getEyePosition(), 0.55f, 0.8f);

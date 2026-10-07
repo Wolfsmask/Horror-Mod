@@ -82,7 +82,7 @@ public final class WakeEvent extends HorrorEvent {
 
 			if (entity.hasVanished() || p.level() != entity.level()) return false;
 			entity.keepAlive();
-			lookTicks = Sight.isLookingAt(p, entity) ? lookTicks + 1 : 0;
+			lookTicks = !entity.isConcealed() && Sight.isLookingAt(p, entity) ? lookTicks + 1 : 0;
 			if (lookTicks > 0) haunt.markShown();
 			if (lookTicks >= 8) {
 				haunt.data.encounters++;
