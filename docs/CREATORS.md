@@ -95,8 +95,8 @@ killing anything. The ending ones are hidden until you get them.
   It goes silent on purpose at the worst moments.
 - **Brightness at Moody (0%).** The dark is the whole game. It has a faint sheen that keeps it
   just visible in real darkness, so your viewers will still see it.
-- **Render distance 8 or more.** The fog covers the edge, so the mod looks the same whatever
-  your render distance, but it needs about eight chunks to stand at the edge of.
+- **Render distance 6 or more.** The fog is thick at about eighty blocks, so past that the mod
+  looks the same whatever your render distance, and anything more only costs frames.
 - **No shaders.** They work, but most shader packs draw their own fog instead of the mod's, and
   the fog and the mod's colour are half of it. It is built to look right without them.
 - **Photosensitive viewers:** set `reduceFlashing` to `true` (Options → The Occupant, or
