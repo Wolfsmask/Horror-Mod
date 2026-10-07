@@ -1,6 +1,6 @@
-# 26.3 with Sodium mc26.3-0.9.3-alpha.1-fabric on 57eb157e65eb5b41e1f1904ccbbc1e4dc8aba404: failure
+# 26.3 with Sodium mc26.3-0.9.3-alpha.1-fabric on e7c70faf4d70911d258f879675515307b37eb865: failure
 > Task :compileJava FAILED
-BUILD FAILED in 20s
+BUILD FAILED in 14s
 --- tail ---
   		                            ^
   /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:178: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
@@ -33,12 +33,12 @@ BUILD FAILED in 20s
   /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:718: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
   		ServerPlayer player = helper.makeMockServerPlayerInLevel();
   		                            ^
-  3 errors
+  1 error
   13 warnings
 
 * Try:
 > Check your code and dependencies to fix the compilation error(s)
 > Run with --scan to get full insights from a Build Scan (powered by Develocity).
 
-BUILD FAILED in 20s
+BUILD FAILED in 14s
 1 actionable task: 1 executed
