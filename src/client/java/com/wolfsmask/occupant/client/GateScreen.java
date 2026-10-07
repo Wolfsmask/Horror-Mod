@@ -96,11 +96,11 @@ public final class GateScreen extends Screen {
 		addRenderableWidget(leave);
 	}
 
-	/** And from the keyboard: Enter makes the world. */
+	/** And from the keyboard: Enter makes the world (unless Tab has picked one of the two). */
 	@Override
 	public boolean keyPressed(KeyEvent event) {
 		int key = event.input();
-		if (key == KEY_ENTER || key == KEY_KP_ENTER) {
+		if ((key == KEY_ENTER || key == KEY_KP_ENTER) && getFocused() == null) {
 			enter(ModeScreen.recording());
 			return true;
 		}
