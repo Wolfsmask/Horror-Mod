@@ -167,6 +167,7 @@ public final class Director {
 		while (it.hasNext()) {
 			Haunt h = it.next();
 			if (server.getPlayerList().getPlayer(h.uuid) == null) {
+				Trifles.forget(null, h);
 				endSequence(h);
 				it.remove();
 			}
@@ -210,6 +211,7 @@ public final class Director {
 
 		if (!eligible) return;
 		h.data.playTicks++;
+		Trifles.tick(player, h, cfg);
 
 		// The first time in this world, once they are actually in it: black, and it tells them.
 		if (!h.data.introduced && player.tickCount > 60) {

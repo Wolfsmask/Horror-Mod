@@ -47,7 +47,7 @@ public final class DoppelChatEvent extends HorrorEvent {
 	}
 
 	/** Formatted exactly like a normal chat message: {@code <name> message}. */
-	static Component chat(String name, String message) {
+	public static Component chat(String name, String message) {
 		return Component.translatable("chat.type.text", Component.literal(name), Component.literal(message));
 	}
 }

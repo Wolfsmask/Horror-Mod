@@ -44,6 +44,19 @@ public final class Haunt {
 	/** Seconds in a row under a roof or underground, and when it last asked why (ticks of play). */
 	int confinedSeconds;
 	long leftBehindAt = -1;
+	/** The small things (see Trifles): what they last said and when it comes back, the step after theirs, a wrong name, home. */
+	@Nullable
+	String echoOf;
+	long echoAt = -1;
+	long stepAt;
+	long stepAgainAt;
+	boolean wasWalking;
+	long renamedUntil;
+	long renameAgainAt;
+	long awaySince = -1;
+	long skullDay = -1;
+	long chestDay = -1;
+	long doorAgainAt;
 	/** When it last saved them from a fall, and from monsters (ticks of play; -1 never). */
 	long mercyFallAt = -1;
 	long mercyMobAt = -1;

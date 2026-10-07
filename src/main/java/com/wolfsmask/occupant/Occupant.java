@@ -135,6 +135,10 @@ public final class Occupant implements ModInitializer {
 		// Opening a chest or barrel nobody has opened before: the next page of the survivor's log is in it.
 		UseBlockCallback.EVENT.register((player, world, hand, hit) -> {
 			if (!world.isClientSide() && player instanceof ServerPlayer sp) {
+				// Fire will not catch while it is close.
+				if (guard("lighting a fire", () -> com.wolfsmask.occupant.director.Trifles.fireRefused(sp, sp.getItemInHand(hand)), false)) {
+					return InteractionResult.FAIL;
+				}
 				BlockPos pos = hit.getBlockPos();
 				if (Loot.unopened(pos)) guard("opening a container", () -> {
 					Director director = Director.get();
@@ -182,6 +186,7 @@ public final class Occupant implements ModInitializer {
 			Director director = Director.get();
 			if (director == null || !(entity instanceof ServerPlayer sp) || !OccupantConfig.get().enabled) return;
 			com.wolfsmask.occupant.story.Silence.died(sp);
+			com.wolfsmask.occupant.director.Trifles.grave(sp);
 			if (director.data(sp).act < 2 || sp.getRandom().nextFloat() > 0.6f) return;
 			String[] lines = {"It was there when you died.", "It watched.", "It stayed with you until the end.", "It will wait for you to come back."};
 			sp.sendSystemMessage(net.minecraft.network.chat.Component.literal(lines[sp.getRandom().nextInt(lines.length)])
