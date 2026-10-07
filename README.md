@@ -59,6 +59,11 @@ breathes behind you; it knocks, and then it is at the window; it is seen far off
 later, closer. After every big scare there is a **calm** of a few minutes with only small,
 deniable things. And stay in too long, in a house or a hole or a cave, and it wants to know
 why you left it out there.
+
+**It does not let you die. Not like that.** Jump from somewhere high enough to kill you and the
+screen goes black, and you wake at your bed with a note: *it doesn't like that.* When a monster
+is about to kill you, the light stutters and it is behind the monster, one long leg through it,
+lifting it off the ground; then it tells you why, and walks away into the fog. Not every time.
 And the Director builds on absence: the longer nothing has happened, the more it favours
 something real, so the next thing lands once you have stopped listening for it.
 
@@ -280,6 +285,7 @@ need rebuilding for the next.
 | `signMessages`, `chatLines` | | What it writes and says. `{player}` and `{day}` work in signs |
 | `screenWhispers` | `true` | Lines of text that surface on the player's screen |
 | `whisperLines` | | What those lines say. `{player}` works |
+| `itSavesYou` | `true` | It does not let you die like that: a fatal fall wakes you at your bed with a note, and now and then it kills the monster that was about to kill you |
 | `silenceMinutes` | `5` | With other players online, someone who dies late in the story loses their voice for this long: nothing they type reaches anyone (0 = off) |
 | `discordBotToken`, `discordServerId`, `discordPlayers` | empty | Optional: the same silence in your Discord server, as a timeout (no messages, no speaking in voice), which lifts by itself. See below. |
 | `debug` | `false` | Log the Director's decisions |

@@ -173,6 +173,10 @@ public final class Occupant implements ModInitializer {
 			return InteractionResult.PASS;
 		});
 
+		// It does not let them die. Not like that.
+		net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents.ALLOW_DEATH.register((entity, source, amount) ->
+				!(entity instanceof ServerPlayer sp) || guard("a death", () -> com.wolfsmask.occupant.director.Mercy.allowDeath(sp, source), true));
+
 		// Dying, late in the story: it was there.
 		net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> guard("a death", () -> {
 			Director director = Director.get();

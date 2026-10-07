@@ -144,6 +144,12 @@ public final class OccupantConfig {
 	public double silenceMinutes = 5.0;
 
 	/**
+	 * It does not let them die: a fatal fall wakes them at their bed with a note, and now and then
+	 * it kills the monster that was about to kill them. Off, they die as anyone does.
+	 */
+	public boolean itSavesYou = true;
+
+	/**
 	 * Optional, off unless filled in: a Discord bot of the server owner's, in their own Discord
 	 * server, that times out the same player there while they are silenced (no messages, no
 	 * speaking in voice). Needs the bot's token, the Discord server's id, and each player's

@@ -44,6 +44,9 @@ public final class Haunt {
 	/** Seconds in a row under a roof or underground, and when it last asked why (ticks of play). */
 	int confinedSeconds;
 	long leftBehindAt = -1;
+	/** When it last saved them from a fall, and from monsters (ticks of play; -1 never). */
+	long mercyFallAt = -1;
+	long mercyMobAt = -1;
 	/** Not again in the lair before this server tick. */
 	long lairAgainAt;
 	/** While above 0, the fog is no further than this (blocks): something is bringing it in. */

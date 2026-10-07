@@ -705,6 +705,15 @@ public final class Director {
 		return tryBegin(h, e, ctx) ? TriggerResult.STARTED : TriggerResult.NO_SPOT;
 	}
 
+	/** Starts something that is not one of the events, now, over whatever was happening. */
+	public void beginNow(ServerPlayer player, String id, Sequence sequence) {
+		Haunt h = haunt(player);
+		endSequence(h);
+		h.pending = null;
+		h.active = sequence;
+		h.activeId = id;
+	}
+
 	public void stopCurrent(ServerPlayer player) {
 		endSequence(haunt(player));
 	}
