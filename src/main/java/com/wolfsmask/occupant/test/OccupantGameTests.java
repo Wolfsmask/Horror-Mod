@@ -484,7 +484,10 @@ public final class OccupantGameTests {
 		Director director = Director.get();
 		ServerLevel level = helper.getLevel();
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
-		player.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+		// A test player is creative whatever it is told; as with the other tests, haunt creative.
+		OccupantConfig cfg = OccupantConfig.get();
+		boolean creativeBefore = cfg.hauntCreative;
+		cfg.hauntCreative = true;
 		HauntData data = director.data(player);
 		data.introduced = true;
 		data.setAct(2);
@@ -510,6 +513,7 @@ public final class OccupantGameTests {
 		boolean again = com.wolfsmask.occupant.director.Mercy.allowDeath(player, player.damageSources().mobAttack(zombie));
 		helper.assertTrue(again, "Not saved from monsters twice in ten minutes");
 		zombie.discard();
+		cfg.hauntCreative = creativeBefore;
 		helper.succeed();
 	}
 

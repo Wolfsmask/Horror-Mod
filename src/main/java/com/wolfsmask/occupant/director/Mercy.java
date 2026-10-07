@@ -67,7 +67,7 @@ public final class Mercy {
 		OccupantConfig cfg = OccupantConfig.get();
 		Director director = Director.get();
 		if (director == null || !cfg.enabled || !cfg.itSavesYou) return true;
-		if (player.isCreative() || player.isSpectator() || !Haunt.worldAllowed(player)) return true;
+		if (player.isCreative() && !cfg.hauntCreative || player.isSpectator() || !Haunt.worldAllowed(player)) return true;
 		Haunt h = director.haunt(player);
 		HauntData d = h.data;
 		if (!d.introduced || d.paused || d.ending == LastNightEnding.FOUND) return true;
