@@ -90,6 +90,29 @@ public final class ClientScares {
 				|| off.is(Items.TORCH) || off.is(Items.SOUL_TORCH) || off.is(Items.LANTERN) || off.is(Items.SOUL_LANTERN);
 	}
 
+	private static boolean screenshotDown;
+	private static int screenshotLineIn = -1;
+
+	/** Late in the story, a photograph taken is not quite of what was there. */
+	static void screenshots(Minecraft mc) {
+		if (mc.player == null) {
+			screenshotLineIn = -1;
+			return;
+		}
+		boolean down = mc.options.keyScreenshot.isDown();
+		if (down && !screenshotDown && PauseLines.act >= 2 && ClientConfig.get().screenText
+				&& mc.player.getRandom().nextFloat() < 0.35f) {
+			screenshotLineIn = 18;
+		}
+		screenshotDown = down;
+		if (screenshotLineIn > 0 && --screenshotLineIn == 0) {
+			String[] lines = {"There are two of you in it.", "It is in this one too.", "Look behind you in it.",
+					"You were not alone in that one."};
+			mc.gui.getChat().addMessage(net.minecraft.network.chat.Component.literal(lines[mc.player.getRandom().nextInt(lines.length)])
+					.withStyle(net.minecraft.ChatFormatting.DARK_GRAY, net.minecraft.ChatFormatting.ITALIC));
+		}
+	}
+
 	/** "Saving world..." for {@code ticks}; {@code which} picks what it says it is saving. */
 	static void saving(int ticks, int which) {
 		savingAge = 0;

@@ -25,6 +25,7 @@ public final class OccupantClient implements ClientModInitializer {
 				context.client().execute(() -> ScreenEffects.whisper(payload)));
 
 		ClientTickEvents.END_CLIENT_TICK.register(ScreenEffects::tick);
+		ClientTickEvents.END_CLIENT_TICK.register(ClientScares::screenshots);
 		// Drawn last, on top of everything else on the HUD (so a blackout really is black).
 		HudElementRegistry.addLast(Occupant.id("screen_effects"), (graphics, deltaTracker) ->
 				ScreenEffects.render(graphics, deltaTracker.getGameTimeDeltaPartialTick(false)));

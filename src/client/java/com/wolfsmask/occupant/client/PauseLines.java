@@ -43,6 +43,21 @@ public final class PauseLines {
 			shownAt = System.currentTimeMillis();
 			ScreenEvents.afterExtract(screen).register((s, graphics, mouseX, mouseY, delta) -> draw(graphics, s));
 		});
+		// Late on, for a moment, the way out of the world is not the way out.
+		ScreenEvents.AFTER_INIT.register((client, screen, width, height) -> {
+			if (!(screen instanceof PauseScreen) || act < 3 || ThreadLocalRandom.current().nextFloat() > 0.25f) return;
+			for (var child : screen.children()) {
+				if (!(child instanceof net.minecraft.client.gui.components.AbstractWidget button)) continue;
+				if (!(button.getMessage().getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents key)
+						|| !key.getKey().equals("menu.returnToMenu")) continue;
+				net.minecraft.network.chat.Component real = button.getMessage();
+				button.setMessage(net.minecraft.network.chat.Component.literal("Save and Stay"));
+				int[] ticks = {0};
+				ScreenEvents.beforeTick(screen).register(s -> {
+					if (++ticks[0] == 30) button.setMessage(real);
+				});
+			}
+		});
 		// The first menu after leaving a world the story had got far in.
 		ScreenEvents.AFTER_INIT.register((client, screen, width, height) -> {
 			if (parting == null || client.level != null || screen instanceof PauseScreen) return;
