@@ -151,8 +151,8 @@ As you explore, you come across places people used to be, all empty:
 - **Abandoned camps**: a tent (or what is left of one), logs round a dead fire, and a sign left
   for whoever came next.
 - **Graveyards**: rows of graves behind a broken fence, one of them dug open.
-- **Watchtowers**: a ladder from the ground up through a hatch to a roofed lookout over the
-  trees, with someone's things still on it.
+- **Watchtowers**: a ladder from the ground up through a hatch to a lookout over the trees
+  (in some the roof has come down), with someone's things still on it.
 - **Chapels**: pews and an altar, one pew turned round to face the door; some with a bell tower,
   some with the roof fallen in.
 - **Radio shacks**: a hut with an aerial, a set (a jukebox), a lever, and a note.
