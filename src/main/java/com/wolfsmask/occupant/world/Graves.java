@@ -29,16 +29,30 @@ final class Graves extends Build {
 
 	@Override
 	void build() {
-		for (int x = -6; x <= 6; x++) {
-			for (int z = -5; z <= 5; z++) {
+		// How many graves, and in how many rows: no two graveyards the same.
+		int rows = 2 + random.nextInt(2);
+		int cols = 2 + random.nextInt(3);
+		int[] xs = new int[cols];
+		for (int i = 0; i < cols; i++) xs[i] = -3 * (cols - 1) / 2 + 3 * i;
+		int[] zs = new int[rows];
+		for (int i = 0; i < rows; i++) zs[i] = (rows == 2 ? -2 : -3) + 3 * i;
+		int x0 = xs[0] - 2, x1 = xs[cols - 1] + 2;
+		int z0 = zs[0] - 2, z1 = zs[rows - 1] + 3;
+
+		for (int x = x0 - 1; x <= x1 + 1; x++) {
+			for (int z = z0 - 1; z <= z1 + 1; z++) {
 				int g = floor(x, z);
 				fill(x, g, z, x, g + 3, z, Blocks.AIR.defaultBlockState());
 			}
 		}
-		// The fence, following the ground, with a way in at the front.
+		// The fence, following the ground, with a way in at the front and gaps where it has rotted.
 		java.util.Set<Long> cells = new java.util.HashSet<>();
-		java.util.List<int[]> ring = ring(-5, -4, 5, 4, new int[]{0, -4});
-		for (int[] c : ring) cells.add(((long) c[0] << 32) ^ (c[1] & 0xFFFFFFFFL));
+		java.util.List<int[]> ring = new java.util.ArrayList<>();
+		for (int[] c : ring(x0, z0, x1, z1, new int[]{0, z0})) {
+			if (random.nextFloat() < 0.12f) continue;
+			ring.add(c);
+			cells.add(((long) c[0] << 32) ^ (c[1] & 0xFFFFFFFFL));
+		}
 		for (int[] c : ring) {
 			BlockState fence = Blocks.SPRUCE_FENCE.defaultBlockState()
 					.setValue(BlockStateProperties.NORTH, cells.contains(((long) c[0] << 32) ^ ((c[1] - 1) & 0xFFFFFFFFL)))
@@ -48,13 +62,16 @@ final class Graves extends Build {
 			put(c[0], floor(c[0], c[1]), c[1], fence);
 		}
 
-		// Two rows of graves: a mound, and a stone at its head. One has been opened.
-		int open = random.nextInt(6);
+		// Rows of graves: a mound, and a stone at its head; one or two missing; one opened.
+		int count = rows * cols;
+		int open = random.nextInt(count);
 		int n = 0;
-		for (int z : new int[]{-2, 1}) {
-			for (int x : new int[]{-3, 0, 3}) {
+		for (int z : zs) {
+			for (int x : xs) {
+				int index = n++;
+				if (index != open && random.nextFloat() < 0.12f) continue;      // nothing left of this one
 				int g = floor(x, z) - 1;
-				if (n++ == open) {
+				if (index == open) {
 					fill(x, g - 1, z, x, g, z + 1, Blocks.AIR.defaultBlockState());
 					container(x, g - 1, z, facing(Blocks.CHEST.defaultBlockState(), Direction.SOUTH), Loot.Kind.GRAVE);
 					put(x, g - 2, z + 1, Blocks.DIRT.defaultBlockState());
@@ -71,8 +88,8 @@ final class Graves extends Build {
 		}
 
 		// A sign at the gate, facing whoever comes.
-		int sy = floor(0, -5);
-		put(0, sy, -5, Blocks.OAK_SIGN.defaultBlockState().setValue(BlockStateProperties.ROTATION_16, 8));
-		Places.sign(level, at(0, sy, -5), SIGNS[random.nextInt(SIGNS.length)]);
+		int sy = floor(0, z0 - 1);
+		put(0, sy, z0 - 1, Blocks.OAK_SIGN.defaultBlockState().setValue(BlockStateProperties.ROTATION_16, 8));
+		Places.sign(level, at(0, sy, z0 - 1), SIGNS[random.nextInt(SIGNS.length)]);
 	}
 }
