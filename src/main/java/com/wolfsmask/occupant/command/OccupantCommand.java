@@ -229,7 +229,9 @@ public final class OccupantCommand {
 	private static boolean mayUse(CommandSourceStack src) {
 		try {
 			if (Commands.hasPermission(Commands.LEVEL_GAMEMASTERS).test(src)) return true;
-			return src.getServer() != null && src.getServer().isSingleplayer();
+			// Alone in their own world, it is theirs to use. Once it is opened to others (LAN, or a
+			// tunnel like e4mc), only those allowed commands may: never a guest.
+			return src.getServer() != null && src.getServer().isSingleplayer() && !src.getServer().isPublished();
 		} catch (Exception | LinkageError e) {
 			Occupant.LOGGER.error("Could not work out who may use /occupant; assuming nobody.", e);
 			return false;

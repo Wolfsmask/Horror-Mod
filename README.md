@@ -268,6 +268,15 @@ The mod is needed on **both** the server and every client. The official launcher
 the right Java for each version. The snapshot jar is built against one snapshot and will likely
 need rebuilding for the next.
 
+### Playing with a friend over the internet (e4mc, e4all, LAN)
+
+Open your world to LAN as usual; tunnel mods like **e4mc** or **e4all** then give your friend an
+address to join. Only the host needs e4mc/e4all, but **everyone needs The Occupant and Fabric
+API**: a friend without them is turned away with a message saying what is missing. Each of you
+is haunted on your own. Once the world is open to others, `/occupant` is only for players allowed
+commands (turn on *Allow Commands* when opening to LAN if you want it). Use e4mc or e4all, not
+both at once.
+
 ## Config
 
 `config/occupant.json` (server) is created on first launch:
