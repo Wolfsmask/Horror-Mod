@@ -200,10 +200,9 @@ final class Places {
 	}
 
 	/** Around a house: a couple of cottages, a well, and the paths between them. */
-	static void village(WorldGenLevel level, RandomSource random, BlockPos house, Rotation rotation) {
+	static void village(WorldGenLevel level, RandomSource random, BlockPos house, Rotation rotation, Palette palette) {
 		// Spots around the house, in its own frame: to its left, behind it to the right, and in front.
 		int[][] spots = {{-15, -3}, {15, 6}, {-2, -13}, {13, -12}};
-		Palette palette = Palette.pick(level, house, random);          // one village, one wood
 		Rotation[] turns = {Rotation.CLOCKWISE_90, Rotation.COUNTERCLOCKWISE_90, Rotation.NONE, Rotation.CLOCKWISE_180};
 		for (int i = 0; i < spots.length; i++) {
 			BlockPos column = house.offset(new BlockPos(spots[i][0], 0, spots[i][1]).rotate(rotation));

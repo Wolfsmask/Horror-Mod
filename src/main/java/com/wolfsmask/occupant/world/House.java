@@ -262,9 +262,11 @@ public final class House {
 		// World generation runs on several threads at once: whoever claims the spot builds there.
 		if (!claim(base)) return false;
 
-		build(level, base, rotation, random);
+		// The house and its village are built of the same wood: whatever grew there.
+		Palette palette = Palette.pick(level, base, random);
+		build(level, base, rotation, random, palette);
 		// Now and then it was not alone: the rest of a village stands round it, as empty as it is.
-		if (random.nextFloat() < 0.55f) Places.village(level, random, base, rotation);
+		if (random.nextFloat() < 0.55f) Places.village(level, random, base, rotation, palette);
 		return true;
 	}
 
@@ -273,7 +275,13 @@ public final class House {
 	 * Unrotated, the front door is at {@code floor + (-2, 1, -5)} and the house runs towards +z.
 	 */
 	public static void build(WorldGenLevel level, BlockPos floor, Rotation rotation, RandomSource random) {
-		new Builder(level, floor, rotation, random).build();
+		build(level, floor, rotation, random, Palette.AS_BUILT);
+	}
+
+	private static void build(WorldGenLevel level, BlockPos floor, Rotation rotation, RandomSource random, Palette palette) {
+		Builder builder = new Builder(level, floor, rotation, random);
+		builder.palette = palette;
+		builder.build();
 	}
 
 	/** For the game tests: one chance at the blight (dead trees, bare ground) in the chunk at {@code origin}. */
@@ -285,7 +293,7 @@ public final class House {
 	public static void buildPlaceForTest(String kind, WorldGenLevel level, BlockPos base, RandomSource random) {
 		if (kind.equals("village") || kind.equals("house")) {
 			build(level, base, Rotation.NONE, random);
-			if (kind.equals("village")) Places.village(level, random, base, Rotation.NONE);
+			if (kind.equals("village")) Places.village(level, random, base, Rotation.NONE, Palette.pick(level, base, random));
 			return;
 		}
 		Places.buildForTest(kind, level, base, random);
