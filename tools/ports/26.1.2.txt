@@ -1,4 +1,4 @@
-# 26.1.2 on 57eb157e65eb5b41e1f1904ccbbc1e4dc8aba404: build failure, tests skipped, jar skipped
+# 26.1.2 on 329157ef79786becf7079ec31219b81d8cafff1a: build failure, tests skipped, jar skipped
 com/wolfsmask/occupant/client/ClientScares.java:111: error: method addMessage in class ChatComponent cannot be applied to given types;
   required: Component,MessageSignature,GuiMessageSource,GuiMessageTag
   found:    MutableComponent
