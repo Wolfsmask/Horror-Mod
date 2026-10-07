@@ -84,8 +84,12 @@ public final class GuiCompat {
 		});
 	}
 
-	/** Presses world creation's "Create New World": Enter does the same thing there. */
+	/** Presses world creation's "Create New World" (Enter does the same, if ever it is not there). */
 	public static void confirmWorldCreation(Screen creation) {
+		if (creation instanceof com.wolfsmask.occupant.mixin.client.CreateWorldAccess access) {
+			access.occupant$create();
+			return;
+		}
 		creation.keyPressed(257, 0, 0);
 	}
 }

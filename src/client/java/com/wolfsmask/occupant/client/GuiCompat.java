@@ -67,18 +67,11 @@ public final class GuiCompat {
 		CreateWorldScreen.openFresh(mc, onBack);
 	}
 
-	/**
-	 * Presses world creation's "Create New World". Where the game's own names are kept at run
-	 * time (26.x) its handler is called directly; otherwise Enter does the same thing there.
-	 */
+	/** Presses world creation's "Create New World" (Enter does the same, if ever it is not there). */
 	public static void confirmWorldCreation(Screen creation) {
-		try {
-			java.lang.reflect.Method create = creation.getClass().getDeclaredMethod("onCreate");
-			create.setAccessible(true);
-			create.invoke(creation);
+		if (creation instanceof com.wolfsmask.occupant.mixin.client.CreateWorldAccess access) {
+			access.occupant$create();
 			return;
-		} catch (ReflectiveOperationException | RuntimeException e) {
-			// Not by that name here: fall back on the key.
 		}
 		creation.keyPressed(new KeyEvent(GLFW_ENTER, 0, 0));
 	}
