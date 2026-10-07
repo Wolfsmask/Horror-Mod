@@ -90,7 +90,6 @@ public final class Compat {
 		return level.getSharedSpawnPos();
 	}
 
-	/** A finished written book. */
 	/** A copy of {@code stack} going by another name. */
 	public static ItemStack named(ItemStack stack, Component name) {
 		ItemStack copy = stack.copy();
@@ -98,6 +97,7 @@ public final class Compat {
 		return copy;
 	}
 
+	/** A finished written book. */
 	public static ItemStack writtenBook(String title, String author, java.util.List<String> pages) {
 		ItemStack book = new ItemStack(Items.WRITTEN_BOOK);
 		java.util.List<Filterable<Component>> content = new java.util.ArrayList<>();

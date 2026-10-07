@@ -65,6 +65,8 @@ public final class Haunt {
 	long greyUntil;
 	long greyDay = -1;
 	long tallyDay = -1;
+	/** The night their pets last sat down by themselves. */
+	long petsNight = -1;
 	/** When it last saved them from a fall, and from monsters (ticks of play; -1 never). */
 	long mercyFallAt = -1;
 	long mercyMobAt = -1;

@@ -8,6 +8,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BarrelBlockEntity;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
 
 import java.util.List;
 import java.util.Set;
@@ -40,6 +42,8 @@ public final class DeepLog {
 	public static void opening(ServerPlayer player, BlockPos pos, Container box) {
 		Director director = Director.get();
 		if (director == null || !OccupantConfig.get().enabled) return;
+		// A chest or a barrel only: in a furnace or a brewing stand a page would sit in the wrong slot.
+		if (!(box instanceof ChestBlockEntity) && !(box instanceof BarrelBlockEntity)) return;
 		if (pos.getY() > DEEP || Compat.level(player).canSeeSky(pos.above()) || GIVEN.contains(pos)) return;
 		HauntData d = director.data(player);
 		int found = d.marks >>> 8;

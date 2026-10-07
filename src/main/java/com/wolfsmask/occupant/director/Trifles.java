@@ -24,6 +24,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.entity.BarrelBlockEntity;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
@@ -59,7 +61,7 @@ public final class Trifles {
 		echo(player, h, cfg, random);
 		if (d.act >= 3 && h.renamedUntil == 0 && now >= h.renameAgainAt && random.nextFloat() < 0.004f) rename(player, h, now, random);
 		home(player, h, cfg, world, now, random);
-		if (d.act >= 2) pets(player, world);
+		if (d.act >= 2) pets(player, h, world, random);
 		answer(player, h, world, now);
 		greyDay(player, h, world, now, random);
 		if (cfg.worldChanges) {
@@ -256,6 +258,8 @@ public final class Trifles {
 	 * thing itself is never touched, and the next look at the pack puts it right.
 	 */
 	private static void rename(ServerPlayer player, Haunt h, long now, RandomSource random) {
+		// Never in creative, whose inventory would send the false name back as the real one.
+		if (player.isCreative()) return;
 		var inventory = player.getInventory();
 		for (int tries = 0; tries < 12; tries++) {
 			int index = random.nextInt(36);
@@ -295,7 +299,7 @@ public final class Trifles {
 		if (dist > 48 && Spots.isLoaded(world, bed)) {
 			if (h.awaySince < 0) h.awaySince = now;
 			// Away at night: something lies down where they sleep, and leaves something behind.
-			if (night && h.skullDay != day && random.nextFloat() < 0.02f) {
+			if (night && h.skullDay != day && random.nextFloat() < 0.02f && !skullBeside(world, bed)) {
 				h.skullDay = day;
 				leaveBySide(world, bed, Blocks.SKELETON_SKULL.defaultBlockState()
 						.setValue(BlockStateProperties.ROTATION_16, random.nextInt(16)));
@@ -334,9 +338,20 @@ public final class Trifles {
 		}
 	}
 
+	/** One is enough: it does not leave a pile of them. */
+	private static boolean skullBeside(ServerLevel world, BlockPos bed) {
+		for (BlockPos p : BlockPos.betweenClosed(bed.offset(-2, -1, -2), bed.offset(2, 1, 2))) {
+			if (world.getBlockState(p).is(Blocks.SKELETON_SKULL)) return true;
+		}
+		return false;
+	}
+
+	/** Only a chest or a barrel: a furnace's or a brewing stand's slots are not all alike. */
 	private static void swapInChest(ServerLevel world, BlockPos bed, RandomSource random) {
 		for (BlockPos p : BlockPos.betweenClosed(bed.offset(-10, -3, -10), bed.offset(10, 3, 10))) {
-			if (!(world.getBlockEntity(p) instanceof Container box) || box.getContainerSize() < 2) continue;
+			var entity = world.getBlockEntity(p);
+			if (!(entity instanceof ChestBlockEntity || entity instanceof BarrelBlockEntity)) continue;
+			if (!(entity instanceof Container box) || box.getContainerSize() < 2) continue;
 			if (com.wolfsmask.occupant.world.Loot.unopened(p)) continue;
 			int a = random.nextInt(box.getContainerSize());
 			int b = random.nextInt(box.getContainerSize());
@@ -362,9 +377,15 @@ public final class Trifles {
 
 	// ------------------------------------------------------------------ pets
 
-	/** At night, their animals will not come out with them: they sit down where they are. */
-	private static void pets(ServerPlayer player, ServerLevel world) {
-		if (!world.isDarkOutside() || !world.canSeeSky(player.blockPosition().above())) return;
+	/**
+	 * At night, their animals will not come out with them: once in the night, they sit down where
+	 * they are. Stood up again, they stay up.
+	 */
+	private static void pets(ServerPlayer player, Haunt h, ServerLevel world, RandomSource random) {
+		long night = (Compat.dayTime(world) + 12000L) / 24000L;
+		if (!world.isDarkOutside() || h.petsNight == night || !world.canSeeSky(player.blockPosition().above())
+				|| random.nextFloat() > 0.01f) return;
+		h.petsNight = night;
 		for (TamableAnimal pet : world.getEntitiesOfClass(TamableAnimal.class, player.getBoundingBox().inflate(16.0),
 				a -> a.isAlive() && a.isOwnedBy(player) && !a.isOrderedToSit() && !a.isPassenger())) {
 			pet.setOrderedToSit(true);

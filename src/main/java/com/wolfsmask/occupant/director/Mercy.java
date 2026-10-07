@@ -24,6 +24,8 @@ import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -71,6 +73,8 @@ public final class Mercy {
 		Haunt h = director.haunt(player);
 		HauntData d = h.data;
 		if (!d.introduced || d.paused || d.ending == LastNightEnding.FOUND) return true;
+		// A totem saves them by itself; it lets the totem do it.
+		if (player.getMainHandItem().is(Items.TOTEM_OF_UNDYING) || player.getOffhandItem().is(Items.TOTEM_OF_UNDYING)) return true;
 
 		boolean fell = source.is(DamageTypeTags.IS_FALL) || source.is(DamageTypes.FELL_OUT_OF_WORLD);
 		if (fell) {
@@ -104,7 +108,8 @@ public final class Mercy {
 		Cues.effect(player, ScreenEffectPayload.BLACKOUT, 70, 1f);
 		Cues.effect(player, ScreenEffectPayload.SILENCE, 0, 1f);
 		ServerLevel overworld = Compat.level(player).getServer().overworld();
-		BlockPos bed = Compat.respawnPos(player);
+		// Their bed only if it is in the overworld, where they are going (an anchor is not).
+		BlockPos bed = player.level().dimension() == Level.OVERWORLD ? Compat.respawnPos(player) : null;
 		BlockPos centre = bed != null ? bed : Compat.spawnPos(overworld);
 		BlockPos feet = standNear(overworld, centre);
 		if (feet == null) {
