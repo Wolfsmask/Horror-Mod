@@ -1,4 +1,4 @@
-# 26.3 client on e7c70faf4d70911d258f879675515307b37eb865: failure
+# 26.3 client on e23a75c9aae6a94cc6ef9579c2d9077d41ae3f58: failure
 === client.log
 /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/ArenaGameTests.java:107: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
 /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:64: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
@@ -9,14 +9,14 @@
 /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:350: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
 /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:381: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
 /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:486: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:494: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:534: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:560: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:624: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:718: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:500: error: cannot find symbol
+				player.getBoundingBox().inflate(6.0), m -> m.getTags().contains("occupant_mercy")).stream().findFirst().orElse(null);
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:538: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:564: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:628: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:722: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
 > Task :compileJava FAILED
 * What went wrong:
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:494: error: cannot find symbol
   /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/ArenaGameTests.java:107: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
   /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:64: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
   /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:96: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
@@ -26,29 +26,31 @@
   /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:350: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
   /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:381: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
   /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:486: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:534: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:560: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:624: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:718: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-BUILD FAILED in 17s
+  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:538: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:564: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:628: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:722: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:500: error: cannot find symbol
+  				player.getBoundingBox().inflate(6.0), m -> m.getTags().contains("occupant_mercy")).stream().findFirst().orElse(null);
+BUILD FAILED in 20s
 --- last of the server thread in client.log ---
 --- tail of client.log ---
-  		                            ^
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:486: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
   		ServerPlayer player = helper.makeMockServerPlayerInLevel();
   		                            ^
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:534: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:564: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
   		ServerPlayer player = helper.makeMockServerPlayerInLevel();
   		                            ^
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:560: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:628: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
   		ServerPlayer player = helper.makeMockServerPlayerInLevel();
   		                            ^
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:624: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:722: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
   		ServerPlayer player = helper.makeMockServerPlayerInLevel();
   		                            ^
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:718: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  		ServerPlayer player = helper.makeMockServerPlayerInLevel();
-  		                            ^
+  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:500: error: cannot find symbol
+  				player.getBoundingBox().inflate(6.0), m -> m.getTags().contains("occupant_mercy")).stream().findFirst().orElse(null);
+  				                                            ^
+    symbol:   method getTags()
+    location: variable m of type Mob
   1 error
   13 warnings
 
@@ -56,5 +58,5 @@ BUILD FAILED in 17s
 > Check your code and dependencies to fix the compilation error(s)
 > Run with --scan to get full insights from a Build Scan (powered by Develocity).
 
-BUILD FAILED in 17s
+BUILD FAILED in 20s
 1 actionable task: 1 executed
