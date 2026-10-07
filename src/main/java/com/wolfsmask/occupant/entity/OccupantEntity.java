@@ -218,6 +218,19 @@ public class OccupantEntity extends PathfinderMob {
 		}
 	}
 
+	/**
+	 * Gone. If {@code player} can see it, it goes in a stutter of the light, which opens dark,
+	 * so it is never seen simply blinking out of the world.
+	 */
+	public void vanishFrom(@Nullable ServerPlayer player) {
+		if (!vanished && player != null && !isConcealed() && player.level() == this.level()
+				&& this.distanceTo(player) < 112.0 && com.wolfsmask.occupant.util.Sight.isOnScreen(player, this)
+				&& com.wolfsmask.occupant.util.Sight.hasLineOfSight(player, this.getEyePosition())) {
+			com.wolfsmask.occupant.util.Cues.effect(player, com.wolfsmask.occupant.network.ScreenEffectPayload.FLICKER, 5, 1f);
+		}
+		vanish();
+	}
+
 	@Nullable
 	public ServerPlayer findHauntedPlayer(boolean requireSameWorld) {
 		if (targetUuid == null || !(this.level() instanceof ServerLevel serverLevel)) return null;

@@ -175,6 +175,8 @@ public final class Mercy {
 		private boolean killed;
 		@Nullable
 		private Vec3 away;
+		@Nullable
+		private ServerPlayer watcher;
 
 		Rescue(Haunt haunt, ServerPlayer player, List<Mob> monsters) {
 			this.haunt = haunt;
@@ -208,6 +210,7 @@ public final class Mercy {
 		@Override
 		public boolean tick(ServerPlayer player) {
 			age++;
+			watcher = player;
 			if (entity != null) {
 				if (entity.hasVanished()) entity = null;
 				else entity.keepAlive();
@@ -280,7 +283,7 @@ public final class Mercy {
 				m.setNoAi(false);
 				m.setNoGravity(false);
 			}
-			if (entity != null) entity.vanish();
+			if (entity != null) entity.vanishFrom(watcher);
 		}
 
 		@Nullable

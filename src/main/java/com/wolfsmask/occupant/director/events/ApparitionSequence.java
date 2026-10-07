@@ -125,7 +125,7 @@ public abstract class ApparitionSequence implements Sequence {
 	@Override
 	public void end() {
 		Vec3 stood = entity.position();
-		entity.vanish();
+		entity.vanishFrom(watching);
 		// The animals that watched it, afterwards, stand in a ring where it stood, facing out,
 		// as if they had kept it there. Only those the player cannot see being moved.
 		ServerPlayer viewer = watching;

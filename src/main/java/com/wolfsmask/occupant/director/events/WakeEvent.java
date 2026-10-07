@@ -58,6 +58,8 @@ public final class WakeEvent extends HorrorEvent {
 		private OccupantEntity entity;
 		private int age;
 		private int lookTicks;
+		@Nullable
+		private ServerPlayer seenBy;
 
 		Waking(Haunt haunt) {
 			this.haunt = haunt;
@@ -66,6 +68,7 @@ public final class WakeEvent extends HorrorEvent {
 		@Override
 		public boolean tick(ServerPlayer p) {
 			age++;
+			seenBy = p;
 			if (entity == null) {
 				// Give the player a moment to get up and for their view to settle.
 				if (age < SETTLE_TICKS) return true;
@@ -95,7 +98,7 @@ public final class WakeEvent extends HorrorEvent {
 
 		@Override
 		public void end() {
-			if (entity != null) entity.vanish();
+			if (entity != null) entity.vanishFrom(seenBy);
 		}
 	}
 }
