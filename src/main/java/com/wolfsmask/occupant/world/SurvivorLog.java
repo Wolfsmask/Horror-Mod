@@ -35,6 +35,26 @@ public final class SurvivorLog {
 	/** The page that says where the last camp is. */
 	public static final int CAMP_PAGE = 11;
 
+	/**
+	 * Whether the next page can be found yet. The log keeps pace with the story rather than with
+	 * how fast somebody loots: a few pages early on, the page that says where the last camp is not
+	 * before the third act, and a little while between any two. A chest opened too soon has its
+	 * things in it but no page; the page can turn up in it later.
+	 */
+	public static boolean ready(com.wolfsmask.occupant.director.HauntData d, double pace) {
+		int next = d.logsFound + 1;
+		int allowed = switch (d.act) {
+			case 0, 1 -> 3;
+			case 2 -> 7;
+			case 3 -> CAMP_PAGE;
+			default -> Integer.MAX_VALUE;
+		};
+		if (next > allowed) return false;
+		int now = (int) (d.playTicks / 20);
+		int gap = (int) (150 * pace);                           // two and a half minutes, at the story's pace
+		return d.lastPageAt < 0 || now - d.lastPageAt >= gap;
+	}
+
 	/** How many pages there are before they run out. */
 	public static int length() {
 		return PAGES.size();

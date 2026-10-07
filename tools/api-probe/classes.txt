@@ -1,8 +1,13 @@
-@mc 26.2 1.21.11 1.20.1
-# Round 25: which Mixin compatibility levels the loader knows, and MixinExtras.
-org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_
-@jars mixinextras
-@jars sponge-mixin
-net.minecraft.world.entity.MobCategory CREATURE
-net.minecraft.world.entity.Mob getNavigation|getLookControl
-net.minecraft.world.entity.ai.navigation.PathNavigation stop
+@mc 26.1.2 26.2 26.3 26.4-snapshot-2 1.21.11 1.21.1 1.20.1
+# Round 30: the sky, the sunset glow and the fog colour in each version (a fog that covers the
+# sky, and no orange band over it at sunrise and sunset); screen input and widget alpha (26.3).
+@private net.minecraft.client.renderer.fog.FogData
+@private net.minecraft.client.renderer.fog.FogRenderer computeFogColor|setupFog|Color|updateBuffer
+@private net.minecraft.client.renderer.SkyRenderer
+@private net.minecraft.client.renderer.FogRenderer setupColor|fogRed|fogGreen|fogBlue|levelFogColor|setupFog|biomeChangedTime
+@private net.minecraft.client.renderer.DimensionSpecialEffects unrise|unset|Sky
+@code net.minecraft.client.renderer.LevelRenderer addSkyPass|renderSky
+@find SkyRenderer|Sunrise|Sunset|FogEnvironment
+@private net.minecraft.client.gui.screens.Screen mouseClicked|keyPressed|extractRenderState|extractBackground|afterMouseAction|charTyped
+net.minecraft.client.gui.components.AbstractWidget setAlpha|visible|active
+net.minecraft.client.input.KeyEvent

@@ -34,9 +34,10 @@ public final class HauntData {
 			Codec.BOOL.optionalFieldOf("pageAfter", false).forGetter(a -> a[7] != 0),
 			Codec.INT.optionalFieldOf("insideSeconds", 0).forGetter(a -> a[8]),
 			Codec.INT.optionalFieldOf("outsideSeconds", 0).forGetter(a -> a[9]),
-			Codec.INT.optionalFieldOf("ending", -1).forGetter(a -> a[10])
-	).apply(i, (logs, ignored, introduced, lastNight, camp, campX, campZ, after, inside, outside, ending) -> new int[]{
-			logs, ignored, introduced ? 1 : 0, lastNight ? 1 : 0, camp, campX, campZ, after ? 1 : 0, inside, outside, ending}));
+			Codec.INT.optionalFieldOf("ending", -1).forGetter(a -> a[10]),
+			Codec.INT.optionalFieldOf("lastPageAt", -1).forGetter(a -> a[11])
+	).apply(i, (logs, ignored, introduced, lastNight, camp, campX, campZ, after, inside, outside, ending, pageAt) -> new int[]{
+			logs, ignored, introduced ? 1 : 0, lastNight ? 1 : 0, camp, campX, campZ, after ? 1 : 0, inside, outside, ending, pageAt}));
 
 	/** Every field is optional with a default, so old or partial saves always load. */
 	public static final Codec<HauntData> CODEC = RecordCodecBuilder.create(i -> i.group(
@@ -55,9 +56,9 @@ public final class HauntData {
 			Codec.unboundedMap(Codec.STRING, Codec.LONG).optionalFieldOf("cooldowns", Map.of()).forGetter(HauntData::activeCooldowns),
 			Codec.STRING.listOf().optionalFieldOf("history", List.of()).forGetter(d -> new ArrayList<>(d.history)),
 			Codec.STRING.listOf().optionalFieldOf("heardChat", List.of()).forGetter(d -> new ArrayList<>(d.heardChat)),
-			STORY.optionalFieldOf("story", new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1}).forGetter(d -> new int[]{d.logsFound, d.ignored,
+			STORY.optionalFieldOf("story", new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1}).forGetter(d -> new int[]{d.logsFound, d.ignored,
 					d.introduced ? 1 : 0, d.lastNight ? 1 : 0, d.lastCamp, d.lastCampX, d.lastCampZ, d.pageAfter ? 1 : 0, d.insideSeconds,
-					d.outsideSeconds, d.ending})
+					d.outsideSeconds, d.ending, d.lastPageAt})
 	).apply(i, HauntData::fromCodec));
 
 	/** 0 = nothing yet, 1 = signs, 2 = presence, 3 = closer, 4 = hunt. */
@@ -105,6 +106,8 @@ public final class HauntData {
 	 * what was left of the survivor (it lets them go), 2 they hid (it came in). -1 before then.
 	 */
 	public int ending = -1;
+	/** When the last page of the log was found, in seconds of play; -1 before the first. */
+	public int lastPageAt = -1;
 	public int outsideSeconds;
 
 	/** Paused by an operator with /occupant pause. */
@@ -152,6 +155,7 @@ public final class HauntData {
 			d.outsideSeconds = story[9];
 		}
 		if (story.length >= 11) d.ending = story[10];
+		if (story.length >= 12) d.lastPageAt = story[11];
 		return d;
 	}
 

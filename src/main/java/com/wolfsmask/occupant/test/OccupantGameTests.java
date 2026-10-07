@@ -137,6 +137,7 @@ public final class OccupantGameTests {
 		d.lastCampZ = 5678;
 		d.insideSeconds = 300;
 		d.ending = 2;
+		d.lastPageAt = 77;
 		d.recordEvent("watcher", 2400);
 		d.rememberChat("hello there");
 		Tag saved = HauntData.CODEC.encodeStart(NbtOps.INSTANCE, d).getOrThrow();
@@ -146,7 +147,7 @@ public final class OccupantGameTests {
 		helper.assertTrue(copy.logsFound == 5 && copy.ignored == 3 && copy.introduced && copy.lastNight,
 				"The story so far should round-trip");
 		helper.assertTrue(copy.lastCamp == 1 && copy.lastCampX == -1234 && copy.lastCampZ == 5678 && copy.insideSeconds == 300
-				&& copy.ending == 2,
+				&& copy.ending == 2 && copy.lastPageAt == 77,
 				"Where the last camp is, and how the story was lived, should round-trip");
 		helper.assertTrue(copy.isOnCooldown("watcher") && copy.recency("watcher") == 0, "Cooldowns and history should round-trip");
 		helper.assertTrue("hello there".equals(copy.heardChat.peekFirst()), "Remembered chat should round-trip");
@@ -449,6 +450,28 @@ public final class OccupantGameTests {
 		Occupant.LOGGER.info("[gametest] blight over 64 chunks: {} blocks changed, {} leaves", changed, leaves);
 		helper.assertTrue(changed > 0, "Something in 64 chunks should have gone a little wrong");
 		helper.assertTrue(leaves == 0, "Dead trees have no leaves");
+		helper.succeed();
+	}
+
+	/** The log keeps pace with the story: a few pages early, the last camp not before the third act. */
+	@GameTest
+	public void theLogKeepsPaceWithTheStory(GameTestHelper helper) {
+		HauntData d = new HauntData();
+		d.setAct(1);
+		d.playTicks = 20 * 600;
+		helper.assertTrue(com.wolfsmask.occupant.world.SurvivorLog.ready(d, 1.0), "The first page can be found in the first act");
+		d.logsFound = 1;
+		d.lastPageAt = 590;
+		helper.assertTrue(!com.wolfsmask.occupant.world.SurvivorLog.ready(d, 1.0), "Not two pages within a few seconds");
+		d.lastPageAt = 100;
+		d.logsFound = 3;
+		helper.assertTrue(!com.wolfsmask.occupant.world.SurvivorLog.ready(d, 1.0), "No more than three pages in the first act");
+		d.logsFound = com.wolfsmask.occupant.world.SurvivorLog.CAMP_PAGE - 1;
+		d.setAct(2);
+		helper.assertTrue(!com.wolfsmask.occupant.world.SurvivorLog.ready(d, 1.0), "Not the last camp's page in the second act");
+		d.setAct(3);
+		d.playTicks = 20 * 6000;
+		helper.assertTrue(com.wolfsmask.occupant.world.SurvivorLog.ready(d, 1.0), "The last camp's page in the third act");
 		helper.succeed();
 	}
 

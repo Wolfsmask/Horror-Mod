@@ -137,8 +137,14 @@ public final class Occupant implements ModInitializer {
 						} else if (data.lastNight && !data.pageAfter) {
 							data.pageAfter = true;
 							page = com.wolfsmask.occupant.world.SurvivorLog.pageAfter(name);
+						} else if (!com.wolfsmask.occupant.world.SurvivorLog.ready(data,
+								com.wolfsmask.occupant.director.Pacing.storyPace(OccupantConfig.get()))) {
+							// Too soon for the next page: only what was left in it, for now. It stays
+							// unread, and the page may be in it next time.
+							return;
 						} else {
 							data.logsFound++;
+							data.lastPageAt = (int) (data.playTicks / 20);
 							com.wolfsmask.occupant.story.Achievements.grant(sp, com.wolfsmask.occupant.story.Achievements.DEAR_DIARY);
 							if (data.logsFound == com.wolfsmask.occupant.world.SurvivorLog.CAMP_PAGE && data.lastCamp == 0) {
 								com.wolfsmask.occupant.world.LastCamp.build(sp, data);
