@@ -342,6 +342,9 @@ public final class Director {
 			case 3 -> 3.5;
 			default -> 3.0;
 		};
+		// And not one straight after another while they are not looking: the rest of the story
+		// still has to happen in between.
+		if (h.lastShowTriedAt >= 0 && h.data.playTicks - h.lastShowTriedAt < 90 * 20) return false;
 		return h.data.playTicks - h.lastShownAt >= minutes * MINUTE / Pacing.frequency(cfg);
 	}
 
@@ -597,6 +600,7 @@ public final class Director {
 		HauntData d = h.data;
 		h.active = seq;
 		h.activeId = e.id();
+		if (e.shows()) h.lastShowTriedAt = d.playTicks;
 		d.recordEvent(e.id(), e.cooldownTicks());
 		if (e.tier() == HorrorEvent.Tier.PEAK) {
 			d.lastPeakAt = d.playTicks;

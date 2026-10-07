@@ -39,6 +39,8 @@ public final class Haunt {
 	int chain;
 	/** When it was last on the player's screen, in ticks of play. */
 	long lastShownAt;
+	/** When something that could show it last began, in ticks of play. */
+	long lastShowTriedAt = -1;
 	/** Not again in the lair before this server tick. */
 	long lairAgainAt;
 	/** While above 0, the fog is no further than this (blocks): something is bringing it in. */
