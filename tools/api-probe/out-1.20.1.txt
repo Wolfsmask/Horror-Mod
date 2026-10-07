@@ -1,198 +1,155 @@
-=== org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel (-public)
-public class org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel extends Enum<org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel> {
-  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_6;
-  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_7;
-  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_8;
-  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_9;
-  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_10;
-  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_11;
-  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_12;
-  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_13;
-  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_14;
-  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_15;
-  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_16;
-  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_17;
-  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_18;
-  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_19;
-  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_20;
-  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_21;
-  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_22;
-  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_23;
-  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_24;
-  public static final org.spongepowered.asm.mixin.MixinEnvironment$CompatibilityLevel JAVA_25;
-=== jars matching mixinextras
---- mixinextras-fabric-0.5.5.jar
-com.llamalad7.mixinextras.platform.fabric.MixinExtrasConfigPlugin
-com.llamalad7.mixinextras.MixinExtrasBootstrap
-com.llamalad7.mixinextras.ap.MixinExtrasAP
-com.llamalad7.mixinextras.ap.StdoutMessager
-com.llamalad7.mixinextras.ap.expressions.DefinitionInfo
-com.llamalad7.mixinextras.config.MixinExtrasConfig
-com.llamalad7.mixinextras.expression.Definition
-com.llamalad7.mixinextras.expression.Definitions
-com.llamalad7.mixinextras.expression.Expression
-com.llamalad7.mixinextras.expression.Expressions
-com.llamalad7.mixinextras.expression.impl.ExpressionParserFacade
-com.llamalad7.mixinextras.expression.impl.ExpressionService
-com.llamalad7.mixinextras.expression.impl.ExpressionSource
-com.llamalad7.mixinextras.expression.impl.ast.expressions.ArrayAccessExpression
-com.llamalad7.mixinextras.expression.impl.ast.expressions.ArrayLiteralExpression
-com.llamalad7.mixinextras.expression.impl.ast.expressions.ArrayStoreExpression
-com.llamalad7.mixinextras.expression.impl.ast.expressions.BinaryExpression
-com.llamalad7.mixinextras.expression.impl.ast.expressions.BooleanLiteralExpression
-com.llamalad7.mixinextras.expression.impl.ast.expressions.BoundMethodReferenceExpression
-com.llamalad7.mixinextras.expression.impl.ast.expressions.CapturingExpression
-com.llamalad7.mixinextras.expression.impl.ast.expressions.CastExpression
-com.llamalad7.mixinextras.expression.impl.ast.expressions.ClassConstantExpression
-com.llamalad7.mixinextras.expression.impl.ast.expressions.ComparisonExpression
-com.llamalad7.mixinextras.expression.impl.ast.expressions.ConstructorReferenceExpression
-com.llamalad7.mixinextras.expression.impl.ast.expressions.DecimalLiteralExpression
-com.llamalad7.mixinextras.expression.impl.ast.expressions.Expression
-com.llamalad7.mixinextras.expression.impl.ast.expressions.FreeMethodReferenceExpression
-com.llamalad7.mixinextras.expression.impl.ast.expressions.IdentifierAssignmentExpression
-com.llamalad7.mixinextras.expression.impl.ast.expressions.IdentifierExpression
-com.llamalad7.mixinextras.expression.impl.ast.expressions.InstanceofExpression
-com.llamalad7.mixinextras.expression.impl.ast.expressions.InstantiationExpression
-com.llamalad7.mixinextras.expression.impl.ast.expressions.IntLiteralExpression
-com.llamalad7.mixinextras.expression.impl.ast.expressions.MemberAccessExpression
-com.llamalad7.mixinextras.expression.impl.ast.expressions.MemberAssignmentExpression
-com.llamalad7.mixinextras.expression.impl.ast.expressions.MethodCallExpression
-com.llamalad7.mixinextras.expression.impl.ast.expressions.NewArrayExpression
-com.llamalad7.mixinextras.expression.impl.ast.expressions.NullLiteralExpression
-com.llamalad7.mixinextras.expression.impl.ast.expressions.ReturnExpression
-com.llamalad7.mixinextras.expression.impl.ast.expressions.SimpleExpression
-com.llamalad7.mixinextras.expression.impl.ast.expressions.StaticMethodCallExpression
-com.llamalad7.mixinextras.expression.impl.ast.expressions.StringLiteralExpression
-com.llamalad7.mixinextras.expression.impl.ast.expressions.SuperCallExpression
-com.llamalad7.mixinextras.expression.impl.ast.expressions.ThisExpression
-com.llamalad7.mixinextras.expression.impl.ast.expressions.ThrowExpression
-com.llamalad7.mixinextras.expression.impl.ast.expressions.UnaryExpression
-com.llamalad7.mixinextras.expression.impl.ast.expressions.WildcardExpression
-com.llamalad7.mixinextras.expression.impl.ast.identifiers.ArrayTypeIdentifier
-com.llamalad7.mixinextras.expression.impl.ast.identifiers.DefinedMemberIdentifier
-com.llamalad7.mixinextras.expression.impl.ast.identifiers.DefinedTypeIdentifier
-com.llamalad7.mixinextras.expression.impl.ast.identifiers.MemberIdentifier
-com.llamalad7.mixinextras.expression.impl.ast.identifiers.TypeIdentifier
-com.llamalad7.mixinextras.expression.impl.ast.identifiers.WildcardIdentifier
-com.llamalad7.mixinextras.expression.impl.flow.Boxing
-com.llamalad7.mixinextras.expression.impl.flow.ComplexDataException
-com.llamalad7.mixinextras.expression.impl.flow.ComplexFlowValue
-com.llamalad7.mixinextras.expression.impl.flow.ComputedFlowValue
-com.llamalad7.mixinextras.expression.impl.flow.DummyFlowValue
-com.llamalad7.mixinextras.expression.impl.flow.FlowContext
-com.llamalad7.mixinextras.expression.impl.flow.FlowInterpreter
-com.llamalad7.mixinextras.expression.impl.flow.FlowValue
-com.llamalad7.mixinextras.expression.impl.flow.LocalsCalculator
-com.llamalad7.mixinextras.expression.impl.flow.expansion.IincExpander
-com.llamalad7.mixinextras.expression.impl.flow.expansion.InsnExpander
-com.llamalad7.mixinextras.expression.impl.flow.expansion.StringConcatFactoryExpander
-com.llamalad7.mixinextras.expression.impl.flow.expansion.UnaryComparisonExpander
-com.llamalad7.mixinextras.expression.impl.flow.postprocessing.ArrayCreationInfo
-com.llamalad7.mixinextras.expression.impl.flow.postprocessing.CallTaggingPostProcessor
-com.llamalad7.mixinextras.expression.impl.flow.postprocessing.FlowPostProcessor
-com.llamalad7.mixinextras.expression.impl.flow.postprocessing.InstantiationInfo
-com.llamalad7.mixinextras.expression.impl.flow.postprocessing.InstantiationPostProcessor
-com.llamalad7.mixinextras.expression.impl.flow.postprocessing.LMFInfo
-com.llamalad7.mixinextras.expression.impl.flow.postprocessing.LMFPostProcessor
-com.llamalad7.mixinextras.expression.impl.flow.postprocessing.MethodCallType
-com.llamalad7.mixinextras.expression.impl.flow.postprocessing.NewArrayPostProcessor
-com.llamalad7.mixinextras.expression.impl.flow.postprocessing.SplitNodeRemovalPostProcessor
-com.llamalad7.mixinextras.expression.impl.flow.postprocessing.StringConcatInfo
-com.llamalad7.mixinextras.expression.impl.flow.postprocessing.StringConcatPostProcessor
-com.llamalad7.mixinextras.expression.impl.flow.utils.InsnReference
-com.llamalad7.mixinextras.expression.impl.point.ExpressionContext
-com.llamalad7.mixinextras.expression.impl.point.ExpressionInjectionPoint
-=== jars matching sponge-mixin
---- sponge-mixin-0.17.4+mixin.0.8.7.jar
-org.spongepowered.tools.agent.MixinAgentClassLoader
-org.spongepowered.tools.agent.MixinAgent
-org.spongepowered.tools.obfuscation.interfaces.IObfuscationManager
-org.spongepowered.tools.obfuscation.interfaces.IObfuscationDataProvider
-org.spongepowered.tools.obfuscation.interfaces.IObfuscationEnvironment
-org.spongepowered.tools.obfuscation.interfaces.IMixinAnnotationProcessor
-org.spongepowered.tools.obfuscation.interfaces.IMessagerSuppressible
-org.spongepowered.tools.obfuscation.interfaces.IOptionProvider
-org.spongepowered.tools.obfuscation.interfaces.IMixinValidator
-org.spongepowered.tools.obfuscation.interfaces.IJavadocProvider
-org.spongepowered.tools.obfuscation.interfaces.IReferenceManager
-org.spongepowered.tools.obfuscation.interfaces.ITypeHandleProvider
-org.spongepowered.tools.obfuscation.interfaces.IMessagerEx
-org.spongepowered.tools.obfuscation.fg3.ObfuscationEnvironmentFG3
-org.spongepowered.tools.obfuscation.fg3.ObfuscationServiceFG3
-org.spongepowered.tools.obfuscation.ObfuscationType
-org.spongepowered.tools.obfuscation.service.IObfuscationService
-org.spongepowered.tools.obfuscation.service.ObfuscationTypeDescriptor
-org.spongepowered.tools.obfuscation.service.ObfuscationServices
-org.spongepowered.tools.obfuscation.AnnotatedMixinElementHandlerShadow
-org.spongepowered.tools.obfuscation.AnnotatedMixin
-org.spongepowered.tools.obfuscation.ext.SpecialPackages
-org.spongepowered.tools.obfuscation.AnnotatedMixinElementHandler
-org.spongepowered.tools.obfuscation.mcp.ObfuscationServiceMCP
-org.spongepowered.tools.obfuscation.mcp.ObfuscationEnvironmentMCP
-org.spongepowered.tools.obfuscation.MixinObfuscationProcessorTargets
-org.spongepowered.tools.obfuscation.MixinObfuscationProcessorInjection
-org.spongepowered.tools.obfuscation.SupportedOptions
-org.spongepowered.tools.obfuscation.mapping.fg3.MappingProviderTSrg
-org.spongepowered.tools.obfuscation.mapping.fg3.MappingMethodLazy
-org.spongepowered.tools.obfuscation.mapping.fg3.MappingWriterTSrg
-org.spongepowered.tools.obfuscation.mapping.IMappingWriter
-org.spongepowered.tools.obfuscation.mapping.mcp.MappingProviderSrg
-org.spongepowered.tools.obfuscation.mapping.mcp.MappingWriterSrg
-org.spongepowered.tools.obfuscation.mapping.IMappingProvider
-org.spongepowered.tools.obfuscation.mapping.common.MappingWriter
-org.spongepowered.tools.obfuscation.mapping.common.MappingProvider
-org.spongepowered.tools.obfuscation.mapping.IMappingConsumer
-org.spongepowered.tools.obfuscation.ObfuscationDataProvider
-org.spongepowered.tools.obfuscation.TargetMap
-org.spongepowered.tools.obfuscation.AnnotatedMixinElementHandlerSoftImplements
-org.spongepowered.tools.obfuscation.AnnotatedMixinElementHandlerAccessor
-org.spongepowered.tools.obfuscation.MixinValidator
-org.spongepowered.tools.obfuscation.validation.ParentValidator
-org.spongepowered.tools.obfuscation.validation.TargetValidator
-org.spongepowered.tools.obfuscation.AnnotatedMixins
-org.spongepowered.tools.obfuscation.ObfuscationEnvironment
-org.spongepowered.tools.obfuscation.struct.Message
-org.spongepowered.tools.obfuscation.struct.InjectorRemap
-org.spongepowered.tools.obfuscation.MixinObfuscationProcessor
-org.spongepowered.tools.obfuscation.Mappings
-org.spongepowered.tools.obfuscation.AnnotatedMixinElementHandlerOverwrite
-org.spongepowered.tools.obfuscation.ObfuscationData
-org.spongepowered.tools.obfuscation.SuppressedBy
-org.spongepowered.tools.obfuscation.mirror.TypeHandleASM
-org.spongepowered.tools.obfuscation.mirror.AnnotationHandle
-org.spongepowered.tools.obfuscation.mirror.MemberHandle
-org.spongepowered.tools.obfuscation.mirror.MethodHandle
-org.spongepowered.tools.obfuscation.mirror.TypeHandleSimulated
-org.spongepowered.tools.obfuscation.mirror.mapping.MappingMethodResolvable
-org.spongepowered.tools.obfuscation.mirror.MethodHandleASM
-org.spongepowered.tools.obfuscation.mirror.FieldHandleASM
-org.spongepowered.tools.obfuscation.mirror.TypeUtils
-org.spongepowered.tools.obfuscation.mirror.TypeReference
-org.spongepowered.tools.obfuscation.mirror.FieldHandle
-org.spongepowered.tools.obfuscation.mirror.TypeHandle
-org.spongepowered.tools.obfuscation.ReferenceManager
-org.spongepowered.tools.obfuscation.AnnotatedMixinElementHandlerInjector
-org.spongepowered.tools.obfuscation.ObfuscationManager
-org.spongepowered.asm.bridge.RemapperAdapterFML
-org.spongepowered.asm.bridge.RemapperAdapter
-org.spongepowered.asm.mixin.transformer.debug.RuntimeDecompiler
-org.spongepowered.asm.mixin.transformer.debug.RuntimeDecompilerAsync
-org.spongepowered.asm.service.mojang.MixinServiceLaunchWrapperBootstrap
-org.spongepowered.asm.service.mojang.LaunchClassLoaderUtil
-org.spongepowered.asm.service.mojang.Blackboard
-org.spongepowered.asm.service.mojang.LegacyTransformerHandle
-org.spongepowered.asm.service.mojang.MixinServiceLaunchWrapper
-org.spongepowered.asm.service.mojang.LoggerAdapterLog4j2
-org.spongepowered.asm.launch.MixinTweaker
-=== net.minecraft.world.entity.MobCategory (-public)
-public final class world.entity.MobCategory extends Enum<world.entity.MobCategory> implements util.StringRepresentable {
-  public static final world.entity.MobCategory CREATURE;
-  public static final world.entity.MobCategory UNDERGROUND_WATER_CREATURE;
-  public static final world.entity.MobCategory WATER_CREATURE;
-=== net.minecraft.world.entity.Mob (-public)
-public abstract class world.entity.Mob extends world.entity.LivingEntity implements world.entity.Targeting {
-  public world.entity.ai.control.LookControl getLookControl();
-  public world.entity.ai.navigation.PathNavigation getNavigation();
-=== net.minecraft.world.entity.ai.navigation.PathNavigation (-public)
-public abstract class world.entity.ai.navigation.PathNavigation {
-  public void stop();
+=== net.minecraft.client.renderer.fog.FogData (-p)
+Error: class not found: client.renderer.fog.FogData
+=== net.minecraft.client.renderer.fog.FogRenderer (-p)
+Error: class not found: client.renderer.fog.FogRenderer
+=== net.minecraft.client.renderer.SkyRenderer (-p)
+Error: class not found: client.renderer.SkyRenderer
+=== net.minecraft.client.renderer.FogRenderer (-p)
+public class client.renderer.FogRenderer {
+  private static float fogRed;
+  private static float fogGreen;
+  private static float fogBlue;
+  private static long biomeChangedTime;
+  public static void setupColor(client.Camera, float, client.multiplayer.ClientLevel, int, float);
+  public static void setupFog(client.Camera, client.renderer.FogRenderer$FogMode, float, boolean, float);
+  public static void levelFogColor();
+=== net.minecraft.client.renderer.DimensionSpecialEffects (-p)
+public abstract class client.renderer.DimensionSpecialEffects {
+  private final float[] sunriseCol;
+  private final client.renderer.DimensionSpecialEffects$SkyType skyType;
+  public client.renderer.DimensionSpecialEffects(float, boolean, client.renderer.DimensionSpecialEffects$SkyType, boolean, boolean);
+  public float[] getSunriseColor(float, float);
+  public client.renderer.DimensionSpecialEffects$SkyType skyType();
+=== net.minecraft.client.renderer.LevelRenderer (code: addSkyPass|renderSky)
+  public void renderSky(com.mojang.blaze3d.vertex.PoseStack, org.joml.Matrix4f, float, client.Camera, boolean, java.lang.Runnable);
+    Code:
+         2: invokeinterface #2823,  1         // InterfaceMethod java/lang/Runnable.run:()V
+         9: ifeq          13
+        15: invokevirtual #2827               // Method net/minecraft/client/Camera.getFluidInCamera:()Lnet/minecraft/world/level/material/FogType;
+        22: getstatic     #2833               // Field net/minecraft/world/level/material/FogType.POWDER_SNOW:Lnet/minecraft/world/level/material/FogType;
+        25: if_acmpeq     45
+        30: getstatic     #2835               // Field net/minecraft/world/level/material/FogType.LAVA:Lnet/minecraft/world/level/material/FogType;
+        33: if_acmpeq     45
+        39: invokevirtual #2839               // Method doesMobEffectBlockSky:(Lnet/minecraft/client/Camera;)Z
+        42: ifeq          46
+        47: getfield      #389                // Field minecraft:Lnet/minecraft/client/Minecraft;
+        50: getfield      #426                // Field net/minecraft/client/Minecraft.level:Lnet/minecraft/client/multiplayer/ClientLevel;
+        53: invokevirtual #1975               // Method net/minecraft/client/multiplayer/ClientLevel.effects:()Lnet/minecraft/client/renderer/DimensionSpecialEffects;
+        56: invokevirtual #2843               // Method net/minecraft/client/renderer/DimensionSpecialEffects.skyType:()Lnet/minecraft/client/renderer/DimensionSpecialEffects$SkyType;
+        59: getstatic     #2847               // Field net/minecraft/client/renderer/DimensionSpecialEffects$SkyType.END:Lnet/minecraft/client/renderer/DimensionSpecialEffects$SkyType;
+        62: if_acmpne     71
+        67: invokevirtual #2849               // Method renderEndSky:(Lcom/mojang/blaze3d/vertex/PoseStack;)V
+        72: getfield      #389                // Field minecraft:Lnet/minecraft/client/Minecraft;
+        75: getfield      #426                // Field net/minecraft/client/Minecraft.level:Lnet/minecraft/client/multiplayer/ClientLevel;
+        78: invokevirtual #1975               // Method net/minecraft/client/multiplayer/ClientLevel.effects:()Lnet/minecraft/client/renderer/DimensionSpecialEffects;
+        81: invokevirtual #2843               // Method net/minecraft/client/renderer/DimensionSpecialEffects.skyType:()Lnet/minecraft/client/renderer/DimensionSpecialEffects$SkyType;
+        84: getstatic     #2852               // Field net/minecraft/client/renderer/DimensionSpecialEffects$SkyType.NORMAL:Lnet/minecraft/client/renderer/DimensionSpecialEffects$SkyType;
+        87: if_acmpeq     91
+        92: getfield      #1232               // Field level:Lnet/minecraft/client/multiplayer/ClientLevel;
+        96: getfield      #389                // Field minecraft:Lnet/minecraft/client/Minecraft;
+        99: getfield      #1140               // Field net/minecraft/client/Minecraft.gameRenderer:Lnet/minecraft/client/renderer/GameRenderer;
+       102: invokevirtual #2856               // Method net/minecraft/client/renderer/GameRenderer.getMainCamera:()Lnet/minecraft/client/Camera;
+       105: invokevirtual #689                // Method net/minecraft/client/Camera.getPosition:()Lnet/minecraft/world/phys/Vec3;
+       109: invokevirtual #2860               // Method net/minecraft/client/multiplayer/ClientLevel.getSkyColor:(Lnet/minecraft/world/phys/Vec3;F)Lnet/minecraft/world/phys/Vec3;
+       116: getfield      #1461               // Field net/minecraft/world/phys/Vec3.x:D
+       119: d2f
+       124: getfield      #1467               // Field net/minecraft/world/phys/Vec3.y:D
+       127: d2f
+       132: getfield      #1469               // Field net/minecraft/world/phys/Vec3.z:D
+       135: d2f
+       138: invokestatic  #1962               // Method net/minecraft/client/renderer/FogRenderer.levelFogColor:()V
+       141: invokestatic  #444                // Method com/mojang/blaze3d/vertex/Tesselator.getInstance:()Lcom/mojang/blaze3d/vertex/Tesselator;
+       144: invokevirtual #448                // Method com/mojang/blaze3d/vertex/Tesselator.getBuilder:()Lcom/mojang/blaze3d/vertex/BufferBuilder;
+       149: iconst_0
+       150: invokestatic  #469                // Method com/mojang/blaze3d/systems/RenderSystem.depthMask:(Z)V
+       159: fconst_1
+       160: invokestatic  #2863               // Method com/mojang/blaze3d/systems/RenderSystem.setShaderColor:(FFFF)V
+       163: invokestatic  #2568               // Method com/mojang/blaze3d/systems/RenderSystem.getShader:()Lnet/minecraft/client/renderer/ShaderInstance;
+       169: getfield      #1176               // Field skyBuffer:Lcom/mojang/blaze3d/vertex/VertexBuffer;
+       172: invokevirtual #1165               // Method com/mojang/blaze3d/vertex/VertexBuffer.bind:()V
+       176: getfield      #1176               // Field skyBuffer:Lcom/mojang/blaze3d/vertex/VertexBuffer;
+       180: invokevirtual #1882               // Method com/mojang/blaze3d/vertex/PoseStack.last:()Lcom/mojang/blaze3d/vertex/PoseStack$Pose;
+       183: invokevirtual #1885               // Method com/mojang/blaze3d/vertex/PoseStack$Pose.pose:()Lorg/joml/Matrix4f;
+       189: invokevirtual #2867               // Method com/mojang/blaze3d/vertex/VertexBuffer.drawWithShader:(Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;Lnet/minecraft/client/renderer/ShaderInstance;)V
+       192: invokestatic  #1172               // Method com/mojang/blaze3d/vertex/VertexBuffer.unbind:()V
+       195: invokestatic  #456                // Method com/mojang/blaze3d/systems/RenderSystem.enableBlend:()V
+       199: getfield      #1232               // Field level:Lnet/minecraft/client/multiplayer/ClientLevel;
+       202: invokevirtual #1975               // Method net/minecraft/client/multiplayer/ClientLevel.effects:()Lnet/minecraft/client/renderer/DimensionSpecialEffects;
+       206: getfield      #1232               // Field level:Lnet/minecraft/client/multiplayer/ClientLevel;
+       210: invokevirtual #2870               // Method net/minecraft/client/multiplayer/ClientLevel.getTimeOfDay:(F)F
+       214: invokevirtual #2874               // Method net/minecraft/client/renderer/DimensionSpecialEffects.getSunriseColor:(FF)[F
+       221: ifnull        495
+       224: invokedynamic #2879,  0           // InvokeDynamic #15:get:()Ljava/util/function/Supplier;
+       229: invokestatic  #496                // Method com/mojang/blaze3d/systems/RenderSystem.setShader:(Ljava/util/function/Supplier;)V
+       232: fconst_1
+       233: fconst_1
+       234: fconst_1
+       235: fconst_1
+       236: invokestatic  #2863               // Method com/mojang/blaze3d/systems/RenderSystem.setShaderColor:(FFFF)V
+       240: invokevirtual #2201               // Method com/mojang/blaze3d/vertex/PoseStack.pushPose:()V
+       244: getstatic     #2799               // Field com/mojang/math/Axis.XP:Lcom/mojang/math/Axis;
+       247: ldc_w         #2800               // float 90.0f
+       250: invokeinterface #2804,  2         // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       255: invokevirtual #2808               // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionf;)V
+       259: getfield      #1232               // Field level:Lnet/minecraft/client/multiplayer/ClientLevel;
+       263: invokevirtual #2882               // Method net/minecraft/client/multiplayer/ClientLevel.getSunAngle:(F)F
+       266: invokestatic  #1198               // Method net/minecraft/util/Mth.sin:(F)F
+       269: fconst_0
+       270: fcmpg
+       271: ifge          280
+       274: ldc_w         #2810               // float 180.0f
+       277: goto          281
+       280: fconst_0
+       284: getstatic     #2813               // Field com/mojang/math/Axis.ZP:Lcom/mojang/math/Axis;
+       289: invokeinterface #2804,  2         // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       294: invokevirtual #2808               // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionf;)V
+       298: getstatic     #2813               // Field com/mojang/math/Axis.ZP:Lcom/mojang/math/Axis;
+       301: ldc_w         #2800               // float 90.0f
+       304: invokeinterface #2804,  2         // InterfaceMethod com/mojang/math/Axis.rotationDegrees:(F)Lorg/joml/Quaternionf;
+       309: invokevirtual #2808               // Method com/mojang/blaze3d/vertex/PoseStack.mulPose:(Lorg/joml/Quaternionf;)V
+       314: iconst_0
+       315: faload
+       320: iconst_1
+       321: faload
+       326: iconst_2
+       327: faload
+       331: invokevirtual #1882               // Method com/mojang/blaze3d/vertex/PoseStack.last:()Lcom/mojang/blaze3d/vertex/PoseStack$Pose;
+       334: invokevirtual #1885               // Method com/mojang/blaze3d/vertex/PoseStack$Pose.pose:()Lorg/joml/Matrix4f;
+       341: getstatic     #1188               // Field com/mojang/blaze3d/vertex/VertexFormat$Mode.TRIANGLE_FAN:Lcom/mojang/blaze3d/vertex/VertexFormat$Mode;
+       344: getstatic     #2886               // Field com/mojang/blaze3d/vertex/DefaultVertexFormat.POSITION_COLOR:Lcom/mojang/blaze3d/vertex/VertexFormat;
+       347: invokevirtual #567                // Method com/mojang/blaze3d/vertex/BufferBuilder.begin:(Lcom/mojang/blaze3d/vertex/VertexFormat$Mode;Lcom/mojang/blaze3d/vertex/VertexFormat;)V
+       354: fconst_0
+       355: ldc_w         #694                // float 100.0f
+       358: fconst_0
+       359: invokevirtual #2818               // Method com/mojang/blaze3d/vertex/BufferBuilder.vertex:(Lorg/joml/Matrix4f;FFF)Lcom/mojang/blaze3d/vertex/VertexConsumer;
+       370: iconst_3
+       371: faload
+       372: invokeinterface #598,  5          // InterfaceMethod com/mojang/blaze3d/vertex/VertexConsumer.color:(FFFF)Lcom/mojang/blaze3d/vertex/VertexConsumer;
+       377: invokeinterface #605,  1          // InterfaceMethod com/mojang/blaze3d/vertex/VertexConsumer.endVertex:()V
+       382: bipush        16
+       384: istore        20
+       386: iconst_0
+       387: istore        21
+       391: bipush        16
+       393: if_icmpgt     483
+       398: i2f
+       399: ldc_w         #2887               // float 6.2831855f
+       402: fmul
+       403: ldc_w         #1177               // float 16.0f
+       406: fdiv
+       411: invokestatic  #1198               // Method net/minecraft/util/Mth.sin:(F)F
+       418: invokestatic  #1195               // Method net/minecraft/util/Mth.cos:(F)F
+       429: ldc_w         #2888               // float 120.0f
+       432: fmul
+=== classes matching SkyRenderer|Sunrise|Sunset|FogEnvironment
+=== net.minecraft.client.gui.screens.Screen (-p)
+public abstract class client.gui.screens.Screen extends client.gui.components.events.AbstractContainerEventHandler implements client.gui.components.Renderable {
+  public boolean keyPressed(int, int, int);
+  public void afterMouseAction();
+=== net.minecraft.client.gui.components.AbstractWidget (-public)
+public abstract class client.gui.components.AbstractWidget implements client.gui.components.Renderable,client.gui.components.events.GuiEventListener,client.gui.layouts.LayoutElement,client.gui.narration.NarratableEntry {
+  public boolean active;
+  public boolean visible;
+  public void setAlpha(float);
+=== net.minecraft.client.input.KeyEvent (-public)
+Error: class not found: client.input.KeyEvent
