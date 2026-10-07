@@ -85,7 +85,7 @@ YouTube thumbnails and Shorts covers, and title ideas. Monetise your videos, no 
 
 ## ⚠️ Compatibility
 
-- ✅ **Fine:** Sodium, Lithium, ImmediatelyFast, Nvidium, FerriteCore, ModernFix, Entity Culling, C2ME, Chunky, Mod Menu, minimaps, JEI/EMI/REI and other performance or utility mods.
+- ✅ **Fine:** Sodium, Lithium, ImmediatelyFast, Nvidium, FerriteCore, ModernFix, Entity Culling, C2ME, Chunky, Mod Menu, minimaps, JEI/EMI/REI and other performance or utility mods. With Sodium Extra, leave its fog settings on.
 - 🟡 **Shaders (Iris/Oculus): not recommended, but they work.** Most shader packs replace the mod's fog and colour with their own, and the fog is half the experience.
 - ❌ **World generation overhauls break things:** Terralith, Tectonic, Biomes O' Plenty, Oh The Biomes You'll Go, Regions Unexplored, WWOO, Continents and the like. The house, the places and its lair are built for vanilla terrain.
 - ❌ **Distant Horizons / Voxy:** they draw land past the fog, and it stands at the fog's edge.

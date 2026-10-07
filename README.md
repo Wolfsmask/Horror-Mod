@@ -224,7 +224,7 @@ sound pack or anything else to make it look and feel like the videos: just Fabri
 
 | | |
 |---|---|
-| **Fine** | Performance mods: Sodium, Lithium, ImmediatelyFast, Nvidium, FerriteCore, ModernFix, Entity Culling, C2ME, Chunky (pre-generating), and so on. Mod Menu, minimaps, JEI/EMI/REI. |
+| **Fine** | Performance mods: Sodium, Lithium, ImmediatelyFast, Nvidium, FerriteCore, ModernFix, Entity Culling, C2ME, Chunky (pre-generating), and so on. Mod Menu, minimaps, JEI/EMI/REI. (CI runs the game with Sodium and checks it draws the land with this fog.) If you use **Sodium Extra**, leave its fog settings on: turned off, they take the fog away. |
 | **Not recommended, but works** | **Shaders** (Iris / Oculus): most shader packs draw their own fog instead of the mod's, so the fog it stands at the edge of is lost, along with the mod's colour. Play without them for the intended look. |
 | **Breaks things** | **World generation overhauls**: Terralith, Tectonic, Biomes O' Plenty, Oh The Biomes You'll Go, Regions Unexplored, William Wythers' Overhauled Overworld, Continents and the like. The house, the old places and its lair are built for the game's own terrain and may not appear, or appear buried or floating. **Distant Horizons / Voxy**: they draw land far past the fog, so the fog's edge, where it stands, means nothing. **Other horror mods** (The Man From The Fog, Cave Dweller, From The Fog...): two of them will step on each other's moments. |
 | **Changes the opening** | Menu mods like FancyMenu can hide the mod's first screens. |
