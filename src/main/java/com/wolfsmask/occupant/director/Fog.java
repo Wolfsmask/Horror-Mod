@@ -10,9 +10,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 
 /**
- * How far each player can see. The fog comes in as the story goes on (eight chunks at first,
- * six by the end), a little further at night, and all the way in, fast, while it is close: it
- * brings the fog with it. The server decides and tells the client; the client eases it in and
+ * How far each player can see. The fog comes in as the story goes on (about eighty blocks at
+ * first, fifty by the end), a little further at night, and all the way in, fast, while it is
+ * close: it brings the fog with it. The server decides and tells the client; the client eases it in and
  * out, and the game's own fog still wins wherever that is nearer.
  */
 public final class Fog {
@@ -37,6 +37,8 @@ public final class Fog {
 		// Ten blocks nearer with each act after the first: 80, 70, 60, 50 with the defaults.
 		if (cfg.fogClosesIn) end -= 10.0f * Mth.clamp(act - 1, 0, 3);
 		if (cfg.fogClosesIn && Compat.level(player).isDarkOutside()) end -= 12.0f;
+		// However thin the setting, closing in never takes the fog away altogether.
+		end = Math.max(FogLine.NEAREST, end);
 		if (cfg.fogClosesIn && closeBy(player, haunt)) end = Math.min(end, ROLLED_IN);
 		int view = Compat.viewDistance(player);
 		if (view > 2) end = Math.min(end, view * 16.0f);

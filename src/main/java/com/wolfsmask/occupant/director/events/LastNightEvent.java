@@ -2,6 +2,7 @@ package com.wolfsmask.occupant.director.events;
 
 import com.wolfsmask.occupant.compat.Compat;
 import com.wolfsmask.occupant.director.EventContext;
+import com.wolfsmask.occupant.director.Fog;
 import com.wolfsmask.occupant.director.Haunt;
 import com.wolfsmask.occupant.director.HauntData;
 import com.wolfsmask.occupant.director.LastNightEnding;
@@ -32,10 +33,10 @@ import org.jetbrains.annotations.Nullable;
  */
 public final class LastNightEvent extends HorrorEvent {
 	public static final String ID = "last_night";
-	/** How far the fog comes in for it. */
-	private static final float FOG = 48.0f;
+	/** How far the fog comes in for it, at most: as near as it ever comes round it. */
+	private static final float FOG = 36.0f;
 	/** How close it is each time you look back. */
-	private static final double[] CLOSER = {19.0, 12.0, 7.0, 3.5};
+	private static final double[] CLOSER = {14.0, 10.0, 6.5, 3.5};
 
 	public LastNightEvent() {
 		super(ID, Tier.PEAK, 4, 40, 90);
@@ -63,9 +64,12 @@ public final class LastNightEvent extends HorrorEvent {
 	@Nullable
 	public Sequence begin(EventContext ctx) {
 		ServerPlayer p = ctx.player;
-		ctx.haunt.closeFog(FOG);
-		double far = FogLine.edgeFar(FOG);
-		BlockPos spot = Spots.aroundPlayer(p, ctx.random, far - 6.0, far, 0, 50, true, 60,
+		// The fog comes in, unless it is already nearer than that; and it stands at the edge of it.
+		float now = Fog.endFor(p, ctx.haunt);
+		float fog = now > 0 ? Math.min(FOG, now) : FOG;
+		ctx.haunt.closeFog(fog);
+		double far = FogLine.edgeFar(fog) - 1.0;
+		BlockPos spot = Spots.aroundPlayer(p, ctx.random, far - 5.0, far, 0, 50, true, 60,
 				pos -> Math.abs(pos.getY() - p.getBlockY()) <= 8
 						&& Sight.hasLineOfSight(p, Vec3.atBottomCenterOf(pos).add(0, 2.5, 0)));
 		OccupantEntity e = spot == null ? null
@@ -121,8 +125,12 @@ public final class LastNightEvent extends HorrorEvent {
 			// It has to have been seen, properly, before it moves; and then only once they have
 			// looked well away.
 			if (seenFor < 12 || towards == null || ++awayFor < 8) return true;
-			if (stage + 1 < CLOSER.length && moveCloser(player, CLOSER[stage + 1])) {
-				stage++;
+			// The next step that is really closer than where it stands now.
+			int next = stage + 1;
+			double now = entity.distanceTo(player);
+			while (next < CLOSER.length - 1 && CLOSER[next] > now - 2.0) next++;
+			if (next < CLOSER.length && moveCloser(player, CLOSER[next])) {
+				stage = next;
 				seenFor = 0;
 				awayFor = 0;
 			}

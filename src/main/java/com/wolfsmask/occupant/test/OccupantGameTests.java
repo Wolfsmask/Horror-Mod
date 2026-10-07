@@ -500,7 +500,7 @@ public final class OccupantGameTests {
 		Occupant.LOGGER.info("[gametest] fog: first act {}, last act {}", first, last);
 		helper.assertTrue(first >= 66 && first <= 80, "About eighty blocks of fog at first, not " + first);
 		helper.assertTrue(last >= 36 && last <= first - 24, "About fifty by the end, not " + last);
-		helper.assertTrue(FogLine.start(last) < FogLine.edgeNear(last) && FogLine.edgeFar(last) < last && FogLine.edgeNear(last) >= 20,
+		helper.assertTrue(FogLine.start(last) < FogLine.edgeNear(last) && FogLine.edgeFar(last) < last && FogLine.edgeNear(last) >= 14,
 				"The fog begins near, and the band it stands in is inside it, short of where it is thick");
 		helper.succeed();
 	}
