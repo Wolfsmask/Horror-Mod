@@ -57,6 +57,14 @@ public final class Haunt {
 	long skullDay = -1;
 	long chestDay = -1;
 	long doorAgainAt;
+	/** Something answers the note they played, or the bell they rang: when, and which. */
+	long answerAt;
+	boolean answerBell;
+	long answerAgainAt;
+	/** A grey day: the fog right in, until this server tick. */
+	long greyUntil;
+	long greyDay = -1;
+	long tallyDay = -1;
 	/** When it last saved them from a fall, and from monsters (ticks of play; -1 never). */
 	long mercyFallAt = -1;
 	long mercyMobAt = -1;

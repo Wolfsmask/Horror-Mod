@@ -20,6 +20,8 @@ public final class Fog {
 	private static final double ROLLS_IN_WITHIN = 28.0;
 	/** How near the fog comes when it does: still well behind it, so it is never lost in it. */
 	private static final float ROLLED_IN = 36.0f;
+	/** How near the fog is on a grey day. */
+	private static final float GREY_DAY = 34.0f;
 
 	private Fog() {
 	}
@@ -40,6 +42,8 @@ public final class Fog {
 		// However thin the setting, closing in never takes the fog away altogether.
 		end = Math.max(FogLine.NEAREST, end);
 		if (cfg.fogClosesIn && closeBy(player, haunt)) end = Math.min(end, ROLLED_IN);
+		// A grey day: the fog right in all day long.
+		if (cfg.fogClosesIn && Compat.level(player).getServer().getTickCount() < haunt.greyUntil) end = Math.min(end, GREY_DAY);
 		int view = Compat.viewDistance(player);
 		if (view > 2) end = Math.min(end, view * 16.0f);
 		end = haunt.fogAfterEvents(end, Compat.level(player).getServer().getTickCount());

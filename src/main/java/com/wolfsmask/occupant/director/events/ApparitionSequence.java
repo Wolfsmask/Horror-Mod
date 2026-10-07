@@ -124,7 +124,32 @@ public abstract class ApparitionSequence implements Sequence {
 
 	@Override
 	public void end() {
+		Vec3 stood = entity.position();
 		entity.vanish();
+		// The animals that watched it, afterwards, stand in a ring where it stood, facing out,
+		// as if they had kept it there. Only those the player cannot see being moved.
+		ServerPlayer viewer = watching;
+		if (viewer != null && age > 100 && animals.size() >= 3) {
+			int placed = 0;
+			int count = Math.min(6, animals.size());
+			for (Mob m : animals) {
+				if (placed >= count || !m.isAlive() || m.level() != entity.level()) continue;
+				if (!Sight.isHidden(viewer, m.blockPosition().above())) continue;
+				double angle = Math.PI * 2 * placed / count;
+				double x = stood.x + Math.cos(angle) * 2.5;
+				double z = stood.z + Math.sin(angle) * 2.5;
+				net.minecraft.core.BlockPos feet = com.wolfsmask.occupant.util.Spots.groundNear(
+						(net.minecraft.server.level.ServerLevel) entity.level(), net.minecraft.util.Mth.floor(x), net.minecraft.util.Mth.floor(stood.y),
+						net.minecraft.util.Mth.floor(z), 3);
+				if (feet == null || !Sight.isHidden(viewer, feet.above())) continue;
+				float yaw = (float) Math.toDegrees(Math.atan2(-(x - stood.x), z - stood.z));
+				m.getNavigation().stop();
+				m.snapTo(feet.getX() + 0.5, feet.getY(), feet.getZ() + 0.5, yaw, 0.0f);
+				m.setYHeadRot(yaw);
+				m.setYBodyRot(yaw);
+				placed++;
+			}
+		}
 		// Gone without their ever noticing, after watching them a good while: now and then, they
 		// are told, afterwards, when there is nothing left to look at.
 		ServerPlayer p = watching;

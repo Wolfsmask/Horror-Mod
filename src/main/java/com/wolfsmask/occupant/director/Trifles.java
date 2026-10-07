@@ -60,6 +60,152 @@ public final class Trifles {
 		if (d.act >= 3 && h.renamedUntil == 0 && now >= h.renameAgainAt && random.nextFloat() < 0.004f) rename(player, h, now, random);
 		home(player, h, cfg, world, now, random);
 		if (d.act >= 2) pets(player, world);
+		answer(player, h, world, now);
+		greyDay(player, h, world, now, random);
+		if (cfg.worldChanges) {
+			tally(player, h, world);
+			if (d.act >= 2 && (d.marks & 1) == 0 && random.nextFloat() < 0.002f) markTrees(player, h, world, random);
+		}
+	}
+
+	// ------------------------------------------------------------------ something answers
+
+	/** They played a note or rang a bell: now and then, a while later, something out there answers. */
+	public static void played(ServerPlayer player, boolean bell) {
+		Director director = Director.get();
+		if (director == null || !OccupantConfig.get().enabled) return;
+		Haunt h = director.haunt(player);
+		long now = Compat.level(player).getServer().getTickCount();
+		if (h.data.act < 2 || h.answerAt > 0 || now < h.answerAgainAt || player.getRandom().nextFloat() > 0.4f) return;
+		h.answerAt = now + 30 + player.getRandom().nextInt(40);
+		h.answerBell = bell;
+		h.answerAgainAt = now + 20L * 60 * 2;
+	}
+
+	private static void answer(ServerPlayer player, Haunt h, ServerLevel world, long now) {
+		if (h.answerAt <= 0 || now < h.answerAt) return;
+		h.answerAt = 0;
+		Vec3 dir = Sight.rotateY(Sight.flatLook(player), 90 + player.getRandom().nextInt(180));
+		Vec3 at = player.position().add(dir.scale(30 + player.getRandom().nextInt(10))).add(0, 2, 0);
+		if (h.answerBell) {
+			Cues.sound(player, SoundEvents.BELL_BLOCK, SoundSource.BLOCKS, at, 1.6f, 0.7f);
+		} else {
+			Cues.sound(player, SoundEvents.NOTE_BLOCK_HARP, SoundSource.RECORDS, at, 1.6f, 0.5f + player.getRandom().nextFloat() * 0.3f);
+		}
+	}
+
+	// ------------------------------------------------------------------ a grey day
+
+	/** Now and then, late on, a day with no sun: the fog right in from first light. */
+	private static void greyDay(ServerPlayer player, Haunt h, ServerLevel world, long now, RandomSource random) {
+		if (h.data.act < 3 || world != world.getServer().overworld()) return;
+		long time = Compat.dayTime(world) % 24000L;
+		long day = Compat.dayTime(world) / 24000L;
+		if (time > 1000 || h.greyDay == day) return;           // decided once, at first light
+		h.greyDay = day;
+		if (random.nextFloat() > 0.3f) return;
+		h.greyUntil = now + (12000 - time);                      // until dusk
+		if (OccupantConfig.get().screenWhispers) Cues.whisper(player, "no sun today", 100);
+	}
+
+	// ------------------------------------------------------------------ the tally
+
+	/** Every day they live through, one more mark on the sign it keeps by their bed. */
+	private static void tally(ServerPlayer player, Haunt h, ServerLevel world) {
+		HauntData d = h.data;
+		BlockPos bed = Compat.respawnPos(player);
+		if (bed == null || world != world.getServer().overworld() || !Spots.isLoaded(world, bed)) return;
+		long day = Compat.dayTime(world) / 24000L;
+		if (h.tallyDay == day) return;
+		h.tallyDay = day;
+		int days = (int) Math.min(60, 1 + d.playTicks / 24000L);
+		BlockPos sign = d.tallyY == Integer.MIN_VALUE ? null : new BlockPos(d.tallyX, d.tallyY, d.tallyZ);
+		if (sign == null || sign.distSqr(bed) > 16 * 16 || !(world.getBlockEntity(sign) instanceof net.minecraft.world.level.block.entity.SignBlockEntity)) {
+			sign = placeTallySign(world, bed);
+			if (sign == null) return;
+			d.tallyX = sign.getX();
+			d.tallyY = sign.getY();
+			d.tallyZ = sign.getZ();
+		}
+		if (world.getBlockEntity(sign) instanceof net.minecraft.world.level.block.entity.SignBlockEntity entity) {
+			String[] lines = new String[4];
+			int left = days;
+			for (int i = 0; i < 4; i++) {
+				StringBuilder line = new StringBuilder();
+				for (int g = 0; g < 3 && left > 0; g++) {
+					int n = Math.min(5, left);
+					left -= n;
+					if (line.length() > 0) line.append(' ');
+					line.append("IIIII", 0, n);
+				}
+				lines[i] = line.toString();
+			}
+			Compat.writeSign(entity, lines);
+		}
+	}
+
+	/** A sign on a wall near their bed, where they will see it; null if there is no wall. */
+	@Nullable
+	private static BlockPos placeTallySign(ServerLevel world, BlockPos bed) {
+		for (int r = 1; r <= 5; r++) {
+			for (BlockPos p : BlockPos.betweenClosed(bed.offset(-r, 0, -r), bed.offset(r, 2, r))) {
+				if (!world.getBlockState(p).isAir()) continue;
+				for (Direction dir : Direction.Plane.HORIZONTAL) {
+					BlockPos wall = p.relative(dir);
+					if (!world.getBlockState(wall).isFaceSturdy(world, wall, dir.getOpposite())) continue;
+					world.setBlock(p, Blocks.OAK_WALL_SIGN.defaultBlockState()
+							.setValue(BlockStateProperties.HORIZONTAL_FACING, dir.getOpposite()), 3);
+					return p.immutable();
+				}
+			}
+		}
+		return null;
+	}
+
+	// ------------------------------------------------------------------ the marked trees
+
+	private static final java.util.Map<net.minecraft.world.level.block.Block, net.minecraft.world.level.block.Block> STRIPPED = java.util.Map.of(
+			Blocks.OAK_LOG, Blocks.STRIPPED_OAK_LOG, Blocks.SPRUCE_LOG, Blocks.STRIPPED_SPRUCE_LOG,
+			Blocks.BIRCH_LOG, Blocks.STRIPPED_BIRCH_LOG, Blocks.JUNGLE_LOG, Blocks.STRIPPED_JUNGLE_LOG,
+			Blocks.ACACIA_LOG, Blocks.STRIPPED_ACACIA_LOG, Blocks.DARK_OAK_LOG, Blocks.STRIPPED_DARK_OAK_LOG,
+			Blocks.MANGROVE_LOG, Blocks.STRIPPED_MANGROVE_LOG, Blocks.CHERRY_LOG, Blocks.STRIPPED_CHERRY_LOG);
+
+	/**
+	 * Once: a line of trees going away from their home, each with the bark torn off at the height
+	 * of a face, all in the same direction. Where it leads, there is nothing. Out of their sight.
+	 */
+	private static void markTrees(ServerPlayer player, Haunt h, ServerLevel world, RandomSource random) {
+		BlockPos home = Compat.respawnPos(player);
+		if (home == null || Math.sqrt(home.distToCenterSqr(player.position())) > 40) return;
+		Direction dir = Direction.Plane.HORIZONTAL.getRandomDirection(random);
+		java.util.List<BlockPos> marks = new java.util.ArrayList<>();
+		for (int step = 10; step <= 70 && marks.size() < 7; step += 2) {
+			BlockPos along = home.relative(dir, step);
+			search:
+			for (int side = -3; side <= 3; side++) {
+				BlockPos column = along.relative(dir.getClockWise(), side);
+				for (int dy = -1; dy <= 6; dy++) {
+					BlockPos p = column.above(dy);
+					if (!Spots.isLoaded(world, p)) break search;
+					BlockState s = world.getBlockState(p);
+					net.minecraft.world.level.block.Block to = STRIPPED.get(s.getBlock());
+					if (to == null || !world.getBlockState(p.below()).is(s.getBlock()) && !world.getBlockState(p.below()).is(Blocks.GRASS_BLOCK)
+							&& !world.getBlockState(p.below()).is(Blocks.DIRT)) continue;
+					if (!Sight.isHidden(player, p)) continue;
+					if (!marks.isEmpty() && marks.get(marks.size() - 1).distSqr(p) < 5 * 5) continue;
+					marks.add(p.above().immutable());
+					break search;
+				}
+			}
+		}
+		if (marks.size() < 3) return;
+		for (BlockPos p : marks) {
+			BlockState s = world.getBlockState(p);
+			net.minecraft.world.level.block.Block to = STRIPPED.get(s.getBlock());
+			if (to == null) continue;
+			world.setBlock(p, to.defaultBlockState().setValue(BlockStateProperties.AXIS, s.getValue(BlockStateProperties.AXIS)), 3);
+		}
+		h.data.marks |= 1;
 	}
 
 	// ------------------------------------------------------------------ the words they said

@@ -140,6 +140,11 @@ public final class Occupant implements ModInitializer {
 					return InteractionResult.FAIL;
 				}
 				BlockPos pos = hit.getBlockPos();
+				// A note played, a bell rung: something out there may answer.
+				net.minecraft.world.level.block.state.BlockState used = world.getBlockState(pos);
+				if (used.is(net.minecraft.world.level.block.Blocks.NOTE_BLOCK) || used.is(net.minecraft.world.level.block.Blocks.BELL)) {
+					guard("an answer", () -> com.wolfsmask.occupant.director.Trifles.played(sp, used.is(net.minecraft.world.level.block.Blocks.BELL)));
+				}
 				if (Loot.unopened(pos)) guard("opening a container", () -> {
 					Director director = Director.get();
 					if (director != null && world.getBlockEntity(pos) instanceof Container box) {
