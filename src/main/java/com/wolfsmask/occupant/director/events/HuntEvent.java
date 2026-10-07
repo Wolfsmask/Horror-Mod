@@ -88,6 +88,8 @@ public final class HuntEvent extends HorrorEvent {
 		private int noSight;
 		private int stuck;
 		private int caughtAt = -1;
+		/** Ticks it has actually been there: nothing starts before it is. */
+		private int thereFor;
 
 		Hunt(Haunt haunt, OccupantEntity entity, int stareTicks) {
 			super(haunt, entity);
@@ -105,9 +107,11 @@ public final class HuntEvent extends HorrorEvent {
 				if (age == 1) {
 					Cues.effect(p, ScreenEffectPayload.SILENCE, 0, 1f);
 					Cues.soundAtEars(p, ModSounds.DRONE, SoundSource.AMBIENT, 0.8f, 0.9f);
-					Cues.whisper(p, "RUN", 40);
+					Cues.whisper(p, "run", 40);
 				}
-				if (age >= stareTicks || (seen && lookTicks > 15) || dist < 6) {
+				if (entity.isConcealed()) return age < 400;
+				thereFor++;
+				if (thereFor >= stareTicks || (seen && lookTicks > 15) || dist < 6) {
 					chasing = true;
 					entity.setMode(OccupantEntity.Mode.CHASE);
 					// The moment it starts running should be a drop in sound, not a bang.
