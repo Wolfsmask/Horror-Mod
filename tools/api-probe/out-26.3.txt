@@ -1,32 +1,17 @@
-=== net.minecraft.client.model.HumanoidModel (code: model.HumanoidModel.net)
-  public client.model.HumanoidModel(client.model.geom.ModelPart);
-    Code:
-         2: invokedynamic #3,  0              // InvokeDynamic #0:apply:()Ljava/util/function/Function;
-         7: invokespecial #7                  // Method "<init>":(Lnet/minecraft/client/model/geom/ModelPart;Ljava/util/function/Function;)V
-
-  public client.model.HumanoidModel(client.model.geom.ModelPart, java.util.function.Function<resources.Identifier, client.renderer.rendertype.RenderType>);
-    Code:
-         3: invokespecial #13                 // Method net/minecraft/client/model/EntityModel."<init>":(Lnet/minecraft/client/model/geom/ModelPart;Ljava/util/function/Function;)V
-         8: ldc           #18                 // String head
-        10: invokevirtual #20                 // Method net/minecraft/client/model/geom/ModelPart.getChild:(Ljava/lang/String;)Lnet/minecraft/client/model/geom/ModelPart;
-        13: putfield      #26                 // Field head:Lnet/minecraft/client/model/geom/ModelPart;
-        18: getfield      #26                 // Field head:Lnet/minecraft/client/model/geom/ModelPart;
-        21: ldc           #29                 // String hat
-        23: invokevirtual #20                 // Method net/minecraft/client/model/geom/ModelPart.getChild:(Ljava/lang/String;)Lnet/minecraft/client/model/geom/ModelPart;
-        26: putfield      #31                 // Field hat:Lnet/minecraft/client/model/geom/ModelPart;
-        31: ldc           #33                 // String body
-        33: invokevirtual #20                 // Method net/minecraft/client/model/geom/ModelPart.getChild:(Ljava/lang/String;)Lnet/minecraft/client/model/geom/ModelPart;
-        36: putfield      #35                 // Field body:Lnet/minecraft/client/model/geom/ModelPart;
-        41: ldc           #37                 // String right_arm
-        43: invokevirtual #20                 // Method net/minecraft/client/model/geom/ModelPart.getChild:(Ljava/lang/String;)Lnet/minecraft/client/model/geom/ModelPart;
-        46: putfield      #39                 // Field rightArm:Lnet/minecraft/client/model/geom/ModelPart;
-        51: ldc           #42                 // String left_arm
-        53: invokevirtual #20                 // Method net/minecraft/client/model/geom/ModelPart.getChild:(Ljava/lang/String;)Lnet/minecraft/client/model/geom/ModelPart;
-        56: putfield      #44                 // Field leftArm:Lnet/minecraft/client/model/geom/ModelPart;
-        61: ldc           #47                 // String right_leg
-        63: invokevirtual #20                 // Method net/minecraft/client/model/geom/ModelPart.getChild:(Ljava/lang/String;)Lnet/minecraft/client/model/geom/ModelPart;
-        66: putfield      #49                 // Field rightLeg:Lnet/minecraft/client/model/geom/ModelPart;
-        71: ldc           #52                 // String left_leg
-        73: invokevirtual #20                 // Method net/minecraft/client/model/geom/ModelPart.getChild:(Ljava/lang/String;)Lnet/minecraft/client/model/geom/ModelPart;
-        76: putfield      #54                 // Field leftLeg:Lnet/minecraft/client/model/geom/ModelPart;
-
+=== net.minecraft.world.entity.Entity (-public)
+public abstract class world.entity.Entity implements world.Nameable, world.level.entity.EntityAccess, world.scores.ScoreHolder, network.syncher.SyncedDataHolder, core.component.DataComponentGetter, world.entity.ItemOwner, world.entity.SlotProvider, util.debug.DebugValueSource, core.TypedInstance<world.entity.EntityType<?>>, attachment.v1.AttachmentTarget, event.lifecycle.v1.EntityLoadData, permission.v1.PermissionContextOwner {
+  public void stopRiding();
+  public boolean isPassenger();
+=== net.minecraft.world.entity.Mob (-public)
+public abstract class world.entity.Mob extends world.entity.LivingEntity implements world.entity.Targeting,world.entity.EquipmentUser,world.entity.Leashable {
+  public void setTarget(world.entity.LivingEntity);
+=== net.minecraft.world.damagesource.DamageSources (-public)
+public class world.damagesource.DamageSources {
+  public world.damagesource.DamageSource mobAttack(world.entity.LivingEntity);
+  public world.damagesource.DamageSource genericKill();
+=== net.minecraft.client.KeyMapping (-public)
+public class client.KeyMapping implements Comparable<client.KeyMapping> {
+  public static void set(blaze3d.platform.InputConstants$Key, boolean);
+  public static void setAll();
+  public static void releaseAll();
+  public static void resetMapping();
