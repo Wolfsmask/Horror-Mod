@@ -1,8 +1,7 @@
-# 1.20.1 on 8fdb6c3d592c7d3678b73b37920c76152620d1b2: build failure, tests skipped, jar skipped
+# 1.20.1 on 3ea6dbd32f83a6695190db8826f96cd9a6350774: build failure, tests skipped, jar skipped
 com/wolfsmask/occupant/director/Director.java:205: error: cannot find symbol
   symbol:   variable JOINED
   location: class ScreenEffectPayload
-com/wolfsmask/occupant/director/Trifles.java:231: error: Places is not public in com.wolfsmask.occupant.world; cannot be accessed from outside package
 > Configure project :
 > Task :versionSourcesMain
 > Task :compileJava
