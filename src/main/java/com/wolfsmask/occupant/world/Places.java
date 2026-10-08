@@ -25,7 +25,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * with the story's rules and keep turning up as the world is explored, well apart, so the world
  * feels lived in, once, by people who are not here any more.
  */
-final class Places {
+public final class Places {
 	/** Not right where players first appear. */
 	private static final int MIN_FROM_SPAWN = 120;
 	/** And well apart from each other. */
