@@ -1,24 +1,12 @@
-=== net.fabricmc.fabric.api.client.gametest.v1.context.TestDedicatedServerContext (-public)
-public interface client.gametest.v1.context.TestDedicatedServerContext extends client.gametest.v1.context.TestServerContext,AutoCloseable {
-  public abstract client.gametest.v1.context.TestDedicatedServerConnection connect();
-  public abstract void close();
-}
-=== net.fabricmc.fabric.api.client.gametest.v1.context.TestServerConnection (-public)
-public interface client.gametest.v1.context.TestServerConnection {
-  public static final int DEFAULT_CHUNK_LOAD_TIMEOUT;
-  public default int waitForChunksDownload();
-  public abstract int waitForChunksDownload(int);
-  public default int waitForChunksRender();
-  public default int waitForChunksRender(int);
-  public default int waitForChunksRender(boolean);
-  public abstract int waitForChunksRender(boolean, int);
-  public abstract void waitForClientboundPackets();
-  public abstract void waitForServerboundPackets();
-  public abstract void waitForClientboundEntityUpdates(world.entity.EntityType<?>, world.entity.EntityType<?>...);
-  public abstract client.player.LocalPlayer getClientPlayer();
-  public abstract server.level.ServerPlayer getServerPlayer();
-  public abstract client.multiplayer.ClientLevel getClientLevel();
-  public abstract server.level.ServerLevel getServerLevel();
-}
-=== net.fabricmc.fabric.api.client.gametest.v1.context.TestClientLevelContext (-public)
-Error: class not found: client.gametest.v1.context.TestClientLevelContext
+=== net.minecraft.world.entity.Entity (-public)
+public abstract class world.entity.Entity implements world.Nameable, world.level.entity.EntityAccess, world.scores.ScoreHolder, network.syncher.SyncedDataHolder, core.component.DataComponentGetter, world.entity.ItemOwner, world.entity.SlotProvider, util.debug.DebugValueSource, core.TypedInstance<world.entity.EntityType<?>>, attachment.v1.AttachmentTarget, event.lifecycle.v1.EntityLoadData, permission.v1.PermissionContextOwner {
+  public double xo;
+  public double yo;
+  public double zo;
+  public double xOld;
+  public double yOld;
+  public double zOld;
+  public final world.phys.Vec3 oldPosition();
+  public final world.phys.Vec3 getEyePosition(float);
+  public final world.phys.Vec3 getPosition(float);
+  public world.phys.Vec3 getRopeHoldPosition(float);
