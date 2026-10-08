@@ -1,19 +1,3 @@
-=== net.minecraft.client.MouseHandler (-public)
-public class client.MouseHandler {
-  public boolean isMouseGrabbed();
-  public void grabMouse();
 === net.minecraft.client.Minecraft (-public)
 public class client.Minecraft extends util.thread.ReentrantBlockableEventLoop<Runnable> implements blaze3d.platform.WindowEventHandler {
-  public client.gui.screens.Screen screen;
-  public void setScreen(client.gui.screens.Screen);
-  public void setOverlay(client.gui.screens.Overlay);
-  public client.gui.screens.worldselection.WorldOpenFlows createWorldOpenFlows();
-  public void setLevel(client.multiplayer.ClientLevel, client.gui.screens.ReceivingLevelScreen$Reason);
-  public void disconnect(client.gui.screens.Screen);
-  public void disconnect(client.gui.screens.Screen, boolean);
-  public void clearClientLevel(client.gui.screens.Screen);
-  public void forceSetScreen(client.gui.screens.Screen);
-  public network.chat.Component grabPanoramixScreenshot(java.io.File, int, int);
-  public client.gui.screens.Overlay getOverlay();
-  public client.gui.screens.social.PlayerSocialManager getPlayerSocialManager();
-  public client.gui.components.DebugScreenOverlay getDebugOverlay();
+  public final client.MouseHandler mouseHandler;
