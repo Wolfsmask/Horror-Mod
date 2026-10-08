@@ -1,6 +1,6 @@
-# 26.4-snapshot-2 on a0574d2515b8269ae1959d5f2b63a129d6e2c02b: build failure, tests skipped, jar skipped
-com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:341: error: incompatible types: try-with-resources not applicable to variable type
-com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:342: error: cannot find symbol
+# 26.4-snapshot-2 on 495f5428d928692110c78d2f792dd40318cf2122: build failure, tests skipped, jar skipped
+com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:351: error: incompatible types: try-with-resources not applicable to variable type
+com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:352: error: cannot find symbol
   symbol:   method waitForChunksRender()
   location: class ClientLevel
 > Configure project :
