@@ -1,30 +1,9 @@
-=== net.minecraft.client.model.ZombieModel (-public)
-Error: class not found: client.model.ZombieModel
-=== net.minecraft.client.model.AbstractZombieModel (-public)
-Error: class not found: client.model.AbstractZombieModel
-=== net.minecraft.client.model.SkeletonModel (-public)
-Error: class not found: client.model.SkeletonModel
-=== net.minecraft.client.model.monster.zombie.ZombieModel (-public)
-public class client.model.monster.zombie.ZombieModel<S extends client.renderer.entity.state.ZombieRenderState> extends client.model.monster.zombie.AbstractZombieModel<S> {
-=== net.minecraft.client.model.monster.zombie.AbstractZombieModel (-public)
-public abstract class client.model.monster.zombie.AbstractZombieModel<S extends client.renderer.entity.state.ZombieRenderState> extends client.model.HumanoidModel<S> {
-  public void setupAnim(S);
-  public void setupAnim(client.renderer.entity.state.HumanoidRenderState);
-  public void setupAnim(Object);
-=== net.minecraft.client.model.monster.skeleton.SkeletonModel (-public)
-public class client.model.monster.skeleton.SkeletonModel<S extends client.renderer.entity.state.SkeletonRenderState> extends client.model.HumanoidModel<S> {
-  public void setupAnim(S);
-  public void setupAnim(client.renderer.entity.state.HumanoidRenderState);
-  public void setupAnim(Object);
-=== net.minecraft.client.renderer.entity.state.HumanoidRenderState (-public)
-public class client.renderer.entity.state.HumanoidRenderState extends client.renderer.entity.state.ArmedEntityRenderState {
-  public float speedValue;
-  public float maxCrossbowChargeDuration;
-=== net.minecraft.client.renderer.entity.state.ZombieRenderState (-public)
-public class client.renderer.entity.state.ZombieRenderState extends client.renderer.entity.state.UndeadRenderState {
-=== net.minecraft.client.MouseHandler (-p)
-public class client.MouseHandler {
-  private double accumulatedDX;
-  private double accumulatedDY;
-  public void handleAccumulatedMovement();
-  private void turnPlayer(double);
+=== net.minecraft.client.model.HumanoidModel (code: <init>)
+=== net.minecraft.network.syncher.EntityDataSerializers (-public)
+public class network.syncher.EntityDataSerializers {
+  public static final network.syncher.EntityDataSerializer<Integer> INT;
+  public static final network.syncher.EntityDataSerializer<String> STRING;
+  public static final network.syncher.EntityDataSerializer<OptionalInt> OPTIONAL_UNSIGNED_INT;
+  public static final network.syncher.EntityDataSerializer<core.Holder<world.entity.decoration.painting.PaintingVariant>> PAINTING_VARIANT;
+=== net.minecraft.client.model.geom.ModelPart (-public)
+public final class client.model.geom.ModelPart {
