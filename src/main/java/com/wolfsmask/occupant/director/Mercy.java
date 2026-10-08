@@ -230,8 +230,8 @@ public final class Mercy {
 			ServerLevel world = Compat.level(player);
 			BlockPos feet = null;
 			for (double d : monsters.size() == 1 ? new double[]{2.4, 1.8, 3.0, 1.3} : new double[]{3.0, 2.2, 1.5}) {
-				Vec3 want = first.position().add(out.scale(d));
-				BlockPos at = Spots.groundNear(world, Mth.floor(want.x), first.getBlockY(), Mth.floor(want.z), 2);
+				Vec3 aim = first.position().add(out.scale(d));
+				BlockPos at = Spots.groundNear(world, Mth.floor(aim.x), first.getBlockY(), Mth.floor(aim.z), 2);
 				if (at != null && clear(world, first, Vec3.atBottomCenterOf(at).add(0.0, 1.2, 0.0))) {
 					feet = at;
 					break;
