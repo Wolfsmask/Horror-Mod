@@ -1,6 +1,6 @@
-# 1.21.11 with Sodium mc1.21.11-0.8.15-beta.1-fabric on a0574d2515b8269ae1959d5f2b63a129d6e2c02b: failure
+# 1.21.11 with Sodium mc1.21.11-0.8.15-beta.1-fabric on 495f5428d928692110c78d2f792dd40318cf2122: failure
 > Task :compileClientJava FAILED
-BUILD FAILED in 33s
+BUILD FAILED in 26s
 --- tail ---
 		                            ^
 15 warnings
@@ -10,7 +10,7 @@ BUILD FAILED in 33s
 > Task :versionSourcesClient
 
 > Task :compileClientJava FAILED
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/client/com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:342: error: cannot find symbol
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/client/com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:352: error: cannot find symbol
 				connection.getClientLevel().waitForChunksRender();
 				          ^
   symbol:   method getClientLevel()
@@ -18,7 +18,7 @@ BUILD FAILED in 33s
 Note: /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/client/com/wolfsmask/occupant/client/OccupantClient.java uses or overrides a deprecated API.
 Note: Recompile with -Xlint:deprecation for details.
 1 error
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/run-1791467426993.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/run-1791467816959.json
 
 [Incubating] Problems report is available at: file:///home/runner/work/Horror-Mod/Horror-Mod/build/reports/problems/problems-report.html
 
@@ -29,7 +29,7 @@ Execution failed for task ':compileClientJava' (registered by plugin class 'org.
 > Compilation failed; see the compiler output below.
   Note: /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/client/com/wolfsmask/occupant/client/OccupantClient.java uses or overrides a deprecated API.
   Note: Recompile with -Xlint:deprecation for details.
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/client/com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:342: error: cannot find symbol
+  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/client/com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:352: error: cannot find symbol
   				connection.getClientLevel().waitForChunksRender();
   				          ^
     symbol:   method getClientLevel()
@@ -40,5 +40,5 @@ Execution failed for task ':compileClientJava' (registered by plugin class 'org.
 > Check your code and dependencies to fix the compilation error(s)
 > Run with --scan to get full insights from a Build Scan (powered by Develocity).
 
-BUILD FAILED in 33s
+BUILD FAILED in 26s
 5 actionable tasks: 5 executed
