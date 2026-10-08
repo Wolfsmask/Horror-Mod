@@ -186,6 +186,8 @@ public final class Mercy {
 		private static final int SAY = GONE + 8;
 		private final List<Mob> monsters;
 		private final List<Vec3> from = new ArrayList<>();
+		/** How far each is lifted: as far as it should be, or as far as the room above it allows. */
+		private final List<Double> lift = new ArrayList<>();
 		private final Haunt haunt;
 		/** The one nearest them, which its leg goes through. */
 		private final Mob held;
@@ -198,8 +200,10 @@ public final class Mercy {
 			this.monsters = monsters;
 			Cues.effect(player, ScreenEffectPayload.SILENCE, 0, 1f);
 			MinecraftServer server = Compat.level(player).getServer();
+			double want = monsters.size() == 1 ? 1.8 : 0.9;
 			for (Mob m : monsters) {
 				from.add(m.position());
+				lift.add(Math.min(want, room(Compat.level(player), m)));
 				m.setNoAi(true);
 				m.setNoGravity(true);
 				m.setDeltaMovement(Vec3.ZERO);
@@ -256,12 +260,11 @@ public final class Mercy {
 			if (age <= DIES) {
 				float t = Mth.clamp((age - LIFT_FROM) / (float) (LIFT_TO - LIFT_FROM), 0.0f, 1.0f);
 				float ease = t * t * (3 - 2 * t);
-				double height = monsters.size() == 1 ? 1.8 : 0.9;
 				for (int i = 0; i < monsters.size(); i++) {
 					Mob m = monsters.get(i);
 					if (!m.isAlive()) continue;
 					Vec3 a = from.get(i);
-					m.setPos(a.x, a.y + height * ease, a.z);
+					m.setPos(a.x, a.y + lift.get(i) * ease, a.z);
 					m.setDeltaMovement(Vec3.ZERO);
 				}
 			}
@@ -286,6 +289,20 @@ public final class Mercy {
 				return false;
 			}
 			return true;
+		}
+
+		/** Clear space over its head, in blocks, up to two: indoors, it is not lifted into the ceiling. */
+		private static double room(ServerLevel world, Mob m) {
+			double top = m.getY() + m.getBbHeight();
+			BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
+			for (double y = top; y < top + 2.0; y += 0.25) {
+				p.set(Mth.floor(m.getX()), Mth.floor(y), Mth.floor(m.getZ()));
+				var shape = world.getBlockState(p).getCollisionShape(world, p);
+				if (!shape.isEmpty() && y - p.getY() >= shape.min(net.minecraft.core.Direction.Axis.Y) - 1.0E-3) {
+					return Math.max(0.0, p.getY() + shape.min(net.minecraft.core.Direction.Axis.Y) - top - 0.05);
+				}
+			}
+			return 2.0;
 		}
 
 		@Override
