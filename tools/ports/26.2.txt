@@ -1,4 +1,4 @@
-# 26.2 on bd8480b3ee4bc104832c65b016617c14f0a7fa6e: build success, tests failure, jar success
+# 26.2 on 0ccca8e70043998ef24b43b07c96bd48024568be: build success, tests success, jar success
 > Configure project :
 > Task :compileJava
 > Task :processResources
@@ -8,11 +8,11 @@
 > Task :processIncludeJars
 > Task :clientClasses
 > Task :compileTestJava NO-SOURCE
-> Task :jar
 > Task :processTestResources NO-SOURCE
-> Task :assemble
 > Task :testClasses UP-TO-DATE
+> Task :jar
 > Task :test NO-SOURCE
+> Task :assemble
 > Task :validateAccessWidener NO-SOURCE
 > Task :check UP-TO-DATE
 > Task :build
@@ -39,30 +39,30 @@ jar: build/libs/occupant-0.1.1+mc26.2.jar
   }
 }
 unobfuscated version: the game's own names are the real ones
-[21:14:40] [Server thread/INFO] (occupant) [gametest] last camp at BlockPos{x=-13328592, y=-61, z=12393582}, chest at BlockPos{x=-13328589, y=-60, z=12393582}
-[21:14:40] [Server thread/INFO] (occupant) [gametest] lair under BlockPos{x=-13328577, y=0, z=12394982}: 22 rungs, going in: STARTED
-[21:14:41] [Server thread/INFO] (occupant) [gametest] blight over 64 chunks: 451 blocks changed, 0 leaves
-[21:14:41] [Server thread/INFO] (occupant) [gametest] houses: found before false, first true, too close false, second true, after finding false
-[21:14:41] [Server thread/INFO] (occupant) [gametest] mercy: fall allowed false, health 20.0, creative true, introduced true
-[21:14:41] [Server thread/INFO] (occupant) [gametest] mercy: zombie allowed false, held true
-[21:14:41] [Server thread/INFO] (occupant) [gametest] void: allowed false, health 20.0 of 20.0, food 20
-[21:14:42] [Server thread/INFO] (occupant) [gametest] advancements of ours loaded: 19
-[21:14:42] [Server thread/INFO] (occupant) [gametest] fog: first act 68.0, last act 38.0
-[21:14:42] [Server thread/INFO] (occupant) [gametest] fog thick at 48.0, begins at 27.839999999999996; it stands 22.47220505424423 away
-[21:14:42] [Server thread/INFO] (occupant) [gametest] places without loot: [], page found: true
-[21:14:43] [Server thread/INFO] (occupant) [gametest] ways of building a place that lost their things: []
-[21:14:43] [Server thread/INFO] (occupant) [gametest] house test player at BlockPos{x=-2, y=1, z=-4} facing 0.0 / (0.0, -0.0, 1.0)
-[21:14:43] [Server thread/INFO] (occupant) [gametest] house hallway spot: peeking BlockPos{x=-13328522, y=-55, z=12394585} / any BlockPos{x=-13328522, y=-55, z=12394585} (relative to the floor: BlockPos{x=4, y=1, z=0})
-[21:14:43] [Server thread/INFO] (occupant) [gametest] hallway light at the far end: block 0 sky 0, dark true
-[21:14:43] [Server thread/INFO] (occupant) [gametest] that spot: mask 1001001001, block light 0, sky 2, main room middle block light 0 sky 8
-[21:14:45] [Server thread/INFO] (occupant) [gametest] rescue: creeper alive true, 0.0 above the ground
-[21:14:45] [Server thread/INFO] (occupant) [gametest] rescue: zombie 1.6258988857269259 above the ground, alive true
-[21:14:45] [Server thread/INFO] (occupant) [gametest] field: darkOutside=true skyDarken=7 light=8 skyLight=15 blockLight=0 isDark=true grassInDirtTag=false
-[21:14:45] [Server thread/INFO] (occupant) [gametest] cave: yaw=-90.0 feet=BlockPos{x=-13328162, y=60, z=12394436} underground=true skyVisible=false skyLight=0 topY=69 light=0 look=(1.0, 0.0, 1.2246468525851679E-16) | ahead: standable=55 dark=55 visible=55
-[21:14:45] [Server thread/INFO] (occupant) [gametest] arena failures: []
-[21:14:45] [Server thread/INFO] (occupant) [gametest] slowest event to start: torch_gone (cave) in 8 ms
-[21:14:47] [Server thread/INFO] (occupant) [gametest] unnoticed: age 241, seen -1, nearby 1, alive true, concealed false, noticed false, in sight true, angle 176, ray MISS at -13328606, -7, 12394289 Block{minecraft:air}, ignored 1, same story true
-[21:14:56] [Server thread/INFO] (occupant) [gametest] events that found a place to happen: [familiar, cave_noise, thunder, echo, breath, fake_join, sign, roof, saving, teammate, advancement, whisper, doppel_chat, stalker, flicker, static, wake]
-[21:14:56] [Server thread/INFO] (Minecraft) ========= 28 GAME TESTS COMPLETE IN 18.00 s ======================
-[21:14:56] [Server thread/INFO] (Minecraft) 1 required tests failed :(
-[21:14:56] [Server thread/INFO] (Minecraft)    - occupant:occupant_game_tests_the_rescue_takes_no_more_than_eight: Could not summon the zombies (6) on tick 0
+[21:21:53] [Server thread/INFO] (occupant) [gametest] houses: found before false, first true, too close false, second true, after finding false
+[21:21:53] [Server thread/INFO] (occupant) [gametest] last camp at BlockPos{x=-4459447, y=-61, z=-10066788}, chest at BlockPos{x=-4459444, y=-60, z=-10066789}
+[21:21:54] [Server thread/INFO] (occupant) [gametest] lair under BlockPos{x=-4459432, y=0, z=-10065388}: 22 rungs, going in: STARTED
+[21:21:55] [Server thread/INFO] (occupant) [gametest] blight over 64 chunks: 409 blocks changed, 0 leaves
+[21:21:55] [Server thread/INFO] (occupant) [gametest] mercy: fall allowed false, health 20.0, creative true, introduced true
+[21:21:55] [Server thread/INFO] (occupant) [gametest] mercy: zombie allowed false, held true
+[21:21:55] [Server thread/INFO] (occupant) [gametest] void: allowed false, health 20.0 of 20.0, food 20
+[21:21:56] [Server thread/INFO] (occupant) [gametest] advancements of ours loaded: 19
+[21:21:56] [Server thread/INFO] (occupant) [gametest] fog: first act 68.0, last act 38.0
+[21:21:57] [Server thread/INFO] (occupant) [gametest] fog thick at 48.0, begins at 27.839999999999996; it stands 23.600847442411894 away
+[21:21:57] [Server thread/INFO] (occupant) [gametest] places without loot: [], page found: true
+[21:21:59] [Server thread/INFO] (occupant) [gametest] ways of building a place that lost their things: []
+[21:21:59] [Server thread/INFO] (occupant) [gametest] house test player at BlockPos{x=-2, y=1, z=-4} facing 0.0 / (0.0, -0.0, 1.0)
+[21:21:59] [Server thread/INFO] (occupant) [gametest] house hallway spot: peeking BlockPos{x=-4459377, y=-55, z=-10065785} / any BlockPos{x=-4459377, y=-55, z=-10065785} (relative to the floor: BlockPos{x=4, y=1, z=0})
+[21:21:59] [Server thread/INFO] (occupant) [gametest] hallway light at the far end: block 0 sky 0, dark true
+[21:21:59] [Server thread/INFO] (occupant) [gametest] that spot: mask 1001001001, block light 0, sky 2, main room middle block light 0 sky 8
+[21:22:01] [Server thread/INFO] (occupant) [gametest] rescue: creeper alive true, 0.0 above the ground
+[21:22:01] [Server thread/INFO] (occupant) [gametest] rescue: zombie 1.6258988857269259 above the ground, alive true
+[21:22:01] [Server thread/INFO] (occupant) [gametest] rescue: 1 come for them
+[21:22:01] [Server thread/INFO] (occupant) [gametest] field: darkOutside=true skyDarken=7 light=8 skyLight=15 blockLight=0 isDark=true grassInDirtTag=false
+[21:22:01] [Server thread/INFO] (occupant) [gametest] cave: yaw=-90.0 feet=BlockPos{x=-4459017, y=60, z=-10065934} underground=true skyVisible=false skyLight=0 topY=69 light=0 look=(1.0, 0.0, 1.2246468525851679E-16) | ahead: standable=55 dark=55 visible=55
+[21:22:01] [Server thread/INFO] (occupant) [gametest] arena failures: []
+[21:22:01] [Server thread/INFO] (occupant) [gametest] slowest event to start: torch_gone (cave) in 21 ms
+[21:22:02] [Server thread/INFO] (occupant) [gametest] rescue of ten: at most 3 on its legs at once
+[21:22:02] [Server thread/INFO] (occupant) [gametest] unnoticed: age 240, seen -1, nearby 1, alive true, concealed false, noticed false, in sight true, angle 176, ray MISS at -4459461, -7, -10066081 Block{minecraft:air}, ignored 1, same story true
+[21:22:12] [Server thread/INFO] (occupant) [gametest] events that found a place to happen: [familiar, cave_noise, thunder, echo, breath, fake_join, sign, roof, saving, teammate, advancement, whisper, doppel_chat, flicker, static, wake]
+[21:22:13] [Server thread/INFO] (Minecraft) ========= 28 GAME TESTS COMPLETE IN 22.68 s ======================
