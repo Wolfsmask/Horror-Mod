@@ -1,131 +1,24 @@
-=== net.minecraft.client.renderer.feature.ModelFeatureRenderer (-p)
-public class client.renderer.feature.ModelFeatureRenderer {
-  private final blaze3d.vertex.PoseStack poseStack;
-  public client.renderer.feature.ModelFeatureRenderer();
-  public void render(client.renderer.SubmitNodeCollection, client.renderer.MultiBufferSource$BufferSource, client.renderer.OutlineBufferSource, client.renderer.MultiBufferSource$BufferSource);
-  private void renderTranslucents(client.renderer.MultiBufferSource$BufferSource, client.renderer.OutlineBufferSource, List<client.renderer.SubmitNodeStorage$TranslucentModelSubmit<?>>, client.renderer.MultiBufferSource$BufferSource);
-  private void renderBatch(client.renderer.MultiBufferSource$BufferSource, client.renderer.OutlineBufferSource, Map<client.renderer.rendertype.RenderType, List<client.renderer.SubmitNodeStorage$ModelSubmit<?>>>, client.renderer.MultiBufferSource$BufferSource);
-  private <S> void renderModel(client.renderer.SubmitNodeStorage$ModelSubmit<S>, client.renderer.rendertype.RenderType, blaze3d.vertex.VertexConsumer, client.renderer.OutlineBufferSource, client.renderer.MultiBufferSource$BufferSource);
-  private static double method_73251(client.renderer.SubmitNodeStorage$TranslucentModelSubmit);
-}
-=== net.minecraft.client.renderer.feature.ModelFeatureRenderer (code: render)
-  public client.renderer.feature.ModelFeatureRenderer();
-    Code:
-         1: invokespecial #45                 // Method java/lang/Object."<init>":()V
-         5: new           #32                 // class com/mojang/blaze3d/vertex/PoseStack
-         9: invokespecial #46                 // Method com/mojang/blaze3d/vertex/PoseStack."<init>":()V
-        12: putfield      #48                 // Field poseStack:Lcom/mojang/blaze3d/vertex/PoseStack;
-
-  public void render(client.renderer.SubmitNodeCollection, client.renderer.MultiBufferSource$BufferSource, client.renderer.OutlineBufferSource, client.renderer.MultiBufferSource$BufferSource);
-    Code:
-         1: invokevirtual #62                 // Method net/minecraft/client/renderer/SubmitNodeCollection.getModelSubmits:()Lnet/minecraft/client/renderer/feature/ModelFeatureRenderer$Storage;
-        11: getfield      #66                 // Field net/minecraft/client/renderer/feature/ModelFeatureRenderer$Storage.opaqueModelSubmits:Ljava/util/Map;
-        16: invokevirtual #70                 // Method renderBatch:(Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/OutlineBufferSource;Ljava/util/Map;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;)V
-        21: getfield      #74                 // Field net/minecraft/client/renderer/feature/ModelFeatureRenderer$Storage.translucentModelSubmits:Ljava/util/List;
-        24: invokedynamic #93,  0             // InvokeDynamic #0:applyAsDouble:()Ljava/util/function/ToDoubleFunction;
-        29: invokestatic  #99                 // InterfaceMethod java/util/Comparator.comparingDouble:(Ljava/util/function/ToDoubleFunction;)Ljava/util/Comparator;
-        32: invokeinterface #105,  2          // InterfaceMethod java/util/List.sort:(Ljava/util/Comparator;)V
-        42: getfield      #74                 // Field net/minecraft/client/renderer/feature/ModelFeatureRenderer$Storage.translucentModelSubmits:Ljava/util/List;
-        47: invokevirtual #109                // Method renderTranslucents:(Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/OutlineBufferSource;Ljava/util/List;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;)V
-
-  private void renderTranslucents(client.renderer.MultiBufferSource$BufferSource, client.renderer.OutlineBufferSource, java.util.List<client.renderer.SubmitNodeStorage$TranslucentModelSubmit<?>>, client.renderer.MultiBufferSource$BufferSource);
-    Code:
-         1: invokeinterface #120,  1          // InterfaceMethod java/util/List.iterator:()Ljava/util/Iterator;
-        10: invokeinterface #128,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
-        15: ifeq          59
-        20: invokeinterface #132,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
-        25: checkcast     #17                 // class net/minecraft/client/renderer/SubmitNodeStorage$TranslucentModelSubmit
-        33: invokevirtual #136                // Method net/minecraft/client/renderer/SubmitNodeStorage$TranslucentModelSubmit.modelSubmit:()Lnet/minecraft/client/renderer/SubmitNodeStorage$ModelSubmit;
-        38: invokevirtual #140                // Method net/minecraft/client/renderer/SubmitNodeStorage$TranslucentModelSubmit.renderType:()Lnet/minecraft/client/renderer/rendertype/RenderType;
-        44: invokevirtual #140                // Method net/minecraft/client/renderer/SubmitNodeStorage$TranslucentModelSubmit.renderType:()Lnet/minecraft/client/renderer/rendertype/RenderType;
-        47: invokevirtual #144                // Method net/minecraft/client/renderer/MultiBufferSource$BufferSource.getBuffer:(Lnet/minecraft/client/renderer/rendertype/RenderType;)Lcom/mojang/blaze3d/vertex/VertexConsumer;
-        53: invokevirtual #148                // Method renderModel:(Lnet/minecraft/client/renderer/SubmitNodeStorage$ModelSubmit;Lnet/minecraft/client/renderer/rendertype/RenderType;Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/minecraft/client/renderer/OutlineBufferSource;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;)V
-        56: goto          8
-
-  private void renderBatch(client.renderer.MultiBufferSource$BufferSource, client.renderer.OutlineBufferSource, java.util.Map<client.renderer.rendertype.RenderType, java.util.List<client.renderer.SubmitNodeStorage$ModelSubmit<?>>>, client.renderer.MultiBufferSource$BufferSource);
-    Code:
-         0: getstatic     #160                // Field net/minecraft/SharedConstants.DEBUG_SHUFFLE_MODELS:Z
-         3: ifeq          33
-         6: new           #162                // class java/util/ArrayList
-        11: invokeinterface #166,  1          // InterfaceMethod java/util/Map.entrySet:()Ljava/util/Set;
-        16: invokespecial #169                // Method java/util/ArrayList."<init>":(Ljava/util/Collection;)V
-        23: invokestatic  #175                // Method java/util/Collections.shuffle:(Ljava/util/List;)V
-        30: goto          41
-        34: invokeinterface #166,  1          // InterfaceMethod java/util/Map.entrySet:()Ljava/util/Set;
-        43: invokeinterface #180,  1          // InterfaceMethod java/lang/Iterable.iterator:()Ljava/util/Iterator;
-        52: invokeinterface #128,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
-        57: ifeq          154
-        62: invokeinterface #132,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
-        67: checkcast     #25                 // class java/util/Map$Entry
-        75: invokeinterface #183,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
-        80: checkcast     #185                // class net/minecraft/client/renderer/rendertype/RenderType
-        83: invokevirtual #144                // Method net/minecraft/client/renderer/MultiBufferSource$BufferSource.getBuffer:(Lnet/minecraft/client/renderer/rendertype/RenderType;)Lcom/mojang/blaze3d/vertex/VertexConsumer;
-        90: invokeinterface #188,  1          // InterfaceMethod java/util/Map$Entry.getValue:()Ljava/lang/Object;
-        95: checkcast     #101                // class java/util/List
-        98: invokeinterface #120,  1          // InterfaceMethod java/util/List.iterator:()Ljava/util/Iterator;
-       107: invokeinterface #128,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
-       112: ifeq          151
-       117: invokeinterface #132,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
-       122: checkcast     #22                 // class net/minecraft/client/renderer/SubmitNodeStorage$ModelSubmit
-       132: invokeinterface #183,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
-       137: checkcast     #185                // class net/minecraft/client/renderer/rendertype/RenderType
-       145: invokevirtual #148                // Method renderModel:(Lnet/minecraft/client/renderer/SubmitNodeStorage$ModelSubmit;Lnet/minecraft/client/renderer/rendertype/RenderType;Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/minecraft/client/renderer/OutlineBufferSource;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;)V
-       148: goto          105
-       151: goto          50
-
-  private <S> void renderModel(client.renderer.SubmitNodeStorage$ModelSubmit<S>, client.renderer.rendertype.RenderType, com.mojang.blaze3d.vertex.VertexConsumer, client.renderer.OutlineBufferSource, client.renderer.MultiBufferSource$BufferSource);
-    Code:
-         1: getfield      #48                 // Field poseStack:Lcom/mojang/blaze3d/vertex/PoseStack;
-         4: invokevirtual #206                // Method com/mojang/blaze3d/vertex/PoseStack.pushPose:()V
-         8: getfield      #48                 // Field poseStack:Lcom/mojang/blaze3d/vertex/PoseStack;
-        11: invokevirtual #210                // Method com/mojang/blaze3d/vertex/PoseStack.last:()Lcom/mojang/blaze3d/vertex/PoseStack$Pose;
-        15: invokevirtual #213                // Method net/minecraft/client/renderer/SubmitNodeStorage$ModelSubmit.pose:()Lcom/mojang/blaze3d/vertex/PoseStack$Pose;
-        18: invokevirtual #217                // Method com/mojang/blaze3d/vertex/PoseStack$Pose.set:(Lcom/mojang/blaze3d/vertex/PoseStack$Pose;)V
-        22: invokevirtual #221                // Method net/minecraft/client/renderer/SubmitNodeStorage$ModelSubmit.model:()Lnet/minecraft/client/model/Model;
-        28: invokevirtual #225                // Method net/minecraft/client/renderer/SubmitNodeStorage$ModelSubmit.sprite:()Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;
-        31: ifnonnull     38
-        35: goto          46
-        39: invokevirtual #225                // Method net/minecraft/client/renderer/SubmitNodeStorage$ModelSubmit.sprite:()Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;
-        43: invokevirtual #233                // Method net/minecraft/client/renderer/texture/TextureAtlasSprite.wrap:(Lcom/mojang/blaze3d/vertex/VertexConsumer;)Lcom/mojang/blaze3d/vertex/VertexConsumer;
-        51: invokevirtual #236                // Method net/minecraft/client/renderer/SubmitNodeStorage$ModelSubmit.state:()Ljava/lang/Object;
-        54: invokevirtual #240                // Method net/minecraft/client/model/Model.setupAnim:(Ljava/lang/Object;)V
-        60: getfield      #48                 // Field poseStack:Lcom/mojang/blaze3d/vertex/PoseStack;
-        66: invokevirtual #244                // Method net/minecraft/client/renderer/SubmitNodeStorage$ModelSubmit.lightCoords:()I
-        70: invokevirtual #247                // Method net/minecraft/client/renderer/SubmitNodeStorage$ModelSubmit.overlayCoords:()I
-        74: invokevirtual #250                // Method net/minecraft/client/renderer/SubmitNodeStorage$ModelSubmit.tintedColor:()I
-        77: invokevirtual #254                // Method net/minecraft/client/model/Model.renderToBuffer:(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;III)V
-        81: invokevirtual #257                // Method net/minecraft/client/renderer/SubmitNodeStorage$ModelSubmit.outlineColor:()I
-        84: ifeq          163
-        88: invokevirtual #261                // Method net/minecraft/client/renderer/rendertype/RenderType.outline:()Ljava/util/Optional;
-        91: invokevirtual #266                // Method java/util/Optional.isPresent:()Z
-        94: ifne          104
-        98: invokevirtual #269                // Method net/minecraft/client/renderer/rendertype/RenderType.isOutline:()Z
-       101: ifeq          163
-       107: invokevirtual #257                // Method net/minecraft/client/renderer/SubmitNodeStorage$ModelSubmit.outlineColor:()I
-       110: invokevirtual #273                // Method net/minecraft/client/renderer/OutlineBufferSource.setColor:(I)V
-       116: invokevirtual #274                // Method net/minecraft/client/renderer/OutlineBufferSource.getBuffer:(Lnet/minecraft/client/renderer/rendertype/RenderType;)Lcom/mojang/blaze3d/vertex/VertexConsumer;
-       124: getfield      #48                 // Field poseStack:Lcom/mojang/blaze3d/vertex/PoseStack;
-       128: invokevirtual #225                // Method net/minecraft/client/renderer/SubmitNodeStorage$ModelSubmit.sprite:()Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;
-       131: ifnonnull     139
-       136: goto          148
-       140: invokevirtual #225                // Method net/minecraft/client/renderer/SubmitNodeStorage$ModelSubmit.sprite:()Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;
-       145: invokevirtual #233                // Method net/minecraft/client/renderer/texture/TextureAtlasSprite.wrap:(Lcom/mojang/blaze3d/vertex/VertexConsumer;)Lcom/mojang/blaze3d/vertex/VertexConsumer;
-       149: invokevirtual #244                // Method net/minecraft/client/renderer/SubmitNodeStorage$ModelSubmit.lightCoords:()I
-       153: invokevirtual #247                // Method net/minecraft/client/renderer/SubmitNodeStorage$ModelSubmit.overlayCoords:()I
-       157: invokevirtual #250                // Method net/minecraft/client/renderer/SubmitNodeStorage$ModelSubmit.tintedColor:()I
-       160: invokevirtual #254                // Method net/minecraft/client/model/Model.renderToBuffer:(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;III)V
-       164: invokevirtual #278                // Method net/minecraft/client/renderer/SubmitNodeStorage$ModelSubmit.crumblingOverlay:()Lnet/minecraft/client/renderer/feature/ModelFeatureRenderer$CrumblingOverlay;
-       167: ifnull        259
-       171: invokevirtual #281                // Method net/minecraft/client/renderer/rendertype/RenderType.affectsCrumbling:()Z
-       174: ifeq          259
-       177: new           #283                // class com/mojang/blaze3d/vertex/SheetedDecalTextureGenerator
-       183: getstatic     #288                // Field net/minecraft/client/resources/model/ModelBakery.DESTROY_TYPES:Ljava/util/List;
-       187: invokevirtual #278                // Method net/minecraft/client/renderer/SubmitNodeStorage$ModelSubmit.crumblingOverlay:()Lnet/minecraft/client/renderer/feature/ModelFeatureRenderer$CrumblingOverlay;
-       190: invokevirtual #291                // Method net/minecraft/client/renderer/feature/ModelFeatureRenderer$CrumblingOverlay.progress:()I
-       193: invokeinterface #295,  2          // InterfaceMethod java/util/List.get:(I)Ljava/lang/Object;
-       198: checkcast     #185                // class net/minecraft/client/renderer/rendertype/RenderType
-       201: invokevirtual #144                // Method net/minecraft/client/renderer/MultiBufferSource$BufferSource.getBuffer:(Lnet/minecraft/client/renderer/rendertype/RenderType;)Lcom/mojang/blaze3d/vertex/VertexConsumer;
-       205: invokevirtual #278                // Method net/minecraft/client/renderer/SubmitNodeStorage$ModelSubmit.crumblingOverlay:()Lnet/minecraft/client/renderer/feature/ModelFeatureRenderer$CrumblingOverlay;
-       208: invokevirtual #298                // Method net/minecraft/client/renderer/feature/ModelFeatureRenderer$CrumblingOverlay.cameraPose:()Lcom/mojang/blaze3d/vertex/PoseStack$Pose;
-       211: fconst_1
-       212: invokespecial #301                // Method com/mojang/blaze3d/vertex/SheetedDecalTextureGenerator."<init>":(Lcom/mojang/blaze3d/vertex/VertexConsumer;Lcom/mojang/blaze3d/vertex/PoseStack$Pose;F)V
+=== net.minecraft.client.MouseHandler (-public)
+public class client.MouseHandler {
+  public boolean isMouseGrabbed();
+  public void grabMouse();
+=== net.minecraft.client.Minecraft (-public)
+public class client.Minecraft extends util.thread.ReentrantBlockableEventLoop<Runnable> implements blaze3d.platform.WindowEventHandler {
+  public final client.gui.components.debug.DebugScreenEntryList debugEntries;
+  public client.gui.screens.Screen screen;
+  public void openChatScreen(client.gui.components.ChatComponent$ChatMethod);
+  public void setScreen(client.gui.screens.Screen);
+  public void setOverlay(client.gui.screens.Overlay);
+  public client.gui.screens.worldselection.WorldOpenFlows createWorldOpenFlows();
+  public void disconnectWithSavingScreen();
+  public void disconnectWithProgressScreen();
+  public void disconnectWithProgressScreen(boolean);
+  public void disconnect(client.gui.screens.Screen, boolean);
+  public void disconnect(client.gui.screens.Screen, boolean, boolean);
+  public void clearClientLevel(client.gui.screens.Screen);
+  public void setScreenAndShow(client.gui.screens.Screen);
+  public network.chat.Component grabPanoramixScreenshot(java.io.File);
+  public client.gui.screens.Overlay getOverlay();
+  public client.gui.screens.social.PlayerSocialManager getPlayerSocialManager();
+  public client.gui.components.DebugScreenOverlay getDebugOverlay();
+  public boolean canInterruptScreen();
