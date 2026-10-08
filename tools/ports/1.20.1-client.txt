@@ -1,19 +1,19 @@
-# 1.20.1 client on 18adce1f26225fd750a713192cc4312919b27521: cancelled
+# 1.20.1 client on bbfd2baed3f22272e834be5490477b0f535a5dea: failure
 === client.log
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/Mercy.java:229: error: variable want is already defined in constructor Rescue(Haunt,ServerPlayer,List<Mob>)
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/Mercy.java:233: error: variable want is already defined in constructor Rescue(Haunt,ServerPlayer,List<Mob>)
 > Task :compileJava FAILED
 * What went wrong:
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/Mercy.java:229: error: variable want is already defined in constructor Rescue(Haunt,ServerPlayer,List<Mob>)
-BUILD FAILED in 35s
+  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/Mercy.java:233: error: variable want is already defined in constructor Rescue(Haunt,ServerPlayer,List<Mob>)
+BUILD FAILED in 25s
 --- the mod's own checks ---
 --- last of the server thread in client.log ---
 --- tail of client.log ---
-			Vec3 want = first.position().add(out.scale(monsters.size() == 1 ? 2.4 : 3.0));
-			     ^
+				Vec3 want = first.position().add(out.scale(d));
+				     ^
 1 error
 
 > Task :compileJava FAILED
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/client-1791482112794.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/client-1791482188601.json
 
 [Incubating] Problems report is available at: file:///home/runner/work/Horror-Mod/Horror-Mod/build/reports/problems/problems-report.html
 
@@ -22,14 +22,14 @@ FAILURE: Build failed with an exception.
 * What went wrong:
 Execution failed for task ':compileJava' (registered by plugin class 'org.gradle.api.plugins.JavaBasePlugin').
 > Compilation failed; see the compiler output below.
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/Mercy.java:229: error: variable want is already defined in constructor Rescue(Haunt,ServerPlayer,List<Mob>)
-  			Vec3 want = first.position().add(out.scale(monsters.size() == 1 ? 2.4 : 3.0));
-  			     ^
+  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/Mercy.java:233: error: variable want is already defined in constructor Rescue(Haunt,ServerPlayer,List<Mob>)
+  				Vec3 want = first.position().add(out.scale(d));
+  				     ^
   1 error
 
 * Try:
 > Check your code and dependencies to fix the compilation error(s)
 > Run with --scan to get full insights from a Build Scan (powered by Develocity).
 
-BUILD FAILED in 35s
+BUILD FAILED in 25s
 2 actionable tasks: 2 executed
