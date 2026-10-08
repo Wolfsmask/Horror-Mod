@@ -100,6 +100,8 @@ For every version:
   - It only takes what is actually after you (not every monster nearby), and it stands behind the one that hit you.
   - Falls: you wake whole, with full health and a full stomach. Falling into the void is always caught now (a second fall soon after the first used to kill you, and so did a totem in your hand, which can't stop the void).
   - After the rescue you are whole again too.
+  - Fixed: caught falling far from your bed (or from spawn), you could wake inside the bedrock at the bottom of the world and suffocate.
+  - Fixed in the rescue: an enderman no longer teleports off the leg; a big slime no longer splits into more slimes; a jockey's rider is lifted off its mount; a held zombie no longer calls in others on Hard; with its back to a wall, it stands behind another monster instead. /kill always works.
 
   0.1.1: fixes, and a better rescue.
 
