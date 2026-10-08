@@ -508,8 +508,11 @@ public final class OccupantGameTests {
 		level.getServer().getCommands().performPrefixedCommand(level.getServer().createCommandSourceStack().withSuppressedOutput(),
 				String.format(java.util.Locale.ROOT, "summon minecraft:zombie %.1f %.1f %.1f {Tags:[\"occupant_mercy\"],PersistenceRequired:1b}",
 						player.getX() + 2, player.getY(), player.getZ()));
+		// Only the one put there: the tests stand close together, and each has a zombie of its own.
+		net.minecraft.world.phys.Vec3 spot = new net.minecraft.world.phys.Vec3(player.getX() + 2, player.getY(), player.getZ());
 		net.minecraft.world.entity.Mob zombie = level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class,
-				player.getBoundingBox().inflate(6.0), m -> com.wolfsmask.occupant.util.Kinds.is(m, "zombie")).stream().findFirst().orElse(null);
+				net.minecraft.world.phys.AABB.ofSize(spot, 1.5, 3.0, 1.5), m -> com.wolfsmask.occupant.util.Kinds.is(m, "zombie"))
+				.stream().findFirst().orElse(null);
 		helper.assertTrue(zombie != null, "Could not summon a zombie");
 		player.setHealth(1.0f);
 		boolean first = com.wolfsmask.occupant.director.Mercy.allowDeath(player, player.damageSources().mobAttack(zombie));
@@ -542,8 +545,11 @@ public final class OccupantGameTests {
 		level.getServer().getCommands().performPrefixedCommand(level.getServer().createCommandSourceStack().withSuppressedOutput(),
 				String.format(java.util.Locale.ROOT, "summon minecraft:zombie %.1f %.1f %.1f {PersistenceRequired:1b}",
 						player.getX() + 2, player.getY(), player.getZ()));
+		// Only the one put there: the tests stand close together, and each has a zombie of its own.
+		net.minecraft.world.phys.Vec3 spot = new net.minecraft.world.phys.Vec3(player.getX() + 2, player.getY(), player.getZ());
 		net.minecraft.world.entity.Mob zombie = level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class,
-				player.getBoundingBox().inflate(6.0), m -> com.wolfsmask.occupant.util.Kinds.is(m, "zombie")).stream().findFirst().orElse(null);
+				net.minecraft.world.phys.AABB.ofSize(spot, 1.5, 3.0, 1.5), m -> com.wolfsmask.occupant.util.Kinds.is(m, "zombie"))
+				.stream().findFirst().orElse(null);
 		helper.assertTrue(zombie != null, "Could not summon a zombie");
 		double ground = zombie.getY();
 		player.setHealth(1.0f);
