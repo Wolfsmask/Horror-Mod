@@ -1,5 +1,5 @@
-# 1.21.11 on a0574d2515b8269ae1959d5f2b63a129d6e2c02b: build failure, tests skipped, jar skipped
-com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:342: error: cannot find symbol
+# 1.21.11 on 495f5428d928692110c78d2f792dd40318cf2122: build failure, tests skipped, jar skipped
+com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:352: error: cannot find symbol
   symbol:   method getClientLevel()
   location: variable connection of type TestServerConnection
 > Configure project :
