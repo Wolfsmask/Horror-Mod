@@ -62,8 +62,9 @@ why you left it out there.
 
 **It does not let you die. Not like that.** Jump from somewhere high enough to kill you and the
 screen goes black, and you wake at your bed with a note: *it doesn't like that.* When a monster
-is about to kill you, the light stutters and it is behind the monster, one long leg through it,
-lifting it off the ground; then it tells you why, and walks away into the fog. Not every time.
+is about to kill you, it is simply there, behind the monster. It lifts the monster off the
+ground, slowly; the monster dies up there; it is gone; and then it tells you why. With more
+than one, they are all lifted and all die together. Not every time.
 And the Director builds on absence: the longer nothing has happened, the more it favours
 something real, so the next thing lands once you have stopped listening for it.
 
@@ -200,19 +201,22 @@ not end well, and when it runs out, the pages that are left are not in the same 
 - **It does not walk, and it does not crawl like a spider.** Each leg reaches out to the nearest
   real thing it can push against (the ground, a wall, a tree, a ceiling) and stays planted
   there. The body hangs between them, lags behind, and is then shoved after itself all at once,
-  leaning into the shove. Legs left stretched too far let go and snap to a new hold. Out in the
+  leaning into the shove. Legs left stretched too far let go and reach, smoothly, for a new hold. Out in the
   open a few legs have nothing to hold and hang limp beside it.
 - In a cramped space it **folds down into it and braces its legs against the walls** rather
   than shrinking, so a corridor makes it look worse, not smaller.
-- **It mostly does nothing, on purpose.** It stands, at the wrong height, for too long, and now
-  and again its head is a few degrees further round than it was. What movement there is happens
-  between frames, the way a thing looks in two photographs taken a second apart.
+- **It does not move while you are looking at it.** Look at it and it winds down to perfect
+  stillness. Everything it does by itself (the sway, the hair, a leg feeling about) happens
+  while you are looking away; look away and back, and its head is tilted a different way, and
+  you never saw it move. Nothing about it ever jumps or stutters.
 - Early in the story it keeps its head down, so the face is hidden and the shape is only a shape.
 - Further away it reads as **much larger**, because there is nothing beside it to measure it
   against, and indoors it never stands up through the ceiling.
 - A faint sheen keeps the face and legs **just visible in real darkness**: in a black forest
   they are the one thing you can half-see.
-- It cannot be killed, farmed, trapped or pushed. Hit it and it is simply gone.
+- It cannot be killed, farmed, trapped or pushed. Hit it and it is simply gone. Nothing else
+  touches it: a berry bush, a cactus or a stray arrow does nothing.
+- Late in the story the debug screen stops telling you where you are. Why would you need to know?
 - It is **never saved to disk**, and it removes itself if nothing is controlling it. You will
   never find it standing around in an old save.
 
