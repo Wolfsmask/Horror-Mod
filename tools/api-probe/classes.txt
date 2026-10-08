@@ -1,3 +1,15 @@
 @mc 1.20.1 1.21.1 1.21.11 26.1.2 26.2 26.3 26.4-snapshot-2
-# Round 37: where an entity was last tick, for drawing a leg into one between ticks.
-net.minecraft.world.entity.Entity (xOld|yOld|zOld| xo| yo| zo|getPosition\(|oldPosition|getEyePosition\(float)
+# Round 38: the rescue as a cutscene. Food, fire and air; the camera and keys; limbs.
+net.minecraft.world.food.FoodData (setFoodLevel|setSaturation|getFoodLevel)
+net.minecraft.world.entity.Entity (clearFire|setAirSupply|getMaxAirSupply|setYRot|setXRot|yRotO|xRotO|getYRot\(\)|getXRot\(\))
+net.minecraft.client.KeyMapping (setDown|isDown|consumeClick|setAll|releaseAll)
+net.minecraft.client.Options (keyUp|keyDown|keyLeft|keyRight|keyJump|keyShift|keySprint|keyAttack|keyUse|keyInventory|keyDrop)
+net.minecraft.world.entity.WalkAnimationState
+net.minecraft.world.entity.LivingEntity (walkAnimation|yHeadRot|yBodyRot|hurtTime|deathTime)
+@find (HumanoidModel|AbstractZombieModel|ZombieModel|SkeletonModel|HumanoidRenderState|ZombieRenderState|SkeletonRenderState|LivingEntityRenderState|CreeperModel|SpiderModel)$
+net.minecraft.client.model.geom.ModelPart (Rot|hasChild|getChild|resetPose|getAllParts|visible)
+net.minecraft.client.model.HumanoidModel (setupAnim|ModelPart|class )
+net.minecraft.client.model.AbstractZombieModel (setupAnim|class )
+@code net.minecraft.client.model.AbstractZombieModel setupAnim
+net.minecraft.client.renderer.entity.LivingEntityRenderer (extractRenderState|render\(|submit\(|setupRotations|class )
+net.minecraft.client.renderer.entity.state.LivingEntityRenderState
