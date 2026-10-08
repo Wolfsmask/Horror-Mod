@@ -105,10 +105,14 @@ public final class TunnelEvent extends HorrorEvent {
 			if (!Spots.isLoaded(world, feet) || !Spots.isLoaded(world, feet.relative(dir))) break;
 			if (!Spots.isNaturalStone(world.getBlockState(feet)) || !Spots.isNaturalStone(world.getBlockState(head))) break;
 			if (WorldBlocks.touchesFluid(world, feet) || WorldBlocks.touchesFluid(world, head)) break;
-			// Walled in on every side but the way it came: ahead, to each side, above and below.
-			if (open(world, feet.relative(dir)) || open(world, head.relative(dir)) || open(world, feet.relative(left))
-					|| open(world, feet.relative(right)) || open(world, head.relative(left)) || open(world, head.relative(right))
-					|| open(world, head.above()) || open(world, feet.below())) break;
+			// Walled in on every side but the way it came: ahead, to each side, above and below. At
+			// the mouth, the cave itself may be beside it (a cave wall is never flat): space there
+			// counts only if it is not open to the cave as well.
+			if (open(world, feet.relative(dir)) || open(world, head.relative(dir))) break;
+			boolean mouth = i == 1;
+			if (elsewhere(world, feet.relative(left), dir, mouth) || elsewhere(world, feet.relative(right), dir, mouth)
+					|| elsewhere(world, head.relative(left), dir, mouth) || elsewhere(world, head.relative(right), dir, mouth)
+					|| elsewhere(world, head.above(), dir, mouth) || elsewhere(world, feet.below(), dir, mouth)) break;
 			out.add(feet);
 			out.add(head);
 		}
@@ -118,5 +122,13 @@ public final class TunnelEvent extends HorrorEvent {
 	/** Nothing solid there: a space the tunnel would open into. */
 	private static boolean open(ServerLevel world, BlockPos pos) {
 		return world.getBlockState(pos).getCollisionShape(world, pos).isEmpty();
+	}
+
+	/**
+	 * Open, and not just the cave it was dug from: at the mouth, a space with the cave right behind
+	 * it is the same cave.
+	 */
+	private static boolean elsewhere(ServerLevel world, BlockPos pos, Direction dir, boolean mouth) {
+		return open(world, pos) && !(mouth && open(world, pos.relative(dir.getOpposite())));
 	}
 }
