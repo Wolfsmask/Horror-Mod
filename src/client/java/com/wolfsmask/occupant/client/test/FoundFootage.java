@@ -53,6 +53,7 @@ final class FoundFootage {
 			shot("window", () -> window(context, game, woods));
 			shot("cave", () -> cave(context, game, spawn));
 			shot("debug", () -> debug(context, game, woods));
+			shot("plates", () -> plates(context, game, spawn));
 		} catch (RuntimeException | AssertionError e) {
 			Occupant.LOGGER.warn("[client-gametest] found footage stopped early", e);
 		} finally {
@@ -214,6 +215,54 @@ final class FoundFootage {
 		context.waitTicks(25);
 		settle(context, "found-debug");
 		context.getInput().pressKey(KEY_F3);
+	}
+
+	/**
+	 * It, against flat green, for the painted pictures to be made round: a box of emerald high in
+	 * the sky, everything seen by night vision so there are no lights to show, no fog, no story's
+	 * darkening; it standing, bent down over the camera, turned three-quarters, and from below.
+	 */
+	private static void plates(ClientGameTestContext context, TestSingleplayerContext game, BlockPos spawn) {
+		TestServerContext server = game.getServer();
+		BlockPos centre = server.computeOnServer(s -> {
+			ServerLevel level = s.overworld();
+			BlockPos o = new BlockPos(spawn.getX() + 300, Math.min(level.getMaxY() - 30, 230), spawn.getZ() + 300);
+			for (int cx = (o.getX() - 18) >> 4; cx <= (o.getX() + 18) >> 4; cx++) {
+				for (int cz = (o.getZ() - 18) >> 4; cz <= (o.getZ() + 18) >> 4; cz++) level.getChunk(cx, cz);
+			}
+			BlockState green = Blocks.EMERALD_BLOCK.defaultBlockState();
+			for (int x = -17; x <= 17; x++) {
+				for (int z = -17; z <= 17; z++) {
+					for (int y = -1; y <= 22; y++) {
+						boolean shell = Math.abs(x) == 17 || Math.abs(z) == 17 || y == -1 || y == 22;
+						set(level, o.offset(x, y, z), shell ? green : Blocks.AIR.defaultBlockState());
+					}
+				}
+			}
+			return o;
+		});
+		server.runCommand("gamemode spectator @p");
+		server.runCommand("effect give @p minecraft:night_vision 600 0 true");
+		context.runOnClient(mc -> {
+			ScreenEffects.trigger(new ScreenEffectPayload(ScreenEffectPayload.ACT, 0, 0), mc);
+			com.wolfsmask.occupant.client.ClientFog.set(0.0f, 1);
+		});
+		Cinematic.hud(context, false);
+		Vec3 feet = Vec3.atBottomCenterOf(centre);
+		plate(context, game, centre, feet.add(0, Cinematic.EYE, -10.5), feet.add(0, 2.3, 0), Cinematic.Look.STARING, "plate-stand");
+		plate(context, game, centre, feet.add(0, 1.9, -3.4), feet.add(0, 2.9, 0), Cinematic.Look.looming(0), "plate-loom");
+		plate(context, game, centre, feet.add(-4.5, Cinematic.EYE, -6.0), feet.add(0, 2.3, 0),
+				Cinematic.Look.glancing(40f, com.wolfsmask.occupant.entity.OccupantEntity.Mode.STARE, 0), "plate-three-quarter");
+		plate(context, game, centre, feet.add(0.3, 0.55, -1.9), feet.add(0, 3.6, 0), Cinematic.Look.looming(0), "plate-below");
+		server.runCommand("effect clear @p minecraft:night_vision");
+		Cinematic.hud(context, true);
+	}
+
+	private static void plate(ClientGameTestContext context, TestSingleplayerContext game, BlockPos it, Vec3 eye, Vec3 look,
+							  Cinematic.Look pose, String name) {
+		Cinematic.camera(context, game, eye, look, 6000);
+		Cinematic.place(game.getServer(), it, eye, pose);
+		settle(context, name);
 	}
 
 	/** Lets it settle into its pose and the light come right, then takes the picture. */

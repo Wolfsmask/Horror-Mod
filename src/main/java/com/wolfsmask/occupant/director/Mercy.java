@@ -158,36 +158,49 @@ public final class Mercy {
 	}
 
 	/**
-	 * It comes for what was about to kill them. The light stutters, and in the dark it is there,
-	 * behind the monster; one leg through it, lifting it off the ground; then it is dead, and it
-	 * says why, and goes. With more than one, they all die together.
+	 * It comes for what was about to kill them, plainly, in five steps: it is there, behind the
+	 * monster; it lifts the monster off the ground, slowly; the monster dies, up there; it is gone;
+	 * and then it says why. With more than one, they are all lifted and all die together.
 	 */
 	private static final class Rescue implements Sequence {
-		private static final int ARRIVE = 2;
-		private static final int LIFTED = 16;
-		private static final int KILL = 22;
-		private final Haunt haunt;
+		/** It is there. */
+		private static final int APPEAR = 2;
+		/** The lift, from here to here, eased at both ends. */
+		private static final int LIFT_FROM = 6;
+		private static final int LIFT_TO = 28;
+		/** The monster dies, still held up. */
+		private static final int DIES = 38;
+		/** It is gone. */
+		private static final int GONE = 50;
+		/** And then the words. */
+		private static final int SAY = 56;
 		private final List<Mob> monsters;
 		private final List<Vec3> from = new ArrayList<>();
+		private final Haunt haunt;
 		@Nullable
 		private OccupantEntity entity;
 		private int age;
-		private boolean killed;
-		@Nullable
-		private Vec3 away;
-		@Nullable
-		private ServerPlayer watcher;
 
 		Rescue(Haunt haunt, ServerPlayer player, List<Mob> monsters) {
 			this.haunt = haunt;
 			this.monsters = monsters;
-			Cues.effect(player, ScreenEffectPayload.FLICKER, 30, 1f);
 			Cues.effect(player, ScreenEffectPayload.SILENCE, 0, 1f);
+			MinecraftServer server = Compat.level(player).getServer();
 			for (Mob m : monsters) {
 				from.add(m.position());
 				m.setNoAi(true);
 				m.setNoGravity(true);
 				m.setDeltaMovement(Vec3.ZERO);
+				// A creeper already hissing would still go off while it is held: its fuse is put out,
+				// by the game's own command, the same on every version.
+				if (com.wolfsmask.occupant.util.Kinds.is(m, "creeper")) {
+					try {
+						server.getCommands().performPrefixedCommand(server.createCommandSourceStack().withSuppressedOutput(),
+								"data merge entity " + m.getStringUUID() + " {Fuse:32767s,ignited:0b}");
+					} catch (RuntimeException e) {
+						Occupant.LOGGER.debug("Could not put out a creeper's fuse", e);
+					}
+				}
 			}
 			// It stands behind the one that nearly had them, on the far side from them.
 			Mob first = monsters.get(0);
@@ -210,34 +223,20 @@ public final class Mercy {
 		@Override
 		public boolean tick(ServerPlayer player) {
 			age++;
-			watcher = player;
 			if (entity != null) {
 				if (entity.hasVanished()) entity = null;
 				else entity.keepAlive();
 			}
-			// It arrives in the dark between flashes, never in front of them.
-			if (age == ARRIVE && entity != null && entity.isConcealed()) {
+			// 1. It is there, already facing them.
+			if (age == APPEAR && entity != null && entity.isConcealed()) {
 				entity.faceTowards(player.getEyePosition());
 				entity.setConcealed(false);
 			}
-			// A creeper is not held: it would still go off. It simply dies, at once.
-			if (age == ARRIVE) {
-				ServerLevel level = Compat.level(player);
-				for (Mob e : monsters) {
-					if (e.isAlive() && com.wolfsmask.occupant.util.Kinds.is(e, "creeper")) {
-						e.hurtServer(level, e.damageSources().genericKill(), Float.MAX_VALUE);
-					}
-				}
-			}
-			if (age == ARRIVE + 1) {
-				Cues.sound(player, SoundEvents.TRIDENT_HIT, SoundSource.HOSTILE,
-						monsters.get(0).position(), 0.9f, 0.6f);
-			}
-			// Lifted, slowly and evenly, off the ground: one off its feet, many a little way.
-			if (!killed && age >= ARRIVE && age <= LIFTED) {
-				float t = (age - ARRIVE) / (float) (LIFTED - ARRIVE);
+			// 2. Held where they were, then lifted off the ground, slowly and evenly.
+			if (age <= DIES) {
+				float t = Mth.clamp((age - LIFT_FROM) / (float) (LIFT_TO - LIFT_FROM), 0.0f, 1.0f);
 				float ease = t * t * (3 - 2 * t);
-				double height = monsters.size() == 1 ? 1.8 : 0.6;
+				double height = monsters.size() == 1 ? 1.8 : 0.9;
 				for (int i = 0; i < monsters.size(); i++) {
 					Mob m = monsters.get(i);
 					if (!m.isAlive()) continue;
@@ -246,34 +245,30 @@ public final class Mercy {
 					m.setDeltaMovement(Vec3.ZERO);
 				}
 			}
-			if (!killed && age == KILL) {
-				killed = true;
+			if (age == LIFT_FROM) {
+				Cues.sound(player, SoundEvents.TRIDENT_HIT, SoundSource.HOSTILE, monsters.get(0).position(), 0.9f, 0.6f);
+			}
+			// 3. It dies, up there.
+			if (age == DIES) {
 				ServerLevel level = Compat.level(player);
 				for (Mob e : monsters) {
 					if (!e.isAlive()) continue;
-					e.setNoGravity(false);
 					level.sendParticles(ParticleTypes.SMOKE, e.getX(), e.getY() + e.getBbHeight() * 0.6, e.getZ(), 12, 0.2, 0.3, 0.2, 0.01);
 					e.hurtServer(level, e.damageSources().genericKill(), Float.MAX_VALUE);
 				}
+			}
+			// 4. It is gone.
+			if (age == GONE && entity != null) {
+				entity.vanish();
+				entity = null;
+			}
+			// 5. And it says why.
+			if (age == SAY) {
 				String[] lines = monsters.size() == 1 ? ONE : MANY;
 				say(player, lines[player.getRandom().nextInt(lines.length)]);
-			}
-			// Then it turns its back and walks off into the fog.
-			if (age == KILL + 20 && entity != null) {
-				Vec3 out = entity.position().subtract(player.position());
-				out = new Vec3(out.x, 0, out.z);
-				out = out.lengthSqr() < 1.0E-4 ? Vec3.ZERO : out.normalize();
-				away = entity.position().add(out.scale(28));
-				entity.setGazeLocked(false);
-				entity.setMode(OccupantEntity.Mode.STALK);
-				entity.walkTo(away, 0.7);
-			}
-			if (entity == null) return age < KILL + 30;
-			// Gone once they are not looking, or once it is out in the fog.
-			if (age > KILL + 30 && (!Sight.isOnScreen(player, entity) || entity.distanceTo(player) > Fog.seenUpTo(player, haunt))) {
 				return false;
 			}
-			return age < KILL + 400;
+			return true;
 		}
 
 		@Override
@@ -283,7 +278,7 @@ public final class Mercy {
 				m.setNoAi(false);
 				m.setNoGravity(false);
 			}
-			if (entity != null) entity.vanishFrom(watcher);
+			if (entity != null) entity.vanish();
 		}
 
 		@Nullable
