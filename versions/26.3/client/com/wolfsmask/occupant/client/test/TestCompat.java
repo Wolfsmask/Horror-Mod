@@ -1,5 +1,8 @@
 package com.wolfsmask.occupant.client.test;
 
+import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
+import net.fabricmc.fabric.api.client.gametest.v1.context.TestDedicatedServerContext;
+import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
 
 import java.lang.reflect.Method;
@@ -18,7 +21,35 @@ final class TestCompat {
 	 * from the game's thread, and this runs on the test's.
 	 */
 	static void waitForWorld(TestSingleplayerContext game) {
-		Object connection = game.getConnection();
+		waitThrough(game.getConnection());
+	}
+
+	/**
+	 * Start a real server, join it over the network, wait for the world, and run {@code body}. The
+	 * connection's own methods are found by name, as for {@link #waitForWorld}.
+	 */
+	static void joinServer(ClientGameTestContext context, java.util.function.Consumer<TestServerContext> body) {
+		try (TestDedicatedServerContext server = context.worldBuilder().createServer()) {
+			Object connection = server.connect();
+			try {
+				waitThrough(connection);
+				body.accept(server);
+			} finally {
+				for (String name : new String[]{"close", "disconnect"}) {
+					Method m = null;
+					for (Method c : connection.getClass().getMethods()) {
+						if (c.getName().equals(name) && c.getParameterCount() == 0) m = c;
+					}
+					if (m != null) {
+						invoke(connection, m);
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	private static void waitThrough(Object connection) {
 		if (waitOn(connection)) return;
 		for (Method m : connection.getClass().getMethods()) {
 			if (m.getParameterCount() == 0 && m.getReturnType().getName().startsWith(TEST_API)
