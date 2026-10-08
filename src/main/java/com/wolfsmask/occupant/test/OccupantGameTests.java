@@ -524,6 +524,43 @@ public final class OccupantGameTests {
 		helper.succeed();
 	}
 
+	/**
+	 * The rescue, run to its end: the monster is lifted off the ground, and only then dies, and
+	 * then it is gone.
+	 */
+	@GameTest(maxTicks = 160)
+	public void theRescueLiftsThenKills(GameTestHelper helper) {
+		Director director = Director.get();
+		ServerLevel level = helper.getLevel();
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		OccupantConfig cfg = OccupantConfig.get();
+		boolean creativeBefore = cfg.hauntCreative;
+		cfg.hauntCreative = true;
+		HauntData data = director.data(player);
+		data.introduced = true;
+		data.setAct(2);
+		level.getServer().getCommands().performPrefixedCommand(level.getServer().createCommandSourceStack().withSuppressedOutput(),
+				String.format(java.util.Locale.ROOT, "summon minecraft:zombie %.1f %.1f %.1f {PersistenceRequired:1b}",
+						player.getX() + 2, player.getY(), player.getZ()));
+		net.minecraft.world.entity.Mob zombie = level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class,
+				player.getBoundingBox().inflate(6.0), m -> com.wolfsmask.occupant.util.Kinds.is(m, "zombie")).stream().findFirst().orElse(null);
+		helper.assertTrue(zombie != null, "Could not summon a zombie");
+		double ground = zombie.getY();
+		player.setHealth(1.0f);
+		helper.assertTrue(!com.wolfsmask.occupant.director.Mercy.allowDeath(player, player.damageSources().mobAttack(zombie)),
+				"A zombie's killing blow should be stopped");
+		helper.runAfterDelay(22, () -> {
+			Occupant.LOGGER.info("[gametest] rescue: zombie {} above the ground, alive {}", zombie.getY() - ground, zombie.isAlive());
+			helper.assertTrue(zombie.isAlive() && zombie.getY() > ground + 0.6, "The zombie should be held up, still alive, before it dies");
+		});
+		helper.succeedWhen(() -> {
+			helper.assertTrue(!zombie.isAlive(), "The zombie should die once it has been lifted");
+			helper.assertTrue(level.getEntitiesOfClass(OccupantEntity.class, player.getBoundingBox().inflate(16.0)).isEmpty(),
+					"Then it should be gone");
+			cfg.hauntCreative = creativeBefore;
+		});
+	}
+
 	/** What comes after an event is always an event there is: a misspelt one would never come. */
 	@GameTest
 	public void followUpsAreRealEvents(GameTestHelper helper) {

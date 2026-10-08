@@ -232,6 +232,21 @@ public final class House {
 	 * version's own feature class calls this.
 	 */
 	public static boolean tryPlace(WorldGenLevel level, RandomSource random, BlockPos origin) {
+		// Whatever goes wrong here goes wrong in world generation, where it would take the whole
+		// server down with it: a place that cannot be built is simply not built, and said once.
+		try {
+			return tryPlaceUnguarded(level, random, origin);
+		} catch (RuntimeException | LinkageError e) {
+			if (!BUILD_FAILED.getAndSet(true)) {
+				com.wolfsmask.occupant.Occupant.LOGGER.error("A place could not be built at {}; carrying on without it", origin, e);
+			}
+			return false;
+		}
+	}
+
+	private static final java.util.concurrent.atomic.AtomicBoolean BUILD_FAILED = new java.util.concurrent.atomic.AtomicBoolean();
+
+	private static boolean tryPlaceUnguarded(WorldGenLevel level, RandomSource random, BlockPos origin) {
 		// The land itself, a little wrong, in one chunk in four (placed_feature/house.json): dead
 		// trees, fallen trunks, bare ground.
 		Blight.tryPlace(level, random, origin);
