@@ -102,7 +102,7 @@ If you have any of these, the mod tells you once, before its first screen, which
 
 - **Fabric**, needs **[Fabric API](https://modrinth.com/mod/fabric-api)**.
 - Needed on **both** the client and the server. Works in multiplayer: everyone gets their own haunting.
-- **Playing with a friend?** Open your world to LAN; **e4mc** or **e4all** on the host gives your friend an address to join. Your friend needs The Occupant and Fabric API too.
+- **Playing with a friend?** Open your world to LAN; **e4mc** or **e4all** on the host gives your friend an address to join. Your friend needs The Occupant and Fabric API too. It comes for each of you on your own: stray more than 16 blocks apart and it will find you.
 - **Die late in the story with others around, and you lose your voice** for a few minutes: nothing you type reaches anyone. Server owners can have it time you out in their Discord too (off unless set up).
 - Supported versions: **1.20.1, 1.21.1, 1.21.11, 26.1.2, 26.2, 26.3** and the **26.4 snapshot**.
 - Nearly everything can be tuned or switched off, in game: **pause menu → The Occupant**. Intensity (*subtle*, *normal*, *relentless*), a **sound-only** mode where it is never seen, music, heartbeat, fog, flashing. More in `config/occupant.json`.
