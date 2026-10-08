@@ -1,20 +1,3 @@
-=== net.minecraft.client.MouseHandler (-public)
-public class client.MouseHandler {
-  public boolean isMouseGrabbed();
-  public void grabMouse();
 === net.minecraft.client.Minecraft (-public)
 public class client.Minecraft extends util.thread.ReentrantBlockableEventLoop<Runnable> implements blaze3d.platform.WindowEventHandler {
-  public final client.gui.components.debug.DebugScreenEntryList debugEntries;
-  public void fullscreenStateChanged(boolean);
-  public client.gui.screens.worldselection.WorldOpenFlows createWorldOpenFlows();
-  public void disconnectWithSavingScreen();
-  public void disconnectWithProgressScreen();
-  public void disconnectWithProgressScreen(boolean);
-  public void disconnect(client.gui.screens.Screen, boolean);
-  public void disconnect(client.gui.screens.Screen, boolean, boolean);
-  public void clearClientLevel(client.gui.screens.Screen);
-  public void setScreenAndShow(client.gui.screens.Screen);
-  public network.chat.Component grabPanoramixScreenshot(java.io.File);
-  public client.gui.screens.social.PlayerSocialManager getPlayerSocialManager();
-  public client.gui.components.DebugScreenOverlay getDebugOverlay();
-  public boolean canInterruptScreen();
+  public final client.MouseHandler mouseHandler;
