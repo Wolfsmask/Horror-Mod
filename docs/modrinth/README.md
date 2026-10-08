@@ -77,22 +77,32 @@ For each file in `dist/`, open **Versions → Create a version** (or drag the ja
 
 | File | Version number | Minecraft versions | Channel |
 |---|---|---|---|
-| `occupant-0.1.0+mc26.3.jar` | `0.1.0+mc26.3` | 26.3 | Release |
-| `occupant-0.1.0+mc26.2.jar` | `0.1.0+mc26.2` | 26.2 | Release |
-| `occupant-0.1.0+mc26.1.2.jar` | `0.1.0+mc26.1.2` | 26.1.2 | Release |
-| `occupant-0.1.0+mc1.21.11.jar` | `0.1.0+mc1.21.11` | 1.21.11 | Release |
-| `occupant-0.1.0+mc1.21.1.jar` | `0.1.0+mc1.21.1` | 1.21.1 | Release |
-| `occupant-0.1.0+mc1.20.1.jar` | `0.1.0+mc1.20.1` | 1.20.1 | Release |
-| `occupant-0.1.0+mc26.4-snapshot-2.jar` | `0.1.0+mc26.4-snapshot-2` | 26.4-snapshot-2 | **Alpha** |
+| `occupant-0.1.1+mc26.3.jar` | `0.1.1+mc26.3` | 26.3 | Release |
+| `occupant-0.1.1+mc26.2.jar` | `0.1.1+mc26.2` | 26.2 | Release |
+| `occupant-0.1.1+mc26.1.2.jar` | `0.1.1+mc26.1.2` | 26.1.2 | Release |
+| `occupant-0.1.1+mc1.21.11.jar` | `0.1.1+mc1.21.11` | 1.21.11 | Release |
+| `occupant-0.1.1+mc1.21.1.jar` | `0.1.1+mc1.21.1` | 1.21.1 | Release |
+| `occupant-0.1.1+mc1.20.1.jar` | `0.1.1+mc1.20.1` | 1.20.1 | Release |
+| `occupant-0.1.1+mc26.4-snapshot-2.jar` | `0.1.1+mc26.4-snapshot-2` | 26.4-snapshot-2 | **Alpha** |
 
 For every version:
 
-- **Version name:** `0.1.0 for <Minecraft version>`, for example `0.1.0 for 1.21.1`.
+- **Version name:** `0.1.1 for <Minecraft version>`, for example `0.1.1 for 1.21.1`.
 - **Loaders:** Fabric.
 - **Dependencies:** add **Fabric API** as **Required**.
 - **Changelog** (the same for all of them):
 
   ```
+  0.1.1: fixes, and a better rescue.
+
+  - The rescue: it is there behind the monster, one of its long legs goes into it and lifts it off the ground, the monster dies up there, it is gone, and then the words. A creeper already hissing is held too, and does not go off.
+  - With a friend (e4mc, e4all, LAN): it now comes for each of you once you are 16 blocks apart (it needed 48, so two friends together hardly ever saw it). Checked in CI by joining a real server over the network.
+  - The black way in no longer shows on servers that don't have the mod.
+  - It is not hurt or moved by the world (cactus, berry bushes, stray arrows): only by your hand.
+  - Nothing it builds or digs goes on, or into, anything you made: its lair, the last camp, tunnels (always a dead end now), marked trees (only real trees).
+  - The face at the window is bent down to the glass.
+  - Fixes: the flower where you died is never a wither rose; the default sign fits; a place that fails to build is skipped, never a crash.
+
   0.1: the first release.
 
   - A story in four acts, three endings, and a survivor's log that leads to their last camp.

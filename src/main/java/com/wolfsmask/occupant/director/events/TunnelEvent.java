@@ -91,18 +91,32 @@ public final class TunnelEvent extends HorrorEvent {
 		return false;
 	}
 
-	/** Blocks to remove (feet and head, alternating), stopping at anything that is not plain stone. */
+	/**
+	 * Blocks to remove (feet and head, alternating), stopping at anything that is not plain stone,
+	 * and before it would break through into any other space: a dead end, always, never a way into
+	 * a room someone dug.
+	 */
 	private static List<BlockPos> plan(ServerLevel world, BlockPos stand, Direction dir, int length) {
 		List<BlockPos> out = new ArrayList<>();
+		Direction left = dir.getCounterClockWise(), right = dir.getClockWise();
 		for (int i = 1; i <= length; i++) {
 			BlockPos feet = stand.relative(dir, i);
 			BlockPos head = feet.above();
-			if (!Spots.isLoaded(world, feet)) break;
+			if (!Spots.isLoaded(world, feet) || !Spots.isLoaded(world, feet.relative(dir))) break;
 			if (!Spots.isNaturalStone(world.getBlockState(feet)) || !Spots.isNaturalStone(world.getBlockState(head))) break;
 			if (WorldBlocks.touchesFluid(world, feet) || WorldBlocks.touchesFluid(world, head)) break;
+			// Walled in on every side but the way it came: ahead, to each side, above and below.
+			if (open(world, feet.relative(dir)) || open(world, head.relative(dir)) || open(world, feet.relative(left))
+					|| open(world, feet.relative(right)) || open(world, head.relative(left)) || open(world, head.relative(right))
+					|| open(world, head.above()) || open(world, feet.below())) break;
 			out.add(feet);
 			out.add(head);
 		}
 		return out;
+	}
+
+	/** Nothing solid there: a space the tunnel would open into. */
+	private static boolean open(ServerLevel world, BlockPos pos) {
+		return world.getBlockState(pos).getCollisionShape(world, pos).isEmpty();
 	}
 }

@@ -542,14 +542,11 @@ public final class OccupantGameTests {
 		HauntData data = director.data(player);
 		data.introduced = true;
 		data.setAct(2);
-		level.getServer().getCommands().performPrefixedCommand(level.getServer().createCommandSourceStack().withSuppressedOutput(),
-				String.format(java.util.Locale.ROOT, "summon minecraft:zombie %.1f %.1f %.1f {PersistenceRequired:1b}",
-						player.getX() + 2, player.getY(), player.getZ()));
-		// Only the one put there: the tests stand close together, and each has a zombie of its own.
-		net.minecraft.world.phys.Vec3 spot = new net.minecraft.world.phys.Vec3(player.getX() + 2, player.getY(), player.getZ());
-		net.minecraft.world.entity.Mob zombie = level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class,
-				net.minecraft.world.phys.AABB.ofSize(spot, 1.5, 3.0, 1.5), m -> com.wolfsmask.occupant.util.Kinds.is(m, "zombie"))
-				.stream().findFirst().orElse(null);
+		// In this test's own place, the zombie two steps from them: the tests stand close together,
+		// and each has a zombie of its own.
+		BlockPos stand = helper.absolutePos(new BlockPos(2, 2, 1));
+		player.snapTo(stand.getX() + 0.5, stand.getY(), stand.getZ() + 0.5, 0.0f, 0.0f);
+		net.minecraft.world.entity.Mob zombie = helper.spawn(net.minecraft.world.entity.EntityType.ZOMBIE, 4, 2, 1);
 		helper.assertTrue(zombie != null, "Could not summon a zombie");
 		double ground = zombie.getY();
 		player.setHealth(1.0f);
@@ -559,14 +556,16 @@ public final class OccupantGameTests {
 		helper.runAfterDelay(30, () -> {
 			Occupant.LOGGER.info("[gametest] rescue: zombie {} above the ground, alive {}", zombie.getY() - ground, zombie.isAlive());
 			helper.assertTrue(zombie.isAlive() && zombie.getY() > ground + 0.6, "The zombie should be held up, still alive, before it dies");
-			for (OccupantEntity it : level.getEntitiesOfClass(OccupantEntity.class, player.getBoundingBox().inflate(16.0))) {
+			// Only the one come for this player: the other rescue test's is not far off.
+			for (OccupantEntity it : level.getEntitiesOfClass(OccupantEntity.class, player.getBoundingBox().inflate(16.0),
+					e -> e.isHaunting(player))) {
 				helper.assertTrue(it.getHolding() == zombie.getId(), "It should have a leg through the zombie it is lifting");
 			}
 		});
 		helper.succeedWhen(() -> {
 			helper.assertTrue(!zombie.isAlive(), "The zombie should die once it has been lifted");
-			helper.assertTrue(level.getEntitiesOfClass(OccupantEntity.class, player.getBoundingBox().inflate(16.0)).isEmpty(),
-					"Then it should be gone");
+			helper.assertTrue(level.getEntitiesOfClass(OccupantEntity.class, player.getBoundingBox().inflate(16.0),
+					e -> e.isHaunting(player)).isEmpty(), "Then it should be gone");
 			cfg.hauntCreative = creativeBefore;
 		});
 	}
@@ -587,21 +586,14 @@ public final class OccupantGameTests {
 		data.introduced = true;
 		data.setAct(2);
 		var server = level.getServer();
-		net.minecraft.world.phys.Vec3 zSpot = new net.minecraft.world.phys.Vec3(player.getX() + 2, player.getY(), player.getZ());
-		net.minecraft.world.phys.Vec3 cSpot = new net.minecraft.world.phys.Vec3(player.getX() - 2, player.getY(), player.getZ());
-		server.getCommands().performPrefixedCommand(server.createCommandSourceStack().withSuppressedOutput(),
-				String.format(java.util.Locale.ROOT, "summon minecraft:zombie %.1f %.1f %.1f {PersistenceRequired:1b}", zSpot.x, zSpot.y, zSpot.z));
+		BlockPos stand = helper.absolutePos(new BlockPos(2, 2, 1));
+		player.snapTo(stand.getX() + 0.5, stand.getY(), stand.getZ() + 0.5, 0.0f, 0.0f);
+		net.minecraft.world.entity.Mob zombie = helper.spawn(net.minecraft.world.entity.EntityType.ZOMBIE, 4, 2, 1);
+		net.minecraft.world.entity.Mob creeper = helper.spawn(net.minecraft.world.entity.EntityType.CREEPER, 0, 2, 1);
+		helper.assertTrue(zombie != null && creeper != null, "Could not summon a zombie and a creeper");
 		// Lit, on a short fuse: left alone it would go off in a second.
 		server.getCommands().performPrefixedCommand(server.createCommandSourceStack().withSuppressedOutput(),
-				String.format(java.util.Locale.ROOT, "summon minecraft:creeper %.1f %.1f %.1f {PersistenceRequired:1b,ignited:1b,Fuse:20s}",
-						cSpot.x, cSpot.y, cSpot.z));
-		net.minecraft.world.entity.Mob zombie = level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class,
-				net.minecraft.world.phys.AABB.ofSize(zSpot, 1.5, 3.0, 1.5), m -> com.wolfsmask.occupant.util.Kinds.is(m, "zombie"))
-				.stream().findFirst().orElse(null);
-		net.minecraft.world.entity.Mob creeper = level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class,
-				net.minecraft.world.phys.AABB.ofSize(cSpot, 1.5, 3.0, 1.5), m -> com.wolfsmask.occupant.util.Kinds.is(m, "creeper"))
-				.stream().findFirst().orElse(null);
-		helper.assertTrue(zombie != null && creeper != null, "Could not summon a zombie and a creeper");
+				"data merge entity " + creeper.getStringUUID() + " {ignited:1b,Fuse:20s}");
 		double ground = creeper.getY();
 		player.setHealth(1.0f);
 		helper.assertTrue(!com.wolfsmask.occupant.director.Mercy.allowDeath(player, player.damageSources().mobAttack(zombie)),
