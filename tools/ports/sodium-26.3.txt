@@ -1,12 +1,12 @@
-# 26.3 with Sodium mc26.3-0.9.3-alpha.1-fabric on a0574d2515b8269ae1959d5f2b63a129d6e2c02b: failure
+# 26.3 with Sodium mc26.3-0.9.3-alpha.1-fabric on 495f5428d928692110c78d2f792dd40318cf2122: failure
 > Task :compileClientJava FAILED
-BUILD FAILED in 16s
+BUILD FAILED in 35s
 --- tail ---
-/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:341: error: incompatible types: try-with-resources not applicable to variable type
+/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:351: error: incompatible types: try-with-resources not applicable to variable type
 			try (net.fabricmc.fabric.api.client.gametest.v1.context.TestServerConnection connection = server.connect()) {
 			                                                                             ^
     (TestServerConnection cannot be converted to AutoCloseable)
-/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:342: error: cannot find symbol
+/home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:352: error: cannot find symbol
 				connection.getClientLevel().waitForChunksRender();
 				                           ^
   symbol:   method waitForChunksRender()
@@ -14,7 +14,7 @@ BUILD FAILED in 16s
 Note: /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/OccupantClient.java uses or overrides a deprecated API.
 Note: Recompile with -Xlint:deprecation for details.
 2 errors
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/run-1791467427365.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/run-1791467818964.json
 
 [Incubating] Problems report is available at: file:///home/runner/work/Horror-Mod/Horror-Mod/build/reports/problems/problems-report.html
 
@@ -25,11 +25,11 @@ Execution failed for task ':compileClientJava' (registered by plugin class 'org.
 > Compilation failed; see the compiler output below.
   Note: /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/OccupantClient.java uses or overrides a deprecated API.
   Note: Recompile with -Xlint:deprecation for details.
-  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:341: error: incompatible types: try-with-resources not applicable to variable type
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:351: error: incompatible types: try-with-resources not applicable to variable type
   			try (net.fabricmc.fabric.api.client.gametest.v1.context.TestServerConnection connection = server.connect()) {
   			                                                                             ^
       (TestServerConnection cannot be converted to AutoCloseable)
-  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:342: error: cannot find symbol
+  /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/test/OccupantClientGameTest.java:352: error: cannot find symbol
   				connection.getClientLevel().waitForChunksRender();
   				                           ^
     symbol:   method waitForChunksRender()
@@ -40,5 +40,5 @@ Execution failed for task ':compileClientJava' (registered by plugin class 'org.
 > Check your code and dependencies to fix the compilation error(s)
 > Run with --scan to get full insights from a Build Scan (powered by Develocity).
 
-BUILD FAILED in 16s
+BUILD FAILED in 35s
 3 actionable tasks: 3 executed
