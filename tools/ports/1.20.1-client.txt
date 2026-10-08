@@ -1,18 +1,17 @@
-# 1.20.1 client on 8fdb6c3d592c7d3678b73b37920c76152620d1b2: failure
+# 1.20.1 client on 3ea6dbd32f83a6695190db8826f96cd9a6350774: failure
 === client.log
 /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/Director.java:205: error: cannot find symbol
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/Trifles.java:231: error: Places is not public in com.wolfsmask.occupant.world; cannot be accessed from outside package
-		return leaves && !com.wolfsmask.occupant.world.Places.looksBuilt(world, base, 3);
 > Task :compileJava FAILED
 * What went wrong:
   /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/Director.java:205: error: cannot find symbol
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/Trifles.java:231: error: Places is not public in com.wolfsmask.occupant.world; cannot be accessed from outside package
-  		return leaves && !com.wolfsmask.occupant.world.Places.looksBuilt(world, base, 3);
-BUILD FAILED in 28s
+BUILD FAILED in 17s
 --- the mod's own checks, last of them ---
 --- last of the server thread in client.log ---
 --- tail of client.log ---
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/client-1791469738011.json
+1 error
+
+> Task :compileJava FAILED
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/client-1791469824420.json
 
 [Incubating] Problems report is available at: file:///home/runner/work/Horror-Mod/Horror-Mod/build/reports/problems/problems-report.html
 
@@ -26,14 +25,11 @@ Execution failed for task ':compileJava' (registered by plugin class 'org.gradle
   			                                                     ^
     symbol:   variable JOINED
     location: class ScreenEffectPayload
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/Trifles.java:231: error: Places is not public in com.wolfsmask.occupant.world; cannot be accessed from outside package
-  		return leaves && !com.wolfsmask.occupant.world.Places.looksBuilt(world, base, 3);
-  		                                              ^
-  2 errors
+  1 error
 
 * Try:
 > Check your code and dependencies to fix the compilation error(s)
 > Run with --scan to get full insights from a Build Scan (powered by Develocity).
 
-BUILD FAILED in 28s
+BUILD FAILED in 17s
 2 actionable tasks: 2 executed
