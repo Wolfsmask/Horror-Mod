@@ -1,6 +1,5 @@
-@mc 26.2
-# Round 35: the dedicated server context and its connection.
+@mc 26.3 1.21.11
+# Round 36: joining a dedicated server from the client test, on these versions.
 net.fabricmc.fabric.api.client.gametest.v1.context.TestDedicatedServerContext
 net.fabricmc.fabric.api.client.gametest.v1.context.TestServerConnection
 net.fabricmc.fabric.api.client.gametest.v1.context.TestClientLevelContext
-net.fabricmc.fabric.api.client.gametest.v1.world.TestWorldBuilder
