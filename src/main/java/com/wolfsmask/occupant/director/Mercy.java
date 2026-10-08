@@ -224,6 +224,8 @@ public final class Mercy {
 		private static final int HANG = 14;
 		/** The game takes twenty ticks to lay the dead down and take them away; then it goes. */
 		private static final int AFTER_DEATH = 28;
+		/** At most this many turns at being looked at and gone: in a crowd, the rest go all together, last. */
+		private static final int VANISH_TURNS = 10;
 
 		private final ServerPlayer player;
 		/** Where the monsters are (and stay, whatever happens to them: through a portal, say). */
@@ -345,8 +347,9 @@ public final class Mercy {
 			// The scene, laid out.
 			int t = APPEAR + LOOK;
 			this.vanishStart = t;
-			this.vanishEvery = vanishing.isEmpty() ? 0 : Mth.clamp(110 / vanishing.size(), 8, 16);
-			if (!vanishing.isEmpty()) t += vanishing.size() * vanishEvery + 14;   // and their eyes come back to it
+			int turns = Math.min(vanishing.size(), VANISH_TURNS);
+			this.vanishEvery = vanishing.isEmpty() ? 0 : Mth.clamp(110 / turns, 8, 16);
+			if (!vanishing.isEmpty()) t += turns * vanishEvery + 14;   // and their eyes come back to it
 			for (int i = 0; i < stabbed.size(); i++) stabAt.add(t + 4 * i);
 			int lifted = t + 4 * (stabbed.size() - 1) + LIFT_AFTER + LIFT_FOR;
 			this.dies = lifted + HANG;
@@ -374,16 +377,20 @@ public final class Mercy {
 			// 2. The ones it does not need to touch: looked at, one by one, and gone.
 			for (int i = 0; i < vanishing.size(); i++) {
 				Mob m = vanishing.get(i);
-				int at = vanishStart + i * vanishEvery;
-				if (age == at && entity != null && m.isAlive()) entity.setFocus(m);
+				int at = vanishStart + Math.min(i, VANISH_TURNS - 1) * vanishEvery;
+				// (A crowd going together: their eyes on the first of them, and one sound for them all.)
+				boolean first = i < VANISH_TURNS;
+				if (age == at && entity != null && m.isAlive() && first) entity.setFocus(m);
 				if (age == at + vanishEvery * 3 / 4 && m.isAlive()) {
 					level.sendParticles(ParticleTypes.LARGE_SMOKE, m.getX(), m.getY() + m.getBbHeight() * 0.5, m.getZ(),
 							10, 0.25, 0.4, 0.25, 0.01);
-					Cues.sound(p, SoundEvents.FIRE_EXTINGUISH, SoundSource.HOSTILE, m.position(), 0.6f, 0.5f);
+					if (first) Cues.sound(p, SoundEvents.FIRE_EXTINGUISH, SoundSource.HOSTILE, m.position(), 0.6f, 0.5f);
 					m.discard();
 				}
 			}
-			if (!vanishing.isEmpty() && age == vanishStart + vanishing.size() * vanishEvery && entity != null) entity.setFocus(null);
+			if (!vanishing.isEmpty() && age == vanishStart + Math.min(vanishing.size(), VANISH_TURNS) * vanishEvery && entity != null) {
+				entity.setFocus(null);
+			}
 			// 3. Its legs go in, one after another, and each one flinches.
 			for (int i = 0; i < stabbed.size(); i++) {
 				if (age != stabAt.get(i) || entity == null) continue;
