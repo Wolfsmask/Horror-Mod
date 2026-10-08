@@ -1,6 +1,4 @@
 @mc 1.20.1 1.21.1 1.21.11 26.1.2 26.2 26.3 26.4-snapshot-2
-# Round 43: what the rescue calls on odd monsters, and putting the keys back after a scene.
-net.minecraft.world.entity.Entity (stopRiding|isPassenger)\(
-net.minecraft.world.entity.Mob setTarget\(
-net.minecraft.world.damagesource.DamageSources (mobAttack|genericKill)\(
-net.minecraft.client.KeyMapping (setAll|releaseAll|resetMapping|set)\(
+# Round 44: the humanoid monsters whose models pose their own arms after the base model does.
+@find \.(ZombieVillagerModel|PiglinModel|AbstractPiglinModel|ZombifiedPiglinModel|DrownedModel|ZombieModel|AbstractZombieModel)$
+@find renderer\.feature\.ModelFeatureRenderer$
