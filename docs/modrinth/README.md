@@ -77,22 +77,30 @@ For each file in `dist/`, open **Versions → Create a version** (or drag the ja
 
 | File | Version number | Minecraft versions | Channel |
 |---|---|---|---|
-| `occupant-0.1.1+mc26.3.jar` | `0.1.1+mc26.3` | 26.3 | Release |
-| `occupant-0.1.1+mc26.2.jar` | `0.1.1+mc26.2` | 26.2 | Release |
-| `occupant-0.1.1+mc26.1.2.jar` | `0.1.1+mc26.1.2` | 26.1.2 | Release |
-| `occupant-0.1.1+mc1.21.11.jar` | `0.1.1+mc1.21.11` | 1.21.11 | Release |
-| `occupant-0.1.1+mc1.21.1.jar` | `0.1.1+mc1.21.1` | 1.21.1 | Release |
-| `occupant-0.1.1+mc1.20.1.jar` | `0.1.1+mc1.20.1` | 1.20.1 | Release |
-| `occupant-0.1.1+mc26.4-snapshot-2.jar` | `0.1.1+mc26.4-snapshot-2` | 26.4-snapshot-2 | **Alpha** |
+| `occupant-0.1.2+mc26.3.jar` | `0.1.2+mc26.3` | 26.3 | Release |
+| `occupant-0.1.2+mc26.2.jar` | `0.1.2+mc26.2` | 26.2 | Release |
+| `occupant-0.1.2+mc26.1.2.jar` | `0.1.2+mc26.1.2` | 26.1.2 | Release |
+| `occupant-0.1.2+mc1.21.11.jar` | `0.1.2+mc1.21.11` | 1.21.11 | Release |
+| `occupant-0.1.2+mc1.21.1.jar` | `0.1.2+mc1.21.1` | 1.21.1 | Release |
+| `occupant-0.1.2+mc1.20.1.jar` | `0.1.2+mc1.20.1` | 1.20.1 | Release |
+| `occupant-0.1.2+mc26.4-snapshot-2.jar` | `0.1.2+mc26.4-snapshot-2` | 26.4-snapshot-2 | **Alpha** |
 
 For every version:
 
-- **Version name:** `0.1.1 for <Minecraft version>`, for example `0.1.1 for 1.21.1`.
+- **Version name:** `0.1.2 for <Minecraft version>`, for example `0.1.2 for 1.21.1`.
 - **Loaders:** Fabric.
 - **Dependencies:** add **Fabric API** as **Required**.
 - **Changelog** (the same for all of them):
 
   ```
+  0.1.2: the rescue is a scene now.
+
+  - About to die to monsters? You watch, and you can't look away: your view is drawn round to it, the picture narrows, and nothing you press moves you until it is over.
+  - Its legs go into every monster after you that it can reach, one after another (eight at most: it stands on the other two), in at the back and out through the chest. They are lifted with their arms, legs and head hanging loose and swinging, and they die up there. Any it can't reach, your eyes are drawn to, one by one, and they are simply gone.
+  - It only takes what is actually after you (not every monster nearby), and it stands behind the one that hit you.
+  - Falls: you wake whole, with full health and a full stomach. Falling into the void is always caught now (a second fall soon after the first used to kill you, and so did a totem in your hand, which can't stop the void).
+  - After the rescue you are whole again too.
+
   0.1.1: fixes, and a better rescue.
 
   - The rescue: it is there behind the monster, one of its long legs goes into it and lifts it off the ground, the monster dies up there, it is gone, and then the words. A creeper already hissing is held too, and does not go off.
