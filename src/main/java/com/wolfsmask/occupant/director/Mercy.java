@@ -218,7 +218,8 @@ public final class Mercy {
 			Vec3 want = first.position().add(out.scale(monsters.size() == 1 ? 1.6 : 4.0));
 			ServerLevel world = Compat.level(player);
 			BlockPos feet = Spots.groundNear(world, Mth.floor(want.x), first.getBlockY(), Mth.floor(want.z), 3);
-			if (feet != null) {
+			// In sound-only mode it is never seen, even now: the monster is lifted by nothing.
+			if (feet != null && !OccupantConfig.get().soundOnly) {
 				entity = haunt.spawnOccupant(player, feet, OccupantEntity.Mode.AMBUSH, OccupantEntity.Form.REVEALED);
 				if (entity != null) {
 					entity.setFootsteps(false);
