@@ -1,11 +1,5 @@
-@mc 1.20.1 1.21.1 1.21.11 26.1.2 26.2 26.3 26.4-snapshot-2
-# Round 39: zombie and skeleton models, their render states, and the mouse.
-net.minecraft.client.model.ZombieModel (setupAnim|class )
-net.minecraft.client.model.AbstractZombieModel (setupAnim|class )
-net.minecraft.client.model.SkeletonModel (setupAnim|class )
-net.minecraft.client.model.monster.zombie.ZombieModel (setupAnim|class )
-net.minecraft.client.model.monster.zombie.AbstractZombieModel (setupAnim|class )
-net.minecraft.client.model.monster.skeleton.SkeletonModel (setupAnim|class )
-net.minecraft.client.renderer.entity.state.HumanoidRenderState (class |isAggressive|attackTime|speedValue|maxCrossbowChargeDuration)
-net.minecraft.client.renderer.entity.state.ZombieRenderState (class )
-@private net.minecraft.client.MouseHandler (turnPlayer|handleAccumulatedMovement|accumulatedD|class )
+@mc 1.20.1 1.21.11 26.2 26.3
+# Round 40: the hat on the head, a string synced on an entity, copying a part's pose.
+@code net.minecraft.client.model.HumanoidModel <init>
+net.minecraft.network.syncher.EntityDataSerializers (STRING|INT)
+net.minecraft.client.model.geom.ModelPart (copyFrom)
