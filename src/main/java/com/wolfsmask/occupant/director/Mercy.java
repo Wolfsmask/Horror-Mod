@@ -112,7 +112,7 @@ public final class Mercy {
 			say(player, ONE[player.getRandom().nextInt(ONE.length)]);
 			return false;
 		}
-		director.beginNow(player, RESCUE, new Rescue(h, player, monsters));
+		director.beginNow(player, RESCUE, new Rescue(h, player, monsters, attacker));
 		return false;
 	}
 
@@ -241,7 +241,7 @@ public final class Mercy {
 		private OccupantEntity entity;
 		private int age;
 
-		Rescue(Haunt haunt, ServerPlayer player, List<Mob> monsters) {
+		Rescue(Haunt haunt, ServerPlayer player, List<Mob> monsters, Mob attacker) {
 			this.player = player;
 			this.haunt = haunt;
 			this.monsters = monsters;
@@ -266,9 +266,11 @@ public final class Mercy {
 					}
 				}
 			}
-			// It stands behind the one that nearly had them, on the far side from them.
+			// It stands behind the one that nearly had them (or, if that one is gone, the nearest),
+			// on the far side from them.
 			Mob first = monsters.get(0);
 			for (Mob m : monsters) if (m.distanceToSqr(player) < first.distanceToSqr(player)) first = m;
+			if (monsters.contains(attacker)) first = attacker;
 			Vec3 out = first.position().subtract(player.position());
 			out = new Vec3(out.x, 0, out.z);
 			out = out.lengthSqr() < 1.0E-4 ? Sight.flatLook(player) : out.normalize();
@@ -398,10 +400,13 @@ public final class Mercy {
 				entity.vanish();
 				entity = null;
 			}
-			// 6. And it says why.
+			// 6. And it says why; and they are whole again, as if none of it had touched them.
 			if (age == say) {
 				String[] lines = monsters.size() == 1 ? ONE : MANY;
 				say(p, lines[p.getRandom().nextInt(lines.length)]);
+				p.setHealth(p.getMaxHealth());
+				p.getFoodData().setFoodLevel(20);
+				p.getFoodData().setSaturation(5.0f);
 			}
 			return age < over;
 		}

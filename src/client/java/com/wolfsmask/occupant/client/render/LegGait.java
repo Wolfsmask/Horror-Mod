@@ -378,11 +378,11 @@ final class LegGait {
 				swingStart[leg] = -1.0f;
 				lingerUntil[leg] = 0.0f;
 			}
-			// In at the back and out through the front, a hand's breadth past it.
+			// In at the back and out through the front, well past it, so the point is seen.
 			Vec3 hip = new Vec3(body.x, rootY(leg, px, dropPx), body.z);
 			Vec3 through = centre.subtract(hip);
 			holdAt[leg] = through.lengthSqr() < 1.0e-4 ? centre
-					: centre.add(through.normalize().scale(held.getBbWidth() * 0.5 + 0.4));
+					: centre.add(through.normalize().scale(held.getBbWidth() * 0.5 + 0.55));
 			any = true;
 		}
 		return any;

@@ -345,7 +345,8 @@ public final class ScreenEffects {
 		Component line = Component.literal(text).withStyle(Style.EMPTY.withColor(TextColor.fromRgb(v << 16 | v << 8 | (v + 6))));
 
 		Font font = Minecraft.getInstance().font;
-		int tw = font.width(text);
+		// Placed by the whole line, so it stays where it is while the letters arrive.
+		int tw = font.width(whisperText);
 		int margin = 14;
 		int x = switch (whisperCorner) {
 			case 1, 3 -> w - margin - tw;

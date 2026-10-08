@@ -66,7 +66,7 @@ note: *it doesn't like that.* When a monster is about to kill you, you watch: yo
 round to it, the picture narrows, and nothing you press moves you. It is there, behind the
 monster. One of its long legs goes in at the monster's back and out through its chest and lifts
 it off the ground, slowly, its arms and legs hanging loose; it dies up there, on the leg; it is
-gone; and then it tells you why. With more than one, each it can reach gets a leg of its own
+gone; and then it tells you why, and you are whole again. With more than one, each it can reach gets a leg of its own
 (eight at most: it stands on the other two), and any it cannot reach you see go, one by one,
 first. Not every time.
 And the Director builds on absence: the longer nothing has happened, the more it favours
