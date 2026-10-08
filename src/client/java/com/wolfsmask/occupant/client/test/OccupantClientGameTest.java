@@ -323,8 +323,35 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 			spawn(context, again.getServer(), 5, "stare");
 			shoot(context, "occupant-after-rejoin");
 		}
+		overTheNetwork(context);
 		Occupant.LOGGER.info("[client-gametest] all client checks passed");
 		ForestGallery.run(context);
+	}
+
+	/**
+	 * A friend joining over e4mc or e4all: a real server, joined over the network rather than played
+	 * in the same game, and it is there for the one who joined, and nothing went wrong on either side.
+	 */
+	private static void overTheNetwork(ClientGameTestContext context) {
+		if (Boolean.getBoolean("fabric.client.gametest.disableNetworkSynchronizer")) {
+			Occupant.LOGGER.info("[client-gametest] over the network: not on this version (no network synchroniser)");
+			return;
+		}
+		try (net.fabricmc.fabric.api.client.gametest.v1.context.TestDedicatedServerContext server = context.worldBuilder().createServer()) {
+			try (net.fabricmc.fabric.api.client.gametest.v1.context.TestServerConnection connection = server.connect()) {
+				connection.getClientLevel().waitForChunksRender();
+				check(context.computeOnClient(mc -> mc.player != null && mc.getSingleplayerServer() == null),
+						"joined over the network, not playing in the same game");
+				context.waitTicks(40);
+				server.runCommand("execute as @a at @s run occupant here 6 stare");
+				context.waitFor(mc -> seen(mc) == 1, 200);
+				context.waitTicks(30);
+				shoot(context, "occupant-over-the-network");
+				int errors = server.computeOnServer(s -> Director.get() == null ? -1 : Director.get().totalErrors());
+				check(errors == 0, "the server raised " + errors + " error(s) in the Occupant with a player joined over the network");
+				Occupant.LOGGER.info("[client-gametest] over the network: it is there for the one who joined");
+			}
+		}
 	}
 
 	/** Clears away any Occupant, puts a new one in front of the player, and waits for it to arrive. */
