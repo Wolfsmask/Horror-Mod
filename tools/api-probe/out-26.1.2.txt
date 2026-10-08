@@ -1,134 +1,30 @@
-=== net.minecraft.world.food.FoodData (-public)
-public class world.food.FoodData {
-  public int getFoodLevel();
-  public void setFoodLevel(int);
-  public void setSaturation(float);
-=== net.minecraft.world.entity.Entity (-public)
-public abstract class world.entity.Entity implements world.Nameable, world.level.entity.EntityAccess, world.scores.ScoreHolder, network.syncher.SyncedDataHolder, core.component.DataComponentGetter, world.entity.ItemOwner, world.entity.SlotProvider, util.debug.DebugValueSource, core.TypedInstance<world.entity.EntityType<?>>, registry.fluid.EntityFluidExtension, attachment.v1.AttachmentTarget, event.lifecycle.v1.EntityLoadData, permission.v1.PermissionContextOwner {
-  public float yRotO;
-  public float xRotO;
-  public void clearFire();
-  public int getMaxAirSupply();
-  public void setAirSupply(int);
-  public float getYRot();
-  public void setYRot(float);
-  public float getXRot();
-  public void setXRot(float);
-=== net.minecraft.client.KeyMapping (-public)
-public class client.KeyMapping implements Comparable<client.KeyMapping> {
-  public static void setAll();
-  public static void releaseAll();
-  public boolean isDown();
-  public boolean consumeClick();
-  public void setDown(boolean);
-=== net.minecraft.client.Options (-public)
-public class client.Options {
-  public final client.KeyMapping keyUp;
-  public final client.KeyMapping keyLeft;
-  public final client.KeyMapping keyDown;
-  public final client.KeyMapping keyRight;
-  public final client.KeyMapping keyJump;
-  public final client.KeyMapping keyShift;
-  public final client.KeyMapping keySprint;
-  public final client.KeyMapping keyInventory;
-  public final client.KeyMapping keyDrop;
-  public final client.KeyMapping keyUse;
-  public final client.KeyMapping keyAttack;
-=== net.minecraft.world.entity.WalkAnimationState (-public)
-public class world.entity.WalkAnimationState {
-  public world.entity.WalkAnimationState();
-  public void setSpeed(float);
-  public void update(float, float, float);
-  public void stop();
-  public float speed();
-  public float speed(float);
-  public float position();
-  public float position(float);
-  public boolean isMoving();
-}
-=== net.minecraft.world.entity.LivingEntity (-public)
-public abstract class world.entity.LivingEntity extends world.entity.Entity implements world.entity.Attackable,world.waypoints.WaypointTransmitter {
-  public int hurtTime;
-  public int deathTime;
-  public final world.entity.WalkAnimationState walkAnimation;
-  public float yBodyRot;
-  public float yBodyRotO;
-  public float yHeadRot;
-  public float yHeadRotO;
-=== classes matching (HumanoidModel|AbstractZombieModel|ZombieModel|SkeletonModel|HumanoidRenderState|ZombieRenderState|SkeletonRenderState|LivingEntityRenderState|CreeperModel|SpiderModel)$
-net.minecraft.client.model.HumanoidModel
-net.minecraft.client.model.monster.spider.SpiderModel
-net.minecraft.client.model.monster.zombie.ZombieModel
-net.minecraft.client.renderer.entity.state.SkeletonRenderState
-net.minecraft.client.model.monster.zombie.AbstractZombieModel
-net.minecraft.client.model.monster.creeper.CreeperModel
-net.minecraft.client.model.monster.zombie.GiantZombieModel
-net.minecraft.client.model.monster.zombie.BabyZombieModel
-net.minecraft.client.renderer.entity.state.LivingEntityRenderState
-net.minecraft.client.renderer.entity.state.ZombieRenderState
-net.minecraft.client.renderer.entity.state.HumanoidRenderState
-net.minecraft.client.model.monster.skeleton.SkeletonModel
-=== net.minecraft.client.model.geom.ModelPart (-public)
-public final class client.model.geom.ModelPart {
-  public float xRot;
-  public float yRot;
-  public float zRot;
-  public boolean visible;
-  public void resetPose();
-  public boolean hasChild(String);
-  public client.model.geom.ModelPart getChild(String);
-  public void setRotation(float, float, float);
-  public void translateAndRotate(blaze3d.vertex.PoseStack);
-  public void offsetRotation(org.joml.Vector3f);
-  public List<client.model.geom.ModelPart> getAllParts();
-=== net.minecraft.client.model.HumanoidModel (-public)
-public class client.model.HumanoidModel<T extends client.renderer.entity.state.HumanoidRenderState> extends client.model.EntityModel<T> implements client.model.ArmedModel<T>, client.model.HeadedModel {
-  public final client.model.geom.ModelPart head;
-  public final client.model.geom.ModelPart hat;
-  public final client.model.geom.ModelPart body;
-  public final client.model.geom.ModelPart rightArm;
-  public final client.model.geom.ModelPart leftArm;
-  public final client.model.geom.ModelPart rightLeg;
-  public final client.model.geom.ModelPart leftLeg;
-  public client.model.HumanoidModel(client.model.geom.ModelPart);
-  public client.model.HumanoidModel(client.model.geom.ModelPart, Function<resources.Identifier, client.renderer.rendertype.RenderType>);
-  public void setupAnim(T);
-  public client.model.geom.ModelPart getArm(world.entity.HumanoidArm);
-  public client.model.geom.ModelPart getHead();
-  public void setupAnim(Object);
+=== net.minecraft.client.model.ZombieModel (-public)
+Error: class not found: client.model.ZombieModel
 === net.minecraft.client.model.AbstractZombieModel (-public)
 Error: class not found: client.model.AbstractZombieModel
-=== net.minecraft.client.model.AbstractZombieModel (code: setupAnim)
-=== net.minecraft.client.renderer.entity.LivingEntityRenderer (-public)
-public abstract class client.renderer.entity.LivingEntityRenderer<T extends world.entity.LivingEntity, S extends client.renderer.entity.state.LivingEntityRenderState, M extends client.model.EntityModel<? super S>> extends client.renderer.entity.EntityRenderer<T, S> implements client.renderer.entity.RenderLayerParent<S, M> {
-  public void submit(S, blaze3d.vertex.PoseStack, client.renderer.SubmitNodeCollector, client.renderer.state.level.CameraRenderState);
-  public void extractRenderState(T, S, float);
-  public void extractRenderState(world.entity.Entity, client.renderer.entity.state.EntityRenderState, float);
-  public void submit(client.renderer.entity.state.EntityRenderState, blaze3d.vertex.PoseStack, client.renderer.SubmitNodeCollector, client.renderer.state.level.CameraRenderState);
-=== net.minecraft.client.renderer.entity.state.LivingEntityRenderState (-public)
-public class client.renderer.entity.state.LivingEntityRenderState extends client.renderer.entity.state.EntityRenderState {
-  public float bodyRot;
-  public float yRot;
-  public float xRot;
-  public float deathTime;
-  public float walkAnimationPos;
-  public float walkAnimationSpeed;
-  public float scale;
-  public float ageScale;
-  public float ticksSinceKineticHitFeedback;
-  public boolean isUpsideDown;
-  public boolean isFullyFrozen;
-  public boolean isBaby;
-  public boolean isInWater;
-  public boolean isAutoSpinAttack;
-  public boolean hasRedOverlay;
-  public boolean isInvisibleToPlayer;
-  public core.Direction bedOrientation;
-  public world.entity.Pose pose;
-  public final client.renderer.item.ItemStackRenderState headItem;
-  public float wornHeadAnimationPos;
-  public world.level.block.SkullBlock$Type wornHeadType;
-  public world.item.component.ResolvableProfile wornHeadProfile;
-  public client.renderer.entity.state.LivingEntityRenderState();
-  public boolean hasPose(world.entity.Pose);
-}
+=== net.minecraft.client.model.SkeletonModel (-public)
+Error: class not found: client.model.SkeletonModel
+=== net.minecraft.client.model.monster.zombie.ZombieModel (-public)
+public class client.model.monster.zombie.ZombieModel<S extends client.renderer.entity.state.ZombieRenderState> extends client.model.monster.zombie.AbstractZombieModel<S> {
+=== net.minecraft.client.model.monster.zombie.AbstractZombieModel (-public)
+public abstract class client.model.monster.zombie.AbstractZombieModel<S extends client.renderer.entity.state.ZombieRenderState> extends client.model.HumanoidModel<S> {
+  public void setupAnim(S);
+  public void setupAnim(client.renderer.entity.state.HumanoidRenderState);
+  public void setupAnim(Object);
+=== net.minecraft.client.model.monster.skeleton.SkeletonModel (-public)
+public class client.model.monster.skeleton.SkeletonModel<S extends client.renderer.entity.state.SkeletonRenderState> extends client.model.HumanoidModel<S> {
+  public void setupAnim(S);
+  public void setupAnim(client.renderer.entity.state.HumanoidRenderState);
+  public void setupAnim(Object);
+=== net.minecraft.client.renderer.entity.state.HumanoidRenderState (-public)
+public class client.renderer.entity.state.HumanoidRenderState extends client.renderer.entity.state.ArmedEntityRenderState {
+  public float speedValue;
+  public float maxCrossbowChargeDuration;
+=== net.minecraft.client.renderer.entity.state.ZombieRenderState (-public)
+public class client.renderer.entity.state.ZombieRenderState extends client.renderer.entity.state.UndeadRenderState {
+=== net.minecraft.client.MouseHandler (-p)
+public class client.MouseHandler {
+  private double accumulatedDX;
+  private double accumulatedDY;
+  public void handleAccumulatedMovement();
+  private void turnPlayer(double);
