@@ -1,4 +1,4 @@
-# 1.21.11 client on 0272ef82137f9d8e862f0e5cef21e7d3e9a448be: success
+# 1.21.11 client on 15bdd6d396aaeb85baf07ad40324147b365c9697: success
 === client.log
 /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/ArenaGameTests.java:107: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
 /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:64: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
@@ -22,92 +22,92 @@
 Note: /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/client/com/wolfsmask/occupant/client/OccupantClient.java uses or overrides a deprecated API.
 	- fabric-client-gametest-api-v1 4.3.5+bfe9fcf43e
 	- occupant 0.1.2+mc1.21.11
-[22:40:19] [Render thread/INFO] (occupant) The Occupant has moved in. Type /occupant check in game to test it.
-	at knot//net.minecraft.client.Minecraft.wrapMethod$zii000$fabric-client-gametest-api-v1$onRun(Minecraft.java:5664)
-[22:40:28] [Render thread/INFO] (occupant) [client] the mode screen has been drawn
-[22:40:33] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-mode -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0000_occupant-mode.png
-[22:40:33] [Render thread/INFO] (occupant) [client] mode clicked at 213, 162: recording
-[22:40:33] [Render thread/INFO] (occupant) [client] the gate screen has been drawn
-[22:40:35] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-gate -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0001_occupant-gate.png
-[22:40:49] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-gate-later -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0002_occupant-gate-later.png
-[22:40:49] [Render thread/INFO] (occupant) [client] gate clicked at 213, 223: leave it alone
-[22:40:50] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-left-alone -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0003_occupant-left-alone.png
-[22:40:52] [Render thread/INFO] (occupant) [client] gate clicked at 213, 129: create world
-[22:40:54] [Render thread/INFO] (occupant) [client] creating the world straight away
-[22:40:54] [Server thread/INFO] (occupant) This world tells the story as the Creator Cut
-[22:41:18] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-quick-world -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0004_occupant-quick-world.png
-[22:41:19] [Server thread/INFO] (Minecraft) Stopping singleplayer server as player logged out
-[22:41:19] [Server thread/INFO] (Minecraft) Stopping server
-[22:41:25] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-title -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0005_occupant-title.png
-[22:41:26] [Server thread/INFO] (occupant) This world tells the story as a slow burn
-[22:41:37] [Test thread/INFO] (occupant) [client-gametest] the story has begun: true
-[22:41:37] [Server thread/INFO] (occupant) Player130 tried to leave survival; put back
-[22:41:39] [Test thread/INFO] (occupant) [client-gametest] creative refused: true
-[22:41:41] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-stare -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0006_occupant-stare.png
-[22:41:43] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-veiled -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0007_occupant-veiled.png
-[22:41:45] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-loom -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0008_occupant-loom.png
-[22:41:46] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-chase -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0009_occupant-chase.png
-[22:41:49] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-three-quarter -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0010_occupant-three-quarter.png
-[22:41:51] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-face -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0011_occupant-face.png
-[22:41:52] [Test thread/INFO] (occupant) [client-gametest] pale face pixels in the close-up: 1783
-[22:41:54] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-looking-up -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0012_occupant-looking-up.png
-[22:41:54] [Test thread/INFO] (occupant) [client-gametest] pale pixels looking up at it: 2627
-[22:41:56] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-shove -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0013_occupant-shove.png
-[22:41:58] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-after-shove -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0014_occupant-after-shove.png
-[22:42:00] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-corridor -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0015_occupant-corridor.png
-[22:42:02] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-trees -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0016_occupant-trees.png
-[22:42:03] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-indoors -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0017_occupant-indoors.png
-[22:42:05] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-night-distant -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0018_occupant-night-distant.png
-[22:42:07] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-night-close -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0019_occupant-night-close.png
-[22:42:12] [Test thread/INFO] (occupant) [client-gametest] screenshot place-village -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0020_place-village.png
+[22:53:00] [Render thread/INFO] (occupant) The Occupant has moved in. Type /occupant check in game to test it.
+	at knot//net.minecraft.client.Minecraft.wrapMethod$zkj000$fabric-client-gametest-api-v1$onRun(Minecraft.java:5164)
+[22:53:07] [Render thread/INFO] (occupant) [client] the mode screen has been drawn
+[22:53:11] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-mode -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0000_occupant-mode.png
+[22:53:11] [Render thread/INFO] (occupant) [client] mode clicked at 213, 162: recording
+[22:53:11] [Render thread/INFO] (occupant) [client] the gate screen has been drawn
+[22:53:13] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-gate -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0001_occupant-gate.png
+[22:53:28] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-gate-later -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0002_occupant-gate-later.png
+[22:53:28] [Render thread/INFO] (occupant) [client] gate clicked at 213, 223: leave it alone
+[22:53:29] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-left-alone -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0003_occupant-left-alone.png
+[22:53:30] [Render thread/INFO] (occupant) [client] gate clicked at 213, 129: create world
+[22:53:32] [Render thread/INFO] (occupant) [client] creating the world straight away
+[22:53:32] [Server thread/INFO] (occupant) This world tells the story as the Creator Cut
+[22:53:51] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-quick-world -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0004_occupant-quick-world.png
+[22:53:53] [Server thread/INFO] (Minecraft) Stopping singleplayer server as player logged out
+[22:53:53] [Server thread/INFO] (Minecraft) Stopping server
+[22:53:58] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-title -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0005_occupant-title.png
+[22:53:59] [Server thread/INFO] (occupant) This world tells the story as a slow burn
+[22:54:09] [Test thread/INFO] (occupant) [client-gametest] the story has begun: true
+[22:54:09] [Server thread/INFO] (occupant) Player11 tried to leave survival; put back
+[22:54:10] [Test thread/INFO] (occupant) [client-gametest] creative refused: true
+[22:54:13] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-stare -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0006_occupant-stare.png
+[22:54:14] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-veiled -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0007_occupant-veiled.png
+[22:54:16] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-loom -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0008_occupant-loom.png
+[22:54:18] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-chase -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0009_occupant-chase.png
+[22:54:20] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-three-quarter -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0010_occupant-three-quarter.png
+[22:54:22] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-face -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0011_occupant-face.png
+[22:54:23] [Test thread/INFO] (occupant) [client-gametest] pale face pixels in the close-up: 1795
+[22:54:25] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-looking-up -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0012_occupant-looking-up.png
+[22:54:25] [Test thread/INFO] (occupant) [client-gametest] pale pixels looking up at it: 2526
+[22:54:27] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-shove -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0013_occupant-shove.png
+[22:54:29] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-after-shove -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0014_occupant-after-shove.png
+[22:54:31] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-corridor -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0015_occupant-corridor.png
+[22:54:32] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-trees -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0016_occupant-trees.png
+[22:54:34] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-indoors -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0017_occupant-indoors.png
+[22:54:36] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-night-distant -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0018_occupant-night-distant.png
+[22:54:38] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-night-close -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0019_occupant-night-close.png
+[22:54:43] [Test thread/INFO] (occupant) [client-gametest] screenshot place-village -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0020_place-village.png
 --- the mod's own checks ---
-[22:41:37] [Test thread/INFO] (occupant) [client-gametest] the story has begun: true
-[22:43:58] [Test thread/INFO] (occupant) [client-gametest] over the network: not on this version (no network synchroniser)
-[22:43:58] [Test thread/INFO] (occupant) [client-gametest] all client checks passed
+[22:54:09] [Test thread/INFO] (occupant) [client-gametest] the story has begun: true
+[22:56:29] [Test thread/INFO] (occupant) [client-gametest] over the network: not on this version (no network synchroniser)
+[22:56:29] [Test thread/INFO] (occupant) [client-gametest] all client checks passed
 --- last of the server thread in client.log ---
-[22:48:58] [Server thread/INFO] (Minecraft) No entity was found
-[22:49:00] [Server thread/INFO] (Minecraft) Killed The Occupant
-[22:49:00] [Server thread/INFO] (Minecraft) Set the time to 6000
-[22:49:00] [Server thread/INFO] (Minecraft) Teleported Player130 to 306.800000, 228.930000, 259.600000
-[22:49:03] [Server thread/INFO] (Minecraft) No entity was found
-[22:49:05] [Server thread/INFO] (Minecraft) Removed effect Night Vision from Player130
-[22:49:05] [Server thread/INFO] (Minecraft) Killed The Occupant
-[22:49:05] [Server thread/INFO] (Minecraft) Player130 lost connection: Disconnected
-[22:49:05] [Server thread/INFO] (Minecraft) Player130 left the game
-[22:49:05] [Server thread/INFO] (Minecraft) Stopping singleplayer server as player logged out
-[22:49:05] [Server thread/INFO] (Minecraft) Stopping server
-[22:49:05] [Server thread/INFO] (Minecraft) Saving players
-[22:49:05] [Server thread/INFO] (Minecraft) Saving worlds
-[22:49:05] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[New World]'/minecraft:overworld
-[22:49:06] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[New World]'/minecraft:the_end
-[22:49:06] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[New World]'/minecraft:the_nether
-[22:49:06] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (New World (1)): All chunks are saved
-[22:49:06] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (DIM1): All chunks are saved
-[22:49:06] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
-[22:49:06] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage: All dimensions are saved
+[23:00:49] [Server thread/INFO] (Minecraft) No entity was found
+[23:00:51] [Server thread/INFO] (Minecraft) Killed The Occupant
+[23:00:51] [Server thread/INFO] (Minecraft) Set the time to 6000
+[23:00:51] [Server thread/INFO] (Minecraft) Teleported Player11 to 322.800000, 228.930000, 243.600000
+[23:00:54] [Server thread/INFO] (Minecraft) No entity was found
+[23:00:56] [Server thread/INFO] (Minecraft) Removed effect Night Vision from Player11
+[23:00:56] [Server thread/INFO] (Minecraft) Killed The Occupant
+[23:00:56] [Server thread/INFO] (Minecraft) Player11 lost connection: Disconnected
+[23:00:56] [Server thread/INFO] (Minecraft) Player11 left the game
+[23:00:56] [Server thread/INFO] (Minecraft) Stopping singleplayer server as player logged out
+[23:00:56] [Server thread/INFO] (Minecraft) Stopping server
+[23:00:56] [Server thread/INFO] (Minecraft) Saving players
+[23:00:56] [Server thread/INFO] (Minecraft) Saving worlds
+[23:00:57] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[New World]'/minecraft:overworld
+[23:00:58] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[New World]'/minecraft:the_end
+[23:00:58] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[New World]'/minecraft:the_nether
+[23:00:58] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (New World (1)): All chunks are saved
+[23:00:58] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[23:00:58] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[23:00:58] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage: All dimensions are saved
 --- tail of client.log ---
-[22:49:03] [Server thread/INFO] (Minecraft) No entity was found
-[22:49:04] [Test thread/INFO] (occupant) [client-gametest] plate-below: 1 in sight
-[22:49:05] [Test thread/INFO] (occupant) [client-gametest] screenshot plate-below -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0084_plate-below.png
-[22:49:05] [Server thread/INFO] (Minecraft) Removed effect Night Vision from Player130
-[22:49:05] [Server thread/INFO] (Minecraft) Killed The Occupant
-[22:49:05] [Server thread/INFO] (Minecraft) Player130 lost connection: Disconnected
-[22:49:05] [Server thread/INFO] (Minecraft) Player130 left the game
-[22:49:05] [Server thread/INFO] (Minecraft) Stopping singleplayer server as player logged out
-[22:49:05] [Server thread/INFO] (Minecraft) Stopping server
-[22:49:05] [Server thread/INFO] (Minecraft) Saving players
-[22:49:05] [Server thread/INFO] (Minecraft) Saving worlds
-[22:49:05] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[New World]'/minecraft:overworld
-[22:49:06] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[New World]'/minecraft:the_end
-[22:49:06] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[New World]'/minecraft:the_nether
-[22:49:06] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (New World (1)): All chunks are saved
-[22:49:06] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (DIM1): All chunks are saved
-[22:49:06] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
-[22:49:06] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage: All dimensions are saved
-[22:49:06] [Render thread/INFO] (Minecraft) Stopping!
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/client-1791499177426.json
+[23:00:54] [Server thread/INFO] (Minecraft) No entity was found
+[23:00:56] [Test thread/INFO] (occupant) [client-gametest] plate-below: 1 in sight
+[23:00:56] [Test thread/INFO] (occupant) [client-gametest] screenshot plate-below -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0084_plate-below.png
+[23:00:56] [Server thread/INFO] (Minecraft) Removed effect Night Vision from Player11
+[23:00:56] [Server thread/INFO] (Minecraft) Killed The Occupant
+[23:00:56] [Server thread/INFO] (Minecraft) Player11 lost connection: Disconnected
+[23:00:56] [Server thread/INFO] (Minecraft) Player11 left the game
+[23:00:56] [Server thread/INFO] (Minecraft) Stopping singleplayer server as player logged out
+[23:00:56] [Server thread/INFO] (Minecraft) Stopping server
+[23:00:56] [Server thread/INFO] (Minecraft) Saving players
+[23:00:56] [Server thread/INFO] (Minecraft) Saving worlds
+[23:00:57] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[New World]'/minecraft:overworld
+[23:00:58] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[New World]'/minecraft:the_end
+[23:00:58] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[New World]'/minecraft:the_nether
+[23:00:58] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (New World (1)): All chunks are saved
+[23:00:58] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[23:00:58] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[23:00:58] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage: All dimensions are saved
+[23:00:58] [Render thread/INFO] (Minecraft) Stopping!
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/client-1791499951041.json
 
 [Incubating] Problems report is available at: file:///home/runner/work/Horror-Mod/Horror-Mod/build/reports/problems/problems-report.html
 
-BUILD SUCCESSFUL in 9m 40s
+BUILD SUCCESSFUL in 8m 32s
 10 actionable tasks: 10 executed
