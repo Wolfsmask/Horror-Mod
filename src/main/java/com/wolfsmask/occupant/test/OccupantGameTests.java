@@ -583,6 +583,8 @@ public final class OccupantGameTests {
 			Occupant.LOGGER.info("[gametest] rescue: zombie {} above the ground, alive {}", zombie.getY() - ground, zombie.isAlive());
 			helper.assertTrue(zombie.isAlive() && zombie.getY() > ground + 0.6, "The zombie should be held up, still alive, before it dies");
 			// Only the one come for this player: the other rescue test's is not far off.
+			Occupant.LOGGER.info("[gametest] rescue: {} come for them", level.getEntitiesOfClass(OccupantEntity.class,
+					player.getBoundingBox().inflate(16.0), e -> e.isHaunting(player)).size());
 			for (OccupantEntity it : level.getEntitiesOfClass(OccupantEntity.class, player.getBoundingBox().inflate(16.0),
 					e -> e.isHaunting(player))) {
 				helper.assertTrue(it.getHolding() == zombie.getId(), "It should have a leg through the zombie it is lifting");
@@ -642,11 +644,11 @@ public final class OccupantGameTests {
 		HauntData data = director.data(player);
 		data.introduced = true;
 		data.setAct(2);
-		// Well away from the other tests: open, level ground all round, so it always has somewhere to stand.
-		BlockPos stand = helper.absolutePos(new BlockPos(4, 2, 4)).offset(0, 0, -480);
-		for (BlockPos p : BlockPos.betweenClosed(stand.offset(-8, -1, -8), stand.offset(8, 4, 8))) {
-			level.setBlock(p, (p.getY() == stand.getY() - 1 ? net.minecraft.world.level.block.Blocks.STONE
-					: net.minecraft.world.level.block.Blocks.AIR).defaultBlockState(), 3);
+		// Ground under all of it, so it always has somewhere to stand (only where there is none, so
+		// nothing another test put down is touched).
+		BlockPos stand = helper.absolutePos(new BlockPos(4, 2, 4));
+		for (BlockPos p : BlockPos.betweenClosed(stand.offset(-5, -1, -5), stand.offset(5, -1, 5))) {
+			if (level.getBlockState(p).isAir()) level.setBlock(p, net.minecraft.world.level.block.Blocks.STONE.defaultBlockState(), 3);
 		}
 		player.snapTo(stand.getX() + 0.5, stand.getY(), stand.getZ() + 0.5, 0.0f, 0.0f);
 		java.util.List<net.minecraft.world.entity.Mob> zombies = new java.util.ArrayList<>();

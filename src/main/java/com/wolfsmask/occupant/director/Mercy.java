@@ -100,8 +100,11 @@ public final class Mercy {
 		if (!(source.getEntity() instanceof Mob attacker) || !(attacker instanceof Enemy) || attacker.getMaxHealth() > 100) return true;
 		if (h.mercyMobAt >= 0 && d.playTicks - h.mercyMobAt < MONSTERS_AGAIN_AFTER) return true;
 		h.mercyMobAt = d.playTicks;
-		List<Mob> monsters = new ArrayList<>(Compat.level(player).getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(12.0),
-				m -> m.isAlive() && m instanceof Enemy && !(m instanceof OccupantEntity) && m.getMaxHealth() <= 100));
+		// Those after them: whatever has them as its target, and anything close enough to be in it.
+		// Not every monster about the place (the one behind a wall that has not noticed them).
+		List<Mob> monsters = new ArrayList<>(Compat.level(player).getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(16.0),
+				m -> m.isAlive() && m instanceof Enemy && !(m instanceof OccupantEntity) && m.getMaxHealth() <= 100
+						&& (m.getTarget() == player || m.distanceToSqr(player) < 3.5 * 3.5)));
 		if (attacker.isAlive() && !monsters.contains(attacker)) monsters.add(attacker);
 		player.setHealth(Math.max(4.0f, player.getMaxHealth() * 0.3f));
 		if (monsters.isEmpty()) {

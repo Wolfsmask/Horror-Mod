@@ -60,12 +60,15 @@ later, closer. After every big scare there is a **calm** of a few minutes with o
 deniable things. And stay in too long, in a house or a hole or a cave, and it wants to know
 why you left it out there.
 
-**It does not let you die. Not like that.** Jump from somewhere high enough to kill you and the
-screen goes black, and you wake at your bed with a note: *it doesn't like that.* When a monster
-is about to kill you, it is simply there, behind the monster. One of its long legs goes into the
-monster and lifts it off the ground, slowly; the monster dies up there, on the leg; it is gone;
-and then it tells you why. With more
-than one, they are all lifted and all die together. Not every time.
+**It does not let you die. Not like that.** Jump from somewhere high enough to kill you, or
+fall into the void, and the screen goes black, and you wake at your bed, whole and fed, with a
+note: *it doesn't like that.* When a monster is about to kill you, you watch: your view is drawn
+round to it, the picture narrows, and nothing you press moves you. It is there, behind the
+monster. One of its long legs goes in at the monster's back and out through its chest and lifts
+it off the ground, slowly, its arms and legs hanging loose; it dies up there, on the leg; it is
+gone; and then it tells you why. With more than one, each it can reach gets a leg of its own
+(eight at most: it stands on the other two), and any it cannot reach you see go, one by one,
+first. Not every time.
 And the Director builds on absence: the longer nothing has happened, the more it favours
 something real, so the next thing lands once you have stopped listening for it.
 
