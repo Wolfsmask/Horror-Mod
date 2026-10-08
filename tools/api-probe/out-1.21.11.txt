@@ -1,9 +1,1 @@
-=== net.minecraft.client.model.HumanoidModel (code: <init>)
-=== net.minecraft.network.syncher.EntityDataSerializers (-public)
-public class network.syncher.EntityDataSerializers {
-  public static final network.syncher.EntityDataSerializer<Integer> INT;
-  public static final network.syncher.EntityDataSerializer<String> STRING;
-  public static final network.syncher.EntityDataSerializer<OptionalInt> OPTIONAL_UNSIGNED_INT;
-  public static final network.syncher.EntityDataSerializer<core.Holder<world.entity.decoration.painting.PaintingVariant>> PAINTING_VARIANT;
-=== net.minecraft.client.model.geom.ModelPart (-public)
-public final class client.model.geom.ModelPart {
+=== net.minecraft.client.model.HumanoidModel (code: HumanoidModel\()
