@@ -40,8 +40,8 @@ import java.util.Locale;
  *   <li>A fall that would kill them (or the void): black, and they wake at their bed, or where
  *   they first came into the world, with a note. It doesn't like that.</li>
  *   <li>A monster about to kill them: it is there, behind the monster, and one of its long legs
- *   goes through it and lifts it off the ground. Then it says why, and walks away into the fog.
- *   With more than one, they all die at once.</li>
+ *   goes through it and lifts it off the ground. It dies up there, it is gone, and then it says
+ *   why. With more than one, they are all lifted and all die at once.</li>
  * </ul>
  * Only once the story has begun, and the monsters only once in a while: otherwise, monsters kill
  * as monsters do.
@@ -165,25 +165,30 @@ public final class Mercy {
 	}
 
 	/**
-	 * It comes for what was about to kill them, plainly, in five steps: it is there, behind the
-	 * monster; it lifts the monster off the ground, slowly; the monster dies, up there; it is gone;
-	 * and then it says why. With more than one, they are all lifted and all die together.
+	 * It comes for what was about to kill them, plainly, one thing at a time: it is there, behind
+	 * the monster; one of its legs goes into the monster; it lifts it off the ground, slowly; the
+	 * monster dies up there, slumps on the leg, and is gone; then it is gone; and then it says why.
+	 * With more than one, they are all lifted and all die together.
 	 */
 	private static final class Rescue implements Sequence {
 		/** It is there. */
 		private static final int APPEAR = 2;
+		/** A leg goes into the monster (the client takes five ticks to put it there). */
+		private static final int REACH = 5;
 		/** The lift, from here to here, eased at both ends. */
-		private static final int LIFT_FROM = 6;
-		private static final int LIFT_TO = 28;
-		/** The monster dies, still held up. */
-		private static final int DIES = 38;
-		/** It is gone. */
-		private static final int GONE = 50;
+		private static final int LIFT_FROM = 11;
+		private static final int LIFT_TO = 33;
+		/** The monster dies, still held up. The game takes twenty ticks to lay it down and take it away. */
+		private static final int DIES = 42;
+		/** It is gone, once the monster is. */
+		private static final int GONE = DIES + 28;
 		/** And then the words. */
-		private static final int SAY = 56;
+		private static final int SAY = GONE + 8;
 		private final List<Mob> monsters;
 		private final List<Vec3> from = new ArrayList<>();
 		private final Haunt haunt;
+		/** The one nearest them, which its leg goes through. */
+		private final Mob held;
 		@Nullable
 		private OccupantEntity entity;
 		private int age;
@@ -212,10 +217,12 @@ public final class Mercy {
 			// It stands behind the one that nearly had them, on the far side from them.
 			Mob first = monsters.get(0);
 			for (Mob m : monsters) if (m.distanceToSqr(player) < first.distanceToSqr(player)) first = m;
+			this.held = first;
 			Vec3 out = first.position().subtract(player.position());
 			out = new Vec3(out.x, 0, out.z);
 			out = out.lengthSqr() < 1.0E-4 ? Sight.flatLook(player) : out.normalize();
-			Vec3 want = first.position().add(out.scale(monsters.size() == 1 ? 1.6 : 4.0));
+			// Close enough that a leg reaches it easily, far enough that the leg is seen to reach.
+			Vec3 want = first.position().add(out.scale(monsters.size() == 1 ? 2.4 : 3.0));
 			ServerLevel world = Compat.level(player);
 			BlockPos feet = Spots.groundNear(world, Mth.floor(want.x), first.getBlockY(), Mth.floor(want.z), 3);
 			// In sound-only mode it is never seen, even now: the monster is lifted by nothing.
@@ -240,7 +247,12 @@ public final class Mercy {
 				entity.faceTowards(player.getEyePosition());
 				entity.setConcealed(false);
 			}
-			// 2. Held where they were, then lifted off the ground, slowly and evenly.
+			// 2. A leg goes into it.
+			if (age == REACH) {
+				if (entity != null) entity.setHolding(held);
+				Cues.sound(player, SoundEvents.TRIDENT_HIT, SoundSource.HOSTILE, held.position(), 0.9f, 0.6f);
+			}
+			// 3. Held where they were, then lifted off the ground, slowly and evenly.
 			if (age <= DIES) {
 				float t = Mth.clamp((age - LIFT_FROM) / (float) (LIFT_TO - LIFT_FROM), 0.0f, 1.0f);
 				float ease = t * t * (3 - 2 * t);
@@ -253,10 +265,7 @@ public final class Mercy {
 					m.setDeltaMovement(Vec3.ZERO);
 				}
 			}
-			if (age == LIFT_FROM) {
-				Cues.sound(player, SoundEvents.TRIDENT_HIT, SoundSource.HOSTILE, monsters.get(0).position(), 0.9f, 0.6f);
-			}
-			// 3. It dies, up there.
+			// 4. It dies, up there.
 			if (age == DIES) {
 				ServerLevel level = Compat.level(player);
 				for (Mob e : monsters) {
@@ -265,12 +274,12 @@ public final class Mercy {
 					e.hurtServer(level, e.damageSources().genericKill(), Float.MAX_VALUE);
 				}
 			}
-			// 4. It is gone.
+			// 5. It is gone.
 			if (age == GONE && entity != null) {
 				entity.vanish();
 				entity = null;
 			}
-			// 5. And it says why.
+			// 6. And it says why.
 			if (age == SAY) {
 				String[] lines = monsters.size() == 1 ? ONE : MANY;
 				say(player, lines[player.getRandom().nextInt(lines.length)]);

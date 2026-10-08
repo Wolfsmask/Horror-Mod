@@ -59,6 +59,8 @@ public class OccupantEntity extends PathfinderMob {
 	 * view, it stays unseen until the player has looked away from it, and then it is simply there.
 	 */
 	private static final EntityDataAccessor<Boolean> CONCEALED = SynchedEntityData.defineId(OccupantEntity.class, EntityDataSerializers.BOOLEAN);
+	/** What it has one of its legs through, by entity id; -1 for nothing. */
+	private static final EntityDataAccessor<Integer> HOLDING = SynchedEntityData.defineId(OccupantEntity.class, EntityDataSerializers.INT);
 
 	/** Ticks out of their sight before it is there: long enough for their screen to catch up. */
 	private static final int REVEAL_AFTER = 6;
@@ -125,6 +127,7 @@ public class OccupantEntity extends PathfinderMob {
 		builder.define(MODE, (byte) Mode.IDLE.ordinal());
 		builder.define(FORM, (byte) Form.VEILED.ordinal());
 		builder.define(CONCEALED, false);
+		builder.define(HOLDING, -1);
 	}
 
 	// ------------------------------------------------------------------ state
@@ -138,6 +141,16 @@ public class OccupantEntity extends PathfinderMob {
 	public boolean shouldRenderAtSqrDistance(double distanceSqr) {
 		double range = 160.0 * getViewScale();
 		return distanceSqr < range * range;
+	}
+
+	/** The id of what it has one of its legs through, or -1. */
+	public int getHolding() {
+		return this.entityData.get(HOLDING);
+	}
+
+	/** Puts one of its legs through this entity, and holds it there; null to let go. */
+	public void setHolding(@Nullable Entity held) {
+		this.entityData.set(HOLDING, held == null ? -1 : held.getId());
 	}
 
 	public boolean isConcealed() {

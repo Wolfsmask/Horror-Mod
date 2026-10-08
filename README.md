@@ -232,7 +232,13 @@ not end well, and when it runs out, the pages that are left are not in the same 
   - every event is forced on a player, and the test fails if anything throws or an Occupant is left behind;
   - an "arena" test builds an open field at night, a cave and a house, and fails unless each event
     designed for that setting actually finds its place there;
-  - it cannot be hurt, removes itself when nothing controls it, and story progress survives a save and load.
+  - nothing but a player touches it (struck, it is simply gone), it removes itself when nothing
+    controls it, and story progress survives a save and load;
+  - the mercy at the edge of death is played out step by step: it appears, lifts what was killing
+    you, that dies, it is gone, and only then the line.
+- It also starts the real game: it plays through the first screens into a world on every version,
+  and on the newest it starts a real server and **joins it over the network**, as a friend on
+  e4mc would, and checks the Occupant is there for them too.
 
 ---
 

@@ -528,8 +528,8 @@ public final class OccupantGameTests {
 	}
 
 	/**
-	 * The rescue, run to its end: the monster is lifted off the ground, and only then dies, and
-	 * then it is gone.
+	 * The rescue, run to its end: a leg goes into the monster, it is lifted off the ground, and only
+	 * then dies, and then it is gone.
 	 */
 	@GameTest(maxTicks = 160)
 	public void theRescueLiftsThenKills(GameTestHelper helper) {
@@ -558,6 +558,9 @@ public final class OccupantGameTests {
 		helper.runAfterDelay(22, () -> {
 			Occupant.LOGGER.info("[gametest] rescue: zombie {} above the ground, alive {}", zombie.getY() - ground, zombie.isAlive());
 			helper.assertTrue(zombie.isAlive() && zombie.getY() > ground + 0.6, "The zombie should be held up, still alive, before it dies");
+			for (OccupantEntity it : level.getEntitiesOfClass(OccupantEntity.class, player.getBoundingBox().inflate(16.0))) {
+				helper.assertTrue(it.getHolding() == zombie.getId(), "It should have a leg through the zombie it is lifting");
+			}
 		});
 		helper.succeedWhen(() -> {
 			helper.assertTrue(!zombie.isAlive(), "The zombie should die once it has been lifted");

@@ -3,18 +3,26 @@ package com.wolfsmask.occupant.client.test;
 import com.wolfsmask.occupant.Occupant;
 import com.wolfsmask.occupant.client.ScreenEffects;
 import com.wolfsmask.occupant.director.Director;
+import com.wolfsmask.occupant.director.HauntData;
+import com.wolfsmask.occupant.director.Mercy;
 import com.wolfsmask.occupant.network.ScreenEffectPayload;
+import com.wolfsmask.occupant.util.Kinds;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.WallTorchBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+
+import java.util.Locale;
 
 /**
  * The other kind of picture for the mod's page: not film stills but screenshots, the kind a player
@@ -53,6 +61,7 @@ final class FoundFootage {
 			shot("window", () -> window(context, game, woods));
 			shot("cave", () -> cave(context, game, spawn));
 			shot("debug", () -> debug(context, game, woods));
+			shot("rescue", () -> rescue(context, game, woods));
 			shot("plates", () -> plates(context, game, spawn));
 		} catch (RuntimeException | AssertionError e) {
 			Occupant.LOGGER.warn("[client-gametest] found footage stopped early", e);
@@ -266,6 +275,63 @@ final class FoundFootage {
 	}
 
 	/** Lets it settle into its pose and the light come right, then takes the picture. */
+	/**
+	 * Not for the page: the mercy at the edge of death, as it plays, frame by frame, so the way it
+	 * moves can be looked at. A husk five steps off has all but killed them. It is there behind the
+	 * husk, a leg goes in, the husk is lifted, dies up there and is gone, then it is gone, then the
+	 * words.
+	 */
+	private static void rescue(ClientGameTestContext context, TestSingleplayerContext game, BlockPos[] woods) {
+		TestServerContext server = game.getServer();
+		BlockPos floor = server.computeOnServer(s -> ForestGallery.clearing(s.overworld(), woods[0].offset(-60, 0, 60)));
+		if (floor == null) return;
+		server.runOnServer(s -> Cinematic.fellTrees(s.overworld(), floor, 12));
+		Vec3[] eyeAndHusk = server.computeOnServer(s -> {
+			ServerLevel level = s.overworld();
+			int hz = floor.getZ() + 5;
+			Vec3 eye = new Vec3(floor.getX() + 0.5, Cinematic.ground(level, floor.getX(), floor.getZ()) + Cinematic.EYE, floor.getZ() + 0.5);
+			return new Vec3[]{eye, new Vec3(floor.getX() + 0.5, Cinematic.ground(level, floor.getX(), hz), hz + 0.5)};
+		});
+		Vec3 husk = eyeAndHusk[1];
+		// Looking a little above the husk, so what stands behind it is in the picture too.
+		Cinematic.camera(context, game, eyeAndHusk[0], husk.add(0, 2.3, 1.0), 6000);
+		server.runCommand(String.format(Locale.ROOT, "summon minecraft:husk %.2f %.2f %.2f {PersistenceRequired:1b,NoAI:1b}",
+				husk.x, husk.y, husk.z));
+		context.waitTicks(10);
+		boolean saved = server.computeOnServer(s -> {
+			ServerPlayer p = Cinematic.player(s);
+			Mob it = s.overworld().getEntitiesOfClass(Mob.class, AABB.ofSize(husk, 2.0, 3.0, 2.0), m -> Kinds.is(m, "husk"))
+					.stream().findFirst().orElse(null);
+			if (it == null) return false;
+			HauntData d = Director.get().data(p);
+			d.paused = false;
+			d.introduced = true;
+			p.setHealth(1.0f);
+			return !Mercy.allowDeath(p, p.damageSources().mobAttack(it));
+		});
+		Occupant.LOGGER.info("[client-gametest] rescue: begun {}", saved);
+		if (!saved) return;
+		try {
+			// About where each step is: the leg going in, the lift, dying on the leg, the leg holding
+			// nothing, and the words.
+			int[] at = {9, 24, 48, 66, 84};
+			String[] names = {"reach", "lift", "dies", "gone", "words"};
+			int waited = 0;
+			for (int i = 0; i < at.length; i++) {
+				context.waitTicks(at[i] - waited);
+				waited = at[i];
+				Occupant.LOGGER.info("[client-gametest] rescue {}: {} in sight", names[i], context.computeOnClient(OccupantClientGameTest::seen));
+				OccupantClientGameTest.shoot(context, "rescue-" + (i + 1) + "-" + names[i]);
+			}
+		} finally {
+			server.runOnServer(s -> {
+				ServerPlayer p = Cinematic.player(s);
+				Director.get().data(p).paused = true;
+				p.setHealth(p.getMaxHealth());
+			});
+		}
+	}
+
 	private static void settle(ClientGameTestContext context, String name) {
 		context.waitTicks(30);
 		Occupant.LOGGER.info("[client-gametest] {}: {} in sight", name, context.computeOnClient(OccupantClientGameTest::seen));

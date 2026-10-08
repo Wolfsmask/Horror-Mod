@@ -4,10 +4,12 @@ import com.wolfsmask.occupant.entity.OccupantEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -35,6 +37,9 @@ final class LegGait {
 	private static final double MAX_LAG = 1.4;
 	/** Further than this from the drawn body and it has moved by other means: start over. */
 	private static final double SNAP = 4.0;
+
+	/** How long a leg takes to go into what it takes hold of, in ticks. */
+	private static final float REACH_IN = 5.0f;
 
 	/** Where the body is drawn: behind the entity, catching up in shoves. */
 	private Vec3 body;
@@ -71,6 +76,16 @@ final class LegGait {
 	/** Its size and how far it is folded, eased, so it never changes shape from one frame to the next. */
 	private float fitScale = Float.NaN;
 	private float fitCrouch;
+	/**
+	 * The leg it has through something, and what (by entity id); -1 for none. The leg goes in over
+	 * a few ticks from wherever it was drawn, then stays exactly in it, and when what it held is
+	 * gone the leg stays out where it was, holding nothing.
+	 */
+	private int heldLeg = -1;
+	private int heldId = -1;
+	private float heldSince;
+	private Vec3 heldFrom;
+	private float lingerUntil;
 
 	static LegGait of(OccupantEntity entity) {
 		return GAITS.computeIfAbsent(entity, e -> new LegGait(e.getId()));
@@ -194,7 +209,9 @@ final class LegGait {
 		// Which leg is worst off, and so is first to let go.
 		int worst = -1;
 		double worstScore = 0.0;
+		Vec3 heldAt = held(entity, level, now, yaw, px, dropPx);
 		for (int i = 0; i < LEGS; i++) {
+			if (i == heldLeg && (heldAt != null || now < lingerUntil)) continue;
 			if (swingStart[i] >= 0.0f) {
 				if (now - swingStart[i] >= swingTime[i]) swingStart[i] = -1.0f;
 				continue;
@@ -220,7 +237,7 @@ final class LegGait {
 		int maxSwinging = chasing ? 3 : 2;
 		if (worst >= 0 && worstScore > 0.0 && swinging < maxSwinging) {
 			replant(worst, level, yaw, px, rootY(worst, px, dropPx), chasing ? 2.0f : 3.0f);
-		} else if (now >= nextFidget && swinging == 0 && lag < 0.1 && !watched) {
+		} else if (now >= nextFidget && swinging == 0 && lag < 0.1 && !watched && heldLeg < 0) {
 			// Standing still, every so often one leg lets go and takes a new grip, slowly.
 			int i = (int) (rand(5, (int) now) * LEGS) % LEGS;
 			replant(i, level, yaw, px, rootY(i, px, dropPx), 9.0f);
@@ -244,6 +261,13 @@ final class LegGait {
 			}
 			double reach = OccupantGeometry.LEG_LENGTH[i] * px;
 			Vec3 hip = new Vec3(body.x, rootY(i, px, dropPx), body.z);
+			boolean holding = i == heldLeg && heldAt != null;
+			if (holding) {
+				// Into it, eased at both ends, and from then on exactly in it, wherever it is.
+				float f = Mth.clamp((now - heldSince) / REACH_IN, 0.0f, 1.0f);
+				float e = f * f * (3.0f - 2.0f * f);
+				at = heldFrom == null ? heldAt : heldFrom.lerp(heldAt, e);
+			}
 			if (at == null) at = dangle(i, level, yaw, reach, hip, clock);
 			if (at == null) {
 				state.legPlanted[i] = false;
@@ -253,7 +277,7 @@ final class LegGait {
 			}
 			// Whatever the leg's point is doing, it gets there smoothly: a hold lost, a free leg
 			// finding one, the floor under a hanging leg stepping down. Never a jump.
-			if (drawn[i] == null || arrived) {
+			if (drawn[i] == null || arrived || holding) {
 				drawn[i] = at;
 			} else {
 				double follow = 1.0 - Math.exp(-0.7 * dt);
@@ -290,6 +314,54 @@ final class LegGait {
 			state.legTarget[i * 3 + 1] = my;
 			state.legTarget[i * 3 + 2] = mz;
 		}
+	}
+
+	/**
+	 * Where the leg that is through something should be this frame: just through the far side of
+	 * it, from the hip it comes out of. Picks the leg the first time (the one pointing most its
+	 * way that can reach), and lets go when the server says so or the thing is gone. Null when it
+	 * holds nothing.
+	 */
+	@Nullable
+	private Vec3 held(OccupantEntity entity, Level level, float now, double yaw, double px, float dropPx) {
+		int id = entity.getHolding();
+		Entity held = id >= 0 ? level.getEntity(id) : null;
+		if (held == null || held.isRemoved()) {
+			if (heldId >= 0 && heldLeg >= 0) {
+				// Gone from the end of its leg: the leg stays out there, holding nothing.
+				foot[heldLeg] = drawn[heldLeg];
+				swingStart[heldLeg] = -1.0f;
+				lingerUntil = now + 40.0f;
+			}
+			heldId = -1;
+			if (now >= lingerUntil) heldLeg = -1;
+			return null;
+		}
+		float partial = Mth.clamp(now - entity.tickCount, 0.0f, 1.0f);
+		Vec3 pos = held.getPosition(partial);
+		Vec3 centre = pos.add(0.0, held.getBbHeight() * 0.55, 0.0);
+		if (heldId != id) {
+			heldId = id;
+			heldLeg = -1;
+			double best = Double.NEGATIVE_INFINITY;
+			for (int i = 0; i < LEGS; i++) {
+				Vec3 hip = new Vec3(body.x, rootY(i, px, dropPx), body.z);
+				Vec3 to = centre.subtract(hip);
+				double score = outward(i, yaw).dot(new Vec3(to.x, 0.0, to.z).normalize());
+				if (to.length() > OccupantGeometry.LEG_LENGTH[i] * px * 0.95) score -= 10.0;   // cannot reach it
+				if (score > best) {
+					best = score;
+					heldLeg = i;
+				}
+			}
+			heldSince = now;
+			heldFrom = drawn[heldLeg] != null ? drawn[heldLeg] : foot[heldLeg];
+			swingStart[heldLeg] = -1.0f;
+		}
+		Vec3 hip = new Vec3(body.x, rootY(heldLeg, px, dropPx), body.z);
+		Vec3 through = centre.subtract(hip);
+		if (through.lengthSqr() < 1.0e-4) return centre;
+		return centre.add(through.normalize().scale(Math.min(0.3, held.getBbWidth() * 0.6)));
 	}
 
 	/**
