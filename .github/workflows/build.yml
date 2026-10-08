@@ -169,7 +169,9 @@ jobs:
           # started, its own run will report, and this one's results are already out of date.
           for attempt in 1 2 3 4 5; do
             git fetch -q origin "${GITHUB_REF_NAME}"
-            if [ -n "$(git log --format=%s "${GITHUB_SHA}..origin/${GITHUB_REF_NAME}" | grep -v '\[skip ci\]')" ]; then
+            # Newer code means a file that would start a build of its own changed: results, docs
+            # and pictures pushed since (and merges of them) do not count.
+            if [ -n "$(git diff --name-only "${GITHUB_SHA}" "origin/${GITHUB_REF_NAME}" -- . ':(exclude)docs' ':(exclude)tools/ports' ':(exclude)tools/api-probe' ':(exclude)tools/marketing')" ]; then
               echo "Newer code is on the branch; leaving the report to its run."
               break
             fi
