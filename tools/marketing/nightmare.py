@@ -151,6 +151,67 @@ def body(canvas, top, bottom, width, colour=(0.035, 0.025, 0.025)):
     paint(canvas, poly_mask(pts, blur=3), colour)
 
 
+# ---------------------------------------------------------------- it, cut out
+
+PLATES = ROOT / "docs/client-test"
+
+
+def plate(name, crop=None):
+    """It, cut out of a frame shot against flat emerald by the client test: RGBA, the green keyed
+    away and its spill taken out of the edges, cropped tight round it. {crop} is an optional box
+    (left, top, right, bottom) as fractions of the frame, to take only part of it."""
+    img = Image.open(PLATES / (name + ".png")).convert("RGB")
+    a = np.asarray(img, np.float32) / 255.0
+    r, g, b = a[..., 0], a[..., 1], a[..., 2]
+    spill = g - np.maximum(r, b)
+    alpha = 1.0 - np.clip((spill - 0.08) / 0.14, 0, 1)
+    a[..., 1] = np.minimum(g, np.maximum(r, b) + 0.02)            # no green left on its edges
+    rgba = np.concatenate([a, alpha[..., None]], axis=2)
+    out = Image.fromarray((np.clip(rgba, 0, 1) * 255).astype(np.uint8), "RGBA")
+    # Shrink the mask a touch, so no green rim is left.
+    al = out.getchannel("A").filter(ImageFilter.MinFilter(3)).filter(ImageFilter.GaussianBlur(0.8))
+    out.putalpha(al)
+    if crop:
+        w, h = out.size
+        out = out.crop((int(crop[0] * w), int(crop[1] * h), int(crop[2] * w), int(crop[3] * h)))
+    box = out.getchannel("A").point(lambda v: 255 if v > 24 else 0).getbbox()
+    return out.crop(box) if box else out
+
+
+def relight(layer, top=0.45, bottom=1.0, gain=1.0, cold=0.15):
+    """Takes away the flat light it was shot in: light from below, darker up top, colder."""
+    a = np.asarray(layer, np.float32) / 255.0
+    h = a.shape[0]
+    ramp = np.linspace(top, bottom, h, dtype=np.float32)[:, None]
+    rgb = a[..., :3] * ramp[..., None] * gain
+    lum = rgb.mean(axis=2, keepdims=True)
+    rgb = rgb * (1 - cold) + lum * cold * np.array([0.9, 0.95, 1.05], np.float32)
+    out = np.concatenate([np.clip(rgb, 0, 1), a[..., 3:4]], axis=2)
+    return Image.fromarray((out * 255).astype(np.uint8), "RGBA")
+
+
+# ---------------------------------------------------------------- the woods
+
+def trunk(canvas, x, top, bottom, width, tone, fog, seed, lean=0.0):
+    """A real trunk: rounded (darker at its edges), barked, flaring into roots at the foot, and
+    paler the further into the fog it stands."""
+    rng = np.random.default_rng(seed)
+    yy, xx = np.mgrid[0:H, 0:W].astype(np.float32)
+    flare = 1.0 + 0.9 * np.clip((yy - (bottom - 60)) / 60.0, 0, 1) ** 2
+    cx = x + lean * (yy - bottom)
+    half = width / 2 * flare
+    d = (xx - cx) / np.maximum(half, 1)
+    inside = np.clip((1 - np.abs(d)) * half / 1.5, 0, 1) * (yy >= top) * (yy <= bottom + 4)
+    round_shade = 0.55 + 0.45 * np.sqrt(np.clip(1 - d * d, 0, 1))
+    bark = noise(seed, 3, (H, W)) * 0.5 + 0.5
+    streak = np.asarray(Image.fromarray((rng.random((H // 40 + 1, W // 2 + 1)) * 255).astype(np.uint8))
+                        .resize((W, H), Image.BICUBIC), np.float32) / 255.0
+    col = tone * round_shade * (0.75 + 0.35 * streak * bark)
+    col = col * (1 - fog) + canvas.mean(axis=2) * fog
+    paint(canvas, inside, (0, 0, 0), 1.0)
+    canvas += (inside * col)[..., None] * np.array([1.0, 0.97, 0.95], np.float32)
+
+
 # ---------------------------------------------------------------- the photograph
 
 def photograph(rgb, seed, fringe=6, ghost=0.25, vignette=0.68, grain=0.05):
