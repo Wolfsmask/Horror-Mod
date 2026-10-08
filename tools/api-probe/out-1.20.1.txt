@@ -1,27 +1,10 @@
-=== net.minecraft.client.model.ZombieModel (-public)
-public class client.model.ZombieModel<T extends world.entity.monster.Zombie> extends client.model.AbstractZombieModel<T> {
-=== net.minecraft.client.model.AbstractZombieModel (-public)
-public abstract class client.model.AbstractZombieModel<T extends world.entity.monster.Monster> extends client.model.HumanoidModel<T> {
-  public void setupAnim(T, float, float, float, float, float);
-  public void setupAnim(world.entity.LivingEntity, float, float, float, float, float);
-  public void setupAnim(world.entity.Entity, float, float, float, float, float);
-=== net.minecraft.client.model.SkeletonModel (-public)
-public class client.model.SkeletonModel<T extends world.entity.Mob & world.entity.monster.RangedAttackMob> extends client.model.HumanoidModel<T> {
-  public void setupAnim(T, float, float, float, float, float);
-  public void setupAnim(world.entity.LivingEntity, float, float, float, float, float);
-  public void setupAnim(world.entity.Entity, float, float, float, float, float);
-=== net.minecraft.client.model.monster.zombie.ZombieModel (-public)
-Error: class not found: client.model.monster.zombie.ZombieModel
-=== net.minecraft.client.model.monster.zombie.AbstractZombieModel (-public)
-Error: class not found: client.model.monster.zombie.AbstractZombieModel
-=== net.minecraft.client.model.monster.skeleton.SkeletonModel (-public)
-Error: class not found: client.model.monster.skeleton.SkeletonModel
-=== net.minecraft.client.renderer.entity.state.HumanoidRenderState (-public)
-Error: class not found: client.renderer.entity.state.HumanoidRenderState
-=== net.minecraft.client.renderer.entity.state.ZombieRenderState (-public)
-Error: class not found: client.renderer.entity.state.ZombieRenderState
-=== net.minecraft.client.MouseHandler (-p)
-public class client.MouseHandler {
-  private double accumulatedDX;
-  private double accumulatedDY;
-  public void turnPlayer();
+=== net.minecraft.client.model.HumanoidModel (code: <init>)
+=== net.minecraft.network.syncher.EntityDataSerializers (-public)
+public class network.syncher.EntityDataSerializers {
+  public static final network.syncher.EntityDataSerializer<Integer> INT;
+  public static final network.syncher.EntityDataSerializer<String> STRING;
+  public static final network.syncher.EntityDataSerializer<OptionalInt> OPTIONAL_UNSIGNED_INT;
+  public static final network.syncher.EntityDataSerializer<core.Holder<world.entity.decoration.PaintingVariant>> PAINTING_VARIANT;
+=== net.minecraft.client.model.geom.ModelPart (-public)
+public final class client.model.geom.ModelPart {
+  public void copyFrom(client.model.geom.ModelPart);
