@@ -1,10 +1,39 @@
-# 1.21.11 on 8fdb6c3d592c7d3678b73b37920c76152620d1b2: build failure, tests skipped, jar skipped
-com/wolfsmask/occupant/director/Trifles.java:231: error: Places is not public in com.wolfsmask.occupant.world; cannot be accessed from outside package
+# 1.21.11 on 3ea6dbd32f83a6695190db8826f96cd9a6350774: build success, tests cancelled, jar success
 > Configure project :
 > Task :versionSourcesMain
 > Task :compileJava
-> Task :compileJava FAILED
-* What went wrong:
-> Compilation failed; see the compiler output below.
-> Check your code and dependencies to fix the compilation error(s)
-> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Task :processResources
+> Task :classes
+> Task :versionSourcesClient
+> Task :compileClientJava
+> Task :processClientResources NO-SOURCE
+> Task :jar
+> Task :processIncludeJars
+> Task :clientClasses
+> Task :compileTestJava NO-SOURCE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+> Task :test NO-SOURCE
+> Task :validateAccessWidener NO-SOURCE
+> Task :check UP-TO-DATE
+> Task :remapJar
+> Task :remapSourcesJar SKIPPED
+> Task :assemble
+=== jar
+jar: build/libs/occupant-0.1.0+mc1.21.11.jar
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.wolfsmask.occupant.mixin.client",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "CreateWorldAccess",
+    "FogRendererMixin",
+    "ScreenAccess",
+    "SkyRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
+the mixin class itself was remapped
