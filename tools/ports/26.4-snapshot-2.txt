@@ -1,60 +1,9 @@
-# 26.4-snapshot-2 on 0e9e90414fc3c8074e7d4c9b8291391c99f59c91: build success, tests success, jar success
+# 26.4-snapshot-2 on 18adce1f26225fd750a713192cc4312919b27521: build failure, tests skipped, jar skipped
+com/wolfsmask/occupant/director/Mercy.java:229: error: variable want is already defined in constructor Rescue(Haunt,ServerPlayer,List<Mob>)
 > Configure project :
 > Task :compileJava
-> Task :processResources
-> Task :classes
-> Task :compileClientJava
-> Task :processClientResources NO-SOURCE
-> Task :processIncludeJars
-> Task :clientClasses
-> Task :compileTestJava NO-SOURCE
-> Task :processTestResources NO-SOURCE
-> Task :testClasses UP-TO-DATE
-> Task :jar
-> Task :test NO-SOURCE
-> Task :assemble
-> Task :validateAccessWidener NO-SOURCE
-> Task :check UP-TO-DATE
-> Task :build
-=== jar
-jar: build/libs/occupant-0.1.1+mc26.4-snapshot-2.jar
-{
-  "required": true,
-  "minVersion": "0.8",
-  "package": "com.wolfsmask.occupant.mixin.client",
-  "compatibilityLevel": "JAVA_25",
-  "client": [
-    "CreateWorldAccess",
-    "FogRendererMixin",
-    "ScreenAccess",
-    "SkyRendererMixin"
-  ],
-  "injectors": {
-    "defaultRequire": 1
-  }
-}
-unobfuscated version: the game's own names are the real ones
-[17:42:14] [Server thread/INFO] (occupant) [gametest] blight over 64 chunks: 468 blocks changed, 0 leaves
-[17:42:14] [Server thread/INFO] (occupant) [gametest] last camp at BlockPos{x=-5496537, y=3, z=5547511}, chest at BlockPos{x=-5496534, y=4, z=5547510}
-[17:42:15] [Server thread/INFO] (occupant) [gametest] lair under BlockPos{x=-5496522, y=0, z=5548911}: 22 rungs, going in: STARTED
-[17:42:16] [Server thread/INFO] (occupant) [gametest] houses: found before false, first true, too close false, second true, after finding false
-[17:42:16] [Server thread/INFO] (occupant) [gametest] mercy: fall allowed false, health 5.0, creative true, introduced true
-[17:42:16] [Server thread/INFO] (occupant) [gametest] mercy: zombie allowed false, held true
-[17:42:16] [Server thread/INFO] (occupant) [gametest] advancements of ours loaded: 19
-[17:42:16] [Server thread/INFO] (occupant) [gametest] fog: first act 80.0, last act 50.0
-[17:42:17] [Server thread/INFO] (occupant) [gametest] fog thick at 60.0, begins at 34.8; it stands 31.89043743820395 away
-[17:42:18] [Server thread/INFO] (occupant) [gametest] places without loot: [], page found: true
-[17:42:19] [Server thread/INFO] (occupant) [gametest] ways of building a place that lost their things: []
-[17:42:20] [Server thread/INFO] (occupant) [gametest] house test player at BlockPos{x=-2, y=1, z=-4} facing 0.0 / (0.0, -0.0, 1.0)
-[17:42:20] [Server thread/INFO] (occupant) [gametest] house hallway spot: peeking BlockPos{x=-5496467, y=8, z=5548514} / any BlockPos{x=-5496467, y=8, z=5548514} (relative to the floor: BlockPos{x=4, y=1, z=0})
-[17:42:20] [Server thread/INFO] (occupant) [gametest] hallway light at the far end: block 0 sky 0, dark true
-[17:42:20] [Server thread/INFO] (occupant) [gametest] that spot: mask 1001001001, block light 0, sky 2, main room middle block light 0 sky 8
-[17:42:21] [Server thread/INFO] (occupant) [gametest] rescue: zombie 1.7087153077125556 above the ground, alive true
-[17:42:21] [Server thread/INFO] (occupant) [gametest] rescue: creeper alive true, 0.894590520858765 above the ground
-[17:42:23] [Server thread/INFO] (occupant) [gametest] field: darkOutside=true skyDarken=7 light=8 skyLight=15 blockLight=0 isDark=true grassInDirtTag=false
-[17:42:23] [Server thread/INFO] (occupant) [gametest] cave: yaw=-90.0 feet=BlockPos{x=-5496137, y=60, z=5548365} underground=true skyVisible=false skyLight=0 topY=69 light=0 look=(1.0, 0.0, 0.0) | ahead: standable=55 dark=55 visible=55
-[17:42:23] [Server thread/INFO] (occupant) [gametest] arena failures: []
-[17:42:23] [Server thread/INFO] (occupant) [gametest] slowest event to start: torch_gone (cave) in 14 ms
-[17:42:23] [Server thread/INFO] (occupant) [gametest] unnoticed: age 241, seen -1, nearby 1, alive true, concealed false, noticed false, in sight true, angle 176, ray MISS at -5496551, 56, 5548218 Block{minecraft:air}, ignored 1, same story true
-[17:42:33] [Server thread/INFO] (occupant) [gametest] events that found a place to happen: [familiar, cave_noise, thunder, echo, breath, fake_join, roof, saving, teammate, advancement, whisper, doppel_chat, stalker, flicker, static, wake]
-[17:42:34] [Server thread/INFO] (Minecraft) ========= 26 GAME TESTS COMPLETE IN 24.41 s ======================
+> Task :compileJava FAILED
+* What went wrong:
+> Compilation failed; see the compiler output below.
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
