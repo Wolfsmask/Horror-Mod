@@ -1,65 +1,85 @@
-=== net.minecraft.client.gui.components.DebugScreenOverlay (-p)
-public class client.gui.components.DebugScreenOverlay {
-  private boolean renderProfilerChart;
-  private boolean renderFpsCharts;
-  private boolean renderNetworkCharts;
-  private boolean renderLightmapTexture;
-  public void extractRenderState(client.gui.GuiGraphicsExtractor);
-  private void extractLines(client.gui.GuiGraphicsExtractor, List<String>, boolean);
-  public boolean showDebugScreen();
-=== net.minecraft.client.player.LocalPlayer (-public)
-public class client.player.LocalPlayer extends client.player.AbstractClientPlayer implements networking.v1.context.PacketContextProvider {
-  public void setReducedDebugInfo(boolean);
-=== net.minecraft.world.entity.player.Player (-public)
-public abstract class world.entity.player.Player extends world.entity.Avatar implements world.entity.ContainerUser {
-  public boolean isReducedDebugInfo();
-  public void setReducedDebugInfo(boolean);
-=== net.minecraft.client.Minecraft (-public)
-public class client.Minecraft extends util.thread.ReentrantBlockableEventLoop<Runnable> implements blaze3d.platform.WindowEventHandler {
-  public final client.gui.components.debug.DebugScreenEntryList debugEntries;
-  public boolean debugClientMetricsStart(Consumer<network.chat.Component>);
-  public client.gui.components.DebugScreenOverlay getDebugOverlay();
-  public void showDebugChat(network.chat.Component);
-=== classes matching debug\.(DebugEntryPosition|DebugScreenEntries|DebugScreenEntryList|DebugEntry.*Pos.*)
-net.minecraft.client.gui.components.debug.DebugScreenEntryList
-net.minecraft.client.gui.components.debug.DebugEntryPosition
-net.minecraft.client.gui.components.debug.DebugEntryPostEffect
-net.minecraft.client.gui.components.debug.DebugEntrySectionPosition
-net.minecraft.client.gui.components.debug.DebugScreenEntries
-=== classes matching gui\.components\.debug\.
-net.minecraft.client.gui.components.debug.DebugEntryNoop
-net.minecraft.client.gui.components.debug.DebugEntryBiome
-net.minecraft.client.gui.components.debug.DebugEntryChunkSourceStats
-net.minecraft.client.gui.components.debug.DebugEntryChunkGeneration
-net.minecraft.client.gui.components.debug.DebugEntryMemory
-net.minecraft.client.gui.components.debug.DebugScreenDisplayer
-net.minecraft.client.gui.components.debug.DebugEntryDetailedMemory
-net.minecraft.client.gui.components.debug.DebugEntryGpuUtilization
-net.minecraft.client.gui.components.debug.DebugEntryCategory
-net.minecraft.client.gui.components.debug.DebugEntryVersion
-net.minecraft.client.gui.components.debug.DebugEntryChunkRenderStats
-net.minecraft.client.gui.components.debug.DebugEntryFps
-net.minecraft.client.gui.components.debug.DebugEntryLight
-net.minecraft.client.gui.components.debug.DebugEntrySimplePerformanceImpactors
-net.minecraft.client.gui.components.debug.DebugEntryTps
-net.minecraft.client.gui.components.debug.DebugScreenEntryStatus
-net.minecraft.client.gui.components.debug.DebugEntrySoundCache
-net.minecraft.client.gui.components.debug.DebugEntryLookingAtEntity
-net.minecraft.client.gui.components.debug.DebugEntryLookingAtEntityTags
-net.minecraft.client.gui.components.debug.DebugEntryLocalDifficulty
-net.minecraft.client.gui.components.debug.DebugEntryHeightmap
-net.minecraft.client.gui.components.debug.DebugScreenEntry
-net.minecraft.client.gui.components.debug.DebugEntryLookingAt
-net.minecraft.client.gui.components.debug.DebugScreenEntryList
-net.minecraft.client.gui.components.debug.DebugEntrySoundMood
-net.minecraft.client.gui.components.debug.DebugEntrySpawnCounts
-net.minecraft.client.gui.components.debug.DebugEntrySystemSpecs
-net.minecraft.client.gui.components.debug.DebugEntryParticleRenderStats
-net.minecraft.client.gui.components.debug.DebugEntryPosition
-net.minecraft.client.gui.components.debug.DebugEntryPostEffect
-net.minecraft.client.gui.components.debug.DebugEntryEntityRenderStats
-net.minecraft.client.gui.components.debug.DebugEntrySectionPosition
-net.minecraft.client.gui.components.debug.DebugScreenEntries
-net.minecraft.client.gui.components.debug.DebugEntryDayCount
-net.minecraft.client.gui.components.debug.DebugScreenProfile
-net.minecraft.client.gui.components.debug.package-info
+=== jars matching client-gametest
+--- fabric-client-gametest-api-v1-5.1.0+db5795489e.jar
+net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest
+net.fabricmc.fabric.api.client.gametest.v1.TestInput
+net.fabricmc.fabric.api.client.gametest.v1.package-info
+net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext
+net.fabricmc.fabric.api.client.gametest.v1.context.TestClientLevelContext
+net.fabricmc.fabric.api.client.gametest.v1.context.TestDedicatedServerContext
+net.fabricmc.fabric.api.client.gametest.v1.context.TestServerConnection
+net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext
+net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext
+net.fabricmc.fabric.api.client.gametest.v1.context.package-info
+net.fabricmc.fabric.api.client.gametest.v1.screenshot.TestScreenshotCommonOptions
+net.fabricmc.fabric.api.client.gametest.v1.screenshot.TestScreenshotComparisonAlgorithm
+net.fabricmc.fabric.api.client.gametest.v1.screenshot.TestScreenshotComparisonOptions
+net.fabricmc.fabric.api.client.gametest.v1.screenshot.TestScreenshotOptions
+net.fabricmc.fabric.api.client.gametest.v1.screenshot.package-info
+net.fabricmc.fabric.api.client.gametest.v1.world.TestWorldBuilder
+net.fabricmc.fabric.api.client.gametest.v1.world.TestWorldSave
+net.fabricmc.fabric.api.client.gametest.v1.world.package-info
+net.fabricmc.fabric.impl.client.gametest.FabricClientGameTestRunner
+net.fabricmc.fabric.impl.client.gametest.TestInputImpl
+net.fabricmc.fabric.impl.client.gametest.TestSystemProperties
+net.fabricmc.fabric.impl.client.gametest.package-info
+net.fabricmc.fabric.impl.client.gametest.context.ClientGameTestContextImpl
+net.fabricmc.fabric.impl.client.gametest.context.TestClientLevelContextImpl
+net.fabricmc.fabric.impl.client.gametest.context.TestDedicatedServerContextImpl
+net.fabricmc.fabric.impl.client.gametest.context.TestServerConnectionImpl
+net.fabricmc.fabric.impl.client.gametest.context.TestServerContextImpl
+net.fabricmc.fabric.impl.client.gametest.context.TestSingleplayerContextImpl
+net.fabricmc.fabric.impl.client.gametest.context.package-info
+net.fabricmc.fabric.impl.client.gametest.screenshot.NativeImageHooks
+net.fabricmc.fabric.impl.client.gametest.screenshot.TestScreenshotCommonOptionsImpl
+net.fabricmc.fabric.impl.client.gametest.screenshot.TestScreenshotComparisonAlgorithms
+net.fabricmc.fabric.impl.client.gametest.screenshot.TestScreenshotComparisonOptionsImpl
+net.fabricmc.fabric.impl.client.gametest.screenshot.TestScreenshotOptionsImpl
+net.fabricmc.fabric.impl.client.gametest.screenshot.package-info
+net.fabricmc.fabric.impl.client.gametest.threading.NetworkSynchronizer
+net.fabricmc.fabric.impl.client.gametest.threading.ThreadingImpl
+net.fabricmc.fabric.impl.client.gametest.threading.package-info
+net.fabricmc.fabric.impl.client.gametest.util.ClientGameTestImpl
+net.fabricmc.fabric.impl.client.gametest.util.DedicatedServerImplUtil
+net.fabricmc.fabric.impl.client.gametest.util.WindowHooks
+net.fabricmc.fabric.impl.client.gametest.util.package-info
+net.fabricmc.fabric.impl.client.gametest.world.TestWorldBuilderImpl
+net.fabricmc.fabric.impl.client.gametest.world.TestWorldSaveImpl
+net.fabricmc.fabric.impl.client.gametest.world.package-info
+net.fabricmc.fabric.mixin.client.gametest.ClientChunkCacheAccessor
+net.fabricmc.fabric.mixin.client.gametest.ClientChunkCacheStorageAccessor
+net.fabricmc.fabric.mixin.client.gametest.ClientLevelAccessor
+net.fabricmc.fabric.mixin.client.gametest.package-info
+net.fabricmc.fabric.mixin.client.gametest.gui.CycleButtonAccessor
+net.fabricmc.fabric.mixin.client.gametest.gui.ScreenAccessor
+net.fabricmc.fabric.mixin.client.gametest.gui.ScreenMixin
+net.fabricmc.fabric.mixin.client.gametest.gui.package-info
+net.fabricmc.fabric.mixin.client.gametest.input.GlCommandEncoderMixin
+net.fabricmc.fabric.mixin.client.gametest.input.InputConstantsMixin
+net.fabricmc.fabric.mixin.client.gametest.input.KeyMappingAccessor
+net.fabricmc.fabric.mixin.client.gametest.input.KeyboardHandlerAccessor
+net.fabricmc.fabric.mixin.client.gametest.input.MonitorManagerMixin
+net.fabricmc.fabric.mixin.client.gametest.input.MouseHandlerAccessor
+net.fabricmc.fabric.mixin.client.gametest.input.VulkanGpuSurfaceMixin
+net.fabricmc.fabric.mixin.client.gametest.input.WindowMixin
+net.fabricmc.fabric.mixin.client.gametest.input.package-info
+net.fabricmc.fabric.mixin.client.gametest.lifecycle.DedicatedServerMixin
+net.fabricmc.fabric.mixin.client.gametest.lifecycle.MinecraftMixin
+net.fabricmc.fabric.mixin.client.gametest.lifecycle.OptionsAccessor
+net.fabricmc.fabric.mixin.client.gametest.lifecycle.OptionsMixin
+net.fabricmc.fabric.mixin.client.gametest.lifecycle.package-info
+net.fabricmc.fabric.mixin.client.gametest.screenshot.DeltaTrackerDefaultValueAccessor
+net.fabricmc.fabric.mixin.client.gametest.screenshot.NativeImageMixin
+net.fabricmc.fabric.mixin.client.gametest.screenshot.package-info
+net.fabricmc.fabric.mixin.client.gametest.threading.BlockableEventLoopMixin
+net.fabricmc.fabric.mixin.client.gametest.threading.ConnectionMixin
+net.fabricmc.fabric.mixin.client.gametest.threading.MainMixin
+net.fabricmc.fabric.mixin.client.gametest.threading.MinecraftMixin
+net.fabricmc.fabric.mixin.client.gametest.threading.MinecraftServerMixin
+net.fabricmc.fabric.mixin.client.gametest.threading.package-info
+net.fabricmc.fabric.mixin.client.gametest.world.CreateWorldScreenMixin
+net.fabricmc.fabric.mixin.client.gametest.world.GameRulesAccessor
+net.fabricmc.fabric.mixin.client.gametest.world.package-info
+net.fabricmc.fabric.impl.client.gametest.ClientGameTestMixinConfigPlugin
+=== net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext (-public)
+public interface client.gametest.v1.context.ClientGameTestContext {
+  public abstract client.gametest.v1.world.TestWorldBuilder worldBuilder();
