@@ -124,10 +124,33 @@ final class Places {
 			if (!loaded) continue;
 			BlockPos base = flatGround(level, new BlockPos(x, home.getY(), z), 4, 2);
 			if (base == null || !solidBelow(level, base, Lair.DEPTH + 4)) continue;
+			// Never into anything anyone made: a farm, a path, a house out here, a village.
+			if (looksBuilt(level, base, 10)) continue;
 			Lair lair = new Lair(level, base, Rotation.getRandom(random), random);
 			lair.build();
 			Lairs.add(lair.hollow());
 			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Whether anything made stands within {@code r} blocks of {@code at}: planks, doors, beds,
+	 * glass, torches, chests, tilled earth and the like. Grown and natural things do not count.
+	 */
+	static boolean looksBuilt(ServerLevel level, BlockPos at, int r) {
+		for (BlockPos p : BlockPos.betweenClosed(at.offset(-r, -4, -r), at.offset(r, 8, r))) {
+			BlockState s = level.getBlockState(p);
+			if (s.isAir()) continue;
+			if (s.is(net.minecraft.tags.BlockTags.PLANKS) || s.is(net.minecraft.tags.BlockTags.WOODEN_STAIRS)
+					|| s.is(net.minecraft.tags.BlockTags.WOODEN_SLABS) || s.is(net.minecraft.tags.BlockTags.DOORS)
+					|| s.is(net.minecraft.tags.BlockTags.BEDS) || s.is(net.minecraft.tags.BlockTags.WOOL)
+					|| s.is(net.minecraft.tags.BlockTags.RAILS) || s.is(Blocks.GLASS) || s.is(Blocks.GLASS_PANE)
+					|| s.is(Blocks.TORCH) || s.is(Blocks.WALL_TORCH) || s.is(Blocks.LANTERN) || s.is(Blocks.CRAFTING_TABLE)
+					|| s.is(Blocks.CHEST) || s.is(Blocks.BARREL) || s.is(Blocks.FURNACE) || s.is(Blocks.FARMLAND)
+					|| s.is(Blocks.COBBLESTONE) || s.is(Blocks.STONE_BRICKS) || s.is(Blocks.DIRT_PATH)) {
+				return true;
+			}
 		}
 		return false;
 	}

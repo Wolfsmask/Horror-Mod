@@ -32,7 +32,7 @@ public final class LastCamp {
 			int z = (int) Math.floor(player.getZ() + Math.sin(a) * d);
 			level.getChunk(x >> 4, z >> 4);
 			BlockPos base = Places.flatGround(level, new BlockPos(x, Places.surface(level, x, z), z), 5, 2);
-			if (base == null) continue;
+			if (base == null || Places.looksBuilt(level, base, 8)) continue;    // never on anything anyone made
 			build(level, base, random);
 			data.lastCamp = 1;
 			data.lastCampX = base.getX();
