@@ -1,17 +1,9 @@
-=== net.minecraft.world.entity.Entity (-public)
-public abstract class world.entity.Entity implements world.Nameable, world.level.entity.EntityAccess, world.scores.ScoreHolder, network.syncher.SyncedDataHolder, core.component.DataComponentGetter, world.entity.ItemOwner, world.entity.SlotProvider, util.debug.DebugValueSource, core.TypedInstance<world.entity.EntityType<?>>, attachment.v1.AttachmentTarget, event.lifecycle.v1.EntityLoadData, permission.v1.PermissionContextOwner {
-  public void stopRiding();
-  public boolean isPassenger();
-=== net.minecraft.world.entity.Mob (-public)
-public abstract class world.entity.Mob extends world.entity.LivingEntity implements world.entity.Targeting,world.entity.EquipmentUser,world.entity.Leashable {
-  public void setTarget(world.entity.LivingEntity);
-=== net.minecraft.world.damagesource.DamageSources (-public)
-public class world.damagesource.DamageSources {
-  public world.damagesource.DamageSource mobAttack(world.entity.LivingEntity);
-  public world.damagesource.DamageSource genericKill();
-=== net.minecraft.client.KeyMapping (-public)
-public class client.KeyMapping implements Comparable<client.KeyMapping> {
-  public static void set(blaze3d.platform.InputConstants$Key, boolean);
-  public static void setAll();
-  public static void releaseAll();
-  public static void resetMapping();
+=== classes matching \.(ZombieVillagerModel|PiglinModel|AbstractPiglinModel|ZombifiedPiglinModel|DrownedModel|ZombieModel|AbstractZombieModel)$
+net.minecraft.client.model.monster.zombie.ZombieVillagerModel
+net.minecraft.client.model.monster.piglin.PiglinModel
+net.minecraft.client.model.monster.zombie.ZombieModel
+net.minecraft.client.model.monster.piglin.ZombifiedPiglinModel
+net.minecraft.client.model.monster.piglin.AbstractPiglinModel
+net.minecraft.client.model.monster.zombie.DrownedModel
+=== classes matching renderer\.feature\.ModelFeatureRenderer$
+net.minecraft.client.renderer.feature.ModelFeatureRenderer
