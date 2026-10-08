@@ -1,4 +1,4 @@
-@mc 1.21.11 26.2 26.3 26.4-snapshot-2
-# Round 45: where a model is posed just before it is drawn, in the newer games.
-@private net.minecraft.client.renderer.feature.ModelFeatureRenderer
-@code net.minecraft.client.renderer.feature.ModelFeatureRenderer render
+@mc 1.20.1 1.21.1 1.21.11 26.1.2 26.2 26.3 26.4-snapshot-2
+# Round 46: whether a screen is open, the same way on every version.
+net.minecraft.client.MouseHandler (isMouseGrabbed|grabMouse)\(
+net.minecraft.client.Minecraft (screen|Screen)
