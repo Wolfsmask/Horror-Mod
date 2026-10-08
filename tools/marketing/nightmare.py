@@ -42,6 +42,11 @@ def face_layer(glint=1.0, light_from_below=True, seed=1):
     skin = (face > 0.25).astype(np.uint8) * 255
     # The whole head's outline, its hollows filled in.
     shape = Image.fromarray(skin).filter(ImageFilter.MaxFilter(13)).filter(ImageFilter.MinFilter(13))
+    # Its hollows (the eyes, the mouth) are part of it: filled, so what is in them shows.
+    outside = Image.fromarray(np.pad(np.asarray(shape), 1, constant_values=0)).copy()
+    ImageDraw.floodfill(outside, (0, 0), 128)
+    filled = (np.asarray(outside)[1:-1, 1:-1] != 128).astype(np.uint8) * 255
+    shape = Image.fromarray(filled).filter(ImageFilter.MinFilter(5)).filter(ImageFilter.MaxFilter(5))
     alpha = np.asarray(shape.filter(ImageFilter.GaussianBlur(1.2)), np.float32) / 255.0
 
     light = np.clip(0.46 + (Y - 330) / 240.0, 0.30, 1.3) if light_from_below else np.ones_like(Y)
@@ -66,6 +71,7 @@ def face_layer(glint=1.0, light_from_below=True, seed=1):
     for ex in (938, 986):
         d = np.sqrt((X - ex - 1.5) ** 2 + (Y - 381) ** 2)
         rgb += (np.exp(-(d / 1.6) ** 2) * 0.95 * glint + np.exp(-(d / 7) ** 2) * 0.08 * glint)[..., None] * np.array([0.9, 0.95, 1.0])
+    alpha = np.maximum(alpha, np.clip(mouth * 1.5, 0, 1))          # the mouth is not a hole in it
     out = np.concatenate([np.clip(rgb, 0, 1), alpha[..., None]], axis=2)
     big = Image.fromarray((out * 255).astype(np.uint8), "RGBA").resize((w * 4, h * 4), Image.BICUBIC)
     return big
@@ -164,13 +170,42 @@ def plate(name, crop=None):
     a = np.asarray(img, np.float32) / 255.0
     r, g, b = a[..., 0], a[..., 1], a[..., 2]
     spill = g - np.maximum(r, b)
-    alpha = 1.0 - np.clip((spill - 0.08) / 0.14, 0, 1)
+    # Green, bright or dark (the game darkens the corners): by how much of the light is green.
+    share = g / (r + g + b + 0.03)
+    alpha = 1.0 - np.maximum(np.clip((spill - 0.06) / 0.10, 0, 1), np.clip((share - 0.42) / 0.06, 0, 1))
     a[..., 1] = np.minimum(g, np.maximum(r, b) + 0.02)            # no green left on its edges
+    # Only it: what is not green and not the black the game puts in the corners, and of that only
+    # the one shape joined to it (the specks of the game's static are left behind), its hollows
+    # (the eyes, the mouth) filled back in.
+    # Anything even a little green is the box: it has nothing green on it.
+    fg = (spill < 0.03) & (share < 0.40) & (a.max(axis=2) > 0.06)
+    alpha = np.minimum(alpha, np.clip(1.0 - (spill - 0.0) / 0.05, 0, 1))
+    lum = a.mean(axis=2)
+    h, w = lum.shape
+    # Specks a pixel or two wide are cut loose first, so nothing joins them to it.
+    m = Image.fromarray((fg * 255).astype(np.uint8)).filter(ImageFilter.MinFilter(3))
+    me = np.asarray(m) == 255
+    # Start from its body: the column, in the middle of the picture, with the most of it in.
+    counts = me[:, w // 4:w * 3 // 4].sum(axis=0)
+    sx = int(np.argmax(counts)) + w // 4
+    rows = np.nonzero(me[:, sx])[0]
+    seed = (int(np.median(rows)) if len(rows) else h // 2, sx)
+    if not me[seed]:
+        seed = (int(rows[len(rows) // 2]), sx) if len(rows) else seed
+    ImageDraw.floodfill(m, (int(seed[1]), int(seed[0])), 128)
+    grown = Image.fromarray(((np.asarray(m) == 128) * 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(5))
+    body_mask = (np.asarray(grown) == 255) & fg
+    # (A copy: an image made straight from an array cannot be filled in place.)
+    outside = Image.fromarray(np.pad(np.where(body_mask, 0, 255), 1, constant_values=255).astype(np.uint8)).copy()
+    ImageDraw.floodfill(outside, (0, 0), 128)
+    # A hollow of its own is black (an eye, the mouth); one between its legs is the green box.
+    holes = (np.asarray(outside)[1:-1, 1:-1] == 255) & (spill < 0.03) & (share < 0.40)
+    keep = body_mask | holes
+    keep_soft = np.asarray(Image.fromarray((keep * 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(3))
+                           .filter(ImageFilter.GaussianBlur(0.8)), np.float32) / 255.0
+    alpha = np.where(holes, 1.0, np.minimum(alpha, keep_soft))
     rgba = np.concatenate([a, alpha[..., None]], axis=2)
     out = Image.fromarray((np.clip(rgba, 0, 1) * 255).astype(np.uint8), "RGBA")
-    # Shrink the mask a touch, so no green rim is left.
-    al = out.getchannel("A").filter(ImageFilter.MinFilter(3)).filter(ImageFilter.GaussianBlur(0.8))
-    out.putalpha(al)
     if crop:
         w, h = out.size
         out = out.crop((int(crop[0] * w), int(crop[1] * h), int(crop[2] * w), int(crop[3] * h)))
