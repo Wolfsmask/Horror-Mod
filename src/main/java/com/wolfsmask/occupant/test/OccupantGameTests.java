@@ -647,7 +647,7 @@ public final class OccupantGameTests {
 		// Ground under all of it, so it always has somewhere to stand (only where there is none, so
 		// nothing another test put down is touched).
 		BlockPos stand = helper.absolutePos(new BlockPos(4, 2, 4));
-		for (BlockPos p : BlockPos.betweenClosed(stand.offset(-5, -1, -5), stand.offset(5, -1, 5))) {
+		for (BlockPos p : BlockPos.betweenClosed(stand.offset(-9, -1, -9), stand.offset(9, -1, 9))) {
 			if (level.getBlockState(p).isAir()) level.setBlock(p, net.minecraft.world.level.block.Blocks.STONE.defaultBlockState(), 3);
 		}
 		player.snapTo(stand.getX() + 0.5, stand.getY(), stand.getZ() + 0.5, 0.0f, 0.0f);
@@ -663,11 +663,13 @@ public final class OccupantGameTests {
 		helper.assertTrue(!com.wolfsmask.occupant.director.Mercy.allowDeath(player, player.damageSources().mobAttack(zombies.get(0))),
 				"A zombie's killing blow should be stopped");
 		int[] most = {0};
+		boolean[] came = {false};
 		for (int t = 10; t <= 400; t += 10) {
 			int when = t;
 			helper.runAfterDelay(t, () -> {
 				for (OccupantEntity it : level.getEntitiesOfClass(OccupantEntity.class, player.getBoundingBox().inflate(24.0),
 						e -> e.isHaunting(player))) {
+					came[0] = true;
 					int held = it.getHeld().length;
 					most[0] = Math.max(most[0], held);
 					helper.assertTrue(held <= 8, "It should never have more than eight on its legs (" + held + " at " + when + ")");
@@ -679,7 +681,7 @@ public final class OccupantGameTests {
 			helper.assertTrue(alive == 0, alive + " zombies are still alive");
 			helper.assertTrue(level.getEntitiesOfClass(OccupantEntity.class, player.getBoundingBox().inflate(24.0),
 					e -> e.isHaunting(player)).isEmpty(), "Then it should be gone");
-			helper.assertTrue(most[0] >= 1, "It should have had at least one on a leg");
+			helper.assertTrue(most[0] >= 1, "It should have had at least one on a leg (it came: " + came[0] + ")");
 			Occupant.LOGGER.info("[gametest] rescue of ten: at most {} on its legs at once", most[0]);
 		});
 	}
