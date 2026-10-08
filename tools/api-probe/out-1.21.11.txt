@@ -1,12 +1,12 @@
-=== net.fabricmc.fabric.api.client.gametest.v1.context.TestDedicatedServerContext (-public)
-public interface client.gametest.v1.context.TestDedicatedServerContext extends client.gametest.v1.context.TestServerContext,AutoCloseable {
-  public abstract client.gametest.v1.context.TestServerConnection connect();
-  public abstract void close();
-}
-=== net.fabricmc.fabric.api.client.gametest.v1.context.TestServerConnection (-public)
-public interface client.gametest.v1.context.TestServerConnection extends AutoCloseable {
-  public abstract client.gametest.v1.context.TestClientWorldContext getClientWorld();
-  public abstract void close();
-}
-=== net.fabricmc.fabric.api.client.gametest.v1.context.TestClientLevelContext (-public)
-Error: class not found: client.gametest.v1.context.TestClientLevelContext
+=== net.minecraft.world.entity.Entity (-public)
+public abstract class world.entity.Entity implements network.syncher.SyncedDataHolder,util.debug.DebugValueSource,world.Nameable,world.entity.ItemOwner,world.entity.SlotProvider,world.level.entity.EntityAccess,world.scores.ScoreHolder,core.component.DataComponentGetter,attachment.v1.AttachmentTarget {
+  public double xo;
+  public double yo;
+  public double zo;
+  public double xOld;
+  public double yOld;
+  public double zOld;
+  public final world.phys.Vec3 oldPosition();
+  public final world.phys.Vec3 getEyePosition(float);
+  public final world.phys.Vec3 getPosition(float);
+  public world.phys.Vec3 getRopeHoldPosition(float);
