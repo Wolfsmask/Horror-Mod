@@ -1,6 +1,6 @@
-# 1.21.11 client on 18adce1f26225fd750a713192cc4312919b27521: cancelled
+# 1.21.11 client on bbfd2baed3f22272e834be5490477b0f535a5dea: failure
 === client.log
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/Mercy.java:229: error: variable want is already defined in constructor Rescue(Haunt,ServerPlayer,List<Mob>)
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/Mercy.java:233: error: variable want is already defined in constructor Rescue(Haunt,ServerPlayer,List<Mob>)
 /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/ArenaGameTests.java:107: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
 /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:64: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
 /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:96: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
@@ -35,8 +35,8 @@
   /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:684: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
   /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:748: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
   /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:842: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/Mercy.java:229: error: variable want is already defined in constructor Rescue(Haunt,ServerPlayer,List<Mob>)
-BUILD FAILED in 28s
+  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/Mercy.java:233: error: variable want is already defined in constructor Rescue(Haunt,ServerPlayer,List<Mob>)
+BUILD FAILED in 36s
 --- the mod's own checks ---
 --- last of the server thread in client.log ---
 --- tail of client.log ---
@@ -53,9 +53,9 @@ BUILD FAILED in 28s
   /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:842: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
   		ServerPlayer player = helper.makeMockServerPlayerInLevel();
   		                            ^
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/Mercy.java:229: error: variable want is already defined in constructor Rescue(Haunt,ServerPlayer,List<Mob>)
-  			Vec3 want = first.position().add(out.scale(monsters.size() == 1 ? 2.4 : 3.0));
-  			     ^
+  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/Mercy.java:233: error: variable want is already defined in constructor Rescue(Haunt,ServerPlayer,List<Mob>)
+  				Vec3 want = first.position().add(out.scale(d));
+  				     ^
   1 error
   16 warnings
 
@@ -63,5 +63,5 @@ BUILD FAILED in 28s
 > Check your code and dependencies to fix the compilation error(s)
 > Run with --scan to get full insights from a Build Scan (powered by Develocity).
 
-BUILD FAILED in 28s
+BUILD FAILED in 36s
 2 actionable tasks: 2 executed
