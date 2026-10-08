@@ -22,7 +22,7 @@ public final class OccupantConfig {
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 	private static final String FILE_NAME = "occupant.json";
 	/** 2: a three-minute grace instead of fifteen. 3: the lines on the screen spoken quietly. */
-	private static final int CURRENT_VERSION = 3;
+	private static final int CURRENT_VERSION = 4;
 
 	private static OccupantConfig instance = new OccupantConfig();
 
@@ -68,9 +68,13 @@ public final class OccupantConfig {
 	/** Allow the Occupant to (rarely) stop you from sleeping. */
 	public boolean interruptSleep = true;
 
-	/** Visual encounters only happen when no other player is within {@link #aloneRadius} blocks. */
+	/**
+	 * Visual encounters only happen when no other player is within {@link #aloneRadius} blocks.
+	 * Only the haunted player ever sees it, so a friend a little way off changes nothing; one
+	 * right beside them would only be looking at the same empty place.
+	 */
 	public boolean requireAlone = true;
-	public int aloneRadius = 48;
+	public int aloneRadius = 16;
 
 	/** Also haunt players in creative mode (useful for recording). */
 	public boolean hauntCreative = false;
@@ -224,6 +228,12 @@ public final class OccupantConfig {
 				whisperLines = new OccupantConfig().whisperLines;
 			}
 			configVersion = 3;
+		}
+		if (configVersion < 4) {
+			// The old default needed no one within 48 blocks: two friends playing together are
+			// nearly always that close, so it hardly ever came for either. Only an untouched value moves.
+			if (aloneRadius == 48) aloneRadius = 16;
+			configVersion = 4;
 		}
 		graceMinutes = clamp(graceMinutes, 0.0, 600.0);
 		storyPace = clamp(storyPace, 0.1, 20.0);

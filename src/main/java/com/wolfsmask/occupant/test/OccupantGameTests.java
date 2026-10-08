@@ -555,7 +555,8 @@ public final class OccupantGameTests {
 		player.setHealth(1.0f);
 		helper.assertTrue(!com.wolfsmask.occupant.director.Mercy.allowDeath(player, player.damageSources().mobAttack(zombie)),
 				"A zombie's killing blow should be stopped");
-		helper.runAfterDelay(22, () -> {
+		// Partway up: the leg has gone in, the lift is most of the way, and it has not died yet.
+		helper.runAfterDelay(30, () -> {
 			Occupant.LOGGER.info("[gametest] rescue: zombie {} above the ground, alive {}", zombie.getY() - ground, zombie.isAlive());
 			helper.assertTrue(zombie.isAlive() && zombie.getY() > ground + 0.6, "The zombie should be held up, still alive, before it dies");
 			for (OccupantEntity it : level.getEntitiesOfClass(OccupantEntity.class, player.getBoundingBox().inflate(16.0))) {

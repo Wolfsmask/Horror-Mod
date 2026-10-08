@@ -138,7 +138,7 @@ final class Places {
 	 * Whether anything made stands within {@code r} blocks of {@code at}: planks, doors, beds,
 	 * glass, torches, chests, tilled earth and the like. Grown and natural things do not count.
 	 */
-	static boolean looksBuilt(ServerLevel level, BlockPos at, int r) {
+	public static boolean looksBuilt(ServerLevel level, BlockPos at, int r) {
 		for (BlockPos p : BlockPos.betweenClosed(at.offset(-r, -4, -r), at.offset(r, 8, r))) {
 			BlockState s = level.getBlockState(p);
 			if (s.isAir()) continue;

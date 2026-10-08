@@ -84,7 +84,8 @@ public final class WindowEvent extends HorrorEvent {
 			}
 		}
 		if (best == null) return null;
-		OccupantEntity e = ctx.haunt.spawnOccupant(p, best, OccupantEntity.Mode.STARE, OccupantEntity.Form.REVEALED);
+		// Bent down to the glass to look in: standing up, all that would show in the window is legs.
+		OccupantEntity e = ctx.haunt.spawnOccupant(p, best, OccupantEntity.Mode.AMBUSH, OccupantEntity.Form.REVEALED);
 		if (e == null) return null;
 		e.setFootsteps(false);
 		e.setGazeLocked(true);

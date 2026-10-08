@@ -28,6 +28,8 @@ public final class Haunt {
 	float fogSent = -1.0f;
 	/** The act this player's client was last told, or -1 before the first time. */
 	int actSent = -1;
+	/** Whether the way in (on joining) has been shown, this time they are here. */
+	boolean joinSent;
 	/** Where they last stood in its world, out of any portal: where they are brought back to. */
 	@Nullable
 	net.minecraft.core.BlockPos lastSafe;

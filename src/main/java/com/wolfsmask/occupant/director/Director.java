@@ -198,6 +198,13 @@ public final class Director {
 			}
 		}
 
+		// Just come into the world: the way in, only where it haunts them (the client never shows
+		// it by itself, so a server without this mod, or with it switched off, has none).
+		if (!h.joinSent) {
+			h.joinSent = true;
+			if (eligible) Cues.effect(player, ScreenEffectPayload.JOINED, 0, 1f);
+		}
+
 		// Once a second, what the client needs to know: the fog (cleared while they are not being
 		// haunted), and how far the story has gone.
 		if (player.tickCount % 20 == 7) {

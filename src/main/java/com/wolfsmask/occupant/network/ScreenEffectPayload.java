@@ -32,6 +32,8 @@ public record ScreenEffectPayload(int effect, int duration, float intensity) imp
 	public static final int FINALE = 7;
 	/** "Saving world..." in the corner, when nothing is: {@code intensity} picks what it says it is saving. */
 	public static final int SAVING = 8;
+	/** They have just come into a world it haunts: the few seconds of black and a line, the way in. */
+	public static final int JOINED = 9;
 
 	public static final CustomPacketPayload.Type<ScreenEffectPayload> TYPE =
 			new CustomPacketPayload.Type<>(Occupant.id("screen_effect"));

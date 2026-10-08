@@ -350,7 +350,11 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 		TestCompat.joinServer(context, server -> {
 			check(context.computeOnClient(mc -> mc.player != null && mc.getSingleplayerServer() == null),
 					"joined over the network, not playing in the same game");
-			context.waitTicks(40);
+			// What the server tells the one who joined reaches them: they are haunted there.
+			context.waitFor(mc -> com.wolfsmask.occupant.client.ScreenEffects.haunted(), 100);
+			// And once the black way in has passed, it is there in front of them.
+			context.waitTicks(80);
+			context.waitFor(mc -> !com.wolfsmask.occupant.client.ScreenEffects.introShowing(), 400);
 			server.runCommand("execute as @a at @s run occupant here 6 stare");
 			context.waitFor(mc -> seen(mc) == 1, 200);
 			context.waitTicks(30);

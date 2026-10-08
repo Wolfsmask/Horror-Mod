@@ -295,6 +295,8 @@ final class FoundFootage {
 		Vec3 husk = eyeAndHusk[1];
 		// Looking a little above the husk, so what stands behind it is in the picture too.
 		Cinematic.camera(context, game, eyeAndHusk[0], husk.add(0, 2.3, 1.0), 6000);
+		// The test world is peaceful, where no monster can even be summoned.
+		server.runCommand("difficulty normal");
 		server.runCommand(String.format(Locale.ROOT, "summon minecraft:husk %.2f %.2f %.2f {PersistenceRequired:1b,NoAI:1b}",
 				husk.x, husk.y, husk.z));
 		context.waitTicks(10);
@@ -310,8 +312,8 @@ final class FoundFootage {
 			return !Mercy.allowDeath(p, p.damageSources().mobAttack(it));
 		});
 		Occupant.LOGGER.info("[client-gametest] rescue: begun {}", saved);
-		if (!saved) return;
 		try {
+			if (!saved) return;
 			// About where each step is: the leg going in, the lift, dying on the leg, the leg holding
 			// nothing, and the words.
 			int[] at = {9, 24, 48, 66, 84};
@@ -329,6 +331,8 @@ final class FoundFootage {
 				Director.get().data(p).paused = true;
 				p.setHealth(p.getMaxHealth());
 			});
+			server.runCommand("kill @e[type=minecraft:husk]");
+			server.runCommand("difficulty peaceful");
 		}
 	}
 

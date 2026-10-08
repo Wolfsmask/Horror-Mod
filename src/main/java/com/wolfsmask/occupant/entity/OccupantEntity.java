@@ -41,7 +41,8 @@ import java.util.UUID;
  * <ul>
  *     <li>Only the player it is haunting can see it ({@link #broadcastToPlayer}).</li>
  *     <li>It is never saved to disk (see ModEntities) and removes itself if nothing controls it.</li>
- *     <li>Any damage makes it vanish instantly: it cannot be killed, farmed, trapped or pushed.</li>
+ *     <li>A player's blow makes it vanish instantly, and nothing else touches it: it cannot be
+ *     killed, farmed, trapped or pushed.</li>
  *     <li>It makes no sound of its own; footsteps are sent to its target only.</li>
  * </ul>
  */

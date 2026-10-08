@@ -195,7 +195,7 @@ public final class Trifles {
 					net.minecraft.world.level.block.Block to = STRIPPED.get(s.getBlock());
 					if (to == null || !world.getBlockState(p.below()).is(s.getBlock()) && !world.getBlockState(p.below()).is(Blocks.GRASS_BLOCK)
 							&& !world.getBlockState(p.below()).is(Blocks.DIRT)) continue;
-					if (!Sight.isHidden(player, p)) continue;
+					if (!Sight.isHidden(player, p) || !isTree(world, p)) continue;
 					if (!marks.isEmpty() && marks.get(marks.size() - 1).distSqr(p) < 5 * 5) continue;
 					marks.add(p.above().immutable());
 					break search;
@@ -210,6 +210,25 @@ public final class Trifles {
 			world.setBlock(p, to.defaultBlockState().setValue(BlockStateProperties.AXIS, s.getValue(BlockStateProperties.AXIS)), 3);
 		}
 		h.data.marks |= 1;
+	}
+
+	/**
+	 * A tree, not a wall of logs: leaves over the trunk, and nothing they made nearby (a log cabin
+	 * is logs on logs on the ground too).
+	 */
+	private static boolean isTree(ServerLevel world, BlockPos base) {
+		boolean leaves = false;
+		for (int up = 1; up <= 14 && !leaves; up++) {
+			BlockPos p = base.above(up);
+			for (Direction d : Direction.values()) {
+				if (d == Direction.DOWN) continue;
+				if (world.getBlockState(p.relative(d)).is(net.minecraft.tags.BlockTags.LEAVES)) {
+					leaves = true;
+					break;
+				}
+			}
+		}
+		return leaves && !com.wolfsmask.occupant.world.Places.looksBuilt(world, base, 3);
 	}
 
 	// ------------------------------------------------------------------ the words they said
@@ -422,7 +441,8 @@ public final class Trifles {
 			BlockState below = world.getBlockState(p.below());
 			if (world.getBlockState(p).isAir()
 					&& (below.is(Blocks.GRASS_BLOCK) || below.is(Blocks.DIRT) || below.is(Blocks.PODZOL) || below.is(Blocks.COARSE_DIRT))) {
-				world.setBlock(p, (player.getRandom().nextBoolean() ? Blocks.POPPY : Blocks.WITHER_ROSE).defaultBlockState(), 3);
+				// Nothing that hurts: they will be walking back over it for their things.
+				world.setBlock(p, (player.getRandom().nextBoolean() ? Blocks.POPPY : Blocks.LILY_OF_THE_VALLEY).defaultBlockState(), 3);
 				return;
 			}
 		}

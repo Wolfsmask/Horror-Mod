@@ -34,7 +34,6 @@ public final class OccupantClient implements ClientModInitializer {
 			PauseLines.leaving();
 			ScreenEffects.reset();
 		});
-		ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> client.execute(ScreenEffects::joined));
 		// Under everything else on the HUD: it belongs to the world, not to the hotbar.
 		HudElementRegistry.addFirst(Occupant.id("atmosphere"), (graphics, deltaTracker) ->
 				ScreenEffects.renderAtmosphere(graphics, deltaTracker.getGameTimeDeltaPartialTick(false)));

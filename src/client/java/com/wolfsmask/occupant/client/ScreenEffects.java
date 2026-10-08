@@ -45,6 +45,11 @@ public final class ScreenEffects {
 	private static float atmosphere;
 	/** How near it is, 0 to 1 (smoothed), for the pulse at the edges of the screen. */
 	private static float nearness;
+	/**
+	 * Whether this server runs the Occupant: it has told us something. Until then (and on a server
+	 * without it) the world is left exactly as it is.
+	 */
+	private static boolean haunted;
 	/** Ticks since joining a world, for the way in. */
 	private static int introAge = -1;
 	private static final int INTRO_TICKS = 110;
@@ -65,8 +70,8 @@ public final class ScreenEffects {
 	private ScreenEffects() {
 	}
 
-	/** On joining a world: a few seconds of black, a line, and then the world, slowly. */
-	public static void joined() {
+	/** On coming into a world it haunts: a few seconds of black, a line, and then the world, slowly. */
+	static void joined() {
 		introAge = 0;
 		introLength = INTRO_TICKS;
 		introSub = null;
@@ -114,7 +119,7 @@ public final class ScreenEffects {
 	 */
 	public static void renderAtmosphere(GuiGraphicsExtractor ctx, float tickDelta) {
 		ClientConfig cfg = ClientConfig.get();
-		if (!cfg.atmosphere) return;
+		if (!cfg.atmosphere || !haunted) return;
 		int w = ctx.guiWidth();
 		int h = ctx.guiHeight();
 		float a = atmosphere;
@@ -137,6 +142,7 @@ public final class ScreenEffects {
 	}
 
 	public static void trigger(ScreenEffectPayload payload, Minecraft client) {
+		haunted = true;
 		switch (payload.effect()) {
 			case ScreenEffectPayload.BLACKOUT -> {
 				blackoutLength = Math.max(1, payload.duration());
@@ -157,6 +163,7 @@ public final class ScreenEffects {
 			case ScreenEffectPayload.SAVING -> ClientScares.saving(payload.duration(), Math.round(payload.intensity()));
 			case ScreenEffectPayload.FOG -> ClientFog.set(payload.intensity(), payload.duration());
 			case ScreenEffectPayload.ACT -> PauseLines.act = Math.round(payload.intensity());
+			case ScreenEffectPayload.JOINED -> joined();
 			default -> {
 			}
 		}
@@ -179,6 +186,7 @@ public final class ScreenEffects {
 	}
 
 	public static void reset() {
+		haunted = false;
 		blackoutAge = blackoutLength = 0;
 		flickerAge = -1;
 		staticAge = staticLength = 0;
@@ -195,6 +203,16 @@ public final class ScreenEffects {
 
 	static float atmosphere() {
 		return atmosphere;
+	}
+
+	/** Whether this server runs the Occupant (it has told this client something). */
+	public static boolean haunted() {
+		return haunted;
+	}
+
+	/** Whether the black way in (on joining, or the first time, or at the end) is up. */
+	public static boolean introShowing() {
+		return introAge >= 0;
 	}
 
 	static float nearness() {

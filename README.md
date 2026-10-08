@@ -62,8 +62,9 @@ why you left it out there.
 
 **It does not let you die. Not like that.** Jump from somewhere high enough to kill you and the
 screen goes black, and you wake at your bed with a note: *it doesn't like that.* When a monster
-is about to kill you, it is simply there, behind the monster. It lifts the monster off the
-ground, slowly; the monster dies up there; it is gone; and then it tells you why. With more
+is about to kill you, it is simply there, behind the monster. One of its long legs goes into the
+monster and lifts it off the ground, slowly; the monster dies up there, on the leg; it is gone;
+and then it tells you why. With more
 than one, they are all lifted and all die together. Not every time.
 And the Director builds on absence: the longer nothing has happened, the more it favours
 something real, so the next thing lands once you have stopped listening for it.
@@ -283,7 +284,8 @@ need rebuilding for the next.
 Open your world to LAN as usual; tunnel mods like **e4mc** or **e4all** then give your friend an
 address to join. Only the host needs e4mc/e4all, but **everyone needs The Occupant and Fabric
 API**: a friend without them is turned away with a message saying what is missing. Each of you
-is haunted on your own. Once the world is open to others, `/occupant` is only for players allowed
+is haunted on your own, and only the one it is haunting ever sees it: it shows itself to you when
+your friend is more than 16 blocks away (`aloneRadius`), so wander apart and it will find you. Once the world is open to others, `/occupant` is only for players allowed
 commands (turn on *Allow Commands* when opening to LAN if you want it). Use e4mc or e4all, not
 both at once.
 
@@ -308,6 +310,7 @@ both at once.
 | `fakeMessages` | `true` | Fake chat, join and advancement messages |
 | `interruptSleep` | `true` | Occasionally "there are monsters nearby" |
 | `requireAlone` | `true` | Visual encounters only when no other player is within `aloneRadius` |
+| `aloneRadius` | `16` | Blocks. Playing with a friend, it comes for each of you when you are further apart than this (configs that still had the old `48` are moved to `16` once) |
 | `hauntCreative` | `false` | Also haunt creative players (for recording) |
 | `intensity` | `normal` | `subtle` (slower, fewer events), `normal`, or `relentless` (faster, more) |
 | `soundOnly` | `false` | It is never seen: only heard. Everything visual is left out |
