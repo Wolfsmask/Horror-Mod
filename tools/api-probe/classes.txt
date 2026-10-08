@@ -1,4 +1,4 @@
-@mc 26.3 1.21.11
-# Round 33: does reduced debug info take the position off the new debug screen?
-@code net.minecraft.client.gui.components.debug.DebugScreenEntry isAllowed
-@code net.minecraft.client.gui.components.debug.DebugEntryPosition isAllowed|display
+@mc 26.2
+# Round 34: can the client test start a dedicated server and join it, like a friend over e4mc?
+@jars client-gametest
+net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext world|server|Server
