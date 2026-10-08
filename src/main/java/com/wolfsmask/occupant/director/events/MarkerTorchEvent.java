@@ -15,6 +15,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.core.BlockPos;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+
 /** A single torch in a part of the cave you have never been to. Later, a red one. */
 public final class MarkerTorchEvent extends HorrorEvent {
 	public MarkerTorchEvent() {
@@ -37,13 +39,15 @@ public final class MarkerTorchEvent extends HorrorEvent {
 		ServerPlayer p = ctx.player;
 		ServerLevel world = ctx.world;
 		BlockState torch = (ctx.act() >= 3 ? Blocks.REDSTONE_TORCH : Blocks.TORCH).defaultBlockState();
-		BlockPos spot = Spots.aroundPlayer(p, ctx.random, 10, 22, 60, 180, false, 30, pos ->
+		// Every spot in a cave, not a few guesses: most of a cave is rock, and guesses all land in it.
+		List<BlockPos> spots = Spots.allAroundPlayer(p, 10, 22, 60, 180, pos ->
 				world.getBlockState(pos).isAir()
 						&& Spots.light(world, pos) <= 3
 						&& WorldBlocks.isNaturalFloor(world.getBlockState(pos.below()))
 						&& torch.canSurvive(world, pos)
 						&& Sight.isHidden(p, pos));
-		if (spot == null) return null;
+		if (spots.isEmpty()) return null;
+		BlockPos spot = spots.get(ctx.random.nextInt(spots.size()));
 		if (!world.setBlock(spot, torch, Block.UPDATE_ALL)) return null;
 		return new Timeline().at(0, pl -> {
 		});

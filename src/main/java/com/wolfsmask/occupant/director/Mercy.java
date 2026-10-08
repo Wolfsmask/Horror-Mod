@@ -268,25 +268,34 @@ public final class Mercy {
 			}
 			// It stands behind the one that nearly had them (or, if that one is gone, the nearest),
 			// on the far side from them.
-			Mob first = monsters.get(0);
-			for (Mob m : monsters) if (m.distanceToSqr(player) < first.distanceToSqr(player)) first = m;
-			if (monsters.contains(attacker)) first = attacker;
-			Vec3 out = first.position().subtract(player.position());
-			out = new Vec3(out.x, 0, out.z);
-			out = out.lengthSqr() < 1.0E-4 ? Sight.flatLook(player) : out.normalize();
+			// If there is nowhere behind that one (its back to a wall), behind the next nearest them.
+			List<Mob> behind = new ArrayList<>(monsters);
+			behind.sort((a, b) -> Double.compare(a.distanceToSqr(player), b.distanceToSqr(player)));
+			if (monsters.contains(attacker)) {
+				behind.remove(attacker);
+				behind.add(0, attacker);
+			}
+			Mob first = behind.get(0);
 			// Close enough that a leg reaches it easily, far enough that the leg is seen to reach; and
 			// on the same side of any wall as the monster, so the leg never goes through one.
 			// Straight behind it first; failing that (a drop, a wall, water), a little to either side.
 			BlockPos feet = null;
+			Mob by = first;
 			search:
-			for (double turn : new double[]{0.0, 30.0, -30.0, 60.0, -60.0}) {
-				Vec3 way = Sight.rotateY(out, turn);
-				for (double d : monsters.size() == 1 ? new double[]{2.4, 1.8, 3.0, 1.3} : new double[]{3.0, 2.2, 1.5}) {
-					Vec3 aim = first.position().add(way.scale(d));
-					BlockPos at = Spots.groundNear(world, Mth.floor(aim.x), first.getBlockY(), Mth.floor(aim.z), 2);
-					if (at != null && clear(world, first, Vec3.atBottomCenterOf(at).add(0.0, 1.2, 0.0))) {
-						feet = at;
-						break search;
+			for (Mob m : behind.subList(0, Math.min(4, behind.size()))) {
+				Vec3 out = m.position().subtract(player.position());
+				out = new Vec3(out.x, 0, out.z);
+				out = out.lengthSqr() < 1.0E-4 ? Sight.flatLook(player) : out.normalize();
+				for (double turn : new double[]{0.0, 30.0, -30.0, 60.0, -60.0}) {
+					Vec3 way = Sight.rotateY(out, turn);
+					for (double d : monsters.size() == 1 ? new double[]{2.4, 1.8, 3.0, 1.3} : new double[]{3.0, 2.2, 1.5}) {
+						Vec3 aim = m.position().add(way.scale(d));
+						BlockPos at = Spots.groundNear(world, Mth.floor(aim.x), m.getBlockY(), Mth.floor(aim.z), 2);
+						if (at != null && clear(world, m, Vec3.atBottomCenterOf(at).add(0.0, 1.2, 0.0))) {
+							feet = at;
+							by = m;
+							break search;
+						}
 					}
 				}
 			}
@@ -298,19 +307,24 @@ public final class Mercy {
 				}
 			}
 			if (entity == null) {
+				if (!OccupantConfig.get().soundOnly) {
+					Occupant.LOGGER.info("It could not come for {}: {}", player.getName().getString(),
+							feet == null ? "nowhere to stand" : "it could not be put at " + feet);
+				}
 				// Lifted by nothing: all of them, together.
 				stabbed.addAll(monsters);
 			} else {
-				// The one that nearly had them first; then whatever else is in reach, nearest first,
-				// as long as it has legs to spare. The rest it does not need to touch.
+				// The one that nearly had them first (if a leg reaches it from where it had to stand;
+				// else the one it stands behind); then whatever else is in reach, nearest first, as
+				// long as it has legs to spare. The rest it does not need to touch.
 				Vec3 stands = Vec3.atBottomCenterOf(feet);
-				stabbed.add(first);
+				Mob lead = reach(first, stands) ? first : by;
+				stabbed.add(lead);
 				List<Mob> rest = new ArrayList<>(monsters);
-				rest.remove(first);
+				rest.remove(lead);
 				rest.sort((a, b) -> Double.compare(flat(a.position(), stands), flat(b.position(), stands)));
 				for (Mob m : rest) {
-					boolean reach = flat(m.position(), stands) <= REACH && Math.abs(m.getY() - stands.y) <= 2.5;
-					if (reach && stabbed.size() < LEGS_FREE) stabbed.add(m);
+					if (reach(m, stands) && stabbed.size() < LEGS_FREE) stabbed.add(m);
 					else vanishing.add(m);
 				}
 			}
@@ -419,6 +433,11 @@ public final class Mercy {
 		private static double flat(Vec3 a, Vec3 b) {
 			double dx = a.x - b.x, dz = a.z - b.z;
 			return Math.sqrt(dx * dx + dz * dz);
+		}
+
+		/** Whether a leg reaches {@code m} from where it stands. */
+		private static boolean reach(Mob m, Vec3 stands) {
+			return flat(m.position(), stands) <= REACH && Math.abs(m.getY() - stands.y) <= 2.5;
 		}
 
 		/** Nothing solid between the middle of {@code m} and {@code to}. */

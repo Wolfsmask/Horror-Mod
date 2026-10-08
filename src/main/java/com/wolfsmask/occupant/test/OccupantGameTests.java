@@ -647,6 +647,12 @@ public final class OccupantGameTests {
 		// Ground under all of it, so it always has somewhere to stand (only where there is none, so
 		// nothing another test put down is touched).
 		BlockPos stand = helper.absolutePos(new BlockPos(4, 2, 4));
+		// Kept loaded all round: a test's player never moves as far as the game is concerned, so the
+		// ground a few steps past this test's own place would otherwise be let go of at once, and
+		// anything that stood there with it.
+		for (int dx = -1; dx <= 1; dx++) {
+			for (int dz = -1; dz <= 1; dz++) level.setChunkForced((stand.getX() >> 4) + dx, (stand.getZ() >> 4) + dz, true);
+		}
 		for (BlockPos p : BlockPos.betweenClosed(stand.offset(-9, -1, -9), stand.offset(9, -1, 9))) {
 			if (level.getBlockState(p).isAir()) level.setBlock(p, net.minecraft.world.level.block.Blocks.STONE.defaultBlockState(), 3);
 		}
@@ -683,6 +689,9 @@ public final class OccupantGameTests {
 					e -> e.isHaunting(player)).isEmpty(), "Then it should be gone");
 			helper.assertTrue(most[0] >= 1, "It should have had at least one on a leg (it came: " + came[0] + ")");
 			Occupant.LOGGER.info("[gametest] rescue of ten: at most {} on its legs at once", most[0]);
+			for (int dx = -1; dx <= 1; dx++) {
+				for (int dz = -1; dz <= 1; dz++) level.setChunkForced((stand.getX() >> 4) + dx, (stand.getZ() >> 4) + dz, false);
+			}
 		});
 	}
 
