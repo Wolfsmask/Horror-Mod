@@ -337,6 +337,16 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 			Occupant.LOGGER.info("[client-gametest] over the network: not on this version (no network synchroniser)");
 			return;
 		}
+		// A dedicated server will not start until the EULA is agreed to, wherever it looks for it.
+		Path game = FabricLoader.getInstance().getGameDir();
+		for (Path eula : new Path[]{Path.of("eula.txt"), game.resolve("eula.txt"), game.resolve("server").resolve("eula.txt")}) {
+			try {
+				Files.createDirectories(eula.toAbsolutePath().getParent());
+				Files.writeString(eula, "eula=true\n");
+			} catch (IOException e) {
+				Occupant.LOGGER.warn("[client-gametest] could not write {}", eula, e);
+			}
+		}
 		try (net.fabricmc.fabric.api.client.gametest.v1.context.TestDedicatedServerContext server = context.worldBuilder().createServer()) {
 			try (net.fabricmc.fabric.api.client.gametest.v1.context.TestServerConnection connection = server.connect()) {
 				connection.getClientLevel().waitForChunksRender();
