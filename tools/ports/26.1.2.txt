@@ -1,4 +1,4 @@
-# 26.1.2 on 34aa76255b4642730972c543e60da477cc206a21: build success, tests cancelled, jar success
+# 26.1.2 on d5835241871ab26347bde89f58558063a681dab8: build success, tests failure, jar success
 > Configure project :
 > Task :compileJava
 > Task :processResources
@@ -17,7 +17,7 @@
 > Task :check UP-TO-DATE
 > Task :build
 === jar
-jar: build/libs/occupant-0.1.1+mc26.1.2.jar
+jar: build/libs/occupant-0.1.2+mc26.1.2.jar
 {
   "required": true,
   "minVersion": "0.8",
@@ -39,3 +39,31 @@ jar: build/libs/occupant-0.1.1+mc26.1.2.jar
   }
 }
 unobfuscated version: the game's own names are the real ones
+[21:37:30] [Server thread/INFO] (occupant) [gametest] houses: found before false, first true, too close false, second true, after finding false
+[21:37:30] [Server thread/INFO] (occupant) [gametest] last camp at BlockPos{x=-9699760, y=-61, z=-4718093}, chest at BlockPos{x=-9699757, y=-60, z=-4718093}
+[21:37:30] [Server thread/INFO] (occupant) [gametest] lair under BlockPos{x=-9699745, y=0, z=-4716693}: 22 rungs, going in: STARTED
+[21:37:31] [Server thread/INFO] (occupant) [gametest] blight over 64 chunks: 472 blocks changed, 0 leaves
+[21:37:31] [Server thread/INFO] (occupant) [gametest] mercy: fall allowed false, health 20.0, creative true, introduced true
+[21:37:32] [Server thread/INFO] (occupant) [gametest] mercy: zombie allowed false, held true
+[21:37:32] [Server thread/INFO] (occupant) [gametest] void: allowed false, health 20.0 of 20.0, food 20
+[21:37:32] [Server thread/INFO] (occupant) [gametest] advancements of ours loaded: 19
+[21:37:32] [Server thread/INFO] (occupant) [gametest] fog: first act 80.0, last act 50.0
+[21:37:32] [Server thread/INFO] (occupant) [gametest] fog thick at 60.0, begins at 34.8; it stands 27.892651361962706 away
+[21:37:34] [Server thread/INFO] (occupant) [gametest] places without loot: [], page found: true
+[21:37:35] [Server thread/INFO] (occupant) [gametest] ways of building a place that lost their things: []
+[21:37:36] [Server thread/INFO] (occupant) [gametest] house test player at BlockPos{x=-2, y=1, z=-4} facing 0.0 / (0.0, -0.0, 1.0)
+[21:37:36] [Server thread/INFO] (occupant) [gametest] house hallway spot: peeking BlockPos{x=-9699690, y=-55, z=-4717090} / any BlockPos{x=-9699690, y=-55, z=-4717090} (relative to the floor: BlockPos{x=4, y=1, z=0})
+[21:37:36] [Server thread/INFO] (occupant) [gametest] hallway light at the far end: block 0 sky 0, dark true
+[21:37:36] [Server thread/INFO] (occupant) [gametest] that spot: mask 1001001001, block light 0, sky 2, main room middle block light 0 sky 8
+[21:37:37] [Server thread/INFO] (occupant) [gametest] rescue: creeper alive true, 0.0 above the ground
+[21:37:37] [Server thread/INFO] (occupant) [gametest] rescue: zombie 1.6258988857269259 above the ground, alive true
+[21:37:37] [Server thread/INFO] (occupant) [gametest] rescue: 1 come for them
+[21:37:38] [Server thread/INFO] (occupant) [gametest] field: darkOutside=true skyDarken=7 light=8 skyLight=15 blockLight=0 isDark=true grassInDirtTag=false
+[21:37:38] [Server thread/INFO] (occupant) [gametest] cave: yaw=-90.0 feet=BlockPos{x=-9699330, y=60, z=-4717239} underground=true skyVisible=false skyLight=0 topY=69 light=0 look=(1.0, 0.0, 1.2246468525851679E-16) | ahead: standable=55 dark=55 visible=55
+[21:37:38] [Server thread/INFO] (occupant) [gametest] arena failures: []
+[21:37:38] [Server thread/INFO] (occupant) [gametest] slowest event to start: torch_gone (cave) in 18 ms
+[21:37:39] [Server thread/INFO] (occupant) [gametest] unnoticed: age 241, seen -1, nearby 1, alive true, concealed false, noticed false, in sight true, angle 176, ray MISS at -9699774, -7, -4717386 Block{minecraft:air}, ignored 1, same story true
+[21:37:49] [Server thread/INFO] (occupant) [gametest] events that found a place to happen: [cave_noise, thunder, echo, breath, fake_join, sign, roof, saving, teammate, advancement, whisper, doppel_chat, flicker, static, wake]
+[21:37:49] [Server thread/INFO] (Minecraft) ========= 28 GAME TESTS COMPLETE IN 22.42 s ======================
+[21:37:49] [Server thread/INFO] (Minecraft) 1 required tests failed :(
+[21:37:49] [Server thread/INFO] (Minecraft)    - occupant:occupant_game_tests_the_rescue_takes_no_more_than_eight: It should have had at least one on a leg on tick 422
