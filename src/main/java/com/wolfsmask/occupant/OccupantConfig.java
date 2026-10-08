@@ -96,7 +96,7 @@ public final class OccupantConfig {
 			"this is|not your|world|",
 			"|dont dig|down|",
 			"|i watched you|build this|",
-			"i know where|you sleep|{x} {y} {z}|",
+			"i know where|you sleep|{x} {z}|",
 			"|{x}|{z}|i was here|",
 			"|it gets|easier|",
 			"|go to sleep|{player}|"
