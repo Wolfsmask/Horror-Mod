@@ -567,6 +567,52 @@ public final class OccupantGameTests {
 		});
 	}
 
+	/**
+	 * A creeper already hissing beside them is held and lifted like the rest, its fuse put out:
+	 * it does not go off in its hands.
+	 */
+	@GameTest(maxTicks = 160)
+	public void theRescueHoldsACreeper(GameTestHelper helper) {
+		Director director = Director.get();
+		ServerLevel level = helper.getLevel();
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		OccupantConfig cfg = OccupantConfig.get();
+		boolean creativeBefore = cfg.hauntCreative;
+		cfg.hauntCreative = true;
+		HauntData data = director.data(player);
+		data.introduced = true;
+		data.setAct(2);
+		var server = level.getServer();
+		net.minecraft.world.phys.Vec3 zSpot = new net.minecraft.world.phys.Vec3(player.getX() + 2, player.getY(), player.getZ());
+		net.minecraft.world.phys.Vec3 cSpot = new net.minecraft.world.phys.Vec3(player.getX() - 2, player.getY(), player.getZ());
+		server.getCommands().performPrefixedCommand(server.createCommandSourceStack().withSuppressedOutput(),
+				String.format(java.util.Locale.ROOT, "summon minecraft:zombie %.1f %.1f %.1f {PersistenceRequired:1b}", zSpot.x, zSpot.y, zSpot.z));
+		// Lit, on a short fuse: left alone it would go off in a second.
+		server.getCommands().performPrefixedCommand(server.createCommandSourceStack().withSuppressedOutput(),
+				String.format(java.util.Locale.ROOT, "summon minecraft:creeper %.1f %.1f %.1f {PersistenceRequired:1b,ignited:1b,Fuse:20s}",
+						cSpot.x, cSpot.y, cSpot.z));
+		net.minecraft.world.entity.Mob zombie = level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class,
+				net.minecraft.world.phys.AABB.ofSize(zSpot, 1.5, 3.0, 1.5), m -> com.wolfsmask.occupant.util.Kinds.is(m, "zombie"))
+				.stream().findFirst().orElse(null);
+		net.minecraft.world.entity.Mob creeper = level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class,
+				net.minecraft.world.phys.AABB.ofSize(cSpot, 1.5, 3.0, 1.5), m -> com.wolfsmask.occupant.util.Kinds.is(m, "creeper"))
+				.stream().findFirst().orElse(null);
+		helper.assertTrue(zombie != null && creeper != null, "Could not summon a zombie and a creeper");
+		double ground = creeper.getY();
+		player.setHealth(1.0f);
+		helper.assertTrue(!com.wolfsmask.occupant.director.Mercy.allowDeath(player, player.damageSources().mobAttack(zombie)),
+				"A zombie's killing blow should be stopped");
+		// Well past where its fuse would have run out, and before they die together.
+		helper.runAfterDelay(32, () -> {
+			Occupant.LOGGER.info("[gametest] rescue: creeper alive {}, {} above the ground", creeper.isAlive(), creeper.getY() - ground);
+			helper.assertTrue(creeper.isAlive() && creeper.getY() > ground + 0.3, "The creeper should be held up, its fuse out, not gone off");
+		});
+		helper.succeedWhen(() -> {
+			helper.assertTrue(!creeper.isAlive() && !zombie.isAlive(), "Both should die together");
+			cfg.hauntCreative = creativeBefore;
+		});
+	}
+
 	/** What it builds while they play (its lair, the last camp) is never put on anything they made. */
 	@GameTest
 	public void itNeverBuildsOnTheirThings(GameTestHelper helper) {
