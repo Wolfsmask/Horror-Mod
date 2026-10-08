@@ -373,7 +373,12 @@ public class OccupantEntity extends PathfinderMob {
 
 	@Override
 	public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
-		if (!this.isRemoved()) {
+		// Struck by someone, it is gone. The world does not touch it: a berry bush, a cactus, the
+		// cold, a stray arrow, a blast would otherwise make it blink out in the middle of being seen.
+		boolean struck = source.getEntity() instanceof net.minecraft.world.entity.player.Player;
+		boolean removed = source.is(net.minecraft.world.damagesource.DamageTypes.GENERIC_KILL)
+				|| source.is(net.minecraft.world.damagesource.DamageTypes.FELL_OUT_OF_WORLD);
+		if (!this.isRemoved() && (struck || removed)) {
 			if (source.getEntity() instanceof ServerPlayer player && isHaunting(player)) {
 				Cues.sound(player, ModSounds.STATIC, SoundSource.HOSTILE, this.getEyePosition(), 0.8f, 1.0f);
 			}

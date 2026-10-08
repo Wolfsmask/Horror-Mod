@@ -88,11 +88,13 @@ public final class Trifles {
 		if (h.answerAt <= 0 || now < h.answerAt) return;
 		h.answerAt = 0;
 		Vec3 dir = Sight.rotateY(Sight.flatLook(player), 90 + player.getRandom().nextInt(180));
-		Vec3 at = player.position().add(dir.scale(30 + player.getRandom().nextInt(10))).add(0, 2, 0);
+		// Far off, but not so far the game drops it: a sound carries sixteen blocks for each unit of
+		// volume, so at this volume it is heard out to forty, faintly from here.
+		Vec3 at = player.position().add(dir.scale(18 + player.getRandom().nextInt(7))).add(0, 2, 0);
 		if (h.answerBell) {
-			Cues.sound(player, SoundEvents.BELL_BLOCK, SoundSource.BLOCKS, at, 1.6f, 0.7f);
+			Cues.sound(player, SoundEvents.BELL_BLOCK, SoundSource.BLOCKS, at, 2.5f, 0.7f);
 		} else {
-			Cues.sound(player, SoundEvents.NOTE_BLOCK_HARP, SoundSource.RECORDS, at, 1.6f, 0.5f + player.getRandom().nextFloat() * 0.3f);
+			Cues.sound(player, SoundEvents.NOTE_BLOCK_HARP, SoundSource.RECORDS, at, 2.5f, 0.5f + player.getRandom().nextFloat() * 0.3f);
 		}
 	}
 

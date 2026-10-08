@@ -26,3 +26,4 @@ Thumbs.db
 hs_err_*.log
 replay_*.log
 *.hprof
+__pycache__/

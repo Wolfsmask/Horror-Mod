@@ -108,14 +108,21 @@ public final class OccupantGameTests {
 		});
 	}
 
-	/** It cannot be hurt, killed or farmed: any damage just makes it vanish. */
+	/**
+	 * It cannot be hurt, killed or farmed: struck by a player, it simply vanishes. The world itself
+	 * (a berry bush, a cactus, a stray arrow) does nothing to it at all.
+	 */
 	@GameTest
 	public void damageMakesItVanish(GameTestHelper helper) {
 		OccupantEntity e = helper.spawn(ModEntities.OCCUPANT, 1, 2, 1);
 		ServerLevel level = helper.getLevel();
 		boolean hurt = e.hurtServer(level, level.damageSources().generic(), 5.0f);
 		helper.assertTrue(!hurt, "Damage should never land");
-		helper.assertTrue(e.isRemoved(), "Damage should make it vanish");
+		helper.assertTrue(!e.isRemoved(), "The world should not make it vanish");
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		hurt = e.hurtServer(level, level.damageSources().playerAttack(player), 5.0f);
+		helper.assertTrue(!hurt, "A player's blow should never land");
+		helper.assertTrue(e.isRemoved(), "A player's blow should make it vanish");
 		helper.succeed();
 	}
 
