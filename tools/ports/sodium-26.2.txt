@@ -1,6 +1,6 @@
-# 26.2 with Sodium mc26.2-0.9.2-fabric on 18adce1f26225fd750a713192cc4312919b27521: failure
+# 26.2 with Sodium mc26.2-0.9.2-fabric on bbfd2baed3f22272e834be5490477b0f535a5dea: failure
 > Task :compileJava FAILED
-BUILD FAILED in 24s
+BUILD FAILED in 13s
 --- tail ---
   		                            ^
   /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:357: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
@@ -30,9 +30,9 @@ BUILD FAILED in 24s
   /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:842: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
   		ServerPlayer player = helper.makeMockServerPlayerInLevel();
   		                            ^
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/Mercy.java:229: error: variable want is already defined in constructor Rescue(Haunt,ServerPlayer,List<Mob>)
-  			Vec3 want = first.position().add(out.scale(monsters.size() == 1 ? 2.4 : 3.0));
-  			     ^
+  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/Mercy.java:233: error: variable want is already defined in constructor Rescue(Haunt,ServerPlayer,List<Mob>)
+  				Vec3 want = first.position().add(out.scale(d));
+  				     ^
   1 error
   16 warnings
 
@@ -40,5 +40,5 @@ BUILD FAILED in 24s
 > Check your code and dependencies to fix the compilation error(s)
 > Run with --scan to get full insights from a Build Scan (powered by Develocity).
 
-BUILD FAILED in 24s
+BUILD FAILED in 13s
 1 actionable task: 1 executed
