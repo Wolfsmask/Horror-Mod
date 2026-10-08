@@ -1,162 +1,31 @@
-# 1.21.1 client on 0e9e90414fc3c8074e7d4c9b8291391c99f59c91: success
+# 1.21.1 client on 18adce1f26225fd750a713192cc4312919b27521: cancelled
 === client.log
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/ArenaGameTests.java:107: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:64: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:96: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:122: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:185: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:279: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:313: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:357: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:388: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:493: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:537: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:577: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:658: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:684: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:748: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:842: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-	- occupant 0.1.1+mc1.21.1
-[17:42:16] [Render thread/INFO] (occupant) The Occupant has moved in. Type /occupant check in game to test it.
-com.mojang.authlib.exceptions.MinecraftClientException: Failed to read from https://sessionserver.mojang.com/session/minecraft/profile/4ed9b5cfd91a3bc89000b0476eccd342?unsigned=false due to Read timed out
-Caused by: java.net.SocketTimeoutException: Read timed out
-[17:42:22] [Render thread/INFO] (occupant) [client] the mode screen has been drawn
-> Task :runClient FAILED
-* What went wrong:
-BUILD FAILED in 1m 9s
+Exception in thread "main" java.net.SocketException: Connection reset
 --- the mod's own checks ---
 --- last of the server thread in client.log ---
-[17:42:19] [Worker-Main-1/INFO] (Minecraft) Found unifont_all_no_pua-15.1.05.hex, loading
-[17:42:19] [Worker-Main-2/INFO] (Minecraft) Found unifont_jp_patch-15.1.05.hex, loading
 --- tail of client.log ---
-	at java.base/java.net.HttpURLConnection.getResponseCode(HttpURLConnection.java:493) ~[?:?]
-	at java.base/sun.net.www.protocol.https.HttpsURLConnectionImpl.getResponseCode(HttpsURLConnectionImpl.java:307) ~[?:?]
-	at knot/com.mojang.authlib.minecraft.client.MinecraftClient.readInputStream(MinecraftClient.java:84) ~[authlib-6.0.54.jar:?]
-	... 8 more
-[17:42:22] [Render thread/INFO] (occupant) [client] the mode screen has been drawn
-
-> Task :runClient FAILED
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/client-1791481311105.json
-
-[Incubating] Problems report is available at: file:///home/runner/work/Horror-Mod/Horror-Mod/build/reports/problems/problems-report.html
-
-FAILURE: Build failed with an exception.
-
-* What went wrong:
-Execution failed for task ':runClient' (registered by plugin 'fabric-loom').
-> Process 'command 'xvfb-run'' finished with non-zero exit value 143 (this value may indicate that the process was terminated with the SIGTERM signal)
-
-* Try:
-> Run with --stacktrace option to get the stack trace.
-> Run with --info or --debug option to get more log output.
-> Run with --scan to get full insights from a Build Scan (powered by Develocity).
-> Get more help at https://help.gradle.org.
-
-BUILD FAILED in 1m 9s
-10 actionable tasks: 10 executed
-=== server.log
-	- occupant 0.1.1+mc1.21.1
-[17:43:10] [main/INFO] (occupant) The Occupant has moved in. Type /occupant check in game to test it.
-[17:43:12] [Server thread/INFO] (occupant) This world tells the story as a slow burn
-[17:43:20] [Server thread/INFO] (Minecraft) Done (7.699s)! For help, type "help"
-[17:43:22] [Server thread/INFO] (Minecraft) [Rcon: Stopping the server]
-[17:43:22] [Server thread/INFO] (Minecraft) Stopping server
---- the mod's own checks ---
---- last of the server thread in server.log ---
-[17:43:19] [Worker-Main-2/INFO] (Minecraft) Preparing spawn area: 18%
-[17:43:19] [Worker-Main-3/INFO] (Minecraft) Preparing spawn area: 51%
-[17:43:20] [Worker-Main-2/INFO] (Minecraft) Preparing spawn area: 51%
-[17:43:20] [Server thread/INFO] (Minecraft) Time elapsed: 3211 ms
-[17:43:20] [Server thread/INFO] (Minecraft) Done (7.699s)! For help, type "help"
-[17:43:20] [Server thread/INFO] (Minecraft) Starting remote control listener
-[17:43:20] [Server thread/INFO] (Minecraft) Thread RCON Listener started
-[17:43:20] [Server thread/INFO] (Minecraft) RCON running on 0.0.0.0:25575
-[17:43:22] [Server thread/INFO] (Minecraft) [Rcon: Stopping the server]
-[17:43:22] [Server thread/INFO] (Minecraft) Stopping server
-[17:43:22] [Server thread/INFO] (Minecraft) Saving players
-[17:43:22] [Server thread/INFO] (Minecraft) Saving worlds
-[17:43:23] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[world]'/minecraft:overworld
-[17:43:23] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[world]'/minecraft:the_end
-[17:43:23] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[world]'/minecraft:the_nether
-[17:43:23] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (world): All chunks are saved
-[17:43:23] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (DIM1): All chunks are saved
-[17:43:23] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
-[17:43:23] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage: All dimensions are saved
-[17:43:23] [Server thread/INFO] (Minecraft) Thread RCON Listener stopped
---- tail of server.log ---
-[17:43:19] [Worker-Main-3/INFO] (Minecraft) Preparing spawn area: 51%
-[17:43:20] [Worker-Main-2/INFO] (Minecraft) Preparing spawn area: 51%
-[17:43:20] [Server thread/INFO] (Minecraft) Time elapsed: 3211 ms
-[17:43:20] [Server thread/INFO] (Minecraft) Done (7.699s)! For help, type "help"
-[17:43:20] [Server thread/INFO] (Minecraft) Starting remote control listener
-[17:43:20] [Server thread/INFO] (Minecraft) Thread RCON Listener started
-[17:43:20] [Server thread/INFO] (Minecraft) RCON running on 0.0.0.0:25575
-[17:43:22] [RCON Listener #1/INFO] (Minecraft) Thread RCON Client /127.0.0.1 started
-[17:43:22] [Server thread/INFO] (Minecraft) [Rcon: Stopping the server]
-[17:43:22] [RCON Client /127.0.0.1 #2/INFO] (Minecraft) Thread RCON Client /127.0.0.1 shutting down
-[17:43:22] [Server thread/INFO] (Minecraft) Stopping server
-[17:43:22] [Server thread/INFO] (Minecraft) Saving players
-[17:43:22] [Server thread/INFO] (Minecraft) Saving worlds
-[17:43:23] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[world]'/minecraft:overworld
-[17:43:23] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[world]'/minecraft:the_end
-[17:43:23] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[world]'/minecraft:the_nether
-[17:43:23] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (world): All chunks are saved
-[17:43:23] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (DIM1): All chunks are saved
-[17:43:23] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
-[17:43:23] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage: All dimensions are saved
-[17:43:23] [Server thread/INFO] (Minecraft) Thread RCON Listener stopped
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/client-1791481383147.json
-
-BUILD SUCCESSFUL in 21s
-7 actionable tasks: 1 executed, 6 up-to-date
-=== world.log
-Picked up JAVA_TOOL_OPTIONS:  -Doccupant.smoke=true
-Picked up JAVA_TOOL_OPTIONS:  -Doccupant.smoke=true
-	- occupant 0.1.1+mc1.21.1
-[17:43:38] [Render thread/INFO] (occupant) The Occupant has moved in. Type /occupant check in game to test it.
-[17:43:52] [Server thread/INFO] (occupant) [smoke] putting it in front of Player646
-[17:43:53] [Render thread/INFO] (occupant) [client] the Occupant has been drawn
-[17:44:01] [IO-Worker-1/INFO] (occupant) [client] photograph: Saved screenshot as 2026-10-08_17.44.01.png
-> Task :runClient FAILED
-* What went wrong:
-BUILD FAILED in 57s
---- the mod's own checks ---
---- last of the server thread in world.log ---
-[17:43:39] [Worker-Main-3/INFO] (Minecraft) Found unifont_all_no_pua-15.1.05.hex, loading
-[17:43:39] [Worker-Main-2/INFO] (Minecraft) Found unifont_jp_patch-15.1.05.hex, loading
-[17:43:43] [Server thread/INFO] (Minecraft) Starting integrated minecraft server version 1.21.1
-[17:43:43] [Server thread/INFO] (Minecraft) Generating keypair
-[17:43:46] [Server thread/INFO] (Minecraft) Preparing start region for dimension minecraft:overworld
-[17:43:46] [Render thread/INFO] (Minecraft) Preparing spawn area: 0%
-[17:43:47] [Server thread/INFO] (Minecraft) Changing view distance to 12, from 10
-[17:43:47] [Server thread/INFO] (Minecraft) Changing simulation distance to 12, from 0
-[17:43:48] [Server thread/INFO] (Minecraft) Player646[local:E:feb5595b] logged in with entity id 10 at (106.5, 69.0, 32.5)
-[17:43:48] [Server thread/INFO] (Minecraft) Player646 joined the game
-[17:43:52] [Server thread/INFO] (occupant) [smoke] putting it in front of Player646
-[17:43:52] [Server thread/INFO] (Minecraft) It is standing behind you... no, in front of you.
---- tail of world.log ---
-[17:43:48] [Server thread/INFO] (Minecraft) Player646 joined the game
-[17:43:48] [Render thread/INFO] (Minecraft) Loaded 2 advancements
-[17:43:52] [Server thread/INFO] (occupant) [smoke] putting it in front of Player646
-[17:43:52] [Server thread/INFO] (Minecraft) It is standing behind you... no, in front of you.
-[17:43:53] [Render thread/INFO] (occupant) [client] the Occupant has been drawn
-[17:44:01] [IO-Worker-1/INFO] (occupant) [client] photograph: Saved screenshot as 2026-10-08_17.44.01.png
-WARN StatusConsoleListener Unable to register Log4j shutdown hook because JVM is shutting down. Using SimpleLogger
-
-> Task :runClient FAILED
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/client-1791481410268.json
-
-FAILURE: Build failed with an exception.
-
-* What went wrong:
-Execution failed for task ':runClient' (registered by plugin 'fabric-loom').
-> Process 'command 'xvfb-run'' finished with non-zero exit value 143 (this value may indicate that the process was terminated with the SIGTERM signal)
-
-* Try:
-> Run with --stacktrace option to get the stack trace.
-> Run with --info or --debug option to get more log output.
-> Run with --scan to get full insights from a Build Scan (powered by Develocity).
-> Get more help at https://help.gradle.org.
-
-BUILD FAILED in 57s
-10 actionable tasks: 1 executed, 9 up-to-date
+	at java.base/sun.nio.ch.NioSocketImpl$1.read(NioSocketImpl.java:798)
+	at java.base/java.net.Socket$SocketInputStream.implRead(Socket.java:974)
+	at java.base/java.net.Socket$SocketInputStream.read(Socket.java:964)
+	at java.base/sun.security.ssl.SSLSocketInputRecord.read(SSLSocketInputRecord.java:489)
+	at java.base/sun.security.ssl.SSLSocketInputRecord.readHeader(SSLSocketInputRecord.java:483)
+	at java.base/sun.security.ssl.SSLSocketInputRecord.decode(SSLSocketInputRecord.java:160)
+	at java.base/sun.security.ssl.SSLTransport.decode(SSLTransport.java:111)
+	at java.base/sun.security.ssl.SSLSocketImpl.decode(SSLSocketImpl.java:1506)
+	at java.base/sun.security.ssl.SSLSocketImpl.readHandshakeRecord(SSLSocketImpl.java:1421)
+	at java.base/sun.security.ssl.SSLSocketImpl.startHandshake(SSLSocketImpl.java:455)
+	at java.base/sun.security.ssl.SSLSocketImpl.startHandshake(SSLSocketImpl.java:426)
+	at java.base/sun.net.www.protocol.https.HttpsClient.afterConnect(HttpsClient.java:490)
+	at java.base/sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.connect(AbstractDelegateHttpsURLConnection.java:190)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.followRedirect0(HttpURLConnection.java:2566)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.followRedirect(HttpURLConnection.java:2481)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1641)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1305)
+	at java.base/java.net.HttpURLConnection.getResponseCode(HttpURLConnection.java:493)
+	at java.base/sun.net.www.protocol.https.HttpsURLConnectionImpl.getResponseCode(HttpsURLConnectionImpl.java:307)
+	at org.gradle.wrapper.Download.download(SourceFile:1)
+	at org.gradle.wrapper.Install.forceFetch(SourceFile)
+	at org.gradle.wrapper.Install.lambda$createDist$0(SourceFile:9)
+	at org.gradle.wrapper.Install.createDist(SourceFile:24)
+	at org.gradle.wrapper.GradleWrapperMain.lambda$prepareWrapper$0(SourceFile:2)
+	at org.gradle.wrapper.GradleWrapperMain.main(SourceFile:2)
