@@ -3,7 +3,7 @@
 Everything here is ready to use: the icon, the gallery, the description and the files.
 
 - `icon.png`: the project icon, 512x512.
-- `gallery/`: the gallery images (`00-featured.png` is the one to feature).
+- `gallery-nightmare/`: the gallery images (`01-too-close.png` is the one to feature).
 - `stills/`: the untouched game frames the gallery is made from, if you want to grade them yourself.
 - `description.md`: paste this into the description box.
 - `../CREATORS.md` and `../creators/`: the **Creator Pack** (guide, thumbnails, Shorts covers),
@@ -50,20 +50,26 @@ description: right-click it in your gallery → *Copy image address*, then add t
 
 ## 4. Gallery
 
-Upload these in this order. Tick **Featured** on the first one only: it is the image people see
-in search, so it decides whether they click.
+Upload the images in `gallery-nightmare/` in this order. Tick **Featured** on the first one only:
+it is the image people see in search, so it decides whether they click.
+
+These are painted, not screenshots: every room, window, wood and corridor is made from nothing,
+and the only thing taken from the game is it (its face, and its body cut out of the client
+test's frames of it). If anyone asks, say that it is the real creature, in scenes made for the
+page.
 
 | File | Title | Description |
 |---|---|---|
-| `00-featured.png` | The Occupant | There is something in this world with you. |
-| `01-treeline.png` | The treeline | It was standing there the whole time. |
-| `02-fog.png` | The edge of the fog | The fog comes in as the story goes on. It waits at the very edge of what you can see. |
-| `03-village.png` | The village | Abandoned villages, empty houses, a well. Everyone left. Something stayed. |
-| `04-ruin.png` | The keep | Ruined keeps with chests that still hold what people left behind. |
-| `05-camp.png` | The camp | Cold campsites, and signs for whoever comes next. |
-| `06-graves.png` | The graveyard | Two rows of graves. One of them has been dug open. |
-| `07-face.png` | Its face | Seventeen feet tall. Ten legs. It is learning how to be you. |
-| `08-the-first-screen.png` | The way in | The mod's own start screen. Create World takes you straight in. |
+| `01-too-close.png` | Too close | It does not move while you are looking at it. |
+| `02-over-you.png` | Over you | You woke up. It was already there. |
+| `03-the-window.png` | The window | It waits a step back from the glass. |
+| `04-the-treeline.png` | The treeline | Further back than you would ever look. |
+| `05-the-doorway.png` | The doorway | You left that door open. |
+| `06-the-corridor.png` | The corridor | One light, halfway down. |
+| `07-the-tape.png` | The tape | It is on all of them. |
+
+`gallery-dread/` (real game frames, made into bad photographs) and `gallery/` (the earlier film
+stills) are there too, if you want a few that are plainly the game.
 
 ## 5. Versions
 
