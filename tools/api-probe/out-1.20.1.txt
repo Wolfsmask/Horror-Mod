@@ -1,19 +1,11 @@
-=== net.minecraft.client.gui.components.DebugScreenOverlay (-p)
-public class client.gui.components.DebugScreenOverlay {
-  public void render(client.gui.GuiGraphics);
-  protected void drawGameInformation(client.gui.GuiGraphics);
-  private void renderLines(client.gui.GuiGraphics, List<String>, boolean);
-  protected List<String> getGameInformation();
-=== net.minecraft.client.player.LocalPlayer (-public)
-public class client.player.LocalPlayer extends client.player.AbstractClientPlayer {
-=== net.minecraft.world.entity.player.Player (-public)
-public abstract class world.entity.player.Player extends world.entity.LivingEntity {
-  public boolean isReducedDebugInfo();
-  public void setReducedDebugInfo(boolean);
-=== net.minecraft.client.Minecraft (-public)
-public class client.Minecraft extends util.thread.ReentrantBlockableEventLoop<Runnable> implements blaze3d.platform.WindowEventHandler {
-  public final client.renderer.debug.DebugRenderer debugRenderer;
-  public boolean debugClientMetricsStart(Consumer<network.chat.Component>);
-  public void debugFpsMeterKeyPress(int);
-=== classes matching debug\.(DebugEntryPosition|DebugScreenEntries|DebugScreenEntryList|DebugEntry.*Pos.*)
-=== classes matching gui\.components\.debug\.
+=== net.minecraft.world.entity.Entity (-public)
+public abstract class world.entity.Entity implements world.Nameable,world.level.entity.EntityAccess,commands.CommandSource,attachment.v1.AttachmentTarget {
+  public double xo;
+  public double yo;
+  public double zo;
+  public double xOld;
+  public double yOld;
+  public double zOld;
+  public final world.phys.Vec3 getEyePosition(float);
+  public final world.phys.Vec3 getPosition(float);
+  public world.phys.Vec3 getRopeHoldPosition(float);
