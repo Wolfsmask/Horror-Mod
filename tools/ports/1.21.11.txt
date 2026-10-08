@@ -1,5 +1,5 @@
-# 1.21.11 on 18adce1f26225fd750a713192cc4312919b27521: build failure, tests skipped, jar skipped
-com/wolfsmask/occupant/director/Mercy.java:229: error: variable want is already defined in constructor Rescue(Haunt,ServerPlayer,List<Mob>)
+# 1.21.11 on bbfd2baed3f22272e834be5490477b0f535a5dea: build failure, tests skipped, jar skipped
+com/wolfsmask/occupant/director/Mercy.java:233: error: variable want is already defined in constructor Rescue(Haunt,ServerPlayer,List<Mob>)
 > Configure project :
 > Task :versionSourcesMain
 > Task :compileJava
