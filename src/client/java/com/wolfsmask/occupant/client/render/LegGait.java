@@ -38,8 +38,10 @@ final class LegGait {
 	/** Further than this from the drawn body and it has moved by other means: start over. */
 	private static final double SNAP = 4.0;
 
-	/** How long a leg takes to go into what it takes hold of, in ticks. */
-	private static final float REACH_IN = 5.0f;
+	/** How long a leg takes to go into what it takes hold of, in ticks: a thrust, not a reach. */
+	private static final float REACH_IN = 3.5f;
+	/** How many of its legs it will put through things: it has ten, and stands on two. */
+	private static final int LEGS_FREE = LEGS - 2;
 
 	/** Where the body is drawn: behind the entity, catching up in shoves. */
 	private Vec3 body;
@@ -77,15 +79,16 @@ final class LegGait {
 	private float fitScale = Float.NaN;
 	private float fitCrouch;
 	/**
-	 * The leg it has through something, and what (by entity id); -1 for none. The leg goes in over
-	 * a few ticks from wherever it was drawn, then stays exactly in it, and when what it held is
-	 * gone the leg stays out where it was, holding nothing.
+	 * For each leg, what it has through it (by entity id; -1 for nothing). A leg goes in fast from
+	 * wherever it was drawn, then stays exactly in it, and when what it held is gone the leg stays
+	 * out where it was a moment, holding nothing.
 	 */
-	private int heldLeg = -1;
-	private int heldId = -1;
-	private float heldSince;
-	private Vec3 heldFrom;
-	private float lingerUntil;
+	private final int[] holds = new int[LEGS];
+	private final float[] holdSince = new float[LEGS];
+	private final Vec3[] holdFrom = new Vec3[LEGS];
+	private final float[] lingerUntil = new float[LEGS];
+	/** Where each holding leg's point is this frame, or null. */
+	private final Vec3[] holdAt = new Vec3[LEGS];
 
 	static LegGait of(OccupantEntity entity) {
 		return GAITS.computeIfAbsent(entity, e -> new LegGait(e.getId()));
@@ -93,7 +96,10 @@ final class LegGait {
 
 	private LegGait(int seed) {
 		this.salt = seed * 0x9E3779B1;
-		for (int i = 0; i < LEGS; i++) swingStart[i] = -1.0f;
+		for (int i = 0; i < LEGS; i++) {
+			swingStart[i] = -1.0f;
+			holds[i] = -1;
+		}
 	}
 
 	/**
@@ -209,9 +215,9 @@ final class LegGait {
 		// Which leg is worst off, and so is first to let go.
 		int worst = -1;
 		double worstScore = 0.0;
-		Vec3 heldAt = held(entity, level, now, yaw, px, dropPx);
+		boolean anyHeld = held(entity, level, now, yaw, px, dropPx);
 		for (int i = 0; i < LEGS; i++) {
-			if (i == heldLeg && (heldAt != null || now < lingerUntil)) continue;
+			if (holdAt[i] != null || now < lingerUntil[i]) continue;
 			if (swingStart[i] >= 0.0f) {
 				if (now - swingStart[i] >= swingTime[i]) swingStart[i] = -1.0f;
 				continue;
@@ -237,7 +243,7 @@ final class LegGait {
 		int maxSwinging = chasing ? 3 : 2;
 		if (worst >= 0 && worstScore > 0.0 && swinging < maxSwinging) {
 			replant(worst, level, yaw, px, rootY(worst, px, dropPx), chasing ? 2.0f : 3.0f);
-		} else if (now >= nextFidget && swinging == 0 && lag < 0.1 && !watched && heldLeg < 0) {
+		} else if (now >= nextFidget && swinging == 0 && lag < 0.1 && !watched && !anyHeld) {
 			// Standing still, every so often one leg lets go and takes a new grip, slowly.
 			int i = (int) (rand(5, (int) now) * LEGS) % LEGS;
 			replant(i, level, yaw, px, rootY(i, px, dropPx), 9.0f);
@@ -261,12 +267,13 @@ final class LegGait {
 			}
 			double reach = OccupantGeometry.LEG_LENGTH[i] * px;
 			Vec3 hip = new Vec3(body.x, rootY(i, px, dropPx), body.z);
-			boolean holding = i == heldLeg && heldAt != null;
+			boolean holding = holdAt[i] != null;
 			if (holding) {
-				// Into it, eased at both ends, and from then on exactly in it, wherever it is.
-				float f = Mth.clamp((now - heldSince) / REACH_IN, 0.0f, 1.0f);
-				float e = f * f * (3.0f - 2.0f * f);
-				at = heldFrom == null ? heldAt : heldFrom.lerp(heldAt, e);
+				// Into it, fast, harder at the end than at the start, and from then on exactly in it,
+				// wherever it is.
+				float f = Mth.clamp((now - holdSince[i]) / REACH_IN, 0.0f, 1.0f);
+				float e = f * f;
+				at = holdFrom[i] == null ? holdAt[i] : holdFrom[i].lerp(holdAt[i], e);
 			}
 			if (at == null) at = dangle(i, level, yaw, reach, hip, clock);
 			if (at == null) {
@@ -317,51 +324,68 @@ final class LegGait {
 	}
 
 	/**
-	 * Where the leg that is through something should be this frame: just through the far side of
-	 * it, from the hip it comes out of. Picks the leg the first time (the one pointing most its
-	 * way that can reach), and lets go when the server says so or the thing is gone. Null when it
-	 * holds nothing.
+	 * Where each leg that is through something should be this frame (into {@link #holdAt}): in at
+	 * the back and out through the front, from the hip it comes out of. A leg is picked for each
+	 * new thing the first time (the free one pointing most its way that can reach it; never more
+	 * than eight, so it still stands), and lets go when the server says so or the thing is gone.
+	 * True if any leg holds something.
 	 */
-	@Nullable
-	private Vec3 held(OccupantEntity entity, Level level, float now, double yaw, double px, float dropPx) {
-		int id = entity.getHolding();
-		Entity held = id >= 0 ? level.getEntity(id) : null;
-		if (held == null || held.isRemoved()) {
-			if (heldId >= 0 && heldLeg >= 0) {
-				// Gone from the end of its leg: the leg stays out there, holding nothing.
-				foot[heldLeg] = drawn[heldLeg];
-				swingStart[heldLeg] = -1.0f;
-				lingerUntil = now + 40.0f;
-			}
-			heldId = -1;
-			if (now >= lingerUntil) heldLeg = -1;
-			return null;
-		}
+	private boolean held(OccupantEntity entity, Level level, float now, double yaw, double px, float dropPx) {
+		int[] ids = entity.getHeld();
 		float partial = Mth.clamp(now - entity.tickCount, 0.0f, 1.0f);
-		Vec3 pos = held.getPosition(partial);
-		Vec3 centre = pos.add(0.0, held.getBbHeight() * 0.55, 0.0);
-		if (heldId != id) {
-			heldId = id;
-			heldLeg = -1;
-			double best = Double.NEGATIVE_INFINITY;
-			for (int i = 0; i < LEGS; i++) {
-				Vec3 hip = new Vec3(body.x, rootY(i, px, dropPx), body.z);
-				Vec3 to = centre.subtract(hip);
-				double score = outward(i, yaw).dot(new Vec3(to.x, 0.0, to.z).normalize());
-				if (to.length() > OccupantGeometry.LEG_LENGTH[i] * px * 0.95) score -= 10.0;   // cannot reach it
-				if (score > best) {
-					best = score;
-					heldLeg = i;
-				}
+		// Let go of what is no longer held, or no longer there: the leg stays out a moment.
+		for (int i = 0; i < LEGS; i++) {
+			holdAt[i] = null;
+			if (holds[i] < 0) continue;
+			Entity held = level.getEntity(holds[i]);
+			boolean still = false;
+			for (int id : ids) still |= id == holds[i];
+			if (!still || held == null || held.isRemoved()) {
+				if (drawn[i] != null) foot[i] = drawn[i];
+				swingStart[i] = -1.0f;
+				lingerUntil[i] = now + 40.0f;
+				holds[i] = -1;
 			}
-			heldSince = now;
-			heldFrom = drawn[heldLeg] != null ? drawn[heldLeg] : foot[heldLeg];
-			swingStart[heldLeg] = -1.0f;
 		}
-		Vec3 hip = new Vec3(body.x, rootY(heldLeg, px, dropPx), body.z);
-		Vec3 through = centre.subtract(hip);
-		if (through.lengthSqr() < 1.0e-4) return centre;
-		return centre.add(through.normalize().scale(Math.min(0.3, held.getBbWidth() * 0.6)));
+		boolean any = false;
+		for (int id : ids) {
+			Entity held = level.getEntity(id);
+			if (held == null || held.isRemoved()) continue;
+			Vec3 centre = held.getPosition(partial).add(0.0, held.getBbHeight() * 0.55, 0.0);
+			int leg = -1;
+			for (int i = 0; i < LEGS; i++) if (holds[i] == id) leg = i;
+			if (leg < 0) {
+				int used = 0;
+				for (int i = 0; i < LEGS; i++) if (holds[i] >= 0) used++;
+				if (used >= LEGS_FREE) continue;
+				double best = Double.NEGATIVE_INFINITY;
+				for (int i = 0; i < LEGS; i++) {
+					if (holds[i] >= 0) continue;
+					Vec3 hip = new Vec3(body.x, rootY(i, px, dropPx), body.z);
+					Vec3 to = centre.subtract(hip);
+					Vec3 flat = new Vec3(to.x, 0.0, to.z);
+					double score = flat.lengthSqr() < 1.0e-6 ? 0.0 : outward(i, yaw).dot(flat.normalize());
+					if (to.length() > OccupantGeometry.LEG_LENGTH[i] * px * 0.95) score -= 10.0;   // cannot reach it
+					if (score > best) {
+						best = score;
+						leg = i;
+					}
+				}
+				if (leg < 0) continue;
+				holds[leg] = id;
+				holdSince[leg] = now;
+				holdFrom[leg] = drawn[leg] != null ? drawn[leg] : foot[leg];
+				swingStart[leg] = -1.0f;
+				lingerUntil[leg] = 0.0f;
+			}
+			// In at the back and out through the front, a hand's breadth past it.
+			Vec3 hip = new Vec3(body.x, rootY(leg, px, dropPx), body.z);
+			Vec3 through = centre.subtract(hip);
+			holdAt[leg] = through.lengthSqr() < 1.0e-4 ? centre
+					: centre.add(through.normalize().scale(held.getBbWidth() * 0.5 + 0.4));
+			any = true;
+		}
+		return any;
 	}
 
 	/**

@@ -6,8 +6,13 @@
   "client": [
     "CreateWorldAccess",
     "FogRendererMixin",
+    "HumanoidModelMixin",
+    "LivingEntityRendererMixin",
+    "MouseHandlerMixin",
     "ScreenAccess",
-    "SkyRendererMixin"
+    "SkeletonModelMixin",
+    "SkyRendererMixin",
+    "ZombieModelMixin"
   ],
   "injectors": {
     "defaultRequire": 1

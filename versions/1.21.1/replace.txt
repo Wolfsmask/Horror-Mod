@@ -19,6 +19,7 @@ OCCUPANT.create(world, MobSpawnType.EVENT) -> OCCUPANT.create(world)
 public boolean hurtServer(ServerLevel level, DamageSource source, float amount) -> public boolean hurt(DamageSource source, float amount)
 p.hurtServer(p.level(), -> p.hurt(
 e.hurtServer(level, -> e.hurt(
+m.hurtServer(level, -> m.hurt(
 Commands.hasPermission(Commands.LEVEL_GAMEMASTERS).test(src) -> src.hasPermission(Commands.LEVEL_GAMEMASTERS)
 # Game tests: vanilla's annotation, on Fabric's empty structure.
 import net.fabricmc.fabric.api.gametest.v1.GameTest; -> import net.minecraft.gametest.framework.GameTest;

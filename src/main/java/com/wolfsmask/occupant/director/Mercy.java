@@ -49,8 +49,11 @@ import java.util.Locale;
 public final class Mercy {
 	/** Not saved from monsters twice within this long, in ticks of play. */
 	private static final long MONSTERS_AGAIN_AFTER = 20L * 60 * 10;
-	/** Nor from falls (a guard against any loop), in ticks of play. */
-	private static final long FALLS_AGAIN_AFTER = 20L * 30;
+	/**
+	 * From falls, every time: only not twice within this long, in ticks of the server, which
+	 * would mean the catch itself had failed (somewhere to stand that was not safe after all).
+	 */
+	private static final long FALLS_AGAIN_AFTER = 20L * 3;
 	private static final String RESCUE = "mercy";
 	private static final String[] FALL_NOTES = {"It doesn't like that.", "Not like that.",
 			"You don't get to leave that way.", "It caught you. It will always catch you."};
@@ -74,8 +77,10 @@ public final class Mercy {
 		Haunt h = director.haunt(player);
 		HauntData d = h.data;
 		if (!d.introduced || d.paused || d.ending == LastNightEnding.FOUND) return true;
-		// A totem saves them by itself; it lets the totem do it.
-		if (player.getMainHandItem().is(Items.TOTEM_OF_UNDYING) || player.getOffhandItem().is(Items.TOTEM_OF_UNDYING)) return true;
+		// A totem saves them by itself; it lets the totem do it. Not from the void, though, which no
+		// totem stops: that one is its to catch.
+		if ((player.getMainHandItem().is(Items.TOTEM_OF_UNDYING) || player.getOffhandItem().is(Items.TOTEM_OF_UNDYING))
+				&& !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) return true;
 
 		// While it is here, in the middle of saving them, nothing else gets them either (an arrow
 		// from further off than it froze, say).
@@ -85,8 +90,9 @@ public final class Mercy {
 		}
 		boolean fell = source.is(DamageTypeTags.IS_FALL) || source.is(DamageTypes.FELL_OUT_OF_WORLD);
 		if (fell) {
-			if (h.mercyFallAt >= 0 && d.playTicks - h.mercyFallAt < FALLS_AGAIN_AFTER) return true;
-			h.mercyFallAt = d.playTicks;
+			long now = Compat.level(player).getServer().getTickCount();
+			if (h.mercyFallAt >= 0 && now - h.mercyFallAt < FALLS_AGAIN_AFTER) return true;
+			h.mercyFallAt = now;
 			caughtFalling(player, director, h);
 			return false;
 		}
@@ -107,9 +113,22 @@ public final class Mercy {
 		return false;
 	}
 
-	/** Black, and back at their bed, with a note. */
+	/** For the tests: as if it had been a long while since it last saved them from anything. */
+	public static void allowAgain(ServerPlayer player) {
+		Director director = Director.get();
+		if (director == null) return;
+		Haunt h = director.haunt(player);
+		h.mercyMobAt = -1;
+		h.mercyFallAt = -1;
+	}
+
+	/** Black, and back at their bed, whole, as if they had only been asleep, with a note. */
 	private static void caughtFalling(ServerPlayer player, Director director, Haunt h) {
-		player.setHealth(Math.max(2.0f, player.getMaxHealth() * 0.25f));
+		player.setHealth(player.getMaxHealth());
+		player.getFoodData().setFoodLevel(20);
+		player.getFoodData().setSaturation(5.0f);
+		player.clearFire();
+		player.setAirSupply(player.getMaxAirSupply());
 		player.resetFallDistance();
 		player.setDeltaMovement(Vec3.ZERO);
 		Cues.effect(player, ScreenEffectPayload.BLACKOUT, 70, 1f);
@@ -165,45 +184,71 @@ public final class Mercy {
 	}
 
 	/**
-	 * It comes for what was about to kill them, plainly, one thing at a time: it is there, behind
-	 * the monster; one of its legs goes into the monster; it lifts it off the ground, slowly; the
-	 * monster dies up there, slumps on the leg, and is gone; then it is gone; and then it says why.
-	 * With more than one, they are all lifted and all die together.
+	 * It comes for what was about to kill them, and they watch: their view is drawn round to it,
+	 * nothing they press moves them, and the picture narrows to a band, until it is over.
+	 * <ol>
+	 *   <li>It is there, behind the one that nearly had them, and their eyes are drawn to it.</li>
+	 *   <li>Any it cannot reach, it does not need to: their eyes are drawn to each in turn, and one
+	 *   by one they are simply gone.</li>
+	 *   <li>Its legs go into the rest, one after another, in at the back and out through the front
+	 *   (eight at most: it stands on the other two). Each flinches, and is lifted off the ground,
+	 *   slowly, hanging loose on the leg, its head going down.</li>
+	 *   <li>They die up there and are gone. Then it is gone. Then it says why.</li>
+	 * </ol>
+	 * In sound-only mode it is never seen, even now: the monsters are lifted by nothing, and their
+	 * view stays their own.
 	 */
 	private static final class Rescue implements Sequence {
+		/** Legs it can put through something: it has ten, and stands on two. */
+		private static final int LEGS_FREE = 8;
+		/** How far from where it stands its legs go into something, along the ground. */
+		private static final double REACH = 3.2;
 		/** It is there. */
 		private static final int APPEAR = 2;
-		/** A leg goes into the monster (the client takes five ticks to put it there). */
-		private static final int REACH = 5;
-		/** The lift, from here to here, eased at both ends. */
-		private static final int LIFT_FROM = 11;
-		private static final int LIFT_TO = 33;
-		/** The monster dies, still held up. The game takes twenty ticks to lay it down and take it away. */
-		private static final int DIES = 42;
-		/** It is gone, once the monster is. */
-		private static final int GONE = DIES + 28;
-		/** And then the words. */
-		private static final int SAY = GONE + 8;
+		/** Long enough for their view to come round to it. */
+		private static final int LOOK = 22;
+		/** From a leg going in to the lift beginning; and the lift itself. */
+		private static final int LIFT_AFTER = 5;
+		private static final int LIFT_FOR = 26;
+		/** Held up, still alive, a moment before they die. */
+		private static final int HANG = 14;
+		/** The game takes twenty ticks to lay the dead down and take them away; then it goes. */
+		private static final int AFTER_DEATH = 28;
+
+		private final ServerPlayer player;
+		private final Haunt haunt;
 		private final List<Mob> monsters;
 		private final List<Vec3> from = new ArrayList<>();
-		/** How far each is lifted: as far as it should be, or as far as the room above it allows. */
 		private final List<Double> lift = new ArrayList<>();
-		private final Haunt haunt;
-		/** The one nearest them, which its leg goes through. */
-		private final Mob held;
+		/** Those its legs go into, nearest it first, and when each goes in. */
+		private final List<Mob> stabbed = new ArrayList<>();
+		private final List<Integer> stabAt = new ArrayList<>();
+		/** Those it cannot reach, gone one by one. */
+		private final List<Mob> vanishing = new ArrayList<>();
+		private final List<Mob> holding = new ArrayList<>();
+		private final int vanishStart;
+		private final int vanishEvery;
+		private final int dies;
+		private final int gone;
+		private final int say;
+		private final int over;
+		/** Whether they are watching it as a scene (and so must be let go of at the end). */
+		private final boolean scene;
 		@Nullable
 		private OccupantEntity entity;
 		private int age;
 
 		Rescue(Haunt haunt, ServerPlayer player, List<Mob> monsters) {
+			this.player = player;
 			this.haunt = haunt;
 			this.monsters = monsters;
 			Cues.effect(player, ScreenEffectPayload.SILENCE, 0, 1f);
-			MinecraftServer server = Compat.level(player).getServer();
-			double want = monsters.size() == 1 ? 1.8 : 0.9;
+			ServerLevel world = Compat.level(player);
+			MinecraftServer server = world.getServer();
+			double want = monsters.size() == 1 ? 1.8 : 1.5;
 			for (Mob m : monsters) {
 				from.add(m.position());
-				lift.add(Math.min(want, room(Compat.level(player), m)));
+				lift.add(Math.min(want, room(world, m)));
 				m.setNoAi(true);
 				m.setNoGravity(true);
 				m.setDeltaMovement(Vec3.ZERO);
@@ -221,13 +266,11 @@ public final class Mercy {
 			// It stands behind the one that nearly had them, on the far side from them.
 			Mob first = monsters.get(0);
 			for (Mob m : monsters) if (m.distanceToSqr(player) < first.distanceToSqr(player)) first = m;
-			this.held = first;
 			Vec3 out = first.position().subtract(player.position());
 			out = new Vec3(out.x, 0, out.z);
 			out = out.lengthSqr() < 1.0E-4 ? Sight.flatLook(player) : out.normalize();
 			// Close enough that a leg reaches it easily, far enough that the leg is seen to reach; and
 			// on the same side of any wall as the monster, so the leg never goes through one.
-			ServerLevel world = Compat.level(player);
 			BlockPos feet = null;
 			for (double d : monsters.size() == 1 ? new double[]{2.4, 1.8, 3.0, 1.3} : new double[]{3.0, 2.2, 1.5}) {
 				Vec3 aim = first.position().add(out.scale(d));
@@ -237,7 +280,6 @@ public final class Mercy {
 					break;
 				}
 			}
-			// In sound-only mode it is never seen, even now: the monster is lifted by nothing.
 			if (feet != null && !OccupantConfig.get().soundOnly) {
 				entity = haunt.spawnOccupant(player, feet, OccupantEntity.Mode.AMBUSH, OccupantEntity.Form.REVEALED);
 				if (entity != null) {
@@ -245,64 +287,131 @@ public final class Mercy {
 					entity.setGazeLocked(true);
 				}
 			}
+			if (entity == null) {
+				// Lifted by nothing: all of them, together.
+				stabbed.addAll(monsters);
+			} else {
+				// The one that nearly had them first; then whatever else is in reach, nearest first,
+				// as long as it has legs to spare. The rest it does not need to touch.
+				Vec3 stands = Vec3.atBottomCenterOf(feet);
+				stabbed.add(first);
+				List<Mob> rest = new ArrayList<>(monsters);
+				rest.remove(first);
+				rest.sort((a, b) -> Double.compare(flat(a.position(), stands), flat(b.position(), stands)));
+				for (Mob m : rest) {
+					boolean reach = flat(m.position(), stands) <= REACH && Math.abs(m.getY() - stands.y) <= 2.5;
+					if (reach && stabbed.size() < LEGS_FREE) stabbed.add(m);
+					else vanishing.add(m);
+				}
+			}
+			// The scene, laid out.
+			int t = APPEAR + LOOK;
+			this.vanishStart = t;
+			this.vanishEvery = vanishing.isEmpty() ? 0 : Mth.clamp(110 / vanishing.size(), 8, 16);
+			if (!vanishing.isEmpty()) t += vanishing.size() * vanishEvery + 14;   // and their eyes come back to it
+			for (int i = 0; i < stabbed.size(); i++) stabAt.add(t + 4 * i);
+			int lifted = t + 4 * (stabbed.size() - 1) + LIFT_AFTER + LIFT_FOR;
+			this.dies = lifted + HANG;
+			this.gone = dies + AFTER_DEATH;
+			this.say = gone + 8;
+			this.over = say + 14;
+			this.scene = entity != null;
+			if (scene) Cues.effect(player, ScreenEffectPayload.CUTSCENE, over + 2, 1f);
 		}
 
 		@Override
-		public boolean tick(ServerPlayer player) {
+		public boolean tick(ServerPlayer p) {
 			age++;
 			if (entity != null) {
 				if (entity.hasVanished()) entity = null;
 				else entity.keepAlive();
 			}
+			ServerLevel level = Compat.level(p);
 			// 1. It is there, already facing them.
 			if (age == APPEAR && entity != null && entity.isConcealed()) {
-				entity.faceTowards(player.getEyePosition());
+				entity.faceTowards(p.getEyePosition());
 				entity.setConcealed(false);
 			}
-			// 2. A leg goes into it.
-			if (age == REACH) {
-				if (entity != null) entity.setHolding(held);
-				Cues.sound(player, SoundEvents.TRIDENT_HIT, SoundSource.HOSTILE, held.position(), 0.9f, 0.6f);
+			// 2. The ones it does not need to touch: looked at, one by one, and gone.
+			for (int i = 0; i < vanishing.size(); i++) {
+				Mob m = vanishing.get(i);
+				int at = vanishStart + i * vanishEvery;
+				if (age == at && entity != null && m.isAlive()) entity.setFocus(m);
+				if (age == at + vanishEvery * 3 / 4 && m.isAlive()) {
+					level.sendParticles(ParticleTypes.LARGE_SMOKE, m.getX(), m.getY() + m.getBbHeight() * 0.5, m.getZ(),
+							10, 0.25, 0.4, 0.25, 0.01);
+					Cues.sound(p, SoundEvents.FIRE_EXTINGUISH, SoundSource.HOSTILE, m.position(), 0.6f, 0.5f);
+					m.discard();
+				}
 			}
-			// 3. Held where they were, then lifted off the ground, slowly and evenly.
-			if (age <= DIES) {
-				float t = Mth.clamp((age - LIFT_FROM) / (float) (LIFT_TO - LIFT_FROM), 0.0f, 1.0f);
-				float ease = t * t * (3 - 2 * t);
+			if (!vanishing.isEmpty() && age == vanishStart + vanishing.size() * vanishEvery && entity != null) entity.setFocus(null);
+			// 3. Its legs go in, one after another, and each one flinches.
+			for (int i = 0; i < stabbed.size(); i++) {
+				if (age != stabAt.get(i) || entity == null) continue;
+				Mob m = stabbed.get(i);
+				if (!m.isAlive()) continue;
+				holding.add(m);
+				entity.setHeld(holding);
+				Cues.sound(p, SoundEvents.TRIDENT_HIT, SoundSource.HOSTILE, m.position(), 1.0f, 0.55f + 0.08f * i);
+				m.hurtServer(level, m.damageSources().generic(), 0.5f);
+			}
+			// Held where they were, then lifted off the ground on the legs, slowly. The leg going in
+			// shoves each one forward a little, and it swings back; its head goes down.
+			if (age <= dies) {
 				for (int i = 0; i < monsters.size(); i++) {
 					Mob m = monsters.get(i);
 					if (!m.isAlive()) continue;
 					Vec3 a = from.get(i);
-					m.setPos(a.x, a.y + lift.get(i) * ease, a.z);
+					int s = stabbed.indexOf(m);
+					double up = 0.0, push = 0.0;
+					Vec3 shove = Vec3.ZERO;
+					if (s >= 0) {
+						int since = age - stabAt.get(s);
+						float t = Mth.clamp((since - LIFT_AFTER) / (float) LIFT_FOR, 0.0f, 1.0f);
+						up = lift.get(i) * (t * t * (3 - 2 * t));
+						if (since > 0 && entity != null) {
+							push = 0.25 * Math.exp(-since / 3.0);
+							Vec3 d = a.subtract(entity.position());
+							d = new Vec3(d.x, 0, d.z);
+							if (d.lengthSqr() > 1.0E-4) shove = d.normalize();
+							float x = m.getXRot();
+							m.setXRot(x + Math.min(6.0f, Math.max(-6.0f, 70.0f - x)));
+						}
+					}
+					m.setPos(a.x + shove.x * push, a.y + up, a.z + shove.z * push);
 					m.setDeltaMovement(Vec3.ZERO);
 				}
 			}
-			// 4. It dies, up there.
-			if (age == DIES) {
-				ServerLevel level = Compat.level(player);
-				for (Mob e : monsters) {
-					if (!e.isAlive()) continue;
-					level.sendParticles(ParticleTypes.SMOKE, e.getX(), e.getY() + e.getBbHeight() * 0.6, e.getZ(), 12, 0.2, 0.3, 0.2, 0.01);
-					e.hurtServer(level, e.damageSources().genericKill(), Float.MAX_VALUE);
+			// 4. They die, up there.
+			if (age == dies) {
+				for (Mob m : stabbed) {
+					if (!m.isAlive()) continue;
+					level.sendParticles(ParticleTypes.SMOKE, m.getX(), m.getY() + m.getBbHeight() * 0.6, m.getZ(), 12, 0.2, 0.3, 0.2, 0.01);
+					m.hurtServer(level, m.damageSources().genericKill(), Float.MAX_VALUE);
 				}
 			}
 			// 5. It is gone.
-			if (age == GONE && entity != null) {
+			if (age == gone && entity != null) {
 				entity.vanish();
 				entity = null;
 			}
 			// 6. And it says why.
-			if (age == SAY) {
+			if (age == say) {
 				String[] lines = monsters.size() == 1 ? ONE : MANY;
-				say(player, lines[player.getRandom().nextInt(lines.length)]);
-				return false;
+				say(p, lines[p.getRandom().nextInt(lines.length)]);
 			}
-			return true;
+			return age < over;
+		}
+
+		private static double flat(Vec3 a, Vec3 b) {
+			double dx = a.x - b.x, dz = a.z - b.z;
+			return Math.sqrt(dx * dx + dz * dz);
 		}
 
 		/** Nothing solid between the middle of {@code m} and {@code to}. */
 		private static boolean clear(ServerLevel world, Mob m, Vec3 to) {
-			Vec3 from = m.position().add(0.0, m.getBbHeight() * 0.5, 0.0);
-			return world.clip(new net.minecraft.world.level.ClipContext(from, to, net.minecraft.world.level.ClipContext.Block.COLLIDER,
+			Vec3 middle = m.position().add(0.0, m.getBbHeight() * 0.5, 0.0);
+			return world.clip(new net.minecraft.world.level.ClipContext(middle, to, net.minecraft.world.level.ClipContext.Block.COLLIDER,
 					net.minecraft.world.level.ClipContext.Fluid.NONE, m)).getType() == net.minecraft.world.phys.HitResult.Type.MISS;
 		}
 
@@ -328,6 +437,14 @@ public final class Mercy {
 				m.setNoGravity(false);
 			}
 			if (entity != null) entity.vanish();
+			// Their view is their own again.
+			if (scene) {
+				try {
+					Cues.effect(player, ScreenEffectPayload.CUTSCENE, 0, 0f);
+				} catch (RuntimeException e) {
+					Occupant.LOGGER.debug("Could not end the scene for {}", player.getName().getString(), e);
+				}
+			}
 		}
 
 		@Nullable

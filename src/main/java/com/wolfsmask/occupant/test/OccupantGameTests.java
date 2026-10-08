@@ -527,6 +527,34 @@ public final class OccupantGameTests {
 	}
 
 	/**
+	 * The void never takes them, however often they fall into it: each time they are caught, and
+	 * wake whole, fed and with all their health, not just alive.
+	 */
+	@GameTest(maxTicks = 200)
+	public void theVoidNeverTakesThem(GameTestHelper helper) {
+		Director director = Director.get();
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		OccupantConfig.get().hauntCreative = true;
+		HauntData data = director.data(player);
+		data.introduced = true;
+		data.setAct(2);
+		player.getFoodData().setFoodLevel(3);
+		player.setHealth(1.0f);
+		boolean first = com.wolfsmask.occupant.director.Mercy.allowDeath(player, player.damageSources().fellOutOfWorld());
+		Occupant.LOGGER.info("[gametest] void: allowed {}, health {} of {}, food {}", first, player.getHealth(),
+				player.getMaxHealth(), player.getFoodData().getFoodLevel());
+		helper.assertTrue(!first, "Falling out of the world should be caught");
+		helper.assertTrue(player.getHealth() >= player.getMaxHealth() - 0.01f && player.getFoodData().getFoodLevel() == 20,
+				"They should wake whole: health " + player.getHealth() + ", food " + player.getFoodData().getFoodLevel());
+		helper.runAfterDelay(80, () -> {
+			player.setHealth(1.0f);
+			boolean again = com.wolfsmask.occupant.director.Mercy.allowDeath(player, player.damageSources().fellOutOfWorld());
+			helper.assertTrue(!again, "Falling out of the world again, a few seconds later, should be caught again");
+			helper.succeed();
+		});
+	}
+
+	/**
 	 * The rescue, run to its end: a leg goes into the monster, it is lifted off the ground, and only
 	 * then dies, and then it is gone.
 	 */
@@ -549,8 +577,9 @@ public final class OccupantGameTests {
 		player.setHealth(1.0f);
 		helper.assertTrue(!com.wolfsmask.occupant.director.Mercy.allowDeath(player, player.damageSources().mobAttack(zombie)),
 				"A zombie's killing blow should be stopped");
-		// Partway up: the leg has gone in, the lift is most of the way, and it has not died yet.
-		helper.runAfterDelay(30, () -> {
+		// Partway up: their view has come round to it, the leg has gone in, the lift is most of the
+		// way, and it has not died yet.
+		helper.runAfterDelay(50, () -> {
 			Occupant.LOGGER.info("[gametest] rescue: zombie {} above the ground, alive {}", zombie.getY() - ground, zombie.isAlive());
 			helper.assertTrue(zombie.isAlive() && zombie.getY() > ground + 0.6, "The zombie should be held up, still alive, before it dies");
 			// Only the one come for this player: the other rescue test's is not far off.
@@ -592,12 +621,65 @@ public final class OccupantGameTests {
 		player.setHealth(1.0f);
 		helper.assertTrue(!com.wolfsmask.occupant.director.Mercy.allowDeath(player, player.damageSources().mobAttack(zombie)),
 				"A zombie's killing blow should be stopped");
-		// Well past where its fuse would have run out, and before they die together.
-		helper.runAfterDelay(32, () -> {
+		// Well past where its fuse would have run out: held still, its fuse out, not gone off.
+		helper.runAfterDelay(30, () -> {
 			Occupant.LOGGER.info("[gametest] rescue: creeper alive {}, {} above the ground", creeper.isAlive(), creeper.getY() - ground);
-			helper.assertTrue(creeper.isAlive() && creeper.getY() > ground + 0.3, "The creeper should be held up, its fuse out, not gone off");
+			helper.assertTrue(creeper.isAlive(), "The creeper should be held, its fuse out, not gone off");
 		});
 		helper.succeedWhen(() -> helper.assertTrue(!creeper.isAlive() && !zombie.isAlive(), "Both should die together"));
+	}
+
+	/**
+	 * Surrounded by ten: it has ten legs and stands on two, so it never has more than eight of
+	 * them on its legs at once; those it cannot reach are simply gone; and at the end every one is.
+	 */
+	@GameTest(maxTicks = 420)
+	public void theRescueTakesNoMoreThanEight(GameTestHelper helper) {
+		Director director = Director.get();
+		ServerLevel level = helper.getLevel();
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		OccupantConfig.get().hauntCreative = true;
+		HauntData data = director.data(player);
+		data.introduced = true;
+		data.setAct(2);
+		// Well away from the other tests: open, level ground all round, so it always has somewhere to stand.
+		BlockPos stand = helper.absolutePos(new BlockPos(4, 2, 4)).offset(0, 0, -480);
+		for (BlockPos p : BlockPos.betweenClosed(stand.offset(-8, -1, -8), stand.offset(8, 4, 8))) {
+			level.setBlock(p, (p.getY() == stand.getY() - 1 ? net.minecraft.world.level.block.Blocks.STONE
+					: net.minecraft.world.level.block.Blocks.AIR).defaultBlockState(), 3);
+		}
+		player.snapTo(stand.getX() + 0.5, stand.getY(), stand.getZ() + 0.5, 0.0f, 0.0f);
+		java.util.List<net.minecraft.world.entity.Mob> zombies = new java.util.ArrayList<>();
+		for (int k = 0; k < 10; k++) {
+			double a = Math.PI * 2 * k / 10;
+			BlockPos at = stand.offset((int) Math.round(Math.cos(a) * 2.5), 0, (int) Math.round(Math.sin(a) * 2.5));
+			net.minecraft.world.entity.Mob z = summon(helper, "zombie", at);
+			if (z != null && !zombies.contains(z)) zombies.add(z);
+		}
+		helper.assertTrue(zombies.size() >= 9, "Could not summon the zombies (" + zombies.size() + ")");
+		player.setHealth(1.0f);
+		helper.assertTrue(!com.wolfsmask.occupant.director.Mercy.allowDeath(player, player.damageSources().mobAttack(zombies.get(0))),
+				"A zombie's killing blow should be stopped");
+		int[] most = {0};
+		for (int t = 10; t <= 400; t += 10) {
+			int when = t;
+			helper.runAfterDelay(t, () -> {
+				for (OccupantEntity it : level.getEntitiesOfClass(OccupantEntity.class, player.getBoundingBox().inflate(24.0),
+						e -> e.isHaunting(player))) {
+					int held = it.getHeld().length;
+					most[0] = Math.max(most[0], held);
+					helper.assertTrue(held <= 8, "It should never have more than eight on its legs (" + held + " at " + when + ")");
+				}
+			});
+		}
+		helper.succeedWhen(() -> {
+			long alive = zombies.stream().filter(net.minecraft.world.entity.Mob::isAlive).count();
+			helper.assertTrue(alive == 0, alive + " zombies are still alive");
+			helper.assertTrue(level.getEntitiesOfClass(OccupantEntity.class, player.getBoundingBox().inflate(24.0),
+					e -> e.isHaunting(player)).isEmpty(), "Then it should be gone");
+			helper.assertTrue(most[0] >= 1, "It should have had at least one on a leg");
+			Occupant.LOGGER.info("[gametest] rescue of ten: at most {} on its legs at once", most[0]);
+		});
 	}
 
 	/**
@@ -612,7 +694,7 @@ public final class OccupantGameTests {
 				String.format(java.util.Locale.ROOT, "summon minecraft:%s %.1f %d %.1f {PersistenceRequired:1b}",
 						kind, at.getX() + 0.5, at.getY(), at.getZ() + 0.5));
 		return level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class,
-				net.minecraft.world.phys.AABB.ofSize(net.minecraft.world.phys.Vec3.atBottomCenterOf(at).add(0, 1, 0), 2.0, 3.0, 2.0),
+				net.minecraft.world.phys.AABB.ofSize(net.minecraft.world.phys.Vec3.atBottomCenterOf(at).add(0, 1, 0), 0.9, 3.0, 0.9),
 				m -> com.wolfsmask.occupant.util.Kinds.is(m, kind))
 				.stream().findFirst().orElse(null);
 	}

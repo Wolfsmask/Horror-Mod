@@ -164,6 +164,7 @@ public final class ScreenEffects {
 			case ScreenEffectPayload.FOG -> ClientFog.set(payload.intensity(), payload.duration());
 			case ScreenEffectPayload.ACT -> PauseLines.act = Math.round(payload.intensity());
 			case ScreenEffectPayload.JOINED -> joined();
+			case ScreenEffectPayload.CUTSCENE -> Cutscene.start(payload.duration());
 			default -> {
 			}
 		}
@@ -187,6 +188,7 @@ public final class ScreenEffects {
 
 	public static void reset() {
 		haunted = false;
+		Cutscene.reset();
 		blackoutAge = blackoutLength = 0;
 		flickerAge = -1;
 		staticAge = staticLength = 0;
@@ -274,6 +276,8 @@ public final class ScreenEffects {
 		float noise = Math.max(proximityStatic, burst);
 		if (cfg.reduceFlashing) noise *= 0.4f;
 		if (cfg.screenStatic && noise > 0.01f) drawStatic(ctx, w, h, Math.min(0.85f, noise));
+		// A scene: the picture narrows to a band (under the words, which come in it).
+		Cutscene.render(ctx, w, h);
 
 		float dark = Math.max(flickerDarkness(cfg), blackoutDarkness(tickDelta, cfg));
 		if (dark > 0.001f) {

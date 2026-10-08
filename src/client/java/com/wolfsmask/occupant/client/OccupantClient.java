@@ -24,6 +24,9 @@ public final class OccupantClient implements ClientModInitializer {
 		ClientPlayNetworking.registerGlobalReceiver(WhisperPayload.TYPE, (payload, context) ->
 				context.client().execute(() -> ScreenEffects.whisper(payload)));
 
+		ClientTickEvents.START_CLIENT_TICK.register(Cutscene::release);
+		ClientTickEvents.END_CLIENT_TICK.register(Cutscene::tick);
+		ClientTickEvents.END_CLIENT_TICK.register(com.wolfsmask.occupant.client.render.Ragdoll::tick);
 		ClientTickEvents.END_CLIENT_TICK.register(ScreenEffects::tick);
 		ClientTickEvents.END_CLIENT_TICK.register(ClientScares::screenshots);
 		ClientTickEvents.END_CLIENT_TICK.register(ClientScares::coordinates);

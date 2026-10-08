@@ -60,8 +60,10 @@ public class OccupantEntity extends PathfinderMob {
 	 * view, it stays unseen until the player has looked away from it, and then it is simply there.
 	 */
 	private static final EntityDataAccessor<Boolean> CONCEALED = SynchedEntityData.defineId(OccupantEntity.class, EntityDataSerializers.BOOLEAN);
-	/** What it has one of its legs through, by entity id; -1 for nothing. */
-	private static final EntityDataAccessor<Integer> HOLDING = SynchedEntityData.defineId(OccupantEntity.class, EntityDataSerializers.INT);
+	/** What it has its legs through, by entity id, in the order they went in: "12,40,7"; empty for nothing. */
+	private static final EntityDataAccessor<String> HELD = SynchedEntityData.defineId(OccupantEntity.class, EntityDataSerializers.STRING);
+	/** Where the eyes of whoever is watching are drawn, by entity id; -1 for the whole of what it is doing. */
+	private static final EntityDataAccessor<Integer> FOCUS = SynchedEntityData.defineId(OccupantEntity.class, EntityDataSerializers.INT);
 
 	/** Ticks out of their sight before it is there: long enough for their screen to catch up. */
 	private static final int REVEAL_AFTER = 6;
@@ -128,7 +130,8 @@ public class OccupantEntity extends PathfinderMob {
 		builder.define(MODE, (byte) Mode.IDLE.ordinal());
 		builder.define(FORM, (byte) Form.VEILED.ordinal());
 		builder.define(CONCEALED, false);
-		builder.define(HOLDING, -1);
+		builder.define(HELD, "");
+		builder.define(FOCUS, -1);
 	}
 
 	// ------------------------------------------------------------------ state
@@ -144,14 +147,47 @@ public class OccupantEntity extends PathfinderMob {
 		return distanceSqr < range * range;
 	}
 
-	/** The id of what it has one of its legs through, or -1. */
-	public int getHolding() {
-		return this.entityData.get(HOLDING);
+	/** The ids of what it has its legs through, in the order they went in. */
+	public int[] getHeld() {
+		String held = this.entityData.get(HELD);
+		if (held.isEmpty()) return new int[0];
+		String[] parts = held.split(",");
+		int[] ids = new int[parts.length];
+		int n = 0;
+		for (String part : parts) {
+			try {
+				ids[n] = Integer.parseInt(part.trim());
+				n++;
+			} catch (NumberFormatException ignored) {
+				// Never written by anything but setHeld; a bad entry is skipped, not trusted.
+			}
+		}
+		return n == ids.length ? ids : java.util.Arrays.copyOf(ids, n);
 	}
 
-	/** Puts one of its legs through this entity, and holds it there; null to let go. */
-	public void setHolding(@Nullable Entity held) {
-		this.entityData.set(HOLDING, held == null ? -1 : held.getId());
+	/** The first thing it has a leg through, or -1. */
+	public int getHolding() {
+		int[] held = getHeld();
+		return held.length == 0 ? -1 : held[0];
+	}
+
+	/** Its legs through these, each held there; empty to let go of everything. */
+	public void setHeld(java.util.List<? extends Entity> held) {
+		StringBuilder ids = new StringBuilder();
+		for (Entity e : held) {
+			if (ids.length() > 0) ids.append(',');
+			ids.append(e.getId());
+		}
+		this.entityData.set(HELD, ids.toString());
+	}
+
+	/** Where a watcher's eyes are drawn: an entity's id, or -1 for the whole of what it is doing. */
+	public int getFocus() {
+		return this.entityData.get(FOCUS);
+	}
+
+	public void setFocus(@Nullable Entity focus) {
+		this.entityData.set(FOCUS, focus == null ? -1 : focus.getId());
 	}
 
 	public boolean isConcealed() {

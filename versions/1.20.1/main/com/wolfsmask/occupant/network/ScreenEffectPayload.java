@@ -34,6 +34,11 @@ public record ScreenEffectPayload(int effect, int duration, float intensity) imp
 	public static final int SAVING = 8;
 	/** They have just come into a world it haunts: the few seconds of black and a line, the way in. */
 	public static final int JOINED = 9;
+	/**
+	 * A scene they watch: for {@code duration} ticks (0 ends it) their view is drawn to what it is
+	 * doing, nothing they press moves them, and the picture narrows to a band.
+	 */
+	public static final int CUTSCENE = 10;
 
 	public static final PacketType<ScreenEffectPayload> TYPE = PacketType.create(Occupant.id("screen_effect"),
 			buf -> new ScreenEffectPayload(buf.readVarInt(), buf.readVarInt(), buf.readFloat()));
