@@ -1,7 +1,15 @@
-=== classes matching \.(ZombieVillagerModel|PiglinModel|AbstractPiglinModel|ZombifiedPiglinModel|DrownedModel|ZombieModel|AbstractZombieModel)$
-net.minecraft.client.model.AbstractZombieModel
-net.minecraft.client.model.DrownedModel
-net.minecraft.client.model.PiglinModel
-net.minecraft.client.model.ZombieModel
-net.minecraft.client.model.ZombieVillagerModel
-=== classes matching renderer\.feature\.ModelFeatureRenderer$
+=== net.minecraft.client.MouseHandler (-public)
+public class client.MouseHandler {
+  public boolean isMouseGrabbed();
+  public void grabMouse();
+=== net.minecraft.client.Minecraft (-public)
+public class client.Minecraft extends util.thread.ReentrantBlockableEventLoop<Runnable> implements blaze3d.platform.WindowEventHandler {
+  public client.gui.screens.Screen screen;
+  public void setScreen(client.gui.screens.Screen);
+  public void setOverlay(client.gui.screens.Overlay);
+  public client.gui.screens.worldselection.WorldOpenFlows createWorldOpenFlows();
+  public void clearLevel(client.gui.screens.Screen);
+  public void forceSetScreen(client.gui.screens.Screen);
+  public network.chat.Component grabPanoramixScreenshot(java.io.File, int, int);
+  public client.gui.screens.Overlay getOverlay();
+  public client.gui.screens.social.PlayerSocialManager getPlayerSocialManager();
