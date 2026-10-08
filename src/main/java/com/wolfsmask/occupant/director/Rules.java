@@ -71,7 +71,8 @@ final class Rules {
 
 	private static void run(MinecraftServer server, String command) {
 		try {
-			server.getCommands().performPrefixedCommand(server.createCommandSourceStack(), command);
+			// Quietly: otherwise every operator is told "Teleported ..." in chat, and the spell breaks.
+			server.getCommands().performPrefixedCommand(server.createCommandSourceStack().withSuppressedOutput(), command);
 		} catch (RuntimeException e) {
 			Occupant.LOGGER.warn("Could not run {}", command, e);
 		}

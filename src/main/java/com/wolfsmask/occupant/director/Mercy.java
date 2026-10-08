@@ -51,6 +51,7 @@ public final class Mercy {
 	private static final long MONSTERS_AGAIN_AFTER = 20L * 60 * 10;
 	/** Nor from falls (a guard against any loop), in ticks of play. */
 	private static final long FALLS_AGAIN_AFTER = 20L * 30;
+	private static final String RESCUE = "mercy";
 	private static final String[] FALL_NOTES = {"It doesn't like that.", "Not like that.",
 			"You don't get to leave that way.", "It caught you. It will always catch you."};
 	private static final String[] ONE = {"I can't have you dying like that.", "Not to that. Never to that.",
@@ -76,6 +77,12 @@ public final class Mercy {
 		// A totem saves them by itself; it lets the totem do it.
 		if (player.getMainHandItem().is(Items.TOTEM_OF_UNDYING) || player.getOffhandItem().is(Items.TOTEM_OF_UNDYING)) return true;
 
+		// While it is here, in the middle of saving them, nothing else gets them either (an arrow
+		// from further off than it froze, say).
+		if (RESCUE.equals(h.activeId)) {
+			player.setHealth(Math.max(player.getHealth(), 2.0f));
+			return false;
+		}
 		boolean fell = source.is(DamageTypeTags.IS_FALL) || source.is(DamageTypes.FELL_OUT_OF_WORLD);
 		if (fell) {
 			if (h.mercyFallAt >= 0 && d.playTicks - h.mercyFallAt < FALLS_AGAIN_AFTER) return true;
@@ -96,7 +103,7 @@ public final class Mercy {
 			say(player, ONE[player.getRandom().nextInt(ONE.length)]);
 			return false;
 		}
-		director.beginNow(player, "mercy", new Rescue(h, player, monsters));
+		director.beginNow(player, RESCUE, new Rescue(h, player, monsters));
 		return false;
 	}
 
