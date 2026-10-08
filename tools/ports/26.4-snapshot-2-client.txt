@@ -1,7 +1,5 @@
-# 26.4-snapshot-2 client on 8fdb6c3d592c7d3678b73b37920c76152620d1b2: failure
+# 26.4-snapshot-2 client on 3ea6dbd32f83a6695190db8826f96cd9a6350774: cancelled
 === client.log
-/home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/Trifles.java:231: error: Places is not public in com.wolfsmask.occupant.world; cannot be accessed from outside package
-		return leaves && !com.wolfsmask.occupant.world.Places.looksBuilt(world, base, 3);
 /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/ArenaGameTests.java:107: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
 /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:64: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
 /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:96: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
@@ -18,52 +16,92 @@
 /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:684: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
 /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:748: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
 /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:842: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-> Task :compileJava FAILED
-* What went wrong:
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/director/Trifles.java:231: error: Places is not public in com.wolfsmask.occupant.world; cannot be accessed from outside package
-  		return leaves && !com.wolfsmask.occupant.world.Places.looksBuilt(world, base, 3);
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/ArenaGameTests.java:107: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:64: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:96: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:122: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:185: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:279: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:313: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:357: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:388: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:493: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:538: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:582: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:658: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:684: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:748: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:842: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-BUILD FAILED in 27s
+Note: /home/runner/work/Horror-Mod/Horror-Mod/src/client/java/com/wolfsmask/occupant/client/OccupantClient.java uses or overrides a deprecated API.
+	- fabric-client-gametest-api-v1 6.0.8+4be74c3f04
+	- occupant 0.1.0+mc26.4-snapshot-2
+[14:30:33] [Render thread/INFO] (occupant) The Occupant has moved in. Type /occupant check in game to test it.
+	at knot//net.minecraft.client.Minecraft.wrapMethod$bcc000$fabric-client-gametest-api-v1$onRun(Minecraft.java:5723)
+[14:30:42] [Render thread/INFO] (occupant) [client] the mode screen has been drawn
+[14:30:46] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-mode -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0000_occupant-mode.png
+[14:30:46] [Render thread/INFO] (occupant) [client] mode clicked at 213, 162: recording
+[14:30:46] [Render thread/INFO] (occupant) [client] the gate screen has been drawn
+[14:30:49] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-gate -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0001_occupant-gate.png
+[14:31:03] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-gate-later -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0002_occupant-gate-later.png
+[14:31:03] [Render thread/INFO] (occupant) [client] gate clicked at 213, 223: leave it alone
+[14:31:04] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-left-alone -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0003_occupant-left-alone.png
+[14:31:05] [Render thread/INFO] (occupant) [client] gate clicked at 213, 129: create world
+[14:31:08] [Render thread/INFO] (occupant) [client] creating the world straight away
+[14:31:08] [Server thread/INFO] (occupant) This world tells the story as the Creator Cut
+[14:31:30] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-quick-world -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0004_occupant-quick-world.png
+[14:31:32] [Server thread/INFO] (Minecraft) Stopping singleplayer server as player logged out
+[14:31:32] [Server thread/INFO] (Minecraft) Stopping server
+[14:31:37] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-title -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0005_occupant-title.png
+[14:31:38] [Server thread/INFO] (occupant) This world tells the story as a slow burn
+[14:31:49] [Test thread/INFO] (occupant) [client-gametest] the story has begun: true
+[14:31:49] [Server thread/INFO] (occupant) Player960 tried to leave survival; put back
+[14:31:50] [Test thread/INFO] (occupant) [client-gametest] creative refused: true
+[14:31:53] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-stare -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0006_occupant-stare.png
+[14:31:55] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-veiled -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0007_occupant-veiled.png
+[14:31:56] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-loom -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0008_occupant-loom.png
+[14:31:58] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-chase -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0009_occupant-chase.png
+[14:32:00] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-three-quarter -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0010_occupant-three-quarter.png
+[14:32:02] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-face -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0011_occupant-face.png
+[14:32:03] [Test thread/INFO] (occupant) [client-gametest] pale face pixels in the close-up: 2068
+[14:32:05] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-looking-up -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0012_occupant-looking-up.png
+[14:32:05] [Test thread/INFO] (occupant) [client-gametest] pale pixels looking up at it: 2736
+[14:32:07] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-shove -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0013_occupant-shove.png
+[14:32:09] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-after-shove -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0014_occupant-after-shove.png
+[14:32:11] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-corridor -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0015_occupant-corridor.png
 --- the mod's own checks, last of them ---
+[14:31:49] [Test thread/INFO] (occupant) [client-gametest] the story has begun: true
+[14:31:50] [Test thread/INFO] (occupant) [client-gametest] creative refused: true
+[14:32:03] [Test thread/INFO] (occupant) [client-gametest] pale face pixels in the close-up: 2068
+[14:32:05] [Test thread/INFO] (occupant) [client-gametest] pale pixels looking up at it: 2736
 --- last of the server thread in client.log ---
+[14:32:09] [Server thread/INFO] (Minecraft) System chat: Successfully filled 12 block(s)
+[14:32:09] [Server thread/INFO] (Minecraft) System chat: Changed the block at 4, -56, 7
+[14:32:09] [Server thread/INFO] (Minecraft) System chat: Changed the block at 4, -56, 12
+[14:32:09] [Server thread/INFO] (Minecraft) System chat: Killed The Occupant
+[14:32:09] [Server thread/INFO] (Minecraft) System chat: It is standing behind you... no, in front of you.
+[14:32:11] [Server thread/INFO] (Minecraft) System chat: Successfully filled 181 block(s)
+[14:32:11] [Server thread/INFO] (Minecraft) System chat: Successfully filled 50 block(s)
+[14:32:11] [Server thread/INFO] (Minecraft) System chat: Successfully filled 9 block(s)
+[14:32:11] [Server thread/INFO] (Minecraft) System chat: Successfully filled 44 block(s)
+[14:32:11] [Server thread/INFO] (Minecraft) System chat: Successfully filled 9 block(s)
+[14:32:11] [Server thread/INFO] (Minecraft) System chat: Successfully filled 22 block(s)
+[14:32:11] [Server thread/INFO] (Minecraft) System chat: Successfully filled 9 block(s)
+[14:32:11] [Server thread/INFO] (Minecraft) System chat: Successfully filled 26 block(s)
+[14:32:11] [Server thread/INFO] (Minecraft) System chat: Successfully filled 9 block(s)
+[14:32:11] [Server thread/INFO] (Minecraft) System chat: Successfully filled 8 block(s)
+[14:32:11] [Server thread/INFO] (Minecraft) System chat: Successfully filled 8 block(s)
+[14:32:11] [Server thread/INFO] (Minecraft) System chat: Successfully filled 8 block(s)
+[14:32:11] [Server thread/INFO] (Minecraft) System chat: Successfully filled 8 block(s)
+[14:32:11] [Server thread/INFO] (Minecraft) System chat: Killed The Occupant
+[14:32:11] [Server thread/INFO] (Minecraft) System chat: It is standing behind you... no, in front of you.
 --- tail of client.log ---
-  		                            ^
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:582: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  		ServerPlayer player = helper.makeMockServerPlayerInLevel();
-  		                            ^
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:658: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  		ServerPlayer player = helper.makeMockServerPlayerInLevel();
-  		                            ^
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:684: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  		ServerPlayer player = helper.makeMockServerPlayerInLevel();
-  		                            ^
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:748: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  		ServerPlayer player = helper.makeMockServerPlayerInLevel();
-  		                            ^
-  /home/runner/work/Horror-Mod/Horror-Mod/src/main/java/com/wolfsmask/occupant/test/OccupantGameTests.java:842: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  		ServerPlayer player = helper.makeMockServerPlayerInLevel();
-  		                            ^
-  1 error
-  16 warnings
-
-* Try:
-> Check your code and dependencies to fix the compilation error(s)
-> Run with --scan to get full insights from a Build Scan (powered by Develocity).
-
-BUILD FAILED in 27s
-1 actionable task: 1 executed
+[14:32:07] [Server thread/INFO] (Minecraft) System chat: Teleported The Occupant to 6.500000, -60.000000, 9.500000
+[14:32:07] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-shove -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0013_occupant-shove.png
+[14:32:09] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-after-shove -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0014_occupant-after-shove.png
+[14:32:09] [Server thread/INFO] (Minecraft) System chat: Successfully filled 258 block(s)
+[14:32:09] [Server thread/INFO] (Minecraft) System chat: Successfully filled 12 block(s)
+[14:32:09] [Server thread/INFO] (Minecraft) System chat: Changed the block at 4, -56, 7
+[14:32:09] [Server thread/INFO] (Minecraft) System chat: Changed the block at 4, -56, 12
+[14:32:09] [Server thread/INFO] (Minecraft) System chat: Killed The Occupant
+[14:32:09] [Server thread/INFO] (Minecraft) System chat: It is standing behind you... no, in front of you.
+[14:32:11] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-corridor -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0015_occupant-corridor.png
+[14:32:11] [Server thread/INFO] (Minecraft) System chat: Successfully filled 181 block(s)
+[14:32:11] [Server thread/INFO] (Minecraft) System chat: Successfully filled 50 block(s)
+[14:32:11] [Server thread/INFO] (Minecraft) System chat: Successfully filled 9 block(s)
+[14:32:11] [Server thread/INFO] (Minecraft) System chat: Successfully filled 44 block(s)
+[14:32:11] [Server thread/INFO] (Minecraft) System chat: Successfully filled 9 block(s)
+[14:32:11] [Server thread/INFO] (Minecraft) System chat: Successfully filled 22 block(s)
+[14:32:11] [Server thread/INFO] (Minecraft) System chat: Successfully filled 9 block(s)
+[14:32:11] [Server thread/INFO] (Minecraft) System chat: Successfully filled 26 block(s)
+[14:32:11] [Server thread/INFO] (Minecraft) System chat: Successfully filled 9 block(s)
+[14:32:11] [Server thread/INFO] (Minecraft) System chat: Successfully filled 8 block(s)
+[14:32:11] [Server thread/INFO] (Minecraft) System chat: Successfully filled 8 block(s)
+[14:32:11] [Server thread/INFO] (Minecraft) System chat: Successfully filled 8 block(s)
+[14:32:11] [Server thread/INFO] (Minecraft) System chat: Successfully filled 8 block(s)
+[14:32:11] [Server thread/INFO] (Minecraft) System chat: Killed The Occupant
+[14:32:11] [Server thread/INFO] (Minecraft) System chat: It is standing behind you... no, in front of you.
+=== threads 40 s into preparing spawn
