@@ -1,30 +1,17 @@
-=== net.minecraft.client.model.ZombieModel (-public)
-Error: class not found: client.model.ZombieModel
-=== net.minecraft.client.model.AbstractZombieModel (-public)
-Error: class not found: client.model.AbstractZombieModel
-=== net.minecraft.client.model.SkeletonModel (-public)
-Error: class not found: client.model.SkeletonModel
-=== net.minecraft.client.model.monster.zombie.ZombieModel (-public)
-public class client.model.monster.zombie.ZombieModel<S extends client.renderer.entity.state.ZombieRenderState> extends client.model.monster.zombie.AbstractZombieModel<S> {
-=== net.minecraft.client.model.monster.zombie.AbstractZombieModel (-public)
-public abstract class client.model.monster.zombie.AbstractZombieModel<S extends client.renderer.entity.state.ZombieRenderState> extends client.model.HumanoidModel<S> {
-  public void setupAnim(S);
-  public void setupAnim(client.renderer.entity.state.HumanoidRenderState);
-  public void setupAnim(Object);
-=== net.minecraft.client.model.monster.skeleton.SkeletonModel (-public)
-public class client.model.monster.skeleton.SkeletonModel<S extends client.renderer.entity.state.SkeletonRenderState> extends client.model.HumanoidModel<S> {
-  public void setupAnim(S);
-  public void setupAnim(client.renderer.entity.state.HumanoidRenderState);
-  public void setupAnim(Object);
-=== net.minecraft.client.renderer.entity.state.HumanoidRenderState (-public)
-public class client.renderer.entity.state.HumanoidRenderState extends client.renderer.entity.state.ArmedEntityRenderState {
-  public float speedValue;
-  public float maxCrossbowChargeDuration;
-=== net.minecraft.client.renderer.entity.state.ZombieRenderState (-public)
-public class client.renderer.entity.state.ZombieRenderState extends client.renderer.entity.state.UndeadRenderState {
-=== net.minecraft.client.MouseHandler (-p)
-public class client.MouseHandler {
-  private double accumulatedDX;
-  private double accumulatedDY;
-  public void handleAccumulatedMovement();
-  private void turnPlayer(double);
+=== net.minecraft.world.entity.Entity (-public)
+public abstract class world.entity.Entity implements world.Nameable, world.level.entity.EntityAccess, world.scores.ScoreHolder, network.syncher.SyncedDataHolder, core.component.DataComponentGetter, world.entity.ItemOwner, world.entity.SlotProvider, util.debug.DebugValueSource, core.TypedInstance<world.entity.EntityType<?>>, registry.fluid.EntityFluidExtension, attachment.v1.AttachmentTarget, event.lifecycle.v1.EntityLoadData, permission.v1.PermissionContextOwner {
+  public void stopRiding();
+  public boolean isPassenger();
+=== net.minecraft.world.entity.Mob (-public)
+public abstract class world.entity.Mob extends world.entity.LivingEntity implements world.entity.Targeting,world.entity.EquipmentUser,world.entity.Leashable {
+  public void setTarget(world.entity.LivingEntity);
+=== net.minecraft.world.damagesource.DamageSources (-public)
+public class world.damagesource.DamageSources {
+  public world.damagesource.DamageSource mobAttack(world.entity.LivingEntity);
+  public world.damagesource.DamageSource genericKill();
+=== net.minecraft.client.KeyMapping (-public)
+public class client.KeyMapping implements Comparable<client.KeyMapping> {
+  public static void set(blaze3d.platform.InputConstants$Key, boolean);
+  public static void setAll();
+  public static void releaseAll();
+  public static void resetMapping();
