@@ -1,4 +1,4 @@
-# 1.21.11 on d2d4c6d628d1b4478347a4cb9f3e1cfc9df058e4: build success, tests success, jar success
+# 1.21.11 on 141868402400f9289dcf48df90528a04db3ba489: build success, tests success, jar success
 > Configure project :
 > Task :versionSourcesMain
 > Task :compileJava
@@ -31,6 +31,7 @@ jar: build/libs/occupant-0.1.2+mc1.21.11.jar
     "FogRendererMixin",
     "HumanoidModelMixin",
     "LivingEntityRendererMixin",
+    "ModelFeatureRendererMixin",
     "MouseHandlerMixin",
     "ScreenAccess",
     "SkeletonModelMixin",
@@ -42,31 +43,31 @@ jar: build/libs/occupant-0.1.2+mc1.21.11.jar
   }
 }
 the mixin class itself was remapped
-[22:11:29] [Server thread/INFO] (occupant) [gametest] last camp at BlockPos{x=2786226, y=-61, z=-5563307}, chest at BlockPos{x=2786229, y=-60, z=-5563309}
-[22:11:29] [Server thread/INFO] (occupant) [gametest] lair under BlockPos{x=2786239, y=0, z=-5561907}: 22 rungs, going in: STARTED
-[22:11:29] [Server thread/INFO] (occupant) [gametest] houses: found before false, first true, too close false, second true, after finding false
-[22:11:31] [Server thread/INFO] (occupant) [gametest] blight over 64 chunks: 551 blocks changed, 0 leaves
-[22:11:31] [Server thread/INFO] (occupant) [gametest] mercy: fall allowed false, health 20.0, creative true, introduced true
-[22:11:31] [Server thread/INFO] (occupant) [gametest] mercy: zombie allowed false, held true
-[22:11:31] [Server thread/INFO] (occupant) [gametest] fall far from home: home loaded before false, woke at BlockPos{x=2790214, y=-60, z=-5558591} (0.0 from the bed), room to stand true
-[22:11:31] [Server thread/INFO] (occupant) [gametest] void: allowed false, health 20.0 of 20.0, food 20
-[22:11:31] [Server thread/INFO] (occupant) [gametest] advancements of ours loaded: 19
-[22:11:31] [Server thread/INFO] (occupant) [gametest] fog: first act 68.0, last act 38.0
-[22:11:32] [Server thread/INFO] (occupant) [gametest] fog thick at 48.0, begins at 27.839999999999996; it stands 22.80350850198276 away
-[22:11:32] [Server thread/INFO] (occupant) [gametest] places without loot: [], page found: true
-[22:11:33] [Server thread/INFO] (occupant) [gametest] ways of building a place that lost their things: []
-[22:11:34] [Server thread/INFO] (occupant) [gametest] house test player at BlockPos{x=-2, y=1, z=-4} facing 0.0 / (0.0, -0.0, 1.0)
-[22:11:34] [Server thread/INFO] (occupant) [gametest] house hallway spot: peeking BlockPos{x=2786288, y=-56, z=-5562302} / any BlockPos{x=2786288, y=-56, z=-5562302} (relative to the floor: BlockPos{x=4, y=1, z=0})
-[22:11:34] [Server thread/INFO] (occupant) [gametest] hallway light at the far end: block 0 sky 0, dark true
-[22:11:34] [Server thread/INFO] (occupant) [gametest] that spot: mask 1001001001, block light 0, sky 2, main room middle block light 0 sky 8
-[22:11:36] [Server thread/INFO] (occupant) [gametest] rescue: creeper alive true, 0.0 above the ground
-[22:11:36] [Server thread/INFO] (occupant) [gametest] rescue: zombie 1.6258988857269259 above the ground, alive true
-[22:11:36] [Server thread/INFO] (occupant) [gametest] rescue: 1 come for them
-[22:11:36] [Server thread/INFO] (occupant) [gametest] field: darkOutside=true skyDarken=7 light=8 skyLight=15 blockLight=0 isDark=true grassInDirtTag=true
-[22:11:36] [Server thread/INFO] (occupant) [gametest] cave: yaw=-90.0 feet=BlockPos{x=2786665, y=60, z=-5562457} underground=true skyVisible=false skyLight=0 topY=69 light=0 look=(1.0, 0.0, 1.2246468525851679E-16) | ahead: standable=55 dark=55 visible=55
-[22:11:36] [Server thread/INFO] (occupant) [gametest] arena failures: []
-[22:11:36] [Server thread/INFO] (occupant) [gametest] slowest event to start: watcher (field) in 14 ms
-[22:11:37] [Server thread/INFO] (occupant) [gametest] rescue of ten: at most 3 on its legs at once
-[22:11:37] [Server thread/INFO] (occupant) [gametest] unnoticed: age 240, seen -1, nearby 1, alive true, concealed false, noticed false, in sight true, angle 176, ray MISS at 2786214, -8, -5562600 Block{minecraft:air}, ignored 1, same story true
-[22:11:51] [Server thread/INFO] (occupant) [gametest] events that found a place to happen: [footsteps, familiar, cave_noise, thunder, echo, breath, fake_join, sign, roof, saving, teammate, advancement, whisper, doppel_chat, flicker, static, wake]
-[22:11:51] [Server thread/INFO] (Minecraft) ========= 29 GAME TESTS COMPLETE IN 25.07 s ======================
+[22:27:09] [Server thread/INFO] (occupant) [gametest] lair under BlockPos{x=-833813, y=0, z=10206584}: 22 rungs, going in: STARTED
+[22:27:11] [Server thread/INFO] (occupant) [gametest] blight over 64 chunks: 421 blocks changed, 0 leaves
+[22:27:11] [Server thread/INFO] (occupant) [gametest] last camp at BlockPos{x=-833826, y=-61, z=10205184}, chest at BlockPos{x=-833823, y=-60, z=10205182}
+[22:27:11] [Server thread/INFO] (occupant) [gametest] fall far from home: home loaded before false, woke at BlockPos{x=-829838, y=-60, z=10209900} (0.0 from the bed), room to stand true
+[22:27:12] [Server thread/INFO] (occupant) [gametest] houses: found before false, first true, too close false, second true, after finding false
+[22:27:12] [Server thread/INFO] (occupant) [gametest] mercy: fall allowed false, health 20.0, creative true, introduced true
+[22:27:12] [Server thread/INFO] (occupant) [gametest] mercy: zombie allowed false, held true
+[22:27:12] [Server thread/INFO] (occupant) [gametest] void: allowed false, health 20.0 of 20.0, food 20
+[22:27:12] [Server thread/INFO] (occupant) [gametest] advancements of ours loaded: 19
+[22:27:12] [Server thread/INFO] (occupant) [gametest] fog: first act 68.0, last act 38.0
+[22:27:13] [Server thread/INFO] (occupant) [gametest] fog thick at 48.0, begins at 27.839999999999996; it stands 19.4164878389476 away
+[22:27:13] [Server thread/INFO] (occupant) [gametest] places without loot: [], page found: true
+[22:27:14] [Server thread/INFO] (occupant) [gametest] ways of building a place that lost their things: []
+[22:27:15] [Server thread/INFO] (occupant) [gametest] house test player at BlockPos{x=-2, y=1, z=-4} facing 0.0 / (0.0, -0.0, 1.0)
+[22:27:15] [Server thread/INFO] (occupant) [gametest] house hallway spot: peeking BlockPos{x=-833764, y=-56, z=10206189} / any BlockPos{x=-833764, y=-56, z=10206189} (relative to the floor: BlockPos{x=4, y=1, z=0})
+[22:27:15] [Server thread/INFO] (occupant) [gametest] hallway light at the far end: block 0 sky 0, dark true
+[22:27:15] [Server thread/INFO] (occupant) [gametest] that spot: mask 1001001001, block light 0, sky 2, main room middle block light 0 sky 8
+[22:27:16] [Server thread/INFO] (occupant) [gametest] rescue: creeper alive true, 0.0 above the ground
+[22:27:16] [Server thread/INFO] (occupant) [gametest] rescue: zombie 1.6258988857269259 above the ground, alive true
+[22:27:16] [Server thread/INFO] (occupant) [gametest] rescue: 1 come for them
+[22:27:16] [Server thread/INFO] (occupant) [gametest] field: darkOutside=true skyDarken=7 light=8 skyLight=15 blockLight=0 isDark=true grassInDirtTag=true
+[22:27:16] [Server thread/INFO] (occupant) [gametest] cave: yaw=-90.0 feet=BlockPos{x=-833387, y=60, z=10206034} underground=true skyVisible=false skyLight=0 topY=69 light=0 look=(1.0, 0.0, 1.2246468525851679E-16) | ahead: standable=55 dark=55 visible=55
+[22:27:17] [Server thread/INFO] (occupant) [gametest] arena failures: []
+[22:27:17] [Server thread/INFO] (occupant) [gametest] slowest event to start: torch_gone (cave) in 17 ms
+[22:27:17] [Server thread/INFO] (occupant) [gametest] rescue of ten: at most 3 on its legs at once
+[22:27:17] [Server thread/INFO] (occupant) [gametest] unnoticed: age 240, seen -1, nearby 1, alive true, concealed false, noticed false, in sight true, angle 176, ray MISS at -833838, -8, 10205891 Block{minecraft:air}, ignored 1, same story true
+[22:27:29] [Server thread/INFO] (occupant) [gametest] events that found a place to happen: [footsteps, familiar, cave_noise, distant_mining, thunder, echo, breath, fake_join, sign, roof, saving, teammate, advancement, whisper, doppel_chat, flicker, static, wake]
+[22:27:29] [Server thread/INFO] (Minecraft) ========= 29 GAME TESTS COMPLETE IN 22.51 s ======================
