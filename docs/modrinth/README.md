@@ -102,6 +102,8 @@ For every version:
   - After the rescue you are whole again too.
   - Fixed: caught falling far from your bed (or from spawn), you could wake inside the bedrock at the bottom of the world and suffocate.
   - Fixed in the rescue: an enderman no longer teleports off the leg; a big slime no longer splits into more slimes; a jockey's rider is lifted off its mount; a held zombie no longer calls in others on Hard; with its back to a wall, it stands behind another monster instead. /kill always works.
+  - Zombie villagers, piglins, zombified piglins and drowned hang loose on the leg too, instead of holding their arms out.
+  - The scene is never cut short by a slow server or by pausing, a key you held down all through it works again straight after, and a huge crowd (a raid) no longer makes it go on for a minute.
 
   0.1.1: fixes, and a better rescue.
 
