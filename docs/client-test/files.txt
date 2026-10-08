@@ -12,6 +12,7 @@ build/clientGametest/occupant-shots/cinematic-camp.png
 build/clientGametest/occupant-shots/occupant-veiled.png
 build/clientGametest/occupant-shots/cinematic-ruin-plate.png
 build/clientGametest/occupant-shots/occupant-gate-later.png
+build/clientGametest/occupant-shots/plate-stand.png
 build/clientGametest/occupant-shots/settings.png
 build/clientGametest/occupant-shots/cinematic-village-plate.png
 build/clientGametest/occupant-shots/cinematic-graves.png
@@ -21,6 +22,7 @@ build/clientGametest/occupant-shots/place-chapel.png
 build/clientGametest/occupant-shots/occupant-left-alone.png
 build/clientGametest/occupant-shots/occupant-trees.png
 build/clientGametest/occupant-shots/place-radio.png
+build/clientGametest/occupant-shots/plate-three-quarter.png
 build/clientGametest/occupant-shots/occupant-face.png
 build/clientGametest/occupant-shots/place-lair.png
 build/clientGametest/occupant-shots/occupant-night-close.png
@@ -36,5 +38,3 @@ build/clientGametest/occupant-shots/occupant-ending.png
 build/clientGametest/occupant-shots/found-cave.png
 build/clientGametest/occupant-shots/occupant-shove.png
 build/clientGametest/occupant-shots/occupant-gate.png
-build/clientGametest/occupant-shots/occupant-looking-up.png
-build/clientGametest/occupant-shots/place-cottage.png
