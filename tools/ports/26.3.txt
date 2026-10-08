@@ -1,13 +1,47 @@
-# 26.3 on 141868402400f9289dcf48df90528a04db3ba489: build failure, tests skipped, jar skipped
-com/wolfsmask/occupant/client/Cutscene.java:89: error: cannot find symbol
-  symbol:   variable screen
-  location: variable mc of type Minecraft
+# 26.3 on df15ae30cf404a30882cead0e5f28cd81aac81e1: build success, tests cancelled, jar success
 > Configure project :
 > Task :compileJava
 > Task :processResources
 > Task :classes
-> Task :compileClientJava FAILED
-* What went wrong:
-> Compilation failed; see the compiler output below.
-> Check your code and dependencies to fix the compilation error(s)
-> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Task :compileClientJava
+> Task :processClientResources NO-SOURCE
+> Task :processIncludeJars
+> Task :clientClasses
+> Task :compileTestJava NO-SOURCE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+> Task :jar
+> Task :test NO-SOURCE
+> Task :assemble
+> Task :validateAccessWidener NO-SOURCE
+> Task :check UP-TO-DATE
+> Task :build
+=== jar
+jar: build/libs/occupant-0.1.2+mc26.3.jar
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.wolfsmask.occupant.mixin.client",
+  "compatibilityLevel": "JAVA_25",
+  "client": [
+    "CreateWorldAccess",
+    "FogRendererMixin",
+    "HumanoidModelMixin",
+    "LivingEntityRendererMixin",
+    "ModelFeatureRendererMixin",
+    "MouseHandlerMixin",
+    "ScreenAccess",
+    "SkeletonModelMixin",
+    "SkyRendererMixin",
+    "ZombieModelMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
+unobfuscated version: the game's own names are the real ones
+[22:39:29] [Server thread/INFO] (occupant) [gametest] last camp at BlockPos{x=-1519768, y=3, z=7273842}, chest at BlockPos{x=-1519765, y=4, z=7273840}
+[22:39:29] [Server thread/INFO] (occupant) [gametest] lair under BlockPos{x=-1519753, y=0, z=7275242}: 22 rungs, going in: STARTED
+[22:39:31] [Server thread/INFO] (occupant) [gametest] blight over 64 chunks: 459 blocks changed, 0 leaves
+[22:39:31] [Server thread/INFO] (occupant) [gametest] mercy: fall allowed false, health 20.0, creative true, introduced true
+[22:39:31] [Server thread/INFO] (occupant) [gametest] mercy: zombie allowed false, held true
