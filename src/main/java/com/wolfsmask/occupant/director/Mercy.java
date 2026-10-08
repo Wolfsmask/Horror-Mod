@@ -294,26 +294,34 @@ public final class Mercy {
 			Mob first = behind.get(0);
 			// Close enough that a leg reaches it easily, far enough that the leg is seen to reach; and
 			// on the same side of any wall as the monster, so the leg never goes through one.
-			// Straight behind it first; failing that (a drop, a wall, water), a little to either side.
+			// Straight behind it, or a little to either side if that is no good (a drop, a wall,
+			// water, leaves overhead): wherever its legs reach the most of them, straight behind if
+			// that is as good as any.
 			BlockPos feet = null;
 			Mob by = first;
-			search:
 			for (Mob m : behind.subList(0, Math.min(4, behind.size()))) {
 				Vec3 out = m.position().subtract(player.position());
 				out = new Vec3(out.x, 0, out.z);
 				out = out.lengthSqr() < 1.0E-4 ? Sight.flatLook(player) : out.normalize();
+				int most = -1;   // any good place at all, before one that reaches more
 				for (double turn : new double[]{0.0, 30.0, -30.0, 60.0, -60.0}) {
 					Vec3 way = Sight.rotateY(out, turn);
 					for (double d : monsters.size() == 1 ? new double[]{2.4, 1.8, 3.0, 1.3} : new double[]{3.0, 2.2, 1.5}) {
 						Vec3 aim = m.position().add(way.scale(d));
 						BlockPos at = Spots.groundNear(world, Mth.floor(aim.x), m.getBlockY(), Mth.floor(aim.z), 2);
-						if (at != null && clear(world, m, Vec3.atBottomCenterOf(at).add(0.0, 1.2, 0.0))) {
+						if (at == null || !clear(world, m, Vec3.atBottomCenterOf(at).add(0.0, 1.2, 0.0))) continue;
+						int reached = 0;
+						for (Mob o : monsters) if (reach(o, Vec3.atBottomCenterOf(at))) reached++;
+						if (reached > most) {
+							most = reached;
 							feet = at;
 							by = m;
-							break search;
 						}
+						if (monsters.size() == 1) break;   // alone, the first good place will do
 					}
+					if (feet != null && monsters.size() == 1) break;
 				}
+				if (feet != null) break;
 			}
 			if (feet != null && !OccupantConfig.get().soundOnly) {
 				entity = haunt.spawnOccupant(player, feet, OccupantEntity.Mode.AMBUSH, OccupantEntity.Form.REVEALED);
@@ -343,6 +351,9 @@ public final class Mercy {
 					if (reach(m, stands) && stabbed.size() < LEGS_FREE) stabbed.add(m);
 					else vanishing.add(m);
 				}
+				Occupant.LOGGER.info("It came for {}: {} after them, {} on its legs, {} gone without it (it stands {} from the one that hit them)",
+						player.getName().getString(), monsters.size(), stabbed.size(), vanishing.size(),
+						String.format(Locale.ROOT, "%.1f", flat(first.position(), stands)));
 			}
 			// The scene, laid out.
 			int t = APPEAR + LOOK;

@@ -359,7 +359,9 @@ final class FoundFootage {
 			context.waitTicks(at[i] - waited);
 			waited = at[i];
 			String label = names != null ? (i + 1) + "-" + names[i] : String.format(Locale.ROOT, "%03d", at[i]);
-			Occupant.LOGGER.info("[client-gametest] {} {}: {} in sight", name, label, context.computeOnClient(OccupantClientGameTest::seen));
+			Occupant.LOGGER.info("[client-gametest] {} {}: {} in sight, {} on its legs", name, label, context.computeOnClient(OccupantClientGameTest::seen),
+					context.computeOnClient(mc -> mc.level.getEntitiesOfClass(com.wolfsmask.occupant.entity.OccupantEntity.class,
+							mc.player.getBoundingBox().inflate(64.0), x -> true).stream().mapToInt(o -> o.getHeld().length).sum()));
 			OccupantClientGameTest.shoot(context, name + "-" + label);
 		}
 		// Until the scene is over, and their view their own again.
