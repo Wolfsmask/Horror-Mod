@@ -316,6 +316,11 @@ public final class House {
 		builder.build();
 	}
 
+	/** For the game tests: whether anything anyone made stands within {@code r} of {@code at}. */
+	public static boolean looksBuiltForTest(ServerLevel level, BlockPos at, int r) {
+		return Places.looksBuilt(level, at, r);
+	}
+
 	/** For the game tests: one chance at the blight (dead trees, bare ground) in the chunk at {@code origin}. */
 	public static void blightForTest(WorldGenLevel level, RandomSource random, BlockPos origin) {
 		Blight.tryPlace(level, random, origin);

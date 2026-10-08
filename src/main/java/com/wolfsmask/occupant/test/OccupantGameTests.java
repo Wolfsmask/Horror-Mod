@@ -561,6 +561,19 @@ public final class OccupantGameTests {
 		});
 	}
 
+	/** What it builds while they play (its lair, the last camp) is never put on anything they made. */
+	@GameTest
+	public void itNeverBuildsOnTheirThings(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos at = helper.absolutePos(new BlockPos(2, 2, 2));
+		boolean before = com.wolfsmask.occupant.world.House.looksBuiltForTest(level, at, 2);
+		helper.setBlock(new BlockPos(3, 2, 2), net.minecraft.world.level.block.Blocks.OAK_PLANKS);
+		boolean after = com.wolfsmask.occupant.world.House.looksBuiltForTest(level, at, 2);
+		helper.assertTrue(!before, "Bare ground should not look built");
+		helper.assertTrue(after, "Planks someone put down should");
+		helper.succeed();
+	}
+
 	/** What comes after an event is always an event there is: a misspelt one would never come. */
 	@GameTest
 	public void followUpsAreRealEvents(GameTestHelper helper) {
