@@ -8,6 +8,7 @@
     "FogRendererMixin",
     "HumanoidModelMixin",
     "LivingEntityRendererMixin",
+    "ModelFeatureRendererMixin",
     "MouseHandlerMixin",
     "ScreenAccess",
     "SkeletonModelMixin",

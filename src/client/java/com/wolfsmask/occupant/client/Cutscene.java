@@ -50,7 +50,7 @@ public final class Cutscene {
 	static void start(int ticks) {
 		Minecraft mc = Minecraft.getInstance();
 		if (ticks <= 0 || mc.player == null) {
-			active = false;
+			if (active) finish(mc);
 			return;
 		}
 		if (!active) {
@@ -76,11 +76,17 @@ public final class Cutscene {
 		// Paused, the scene is too: it is only over when the server's is.
 		if (mc.isPaused()) return;
 		if (mc.player == null || mc.level == null || --remaining <= 0) {
-			active = false;
+			finish(mc);
 			return;
 		}
 		release(mc);
 		target = lookAt(mc.player);
+	}
+
+	/** Over: and a key they have held down all through it counts again, without pressing it anew. */
+	private static void finish(Minecraft mc) {
+		active = false;
+		if (mc.screen == null) KeyMapping.setAll();
 	}
 
 	/** Nothing they press moves them: before the game reads the keys, and after. */

@@ -91,8 +91,11 @@ public final class Ragdoll {
 	}
 
 	private static final Map<Integer, Body> HELD = new HashMap<>();
-	/** For the newer games, where a model is posed from a copy of the entity: that copy's pose. */
-	private static final Map<Object, float[]> STATES = new WeakHashMap<>();
+	/**
+	 * For the newer games, where a model is posed from a copy of the entity: that copy's pose (read
+	 * wherever the game poses its models, which need not be the thread that noted it).
+	 */
+	private static final Map<Object, float[]> STATES = java.util.Collections.synchronizedMap(new WeakHashMap<>());
 
 	private Ragdoll() {
 	}

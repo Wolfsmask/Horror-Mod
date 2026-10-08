@@ -351,7 +351,9 @@ public final class Mercy {
 			this.say = gone + 8;
 			this.over = say + 14;
 			this.scene = entity != null;
-			if (scene) Cues.effect(player, ScreenEffectPayload.CUTSCENE, over + 2, 1f);
+			// It is ended from here when it is over (however slow the server is running); the
+			// length only lets them go by themselves if that word never comes.
+			if (scene) Cues.effect(player, ScreenEffectPayload.CUTSCENE, over + 100, 1f);
 		}
 
 		@Override

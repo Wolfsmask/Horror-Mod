@@ -280,8 +280,9 @@ final class FoundFootage {
 	 * Not for the page: the mercy at the edge of death, as it plays, frame by frame, so the way it
 	 * moves can be looked at. First one husk, five steps off, that has all but killed them: their
 	 * view is drawn round, a leg goes in, it is lifted, hangs, dies up there and is gone, then it is
-	 * gone, then the words. Then seven: the three it can reach go up on its legs; the four round
-	 * behind them it does not touch, and one by one they are gone.
+	 * gone, then the words. Then seven, all after them: the three it can reach go up on its legs
+	 * (one a zombified piglin, whose own model holds its arms out: here they hang like the rest);
+	 * the four round behind them it does not touch, and one by one they are gone.
 	 */
 	private static void rescue(ClientGameTestContext context, TestSingleplayerContext game, BlockPos[] woods) {
 		TestServerContext server = game.getServer();
@@ -292,10 +293,11 @@ final class FoundFootage {
 		// The test world is peaceful, where no monster can even be summoned.
 		server.runCommand("difficulty normal");
 		try {
-			saved(context, game, floor, "rescue", new double[][]{{0, 5}},
+			saved(context, game, floor, "rescue", new double[][]{{0, 5}}, new String[]{"husk"},
 					new int[]{6, 20, 27, 44, 62, 78, 101, 112}, new String[]{"appear", "turn", "stab", "lift", "hang", "dies", "gone", "words"});
 			context.waitTicks(30);
 			saved(context, game, floor, "rescue-many", new double[][]{{0, 4.5}, {-1.6, 5.2}, {1.7, 5.0}, {-3.2, 0.5}, {3.1, -0.4}, {-1.2, -3.0}, {1.8, -2.8}},
+					new String[]{"husk", "zombified_piglin", "husk", "husk", "husk", "husk", "husk"},
 					new int[]{20, 40, 60, 80, 100, 120, 140, 160, 180, 200}, null);
 		} finally {
 			server.runOnServer(s -> {
@@ -304,28 +306,32 @@ final class FoundFootage {
 				p.setHealth(p.getMaxHealth());
 			});
 			server.runCommand("kill @e[type=minecraft:husk]");
+			server.runCommand("kill @e[type=minecraft:zombified_piglin]");
 			server.runCommand("difficulty peaceful");
 		}
 	}
 
 	/**
-	 * Husks at these places round {@code floor} (x and z, in blocks; the first is the one that has
-	 * them), and they are about to die to the first: frames of what happens, at these ticks.
+	 * Monsters of these kinds at these places round {@code floor} (x and z, in blocks; the first is
+	 * a husk, and the one that has them), all after them, and they are about to die to the first:
+	 * frames of what happens, at these ticks.
 	 */
 	private static void saved(ClientGameTestContext context, TestSingleplayerContext game, BlockPos floor, String name,
-							  double[][] husks, int[] at, String[] names) {
+							  double[][] husks, String[] kinds, int[] at, String[] names) {
 		TestServerContext server = game.getServer();
 		Vec3 eye = server.computeOnServer(s -> new Vec3(floor.getX() + 0.5,
 				Cinematic.ground(s.overworld(), floor.getX(), floor.getZ()) + Cinematic.EYE, floor.getZ() + 0.5));
 		Vec3 first = new Vec3(floor.getX() + 0.5 + husks[0][0], eye.y, floor.getZ() + 0.5 + husks[0][1]);
 		// Looking a little above the first, so what comes to stand behind it is in the picture too.
 		Cinematic.camera(context, game, eye, first.add(0, 0.7, 1.0), 6000);
-		for (double[] h : husks) {
+		for (int k = 0; k < husks.length; k++) {
+			double[] h = husks[k];
+			String kind = kinds[k];
 			server.runOnServer(s -> {
 				int x = Mth.floor(floor.getX() + 0.5 + h[0]), z = Mth.floor(floor.getZ() + 0.5 + h[1]);
 				int y = Cinematic.ground(s.overworld(), x, z);
 				s.getCommands().performPrefixedCommand(s.createCommandSourceStack().withSuppressedOutput(), String.format(Locale.ROOT,
-						"summon minecraft:husk %.2f %d %.2f {PersistenceRequired:1b,NoAI:1b}", floor.getX() + 0.5 + h[0], y, floor.getZ() + 0.5 + h[1]));
+						"summon minecraft:%s %.2f %d %.2f {PersistenceRequired:1b,NoAI:1b}", kind, floor.getX() + 0.5 + h[0], y, floor.getZ() + 0.5 + h[1]));
 			});
 		}
 		context.waitTicks(10);
@@ -334,6 +340,11 @@ final class FoundFootage {
 			Mob it = s.overworld().getEntitiesOfClass(Mob.class, AABB.ofSize(first, 1.5, 6.0, 1.5), m -> Kinds.is(m, "husk"))
 					.stream().findFirst().orElse(null);
 			if (it == null) return false;
+			// All of them after them, as they would be (held still, they would not have noticed).
+			for (Mob m : s.overworld().getEntitiesOfClass(Mob.class, AABB.ofSize(Vec3.atCenterOf(floor), 16.0, 8.0, 16.0),
+					x -> Kinds.is(x, "husk") || Kinds.is(x, "zombified_piglin"))) {
+				m.setTarget(p);
+			}
 			HauntData d = Director.get().data(p);
 			d.paused = false;
 			d.introduced = true;
