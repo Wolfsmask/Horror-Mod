@@ -1,9 +1,60 @@
-# 26.1.2 on bbfd2baed3f22272e834be5490477b0f535a5dea: build failure, tests skipped, jar skipped
-com/wolfsmask/occupant/director/Mercy.java:233: error: variable want is already defined in constructor Rescue(Haunt,ServerPlayer,List<Mob>)
+# 26.1.2 on 844a68f62ceb17a36f23244046a1cc4a4239976f: build success, tests success, jar success
 > Configure project :
 > Task :compileJava
-> Task :compileJava FAILED
-* What went wrong:
-> Compilation failed; see the compiler output below.
-> Check your code and dependencies to fix the compilation error(s)
-> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Task :processResources
+> Task :classes
+> Task :compileClientJava
+> Task :processClientResources NO-SOURCE
+> Task :processIncludeJars
+> Task :clientClasses
+> Task :compileTestJava NO-SOURCE
+> Task :jar
+> Task :processTestResources NO-SOURCE
+> Task :assemble
+> Task :testClasses UP-TO-DATE
+> Task :test NO-SOURCE
+> Task :validateAccessWidener NO-SOURCE
+> Task :check UP-TO-DATE
+> Task :build
+=== jar
+jar: build/libs/occupant-0.1.1+mc26.1.2.jar
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.wolfsmask.occupant.mixin.client",
+  "compatibilityLevel": "JAVA_25",
+  "client": [
+    "CreateWorldAccess",
+    "FogRendererMixin",
+    "ScreenAccess",
+    "SkyRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
+unobfuscated version: the game's own names are the real ones
+[17:59:41] [Server thread/INFO] (occupant) [gametest] houses: found before false, first true, too close false, second true, after finding false
+[17:59:41] [Server thread/INFO] (occupant) [gametest] last camp at BlockPos{x=7237420, y=-61, z=13262017}, chest at BlockPos{x=7237423, y=-60, z=13262017}
+[17:59:42] [Server thread/INFO] (occupant) [gametest] lair under BlockPos{x=7237435, y=0, z=13263417}: 22 rungs, going in: STARTED
+[17:59:43] [Server thread/INFO] (occupant) [gametest] blight over 64 chunks: 433 blocks changed, 0 leaves
+[17:59:43] [Server thread/INFO] (occupant) [gametest] mercy: fall allowed false, health 5.0, creative true, introduced true
+[17:59:43] [Server thread/INFO] (occupant) [gametest] mercy: zombie allowed false, held true
+[17:59:43] [Server thread/INFO] (occupant) [gametest] advancements of ours loaded: 19
+[17:59:43] [Server thread/INFO] (occupant) [gametest] fog: first act 80.0, last act 50.0
+[17:59:43] [Server thread/INFO] (occupant) [gametest] fog thick at 60.0, begins at 34.8; it stands 29.966648127543394 away
+[17:59:44] [Server thread/INFO] (occupant) [gametest] places without loot: [], page found: true
+[17:59:44] [Server thread/INFO] (occupant) [gametest] ways of building a place that lost their things: []
+[17:59:45] [Server thread/INFO] (occupant) [gametest] house test player at BlockPos{x=-2, y=1, z=-4} facing 0.0 / (0.0, -0.0, 1.0)
+[17:59:45] [Server thread/INFO] (occupant) [gametest] house hallway spot: peeking BlockPos{x=7237490, y=-55, z=13263020} / any BlockPos{x=7237490, y=-55, z=13263020} (relative to the floor: BlockPos{x=4, y=1, z=0})
+[17:59:45] [Server thread/INFO] (occupant) [gametest] hallway light at the far end: block 0 sky 0, dark true
+[17:59:45] [Server thread/INFO] (occupant) [gametest] that spot: mask 1001001001, block light 0, sky 2, main room middle block light 0 sky 8
+[17:59:47] [Server thread/INFO] (occupant) [gametest] rescue: zombie 1.708715307712552 above the ground, alive true
+[17:59:47] [Server thread/INFO] (occupant) [gametest] rescue: creeper alive true, 0.8945905208587632 above the ground
+[17:59:48] [Server thread/INFO] (occupant) [gametest] field: darkOutside=true skyDarken=7 light=8 skyLight=15 blockLight=0 isDark=true grassInDirtTag=false
+[17:59:48] [Server thread/INFO] (occupant) [gametest] cave: yaw=-90.0 feet=BlockPos{x=7237820, y=60, z=13262871} underground=true skyVisible=false skyLight=0 topY=69 light=0 look=(1.0, 0.0, 1.2246468525851679E-16) | ahead: standable=55 dark=55 visible=55
+[17:59:48] [Server thread/INFO] (occupant) [gametest] arena failures: []
+[17:59:48] [Server thread/INFO] (occupant) [gametest] slowest event to start: watcher (field) in 12 ms
+[17:59:49] [Server thread/INFO] (occupant) [gametest] unnoticed: age 241, seen -1, nearby 1, alive true, concealed false, noticed false, in sight true, angle 176, ray MISS at 7237406, -7, 13262724 Block{minecraft:air}, ignored 1, same story true
+[18:00:00] [Server thread/INFO] (occupant) [gametest] events that found a place to happen: [familiar, cave_noise, thunder, echo, breath, fake_join, sign, roof, saving, advancement, whisper, doppel_chat, flicker, static, wake]
+[18:00:01] [Server thread/INFO] (Minecraft) ========= 26 GAME TESTS COMPLETE IN 22.08 s ======================
