@@ -235,14 +235,17 @@ public final class OccupantConfig {
 		if (discordBotToken == null) discordBotToken = "";
 		if (discordServerId == null) discordServerId = "";
 		if (discordPlayers == null) discordPlayers = new java.util.LinkedHashMap<>();
-		if (intensity == null || !java.util.List.of("subtle", "normal", "relentless").contains(intensity.toLowerCase(java.util.Locale.ROOT))) intensity = "normal";
+		intensity = intensity == null ? "normal" : intensity.trim().toLowerCase(java.util.Locale.ROOT);
+		if (!java.util.List.of("subtle", "normal", "relentless").contains(intensity)) intensity = "normal";
 		if (signMessages == null || signMessages.isEmpty()) signMessages = new OccupantConfig().signMessages;
 		if (chatLines == null || chatLines.isEmpty()) chatLines = new OccupantConfig().chatLines;
 		if (whisperLines == null || whisperLines.isEmpty()) whisperLines = new OccupantConfig().whisperLines;
 		signMessages.removeIf(s -> s == null || s.isBlank());
 		chatLines.removeIf(s -> s == null || s.isBlank());
+		whisperLines.removeIf(s -> s == null || s.isBlank());
 		if (signMessages.isEmpty()) signMessages = new OccupantConfig().signMessages;
 		if (chatLines.isEmpty()) chatLines = new OccupantConfig().chatLines;
+		if (whisperLines.isEmpty()) whisperLines = new OccupantConfig().whisperLines;
 		return this;
 	}
 
