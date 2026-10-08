@@ -1,11 +1,122 @@
+=== net.minecraft.world.food.FoodData (-public)
+public class world.food.FoodData {
+  public int getFoodLevel();
+  public void setFoodLevel(int);
+  public void setSaturation(float);
 === net.minecraft.world.entity.Entity (-public)
 public abstract class world.entity.Entity implements world.Nameable,world.level.entity.EntityAccess,commands.CommandSource,attachment.v1.AttachmentTarget {
-  public double xo;
-  public double yo;
-  public double zo;
-  public double xOld;
-  public double yOld;
-  public double zOld;
-  public final world.phys.Vec3 getEyePosition(float);
-  public final world.phys.Vec3 getPosition(float);
-  public world.phys.Vec3 getRopeHoldPosition(float);
+  public float yRotO;
+  public float xRotO;
+  public void clearFire();
+  public int getMaxAirSupply();
+  public void setAirSupply(int);
+  public float getYRot();
+  public void setYRot(float);
+  public float getXRot();
+  public void setXRot(float);
+=== net.minecraft.client.KeyMapping (-public)
+public class client.KeyMapping implements Comparable<client.KeyMapping> {
+  public static void setAll();
+  public static void releaseAll();
+  public boolean isDown();
+  public boolean consumeClick();
+  public void setDown(boolean);
+=== net.minecraft.client.Options (-public)
+public class client.Options {
+  public final client.KeyMapping keyUp;
+  public final client.KeyMapping keyLeft;
+  public final client.KeyMapping keyDown;
+  public final client.KeyMapping keyRight;
+  public final client.KeyMapping keyJump;
+  public final client.KeyMapping keyShift;
+  public final client.KeyMapping keySprint;
+  public final client.KeyMapping keyInventory;
+  public final client.KeyMapping keyDrop;
+  public final client.KeyMapping keyUse;
+  public final client.KeyMapping keyAttack;
+=== net.minecraft.world.entity.WalkAnimationState (-public)
+public class world.entity.WalkAnimationState {
+  public world.entity.WalkAnimationState();
+  public void setSpeed(float);
+  public void update(float, float);
+  public float speed();
+  public float speed(float);
+  public float position();
+  public float position(float);
+  public boolean isMoving();
+}
+=== net.minecraft.world.entity.LivingEntity (-public)
+public abstract class world.entity.LivingEntity extends world.entity.Entity implements world.entity.Attackable {
+  public int hurtTime;
+  public int deathTime;
+  public final world.entity.WalkAnimationState walkAnimation;
+  public float yBodyRot;
+  public float yBodyRotO;
+  public float yHeadRot;
+  public float yHeadRotO;
+=== classes matching (HumanoidModel|AbstractZombieModel|ZombieModel|SkeletonModel|HumanoidRenderState|ZombieRenderState|SkeletonRenderState|LivingEntityRenderState|CreeperModel|SpiderModel)$
+net.minecraft.client.model.AbstractZombieModel
+net.minecraft.client.model.CreeperModel
+net.minecraft.client.model.GiantZombieModel
+net.minecraft.client.model.HumanoidModel
+net.minecraft.client.model.SkeletonModel
+net.minecraft.client.model.SpiderModel
+net.minecraft.client.model.ZombieModel
+=== net.minecraft.client.model.geom.ModelPart (-public)
+public final class client.model.geom.ModelPart {
+  public float xRot;
+  public float yRot;
+  public float zRot;
+  public boolean visible;
+  public void resetPose();
+  public boolean hasChild(String);
+  public client.model.geom.ModelPart getChild(String);
+  public void setRotation(float, float, float);
+  public void translateAndRotate(blaze3d.vertex.PoseStack);
+  public void offsetRotation(org.joml.Vector3f);
+  public stream.Stream<client.model.geom.ModelPart> getAllParts();
+=== net.minecraft.client.model.HumanoidModel (-public)
+public class client.model.HumanoidModel<T extends world.entity.LivingEntity> extends client.model.AgeableListModel<T> implements client.model.ArmedModel, client.model.HeadedModel {
+  public final client.model.geom.ModelPart head;
+  public final client.model.geom.ModelPart hat;
+  public final client.model.geom.ModelPart body;
+  public final client.model.geom.ModelPart rightArm;
+  public final client.model.geom.ModelPart leftArm;
+  public final client.model.geom.ModelPart rightLeg;
+  public final client.model.geom.ModelPart leftLeg;
+  public client.model.HumanoidModel(client.model.geom.ModelPart);
+  public client.model.HumanoidModel(client.model.geom.ModelPart, Function<resources.ResourceLocation, client.renderer.RenderType>);
+  public void setupAnim(T, float, float, float, float, float);
+  public client.model.geom.ModelPart getHead();
+  public void setupAnim(world.entity.Entity, float, float, float, float, float);
+=== net.minecraft.client.model.AbstractZombieModel (-public)
+public abstract class client.model.AbstractZombieModel<T extends world.entity.monster.Monster> extends client.model.HumanoidModel<T> {
+  public void setupAnim(T, float, float, float, float, float);
+  public void setupAnim(world.entity.LivingEntity, float, float, float, float, float);
+  public void setupAnim(world.entity.Entity, float, float, float, float, float);
+=== net.minecraft.client.model.AbstractZombieModel (code: setupAnim)
+  public void setupAnim(T, float, float, float, float, float);
+    Code:
+        10: invokespecial #27                 // Method net/minecraft/client/model/HumanoidModel.setupAnim:(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V
+        14: getfield      #30                 // Field leftArm:Lnet/minecraft/client/model/geom/ModelPart;
+        18: getfield      #33                 // Field rightArm:Lnet/minecraft/client/model/geom/ModelPart;
+        23: invokevirtual #37                 // Method isAggressive:(Lnet/minecraft/world/entity/monster/Monster;)Z
+        27: getfield      #41                 // Field attackTime:F
+        32: invokestatic  #47                 // Method net/minecraft/client/model/AnimationUtils.animateZombieArms:(Lnet/minecraft/client/model/geom/ModelPart;Lnet/minecraft/client/model/geom/ModelPart;ZFF)V
+
+  public void setupAnim(world.entity.LivingEntity, float, float, float, float, float);
+    Code:
+         2: checkcast     #53                 // class net/minecraft/world/entity/monster/Monster
+        13: invokevirtual #55                 // Method setupAnim:(Lnet/minecraft/world/entity/monster/Monster;FFFFF)V
+
+  public void setupAnim(world.entity.Entity, float, float, float, float, float);
+    Code:
+         2: checkcast     #53                 // class net/minecraft/world/entity/monster/Monster
+        13: invokevirtual #55                 // Method setupAnim:(Lnet/minecraft/world/entity/monster/Monster;FFFFF)V
+}
+=== net.minecraft.client.renderer.entity.LivingEntityRenderer (-public)
+public abstract class client.renderer.entity.LivingEntityRenderer<T extends world.entity.LivingEntity, M extends client.model.EntityModel<T>> extends client.renderer.entity.EntityRenderer<T> implements client.renderer.entity.RenderLayerParent<T, M> {
+  public void render(T, float, float, blaze3d.vertex.PoseStack, client.renderer.MultiBufferSource, int);
+  public void render(world.entity.Entity, float, float, blaze3d.vertex.PoseStack, client.renderer.MultiBufferSource, int);
+=== net.minecraft.client.renderer.entity.state.LivingEntityRenderState (-public)
+Error: class not found: client.renderer.entity.state.LivingEntityRenderState
