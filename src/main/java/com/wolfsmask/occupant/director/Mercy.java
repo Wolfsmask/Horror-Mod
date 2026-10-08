@@ -225,10 +225,18 @@ public final class Mercy {
 			Vec3 out = first.position().subtract(player.position());
 			out = new Vec3(out.x, 0, out.z);
 			out = out.lengthSqr() < 1.0E-4 ? Sight.flatLook(player) : out.normalize();
-			// Close enough that a leg reaches it easily, far enough that the leg is seen to reach.
-			Vec3 want = first.position().add(out.scale(monsters.size() == 1 ? 2.4 : 3.0));
+			// Close enough that a leg reaches it easily, far enough that the leg is seen to reach; and
+			// on the same side of any wall as the monster, so the leg never goes through one.
 			ServerLevel world = Compat.level(player);
-			BlockPos feet = Spots.groundNear(world, Mth.floor(want.x), first.getBlockY(), Mth.floor(want.z), 3);
+			BlockPos feet = null;
+			for (double d : monsters.size() == 1 ? new double[]{2.4, 1.8, 3.0, 1.3} : new double[]{3.0, 2.2, 1.5}) {
+				Vec3 want = first.position().add(out.scale(d));
+				BlockPos at = Spots.groundNear(world, Mth.floor(want.x), first.getBlockY(), Mth.floor(want.z), 2);
+				if (at != null && clear(world, first, Vec3.atBottomCenterOf(at).add(0.0, 1.2, 0.0))) {
+					feet = at;
+					break;
+				}
+			}
 			// In sound-only mode it is never seen, even now: the monster is lifted by nothing.
 			if (feet != null && !OccupantConfig.get().soundOnly) {
 				entity = haunt.spawnOccupant(player, feet, OccupantEntity.Mode.AMBUSH, OccupantEntity.Form.REVEALED);
@@ -289,6 +297,13 @@ public final class Mercy {
 				return false;
 			}
 			return true;
+		}
+
+		/** Nothing solid between the middle of {@code m} and {@code to}. */
+		private static boolean clear(ServerLevel world, Mob m, Vec3 to) {
+			Vec3 from = m.position().add(0.0, m.getBbHeight() * 0.5, 0.0);
+			return world.clip(new net.minecraft.world.level.ClipContext(from, to, net.minecraft.world.level.ClipContext.Block.COLLIDER,
+					net.minecraft.world.level.ClipContext.Fluid.NONE, m)).getType() == net.minecraft.world.phys.HitResult.Type.MISS;
 		}
 
 		/** Clear space over its head, in blocks, up to two: indoors, it is not lifted into the ceiling. */
