@@ -1,3 +1,6 @@
-@mc 1.21.11 26.2 26.3
-# Round 42: whether the hat hangs from the head (the constructor's getChild calls).
-@code net.minecraft.client.model.HumanoidModel model.HumanoidModel.net
+@mc 1.20.1 1.21.1 1.21.11 26.1.2 26.2 26.3 26.4-snapshot-2
+# Round 43: what the rescue calls on odd monsters, and putting the keys back after a scene.
+net.minecraft.world.entity.Entity (stopRiding|isPassenger)\(
+net.minecraft.world.entity.Mob setTarget\(
+net.minecraft.world.damagesource.DamageSources (mobAttack|genericKill)\(
+net.minecraft.client.KeyMapping (setAll|releaseAll|resetMapping|set)\(
