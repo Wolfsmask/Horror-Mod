@@ -1,7 +1,5 @@
-# 1.21.11 client on 8fdb6c3d592c7d3678b73b37920c76152620d1b2: failure
+# 1.21.11 client on 3ea6dbd32f83a6695190db8826f96cd9a6350774: cancelled
 === client.log
-/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/Trifles.java:231: error: Places is not public in com.wolfsmask.occupant.world; cannot be accessed from outside package
-		return leaves && !com.wolfsmask.occupant.world.Places.looksBuilt(world, base, 3);
 /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/ArenaGameTests.java:107: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
 /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:64: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
 /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:96: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
@@ -18,52 +16,70 @@
 /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:684: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
 /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:748: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
 /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:842: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-> Task :compileJava FAILED
-* What went wrong:
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/director/Trifles.java:231: error: Places is not public in com.wolfsmask.occupant.world; cannot be accessed from outside package
-  		return leaves && !com.wolfsmask.occupant.world.Places.looksBuilt(world, base, 3);
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/ArenaGameTests.java:107: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:64: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:96: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:122: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:185: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:279: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:313: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:357: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:388: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:493: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:538: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:582: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:658: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:684: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:748: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:842: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-BUILD FAILED in 20s
+Note: /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/client/com/wolfsmask/occupant/client/OccupantClient.java uses or overrides a deprecated API.
+	- fabric-client-gametest-api-v1 4.3.5+bfe9fcf43e
+	- occupant 0.1.0+mc1.21.11
+[14:31:12] [Render thread/INFO] (occupant) The Occupant has moved in. Type /occupant check in game to test it.
+	at knot//net.minecraft.client.Minecraft.wrapMethod$zgg000$fabric-client-gametest-api-v1$onRun(Minecraft.java:5164)
+[14:31:22] [Render thread/INFO] (occupant) [client] the mode screen has been drawn
+[14:31:26] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-mode -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0000_occupant-mode.png
+[14:31:26] [Render thread/INFO] (occupant) [client] mode clicked at 213, 162: recording
+[14:31:26] [Render thread/INFO] (occupant) [client] the gate screen has been drawn
+[14:31:29] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-gate -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0001_occupant-gate.png
+[14:31:43] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-gate-later -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0002_occupant-gate-later.png
+[14:31:43] [Render thread/INFO] (occupant) [client] gate clicked at 213, 223: leave it alone
+[14:31:44] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-left-alone -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0003_occupant-left-alone.png
+[14:31:45] [Render thread/INFO] (occupant) [client] gate clicked at 213, 129: create world
+[14:31:48] [Render thread/INFO] (occupant) [client] creating the world straight away
+[14:31:48] [Server thread/INFO] (occupant) This world tells the story as the Creator Cut
+[14:32:11] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-quick-world -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0004_occupant-quick-world.png
+[14:32:13] [Server thread/INFO] (Minecraft) Stopping singleplayer server as player logged out
+[14:32:13] [Server thread/INFO] (Minecraft) Stopping server
 --- the mod's own checks, last of them ---
 --- last of the server thread in client.log ---
+[14:31:59] [Server thread/INFO] (Minecraft) Player646 joined the game
+[14:31:59] [Server thread/INFO] (Minecraft) Changing view distance to 5, from 10
+[14:31:59] [Server thread/INFO] (Minecraft) Changing simulation distance to 12, from 0
+[14:32:11] [Server thread/INFO] (Minecraft) Saving and pausing game...
+[14:32:11] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[The Occupant]'/minecraft:overworld
+[14:32:11] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[The Occupant]'/minecraft:the_nether
+[14:32:11] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[The Occupant]'/minecraft:the_end
+[14:32:13] [Server thread/INFO] (Minecraft) Player646 lost connection: Disconnected
+[14:32:13] [Server thread/INFO] (Minecraft) Player646 left the game
+[14:32:13] [Server thread/INFO] (Minecraft) Stopping singleplayer server as player logged out
+[14:32:13] [Server thread/INFO] (Minecraft) Stopping server
+[14:32:13] [Server thread/INFO] (Minecraft) Saving players
+[14:32:13] [Server thread/INFO] (Minecraft) Saving worlds
+[14:32:14] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[The Occupant]'/minecraft:overworld
+[14:32:14] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[The Occupant]'/minecraft:the_nether
+[14:32:14] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[The Occupant]'/minecraft:the_end
+[14:32:14] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (The Occupant): All chunks are saved
+[14:32:14] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[14:32:14] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[14:32:14] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage: All dimensions are saved
 --- tail of client.log ---
-  		                            ^
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:582: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  		ServerPlayer player = helper.makeMockServerPlayerInLevel();
-  		                            ^
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:658: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  		ServerPlayer player = helper.makeMockServerPlayerInLevel();
-  		                            ^
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:684: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  		ServerPlayer player = helper.makeMockServerPlayerInLevel();
-  		                            ^
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:748: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  		ServerPlayer player = helper.makeMockServerPlayerInLevel();
-  		                            ^
-  /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:842: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
-  		ServerPlayer player = helper.makeMockServerPlayerInLevel();
-  		                            ^
-  1 error
-  16 warnings
-
-* Try:
-> Check your code and dependencies to fix the compilation error(s)
-> Run with --scan to get full insights from a Build Scan (powered by Develocity).
-
-BUILD FAILED in 20s
-2 actionable tasks: 2 executed
+[14:32:01] [Render thread/INFO] (Minecraft) Resizing Chunk Sections UBO, capacity limit of 4 reached during a single frame. New capacity will be 8.
+[14:32:02] [Render thread/INFO] (Minecraft) Resizing Chunk Sections UBO, capacity limit of 8 reached during a single frame. New capacity will be 16.
+[14:32:03] [Render thread/INFO] (Minecraft) Resizing Chunk Sections UBO, capacity limit of 16 reached during a single frame. New capacity will be 32.
+[14:32:05] [Render thread/INFO] (Minecraft) Resizing Chunk Sections UBO, capacity limit of 32 reached during a single frame. New capacity will be 64.
+[14:32:09] [Render thread/INFO] (Minecraft) Resizing Chunk Sections UBO, capacity limit of 64 reached during a single frame. New capacity will be 128.
+[14:32:11] [Render thread/INFO] (Minecraft) Resizing Dynamic Transforms UBO, capacity limit of 8 reached during a single frame. New capacity will be 16.
+[14:32:11] [Render thread/INFO] (Minecraft) Resizing Chunk Sections UBO, capacity limit of 128 reached during a single frame. New capacity will be 256.
+[14:32:11] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-quick-world -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0004_occupant-quick-world.png
+[14:32:11] [Server thread/INFO] (Minecraft) Saving and pausing game...
+[14:32:11] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[The Occupant]'/minecraft:overworld
+[14:32:11] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[The Occupant]'/minecraft:the_nether
+[14:32:11] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[The Occupant]'/minecraft:the_end
+[14:32:13] [Server thread/INFO] (Minecraft) Player646 lost connection: Disconnected
+[14:32:13] [Server thread/INFO] (Minecraft) Player646 left the game
+[14:32:13] [Server thread/INFO] (Minecraft) Stopping singleplayer server as player logged out
+[14:32:13] [Server thread/INFO] (Minecraft) Stopping server
+[14:32:13] [Server thread/INFO] (Minecraft) Saving players
+[14:32:13] [Server thread/INFO] (Minecraft) Saving worlds
+[14:32:14] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[The Occupant]'/minecraft:overworld
+[14:32:14] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[The Occupant]'/minecraft:the_nether
+[14:32:14] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[The Occupant]'/minecraft:the_end
+[14:32:14] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (The Occupant): All chunks are saved
+[14:32:14] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[14:32:14] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[14:32:14] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage: All dimensions are saved
