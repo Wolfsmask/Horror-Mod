@@ -225,9 +225,11 @@ not end well, and when it runs out, the pages that are left are not in the same 
 
 - Every event runs inside error handling. If something ever goes wrong it is logged, cleaned up
   (no leftover entities), and after three failures that one event is switched off, never the game.
-- The Occupant never loads chunks, never digs into anything but natural stone, never breaks into
-  water or lava, never removes torches near your bed or outside caves, and never places anything
-  over existing blocks.
+- The Occupant never loads chunks, never digs into anything but natural stone (and a tunnel it
+  digs is always a dead end, never a way into a room you dug), never breaks into water or lava,
+  never removes torches near your bed or outside caves, never places anything over existing
+  blocks, and never builds on, or marks, anything you made. It never moves your animals: nothing
+  named, tamed, on a lead or penned in.
 - It backs off when you are in a fight, in a menu, riding, flying, in water, AFK, or low on health.
 - CI builds the mod and runs **game tests on a real headless server** on every push:
   - every event is forced on a player, and the test fails if anything throws or an Occupant is left behind;
