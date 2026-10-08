@@ -1,10 +1,17 @@
-=== net.minecraft.client.model.HumanoidModel (code: <init>)
-=== net.minecraft.network.syncher.EntityDataSerializers (-public)
-public class network.syncher.EntityDataSerializers {
-  public static final network.syncher.EntityDataSerializer<Integer> INT;
-  public static final network.syncher.EntityDataSerializer<String> STRING;
-  public static final network.syncher.EntityDataSerializer<OptionalInt> OPTIONAL_UNSIGNED_INT;
-  public static final network.syncher.EntityDataSerializer<core.Holder<world.entity.decoration.PaintingVariant>> PAINTING_VARIANT;
-=== net.minecraft.client.model.geom.ModelPart (-public)
-public final class client.model.geom.ModelPart {
-  public void copyFrom(client.model.geom.ModelPart);
+=== net.minecraft.world.entity.Entity (-public)
+public abstract class world.entity.Entity implements world.Nameable,world.level.entity.EntityAccess,commands.CommandSource,attachment.v1.AttachmentTarget {
+  public void stopRiding();
+  public boolean isPassenger();
+=== net.minecraft.world.entity.Mob (-public)
+public abstract class world.entity.Mob extends world.entity.LivingEntity implements world.entity.Targeting {
+  public void setTarget(world.entity.LivingEntity);
+=== net.minecraft.world.damagesource.DamageSources (-public)
+public class world.damagesource.DamageSources {
+  public world.damagesource.DamageSource mobAttack(world.entity.LivingEntity);
+  public world.damagesource.DamageSource genericKill();
+=== net.minecraft.client.KeyMapping (-public)
+public class client.KeyMapping implements Comparable<client.KeyMapping> {
+  public static void set(blaze3d.platform.InputConstants$Key, boolean);
+  public static void setAll();
+  public static void releaseAll();
+  public static void resetMapping();
