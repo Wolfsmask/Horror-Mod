@@ -74,6 +74,8 @@ public final class Mercy {
 		Director director = Director.get();
 		if (director == null || !cfg.enabled || !cfg.itSavesYou) return true;
 		if (player.isCreative() && !cfg.hauntCreative || player.isSpectator() || !Haunt.worldAllowed(player)) return true;
+		// /kill is their own choice, and always works, even in the middle of it saving them.
+		if (source.is(DamageTypes.GENERIC_KILL)) return true;
 		Haunt h = director.haunt(player);
 		HauntData d = h.data;
 		if (!d.introduced || d.paused || d.ending == LastNightEnding.FOUND) return true;
@@ -140,6 +142,11 @@ public final class Mercy {
 		// Their bed only if it is in the overworld, where they are going (an anchor is not).
 		BlockPos bed = player.level().dimension() == Level.OVERWORLD ? Compat.respawnPos(player) : null;
 		BlockPos centre = bed != null ? bed : Compat.spawnPos(overworld);
+		// Loaded first: far from them, it is not, and there the ground reads as the very bottom of
+		// the world, inside the bedrock.
+		for (int cx = (centre.getX() - 3) >> 4; cx <= (centre.getX() + 3) >> 4; cx++) {
+			for (int cz = (centre.getZ() - 3) >> 4; cz <= (centre.getZ() + 3) >> 4; cz++) overworld.getChunk(cx, cz);
+		}
 		BlockPos feet = standNear(overworld, centre);
 		if (feet == null) {
 			int top = overworld.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, centre.getX(), centre.getZ());
@@ -250,8 +257,12 @@ public final class Mercy {
 			MinecraftServer server = world.getServer();
 			double want = monsters.size() == 1 ? 1.8 : 1.5;
 			for (Mob m : monsters) {
+				// Off whatever it rides (a jockey's chicken, a spider), or it would be held down on it.
+				if (m.isPassenger()) m.stopRiding();
 				from.add(m.position());
 				lift.add(Math.min(want, room(world, m)));
+				// After no one: a zombie hurt while it has someone to go for calls others to help.
+				m.setTarget(null);
 				m.setNoAi(true);
 				m.setNoGravity(true);
 				m.setDeltaMovement(Vec3.ZERO);
@@ -377,7 +388,7 @@ public final class Mercy {
 				holding.add(m);
 				entity.setHeld(holding);
 				Cues.sound(p, SoundEvents.TRIDENT_HIT, SoundSource.HOSTILE, m.position(), 1.0f, 0.55f + 0.08f * i);
-				m.hurtServer(level, m.damageSources().generic(), 0.5f);
+				m.hurtServer(level, sourceFor(m, m.damageSources().generic()), 0.5f);
 			}
 			// Held where they were, then lifted off the ground on the legs, slowly. The leg going in
 			// shoves each one forward a little, and it swings back; its head goes down.
@@ -411,7 +422,9 @@ public final class Mercy {
 				for (Mob m : stabbed) {
 					if (!m.isAlive()) continue;
 					level.sendParticles(ParticleTypes.SMOKE, m.getX(), m.getY() + m.getBbHeight() * 0.6, m.getZ(), 12, 0.2, 0.3, 0.2, 0.01);
-					m.hurtServer(level, m.damageSources().genericKill(), Float.MAX_VALUE);
+					// A slime that died would only come apart into more of them, and go for them again.
+					if (com.wolfsmask.occupant.util.Kinds.is(m, "slime") || com.wolfsmask.occupant.util.Kinds.is(m, "magma_cube")) m.discard();
+					else m.hurtServer(level, sourceFor(m, m.damageSources().genericKill()), Float.MAX_VALUE);
 				}
 			}
 			// 5. It is gone.
@@ -433,6 +446,14 @@ public final class Mercy {
 		private static double flat(Vec3 a, Vec3 b) {
 			double dx = a.x - b.x, dz = a.z - b.z;
 			return Math.sqrt(dx * dx + dz * dz);
+		}
+
+		/**
+		 * What the leg does to it, as the game counts it: from nothing in particular, except to an
+		 * enderman, which hurt by nothing alive leaps somewhere else, and so is hurt by it.
+		 */
+		private DamageSource sourceFor(Mob m, DamageSource otherwise) {
+			return entity != null && com.wolfsmask.occupant.util.Kinds.is(m, "enderman") ? m.damageSources().mobAttack(entity) : otherwise;
 		}
 
 		/** Whether a leg reaches {@code m} from where it stands. */

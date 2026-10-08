@@ -555,6 +555,36 @@ public final class OccupantGameTests {
 	}
 
 	/**
+	 * Caught falling a long way from home, where nothing is loaded: they wake by their bed, standing
+	 * on the ground, not buried at the bottom of the world.
+	 */
+	@GameTest(maxTicks = 100)
+	public void aFallFarFromHomeEndsAtHome(GameTestHelper helper) {
+		Director director = Director.get();
+		ServerLevel level = helper.getLevel();
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		OccupantConfig.get().hauntCreative = true;
+		HauntData data = director.data(player);
+		data.introduced = true;
+		data.setAct(2);
+		BlockPos home = helper.absolutePos(new BlockPos(1, 2, 1)).offset(4000, 0, 4000);
+		boolean loaded = level.hasChunk(home.getX() >> 4, home.getZ() >> 4);
+		com.wolfsmask.occupant.compat.Compat.setRespawn(player, home);
+		player.setHealth(1.0f);
+		boolean allowed = com.wolfsmask.occupant.director.Mercy.allowDeath(player, player.damageSources().fall());
+		BlockPos feet = player.blockPosition();
+		double away = Math.sqrt(Math.pow(player.getX() - (home.getX() + 0.5), 2) + Math.pow(player.getZ() - (home.getZ() + 0.5), 2));
+		boolean free = level.getBlockState(feet).getCollisionShape(level, feet).isEmpty()
+				&& level.getBlockState(feet.above()).getCollisionShape(level, feet.above()).isEmpty();
+		Occupant.LOGGER.info("[gametest] fall far from home: home loaded before {}, woke at {} ({} from the bed), room to stand {}",
+				loaded, feet, away, free);
+		helper.assertTrue(!allowed, "A fall far from home should be caught");
+		helper.assertTrue(away < 8.0, "They should wake by their bed, not " + away + " blocks from it (at " + feet + ")");
+		helper.assertTrue(free, "They should wake standing in the open, not inside the ground (at " + feet + ")");
+		helper.succeed();
+	}
+
+	/**
 	 * The rescue, run to its end: a leg goes into the monster, it is lifted off the ground, and only
 	 * then dies, and then it is gone.
 	 */

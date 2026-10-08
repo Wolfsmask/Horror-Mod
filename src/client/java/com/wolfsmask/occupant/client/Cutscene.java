@@ -73,6 +73,8 @@ public final class Cutscene {
 	/** Every tick: what to look at now, and the keys let go of. */
 	static void tick(Minecraft mc) {
 		if (!active) return;
+		// Paused, the scene is too: it is only over when the server's is.
+		if (mc.isPaused()) return;
 		if (mc.player == null || mc.level == null || --remaining <= 0) {
 			active = false;
 			return;
