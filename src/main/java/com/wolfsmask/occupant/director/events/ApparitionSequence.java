@@ -133,7 +133,7 @@ public abstract class ApparitionSequence implements Sequence {
 			int placed = 0;
 			int count = Math.min(6, animals.size());
 			for (Mob m : animals) {
-				if (placed >= count || !m.isAlive() || m.level() != entity.level()) continue;
+				if (placed >= count || !m.isAlive() || m.level() != entity.level() || !wild(m)) continue;
 				if (!Sight.isHidden(viewer, m.blockPosition().above())) continue;
 				double angle = Math.PI * 2 * placed / count;
 				double x = stood.x + Math.cos(angle) * 2.5;
@@ -159,6 +159,24 @@ public abstract class ApparitionSequence implements Sequence {
 					"It was there the whole time.", "It stood there for " + seconds + " seconds. You never looked."};
 			Cues.whisper(p, lines[p.getRandom().nextInt(lines.length)], 100);
 		}
+	}
+
+	/**
+	 * Only the wild ones are moved: nothing of theirs (named, tamed, on a lead, ridden) and nothing
+	 * penned in, which would be let out of its pen.
+	 */
+	private static boolean wild(Mob m) {
+		if (m.hasCustomName() || m.isLeashed() || m.isPassenger() || m.isVehicle()) return false;
+		if (m instanceof net.minecraft.world.entity.TamableAnimal t && t.isTame()) return false;
+		net.minecraft.core.BlockPos at = m.blockPosition();
+		for (net.minecraft.core.BlockPos p : net.minecraft.core.BlockPos.betweenClosed(at.offset(-6, -2, -6), at.offset(6, 2, 6))) {
+			net.minecraft.world.level.block.state.BlockState s = m.level().getBlockState(p);
+			if (s.is(net.minecraft.tags.BlockTags.FENCES) || s.is(net.minecraft.tags.BlockTags.FENCE_GATES)
+					|| s.is(net.minecraft.tags.BlockTags.WALLS)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	@Override

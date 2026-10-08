@@ -492,9 +492,9 @@ public final class OccupantGameTests {
 		ServerLevel level = helper.getLevel();
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
 		// A test player is creative whatever it is told; as with the other tests, haunt creative.
-		OccupantConfig cfg = OccupantConfig.get();
-		boolean creativeBefore = cfg.hauntCreative;
-		cfg.hauntCreative = true;
+		// Left on, as every test leaves it: the tests run side by side, and one putting it back
+		// would end another's rescue halfway through.
+		OccupantConfig.get().hauntCreative = true;
 		HauntData data = director.data(player);
 		data.introduced = true;
 		data.setAct(2);
@@ -523,7 +523,6 @@ public final class OccupantGameTests {
 		boolean again = com.wolfsmask.occupant.director.Mercy.allowDeath(player, player.damageSources().mobAttack(zombie));
 		helper.assertTrue(again, "Not saved from monsters twice in ten minutes");
 		zombie.discard();
-		cfg.hauntCreative = creativeBefore;
 		helper.succeed();
 	}
 
@@ -536,9 +535,7 @@ public final class OccupantGameTests {
 		Director director = Director.get();
 		ServerLevel level = helper.getLevel();
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
-		OccupantConfig cfg = OccupantConfig.get();
-		boolean creativeBefore = cfg.hauntCreative;
-		cfg.hauntCreative = true;
+		OccupantConfig.get().hauntCreative = true;
 		HauntData data = director.data(player);
 		data.introduced = true;
 		data.setAct(2);
@@ -546,7 +543,7 @@ public final class OccupantGameTests {
 		// and each has a zombie of its own.
 		BlockPos stand = helper.absolutePos(new BlockPos(2, 2, 1));
 		player.snapTo(stand.getX() + 0.5, stand.getY(), stand.getZ() + 0.5, 0.0f, 0.0f);
-		net.minecraft.world.entity.Mob zombie = helper.spawn(net.minecraft.world.entity.EntityType.ZOMBIE, 4, 2, 1);
+		net.minecraft.world.entity.Mob zombie = summon(helper, "zombie", stand.east(2));
 		helper.assertTrue(zombie != null, "Could not summon a zombie");
 		double ground = zombie.getY();
 		player.setHealth(1.0f);
@@ -566,7 +563,6 @@ public final class OccupantGameTests {
 			helper.assertTrue(!zombie.isAlive(), "The zombie should die once it has been lifted");
 			helper.assertTrue(level.getEntitiesOfClass(OccupantEntity.class, player.getBoundingBox().inflate(16.0),
 					e -> e.isHaunting(player)).isEmpty(), "Then it should be gone");
-			cfg.hauntCreative = creativeBefore;
 		});
 	}
 
@@ -579,17 +575,15 @@ public final class OccupantGameTests {
 		Director director = Director.get();
 		ServerLevel level = helper.getLevel();
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
-		OccupantConfig cfg = OccupantConfig.get();
-		boolean creativeBefore = cfg.hauntCreative;
-		cfg.hauntCreative = true;
+		OccupantConfig.get().hauntCreative = true;
 		HauntData data = director.data(player);
 		data.introduced = true;
 		data.setAct(2);
 		var server = level.getServer();
 		BlockPos stand = helper.absolutePos(new BlockPos(2, 2, 1));
 		player.snapTo(stand.getX() + 0.5, stand.getY(), stand.getZ() + 0.5, 0.0f, 0.0f);
-		net.minecraft.world.entity.Mob zombie = helper.spawn(net.minecraft.world.entity.EntityType.ZOMBIE, 4, 2, 1);
-		net.minecraft.world.entity.Mob creeper = helper.spawn(net.minecraft.world.entity.EntityType.CREEPER, 0, 2, 1);
+		net.minecraft.world.entity.Mob zombie = summon(helper, "zombie", stand.east(2));
+		net.minecraft.world.entity.Mob creeper = summon(helper, "creeper", stand.west(2));
 		helper.assertTrue(zombie != null && creeper != null, "Could not summon a zombie and a creeper");
 		// Lit, on a short fuse: left alone it would go off in a second.
 		server.getCommands().performPrefixedCommand(server.createCommandSourceStack().withSuppressedOutput(),
@@ -603,10 +597,24 @@ public final class OccupantGameTests {
 			Occupant.LOGGER.info("[gametest] rescue: creeper alive {}, {} above the ground", creeper.isAlive(), creeper.getY() - ground);
 			helper.assertTrue(creeper.isAlive() && creeper.getY() > ground + 0.3, "The creeper should be held up, its fuse out, not gone off");
 		});
-		helper.succeedWhen(() -> {
-			helper.assertTrue(!creeper.isAlive() && !zombie.isAlive(), "Both should die together");
-			cfg.hauntCreative = creativeBefore;
-		});
+		helper.succeedWhen(() -> helper.assertTrue(!creeper.isAlive() && !zombie.isAlive(), "Both should die together"));
+	}
+
+	/**
+	 * A monster of this kind at {@code at}, by the game's own command (its entity type is not
+	 * reachable by name on every version), or null if it could not be put there.
+	 */
+	@org.jetbrains.annotations.Nullable
+	private static net.minecraft.world.entity.Mob summon(GameTestHelper helper, String kind, BlockPos at) {
+		ServerLevel level = helper.getLevel();
+		MinecraftServer server = level.getServer();
+		server.getCommands().performPrefixedCommand(server.createCommandSourceStack().withLevel(level).withSuppressedOutput(),
+				String.format(java.util.Locale.ROOT, "summon minecraft:%s %.1f %d %.1f {PersistenceRequired:1b}",
+						kind, at.getX() + 0.5, at.getY(), at.getZ() + 0.5));
+		return level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class,
+				net.minecraft.world.phys.AABB.ofSize(net.minecraft.world.phys.Vec3.atBottomCenterOf(at).add(0, 1, 0), 2.0, 3.0, 2.0),
+				m -> com.wolfsmask.occupant.util.Kinds.is(m, kind))
+				.stream().findFirst().orElse(null);
 	}
 
 	/** What it builds while they play (its lair, the last camp) is never put on anything they made. */

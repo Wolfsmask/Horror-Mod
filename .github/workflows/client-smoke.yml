@@ -79,8 +79,8 @@ jobs:
               echo "=== $log"
               grep -E "\[client\]|\[smoke\]|client-gametest|Exception|Caused by|Crash|FAILED|What went wrong|occupant|Done \(|Stopping" "$log" \
                 | grep -vE "DEBUG|Datafixer|flite|OpenAL|Realms|GLX|World loading finished|Reloading ResourceManager" | head -n 60 || true
-              echo "--- the mod's own checks, last of them ---"
-              grep -E "\(occupant\) \[client-gametest\]|Director error|AssertionError" "$log" | grep -vE "screenshot " | tail -n 30 || true
+              echo "--- the mod's own checks ---"
+              grep -E "over the network|all client checks|the story has begun|Director error|AssertionError" "$log" | head -n 20 || true
               echo "--- last of the server thread in $log ---"
               grep -E "Server thread|Worker-Main|Preparing" "$log" | grep -v DEBUG | tail -n 20 || true
               echo "--- tail of $log ---"
