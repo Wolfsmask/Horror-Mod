@@ -86,7 +86,8 @@ public final class Cutscene {
 	/** Over: and a key they have held down all through it counts again, without pressing it anew. */
 	private static void finish(Minecraft mc) {
 		active = false;
-		if (mc.screen == null) KeyMapping.setAll();
+		// Only while they are in the world (no screen open, the mouse theirs to look with).
+		if (mc.mouseHandler.isMouseGrabbed()) KeyMapping.setAll();
 	}
 
 	/** Nothing they press moves them: before the game reads the keys, and after. */

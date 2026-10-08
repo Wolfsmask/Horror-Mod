@@ -226,6 +226,8 @@ public final class Mercy {
 		private static final int AFTER_DEATH = 28;
 
 		private final ServerPlayer player;
+		/** Where the monsters are (and stay, whatever happens to them: through a portal, say). */
+		private final ServerLevel level;
 		private final Haunt haunt;
 		private final List<Mob> monsters;
 		private final List<Vec3> from = new ArrayList<>();
@@ -254,6 +256,7 @@ public final class Mercy {
 			this.monsters = monsters;
 			Cues.effect(player, ScreenEffectPayload.SILENCE, 0, 1f);
 			ServerLevel world = Compat.level(player);
+			this.level = world;
 			MinecraftServer server = world.getServer();
 			double want = monsters.size() == 1 ? 1.8 : 1.5;
 			for (Mob m : monsters) {
@@ -363,7 +366,6 @@ public final class Mercy {
 				if (entity.hasVanished()) entity = null;
 				else entity.keepAlive();
 			}
-			ServerLevel level = Compat.level(p);
 			// 1. It is there, already facing them.
 			if (age == APPEAR && entity != null && entity.isConcealed()) {
 				entity.faceTowards(p.getEyePosition());
