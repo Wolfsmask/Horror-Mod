@@ -29,7 +29,7 @@ final class RadioShack extends Build {
 	}
 
 	@Override
-	void build() {
+	void make() {
 		int back = 2 + random.nextInt(2);                 // five deep, or six
 		boolean slope = chance(0.5f);
 		boolean porch = chance(0.45f);

@@ -24,7 +24,7 @@ final class Cottage extends Build {
 	}
 
 	@Override
-	void build() {
+	void make() {
 		BlockState air = Blocks.AIR.defaultBlockState();
 		boolean spruce = chance(0.6f);
 		BlockState planks = (spruce ? Blocks.SPRUCE_PLANKS : Blocks.OAK_PLANKS).defaultBlockState();

@@ -32,7 +32,7 @@ final class Watchtower extends Build {
 	}
 
 	@Override
-	void build() {
+	void make() {
 		int top = 11 + random.nextInt(4);                      // how high the floor is: no two the same
 		boolean roofless = chance(0.25f);                        // the roof came down in a storm, long ago
 		BlockState log = Blocks.SPRUCE_LOG.defaultBlockState();

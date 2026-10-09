@@ -29,7 +29,7 @@ final class Lair extends Build {
 	}
 
 	@Override
-	void build() {
+	void make() {
 		// The mark on the surface.
 		for (int x = -3; x <= 3; x++) for (int z = -3; z <= 3; z++) {
 			if (x * x + z * z > 10) continue;

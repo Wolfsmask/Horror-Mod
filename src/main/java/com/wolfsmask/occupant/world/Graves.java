@@ -28,7 +28,7 @@ final class Graves extends Build {
 	}
 
 	@Override
-	void build() {
+	void make() {
 		// How many graves, and in how many rows: no two graveyards the same.
 		int rows = 2 + random.nextInt(2);
 		int cols = 2 + random.nextInt(3);

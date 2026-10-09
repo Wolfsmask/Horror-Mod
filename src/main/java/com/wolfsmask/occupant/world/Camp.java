@@ -33,7 +33,7 @@ final class Camp extends Build {
 	}
 
 	@Override
-	void build() {
+	void make() {
 		for (int x = -5; x <= 5; x++) {
 			for (int z = -5; z <= 5; z++) {
 				int g = floor(x, z);

@@ -40,7 +40,7 @@ final class Ruin extends Build {
 	}
 
 	@Override
-	void build() {
+	void make() {
 		r = 5 + random.nextInt(3);
 		int height = 4 + random.nextInt(2);
 		// Which corners have towers: all four, the two either side of the gate, two across from

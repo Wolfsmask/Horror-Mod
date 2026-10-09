@@ -14,7 +14,7 @@ final class Well extends Build {
 	}
 
 	@Override
-	void build() {
+	void make() {
 		BlockState cobble = Blocks.COBBLESTONE.defaultBlockState();
 		BlockState mossy = Blocks.MOSSY_COBBLESTONE.defaultBlockState();
 		fill(-2, 1, -2, 2, 5, 2, Blocks.AIR.defaultBlockState());

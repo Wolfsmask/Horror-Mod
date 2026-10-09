@@ -37,7 +37,7 @@ public final class Places {
 
 	/** The kinds of place, how often each comes up, and how far each reaches from its middle. */
 	private static final String[] KINDS = {"lair", "lighthouse", "ruin", "camp", "graves", "watchtower", "chapel", "radio"};
-	private static final float[] SHARES = {0.06f, 0.07f, 0.14f, 0.19f, 0.14f, 0.14f, 0.14f, 0.12f};
+	private static final float[] SHARES = {0.06f, 0.12f, 0.13f, 0.17f, 0.13f, 0.13f, 0.14f, 0.12f};
 
 	private static final List<BlockPos> PLACES = new CopyOnWriteArrayList<>();
 	/** Which kind each place is, where known (worlds from before this was kept have none). */
@@ -72,6 +72,7 @@ public final class Places {
 		PLACES.clear();
 		KIND_AT.clear();
 		SIGNS.clear();
+		Overgrowth.clear();
 	}
 
 	/**
@@ -89,8 +90,9 @@ public final class Places {
 		}
 	}
 
-	/** Called every second: writes any waiting signs whose chunks are now loaded. */
+	/** Called every second: writes any waiting signs whose chunks are now loaded, and clears out overgrowth. */
 	public static void tick(MinecraftServer server) {
+		Overgrowth.tick(server);
 		if (SIGNS.isEmpty()) return;
 		ServerLevel level = server.overworld();
 		SIGNS.entrySet().removeIf(e -> {
@@ -269,6 +271,7 @@ public final class Places {
 			Rotation turned = rotation.getRotated(turns[i]);
 			Build build = well ? new Well(level, base, turned, random) : new Cottage(level, base, turned, random);
 			build.palette = palette;
+			build.home = house;
 			build.build();
 			path(level, random, house, base);
 		}
@@ -290,10 +293,24 @@ public final class Places {
 		}
 	}
 
-	/** The first open y above the ground at a column (not counting leaves or water). */
+	/**
+	 * The first open y above the ground at a column (not counting water): under any tree standing
+	 * there, not up in its leaves. While the world is being made, through its trunk too.
+	 */
 	static int surface(WorldGenLevel level, int x, int z) {
 		Heightmap.Types type = level instanceof ServerLevel ? Heightmap.Types.OCEAN_FLOOR : Heightmap.Types.OCEAN_FLOOR_WG;
-		return level.getHeight(type, x, z);
+		int top = level.getHeight(type, x, z);
+		boolean making = !(level instanceof ServerLevel);
+		BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos(x, top - 1, z);
+		BlockState s = level.getBlockState(p);
+		if (!Trees.leaf(s) && !(making && s.is(net.minecraft.tags.BlockTags.LOGS))) return top;
+		for (int d = 0; d < 48; d++) {
+			p.move(net.minecraft.core.Direction.DOWN);
+			s = level.getBlockState(p);
+			boolean open = s.isAir() || (s.canBeReplaced() && s.getFluidState().isEmpty());
+			if (!open && !Trees.leaf(s) && !(making && s.is(net.minecraft.tags.BlockTags.LOGS))) return p.getY() + 1;
+		}
+		return top;
 	}
 
 	/**
@@ -328,12 +345,17 @@ public final class Places {
 		return true;
 	}
 
-	/** Water within a few blocks of the ground here: the shore. */
+	/**
+	 * Open water a little way off: the shore of the sea, a lake or a wide river, not a puddle (three
+	 * or more of the spots looked at round about are water).
+	 */
 	private static boolean nearWater(WorldGenLevel level, BlockPos base) {
-		for (int[] c : new int[][]{{8, 0}, {-8, 0}, {0, 8}, {0, -8}, {6, 6}, {-6, 6}, {6, -6}, {-6, -6}}) {
+		int wet = 0;
+		for (int[] c : new int[][]{{8, 0}, {-8, 0}, {0, 8}, {0, -8}, {6, 6}, {-6, 6}, {6, -6}, {-6, -6},
+				{14, 0}, {-14, 0}, {0, 14}, {0, -14}, {10, 10}, {-10, 10}, {10, -10}, {-10, -10}}) {
 			int x = base.getX() + c[0], z = base.getZ() + c[1];
 			BlockPos top = new BlockPos(x, level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z) - 1, z);
-			if (!level.getFluidState(top).isEmpty()) return true;
+			if (!level.getFluidState(top).isEmpty() && ++wet >= 3) return true;
 		}
 		return false;
 	}

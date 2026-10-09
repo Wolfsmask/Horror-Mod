@@ -943,6 +943,55 @@ public final class OccupantGameTests {
 	}
 
 	/**
+	 * A place built through a tree takes the whole tree down: no trunk left standing with its top
+	 * cut off, no leaves left hanging over nothing where the clearing for it ended.
+	 */
+	@GameTest(maxTicks = 40)
+	public void aPlaceBuiltThroughATreeLeavesNoneOfItHanging(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos at = helper.absolutePos(new BlockPos(0, 1, 0)).offset(-2400, 0, 640);
+		java.util.Set<Long> chunks = new java.util.HashSet<>();
+		for (int dx = -2; dx <= 2; dx++) {
+			for (int dz = -2; dz <= 2; dz++) {
+				int cx = (at.getX() >> 4) + dx, cz = (at.getZ() >> 4) + dz;
+				if (chunks.add(((long) cx << 32) | (cz & 0xFFFFFFFFL))) level.setChunkForced(cx, cz, true);
+			}
+		}
+		try {
+			int top = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, at.getX(), at.getZ());
+			BlockPos base = new BlockPos(at.getX(), top - 1, at.getZ());
+			// An oak just outside the watchtower's clearing, its leaves reaching into it.
+			BlockPos trunk = base.offset(8, 0, 0);
+			net.minecraft.world.level.block.state.BlockState log = net.minecraft.world.level.block.Blocks.OAK_LOG.defaultBlockState();
+			level.setBlock(trunk, net.minecraft.world.level.block.Blocks.DIRT.defaultBlockState(), 2);
+			for (int y = 1; y <= 5; y++) level.setBlock(trunk.above(y), log, 2);
+			for (int dx = -2; dx <= 2; dx++) {
+				for (int dz = -2; dz <= 2; dz++) {
+					for (int y = 4; y <= 6; y++) {
+						if (dx == 0 && dz == 0 && y <= 5) continue;
+						int distance = Math.min(7, Math.abs(dx) + Math.abs(dz) + (y > 5 ? 1 : 0));
+						level.setBlock(trunk.offset(dx, y, dz), net.minecraft.world.level.block.Blocks.OAK_LEAVES.defaultBlockState()
+								.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.DISTANCE, distance), 2);
+					}
+				}
+			}
+			House.buildPlaceForTest("watchtower", level, base, net.minecraft.util.RandomSource.create(7L));
+			int logs = 0;
+			for (int y = 1; y <= 5; y++) if (level.getBlockState(trunk.above(y)).is(net.minecraft.world.level.block.Blocks.OAK_LOG)) logs++;
+			int leaves = 0;
+			for (BlockPos p : BlockPos.betweenClosed(trunk.offset(-3, 3, -3), trunk.offset(3, 7, 3))) {
+				if (level.getBlockState(p).is(net.minecraft.world.level.block.Blocks.OAK_LEAVES)) leaves++;
+			}
+			Occupant.LOGGER.info("[gametest] the tree a place was built through: {} logs and {} leaves left", logs, leaves);
+			helper.assertTrue(logs == 0, "The tree a place cut into should come down whole: " + logs + " logs left standing");
+			helper.assertTrue(leaves == 0, "No leaves should be left hanging where a tree came down: " + leaves + " left");
+		} finally {
+			for (long c : chunks) level.setChunkForced((int) (c >> 32), (int) c, false);
+		}
+		helper.succeed();
+	}
+
+	/**
 	 * Every kind of place, built six different ways (a seed each: size, shape, wood, what has
 	 * fallen in): however it comes out, its chest or barrel is still there to be found.
 	 */

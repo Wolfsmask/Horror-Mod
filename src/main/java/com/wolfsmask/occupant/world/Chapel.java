@@ -53,7 +53,7 @@ final class Chapel extends Build {
 	}
 
 	@Override
-	void build() {
+	void make() {
 		wooden = chance(0.35f);
 		back = 5 + random.nextInt(3);
 		boolean tower = chance(0.55f);

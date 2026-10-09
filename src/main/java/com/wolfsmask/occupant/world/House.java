@@ -19,6 +19,7 @@ import net.minecraft.world.level.block.BarrelBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CrossCollisionBlock;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -256,9 +257,24 @@ public final class House {
 		if (from == null) return false;                       // the world is not open yet
 		// The middle of the chunk: from there a build can reach furthest in every direction.
 		BlockPos centre = new BlockPos((origin.getX() & ~15) + 8, origin.getY(), (origin.getZ() & ~15) + 8);
+		// Never into a village, an outpost, a temple: anything the game itself builds on the surface.
+		if (structureNear(level, centre)) return false;
 		double fromSpawn = Math.sqrt(Math.pow(centre.getX() - from.getX(), 2) + Math.pow(centre.getZ() - from.getZ(), 2));
 		if (!CLOSED.get() && random.nextFloat() < 0.6f && tryPlaceHouse(level, random, centre)) return true;
 		return Places.tryPlace(level, random, centre, fromSpawn);
+	}
+
+	/** Whether the game builds anything of its own on the surface (a village, an outpost) in this chunk or round it. */
+	private static boolean structureNear(WorldGenLevel level, BlockPos centre) {
+		int cx = centre.getX() >> 4, cz = centre.getZ() >> 4;
+		for (int dx = -1; dx <= 1; dx++) {
+			for (int dz = -1; dz <= 1; dz++) {
+				for (var e : level.getChunk(cx + dx, cz + dz).getAllReferences().entrySet()) {
+					if (!e.getValue().isEmpty() && e.getKey().step() == GenerationStep.Decoration.SURFACE_STRUCTURES) return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -354,7 +370,7 @@ public final class House {
 		}
 
 		@Override
-		void build() {
+		void make() {
 			BlockState air = Blocks.AIR.defaultBlockState();
 			BlockState planks = Blocks.SPRUCE_PLANKS.defaultBlockState();
 			BlockState floor = Blocks.DARK_OAK_PLANKS.defaultBlockState();
