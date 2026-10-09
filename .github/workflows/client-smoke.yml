@@ -3,7 +3,7 @@ name: Client start
 # Starts the real game client for each ported version under a virtual display and software
 # rendering. Versions with Fabric's client test API run the full client game test (photographs
 # and all); the older ones, which have no such API, are started, left on the first screen long
-# enough to draw it many times, and checked for a crash. Results go to tools/ports/<mc>-client.txt.
+# enough to draw it many times, and checked for a crash. Results go to ports/<mc>-client.txt on the ci-results branch.
 on:
   workflow_dispatch:
   push:
@@ -26,7 +26,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        mc: ['1.20.1', '1.21.1', '1.21.11', '26.1.2', '26.3', '26.4-snapshot-2']
+        mc: ['1.20.1', '1.21.1', '1.21.11', '26.1.2', '26.3']
     steps:
       - uses: actions/checkout@v4
 
@@ -91,17 +91,8 @@ jobs:
               awk '/^"/{keep = ($0 ~ /Server thread|Worker-Main|Render thread|Test thread|IO-Worker/); n = 0} keep && n < 45 {print; n++}' threads.txt | head -n 400
             fi
           } > "$OUT/result.txt"
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          for attempt in 1 2 3 4 5 6; do
-            git fetch -q origin "${GITHUB_REF_NAME}"
-            git reset -q --hard "origin/${GITHUB_REF_NAME}"
-            mkdir -p tools/ports
-            cp "$OUT/result.txt" "tools/ports/${{ matrix.mc }}-client.txt"
-            for shot in shot-*.png; do if [ -f "$shot" ]; then cp "$shot" "tools/ports/${{ matrix.mc }}-${shot#shot-}"; fi; done
-            git add -A tools/ports
-            git diff --cached --quiet && break
-            git commit -q -m "Client start result for ${{ matrix.mc }} [skip ci]"
-            git push origin "HEAD:${GITHUB_REF_NAME}" && break
-            sleep $((attempt * 4))
-          done
+          SAVE="$RUNNER_TEMP/save"
+          mkdir -p "$SAVE"
+          cp "$OUT/result.txt" "$SAVE/${{ matrix.mc }}-client.txt"
+          for shot in shot-*.png; do if [ -f "$shot" ]; then cp "$shot" "$SAVE/${{ matrix.mc }}-${shot#shot-}"; fi; done
+          bash tools/ci/save-results.sh "Client start result for ${{ matrix.mc }}" ports "$SAVE/." 

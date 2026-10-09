@@ -3,10 +3,8 @@ name: Build & Test
 on:
   push:
     paths-ignore:
-      - 'docs/**'
+      - 'dist/**'
       - 'tools/api-probe/**'
-      - 'tools/marketing/**'
-      - 'tools/ports/**'
   pull_request:
   workflow_dispatch:
 
@@ -42,8 +40,9 @@ jobs:
           python3 tools/check_model.py
           python3 tools/generate_model.py
           git diff --exit-code -- src/client/java/com/wolfsmask/occupant/client/render/OccupantGeometry.java \
-            src/main/resources/assets/occupant/textures/entity \
             || { echo "::error::The committed model does not match tools/generate_model.py. Run it and commit."; exit 1; }
+          python3 tools/ci/compare-textures.py \
+            || { echo "::error::The committed texture does not match tools/generate_model.py. Run it and commit."; exit 1; }
 
       - name: Build
         run: |
@@ -61,16 +60,8 @@ jobs:
             grep -E "\.java:[0-9]+: (error|warning):|^e: |^error: |symbol:|location:|required:|found:|reason:" build.log | head -n 120
             echo "--- tail ---"
             tail -n 40 build.log
-          } > tools/api-probe/build-errors.txt
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f tools/api-probe/build-errors.txt
-          git commit -m "Build errors [skip ci]" || true
-          # Someone may have pushed while this ran: rebase onto them rather than fail.
-          for attempt in 1 2 3 4 5; do
-            git pull --rebase --quiet origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && break
-            sleep $((attempt * 3))
-          done
+          } > "$RUNNER_TEMP/build-errors.txt"
+          bash tools/ci/save-results.sh "Build errors" build "$RUNNER_TEMP/build-errors.txt"
 
       - name: Run game tests (headless server)
         run: |
@@ -162,29 +153,14 @@ jobs:
             echo "--- tail ---"
             tail -n 60 client.log
           } > "$OUT/result.txt"
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # Each attempt starts again from the branch as it is now, so two runs finishing together
-          # can never conflict over the same images. If newer code has been pushed since this run
-          # started, its own run will report, and this one's results are already out of date.
-          for attempt in 1 2 3 4 5; do
-            git fetch -q origin "${GITHUB_REF_NAME}"
-            # Newer code means a file that would start a build of its own changed: results, jars,
-            # docs and pictures pushed since (and merges of them) do not count.
-            if [ -n "$(git diff --name-only "${GITHUB_SHA}" "origin/${GITHUB_REF_NAME}" -- . ':(exclude)docs' ':(exclude)dist' ':(exclude)tools/ports' ':(exclude)tools/api-probe' ':(exclude)tools/marketing')" ]; then
-              echo "Newer code is on the branch; leaving the report to its run."
-              break
-            fi
-            git reset -q --hard "origin/${GITHUB_REF_NAME}"
-            rm -rf docs/client-test
-            mkdir -p docs/client-test
-            cp -r "$OUT"/. docs/client-test/
-            git add -A -f docs/client-test
-            git diff --cached --quiet && break
-            git commit -q -m "Client game test results [skip ci]"
-            git push origin "HEAD:${GITHUB_REF_NAME}" && break
-            sleep $((attempt * 3))
-          done
+          # If newer code has been pushed since this run started, its own run will report, and
+          # this one's results are already out of date. (Jars and probe requests do not count.)
+          git fetch -q origin "${GITHUB_REF_NAME}"
+          if [ -n "$(git diff --name-only "${GITHUB_SHA}" "origin/${GITHUB_REF_NAME}" -- . ':(exclude)dist' ':(exclude)tools/api-probe')" ]; then
+            echo "Newer code is on the branch; leaving the report to its run."
+          else
+            CLEAR=1 bash tools/ci/save-results.sh "Client game test results" client-test "$OUT/."
+          fi
 
   # The client again, with Sodium, which most players have: Sodium draws the land itself, with its
   # own copy of the fog, and that copy must be this mod's fog. The latest Sodium for the version is
@@ -247,19 +223,8 @@ jobs:
             echo "--- tail ---"
             tail -n 40 sodium.log 2>/dev/null
           } > "$OUT"
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          for attempt in 1 2 3 4 5; do
-            git fetch -q origin "${GITHUB_REF_NAME}"
-            git reset -q --hard "origin/${GITHUB_REF_NAME}"
-            mkdir -p tools/ports
-            cp "$OUT" "tools/ports/sodium-${{ matrix.mc }}.txt"
-            git add -f "tools/ports/sodium-${{ matrix.mc }}.txt"
-            git diff --cached --quiet && break
-            git commit -q -m "Sodium result for ${{ matrix.mc }} [skip ci]"
-            git push origin "HEAD:${GITHUB_REF_NAME}" && break
-            sleep $((attempt * 3))
-          done
+          cp "$OUT" "$RUNNER_TEMP/sodium-${{ matrix.mc }}.txt"
+          bash tools/ci/save-results.sh "Sodium result for ${{ matrix.mc }}" ports "$RUNNER_TEMP/sodium-${{ matrix.mc }}.txt"
 
       - name: Fail if the fog did not reach Sodium
         if: steps.run.outcome == 'failure'

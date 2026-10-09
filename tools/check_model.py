@@ -25,6 +25,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 GEOM = ROOT / "src/client/java/com/wolfsmask/occupant/client/render/OccupantGeometry.java"
 MODEL = ROOT / "src/client/java/com/wolfsmask/occupant/client/render/OccupantModel.java"
+# Where the bones are looked up by name, to be moved.
+POSE = ROOT / "src/client/java/com/wolfsmask/occupant/client/render/OccupantPose.java"
 
 # Faces closer together than this count as the same plane.
 PLANE_EPS = 0.02
@@ -52,7 +54,7 @@ def load():
         if len(vals) > 3 and any(abs(v) > 1e-6 for v in vals[3:6]):
             print("note: %s is built rotated; its check is approximate" % name)
         for _uv, box in BOX_RE.findall(cubes):
-            x, y, z, w, h, d = [float(v) for v in NUM_RE.findall(box)]
+            x, y, z, w, h, d = [float(v) for v in NUM_RE.findall(box)][:6]
             boxes.append([name, (x, y, z, x + w, y + h, z + d)])
 
     def origin(name):
@@ -154,9 +156,13 @@ def check_uvs():
         name = m.group(2)
         for uv, box in BOX_RE.findall(m.group(3)):
             u, v = [float(t) for t in NUM_RE.findall(uv)]
-            _x, _y, _z, w, h, d = [float(t) for t in NUM_RE.findall(box)]
-            w, h, d = [max(1, int(-(-v // 1))) for v in (w, h, d)]   # ceil, min 1
-            rects.append((name, u, v, u + 2 * d + 2 * w, v + d + h))
+            nums = [float(t) for t in NUM_RE.findall(box)]
+            _x, _y, _z, w, h, d = nums[:6]
+            # A texture scale (the face's boxes) divides everything: offset and sizes alike.
+            ts = nums[6] if len(nums) >= 8 else 1.0
+            if ts == 1.0:
+                w, h, d = [max(1, int(-(-v // 1))) for v in (w, h, d)]   # ceil, min 1
+            rects.append((name, u / ts, v / ts, (u + 2 * d + 2 * w) / ts, (v + d + h) / ts))
     bad = []
     for i in range(len(rects)):
         na, ax0, ay0, ax1, ay1 = rects[i]
@@ -170,7 +176,7 @@ def check_uvs():
 def check_lookups():
     """Every bone OccupantModel.java asks for has to exist, or the model throws on first draw."""
     defined = set(re.findall(r'addOrReplaceChild\("(\w+)"', GEOM.read_text()))
-    src = MODEL.read_text()
+    src = MODEL.read_text() + POSE.read_text()
     wanted = set(re.findall(r'getChild\("(\w+)"\)', src))
     # Names built up in loops, e.g. SIDE[s] + "_upper" and "_finger" + i.
     for suffix in re.findall(r'getChild\(SIDE\[s\] \+ "(\w+)"\)', src):

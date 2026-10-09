@@ -1,7 +1,8 @@
 name: API probe
 
 # Prints real method signatures from the Minecraft/Fabric jars the mod builds against, for every
-# version named on the "@mc" line of tools/api-probe/classes.txt, into out-<version>.txt.
+# version named on the "@mc" line of tools/api-probe/classes.txt, into api-probe/out-<version>.txt
+# on the ci-results branch.
 on:
   workflow_dispatch:
   push:
@@ -44,16 +45,7 @@ jobs:
           ./gradlew --quiet -Pmc=${{ matrix.mc }} --init-script tools/api-probe/classpath.init.gradle printProbeClasspath | grep '^PROBE_CP=' | head -1 | cut -d= -f2- > cp.txt
           tr ':' '\n' < cp.txt | grep -iE 'minecraft|fabric-api|gametest|rendering|networking' | head -40
       - name: Probe
-        run: tools/api-probe/probe.sh "$(cat cp.txt)" | tee tools/api-probe/out-${{ matrix.mc }}.txt
-      # Committed rather than only logged: the log tail is unreliable to read back.
-      - name: Commit the output
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f tools/api-probe/out-${{ matrix.mc }}.txt
-          git diff --cached --quiet || git commit -m "API probe output for ${{ matrix.mc }} [skip ci]"
-          # Someone may have pushed while this ran: rebase onto them rather than fail.
-          for attempt in 1 2 3 4 5 6; do
-            git pull --rebase --quiet origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && break
-            sleep $((attempt * 4))
-          done
+        run: tools/api-probe/probe.sh "$(cat cp.txt)" | tee "$RUNNER_TEMP/out-${{ matrix.mc }}.txt"
+      # Saved rather than only logged: the log is not readable from where the probes are asked for.
+      - name: Save the output
+        run: bash tools/ci/save-results.sh "API probe output for ${{ matrix.mc }}" api-probe "$RUNNER_TEMP/out-${{ matrix.mc }}.txt"

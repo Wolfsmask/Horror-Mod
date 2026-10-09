@@ -10,12 +10,14 @@ the texture can never drift apart. It writes:
 
     src/client/java/com/wolfsmask/occupant/client/render/OccupantGeometry.java
     src/main/resources/assets/occupant/textures/entity/occupant.png
-    src/main/resources/assets/occupant/textures/entity/occupant_eyes.png
+    src/main/resources/assets/occupant/textures/entity/occupant_glow.png
 
-The animation lives in OccupantModel.java, which is written by hand.
+The animation lives in OccupantPose.java, which is written by hand. tools/preview_model.py draws
+what this builds, as the game would, without starting the game.
 
-What it is: Father Fester. A long pale face that is mostly mouth, framed by long thin hair the
-colour of dried blood, on a body far too tall and as thin as paper, carried on ten long pale
+What it is: Father Fester. A swollen bald head, pale as something kept from the light, with two
+big round black eyes and a long gaping mouth ringed with needles that is most of the face, framed
+by long thin hair the colour of dried blood, on a body far too tall and as thin as paper, carried on ten long pale
 legs. The legs are not walked on. Each one reaches out to the nearest thing it can push against,
 the ground, a wall, a tree, a ceiling, and the body is shoved along between them. Where each leg
 is planted is worked out in game (OccupantRenderer / LegGait) and the joints are solved to reach
@@ -23,6 +25,7 @@ it (OccupantModel), so this only builds the parts at rest, hanging straight down
 
 Units are pixels; the ground is at y = 24 and up is -y (the same convention as vanilla models).
 """
+import math
 from pathlib import Path
 
 import numpy as np
@@ -89,11 +92,11 @@ def _cowl_strands():
         front = np.cos(a)
         if front < -0.5 and abs(np.sin(a)) < 0.62:
             continue                                   # the face
-        x = float(np.sin(a)) * (4.25 + 0.5 * float(_S.random()))
-        z = float(np.cos(a)) * (3.55 + 0.45 * float(_S.random()))
+        x = float(np.sin(a)) * (4.7 + 0.5 * float(_S.random()))
+        z = float(np.cos(a)) * (3.75 + 0.45 * float(_S.random()))
         if front < 0.0:
-            # Beside the face the hair has to hang clear of the cheeks, not through them.
-            x = float(np.sign(np.sin(a))) * max(abs(x), 4.05)
+            # Beside the face the hair has to hang clear of the swollen brow, not through it.
+            x = float(np.sign(np.sin(a))) * max(abs(x), 4.5)
         # Long enough at the sides to frame the face past the chin; longest down the back.
         length = 20.0 + 9.0 * max(0.0, (front + 1.0) / 2.0) + 6.0 * float(_S.random())
         out.append(_strand(i + 1, x, z, -6.9, length, thin=True))
@@ -132,6 +135,111 @@ def leg_root_height(rise):
     return HIPS_HEIGHT + 1.0 - 2.0 + rise
 
 
+# --------------------------------------------------------------------------- the face
+#
+# The face is what is looked at, from close, so it is built differently from the rest: rounded
+# out of rows instead of being one box, with real hollows where the eyes are, and painted at eight
+# texels to a pixel instead of one. The whole texture is SCALE times the size its offsets are
+# written for, and the face's boxes take FACE_TS of the usual texture scale, which gives them
+# 1 / FACE_TS times as much of it again. Every face dimension is a multiple of 1/8, so each one's
+# texture lands on whole texels.
+SCALE = 4
+FACE_TS = 0.5
+FACE_KINDS = ("skin", "socket", "cavity", "fang")
+
+# Where the eyes are, in the skull's own space (x across, y down, the face at -z), and how far the
+# black of them reaches: big and round, as in the drawings of Father Fester. The hollow itself is
+# smaller than the black, so its corners never show; the paint makes the round.
+EYE_X, EYE_Y = 1.75, -5.675
+EYE_RX, EYE_RY = 1.4, 1.75
+# The mouth, row by row down the jaw (1 px each): how far the cheek reaches out, how far in the
+# opening comes, and how far forward the skin stands. Wide in the middle, closing to a point. The
+# front of the whole face is one flat plane, like a mask: every step back in it showed in game as a
+# dark line across the face, so the hollows of the cheeks are in the paint instead.
+JAW_ROWS = [
+    # outer, opening, front
+    (3.5, 1.25, -3.0),
+    (3.375, 1.625, -3.0),
+    (3.25, 1.875, -3.0),
+    (3.125, 2.0, -3.0),       # the cheeks fall in here: hollow
+    (3.0, 1.875, -3.0),
+    (2.875, 1.75, -3.0),
+    (2.625, 1.5, -3.0),
+    (2.375, 1.25, -3.0),
+    (2.125, 0.875, -3.0),
+    (1.875, 0.5, -3.0),
+]
+JAW_BACK = 0.375
+
+
+def tex_scale(kind):
+    return FACE_TS if kind in FACE_KINDS else 1.0
+
+
+def skull_boxes():
+    """
+    Above the mouth: a bald, swollen crown, wider than the face below it, like an egg; under it
+    two big round hollows for eyes either side of a broad flat bridge, a pixel deep; then the
+    face narrows into the cheeks, with no nose.
+    """
+    return [
+        ("skin", -1.75, -11.05, -2.0, 3.5, 0.5, 4.25),
+        ("skin", -2.75, -10.55, -2.5, 5.5, 0.5, 5.125),
+        ("skin", -3.375, -10.05, -2.75, 6.75, 0.5, 5.625),
+        ("skin", -3.75, -9.55, -2.875, 7.5, 0.5, 5.75),
+        ("skin", -3.875, -9.05, -3.0, 7.75, 2.25, 6.0),             # the forehead, at its widest
+        ("skin", -3.875, -6.8, -3.0, 1.25, 2.25, 6.0),              # beside the left eye
+        ("socket", -2.625, -6.8, -1.75, 1.75, 2.25, 4.75),          # the left eye: a hollow
+        ("skin", -0.875, -6.8, -3.0, 1.75, 2.25, 6.0),              # the bridge between them
+        ("socket", 0.875, -6.8, -1.75, 1.75, 2.25, 4.75),           # the right eye
+        ("skin", 2.625, -6.8, -3.0, 1.25, 2.25, 6.0),
+        ("skin", -3.75, -4.55, -3.0, 7.5, 2.25, 5.875),             # under the eyes, and no nose
+    ]
+
+
+def jaw_boxes():
+    """
+    The mouth is most of the face: the cheeks run down either side of it, falling in and then
+    narrowing to a small pointed chin, and between them it is open all the way down. Needles all
+    round the inside of it: hanging from the top, pointing in from both sides, and up from the
+    bottom.
+    """
+    out = []
+    for r, (outer, opening, front) in enumerate(JAW_ROWS):
+        out.append(("skin", -outer, float(r), front, outer - opening, 1.0, JAW_BACK - front))
+        out.append(("skin", opening, float(r), front, outer - opening, 1.0, JAW_BACK - front))
+    # The chin: no opening, narrowing to a point.
+    out.append(("skin", -1.5, 10.0, -3.0, 3.0, 0.75, JAW_BACK + 3.0))
+    out.append(("skin", -1.0, 10.75, -3.0, 2.0, 0.625, JAW_BACK + 3.0))
+    out.append(("skin", -0.5, 11.375, -3.0, 1.0, 0.375, JAW_BACK + 3.0))
+    # Inside: a hollow behind the cheeks, reaching into them so its walls are never seen, and
+    # narrower where the cheeks are, lower down, so it never shows outside them.
+    out.append(("cavity", -2.125, 0.125, -1.5, 4.25, 6.375, 1.625))     # split between rows, not on one
+    out.append(("cavity", -1.625, 6.5, -1.5, 3.25, 3.125, 1.625))
+
+    # The needles. Each its own box, each a little nearer or further than the last, so no two of
+    # them share a plane; all of them well behind the skin of the cheeks and in front of the
+    # hollow, so none of them shares a plane with those either.
+    seq = [0]
+
+    def needle(x, y, w, h):
+        seq[0] += 1
+        z = -1.9 - 0.0137 * seq[0]
+        out.append(("fang", x, y, z, w, h, 0.25))
+
+    for x, length in ((-1.0, 1.25), (-0.67, 0.875), (-0.33, 1.5), (0.0, 1.0), (0.33, 1.625), (0.67, 0.75),
+                      (1.0, 1.125)):
+        needle(x - 0.125, 0.125, 0.25, length)                       # hanging from the top
+    for r, left, right in ((1, 0.625, 0.5), (3, 0.5, 0.75), (5, 0.75, 0.375), (7, 0.375, 0.625)):
+        opening = JAW_ROWS[r][1]
+        jag = 0.25 * ((r * 0.618) % 1.0)
+        needle(-opening - 0.125, r + 0.25 + jag, left + 0.125, 0.125)       # in from the left
+        needle(opening - right, r + 0.6 - jag * 0.5, right + 0.125, 0.125)  # in from the right
+    for x, length in ((-0.3, 0.875), (0.05, 1.25), (0.38, 0.75)):
+        needle(x - 0.125, 10.0 - length, 0.25, length + 0.125)       # up from the bottom
+    return out
+
+
 def parts():
     """Every bone, in order: name, parent, pivot, rotation, [(kind, x, y, z, w, h, d)]."""
     p = [
@@ -162,37 +270,10 @@ def parts():
             ("drape", -1.2, -11.0, -1.2, 2.4, 11, 2.4),
         ]),
 
-        # The top of the face: a broad, rounded brow and two small round holes set close
-        # together over a narrow bridge.
-        # The skull turns about the middle of the whole face, eyes to chin, not about the top of
-        # the neck: turned about the neck, a tilt swung the long jaw out sideways like a pendulum.
-        ("skull", "neck", (0, -11.0 + FACE_MID, -0.4), (0, 0, 0), [
-            ("face", -3.5, -7.0 - FACE_MID, -3.0, 7, 7, 6),
-            ("crown", -2.75, -8.1 - FACE_MID, -2.4, 5.5, 1.1, 4.8),       # rounds off the top of it
-        ]),
-        # The rest of the face is the mouth. The skin carries on down both sides of it, much
-        # too far, to a small pointed chin; between them it is open, with a row of small teeth
-        # along the top and something red at the bottom.
-        ("jaw", "skull", (0, -FACE_MID, 0), (0, 0, 0), [
-            ("cheek", 1.75, 0.0, -2.95, 1.7, 6.0, 3.35),       # cheeks, either side
-            ("cheek", -3.45, 0.0, -2.95, 1.7, 6.0, 3.35),
-            ("cheek", 1.35, 6.0, -2.8, 1.4, 4.6, 3.0),         # narrowing towards the chin
-            ("cheek", -2.75, 6.0, -2.8, 1.4, 4.6, 3.0),
-            ("chin", -1.85, 9.55, -2.6, 3.7, 2.1, 2.55),
-            ("mouth", -1.74, 0.02, -2.0, 3.48, 9.56, 1.9),     # set back: the inside of it
-            # A row of small, separate teeth along the top, each its own tiny box so the gaps
-            # between them are real; one painted gap on a single box read as a grey block.
-            ("tooth", -1.13, 0.05, -2.72, 0.42, 0.95, 0.66),
-            ("tooth", -0.55, 0.05, -2.70, 0.43, 0.78, 0.64),
-            ("tooth", 0.04, 0.05, -2.71, 0.41, 0.92, 0.65),
-            ("tooth", 0.62, 0.05, -2.69, 0.44, 0.74, 0.63),
-            # The skin folds in at the corners, top and bottom, so the opening is long and
-            # rounded rather than a slot cut out of the face.
-            ("lip", -1.74, 0.0, -2.86, 0.53, 1.55, 0.79),
-            ("lip", 1.21, 0.0, -2.86, 0.53, 1.55, 0.79),
-            ("lip", -1.33, 8.15, -2.84, 0.48, 1.42, 0.77),
-            ("lip", 0.85, 8.15, -2.84, 0.48, 1.42, 0.77),
-        ]),
+        # The face is built in tools/generate_model.py's FACE section: rounded, with real hollows
+        # for the eyes and a mouth ringed with needles, at eight times the texture of the rest.
+        ("skull", "neck", (0, -11.0 + FACE_MID, -0.4), (0, 0, 0), skull_boxes()),
+        ("jaw", "skull", (0, -FACE_MID, 0), (0, 0, 0), jaw_boxes()),
         # No loose hairs standing up off the crown: in blocks, anything sticking up off a head
         # reads as horns or antennae, however short it is.
         ("hair", "skull", (0, -FACE_MID, 0), (0, 0, 0), _cowl_strands()),
@@ -253,8 +334,8 @@ def avoid_coplanar(ps, tries=400):
     def world(name, box):
         ox, oy, oz = origins[name]
         _k, x, y, z, w, h, d = box
-        lo = (round(x, 2) + ox, round(y, 2) + oy, round(z, 2) + oz)
-        return lo, (lo[0] + round(w, 2), lo[1] + round(h, 2), lo[2] + round(d, 2))
+        lo = (round(x, 3) + ox, round(y, 3) + oy, round(z, 3) + oz)
+        return lo, (lo[0] + round(w, 3), lo[1] + round(h, 3), lo[2] + round(d, 3))
 
     def clashes(name, i, box):
         lo, hi = world(name, box)
@@ -285,9 +366,11 @@ def avoid_coplanar(ps, tries=400):
                 # A small step in a direction that never repeats, so it cannot oscillate
                 # between two bad positions.
                 k += 1
-                dx = 0.09 * (((k * 0.6180339887) % 1.0) - 0.5)
-                dz = 0.09 * (((k * 0.7548776662) % 1.0) - 0.5)
-                dy = 0.09 * (((k * 0.5698402910) % 1.0) - 0.5)
+                # And a little further each time, so it cannot stay caught among close planes.
+                step = 0.09 * (1.0 + k / 150.0)
+                dx = step * (((k * 0.6180339887) % 1.0) - 0.5)
+                dz = step * (((k * 0.7548776662) % 1.0) - 0.5)
+                dy = step * (((k * 0.5698402910) % 1.0) - 0.5)
                 kind, x, y, z, w, h, d = box
                 box = (kind, x + dx, y + dy, z + dz, w, h, d)
                 boxes[i] = box
@@ -311,26 +394,41 @@ def _texels(v):
     return max(1, int(np.ceil(v - 1e-6)))
 
 
-def unfolded(w, h, d):
-    """Size of a cube's unwrapped texture region."""
-    return 2 * _texels(d) + 2 * _texels(w), _texels(d) + _texels(h)
+def unfolded(w, h, d, ts=1.0):
+    """
+    Size of a cube's unwrapped texture region, in the units the offsets are written in. A box with
+    a texture scale below one is given that much more of the texture: the game divides by it.
+    """
+    if ts == 1.0:
+        return 2 * _texels(d) + 2 * _texels(w), _texels(d) + _texels(h)
+    return int(np.ceil((2 * d + 2 * w) / ts - 1e-6)), int(np.ceil((d + h) / ts - 1e-6))
 
 
 def pack(boxes):
-    """Shelf-packs every cube into the texture. Returns {index: (u, v)}."""
-    order = sorted(range(len(boxes)), key=lambda i: -unfolded(*boxes[i][5:8])[1])
+    """
+    Shelf-packs every cube into the texture. Returns {index: (u, v)}, the offsets as written in
+    the Java: for a box with its own texture scale, that is where its region starts times the
+    scale, so its region has to start where that comes out whole.
+    """
+    size = {i: unfolded(*boxes[i][5:8], tex_scale(boxes[i][1])) for i in range(len(boxes))}
+    order = sorted(range(len(boxes)), key=lambda i: (-size[i][1], i))
     placed = {}
     x = y = shelf = 0
     for i in order:
-        bw, bh = unfolded(*boxes[i][5:8])
-        bw, bh = max(bw, 1), max(bh, 1)
+        ts = tex_scale(boxes[i][1])
+        step = int(round(1.0 / ts))
+        bw, bh = max(size[i][0], 1), max(size[i][1], 1)
+        x = -(-x // step) * step
         if x + bw > TEX_W:
             x, y, shelf = 0, y + shelf, 0
-        if y + bh > TEX_H:
+        y_at = -(-y // step) * step
+        if y_at + bh > TEX_H:
             raise SystemExit("texture is full: make it bigger")
-        placed[i] = (x, y)
+        if y_at != y:
+            shelf = max(shelf, bh + (y_at - y))
+        placed[i] = (int(round(x * ts)), int(round(y_at * ts)))
         x += bw
-        shelf = max(shelf, bh)
+        shelf = max(shelf, bh + (y_at - y))
     return placed
 
 
@@ -395,6 +493,8 @@ def paint_texture(boxes, placed):
                 img[by, bx, :3] = (184, 158, 150)                 # faint blotches
 
     for i, (owner, kind, _x, _y, _z, w, h, d) in enumerate(boxes):
+        if kind in FACE_KINDS:
+            continue                                  # painted afterwards, at full detail
         u, v = placed[i]
         f = faces_of(u, v, w, h, d)
 
@@ -413,58 +513,6 @@ def paint_texture(boxes, placed):
                     fx = int(rng.integers(x0, x1))
                     fy = int(rng.integers(y0, max(y0 + 1, y1 - 3)))
                     img[fy:fy + 3, fx, :3] = HAIR_LIT if rng.random() < 0.5 else HAIR_DEEP
-
-        elif kind == "face":
-            paint_face(img, f)
-
-        elif kind == "crown":
-            skin(f, shade_sides=18)
-            x0, y0, x1, y1 = f["top"]
-            img[y0:y1, x0:x1, :3] = np.clip(img[y0:y1, x0:x1, :3].astype(int) - 14, 0, 255)
-
-        elif kind == "cheek":
-            skin(f)
-            # The edge that faces into the mouth is in its shadow.
-            for name in ("left", "right"):
-                x0, y0, x1, y1 = f[name]
-                img[y0:y1, x0:x1, :3] = np.clip(img[y0:y1, x0:x1, :3].astype(int) - 40, 0, 255)
-            x0, y0, x1, y1 = f["front"]
-            img[y0:y1, x0, :3] = SKIN_LO
-            img[y0:y1, x1 - 1, :3] = SKIN_LO
-
-        elif kind == "chin":
-            skin(f)
-            x0, y0, x1, y1 = f["front"]
-            img[y0, x0:x1, :3] = RED                              # the lower lip, wet
-            x0, y0, x1, y1 = f["top"]
-            img[y0:y1, x0:x1, :3] = RED
-
-        elif kind == "mouth":
-            for side in f.values():
-                fill(side, PIT, 2)
-            x0, y0, x1, y1 = f["front"]
-            h_ = y1 - y0
-            # Black all the way in, deepening slowly to a wet dark red at the bottom.
-            ramp = [(26, 8, 8), (52, 14, 13), (78, 22, 20), (100, 32, 29), (112, 40, 36)]
-            for k, colour in enumerate(ramp):
-                row = y1 - len(ramp) + k
-                if row >= y0:
-                    img[row, x0:x1, :3] = colour
-            # A little darker down the middle, so it reads as a hollow and not a panel.
-            mid = x0 + (x1 - x0) // 2
-            img[y1 - 3:y1, mid - 1:mid + 1, :3] = np.clip(img[y1 - 3:y1, mid - 1:mid + 1, :3].astype(int) - 18, 0, 255)
-
-        elif kind == "tooth":
-            for side in f.values():
-                fill(side, TOOTH, 5)
-            x0, y0, x1, y1 = f["front"]
-            img[y1 - 1, x0:x1, :3] = (176, 160, 140)               # the worn tip
-
-        elif kind == "lip":
-            skin(f, shade_sides=30)
-            x0, y0, x1, y1 = f["front"]
-            img[y0:y1, x0:x1, :3] = np.clip(img[y0:y1, x0:x1, :3].astype(int) - 12, 0, 255)
-
         elif kind in ("limb", "claw"):
             # Pale like the face but greyer and dirtier, darker towards each joint.
             base = LIMB if kind == "limb" else (88, 70, 64)
@@ -483,7 +531,6 @@ def paint_texture(boxes, placed):
             for side in f.values():
                 x0, y0, x1, y1 = side
                 limb_mask[y0:y1, x0:x1] = True
-
         elif kind == "pale":
             for side in f.values():
                 fill(side, SKIN_LO, 7)
@@ -494,6 +541,11 @@ def paint_texture(boxes, placed):
             for side in f.values():
                 fill(side, SKIN, 6)
 
+    # Everything but the face, at the texture's full size: each texel of it becomes SCALE x SCALE.
+    img = np.repeat(np.repeat(img, SCALE, axis=0), SCALE, axis=1)
+    dark_mask = np.repeat(np.repeat(dark_mask, SCALE, axis=0), SCALE, axis=1)
+    limb_mask = np.repeat(np.repeat(limb_mask, SCALE, axis=0), SCALE, axis=1)
+
     # A faint sheen, drawn full-bright, so the face is the one thing still visible in the dark.
     # The game draws this layer BLENDED over the body, not added to it: an opaque pixel here
     # replaces the lit face underneath. So the sheen is the face's own colour at low opacity.
@@ -503,42 +555,271 @@ def paint_texture(boxes, placed):
     glow[limb_mask, 3] = SHEEN // 2                      # the legs, fainter than the face
     glow[dark_mask] = 0
 
+    paint_face_boxes(img, glow, boxes, placed)
+
     Image.fromarray(img, "RGBA").save(TEX / "occupant.png")
     Image.fromarray(glow, "RGBA").save(TEX / "occupant_glow.png")
 
 
-def paint_face(img, f):
+# --------------------------------------------------------------------------- painting the face
+
+SKIN_F = np.array([206, 201, 188], float)      # pale as a thing kept from the light, a little grey
+SHADE_F = np.array([116, 114, 102], float)     # where it turns away, faintly green
+BRUISE_F = np.array([70, 52, 62], float)       # round the eyes
+VEIN_F = np.array([96, 90, 118], float)
+BLOOD_F = np.array([40, 6, 8], float)          # what has run from the eyes, long dried
+WET_F = np.array([126, 24, 22], float)         # the lips, and the torn corners
+GUM_F = np.array([110, 30, 28], float)
+BLACK_F = np.array([6, 4, 4], float)
+THROAT_F = np.array([134, 34, 34], float)      # far down inside the mouth, red
+ROOT_F = np.array([118, 96, 64], float)
+TIP_F = np.array([238, 232, 210], float)
+GLINT_F = np.array([196, 188, 168], float)     # something, far back in each eye
+
+_NOISE = np.random.default_rng(77).random((24, 24, 24))
+
+
+def vnoise(p, freq):
+    """Smooth value noise in 0..1 at the points p (N x 3)."""
+    q = p * freq + 37.0
+    i = np.floor(q).astype(int)
+    f = q - i
+    f = f * f * (3 - 2 * f)
+    n = _NOISE.shape[0]
+
+    def g(dx, dy, dz):
+        return _NOISE[(i[:, 0] + dx) % n, (i[:, 1] + dy) % n, (i[:, 2] + dz) % n]
+
+    x0 = g(0, 0, 0) * (1 - f[:, 0]) + g(1, 0, 0) * f[:, 0]
+    x1 = g(0, 1, 0) * (1 - f[:, 0]) + g(1, 1, 0) * f[:, 0]
+    x2 = g(0, 0, 1) * (1 - f[:, 0]) + g(1, 0, 1) * f[:, 0]
+    x3 = g(0, 1, 1) * (1 - f[:, 0]) + g(1, 1, 1) * f[:, 0]
+    y0 = x0 * (1 - f[:, 1]) + x1 * f[:, 1]
+    y1 = x2 * (1 - f[:, 1]) + x3 * f[:, 1]
+    return y0 * (1 - f[:, 2]) + y1 * f[:, 2]
+
+
+def smooth(a, b, x):
+    t = np.clip((x - a) / (b - a), 0.0, 1.0)
+    return t * t * (3 - 2 * t)
+
+
+def mix(col, target, amount):
+    a = np.clip(np.broadcast_to(np.asarray(amount, float), (len(col),)), 0.0, 1.0)[:, None]
+    return col * (1 - a) + np.asarray(target, float) * a
+
+
+def _polyline_distance(px, py, pts):
+    """Distance from each point to a polyline, and how far along it (0..1) the nearest point is."""
+    best = np.full(px.shape, np.inf)
+    along = np.zeros(px.shape)
+    total = sum(np.hypot(b[0] - a[0], b[1] - a[1]) for a, b in zip(pts, pts[1:]))
+    walked = 0.0
+    for a, b in zip(pts, pts[1:]):
+        ax, ay = a
+        bx, by = b
+        dx, dy = bx - ax, by - ay
+        ln2 = dx * dx + dy * dy
+        t = np.clip(((px - ax) * dx + (py - ay) * dy) / ln2, 0, 1)
+        d = np.hypot(px - (ax + t * dx), py - (ay + t * dy))
+        closer = d < best
+        best = np.where(closer, d, best)
+        along = np.where(closer, (walked + t * math.sqrt(ln2)) / total, along)
+        walked += math.sqrt(ln2)
+    return best, along
+
+
+def _wander(seed, start, step, n, drift):
+    """A path that wanders: for veins, tears and the like."""
+    r = np.random.default_rng(seed)
+    pts = [start]
+    x, y = start
+    for k in range(n):
+        x += drift[0] * step + r.normal(0, step * 0.35)
+        y += drift[1] * step + r.normal(0, step * 0.12)
+        pts.append((x, y))
+    return pts
+
+
+# Dried runs down from the bottom of each eye, over the cheek and down the side of the mouth.
+TEARS = []
+for side in (-1, 1):
+    for k, (off, length, width) in enumerate(((-0.55, 5.8, 0.15), (0.05, 8.2, 0.19), (0.5, 4.2, 0.12))):
+        x0 = side * (EYE_X + off)
+        TEARS.append((_wander(400 + k + (10 if side > 0 else 0), (x0, EYE_Y + EYE_RY - 0.35), 0.45,
+                              int(length / 0.45), (side * 0.03, 1.0)), width))
+# Veins up the temples and across the swollen crown.
+VEINS = []
+for side in (-1, 1):
+    for k in range(3):
+        start = (side * (3.2 - 0.35 * k), -7.2 - 0.6 * k)
+        VEINS.append(_wander(500 + k + (10 if side > 0 else 0), start, 0.35, 9, (-side * 0.45, -0.9)))
+# The corners of the mouth, torn up towards the eyes, as if it had been opened wider than it goes.
+TEARS_MOUTH = [
+    ([(side * 1.2, -2.2), (side * 1.7, -2.6), (side * 2.15, -2.85), (side * 2.5, -3.15)], 0.08)
+    for side in (-1, 1)
+]
+
+
+def skin_colour(p, n, owner):
+    """The skin at points p (skull space), on a face whose outward direction is n."""
+    x, y, z = p[:, 0], p[:, 1], p[:, 2]
+    ax = np.abs(x)
+    col = SKIN_F * (1.0 + 0.10 * (vnoise(p, 0.55) - 0.5) + 0.06 * (vnoise(p, 2.3) - 0.5))[:, None]
+    front = n[2] < -0.5
+
+    # Where it turns away from you, it darkens.
+    if front:
+        col = mix(col, SHADE_F, 0.42 * smooth(2.4, 3.9, ax) ** 1.3)
+        col = mix(col, SHADE_F, 0.35 * smooth(-9.4, -10.9, y))             # the crown curving over
+    elif n[1] < -0.5:
+        col = mix(col, SHADE_F, 0.12 + 0.15 * vnoise(p, 1.4))               # the top of the head
+    elif n[1] > 0.5:
+        col = mix(col, SHADE_F * 0.55, 0.65)                                 # undersides
+    else:
+        col = mix(col, SHADE_F, 0.28 + 0.12 * smooth(0.0, 2.5, z))          # the sides
+
+    # Veins, faint, under the skin of the temples and the crown.
+    if front or abs(n[0]) > 0.5:
+        u = x if front else np.sign(n[0]) * (3.9 + 0.35 * (z + 3.0))
+        for pts in VEINS:
+            d, _ = _polyline_distance(u, y, pts)
+            col = mix(col, VEIN_F, 0.38 * smooth(0.11, 0.03, d))
+
+    # The black of the eyes, round, spreading into a bruise round them.
+    ex = (ax - EYE_X) / EYE_RX
+    ey = (y - EYE_Y) / EYE_RY
+    r = np.sqrt(ex * ex + ey * ey)
+    col = mix(col, BRUISE_F, 0.75 * smooth(1.55, 1.05, r))
+    col = mix(col, BLACK_F, smooth(1.02, 0.9, r))
+    # Inside the hollows (their walls, the brow over them, the ledge under them): black.
+    hollow = (ax > 0.86) & (ax < 2.64) & (y > -6.82) & (y < -4.53) & (z > -2.86)
+    col[hollow] = mix(col[hollow], BLACK_F, np.ones(hollow.sum()))
+
+    if front:
+        # Two slits where a nose should be.
+        nx = (ax - 0.42) / 0.12
+        ny = (y + 3.05 + 0.25 * (ax - 0.42)) / 0.36
+        col = mix(col, (24, 12, 12), 0.92 * smooth(1.1, 0.7, np.sqrt(nx * nx + ny * ny)))
+        # The cheekbones catch the light; under them the face falls in.
+        cb = np.exp(-(((ax - 2.55) / 0.7) ** 2 + ((y + 3.4) / 0.55) ** 2))
+        col = col * (1.0 + 0.12 * cb)[:, None]
+        col = mix(col, SHADE_F, 0.38 * np.exp(-(((ax - 2.6) / 0.6) ** 2 + ((y - 1.6) / 1.9) ** 2)))
+        # What has run from the eyes.
+        for pts, width in TEARS:
+            d, along = _polyline_distance(x, y, pts)
+            w = width * (1.0 - 0.55 * along)
+            col = mix(col, BLOOD_F, (0.92 - 0.45 * along) * smooth(w, w * 0.35, d))
+        # The torn corners of the mouth.
+        for pts, width in TEARS_MOUTH:
+            d, _ = _polyline_distance(x, y, pts)
+            col = mix(col, WET_F, 0.9 * smooth(width * 1.9, width, d))
+            col = mix(col, BLOOD_F, smooth(width, width * 0.3, d))
+
+    # The edge of the mouth: lips, thin, wet and dark.
+    if owner == "jaw":
+        jy = y + FACE_MID
+        row = np.clip(np.floor(jy).astype(int), 0, len(JAW_ROWS) - 1)
+        opening = np.array([r_[1] for r_ in JAW_ROWS])[row]
+        edge = ax - opening
+        inside_mouth = (jy < len(JAW_ROWS)) & (edge < 0.32)
+        if front:
+            col[inside_mouth] = mix(col[inside_mouth], WET_F * 0.8, 0.85 * smooth(0.32, 0.05, edge[inside_mouth]))
+        elif not (n[2] > 0.5):
+            # Facing into the mouth: gums, darkening the further in they go.
+            gum = mix(np.tile(GUM_F, (len(p), 1)), BLACK_F, smooth(-2.6, -1.4, z))
+            near = (jy < len(JAW_ROWS) + 0.01) & (ax < 2.2)
+            col[near] = gum[near]
+    elif n[1] > 0.5:
+        # The roof of the mouth, seen from below through it.
+        roof = (ax < 1.7) & (y > -2.35)
+        col[roof] = mix(col[roof], GUM_F * 0.6, np.ones(roof.sum()))
+    return col
+
+
+def face_texels(kind, owner, box, p, n):
+    """Colour and glow (0-255) for the points p of one face of a box of the face."""
+    x, y, z = p[:, 0], p[:, 1], p[:, 2]
+    glow = np.full(len(p), float(SHEEN))
+    if kind == "socket":
+        col = np.tile(BLACK_F, (len(p), 1))
+        glow[:] = 0
+        # Far back in each, something pale, very small, looking at you.
+        gx = np.abs(x) - (EYE_X - 0.18)
+        gy = y - (EYE_Y + 0.08)
+        g = np.sqrt(gx * gx + gy * gy)
+        if n[2] < -0.5:
+            col = mix(col, GLINT_F, smooth(0.13, 0.07, g))
+            glow = np.maximum(glow, 170 * smooth(0.13, 0.06, g))
+        return col, glow
+    if kind == "cavity":
+        jy = y + FACE_MID
+        col = mix(np.tile(BLACK_F, (len(p), 1)), THROAT_F, 0.95 * smooth(3.5, 9.4, jy) ** 1.2)
+        col = col * (0.85 + 0.15 * np.sin(x * 7.0) ** 2)[:, None]            # ridges down the throat
+        if n[1] < -0.5:
+            col = mix(col, (36, 8, 8), np.full(len(p), 0.8))
+        glow[:] = 0
+        return col, glow
+    if kind == "fang":
+        _k, bx, by, bz, w, h, d = box
+        if h > w:   # hanging down, or standing up from the bottom
+            t = (y - (by - FACE_MID)) / h if by < 5 else ((by - FACE_MID + h) - y) / h
+        else:       # pointing in from a side
+            t = (x - bx) / w if bx < 0 else ((bx + w) - x) / w
+        t = np.clip(t, 0, 1)
+        col = mix(np.tile(ROOT_F, (len(p), 1)), TIP_F, t ** 0.6)
+        col = col * (0.9 + 0.2 * vnoise(p, 6.0))[:, None]
+        glow[:] = 20 + 30 * t
+        return col, glow
+    col = skin_colour(p, n, owner)
+    # Dark things do not shine.
+    glow = SHEEN * np.clip(col.mean(axis=1) / 190.0, 0.0, 1.0) ** 1.5
+    return col, glow
+
+
+def paint_face_boxes(img, glow, boxes, placed):
     """
-    The top of the face: a broad pale brow, two small round black holes set close over a
-    narrow bridge, and nothing else. The rest of the face is the mouth, built separately.
+    Paints the face's boxes at full detail. Every texel is worked out from where it is on the
+    face in three dimensions, so the paint runs on across the edges between boxes, and round the
+    corners of them, as if the face were one surface.
     """
-    for side in f.values():
-        x0, y0, x1, y1 = side
-        n = rng.integers(-5, 6, size=(y1 - y0, x1 - x0, 1))
-        img[y0:y1, x0:x1, :3] = np.clip(np.array(SKIN) + n, 0, 255)
-        img[y0:y1, x0:x1, 3] = 255
-    for side in ("back", "left", "right", "top"):
-        x0, y0, x1, y1 = f[side]
-        img[y0:y1, x0:x1, :3] = np.clip(img[y0:y1, x0:x1, :3].astype(int) - 24, 0, 255)
-
-    x0, y0, x1, y1 = f["front"]
-    w = x1 - x0
-    # The brow catches the most light.
-    img[y0:y0 + 2, x0 + 1:x1 - 1, :3] = SKIN_HI
-    # Two small round holes, close together, low on the brow.
-    ey = y0 + 3
-    for ex in (x0 + 1, x0 + w - 3):
-        img[ey:ey + 2, ex:ex + 2, :3] = PIT
-        # A ring of shadow, so the hole reads round rather than square.
-        img[ey - 1, ex:ex + 2, :3] = SKIN_LO
-        img[ey + 2, ex:ex + 2, :3] = SKIN_LO
-        img[ey:ey + 2, ex - 1 if ex > x0 else ex, :3] = np.minimum(
-            img[ey:ey + 2, ex - 1 if ex > x0 else ex, :3], np.array(SKIN_LO))
-    # The narrow bridge between them, and the shadow under it where the mouth begins.
-    img[ey:ey + 3, x0 + w // 2, :3] = SKIN_HI
-    img[y1 - 1, x0 + 2:x1 - 2, :3] = SKIN_LO
-
-
+    for i, (owner, kind, bx, by, bz, w, h, d) in enumerate(boxes):
+        if kind not in FACE_KINDS:
+            continue
+        u, v = placed[i]
+        k = SCALE / FACE_TS
+        # Where each face's region is, in texels (the game's own arithmetic: offset plus sizes).
+        cols = [u, u + d, u + d + w, u + d + 2 * w, u + 2 * d + w, u + 2 * d + 2 * w]
+        rows = [v, v + d, v + d + h]
+        cu = [int(round(c * k)) for c in cols]
+        rv = [int(round(r_ * k)) for r_ in rows]
+        x0, y0, z0, x1, y1, z1 = bx, by, bz, bx + w, by + h, bz + d
+        off = np.array([0.0, -FACE_MID, 0.0]) if owner == "jaw" else np.zeros(3)
+        faces = {
+            # name: (texel rect, normal, function from (s, t) in 0..1 to a point)
+            "top": ((cu[1], rv[0], cu[2], rv[1]), (0, -1, 0), lambda s, t: (x0 + s * w, y0 + 0 * s, z1 - t * d)),
+            "bottom": ((cu[2], rv[0], cu[3], rv[1]), (0, 1, 0), lambda s, t: (x0 + s * w, y1 + 0 * s, z1 - t * d)),
+            "right": ((cu[0], rv[1], cu[1], rv[2]), (-1, 0, 0), lambda s, t: (x0 + 0 * s, y0 + t * h, z1 - s * d)),
+            "front": ((cu[1], rv[1], cu[2], rv[2]), (0, 0, -1), lambda s, t: (x0 + s * w, y0 + t * h, z0 + 0 * s)),
+            "left": ((cu[2], rv[1], cu[4], rv[2]), (1, 0, 0), lambda s, t: (x1 + 0 * s, y0 + t * h, z0 + s * d)),
+            "back": ((cu[4], rv[1], cu[5], rv[2]), (0, 0, 1), lambda s, t: (x1 - s * w, y0 + t * h, z1 + 0 * s)),
+        }
+        box_skull = (kind, bx, by + off[1], bz, w, h, d)
+        for name, ((rx0, ry0, rx1, ry1), normal, at) in faces.items():
+            if rx1 <= rx0 or ry1 <= ry0:
+                continue
+            gx, gy = np.meshgrid(np.arange(rx0, rx1) + 0.5, np.arange(ry0, ry1) + 0.5)
+            s_ = ((gx - rx0) / (rx1 - rx0)).ravel()
+            t_ = ((gy - ry0) / (ry1 - ry0)).ravel()
+            px, py, pz = at(s_, t_)
+            pts = np.stack([px, py, pz], axis=1) + off
+            col, gl = face_texels(kind, owner, box_skull, pts, np.array(normal, float))
+            col = np.clip(col, 0, 255).astype(np.uint8).reshape(ry1 - ry0, rx1 - rx0, 3)
+            gl = np.clip(gl, 0, 255).astype(np.uint8).reshape(ry1 - ry0, rx1 - rx0)
+            img[ry0:ry1, rx0:rx1, :3] = col
+            img[ry0:ry1, rx0:rx1, 3] = 255
+            glow[ry0:ry1, rx0:rx1, :3] = col
+            glow[ry0:ry1, rx0:rx1, 3] = gl
 
 HEADER = """// GENERATED by tools/generate_model.py -- do not edit by hand.
 // The texture assets/occupant/textures/entity/occupant.png is written by the same script,
@@ -546,6 +827,7 @@ HEADER = """// GENERATED by tools/generate_model.py -- do not edit by hand.
 package com.wolfsmask.occupant.client.render;
 
 import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
@@ -582,7 +864,13 @@ public final class OccupantGeometry {
 
 
 def num(v):
-    return ("%.2ff" % v).replace(".00f", ".0f")
+    """A float as the Java is written: to the nearest 1/1000, which every face size is exact in."""
+    text = ("%.3f" % v).rstrip("0")
+    if text.endswith("."):
+        text += "0"
+    if text in ("-0.0",):
+        text = "0.0"
+    return text + "f"
 
 
 def write_java(ps, boxes, placed):
@@ -606,10 +894,12 @@ def write_java(ps, boxes, placed):
     for name, parent, pivot, rot, own in ps:
         cubes = "CubeListBuilder.create()"
         for i in box_at.get(name, []):
-            _, _, x, y, z, w, h, d = boxes[i]
+            _, kind, x, y, z, w, h, d = boxes[i]
             u, v = placed[i]
-            cubes += "\n\t\t\t\t.texOffs(%d, %d).addBox(%s, %s, %s, %s, %s, %s)" % (
-                u, v, num(x), num(y), num(z), num(w), num(h), num(d))
+            ts = tex_scale(kind)
+            extra = "" if ts == 1.0 else ", CubeDeformation.NONE, %s, %s" % (num(ts), num(ts))
+            cubes += "\n\t\t\t\t.texOffs(%d, %d).addBox(%s, %s, %s, %s, %s, %s%s)" % (
+                u, v, num(x), num(y), num(z), num(w), num(h), num(d), extra)
         if any(rot):
             pose = "PartPose.offsetAndRotation(%s, %s, %s, %s, %s, %s)" % (
                 num(pivot[0]), num(pivot[1]), num(pivot[2]), num(rot[0]), num(rot[1]), num(rot[2]))
@@ -634,8 +924,10 @@ def main():
     placed = pack(boxes)
     paint_texture(boxes, placed)
     write_java(ps, boxes, placed)
-    used = max(placed[i][1] + unfolded(*boxes[i][5:8])[1] for i in placed)
-    print("%d bones, %d cubes, texture %dx%d (%d rows used)" % (len(ps), len(boxes), TEX_W, TEX_H, used))
+    used = max(placed[i][1] / tex_scale(boxes[i][1]) + unfolded(*boxes[i][5:8], tex_scale(boxes[i][1]))[1]
+               for i in placed)
+    print("%d bones, %d cubes, texture %dx%d at %dx (%d of %d rows used)"
+          % (len(ps), len(boxes), TEX_W, TEX_H, SCALE, used, TEX_H))
 
 
 if __name__ == "__main__":

@@ -1,8 +1,8 @@
 name: Ports
 
 # Builds the mod for every Minecraft version in versions/, runs the game tests where it builds,
-# and records the result for each: compile errors in tools/ports/<version>.txt, and a tested jar
-# in dist/ when everything passes.
+# and records the result for each: the log in ports/<version>.txt on the ci-results branch, and a
+# tested jar in dist/ on this branch when everything passes. Nothing else is put on this branch.
 on:
   workflow_dispatch:
   push:
@@ -23,7 +23,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        mc: ['1.20.1', '1.21.1', '1.21.11', '26.1.2', '26.2', '26.3', '26.4-snapshot-2']
+        mc: ['1.20.1', '1.21.1', '1.21.11', '26.1.2', '26.2', '26.3']
     steps:
       - uses: actions/checkout@v4
 
@@ -78,20 +78,22 @@ jobs:
             cp build/libs/occupant-*.jar "$OUT/" 2>/dev/null || true
             rm -f "$OUT"/*-sources.jar
           fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          for attempt in 1 2 3 4 5 6; do
-            git fetch -q origin "${GITHUB_REF_NAME}"
-            git reset -q --hard "origin/${GITHUB_REF_NAME}"
-            mkdir -p tools/ports dist
-            cp "$OUT/result.txt" "tools/ports/${{ matrix.mc }}.txt"
-            if ls "$OUT"/*.jar >/dev/null 2>&1; then
+          cp "$OUT/result.txt" "$RUNNER_TEMP/${{ matrix.mc }}.txt"
+          bash tools/ci/save-results.sh "Port result for ${{ matrix.mc }}" ports "$RUNNER_TEMP/${{ matrix.mc }}.txt"
+          # The download itself: the only thing CI ever puts on this branch.
+          if ls "$OUT"/*.jar >/dev/null 2>&1; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            for attempt in 1 2 3 4 5 6; do
+              git fetch -q origin "${GITHUB_REF_NAME}"
+              git reset -q --hard "origin/${GITHUB_REF_NAME}"
+              mkdir -p dist
               rm -f dist/occupant-*+mc${{ matrix.mc }}.jar
               cp "$OUT"/*.jar dist/
-            fi
-            git add -A tools/ports dist
-            git diff --cached --quiet && break
-            git commit -q -m "Port result for ${{ matrix.mc }} [skip ci]"
-            git push origin "HEAD:${GITHUB_REF_NAME}" && break
-            sleep $((attempt * 4))
-          done
+              git add -A dist
+              git diff --cached --quiet && break
+              git commit -q -m "Jar for ${{ matrix.mc }} [skip ci]"
+              git push origin "HEAD:${GITHUB_REF_NAME}" && break
+              sleep $((attempt * 4))
+            done
+          fi
