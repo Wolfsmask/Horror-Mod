@@ -102,6 +102,8 @@ public final class HuntEvent extends HorrorEvent {
 		private static final float CHASE_FOG = 18.0f;
 		/** The longest it runs before letting them go. */
 		private static final int MOST = 20 * 60;
+		/** Come for them because they hid: it does not let them go so easily. */
+		private static final int MOST_FOUND = 20 * 60 * 3;
 		/** Never cut them off twice in less than this. */
 		private static final int CUT_OFF_EVERY = 50;
 
@@ -189,7 +191,7 @@ public final class HuntEvent extends HorrorEvent {
 			// behind them any more. It is ahead.
 			boolean behindThem = dist > 16 && (noSight > 15 || dist > 24);
 			if ((behindThem || stuck > 30) && age - cutOffAt >= CUT_OFF_EVERY && cutOff(p)) stuck = 0;
-			return chaseTicks < MOST;
+			return chaseTicks < (caught != null ? MOST_FOUND : MOST);
 		}
 
 		private void startChase(ServerPlayer p) {
