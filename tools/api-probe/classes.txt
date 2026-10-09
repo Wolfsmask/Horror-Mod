@@ -1,3 +1,4 @@
-@mc 1.20.1 26.2
-# Round 49: how a box's texture scale is used when it is baked.
-@code net.minecraft.client.model.geom.builders.CubeDefinition bake
+@mc 1.20.1 1.21.1
+# Round 50: a piglin's outer layer (sleeves, trousers), for the hanging pose before 1.21.2.
+net.minecraft.client.model.PlayerModel
+@code net.minecraft.client.model.PiglinModel setupAnim
