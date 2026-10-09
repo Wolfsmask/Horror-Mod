@@ -152,6 +152,7 @@ public final class BehindYouEvent extends HorrorEvent {
 
 		@Override
 		public void end() {
+			if (strike != null) strike.release();
 			if (attack && (strike == null || !strike.landed())) Director.attackSoon(haunt.data);
 			super.end();
 		}

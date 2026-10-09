@@ -253,7 +253,9 @@ public final class Director {
 			else h.data.outsideSeconds++;
 		}
 		House.noticeNear(player.blockPosition());
-		LeftBehind.tick(player, h, s, cfg);
+		Hiding.tick(player, h, s, cfg, this);
+		// Held up on its leg is the only time they float: anything left over from that, gone.
+		if (player.isNoGravity() && h.active == null && !player.isCreative() && !player.isSpectator()) player.setNoGravity(false);
 		updateDread(h.data, s);
 		int actBefore = h.data.act;
 		updateAct(h.data, cfg, player);

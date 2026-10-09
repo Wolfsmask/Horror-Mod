@@ -44,8 +44,11 @@ public final class Haunt {
 	/** When something that could show it last began, in ticks of play. */
 	long lastShowTriedAt = -1;
 	/** Seconds in a row under a roof or underground, and when it last asked why (ticks of play). */
-	int confinedSeconds;
-	long leftBehindAt = -1;
+	/** Seconds hidden away (a house, a hole, under the ground), out of the open, and seconds since back in it. */
+	int hiddenSeconds;
+	int outFor;
+	/** Not counted again before this (in ticks of play): it has just come for them. */
+	long hideCalmUntil;
 	/** The small things (see Trifles): what they last said and when it comes back, the step after theirs, a wrong name, home. */
 	@Nullable
 	String echoOf;

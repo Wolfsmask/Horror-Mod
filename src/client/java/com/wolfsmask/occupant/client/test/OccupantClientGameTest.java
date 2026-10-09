@@ -124,6 +124,7 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 			server.runOnServer(s -> {
 				com.wolfsmask.occupant.OccupantConfig.get().keepToTheRules = false;
 				com.wolfsmask.occupant.OccupantConfig.get().attacks = false;
+				com.wolfsmask.occupant.OccupantConfig.get().hidingPunished = false;
 			});
 			check(errorsBefore >= 0, "the Director should be running once a world is open");
 

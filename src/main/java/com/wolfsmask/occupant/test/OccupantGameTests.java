@@ -96,10 +96,17 @@ public final class OccupantGameTests {
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
 		OccupantConfig cfg = OccupantConfig.get();
 
-		helper.assertTrue(Strike.amount(3, 20.0f) >= 6.0f, "In the third act it should hurt: " + Strike.amount(3, 20.0f));
-		helper.assertTrue(Strike.amount(3, 5.0f) <= 4.0f, "In the third act it should always leave them alive");
+		helper.assertTrue(Strike.amount(3, 20.0f) >= 4.0f, "Its first leg should hurt: " + Strike.amount(3, 20.0f));
+		helper.assertTrue(Strike.amount(3, 5.0f) <= 4.0f, "Its first leg never ends it before it is done");
 		helper.assertTrue(Strike.amount(3, 1.0f) == 0.0f, "Even at their last half heart");
-		helper.assertTrue(Strike.amount(4, 5.0f) >= 5.0f, "In the last act it can kill them");
+		HauntData spared = new HauntData();
+		spared.act = 3;
+		helper.assertTrue(!Strike.lethal(spared), "The first time in the third act it lets them go");
+		spared.cooldowns.put(Strike.SPARED, Long.MAX_VALUE);
+		helper.assertTrue(Strike.lethal(spared), "The second time it does not");
+		spared.cooldowns.remove(Strike.SPARED);
+		spared.act = 4;
+		helper.assertTrue(Strike.lethal(spared), "In the last act it never lets them go");
 		// The game scales a monster's blow by difficulty: what it is hurt by undoes that exactly.
 		helper.assertTrue(Math.abs(Strike.beforeDifficulty(7.0f, net.minecraft.world.Difficulty.EASY) / 2.0f + 1.0f - 7.0f) < 1.0e-4f,
 				"On easy the game should take exactly what it means to");

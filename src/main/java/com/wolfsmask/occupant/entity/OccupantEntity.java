@@ -308,7 +308,18 @@ public class OccupantEntity extends PathfinderMob {
 		this.getNavigation().moveTo(pos.x, pos.y, pos.z, speed);
 	}
 
+	/**
+	 * After {@code entity}. The way there is only worked out again once they have moved off the end
+	 * of it: worked out afresh every few ticks, the first step of a new way can be back behind it,
+	 * and it is seen to jerk back a step each time.
+	 */
 	public void chase(Entity entity, double speed) {
+		net.minecraft.world.level.pathfinder.Path path = this.getNavigation().getPath();
+		if (path != null && !path.isDone() && path.getTarget() != null
+				&& path.getTarget().distSqr(entity.blockPosition()) <= 2 * 2) {
+			this.getNavigation().setSpeedModifier(speed);
+			return;
+		}
 		this.getNavigation().moveTo(entity, speed);
 	}
 

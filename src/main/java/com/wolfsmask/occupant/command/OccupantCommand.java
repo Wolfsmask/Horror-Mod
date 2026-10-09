@@ -80,6 +80,9 @@ public final class OccupantCommand {
 				.then(literal("attack")
 						.then(argument("player", EntityArgument.player())
 								.executes(OccupantCommand::attack)))
+				.then(literal("found")
+						.then(argument("player", EntityArgument.player())
+								.executes(OccupantCommand::found)))
 				.then(literal("act")
 						.then(argument("player", EntityArgument.player())
 								.then(argument("act", IntegerArgumentType.integer(0, HauntData.MAX_ACT))
@@ -294,6 +297,24 @@ public final class OccupantCommand {
 		}
 		ctx.getSource().sendFailure(Component.literal("It could not get at them here: it needs them on solid ground, out of water, and not in a fight."));
 		return 0;
+	}
+
+	/** As if they had hidden too long, wherever they are now: the roof, the hole, or the hunt. */
+	private static int found(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+		Director dir = director(ctx.getSource());
+		if (dir == null) return 0;
+		ServerPlayer p = EntityArgument.getPlayer(ctx, "player");
+		com.wolfsmask.occupant.director.Hiding.Where where = com.wolfsmask.occupant.director.Hiding.where(p);
+		dir.stopCurrent(p);
+		dir.beginNow(p, com.wolfsmask.occupant.director.events.Found.ID,
+				com.wolfsmask.occupant.director.events.Found.begin(dir.haunt(p), p, where));
+		String how = switch (where) {
+			case HOUSE -> "It is taking the roof off.";
+			case HOLE -> "It is coming down through the ground.";
+			default -> "It is hunting them through the dark.";
+		};
+		ctx.getSource().sendSuccess(() -> Component.literal("It found " + p.getName().getString() + ". " + how), false);
+		return 1;
 	}
 
 	@FunctionalInterface

@@ -61,10 +61,18 @@ public final class OccupantConfig {
 
 	/**
 	 * From the third act it hurts you itself, every few minutes: a chase that catches you, or
-	 * behind you when you turn round. Before the last act it always leaves you alive; in the last,
-	 * it can kill you. Off, it only ever frightens you.
+	 * behind you when you turn round, lifts you on its leg and puts the rest in. The first time it
+	 * lets you live; after that, and always in the last act, it kills you. Off, it only ever
+	 * frightens you.
 	 */
 	public boolean attacks = true;
+
+	/**
+	 * Hide from it too long (a house, a hole, underground) and it warns you, warns you once more,
+	 * then comes for you: the roof off, the ground over you smashed in, or hunted through the dark;
+	 * you wake where you sleep with things missing, and the second time it kills you.
+	 */
+	public boolean hidingPunished = true;
 
 	/** Health it takes when it hurts you (0 = the story's own: 7 in the third act, 10 in the last; 2.0 = one heart). */
 	public float chaseDamage = 0.0f;

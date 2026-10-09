@@ -17,12 +17,13 @@ import java.util.WeakHashMap;
 /**
  * Where its legs are, and how its body gets from one place to the next.
  * <p>
- * It does not walk. Each of its legs reaches out to the nearest thing it can push against: a wall,
- * a tree, a ceiling, or the ground, and stays planted there. The body hangs between them and does
- * not follow where the entity actually is; it lags behind, then is shoved most of the way there all
- * at once, then hangs again. Legs that are left stretched too far let go and snap to a new hold.
- * Nothing about it is rhythmic, and the body never drops low and scuttles, so it never reads as
- * a spider. It reads as something pushing itself through the world against the grain.
+ * Standing, each of its legs reaches out to the nearest thing it can push against: a wall, a tree,
+ * a ceiling, or the ground, and stays planted there, and now and then one lets go and slowly takes
+ * a new grip. Moving, it goes in a wave: its legs in two sets, every other one round the body,
+ * one set reaching ahead to where the body is going while the other holds, then the other, each
+ * leg put down in front of it so the body is carried over its legs, never dragged after them. The
+ * body follows where it really is closely and smoothly, leaning into the way it goes; it never
+ * falls behind and is never jerked after itself.
  * <p>
  * Nothing it does jumps: every leg's point and every knee is eased to where it is going. And
  * nothing it does by itself is ever seen: while it is being looked at, it is perfectly still.
@@ -34,7 +35,18 @@ public final class LegGait {
 	private static final Map<OccupantEntity, LegGait> GAITS = new WeakHashMap<>();
 	private static final int LEGS = OccupantGeometry.LEGS;
 	/** How far the drawn body may lag behind the real one, in blocks. */
-	private static final double MAX_LAG = 1.4;
+	private static final double MAX_LAG = 0.5;
+	/** Which of the two sets each leg steps with: every other one round the body. */
+	private static final int[] SET = new int[OccupantGeometry.LEGS];
+	/** Moving: how far a planted leg may fall behind where it should be before it steps, as a share of its length. */
+	private static final double STRIDE = 0.28;
+	/** Slower than this, in blocks a tick, it is standing. */
+	private static final double MOVING = 0.012;
+
+	static {
+		// The legs are listed in order round the body, so alternate ones are on alternate sides of each other.
+		for (int i = 0; i < OccupantGeometry.LEGS; i++) SET[i] = i % 2;
+	}
 	/** Further than this from the drawn body and it has moved by other means: start over. */
 	private static final double SNAP = 4.0;
 
@@ -51,8 +63,13 @@ public final class LegGait {
 	private final float[] swingStart = new float[LEGS];
 	private final float[] swingTime = new float[LEGS];
 	private float lastTime = Float.NaN;
-	private float shoveUntil;
-	private float nextShove;
+	/** Where it really was last frame, and how fast it is going, in blocks a tick (eased). */
+	@Nullable
+	private Vec3 lastReal;
+	private Vec3 velocity = Vec3.ZERO;
+	/** Which set of legs is stepping, and until when. */
+	private int stepping;
+	private float setUntil;
 	private float nextFidget;
 	private int lastCheck;
 	/** Which way it was last shoved, in the entity's own frame: forward and to its right. */
@@ -175,7 +192,7 @@ public final class LegGait {
 			arrived = true;
 			body = real;
 			for (int i = 0; i < LEGS; i++) {
-				foot[i] = findHold(i, level, yaw, OccupantGeometry.LEG_LENGTH[i] * px, root(i, px, dropPx));
+				foot[i] = findHold(i, level, yaw, OccupantGeometry.LEG_LENGTH[i] * px, root(i, px, dropPx), Vec3.ZERO);
 				swingStart[i] = -1.0f;
 				drawn[i] = null;
 				bendNow[i] = null;
@@ -200,15 +217,20 @@ public final class LegGait {
 		state.tilt = tilt;
 
 		boolean chasing = state.mode == OccupantEntity.Mode.CHASE;
-		// The body: dragged slowly, then shoved. Height always follows exactly, so it never sinks.
+		// How fast it is really going, eased so one late update from the server is not a lurch.
+		if (fresh || lastReal == null) {
+			velocity = Vec3.ZERO;
+		} else if (dt > 1.0e-3) {
+			Vec3 moved = new Vec3((real.x - lastReal.x) / dt, 0.0, (real.z - lastReal.z) / dt);
+			velocity = velocity.lerp(moved, 1.0 - Math.exp(-0.35 * dt));
+		}
+		lastReal = real;
+		double speed = Math.hypot(velocity.x, velocity.z);
+		boolean moving = speed > MOVING;
+		// The body: close behind where it really is, smoothly. Height always follows exactly, so it never sinks.
 		Vec3 gap = new Vec3(real.x - body.x, 0.0, real.z - body.z);
 		double lag = gap.length();
-		if (lag > 0.3 && now >= nextShove && now >= shoveUntil) {
-			shoveUntil = now + (chasing ? 3.0f : 5.0f);
-			nextShove = now + (chasing ? 3.0f : 8.0f) + rand(17, (int) now) * (chasing ? 4.0f : 14.0f);
-		}
-		double rate = now < shoveUntil ? 0.75 : 0.03;
-		double k = 1.0 - Math.exp(-rate * dt);
+		double k = 1.0 - Math.exp(-0.8 * dt);
 		double bx = body.x + gap.x * k;
 		double bz = body.z + gap.z * k;
 		if (lag > MAX_LAG) {
@@ -233,11 +255,11 @@ public final class LegGait {
 		}
 		body = new Vec3(bx, real.y, bz);
 
-		// Lean into the shove, in its own frame.
+		// Lean into the way it is going, in its own frame: hardest when it runs.
 		double fx = -Math.sin(yaw), fz = Math.cos(yaw);       // the way it faces
 		double rx = -fz, rz = fx;                             // to its right
-		float wantF = (float) Mth.clamp((gap.x * fx + gap.z * fz) * 0.5, -0.5, 0.5);
-		float wantS = (float) Mth.clamp((gap.x * rx + gap.z * rz) * 0.5, -0.5, 0.5);
+		float wantF = (float) Mth.clamp((velocity.x * fx + velocity.z * fz) * 1.6 + (gap.x * fx + gap.z * fz) * 0.3, -0.5, 0.5);
+		float wantS = (float) Mth.clamp((velocity.x * rx + velocity.z * rz) * 1.2 + (gap.x * rx + gap.z * rz) * 0.3, -0.5, 0.5);
 		float ease = (float) (1.0 - Math.exp(-0.2 * dt));
 		leanForward += (wantF - leanForward) * ease;
 		leanSide += (wantS - leanSide) * ease;
@@ -249,40 +271,74 @@ public final class LegGait {
 		boolean recheck = (int) now / 20 != lastCheck;
 		lastCheck = (int) now / 20;
 
-		// Which leg is worst off, and so is first to let go.
-		int worst = -1;
-		double worstScore = 0.0;
+		// Moving, one set of legs steps while the other holds, then the other: quicker the faster it goes.
+		float stepTicks = (float) Mth.clamp(1.1 / Math.max(speed, 1.0e-3) * 0.5, chasing ? 2.5 : 3.5, 7.0);
+		if (moving && now >= setUntil) {
+			stepping ^= 1;
+			setUntil = now + stepTicks + 0.5f;
+		}
+		Vec3 heading = moving ? velocity.scale(1.0 / speed) : Vec3.ZERO;
+
+		// Which legs are worst off, and so are first to let go.
+		double[] score = new double[LEGS];
 		boolean anyHeld = held(entity, level, now, yaw, px, dropPx);
 		for (int i = 0; i < LEGS; i++) {
+			score[i] = 0.0;
 			if (holdAt[i] != null || now < lingerUntil[i]) continue;
 			if (swingStart[i] >= 0.0f) {
 				if (now - swingStart[i] >= swingTime[i]) swingStart[i] = -1.0f;
-				continue;
+				else continue;
 			}
 			double reach = OccupantGeometry.LEG_LENGTH[i] * px;
 			Vec3 hip = root(i, px, dropPx);
-			double score;
 			if (foot[i] == null) {
-				score = recheck ? 0.4 : 0.0;                  // a free leg feels about now and then
-			} else {
-				double stretch = foot[i].distanceTo(hip) / reach;
-				Vec3 ideal = ideal(i, yaw, reach, hip);
-				double drift = ideal == null ? 0.0 : Math.hypot(foot[i].x - ideal.x, foot[i].z - ideal.z) / reach;
-				score = Math.max((stretch - 0.9) * 10.0, drift - 0.55);
-				if (recheck && !heldBy(level, foot[i])) score = 2.0;   // what it held is gone
+				score[i] = recheck || moving && SET[i] == stepping ? 0.4 : 0.0;   // a free leg feels about now and then
+				continue;
 			}
-			if (score > worstScore) {
-				worstScore = score;
-				worst = i;
+			double stretch = foot[i].distanceTo(hip) / reach;
+			Vec3 ideal = ideal(i, yaw, reach, hip);
+			if (moving && !high(i) && ideal != null) {
+				// Where it should be by the time it is down again: ahead, the way the body is going.
+				Vec3 want = ideal.add(heading.scale(lead(i, reach, speed, stepTicks)));
+				double drift = Math.hypot(foot[i].x - want.x, foot[i].z - want.z) / reach;
+				score[i] = drift > STRIDE ? drift : 0.0;
+				if (stretch > 0.95) score[i] = 10.0;          // about to be torn off it: now, whichever set
+			} else {
+				double drift = ideal == null ? 0.0 : Math.hypot(foot[i].x - ideal.x, foot[i].z - ideal.z) / reach;
+				score[i] = Math.max((stretch - 0.9) * 10.0, drift - 0.55);
+			}
+			if (recheck && !heldBy(level, foot[i])) score[i] = 2.0;   // what it held is gone
+		}
+		boolean stepped = false;
+		if (moving) {
+			// Every leg of the set that is stepping and wants to, and any leg that has to, worst first.
+			int maxSwinging = LEGS / 2 + 1;
+			for (int n = 0; n < LEGS && swinging < maxSwinging; n++) {
+				int best = -1;
+				for (int i = 0; i < LEGS; i++) {
+					if (score[i] <= 0.0 || (SET[i] != stepping && score[i] < 10.0)) continue;
+					if (best < 0 || score[i] > score[best]) best = i;
+				}
+				if (best < 0) break;
+				double reach = OccupantGeometry.LEG_LENGTH[best] * px;
+				replant(best, level, yaw, px, root(best, px, dropPx), stepTicks,
+						heading.scale(lead(best, reach, speed, stepTicks)));
+				score[best] = 0.0;
+				swinging++;
+				stepped = true;
+			}
+		} else {
+			int worst = -1;
+			for (int i = 0; i < LEGS; i++) if (score[i] > 0.0 && (worst < 0 || score[i] > score[worst])) worst = i;
+			if (worst >= 0 && swinging < 2) {
+				replant(worst, level, yaw, px, root(worst, px, dropPx), 3.0f, Vec3.ZERO);
+				stepped = true;
 			}
 		}
-		int maxSwinging = chasing ? 3 : 2;
-		if (worst >= 0 && worstScore > 0.0 && swinging < maxSwinging) {
-			replant(worst, level, yaw, px, root(worst, px, dropPx), chasing ? 2.0f : 3.0f);
-		} else if (now >= nextFidget && swinging == 0 && lag < 0.1 && !watched && !anyHeld) {
+		if (!stepped && now >= nextFidget && swinging == 0 && !moving && lag < 0.1 && !watched && !anyHeld) {
 			// Standing still, every so often one leg lets go and takes a new grip, slowly.
 			int i = (int) (rand(5, (int) now) * LEGS) % LEGS;
-			replant(i, level, yaw, px, root(i, px, dropPx), 9.0f);
+			replant(i, level, yaw, px, root(i, px, dropPx), 9.0f, Vec3.ZERO);
 			nextFidget = now + 90.0f + rand(9, (int) now) * 220.0f;
 		}
 
@@ -323,7 +379,8 @@ public final class LegGait {
 			if (drawn[i] == null || arrived || holding) {
 				drawn[i] = at;
 			} else {
-				double follow = 1.0 - Math.exp(-0.7 * dt);
+				// A step is already eased along its arc: followed closely, so the foot comes down where it lands.
+				double follow = 1.0 - Math.exp(-(swingStart[i] >= 0.0f ? 2.5 : 0.7) * dt);
 				drawn[i] = drawn[i].lerp(at, follow);
 			}
 			at = drawn[i];
@@ -385,31 +442,37 @@ public final class LegGait {
 	private boolean held(OccupantEntity entity, Level level, float now, double yaw, double px, float dropPx) {
 		int[] ids = entity.getHeld();
 		float partial = Mth.clamp(now - entity.tickCount, 0.0f, 1.0f);
-		// Let go of what is no longer held, or no longer there: the leg stays out a moment.
+		// How many legs each thing is to have through it (the same one more than once: more legs).
+		Map<Integer, Integer> wanted = new java.util.HashMap<>();
+		for (int id : ids) wanted.merge(id, 1, Integer::sum);
+		// Let go of what is no longer held (or not by so many legs), or no longer there: the leg stays out a moment.
+		Map<Integer, Integer> kept = new java.util.HashMap<>();
 		for (int i = 0; i < LEGS; i++) {
 			holdAt[i] = null;
 			if (holds[i] < 0) continue;
 			Entity held = level.getEntity(holds[i]);
-			boolean still = false;
-			for (int id : ids) still |= id == holds[i];
-			if (!still || held == null || held.isRemoved()) {
+			int already = kept.getOrDefault(holds[i], 0);
+			boolean still = held != null && !held.isRemoved() && already < wanted.getOrDefault(holds[i], 0);
+			if (!still) {
 				if (drawn[i] != null) foot[i] = drawn[i];
 				swingStart[i] = -1.0f;
 				lingerUntil[i] = now + 40.0f;
 				holds[i] = -1;
+			} else {
+				kept.put(holds[i], already + 1);
 			}
 		}
-		boolean any = false;
-		for (int id : ids) {
+		// New legs for what is to have more through it than it has.
+		for (Map.Entry<Integer, Integer> w : wanted.entrySet()) {
+			int id = w.getKey();
 			Entity held = level.getEntity(id);
 			if (held == null || held.isRemoved()) continue;
 			Vec3 centre = held.getPosition(partial).add(0.0, held.getBbHeight() * 0.55, 0.0);
-			int leg = -1;
-			for (int i = 0; i < LEGS; i++) if (holds[i] == id) leg = i;
-			if (leg < 0) {
+			for (int n = kept.getOrDefault(id, 0); n < w.getValue(); n++) {
 				int used = 0;
 				for (int i = 0; i < LEGS; i++) if (holds[i] >= 0) used++;
-				if (used >= LEGS_FREE) continue;
+				if (used >= LEGS_FREE) break;
+				int leg = -1;
 				double best = Double.NEGATIVE_INFINITY;
 				for (int i = 0; i < LEGS; i++) {
 					if (holds[i] >= 0) continue;
@@ -423,17 +486,27 @@ public final class LegGait {
 						leg = i;
 					}
 				}
-				if (leg < 0) continue;
+				if (leg < 0) break;
 				holds[leg] = id;
 				holdSince[leg] = now;
 				holdFrom[leg] = drawn[leg] != null ? drawn[leg] : foot[leg];
 				swingStart[leg] = -1.0f;
 				lingerUntil[leg] = 0.0f;
 			}
+		}
+		boolean any = false;
+		for (int i = 0; i < LEGS; i++) {
+			if (holds[i] < 0) continue;
+			Entity held = level.getEntity(holds[i]);
+			if (held == null || held.isRemoved()) continue;
+			// Each leg a little higher or lower through it than the next, so they do not all come out
+			// of the same place.
+			double at = 0.55 + (rand(i, 31) - 0.5) * 0.3;
+			Vec3 centre = held.getPosition(partial).add(0.0, held.getBbHeight() * at, 0.0);
 			// In at the back and out through the front, well past it, so the point is seen.
-			Vec3 hip = root(leg, px, dropPx);
+			Vec3 hip = root(i, px, dropPx);
 			Vec3 through = centre.subtract(hip);
-			holdAt[leg] = through.lengthSqr() < 1.0e-4 ? centre
+			holdAt[i] = through.lengthSqr() < 1.0e-4 ? centre
 					: centre.add(through.normalize().scale(held.getBbWidth() * 0.5 + 0.55));
 			any = true;
 		}
@@ -499,10 +572,24 @@ public final class LegGait {
 		return body.add(ax * c + az * sn, up, -ax * sn + az * c);
 	}
 
-	/** Sends leg i off to a new hold, if it can find one; otherwise it hangs free. */
-	private void replant(int i, Level level, double yaw, double px, Vec3 hip, float duration) {
+	/** Whether leg i is one of those high up the body, that reach for walls and ceilings, not the floor. */
+	private static boolean high(int i) {
+		return OccupantGeometry.LEG_ROOT_HEIGHT[i] > OccupantGeometry.HIPS_HEIGHT + 17.0f;
+	}
+
+	/** Moving: how far ahead of where it rests leg i is put down, so the body is carried over it. */
+	private static double lead(int i, double reach, double speed, float stepTicks) {
+		return Math.min(reach * 0.3, speed * (stepTicks + 4.0));
+	}
+
+	/**
+	 * Sends leg i off to a new hold, {@code lead} ahead of where it would rest if the body stood
+	 * still (as near that as it can reach), if it can find one; otherwise it hangs free.
+	 */
+	private void replant(int i, Level level, double yaw, double px, Vec3 hip, float duration, Vec3 lead) {
 		double reach = OccupantGeometry.LEG_LENGTH[i] * px;
-		Vec3 hold = findHold(i, level, yaw, reach, hip);
+		Vec3 hold = null;
+		for (double f = 1.0; f >= 0.0 && hold == null; f -= 0.5) hold = findHold(i, level, yaw, reach, hip, lead.scale(f));
 		if (hold == null) {
 			foot[i] = null;
 			return;
@@ -540,10 +627,10 @@ public final class LegGait {
 	 * only ever reach high; with nothing beside it to brace on, those hang free rather than join
 	 * the others on the ground, so out in the open it does not stand on a ring of legs.
 	 */
-	private Vec3 findHold(int i, Level level, double yaw, double reach, Vec3 hip) {
+	private Vec3 findHold(int i, Level level, double yaw, double reach, Vec3 hip, Vec3 lead) {
 		Vec3 d = outward(i, yaw);
 		// The legs highest up the body reach for walls and ceilings, not the floor.
-		boolean high = OccupantGeometry.LEG_ROOT_HEIGHT[i] > OccupantGeometry.HIPS_HEIGHT + 17.0f;
+		boolean high = high(i);
 		double height = (high ? 0.9 + 0.9 * rand(i, 11) : 0.15 + 0.6 * rand(i, 13)) * (hip.y - body.y);
 
 		// Something beside it.
@@ -570,6 +657,7 @@ public final class LegGait {
 		// The ground.
 		Vec3 g = ideal(i, yaw, reach, hip);
 		if (g == null) return null;
+		g = g.add(lead.x, 0.0, lead.z);
 		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 		int top = Mth.floor(body.y + 1.0);
 		for (int y = top; y >= top - 3; y--) {

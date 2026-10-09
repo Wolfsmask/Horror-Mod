@@ -135,7 +135,8 @@ public final class Cutscene {
 		int n = 0;
 		for (int id : it.getHeld()) {
 			Entity h = player.level().getEntity(id);
-			if (h == null || h.isRemoved()) continue;
+			// Not at themselves, when it is them it has: at its face.
+			if (h == null || h.isRemoved() || h == player) continue;
 			sum = sum.add(h.position().add(0.0, h.getBbHeight() * 0.5, 0.0));
 			n++;
 		}

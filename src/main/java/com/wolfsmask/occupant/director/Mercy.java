@@ -140,6 +140,20 @@ public final class Mercy {
 		player.setDeltaMovement(Vec3.ZERO);
 		Cues.effect(player, ScreenEffectPayload.BLACKOUT, 70, 1f);
 		Cues.effect(player, ScreenEffectPayload.SILENCE, 0, 1f);
+		sendHome(player);
+		String note = FALL_NOTES[player.getRandom().nextInt(FALL_NOTES.length)];
+		ItemStack book = Compat.writtenBook("A note", "?", List.of(note));
+		if (!player.getInventory().add(book)) {
+			ServerLevel here = Compat.level(player);
+			here.addFreshEntity(new net.minecraft.world.entity.item.ItemEntity(here, player.getX(), player.getY(), player.getZ(), book));
+		}
+		Occupant.LOGGER.info("{} would have died falling; it caught them", player.getName().getString());
+	}
+
+	/** Back at their bed (or where the world began, if they have none), standing on the ground. */
+	public static void sendHome(ServerPlayer player) {
+		player.resetFallDistance();
+		player.setDeltaMovement(Vec3.ZERO);
 		ServerLevel overworld = Compat.level(player).getServer().overworld();
 		// Their bed only if it is in the overworld, where they are going (an anchor is not).
 		BlockPos bed = player.level().dimension() == Level.OVERWORLD ? Compat.respawnPos(player) : null;
@@ -155,13 +169,6 @@ public final class Mercy {
 			feet = new BlockPos(centre.getX(), top, centre.getZ());
 		}
 		teleport(player, feet);
-		String note = FALL_NOTES[player.getRandom().nextInt(FALL_NOTES.length)];
-		ItemStack book = Compat.writtenBook("A note", "?", List.of(note));
-		if (!player.getInventory().add(book)) {
-			ServerLevel here = Compat.level(player);
-			here.addFreshEntity(new net.minecraft.world.entity.item.ItemEntity(here, player.getX(), player.getY(), player.getZ(), book));
-		}
-		Occupant.LOGGER.info("{} would have died falling; it caught them", player.getName().getString());
 	}
 
 	@Nullable
