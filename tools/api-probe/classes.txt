@@ -1,3 +1,4 @@
 @mc 1.20.1 1.21.1 1.21.11 26.1.2 26.2 26.3 26.4-snapshot-2
-# Round 47: the mouse handler, from the game.
-net.minecraft.client.Minecraft (mouseHandler|MouseHandler)
+# Round 48: boxes with more texture than their size (a sharper face), on every version.
+net.minecraft.client.model.geom.builders.CubeListBuilder addBox\(
+net.minecraft.client.model.geom.builders.CubeDeformation (CubeDeformation\(|NONE)
