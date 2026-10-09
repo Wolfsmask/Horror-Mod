@@ -64,6 +64,7 @@ final class FoundFootage {
 			shot("debug", () -> debug(context, game, woods));
 			shot("rescue", () -> rescue(context, game, woods));
 			shot("plates", () -> plates(context, game, spawn));
+			shot("struck", () -> struck(context, game, woods));
 		} catch (RuntimeException | AssertionError e) {
 			Occupant.LOGGER.warn("[client-gametest] found footage stopped early", e);
 		} finally {
@@ -310,6 +311,71 @@ final class FoundFootage {
 			server.runCommand("kill @e[type=minecraft:husk]");
 			server.runCommand("kill @e[type=minecraft:zombified_piglin]");
 			server.runCommand("difficulty peaceful");
+		}
+	}
+
+	/**
+	 * The night it comes to hurt them. Standing in a clearing, looking ahead: it is behind them, a
+	 * breath, and then its leg, in at their back and out of their chest. From their own eyes, then
+	 * from behind them, the way someone with them would have seen it.
+	 */
+	private static void struck(ClientGameTestContext context, TestSingleplayerContext game, BlockPos[] woods) {
+		TestServerContext server = game.getServer();
+		BlockPos floor = server.computeOnServer(s -> ForestGallery.clearing(s.overworld(), woods[0].offset(60, 0, 60)));
+		if (floor == null) return;
+		server.runOnServer(s -> Cinematic.fellTrees(s.overworld(), floor, 12));
+		Vec3 eye = server.computeOnServer(s -> new Vec3(floor.getX() + 0.5,
+				Cinematic.ground(s.overworld(), floor.getX(), floor.getZ()) + Cinematic.EYE, floor.getZ() + 0.5));
+		Cinematic.camera(context, game, eye, eye.add(0.0, -0.5, 6.0), 18000);
+		int[] actBefore = new int[1];
+		boolean begun = server.computeOnServer(s -> {
+			ServerPlayer p = Cinematic.player(s);
+			HauntData d = Director.get().data(p);
+			actBefore[0] = d.act;
+			d.setAct(3);
+			d.paused = false;
+			d.introduced = true;
+			d.sightings = Math.max(1, d.sightings);
+			p.setHealth(p.getMaxHealth());
+			// From behind, not a hunt from across the clearing: hunts are not on for this.
+			com.wolfsmask.occupant.OccupantConfig cfg = com.wolfsmask.occupant.OccupantConfig.get();
+			boolean chases = cfg.chases;
+			cfg.chases = false;
+			boolean ok = Director.get().attackNow(p) == Director.TriggerResult.STARTED;
+			cfg.chases = chases;
+			return ok;
+		});
+		Occupant.LOGGER.info("[client-gametest] struck: begun {}", begun);
+		try {
+			if (!begun) return;
+			int waited = 0;
+			while (waited < 400 && context.computeOnClient(mc -> mc.level.getEntitiesOfClass(com.wolfsmask.occupant.entity.OccupantEntity.class,
+					mc.player.getBoundingBox().inflate(16.0), x -> x.getHeld().length > 0).isEmpty())) {
+				context.waitTick();
+				waited++;
+			}
+			Occupant.LOGGER.info("[client-gametest] struck: the leg went in after {} ticks", waited);
+			if (waited >= 400) return;
+			context.waitTicks(2);
+			OccupantClientGameTest.shoot(context, "found-struck-1-in");
+			context.waitTicks(3);
+			OccupantClientGameTest.shoot(context, "found-struck-2-through");
+			context.runOnClient(mc -> mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK));
+			context.waitTicks(1);
+			OccupantClientGameTest.shoot(context, "found-struck-3-behind");
+			context.runOnClient(mc -> mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON));
+			for (int i = 0; i < 200 && Director.get() != null && server.computeOnServer(s -> Director.get().haunt(Cinematic.player(s)).isBusy()); i++) {
+				context.waitTick();
+			}
+		} finally {
+			context.runOnClient(mc -> mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON));
+			server.runOnServer(s -> {
+				ServerPlayer p = Cinematic.player(s);
+				HauntData d = Director.get().data(p);
+				d.setAct(actBefore[0]);
+				d.paused = true;
+				p.setHealth(p.getMaxHealth());
+			});
 		}
 	}
 

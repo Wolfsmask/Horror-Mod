@@ -270,6 +270,12 @@ public final class Director {
 		}
 		if (enteredHouse(h, player)) return;
 		if (enteredLair(h, player)) return;
+		// Once it is due to hurt them, it does not wait for the story's next turn: after a little
+		// quiet, it comes as soon as they are somewhere it can (looked at every few seconds).
+		if (h.quietSeconds >= 40 && h.quietSeconds % 5 == 0 && attackDue(h.data, cfg) && !s.afk() && !s.busy()
+				&& !(player.isCreative() && !cfg.hauntCreative) && attack(h, player, s, cfg, false)) {
+			return;
+		}
 		h.nextEventIn -= 20;
 		if (h.nextEventIn > 0) return;
 
