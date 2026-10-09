@@ -161,6 +161,12 @@ processResources {
 		}
 		exclude "data/occupant/advancement/**"
 	}
+	// 26.3 names the state a sapling must be able to stand in by the block alone.
+	if (mc == '26.3') {
+		filesMatching("data/occupant/worldgen/placed_feature/woods_*.json") {
+			filter { String line -> line.replaceAll(/"state": \{"Name": "([^"]+)", "Properties": \{[^}]*\}\}/, '"state": "$1"') }
+		}
+	}
 	def mixinJava = "JAVA_${javaRelease}"
 	inputs.property "mixin_java", mixinJava
 	filesMatching("*.mixins.json") {
