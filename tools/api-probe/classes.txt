@@ -1,4 +1,6 @@
-@mc 1.20.1 1.21.1
-# Round 50: a piglin's outer layer (sleeves, trousers), for the hanging pose before 1.21.2.
-net.minecraft.client.model.PlayerModel
-@code net.minecraft.client.model.PiglinModel setupAnim
+@mc 1.20.1 1.21.1 1.21.11 26.1.2 26.2 26.3
+# Round 51: telling a vanilla village or outpost is round a chunk, during world generation.
+net.minecraft.world.level.chunk.ChunkAccess Reference|hasAny
+net.minecraft.world.level.levelgen.structure.Structure step
+net.minecraft.world.level.WorldGenLevel getLevel
+net.minecraft.world.level.block.state.BlockBehaviour$BlockStateBase blocksMotion|canBeReplaced
