@@ -1,6 +1,7 @@
 package com.wolfsmask.occupant.director.events;
 
 import com.wolfsmask.occupant.OccupantConfig;
+import com.wolfsmask.occupant.director.Director;
 import com.wolfsmask.occupant.director.EventContext;
 import com.wolfsmask.occupant.director.Haunt;
 import com.wolfsmask.occupant.director.HorrorEvent;
@@ -22,16 +23,16 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * The finale beat. The music stops. It is standing out there, looking at you.
- * Then it runs. It is about as fast as you sprinting, so you can get away: break line of
- * sight, get behind a door, keep going. If it reaches you, the screen goes black.
- * It never kills you unless the server config says it may hurt you.
+ * The hunt. The music stops. It is standing out there, looking at you. Then it runs. It is about
+ * as fast as you sprinting, so you can get away: break line of sight, get behind a door, keep
+ * going. If it reaches you, its leg goes through you (see Strike): from the third act, when it is
+ * due to hurt you, by day as well as by night. Get away, and it comes again sooner.
  */
 public final class HuntEvent extends HorrorEvent {
 	private static final double CHASE_SPEED = 1.45;
 
 	public HuntEvent() {
-		super("hunt", Tier.PEAK, 4, 5, 30);
+		super("hunt", Tier.PEAK, 3, 5, 30);
 	}
 
 	@Override
@@ -47,8 +48,8 @@ public final class HuntEvent extends HorrorEvent {
 	@Override
 	public boolean fits(EventContext ctx) {
 		Situation s = ctx.situation;
-		return ctx.aloneEnough() && !s.inCombat() && !s.busy() && !s.inWater() && !s.sheltered() && s.gloomy()
-				&& ctx.player.getHealth() > 8.0f;
+		return ctx.aloneEnough() && !s.inCombat() && !s.busy() && !s.inWater() && !s.sheltered()
+				&& (s.gloomy() || ctx.attack) && ctx.player.getHealth() > 8.0f;
 	}
 
 	@Override
@@ -73,7 +74,7 @@ public final class HuntEvent extends HorrorEvent {
 		OccupantEntity.Form form = ctx.random.nextFloat() < 0.8f ? OccupantEntity.Form.REVEALED : OccupantEntity.Form.VEILED;
 		OccupantEntity e = ctx.haunt.spawnOccupant(p, spot, OccupantEntity.Mode.STARE, form);
 		if (e == null) return null;
-		return new Hunt(ctx.haunt, e, 50 + ctx.random.nextInt(30));
+		return new Hunt(ctx.haunt, e, 50 + ctx.random.nextInt(30), ctx.attack);
 	}
 
 	private static final class Hunt extends ApparitionSequence {
@@ -90,16 +91,22 @@ public final class HuntEvent extends HorrorEvent {
 		private int caughtAt = -1;
 		/** Ticks it has actually been there: nothing starts before it is. */
 		private int thereFor;
+		/** It came to hurt them, and the leg once it reaches them. */
+		private final boolean attack;
+		@Nullable
+		private Strike strike;
 
-		Hunt(Haunt haunt, OccupantEntity entity, int stareTicks) {
+		Hunt(Haunt haunt, OccupantEntity entity, int stareTicks, boolean attack) {
 			super(haunt, entity);
 			this.stareTicks = stareTicks;
+			this.attack = attack;
 			entity.setFootsteps(true);
 			entity.setGazeLocked(true);
 		}
 
 		@Override
 		protected boolean update(ServerPlayer p, boolean looking) {
+			if (strike != null) return strike.tick(p);
 			if (caughtAt >= 0) return age < caughtAt + 3;
 			double dist = entity.distanceTo(p);
 
@@ -128,6 +135,10 @@ public final class HuntEvent extends HorrorEvent {
 			}
 
 			if (dist < 1.7) {
+				if (OccupantConfig.get().attacks) {
+					strike = new Strike(haunt, entity);
+					return strike.tick(p);
+				}
 				caught(p);
 				return true;
 			}
@@ -138,6 +149,13 @@ public final class HuntEvent extends HorrorEvent {
 			stuck = (!entity.isPathing() && dist > 3) ? stuck + 1 : 0;
 			if (stuck > 40) return false;
 			return chaseTicks < 400;
+		}
+
+		@Override
+		public void end() {
+			// They got away from it, when it had come to hurt them: it will not wait as long next time.
+			if (attack && (strike == null || !strike.landed())) Director.attackSoon(haunt.data);
+			super.end();
 		}
 
 		private void caught(ServerPlayer p) {

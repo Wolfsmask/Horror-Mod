@@ -9,6 +9,7 @@ import com.wolfsmask.occupant.director.HorrorEvent;
 import com.wolfsmask.occupant.director.events.DistantEvent;
 import com.wolfsmask.occupant.director.events.Events;
 import com.wolfsmask.occupant.director.events.HallwayEvent;
+import com.wolfsmask.occupant.director.events.Strike;
 import com.wolfsmask.occupant.entity.OccupantEntity;
 import com.wolfsmask.occupant.registry.ModEntities;
 import com.wolfsmask.occupant.util.FogLine;
@@ -81,6 +82,41 @@ public final class OccupantGameTests {
 			e.vanish();
 			helper.succeed();
 		});
+	}
+
+	/**
+	 * From the third act it hurts them itself: in the third act never all of their health, in the
+	 * last act all of it if it comes to that; nothing saves them from it, as it saves them from
+	 * everything else; and once it has come for them, it comes round again.
+	 */
+	@GameTest
+	public void itHurtsYouFromTheThirdAct(GameTestHelper helper) {
+		Director director = Director.get();
+		helper.assertTrue(director != null, "Director should be running");
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		OccupantConfig cfg = OccupantConfig.get();
+
+		helper.assertTrue(Strike.amount(3, 20.0f) >= 6.0f, "In the third act it should hurt: " + Strike.amount(3, 20.0f));
+		helper.assertTrue(Strike.amount(3, 5.0f) <= 4.0f, "In the third act it should always leave them alive");
+		helper.assertTrue(Strike.amount(3, 1.0f) == 0.0f, "Even at their last half heart");
+		helper.assertTrue(Strike.amount(4, 5.0f) >= 5.0f, "In the last act it can kill them");
+
+		OccupantEntity e = helper.spawn(ModEntities.OCCUPANT, 1, 2, 1);
+		boolean dies = com.wolfsmask.occupant.director.Mercy.allowDeath(player, player.damageSources().mobAttack(e));
+		helper.assertTrue(dies, "Nothing should save them from its own strike");
+
+		HauntData d = director.data(player);
+		d.sightings = 1;
+		d.cooldowns.remove(Director.ATTACK_DUE);
+		d.setAct(2);
+		helper.assertTrue(!Director.attackDue(d, cfg), "It should not hurt anyone before the third act");
+		d.setAct(3);
+		helper.assertTrue(Director.attackDue(d, cfg) == cfg.attacks, "In the third act, with nothing in the way, it should be due");
+		Director.attackSoon(d);
+		helper.assertTrue(!Director.attackDue(d, cfg), "Having just come for them, it should not be due again at once");
+		d.cooldowns.remove(Director.ATTACK_DUE);
+		e.vanish();
+		helper.succeed();
 	}
 
 	/**

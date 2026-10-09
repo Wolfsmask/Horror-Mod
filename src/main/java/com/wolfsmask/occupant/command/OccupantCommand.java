@@ -77,6 +77,9 @@ public final class OccupantCommand {
 								.then(argument("event", StringArgumentType.word())
 										.suggests((ctx, builder) -> SharedSuggestionProvider.suggest(Events.ids(), builder))
 										.executes(OccupantCommand::trigger))))
+				.then(literal("attack")
+						.then(argument("player", EntityArgument.player())
+								.executes(OccupantCommand::attack)))
 				.then(literal("act")
 						.then(argument("player", EntityArgument.player())
 								.then(argument("act", IntegerArgumentType.integer(0, HauntData.MAX_ACT))
@@ -274,6 +277,23 @@ public final class OccupantCommand {
 					"Couldn't find a convincing place for " + event + " here. Try somewhere darker, a cave, or near a door."));
 		}
 		return result == Director.TriggerResult.STARTED ? 1 : 0;
+	}
+
+	private static int attack(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+		Director dir = director(ctx.getSource());
+		if (dir == null) return 0;
+		ServerPlayer p = EntityArgument.getPlayer(ctx, "player");
+		if (dir.data(p).act < 3) {
+			ctx.getSource().sendFailure(Component.literal("It does not hurt anyone before the third act. Try /occupant act "
+					+ p.getName().getString() + " 3 first."));
+			return 0;
+		}
+		if (dir.attackNow(p) == Director.TriggerResult.STARTED) {
+			ctx.getSource().sendSuccess(() -> Component.literal("It is coming for " + p.getName().getString() + "."), false);
+			return 1;
+		}
+		ctx.getSource().sendFailure(Component.literal("It could not get at them here: it needs them on solid ground, out of water, and not in a fight."));
+		return 0;
 	}
 
 	@FunctionalInterface

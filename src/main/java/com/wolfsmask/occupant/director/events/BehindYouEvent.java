@@ -1,6 +1,7 @@
 package com.wolfsmask.occupant.director.events;
 
 import com.wolfsmask.occupant.OccupantConfig;
+import com.wolfsmask.occupant.director.Director;
 import com.wolfsmask.occupant.director.EventContext;
 import com.wolfsmask.occupant.director.Haunt;
 import com.wolfsmask.occupant.director.HorrorEvent;
@@ -21,8 +22,12 @@ import org.jetbrains.annotations.Nullable;
 
 /**
  * It is standing right behind you. After a moment you hear it breathe.
- * When you turn around: face to face, a stinger, and the screen cuts to black.
- * When the picture comes back, there is nothing there.
+ * When you turn around: face to face, and the screen cuts to black. When the picture comes back,
+ * there is nothing there.
+ * <p>
+ * From the third act, when it is due to hurt you (see Director), it does not wait to be seen: it
+ * keeps close behind you, breathes, and when you turn round, or soon if you never do, its leg
+ * goes through you (see Strike). Indoors or out, by day or night.
  */
 public final class BehindYouEvent extends HorrorEvent {
 	public BehindYouEvent() {
@@ -43,7 +48,7 @@ public final class BehindYouEvent extends HorrorEvent {
 	public boolean fits(EventContext ctx) {
 		Situation s = ctx.situation;
 		return ctx.aloneEnough() && ctx.player.onGround() && !s.sprinting() && !s.inCombat() && !s.busy()
-				&& !s.inWater() && (s.sheltered() || s.gloomy());
+				&& !s.inWater() && (ctx.attack || s.sheltered() || s.gloomy());
 	}
 
 	@Override
@@ -61,23 +66,37 @@ public final class BehindYouEvent extends HorrorEvent {
 
 			OccupantEntity e = ctx.haunt.spawnOccupant(p, feet, OccupantEntity.Mode.AMBUSH, OccupantEntity.Form.REVEALED);
 			if (e == null) continue;
-			return new Ambush(ctx.haunt, e);
+			return new Ambush(ctx.haunt, e, ctx.attack);
 		}
 		return null;
 	}
 
 	private static final class Ambush extends ApparitionSequence {
 		private int scaredAt = -1;
+		/** It came to hurt them, and the leg once it does. */
+		private final boolean attack;
+		@Nullable
+		private Strike strike;
+		/** When it was really there, behind them; -1 before then. */
+		private int thereAt = -1;
 
-		Ambush(Haunt haunt, OccupantEntity entity) {
+		Ambush(Haunt haunt, OccupantEntity entity, boolean attack) {
 			super(haunt, entity);
+			this.attack = attack;
 			entity.setFootsteps(false);
 			entity.setGazeLocked(true);
 		}
 
 		@Override
+		protected int stareLimit() {
+			return attack ? Integer.MAX_VALUE : super.stareLimit();   // come to hurt them, being seen does not stop it
+		}
+
+		@Override
 		protected boolean update(ServerPlayer p, boolean looking) {
+			if (strike != null) return strike.tick(p);
 			if (scaredAt >= 0) return age < scaredAt + 3;
+			if (attack) return closeIn(p);
 			if (entity.distanceTo(p) > 4.5) return false; // walked away without ever knowing
 
 			if (age == 30) {
@@ -96,6 +115,32 @@ public final class BehindYouEvent extends HorrorEvent {
 				return true;
 			}
 			return age < 240;
+		}
+
+		/**
+		 * Come to hurt them. It keeps close behind them, silently; a breath at their ear; and when
+		 * they turn round, or a few seconds after if they never do, the leg.
+		 */
+		private boolean closeIn(ServerPlayer p) {
+			if (entity.isConcealed()) return age < 300;    // not there yet: it never arrives in sight
+			if (thereAt < 0) thereAt = age;
+			int there = age - thereAt;
+			double dist = entity.distanceTo(p);
+			if (there == 12) Cues.sound(p, ModSounds.BREATH, SoundSource.HOSTILE, entity.getEyePosition(), 0.8f, 0.9f);
+			boolean turned = Sight.angleTo(p, entity.getEyePosition()) <= 55.0 && Sight.canSeeAnyPart(p, entity);
+			if (turned || there >= 60 || dist < 1.2) {
+				strike = new Strike(haunt, entity);
+				return strike.tick(p);
+			}
+			if (dist > 9.0) return false;                 // they ran: it will not wait as long next time
+			if (dist > 2.4 && age % 5 == 0) entity.chase(p, 1.15);
+			return age < 600;
+		}
+
+		@Override
+		public void end() {
+			if (attack && (strike == null || !strike.landed())) Director.attackSoon(haunt.data);
+			super.end();
 		}
 	}
 }

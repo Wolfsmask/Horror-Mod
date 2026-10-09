@@ -176,6 +176,7 @@ public final class ArenaGameTests {
 			}
 			expect("field", "stare", "last_night");
 			command("kill @e[tag=occupant_arena]");
+			expectAttack("field");
 
 			// Cave, facing east (+X) down the corridor.
 			place(cave, -90.0f);
@@ -191,6 +192,7 @@ public final class ArenaGameTests {
 			// A fire behind them: it goes out.
 			world.setBlock(house.offset(-3, 0, -3), Blocks.CAMPFIRE.defaultBlockState(), Block.UPDATE_ALL);
 			expect("house", "fire_out");
+			expectAttack("house");
 		}
 
 		/** Logs what the cave looks like to the spot checks, so a failure here is easy to understand. */
@@ -246,6 +248,16 @@ public final class ArenaGameTests {
 				}
 				if (!started) failures.add(id + " (" + where + ")");
 			}
+		}
+
+		/** It can come to hurt them here: out in the open, and indoors. */
+		private void expectAttack(String where) {
+			boolean started = false;
+			for (int i = 0; i < TRIES && !started; i++) {
+				started = director.attackNow(player) == Director.TriggerResult.STARTED;
+				director.stopCurrent(player);
+			}
+			if (!started) failures.add("attack (" + where + ")");
 		}
 
 		private void finish(String fatal) {

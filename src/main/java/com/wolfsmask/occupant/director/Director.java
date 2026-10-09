@@ -40,6 +40,14 @@ import java.util.UUID;
 public final class Director {
 	private static final int MAX_FAILURES_PER_EVENT = 3;
 	private static final long MINUTE = 1200L;
+	/**
+	 * When it next comes to hurt them, in play ticks. Kept among the cooldowns, which are saved,
+	 * as the time until which it is not due: once that has passed (or in a save from before there
+	 * was one), it is due.
+	 */
+	public static final String ATTACK_DUE = "attack_due";
+	/** The ways it can come to hurt them, in the order they are tried: out in the open, the hunt. */
+	private static final List<String> ATTACKS = List.of("hunt", "behind_you");
 
 	@Nullable
 	private static Director instance;
@@ -417,6 +425,8 @@ public final class Director {
 		if (d.act != before) {
 			debug("{} entered act {}", player.getName().getString(), d.act);
 			save.setDirty();
+			// From the third act it hurts them: the first time a few minutes in.
+			if (d.act == 3 && before < 3) d.cooldowns.put(ATTACK_DUE, d.playTicks + (long) (5 * MINUTE * pace));
 			// From the third act its lair moves closer: dug anew, out in the fog, nearer their home.
 			if (d.act >= 3 && OccupantConfig.get().worldChanges) {
 				BlockPos home = Compat.respawnPos(player);
@@ -525,6 +535,10 @@ public final class Director {
 			}
 		}
 
+		// From the third act it hurts them, every so often, whatever the dread, the hour or where
+		// they are: it saves them from everything else so that only it gets to.
+		if (attackDue(d, cfg) && attack(h, player, s, cfg)) return;
+
 		// Too long since it was seen: something it can be seen in comes first, if anything fits.
 		if (sightingDue(h, cfg)) {
 			List<HorrorEvent> visible = new ArrayList<>();
@@ -561,6 +575,45 @@ public final class Director {
 
 		// Nothing could happen convincingly. Try again soon.
 		h.nextEventIn = 20 * (20 + random.nextInt(25));
+	}
+
+	/**
+	 * Whether it is due to come and hurt them: from the third act, once its time has come round
+	 * (see ATTACK_DUE), and only once they have seen it at least once.
+	 */
+	public static boolean attackDue(HauntData d, OccupantConfig cfg) {
+		return cfg.attacks && !cfg.soundOnly && d.act >= 3 && d.sightings > 0 && !d.isOnCooldown(ATTACK_DUE);
+	}
+
+	/** They got away from it: it comes again sooner than it would have. */
+	public static void attackSoon(HauntData d) {
+		long soon = d.playTicks + 3 * MINUTE;
+		Long due = d.cooldowns.get(ATTACK_DUE);
+		if (due == null || due > soon) d.cooldowns.put(ATTACK_DUE, soon);
+	}
+
+	/**
+	 * It comes to hurt them: out in the open it hunts them, if it has not lately; anywhere, it is
+	 * right behind them. False if neither can happen here and now (it is still due, and tried again
+	 * next time). The fright-only versions of these keep their own cooldowns and rules.
+	 */
+	private boolean attack(Haunt h, ServerPlayer player, Situation s, OccupantConfig cfg) {
+		HauntData d = h.data;
+		EventContext ctx = new EventContext(player, h, s, false);
+		ctx.attack = true;
+		for (String id : ATTACKS) {
+			HorrorEvent e = Events.byId(id);
+			if (e == null || disabledEvents.contains(id) || d.act < e.minAct()) continue;
+			if (id.equals("hunt") && (!cfg.chases || d.isOnCooldown(id))) continue;
+			if (!e.fits(ctx) || !tryBegin(h, e, ctx)) continue;
+			d.cooldowns.put(ATTACK_DUE, d.playTicks + (long) ((d.act >= 4 ? 6 : 9) * MINUTE / Pacing.frequency(cfg)));
+			h.quietSeconds = 0;
+			h.chain = 0;
+			scheduleAfter(h, e, player.getRandom(), cfg);
+			debug("{}: it came to hurt them ({})", player.getName().getString(), id);
+			return true;
+		}
+		return false;
 	}
 
 	private boolean isCandidate(HorrorEvent e, EventContext ctx, boolean calm) {
@@ -728,6 +781,16 @@ public final class Director {
 		EventContext ctx = new EventContext(player, h, s, forced);
 		if (!forced && (!e.allowedBy(ctx.config) || !e.fits(ctx))) return TriggerResult.NO_SPOT;
 		return tryBegin(h, e, ctx) ? TriggerResult.STARTED : TriggerResult.NO_SPOT;
+	}
+
+	/**
+	 * It comes to hurt them now, the way it does when it is due (for /occupant attack and the
+	 * tests), over whatever was happening: STARTED, or NO_SPOT if it cannot here and now.
+	 */
+	public TriggerResult attackNow(ServerPlayer player) {
+		Haunt h = haunt(player);
+		endSequence(h);
+		return attack(h, player, h.capture(player), OccupantConfig.get()) ? TriggerResult.STARTED : TriggerResult.NO_SPOT;
 	}
 
 	/** Starts something that is not one of the events, now, over whatever was happening. */

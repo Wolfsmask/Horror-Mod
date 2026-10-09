@@ -119,8 +119,12 @@ public final class OccupantClientGameTest implements FabricClientGameTest {
 			boolean fair = context.computeOnClient(mc -> mc.player != null && !mc.player.isCreative());
 			Occupant.LOGGER.info("[client-gametest] creative refused: {}", fair);
 			check(fair, "switching to creative should be refused once the story has started");
-			// The photographs below need a free camera.
-			server.runOnServer(s -> com.wolfsmask.occupant.OccupantConfig.get().keepToTheRules = false);
+			// The photographs below need a free camera, and none of them may be of it coming to hurt
+			// the player because its time came round in the middle of one (that has a scene of its own).
+			server.runOnServer(s -> {
+				com.wolfsmask.occupant.OccupantConfig.get().keepToTheRules = false;
+				com.wolfsmask.occupant.OccupantConfig.get().attacks = false;
+			});
 			check(errorsBefore >= 0, "the Director should be running once a world is open");
 
 			// A clear day with nothing else in shot, the player standing still and facing south.

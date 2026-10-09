@@ -19,6 +19,11 @@ public final class EventContext {
 	public final OccupantConfig config;
 	/** Triggered by a command: situation checks are skipped, but physical placement checks never are. */
 	public final boolean forced;
+	/**
+	 * It is due to hurt them (see Director): the events it can do that in (the hunt, behind you)
+	 * happen by day as well as night, and end with its leg in them, not only a fright.
+	 */
+	public boolean attack;
 	/** How far off it can be made out through the fog, once worked out; below 0 until then. */
 	private double seen = -1.0;
 

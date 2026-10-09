@@ -59,7 +59,14 @@ public final class OccupantConfig {
 	/** Allow the late-story chase sequences. */
 	public boolean chases = true;
 
-	/** Health removed when a chase catches you (0 = never hurts you; 2.0 = one heart). */
+	/**
+	 * From the third act it hurts you itself, every few minutes: a chase that catches you, or
+	 * behind you when you turn round. Before the last act it always leaves you alive; in the last,
+	 * it can kill you. Off, it only ever frightens you.
+	 */
+	public boolean attacks = true;
+
+	/** Health it takes when it hurts you (0 = the story's own: 7 in the third act, 10 in the last; 2.0 = one heart). */
 	public float chaseDamage = 0.0f;
 
 	/** Allow fake chat and fake "joined the game" messages. */
