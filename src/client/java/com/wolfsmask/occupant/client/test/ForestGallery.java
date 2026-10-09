@@ -304,8 +304,7 @@ final class ForestGallery {
 	private static BlockPos findForest(ServerLevel level, BlockPos from, boolean darkOnly) {
 		Predicate<Holder<Biome>> dark = h -> h.is(Biomes.DARK_FOREST);
 		Predicate<Holder<Biome>> any = h -> h.is(Biomes.OLD_GROWTH_SPRUCE_TAIGA)
-				|| h.is(Biomes.OLD_GROWTH_PINE_TAIGA) || h.is(Biomes.FOREST) || h.is(Biomes.BIRCH_FOREST)
-				|| h.is(Biomes.OLD_GROWTH_BIRCH_FOREST);
+				|| h.is(Biomes.OLD_GROWTH_PINE_TAIGA) || h.is(Biomes.FOREST);
 		var found = darkOnly ? level.findClosestBiome3d(dark, from, 6400, 32, 64) : null;
 		Predicate<Holder<Biome>> kind = dark;
 		if (found == null) {

@@ -14,9 +14,9 @@ import java.util.Map;
 
 /**
  * What a place is built of. The builders are written in spruce and cobblestone; a palette swaps
- * that for the wood that grows round where it stands (spruce in the north, oak and birch and dark
- * oak in the woods), and weathers its stone more or less, so no two camps or towers or chapels
- * look like the same one set down twice.
+ * that for a dark wood that grows round where it stands (spruce in the north, oak and dark oak in
+ * the woods: never birch, too pale and too clean for any of them), and weathers its stone more or
+ * less, so no two camps or towers or chapels look like the same one set down twice.
  */
 final class Palette {
 	/** Leaves every block as the builder wrote it. */
@@ -38,8 +38,7 @@ final class Palette {
 		if (biome.is(BiomeTags.IS_TAIGA) || random.nextFloat() < 0.15f) {
 			wood = Wood.SPRUCE;
 		} else {
-			float r = random.nextFloat();
-			wood = r < 0.4f ? Wood.OAK : r < 0.7f ? Wood.DARK_OAK : Wood.BIRCH;
+			wood = random.nextFloat() < 0.5f ? Wood.OAK : Wood.DARK_OAK;
 		}
 		return new Palette(wood.swaps(), random.nextFloat() * 0.45f);
 	}
@@ -69,7 +68,7 @@ final class Palette {
 	}
 
 	private enum Wood {
-		SPRUCE, OAK, DARK_OAK, BIRCH;
+		SPRUCE, OAK, DARK_OAK;
 
 		Map<Block, Block> swaps() {
 			Map<Block, Block> m = new HashMap<>();
@@ -81,8 +80,6 @@ final class Palette {
 				case DARK_OAK -> put(m, Blocks.DARK_OAK_PLANKS, Blocks.DARK_OAK_STAIRS, Blocks.DARK_OAK_SLAB, Blocks.DARK_OAK_FENCE,
 						Blocks.DARK_OAK_LOG, Blocks.STRIPPED_DARK_OAK_LOG, Blocks.DARK_OAK_PRESSURE_PLATE, Blocks.DARK_OAK_TRAPDOOR,
 						Blocks.DARK_OAK_DOOR, Blocks.DARK_OAK_FENCE_GATE);
-				case BIRCH -> put(m, Blocks.BIRCH_PLANKS, Blocks.BIRCH_STAIRS, Blocks.BIRCH_SLAB, Blocks.BIRCH_FENCE, Blocks.BIRCH_LOG,
-						Blocks.STRIPPED_BIRCH_LOG, Blocks.BIRCH_PRESSURE_PLATE, Blocks.BIRCH_TRAPDOOR, Blocks.BIRCH_DOOR, Blocks.BIRCH_FENCE_GATE);
 			}
 			return m;
 		}
