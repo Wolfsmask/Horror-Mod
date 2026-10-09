@@ -348,14 +348,19 @@ final class FoundFootage {
 		Occupant.LOGGER.info("[client-gametest] struck: begun {}", begun);
 		try {
 			if (!begun) return;
-			int waited = 0;
-			while (waited < 400 && context.computeOnClient(mc -> mc.level.getEntitiesOfClass(com.wolfsmask.occupant.entity.OccupantEntity.class,
-					mc.player.getBoundingBox().inflate(16.0), x -> x.getHeld().length > 0).isEmpty())) {
+			// Counted in the server's own ticks: on a slow machine it can fall far behind the picture.
+			long from = server.computeOnServer(s -> (long) s.getTickCount());
+			long now = from;
+			boolean in = false;
+			for (int i = 0; i < 2400 && now - from < 500 && !in; i++) {
 				context.waitTick();
-				waited++;
+				now = server.computeOnServer(s -> (long) s.getTickCount());
+				in = !context.computeOnClient(mc -> mc.level.getEntitiesOfClass(com.wolfsmask.occupant.entity.OccupantEntity.class,
+						mc.player.getBoundingBox().inflate(16.0), x -> x.getHeld().length > 0).isEmpty());
+				if (!in && !server.computeOnServer(s -> Director.get().haunt(Cinematic.player(s)).isBusy())) break;
 			}
-			Occupant.LOGGER.info("[client-gametest] struck: the leg went in after {} ticks", waited);
-			if (waited >= 400) return;
+			Occupant.LOGGER.info("[client-gametest] struck: the leg went in: {}, after {} of the server's ticks", in, now - from);
+			if (!in) return;
 			context.waitTicks(2);
 			OccupantClientGameTest.shoot(context, "found-struck-1-in");
 			context.waitTicks(3);

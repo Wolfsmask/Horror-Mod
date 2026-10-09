@@ -526,7 +526,25 @@ final class Cinematic {
 				eye.x, eye.y - EYE, eye.z, look.x, look.y, look.z));
 		context.waitTicks(30);
 		TestCompat.waitForWorld(game);
+		noBirch(server, eye);
 		context.waitTicks(30);
+	}
+
+	/**
+	 * No birch anywhere in a picture: every birch tree, trunk and leaves, within sight of where
+	 * the camera stands is taken away first. Pale and clean, it is the wrong wood for this.
+	 */
+	static void noBirch(TestServerContext server, Vec3 eye) {
+		int x0 = Mth.floor(eye.x) - 40, x1 = Mth.floor(eye.x) + 40;
+		int z0 = Mth.floor(eye.z) - 40, z1 = Mth.floor(eye.z) + 40;
+		int y0 = Mth.floor(eye.y) - 14, y1 = Mth.floor(eye.y) + 24;
+		for (String what : new String[]{"minecraft:birch_log", "minecraft:birch_leaves"}) {
+			// In slices, to stay inside what one fill may change.
+			for (int x = x0; x <= x1; x += 8) {
+				server.runCommand(String.format(Locale.ROOT, "fill %d %d %d %d %d %d minecraft:air replace %s",
+						x, y0, z0, Math.min(x + 7, x1), y1, z1, what));
+			}
+		}
 	}
 
 	private static void still(ClientGameTestContext context, TestSingleplayerContext game, String name) {

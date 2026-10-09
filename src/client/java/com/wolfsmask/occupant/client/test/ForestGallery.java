@@ -125,6 +125,7 @@ final class ForestGallery {
 						stand.getX() + 0.5, stand.getY(), stand.getZ() + 0.5, yaw));
 				context.waitTicks(10);
 				TestCompat.waitForWorld(game);
+				Cinematic.noBirch(server, net.minecraft.world.phys.Vec3.atBottomCenterOf(stand).add(0.0, Cinematic.EYE, 0.0));
 				boolean started = server.computeOnServer(s -> {
 					ServerPlayer player = s.getPlayerList().getPlayers().get(0);
 					Director.get().data(player).setAct(act);

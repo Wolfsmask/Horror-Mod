@@ -39,7 +39,8 @@ final class Lighthouse extends Build {
 
 	private BlockState band(int y, int height) {
 		boolean light = (y / 3) % 2 == 0;
-		BlockState calcite = old(Blocks.CALCITE.defaultBlockState(), Blocks.CRACKED_STONE_BRICKS.defaultBlockState(), 0.12f);
+		// White, gone grey here and there: patches of a greyer white, not squares of another stone.
+		BlockState calcite = old(Blocks.CALCITE.defaultBlockState(), Blocks.DIORITE.defaultBlockState(), 0.12f);
 		return switch (paint) {
 			case RED -> light ? calcite : Blocks.BRICKS.defaultBlockState();
 			case BLACK -> light ? calcite
