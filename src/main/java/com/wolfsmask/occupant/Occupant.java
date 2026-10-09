@@ -70,6 +70,7 @@ public final class Occupant implements ModInitializer {
 		ModSounds.init();
 		ModEntities.init();
 		ModWorld.init();
+		com.wolfsmask.occupant.world.DeadVillages.init();
 		Compat.serverToClient().register(ScreenEffectPayload.TYPE, ScreenEffectPayload.CODEC);
 		Compat.serverToClient().register(WhisperPayload.TYPE, WhisperPayload.CODEC);
 

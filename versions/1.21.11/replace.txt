@@ -4,3 +4,5 @@ public void extractBackground(GuiGraphics -> public void renderBackground(GuiGra
 public void extractRenderState(GuiGraphics -> public void render(GuiGraphics
 ScreenEvents.afterExtract( -> ScreenEvents.afterRender(
 g.text(font, text, x, y, color, false) -> g.drawString(font, text, x, y, color, false)
+setGrassColorOverride( -> setGrassColor(
+setFoliageColorOverride( -> setFoliageColor(

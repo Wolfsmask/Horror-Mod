@@ -43,3 +43,5 @@ import net.minecraft.client.input.KeyEvent; ->
 public boolean keyPressed(KeyEvent event) { -> public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
 int key = event.input(); -> int key = keyCode;
 super.keyPressed(event) -> super.keyPressed(keyCode, scanCode, modifiers)
+setGrassColorOverride( -> setGrassColor(
+setFoliageColorOverride( -> setFoliageColor(

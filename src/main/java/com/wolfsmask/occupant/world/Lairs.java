@@ -53,6 +53,28 @@ public final class Lairs {
 		}
 	}
 
+	/** The hollow nearest {@code pos} (along the ground), within {@code within} blocks, or null. */
+	@Nullable
+	public static BlockPos nearest(BlockPos pos, double within) {
+		BlockPos best = null;
+		double bestSq = within * within;
+		for (BlockPos h : HOLLOWS) {
+			double dx = h.getX() - pos.getX(), dz = h.getZ() - pos.getZ();
+			double sq = dx * dx + dz * dz;
+			if (sq < bestSq) {
+				bestSq = sq;
+				best = h;
+			}
+		}
+		return best;
+	}
+
+	/** The one dug last, or null. */
+	@Nullable
+	public static BlockPos newest() {
+		return HOLLOWS.isEmpty() ? null : HOLLOWS.get(HOLLOWS.size() - 1);
+	}
+
 	/** The hollow this position is in, if it is in one. */
 	@Nullable
 	public static BlockPos hollowAt(BlockPos pos) {

@@ -29,15 +29,15 @@ public final class Places {
 	/** Not right where players first appear. */
 	private static final int MIN_FROM_SPAWN = 120;
 	/** And well apart from each other. */
-	private static final int MIN_APART = 260;
+	private static final int MIN_APART = 200;
 	/** And never the same kind of place twice in a walk: two camps are this far apart at least. */
-	private static final int SAME_KIND_APART = 600;
+	private static final int SAME_KIND_APART = 450;
 	/** Never this close to a house, whose village reaches twenty-odd blocks round it, or a house to them. */
 	static final int CLEAR_OF_OTHERS = 80;
 
 	/** The kinds of place, how often each comes up, and how far each reaches from its middle. */
 	private static final String[] KINDS = {"lair", "lighthouse", "ruin", "camp", "graves", "watchtower", "chapel", "radio"};
-	private static final float[] SHARES = {0.06f, 0.12f, 0.13f, 0.17f, 0.13f, 0.13f, 0.14f, 0.12f};
+	private static final float[] SHARES = {0.09f, 0.13f, 0.12f, 0.16f, 0.12f, 0.13f, 0.13f, 0.12f};
 
 	private static final List<BlockPos> PLACES = new CopyOnWriteArrayList<>();
 	/** Which kind each place is, where known (worlds from before this was kept have none). */

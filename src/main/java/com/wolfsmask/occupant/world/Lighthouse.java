@@ -159,7 +159,8 @@ final class Lighthouse extends Build {
 		}
 		put(0, gallery + 1, -lamp, Blocks.AIR.defaultBlockState());
 		put(0, gallery + 2, -lamp, Blocks.AIR.defaultBlockState());
-		put(0, gallery + 1, 0, Blocks.REDSTONE_LAMP.defaultBlockState());
+		// Its lamp: dead, mostly. In some, somebody has lit it again, and it shows through the fog at night.
+		put(0, gallery + 1, 0, chance(0.5f) ? Blocks.GLOWSTONE.defaultBlockState() : Blocks.REDSTONE_LAMP.defaultBlockState());
 		container(1, gallery + 1, -1, facing(Blocks.CHEST.defaultBlockState(), Direction.WEST), Loot.Kind.RUIN);
 		if (chance(0.7f)) put(-1, gallery + 3, -1, Blocks.COBWEB.defaultBlockState());
 		unsettle(-(lamp - 1), -(lamp - 1), lamp - 1, 0, gallery + 1, 1);

@@ -30,15 +30,46 @@ final class Lair extends Build {
 
 	@Override
 	void make() {
-		// The mark on the surface.
-		for (int x = -3; x <= 3; x++) for (int z = -3; z <= 3; z++) {
-			if (x * x + z * z > 10) continue;
-			put(x, 0, z, chance(0.5f) ? Blocks.COARSE_DIRT.defaultBlockState() : Blocks.ROOTED_DIRT.defaultBlockState());
+		// The mark on the surface, seen from a long way off even in the fog: a clearing where nothing
+		// grows, ringed with trees that died standing, bones about it, the earth it dug out heaped up
+		// round a hole that is wide and black.
+		for (int x = -7; x <= 7; x++) {
+			for (int z = -7; z <= 7; z++) {
+				if (x * x + z * z > 42 + random.nextInt(8)) continue;
+				int g = ground(x, z);
+				if (Math.abs(g) > 2) continue;
+				float f = random.nextFloat();
+				put(x, g, z, (f < 0.45f ? Blocks.COARSE_DIRT : f < 0.75f ? Blocks.ROOTED_DIRT : Blocks.PODZOL).defaultBlockState());
+				BlockState above = level.getBlockState(at(x, g + 1, z));
+				if (!above.isAir() && above.canBeReplaced() && above.getFluidState().isEmpty()) put(x, g + 1, z, Blocks.AIR.defaultBlockState());
+			}
 		}
-		put(2, 1, -1, Blocks.SKELETON_SKULL.defaultBlockState().setValue(BlockStateProperties.ROTATION_16, random.nextInt(16)));
-		put(-2, 1, 2, Blocks.BONE_BLOCK.defaultBlockState());
-		put(-1, 1, -2, Blocks.DEAD_BUSH.defaultBlockState());
-		// The hole, and a ladder down its side.
+		for (int i = 0; i < 6; i++) {
+			double a = i * Math.PI / 3 + random.nextDouble() * 0.6;
+			deadTree((int) Math.round(Math.cos(a) * 6.5), (int) Math.round(Math.sin(a) * 6.5));
+		}
+		for (int i = 0; i < 7; i++) {
+			int x = random.nextInt(11) - 5, z = random.nextInt(11) - 5;
+			if (Math.abs(x) <= 2 && Math.abs(z) <= 2) continue;
+			int g = ground(x, z) + 1;
+			if (Math.abs(g) > 3 || !level.getBlockState(at(x, g, z)).isAir()) continue;
+			put(x, g, z, switch (random.nextInt(3)) {
+				case 0 -> Blocks.SKELETON_SKULL.defaultBlockState().setValue(BlockStateProperties.ROTATION_16, random.nextInt(16));
+				case 1 -> Blocks.BONE_BLOCK.defaultBlockState();
+				default -> Blocks.DEAD_BUSH.defaultBlockState();
+			});
+		}
+		// The earth it dug out, heaped beside the hole.
+		for (int[] c : new int[][]{{-2, 1}, {2, 2}, {-2, 3}, {2, 0}, {1, 4}}) {
+			int g = ground(c[0], c[1]) + 1;
+			if (Math.abs(g) <= 2 && level.getBlockState(at(c[0], g, c[1])).isAir()) {
+				put(c[0], g, c[1], (chance(0.5f) ? Blocks.COARSE_DIRT : Blocks.GRAVEL).defaultBlockState());
+			}
+		}
+		// The hole: its mouth three wide and black, and a ladder down its side.
+		for (int y = 0; y >= -2; y--) {
+			for (int x = -1; x <= 1; x++) for (int z = 0; z <= 2; z++) put(x, y, z, Blocks.AIR.defaultBlockState());
+		}
 		for (int y = 0; y >= -DEPTH + 2; y--) {
 			put(0, y, 0, Blocks.AIR.defaultBlockState());
 			put(0, y, 1, Blocks.AIR.defaultBlockState());
@@ -76,6 +107,25 @@ final class Lair extends Build {
 			put(x, cy - 1, z, thing);
 		}
 		container(0, cy - 1, 5, facing(Blocks.CHEST.defaultBlockState(), Direction.NORTH), Loot.Kind.GRAVE);
+	}
+
+	/** A tree that died standing, at (x, z) in the lair's own coordinates, on whatever ground is there. */
+	private void deadTree(int x, int z) {
+		int g = ground(x, z);
+		if (Math.abs(g) > 3) return;
+		BlockState log = (chance(0.5f) ? Blocks.DARK_OAK_LOG : Blocks.SPRUCE_LOG).defaultBlockState();
+		int tall = 5 + random.nextInt(4);
+		for (int y = 1; y <= tall; y++) {
+			if (!level.getBlockState(at(x, g + y, z)).isAir() && !level.getBlockState(at(x, g + y, z)).canBeReplaced()) return;
+		}
+		for (int y = 1; y <= tall; y++) put(x, g + y, z, log);
+		Direction side = Direction.Plane.HORIZONTAL.getRandomDirection(random);
+		for (Direction d : new Direction[]{side, side.getOpposite()}) {
+			int y = g + tall - 1 - random.nextInt(2);
+			if (level.getBlockState(at(x + d.getStepX(), y, z + d.getStepZ())).isAir()) {
+				put(x + d.getStepX(), y, z + d.getStepZ(), log.setValue(BlockStateProperties.AXIS, d.getAxis()));
+			}
+		}
 	}
 
 	private BlockState stone() {

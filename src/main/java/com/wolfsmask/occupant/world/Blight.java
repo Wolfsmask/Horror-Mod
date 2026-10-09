@@ -38,18 +38,18 @@ final class Blight {
 		else remains(level, random, ground);
 	}
 
-	private static boolean natural(BlockState s) {
+	static boolean natural(BlockState s) {
 		return s.is(Blocks.GRASS_BLOCK) || s.is(Blocks.DIRT) || s.is(Blocks.PODZOL) || s.is(Blocks.COARSE_DIRT)
 				|| s.is(Blocks.MYCELIUM) || s.is(Blocks.ROOTED_DIRT);
 	}
 
 	/** Air, or something the ground grows that would be trampled anyway (grass, snow, flowers). */
-	private static boolean open(WorldGenLevel level, BlockPos p) {
+	static boolean open(WorldGenLevel level, BlockPos p) {
 		BlockState s = level.getBlockState(p);
 		return s.isAir() || (s.canBeReplaced() && s.getFluidState().isEmpty());
 	}
 
-	private static void set(WorldGenLevel level, BlockPos p, BlockState s) {
+	static void set(WorldGenLevel level, BlockPos p, BlockState s) {
 		if (level.ensureCanWrite(p)) level.setBlock(p, s, Block.UPDATE_CLIENTS);
 	}
 
@@ -63,7 +63,7 @@ final class Blight {
 	 * A tree that died standing: a bare trunk, four to six high, with a stub or two of branch
 	 * near the top. Plain, so it reads as a dead tree and not as something built.
 	 */
-	private static void deadTree(WorldGenLevel level, RandomSource random, BlockPos ground) {
+	static void deadTree(WorldGenLevel level, RandomSource random, BlockPos ground) {
 		Block log = log(level, ground, random);
 		int height = 4 + random.nextInt(3);
 		for (int y = 1; y <= height + 1; y++) if (!open(level, ground.above(y))) return;
@@ -104,7 +104,7 @@ final class Blight {
 	}
 
 	/** A ragged patch where nothing will grow: bare earth, roots, a dead bush. */
-	private static void badGround(WorldGenLevel level, RandomSource random, BlockPos ground) {
+	static void badGround(WorldGenLevel level, RandomSource random, BlockPos ground) {
 		int r = 2 + random.nextInt(2);
 		for (int dx = -r; dx <= r; dx++) {
 			for (int dz = -r; dz <= r; dz++) {
@@ -125,7 +125,7 @@ final class Blight {
 	}
 
 	/** Something that was alive once, mostly in the ground. */
-	private static void remains(WorldGenLevel level, RandomSource random, BlockPos ground) {
+	static void remains(WorldGenLevel level, RandomSource random, BlockPos ground) {
 		set(level, ground, Blocks.BONE_BLOCK.defaultBlockState().setValue(RotatedPillarBlock.AXIS,
 				random.nextBoolean() ? Direction.Axis.X : Direction.Axis.Z));
 		BlockPos next = ground.relative(Direction.Plane.HORIZONTAL.getRandomDirection(random));

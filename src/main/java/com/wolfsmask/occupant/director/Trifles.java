@@ -181,7 +181,11 @@ public final class Trifles {
 	private static void markTrees(ServerPlayer player, Haunt h, ServerLevel world, RandomSource random) {
 		BlockPos home = Compat.respawnPos(player);
 		if (home == null || Math.sqrt(home.distToCenterSqr(player.position())) > 40) return;
-		Direction dir = Direction.Plane.HORIZONTAL.getRandomDirection(random);
+		// Towards where it sleeps, if that is anywhere near: the marks lead there.
+		BlockPos lair = com.wolfsmask.occupant.world.Lairs.nearest(home, 200.0);
+		Direction dir = lair != null
+				? Direction.getApproximateNearest((double) (lair.getX() - home.getX()), 0.0, (double) (lair.getZ() - home.getZ()))
+				: Direction.Plane.HORIZONTAL.getRandomDirection(random);
 		java.util.List<BlockPos> marks = new java.util.ArrayList<>();
 		for (int step = 10; step <= 70 && marks.size() < 7; step += 2) {
 			BlockPos along = home.relative(dir, step);

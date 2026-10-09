@@ -22,6 +22,8 @@ public final class ModWorld {
 			new HouseFeature(NoneFeatureConfiguration.CODEC));
 	public static final ResourceKey<PlacedFeature> HOUSE_PLACED =
 			ResourceKey.create(Registries.PLACED_FEATURE, Occupant.id("house"));
+	public static final GloomFeature GLOOM = Registry.register(BuiltInRegistries.FEATURE, Occupant.id("gloom"),
+			new GloomFeature(NoneFeatureConfiguration.CODEC));
 
 	private ModWorld() {
 	}
@@ -34,5 +36,6 @@ public final class ModWorld {
 						.or(BiomeSelectors.includeByKey(Biomes.PLAINS, Biomes.SNOWY_PLAINS, Biomes.MEADOW,
 								Biomes.SUNFLOWER_PLAINS)),
 				GenerationStep.Decoration.SURFACE_STRUCTURES, HOUSE_PLACED);
+		Bleak.init();
 	}
 }

@@ -74,6 +74,15 @@ public final class OccupantConfig {
 	 */
 	public boolean hidingPunished = true;
 
+	/**
+	 * The land gone bleak: dark, thick woods where the light ones were, the grass dying, no flowers,
+	 * murky water. Takes effect after a restart, in land made after that.
+	 */
+	public boolean bleakLand = true;
+
+	/** Some villages are dead: nobody left in them, only what the iron golem dropped. */
+	public boolean deadVillages = true;
+
 	/** Health it takes when it hurts you (0 = the story's own: 7 in the third act, 10 in the last; 2.0 = one heart). */
 	public float chaseDamage = 0.0f;
 

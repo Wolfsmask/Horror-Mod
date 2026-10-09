@@ -440,7 +440,17 @@ public final class Director {
 				BlockPos home = Compat.respawnPos(player);
 				if (home == null) home = player.blockPosition();
 				try {
-					com.wolfsmask.occupant.world.House.lairNear(Compat.level(player).getServer().overworld(), home, player.getRandom());
+					if (com.wolfsmask.occupant.world.House.lairNear(Compat.level(player).getServer().overworld(), home, player.getRandom())) {
+						// They are meant to find it: something heavy, digging, out that way, and the words.
+						BlockPos lair = com.wolfsmask.occupant.world.Lairs.newest();
+						if (lair != null && player.isAlive()) {
+							net.minecraft.world.phys.Vec3 way = new net.minecraft.world.phys.Vec3(lair.getX() - player.getX(), 0.0, lair.getZ() - player.getZ());
+							if (way.lengthSqr() > 1.0) way = way.normalize();
+							Cues.sound(player, net.minecraft.sounds.SoundEvents.GRAVEL_BREAK, net.minecraft.sounds.SoundSource.HOSTILE,
+									player.getEyePosition().add(way.scale(14.0)), 1.0f, 0.5f);
+							Cues.whisper(player, "It has dug itself a place. Near you.", 120);
+						}
+					}
 				} catch (RuntimeException e) {
 					Occupant.LOGGER.warn("Could not dig its lair closer", e);
 				}
