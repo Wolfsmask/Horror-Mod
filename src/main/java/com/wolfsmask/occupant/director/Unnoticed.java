@@ -103,7 +103,7 @@ final class Unnoticed {
 	/** Their crosshair is on it, or near it. */
 	private static boolean noticed(ServerPlayer player, OccupantEntity e) {
 		if (Sight.isLookingAt(player, e)) return true;
-		double h = e.getBbHeight() * Sight.DRAWN_HEIGHT_FACTOR;
+		double h = Sight.drawnHeight(player, e);
 		Vec3 centre = e.position().add(0, h * 0.55, 0);
 		double dist = Math.max(0.5, player.getEyePosition().distanceTo(centre));
 		double near = 15.0 + Math.toDegrees(Math.atan((h * 0.5) / dist));

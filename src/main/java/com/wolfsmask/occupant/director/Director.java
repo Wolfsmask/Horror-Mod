@@ -99,6 +99,12 @@ public final class Director {
 		return haunt(player).data;
 	}
 
+	/** How far their story has gone, 0 if it has not begun; asking starts nothing. */
+	public int actOf(ServerPlayer player) {
+		Haunt h = haunts.get(player.getUUID());
+		return h == null ? 0 : h.data.act;
+	}
+
 	public Haunt haunt(ServerPlayer player) {
 		return haunts.computeIfAbsent(player.getUUID(), u -> new Haunt(u, save.forPlayer(u), player.getRandom()));
 	}

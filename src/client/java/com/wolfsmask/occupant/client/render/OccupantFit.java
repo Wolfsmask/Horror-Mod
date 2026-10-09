@@ -1,5 +1,6 @@
 package com.wolfsmask.occupant.client.render;
 
+import com.wolfsmask.occupant.util.Sight;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
@@ -14,20 +15,10 @@ import net.minecraft.world.phys.Vec3;
  * folding cannot make it fit does it get smaller, and never down to a person's size.
  */
 final class OccupantFit {
-	/**
-	 * Its height in blocks, standing up, close to. Seventeen feet, near enough. It does not fit
-	 * in most of the places the story puts it, so it folds down into them rather than shrinking.
-	 */
-	static final float NEAR_BLOCKS = 4.4f;
-	/**
-	 * Far away there is nothing beside it to measure it against, and it reads as much larger:
-	 * a shape standing above the treeline. Nobody ever sees both at once, which is the point.
-	 */
-	static final float FAR_BLOCKS = 5.6f;
 	/** However cramped the room, it is never allowed to look like a person. */
 	static final float MIN_BLOCKS = 2.6f;
-	private static final float NEAR_DISTANCE = 28.0f;
-	private static final float FAR_DISTANCE = 64.0f;
+	/** The most blocks it is ever drawn tall (far off, at the end): how far up to look for a ceiling. */
+	private static final int TALLEST = Mth.ceil(Sight.drawnBlocks(Double.MAX_VALUE, 4));
 	/** How far the hips drop, in model pixels, and how far the body bends, when fully folded. */
 	static final float CROUCH_DROP = 26.0f;
 	static final float CROUCH_BEND = 0.95f;
@@ -40,11 +31,10 @@ final class OccupantFit {
 	/** Works out {@code state.crouch} and {@code state.occupantScale} for it standing at (x, y, z). */
 	static void fit(Level level, OccupantRenderState state, double x, double y, double z) {
 		state.headroom = headroom(level, x, y, z);
-		float distance = (float) Math.sqrt(state.distanceToCameraSq);
-		float far = Mth.clamp((distance - NEAR_DISTANCE) / (FAR_DISTANCE - NEAR_DISTANCE), 0.0f, 1.0f);
-		float blocks = Mth.lerp(far, NEAR_BLOCKS, FAR_BLOCKS);
-		// It grows with every act: by the end it is a quarter again as tall as when it was first seen.
-		blocks *= 1.0f + 0.08f * Mth.clamp(com.wolfsmask.occupant.client.PauseLines.act() - 1, 0, 3);
+		// Its full height, standing up, from this far off, so far into the story (the same the
+		// server reckons with when it asks whether it could be seen). It does not fit in most of
+		// the places the story puts it, so it folds down into them rather than shrinking.
+		float blocks = Sight.drawnBlocks(Math.sqrt(state.distanceToCameraSq), com.wolfsmask.occupant.client.PauseLines.act());
 		float room = state.headroom - 0.15f;
 		double yaw = Math.toRadians(state.bodyRot);
 
@@ -105,7 +95,7 @@ final class OccupantFit {
 		float least = 64.0f;
 		for (double[] o : new double[][]{{0, 0}, {HALF_WIDTH, 0}, {-HALF_WIDTH, 0}, {0, HALF_WIDTH}, {0, -HALF_WIDTH}}) {
 			BlockPos feet = BlockPos.containing(x + o[0], y + 0.01, z + o[1]);
-			for (int i = 0; i < Mth.ceil(FAR_BLOCKS); i++) {
+			for (int i = 0; i < TALLEST; i++) {
 				BlockPos p = feet.above(i);
 				if (!level.getBlockState(p).getCollisionShape(level, p).isEmpty()) {
 					least = Math.min(least, i);

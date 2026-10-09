@@ -5,6 +5,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.wolfsmask.occupant.client.render.Ragdoll;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -14,7 +15,8 @@ import org.spongepowered.asm.mixin.injection.At;
 /**
  * Before 1.21.2 a model is posed straight from the entity, here: the hanging pose of anything on
  * its leg gets the last word, however its own model would have held its arms out (a zombie
- * villager's, a piglin's, a drowned's). What it wears copies the pose from this model.
+ * villager's, a piglin's, a drowned's). What it wears copies the pose from this model; what a
+ * piglin's model copied from its limbs before this (its sleeves and trousers) is copied again.
  */
 @Mixin(LivingEntityRenderer.class)
 public abstract class LivingEntityRendererMixin {
@@ -28,5 +30,13 @@ public abstract class LivingEntityRendererMixin {
 		if (pose == null) return;
 		Ragdoll.apply(humanoid, pose);
 		humanoid.hat.copyFrom(humanoid.head);
+		if (humanoid instanceof PlayerModel<?> outer) {
+			// A piglin's sleeves and trousers are parts of their own, copied from its limbs before
+			// this: copied again, or they stay held out while the arms inside them hang.
+			outer.leftSleeve.copyFrom(outer.leftArm);
+			outer.rightSleeve.copyFrom(outer.rightArm);
+			outer.leftPants.copyFrom(outer.leftLeg);
+			outer.rightPants.copyFrom(outer.rightLeg);
+		}
 	}
 }

@@ -1,5 +1,7 @@
 package com.wolfsmask.occupant.util;
 
+import com.wolfsmask.occupant.director.Director;
+import com.wolfsmask.occupant.entity.OccupantEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
@@ -88,14 +90,43 @@ public final class Sight {
 	}
 
 	/**
-	 * How tall the Occupant is actually drawn, against its hitbox: its head is up here, and when it
-	 * stands mostly hidden its head may be all there is to see.
+	 * How tall the Occupant is drawn, in blocks, standing upright, close to: seventeen feet, near
+	 * enough. Its hitbox is a person's; what is drawn is far taller, and its head is up there.
 	 */
-	public static final double DRAWN_HEIGHT_FACTOR = 2.15;
+	public static final float NEAR_BLOCKS = 4.4f;
+	/**
+	 * Far away there is nothing beside it to measure it against, and it is drawn larger: a shape
+	 * standing above the treeline. Nobody ever sees both at once, which is the point.
+	 */
+	public static final float FAR_BLOCKS = 5.6f;
+	/** Between these distances it is drawn between the two. */
+	public static final float NEAR_DISTANCE = 28.0f;
+	public static final float FAR_DISTANCE = 64.0f;
+	/** And it grows with every act: by the last it is a quarter again as tall. */
+	public static final float GROWTH_PER_ACT = 0.08f;
+
+	/**
+	 * How tall the Occupant is drawn, in blocks, standing upright, seen from {@code distance}, so far
+	 * into the story: what the renderer draws it at before folding it into anywhere too low for it.
+	 */
+	public static float drawnBlocks(double distance, int act) {
+		float far = (float) Mth.clamp((distance - NEAR_DISTANCE) / (FAR_DISTANCE - NEAR_DISTANCE), 0.0, 1.0);
+		return Mth.lerp(far, NEAR_BLOCKS, FAR_BLOCKS) * (1.0f + GROWTH_PER_ACT * Mth.clamp(act - 1, 0, 3));
+	}
+
+	/**
+	 * How tall {@code entity} is as {@code player} sees it, in blocks: the Occupant as it is drawn
+	 * for them (its head may be all there is to see over a hill or a wall), anything else as it is.
+	 */
+	public static double drawnHeight(ServerPlayer player, Entity entity) {
+		if (!(entity instanceof OccupantEntity)) return entity.getBbHeight();
+		Director director = Director.get();
+		return drawnBlocks(player.distanceTo(entity), director == null ? 0 : director.actOf(player));
+	}
 
 	/** Line of sight to any of its head, chest, middle or knees, as it is drawn. */
 	public static boolean canSeeAnyPart(ServerPlayer player, Entity entity) {
-		double h = entity.getBbHeight() * DRAWN_HEIGHT_FACTOR;
+		double h = drawnHeight(player, entity);
 		Vec3 base = entity.position();
 		return hasLineOfSight(player, base.add(0, h * 0.9, 0))
 				|| hasLineOfSight(player, base.add(0, h * 0.7, 0))
@@ -108,7 +139,7 @@ public final class Sight {
 	 * closer (it takes up more of the screen), so this feels right at any distance.
 	 */
 	public static boolean isLookingAt(ServerPlayer player, Entity entity) {
-		double h = entity.getBbHeight() * DRAWN_HEIGHT_FACTOR;
+		double h = drawnHeight(player, entity);
 		Vec3 center = entity.position().add(0, h * 0.55, 0);
 		Vec3 head = entity.position().add(0, h * 0.9, 0);
 		double dist = Math.max(0.5, player.getEyePosition().distanceTo(center));
@@ -127,7 +158,7 @@ public final class Sight {
 
 	/** As {@link #couldBeSeen(ServerPlayer, Entity)}, with a wider cone: {@code degrees} either side. */
 	public static boolean couldBeSeen(ServerPlayer player, Entity entity, double degrees) {
-		double h = entity.getBbHeight() * DRAWN_HEIGHT_FACTOR;
+		double h = drawnHeight(player, entity);
 		Vec3 base = entity.position();
 		boolean inCone = angleTo(player, base.add(0, h * 0.5, 0)) < degrees
 				|| angleTo(player, base.add(0, h * 0.9, 0)) < degrees
@@ -137,7 +168,7 @@ public final class Sight {
 
 	/** Could this entity be on the player's screen right now (inside the view cone and unobstructed)? */
 	public static boolean isOnScreen(ServerPlayer player, Entity entity) {
-		Vec3 center = entity.position().add(0, entity.getBbHeight() * DRAWN_HEIGHT_FACTOR * 0.5, 0);
+		Vec3 center = entity.position().add(0, drawnHeight(player, entity) * 0.5, 0);
 		return angleTo(player, center) <= 60.0 && canSeeAnyPart(player, entity);
 	}
 

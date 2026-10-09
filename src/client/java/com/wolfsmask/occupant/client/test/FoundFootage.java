@@ -185,9 +185,11 @@ final class FoundFootage {
 					for (int y = -1; y <= 5; y++) {
 						BlockPos p = o.offset(x, y, z);
 						boolean tunnel = Math.abs(x) <= 1 && y >= 0 && y <= 2 && z >= 0 && z <= 27;
+						// Gravel only where it has something under it: in the roof it falls into the shot.
+						boolean roof = Math.abs(x) <= 1 && y == 3 && z >= 0 && z <= 27;
 						long h = (p.asLong() * 0x9E3779B97F4A7C15L) >>> 58;
 						BlockState rock = h < 6 ? Blocks.TUFF.defaultBlockState() : h < 9 ? Blocks.COAL_ORE.defaultBlockState()
-								: h < 10 ? Blocks.GRAVEL.defaultBlockState() : Blocks.DEEPSLATE.defaultBlockState();
+								: h < 10 && !roof ? Blocks.GRAVEL.defaultBlockState() : Blocks.DEEPSLATE.defaultBlockState();
 						set(level, p, tunnel ? Blocks.AIR.defaultBlockState() : rock);
 					}
 				}

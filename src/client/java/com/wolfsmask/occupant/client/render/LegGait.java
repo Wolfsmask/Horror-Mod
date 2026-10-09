@@ -115,8 +115,12 @@ public final class LegGait {
 		// From the base of the neck to the mouth, turned by the neck, then on from the root of the spine.
 		float[] n = OccupantGeometry.NECK_TO_MOUTH, s = OccupantGeometry.SPINE_TO_NECK;
 		double c = Math.cos(g.neckX), sn = Math.sin(g.neckX);
-		return g.fromSpine(s[0] + n[0], s[1] + n[1] * c - n[2] * sn, s[2] + n[1] * sn + n[2] * c,
+		Vec3 at = g.fromSpine(s[0] + n[0], s[1] + n[1] * c - n[2] * sn, s[2] + n[1] * sn + n[2] * c,
 				g.fitScale / 16.0, g.drawnDrop);
+		// Not drawn lately (out of sight), it may have gone on since without its drawn body: shaped
+		// as it was last drawn, but where it is now, not left behind in the air where it was.
+		if (Float.isNaN(g.lastTime) || entity.tickCount - g.lastTime > 2.0f) at = at.subtract(g.body).add(entity.position());
+		return at;
 	}
 
 	static LegGait of(OccupantEntity entity) {
