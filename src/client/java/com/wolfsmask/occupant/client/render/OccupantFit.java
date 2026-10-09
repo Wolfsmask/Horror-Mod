@@ -45,9 +45,9 @@ final class OccupantFit {
 		net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
 		if (mc.player == null) return;
 		Vec3 eye = mc.player.getEyePosition(partialTick);
-		// Its eyes: about five and a half model pixels below the top of its head, folded or not.
+		// Its eyes: about four and a half model pixels below the top of its head, folded or not.
 		float tall = foldedHeight(state.crouch) * OccupantGeometry.HEIGHT;
-		double eyes = state.y + state.occupantScale * (tall - 5.5f) / 16.0f;
+		double eyes = state.y + state.occupantScale * (tall - 4.6f) / 16.0f;
 		double dx = eye.x - (state.x + state.offsetX);
 		double dy = eye.y - eyes;
 		double dz = eye.z - (state.z + state.offsetZ);
