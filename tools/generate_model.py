@@ -53,11 +53,6 @@ LEG_LOWER = 30.0
 LEG_CLAW = 6.0
 # From the bottom of the eyes to the middle of the face (eyes to chin), which is what it tilts about.
 FACE_MID = 2.3
-# The eyes' holes, in the skull's own space: their middles, and where the pupils hang in them,
-# in the black between the back of each hole and the face, near enough the front that the rim
-# never hides them.
-EYE_X, EYE_Y = 1.75, -3.5 - FACE_MID
-PUPIL_Z = -2.45
 # How far up the trunk the highest legs leave it, above the hips.
 LEG_RISE = 26.0
 # Nothing is ever taken off. What it is wearing is most of what it is.
@@ -112,10 +107,7 @@ def _mantle_strands():
         a = ((i + 0.37) / 16.0) * 2.0 * np.pi   # out of phase with the cowl above it
         x = float(np.sin(a)) * (4.35 + 0.5 * float(_S.random()))
         z = float(np.cos(a)) * (2.25 + 0.4 * float(_S.random()))
-        length = 16.0 + 18.0 * float(_S.random())
-        if np.cos(a) < -0.55 and abs(x) < 2.6:
-            continue                            # the front of the neck, where the mouth runs down
-        out.append(_strand(i + 41, x, z, 0.11, length))
+        out.append(_strand(i + 41, x, z, 0.11, 16.0 + 18.0 * float(_S.random())))
     return out
 
 
@@ -207,53 +199,36 @@ def parts():
             ("drape", -1.2, -11.0, -1.2, 2.4, 11, 2.4),
         ]),
 
-        # The top of the face: a broad, rounded brow, and under it the eyes, hollowed right out:
-        # two great black holes a pixel deep either side of a narrow bridge, and in each, one
-        # tiny white point (the pupils, below, are bones of their own, moved in game to stay on
-        # whoever is looking). Nothing where a nose should be.
+        # The top of the face: a broad, rounded brow and two small round holes set close
+        # together over a narrow bridge.
         # The skull turns about the middle of the whole face, eyes to chin, not about the top of
         # the neck: turned about the neck, a tilt swung the long jaw out sideways like a pendulum.
         ("skull", "neck", (0, -11.0 + FACE_MID, -0.4), (0, 0, 0), [
-            ("brow", -3.5, -7.0 - FACE_MID, -3.0, 7, 2.0, 6),
-            ("eyeside", -3.5, -5.0 - FACE_MID, -3.0, 0.5, 3.0, 6),
-            ("socket", -3.0, -5.0 - FACE_MID, -2.0, 2.5, 3.0, 5),          # the left eye: a hole
-            ("bridge", -0.5, -5.0 - FACE_MID, -3.0, 1.0, 3.0, 6),
-            ("socket", 0.5, -5.0 - FACE_MID, -2.0, 2.5, 3.0, 5),           # the right eye
-            ("eyeside", 3.0, -5.0 - FACE_MID, -3.0, 0.5, 3.0, 6),
-            ("cheekbone", -3.5, -2.0 - FACE_MID, -3.0, 7, 2.0, 6),
+            ("face", -3.5, -7.0 - FACE_MID, -3.0, 7, 7, 6),
             ("crown", -2.75, -8.1 - FACE_MID, -2.4, 5.5, 1.1, 4.8),       # rounds off the top of it
         ]),
-        ("left_pupil", "skull", (EYE_X, EYE_Y, PUPIL_Z), (0, 0, 0), [
-            ("pupil", -0.25, -0.25, -0.15, 0.5, 0.5, 0.1),
-        ]),
-        ("right_pupil", "skull", (-EYE_X, EYE_Y, PUPIL_Z), (0, 0, 0), [
-            ("pupil", -0.25, -0.25, -0.15, 0.5, 0.5, 0.1),
-        ]),
-        # The rest of the face is the mouth: the cheeks run down both sides of it, much too far,
-        # and between them it is open, black, and empty all the way in. It does not stop at the
-        # chin: it carries on down the front of the neck, narrowing, far further than a mouth goes.
+        # The rest of the face is the mouth. The skin carries on down both sides of it, much
+        # too far, to a small pointed chin; between them it is open, with a row of small teeth
+        # along the top and something red at the bottom.
         ("jaw", "skull", (0, -FACE_MID, 0), (0, 0, 0), [
             ("cheek", 1.75, 0.0, -2.95, 1.7, 6.0, 3.35),       # cheeks, either side
             ("cheek", -3.45, 0.0, -2.95, 1.7, 6.0, 3.35),
-            ("cheek", 1.35, 6.0, -2.8, 1.4, 4.6, 3.0),         # narrowing
+            ("cheek", 1.35, 6.0, -2.8, 1.4, 4.6, 3.0),         # narrowing towards the chin
             ("cheek", -2.75, 6.0, -2.8, 1.4, 4.6, 3.0),
-            ("mouth", -1.74, 0.02, -2.0, 3.48, 10.4, 1.9),     # set back: the inside of it
-            # The skin folds in at the top corners, so the opening is long and rounded rather
-            # than a slot cut out of the face.
+            ("chin", -1.85, 9.55, -2.6, 3.7, 2.1, 2.55),
+            ("mouth", -1.74, 0.02, -2.0, 3.48, 9.56, 1.9),     # set back: the inside of it
+            # A row of small, separate teeth along the top, each its own tiny box so the gaps
+            # between them are real; one painted gap on a single box read as a grey block.
+            ("tooth", -1.13, 0.05, -2.72, 0.42, 0.95, 0.66),
+            ("tooth", -0.55, 0.05, -2.70, 0.43, 0.78, 0.64),
+            ("tooth", 0.04, 0.05, -2.71, 0.41, 0.92, 0.65),
+            ("tooth", 0.62, 0.05, -2.69, 0.44, 0.74, 0.63),
+            # The skin folds in at the corners, top and bottom, so the opening is long and
+            # rounded rather than a slot cut out of the face.
             ("lip", -1.74, 0.0, -2.86, 0.53, 1.55, 0.79),
             ("lip", 1.21, 0.0, -2.86, 0.53, 1.55, 0.79),
-            # Down the neck: two pale strips either side of the black, narrowing to a point.
-            ("throat", 1.05, 10.6, -2.7, 1.2, 4.0, 1.0),
-            ("throat", -2.25, 10.6, -2.7, 1.2, 4.0, 1.0),
-            ("throat", 0.8, 14.6, -2.7, 0.95, 4.0, 1.0),
-            ("throat", -1.75, 14.6, -2.7, 0.95, 4.0, 1.0),
-            ("throat", 0.55, 18.6, -2.7, 0.7, 3.0, 1.0),
-            ("throat", -1.25, 18.6, -2.7, 0.7, 3.0, 1.0),
-            ("throat", 0.35, 21.6, -2.7, 0.5, 2.0, 1.0),
-            ("throat", -0.85, 21.6, -2.7, 0.5, 2.0, 1.0),
-            ("throat", -0.85, 23.6, -2.7, 1.7, 0.8, 1.0),      # where it finally closes
-            ("mouth", -1.1, 10.3, -1.6, 2.2, 8.5, 0.55),       # the black, all the way down,
-            ("mouth", -0.7, 18.6, -1.57, 1.4, 5.2, 0.5),       # narrower where the strips are
+            ("lip", -1.33, 8.15, -2.84, 0.48, 1.42, 0.77),
+            ("lip", 0.85, 8.15, -2.84, 0.48, 1.42, 0.77),
         ]),
         # No loose hairs standing up off the crown: in blocks, anything sticking up off a head
         # reads as horns or antennae, however short it is.
@@ -449,7 +424,6 @@ HAIR = (50, 46, 47)         # long, thin, the grey-brown of wet stone
 DRAPE = (37, 35, 39)        # the robe: darker, the colour of the deep rock
 STONE_LIGHT = (72, 69, 73)
 STONE_DARK = (22, 21, 25)
-PUPIL = (250, 250, 246)
 LIMB = (170, 154, 144)      # the legs
 # How strongly the face shows through in the dark, as the glow layer's opacity (0-255).
 SHEEN = 56
@@ -486,8 +460,6 @@ def paint_texture(boxes, placed):
                 bx, by = int(rng.integers(x0, x1)), int(rng.integers(y0, y1))
                 img[by, bx, :3] = (184, 158, 150)                 # faint blotches
 
-    pupils = []
-
     def stone(region, flecks):
         """Flecks of lighter and darker rock, a pixel or two each, and here and there a seam."""
         x0, y0, x1, y1 = region
@@ -502,11 +474,6 @@ def paint_texture(boxes, placed):
         if y1 - y0 > 6 and rng.random() < 0.5:
             sy = int(rng.integers(y0 + 2, y1 - 2))
             img[sy, x0:x1, :3] = np.clip(img[sy, x0:x1, :3].astype(int) - 9, 0, 255)
-
-    def black(f):
-        for side in f.values():
-            fill(side, PIT, 1)
-        mark_dark(f)
 
     for i, (owner, kind, _x, _y, _z, w, h, d) in enumerate(boxes):
         u, v = placed[i]
@@ -526,30 +493,8 @@ def paint_texture(boxes, placed):
                         if cut:
                             img[y1 - cut:y1, x, 3] = 0            # it frays out, never a hem
 
-        elif kind == "brow":
-            skin(f)
-            x0, y0, x1, y1 = f["front"]
-            img[y0:y0 + 1, x0 + 1:x1 - 1, :3] = SKIN_HI          # the brow catches the light
-            img[y1 - 1, x0:x1, :3] = SKIN_LO                     # and the shadow under it
-            x0, y0, x1, y1 = f["bottom"]
-            img[y0:y1, x0:x1, :3] = PIT                          # over the holes: black
-
-        elif kind in ("eyeside", "bridge", "cheekbone"):
-            skin(f)
-            # Every face of these that looks into a hole is the inside of the hole: black.
-            inner = {"eyeside": ("left",) if _x < 0 else ("right",),
-                     "bridge": ("left", "right"), "cheekbone": ("top",)}[kind]
-            for name in inner:
-                x0, y0, x1, y1 = f[name]
-                img[y0:y1, x0:x1, :3] = PIT
-
-        elif kind == "socket":
-            black(f)                                              # nothing at all
-
-        elif kind == "pupil":
-            for side in f.values():
-                fill(side, PUPIL, 2)
-                pupils.append(side)
+        elif kind == "face":
+            paint_face(img, f)
 
         elif kind == "crown":
             skin(f, shade_sides=18)
@@ -574,17 +519,19 @@ def paint_texture(boxes, placed):
             img[y0:y1, x0:x1, :3] = RED
 
         elif kind == "mouth":
-            black(f)                                              # black all the way in, and down
-
-        elif kind == "throat":
-            skin(f)
-            # Like the cheeks: the edges that face into the black are in its shadow.
-            for name in ("left", "right"):
-                x0, y0, x1, y1 = f[name]
-                img[y0:y1, x0:x1, :3] = np.clip(img[y0:y1, x0:x1, :3].astype(int) - 60, 0, 255)
+            for side in f.values():
+                fill(side, PIT, 2)
             x0, y0, x1, y1 = f["front"]
-            img[y0:y1, x0, :3] = SKIN_LO
-            img[y0:y1, x1 - 1, :3] = SKIN_LO
+            h_ = y1 - y0
+            # Black all the way in, deepening slowly to a wet dark red at the bottom.
+            ramp = [(26, 8, 8), (52, 14, 13), (78, 22, 20), (100, 32, 29), (112, 40, 36)]
+            for k, colour in enumerate(ramp):
+                row = y1 - len(ramp) + k
+                if row >= y0:
+                    img[row, x0:x1, :3] = colour
+            # A little darker down the middle, so it reads as a hollow and not a panel.
+            mid = x0 + (x1 - x0) // 2
+            img[y1 - 3:y1, mid - 1:mid + 1, :3] = np.clip(img[y1 - 3:y1, mid - 1:mid + 1, :3].astype(int) - 18, 0, 255)
 
         elif kind == "tooth":
             for side in f.values():
@@ -635,10 +582,6 @@ def paint_texture(boxes, placed):
     glow[:, :, 3] = np.where(img[:, :, 3] > 0, SHEEN, 0)
     glow[limb_mask, 3] = SHEEN // 2                      # the legs, fainter than the face
     glow[dark_mask] = 0
-    # The pupils, alone, shine at full strength: in the dark they are all there is to see of it.
-    for x0, y0, x1, y1 in pupils:
-        glow[y0:y1, x0:x1, :3] = PUPIL
-        glow[y0:y1, x0:x1, 3] = 255
 
     Image.fromarray(img, "RGBA").save(TEX / "occupant.png")
     Image.fromarray(glow, "RGBA").save(TEX / "occupant_glow.png")

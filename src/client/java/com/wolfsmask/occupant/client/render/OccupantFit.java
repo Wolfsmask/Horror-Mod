@@ -37,25 +37,6 @@ final class OccupantFit {
 	private OccupantFit() {
 	}
 
-	/**
-	 * Where the one watching it is, from its eyes ({@code state.watchYaw} and {@code watchPitch}):
-	 * the player whose eyes the picture is drawn from. After {@link #fit}, which sets its size.
-	 */
-	static void watch(OccupantRenderState state, float partialTick) {
-		net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
-		if (mc.player == null) return;
-		Vec3 eye = mc.player.getEyePosition(partialTick);
-		// Its eyes: about four and a half model pixels below the top of its head, folded or not.
-		float tall = foldedHeight(state.crouch) * OccupantGeometry.HEIGHT;
-		double eyes = state.y + state.occupantScale * (tall - 4.6f) / 16.0f;
-		double dx = eye.x - (state.x + state.offsetX);
-		double dy = eye.y - eyes;
-		double dz = eye.z - (state.z + state.offsetZ);
-		float yaw = (float) Math.toDegrees(Math.atan2(-dx, dz));
-		state.watchYaw = Mth.wrapDegrees(yaw - state.bodyRot);
-		state.watchPitch = (float) -Math.toDegrees(Math.atan2(dy, Math.sqrt(dx * dx + dz * dz)));
-	}
-
 	/** Works out {@code state.crouch} and {@code state.occupantScale} for it standing at (x, y, z). */
 	static void fit(Level level, OccupantRenderState state, double x, double y, double z) {
 		state.headroom = headroom(level, x, y, z);
