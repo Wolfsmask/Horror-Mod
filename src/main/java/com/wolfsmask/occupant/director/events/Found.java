@@ -168,27 +168,42 @@ public final class Found {
 
 	/**
 	 * In a house: it is outside, as tall as the house. Three blows on the roof, then the roof comes
-	 * off, all of it, piece after piece, while they watch, and it looks in at them. Then black.
+	 * off, all of it, piece after piece, while they watch; then it climbs up onto the top of the
+	 * wall and leans over, and looks down in at them. Then black.
 	 */
 	static final class RoofOff implements Sequence {
 		private static final int TEAR = 40;
 		private static final int TORN = 82;
-		private static final int BLACK = 112;
-		private static final int PUNISH = 120;
-		private static final int OVER = 132;
+		/** How long it takes to climb up onto the wall. */
+		private static final int CLIMB = 16;
+		private static final int THERE = TORN + CLIMB + 2;
+		private static final int BLACK = THERE + 22;
+		private static final int PUNISH = BLACK + 8;
+		private static final int OVER = PUNISH + 12;
 
 		private final Haunt haunt;
 		private final OccupantEntity entity;
 		private final ServerLevel level;
 		private final List<BlockPos> roof;
+		/** The top of the wall on its side, where it climbs to, and the room it leans over. */
+		private final BlockPos wall;
+		private final Vec3 inside;
+		private final int ceiling;
+		@Nullable
+		private Vec3 climbFrom;
+		@Nullable
+		private Vec3 climbTo;
 		private int t;
 		private int next;
 
-		private RoofOff(Haunt haunt, OccupantEntity entity, ServerLevel level, List<BlockPos> roof) {
+		private RoofOff(Haunt haunt, OccupantEntity entity, ServerLevel level, List<BlockPos> roof, BlockPos wall, Vec3 inside, int ceiling) {
 			this.haunt = haunt;
 			this.entity = entity;
 			this.level = level;
 			this.roof = roof;
+			this.wall = wall;
+			this.inside = inside;
+			this.ceiling = ceiling;
 			entity.setGazeLocked(true);
 		}
 
@@ -262,7 +277,27 @@ public final class Found {
 			// Torn off from its side first.
 			Vec3 from = e.position();
 			roof.sort(Comparator.comparingDouble(b -> Vec3.atCenterOf(b).distanceToSqr(from.x, b.getY(), from.z)));
-			return new RoofOff(h, e, level, roof);
+			// The wall it will climb: the one between it and the nearest of the room.
+			BlockPos near = cells.get(0);
+			for (BlockPos c : cells) {
+				if (Math.hypot(c.getX() + 0.5 - from.x, c.getZ() + 0.5 - from.z) < Math.hypot(near.getX() + 0.5 - from.x, near.getZ() + 0.5 - from.z)) near = c;
+			}
+			double dx = from.x - (near.getX() + 0.5), dz = from.z - (near.getZ() + 0.5);
+			Direction out = Math.abs(dx) > Math.abs(dz) ? (dx > 0 ? Direction.EAST : Direction.WEST) : (dz > 0 ? Direction.SOUTH : Direction.NORTH);
+			return new RoofOff(h, e, level, roof, near.relative(out), Vec3.atBottomCenterOf(near), ceiling);
+		}
+
+		/** On top of what is left of the wall, leaning a little in over the room; null if there is no wall to climb. */
+		@Nullable
+		private Vec3 perch() {
+			for (int y = ceiling + 1; y >= ceiling - 6; y--) {
+				BlockPos at = new BlockPos(wall.getX(), y, wall.getZ());
+				if (level.getBlockState(at).getCollisionShape(level, at).isEmpty()) continue;
+				Vec3 top = new Vec3(wall.getX() + 0.5, y + 1.0, wall.getZ() + 0.5);
+				Vec3 in = new Vec3(inside.x - top.x, 0.0, inside.z - top.z);
+				return in.lengthSqr() > 1.0e-4 ? top.add(in.normalize().scale(0.35)) : top;
+			}
+			return null;
 		}
 
 		@Override
@@ -289,6 +324,24 @@ public final class Found {
 			if (t == TORN) {
 				while (next < roof.size()) tear(roof.get(next++), false);
 				entity.faceTowards(p.getEyePosition());
+				// Up onto the wall, over them.
+				climbTo = perch();
+				if (climbTo != null) {
+					climbFrom = entity.position();
+					entity.halt();
+					entity.setNoGravity(true);
+					Cues.sound(p, SoundEvents.ZOMBIE_ATTACK_WOODEN_DOOR, SoundSource.HOSTILE, climbTo, 0.7f, 0.4f);
+				}
+			}
+			if (t > TORN && t <= TORN + CLIMB && climbFrom != null && climbTo != null) {
+				// Up first, then over: it does not slide, it hauls itself up.
+				double f = (t - TORN) / (double) CLIMB;
+				double up = 1.0 - (1.0 - f) * (1.0 - f);
+				double over = f * f * (3.0 - 2.0 * f);
+				entity.setPos(Mth.lerp(over, climbFrom.x, climbTo.x), Mth.lerp(up, climbFrom.y, climbTo.y), Mth.lerp(over, climbFrom.z, climbTo.z));
+				entity.setDeltaMovement(Vec3.ZERO);
+			}
+			if (t == THERE) {
 				Cues.whisper(p, "There you are.", 70);
 				Cues.sound(p, ModSounds.BREATH, SoundSource.HOSTILE, entity.getEyePosition(), 1.0f, 0.6f);
 			}

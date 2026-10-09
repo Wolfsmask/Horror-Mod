@@ -429,7 +429,7 @@ final class FoundFootage {
 		});
 		if (!begun) return;
 		String name = hut ? "found-roof" : "found-hole";
-		int[] at = hut ? new int[]{24, 52, 70, 96} : new int[]{18, 36, 56, 76};
+		int[] at = hut ? new int[]{24, 52, 80, 106} : new int[]{18, 36, 56, 76};
 		int waited = 0;
 		try {
 			for (int i = 0; i < at.length; i++) {
