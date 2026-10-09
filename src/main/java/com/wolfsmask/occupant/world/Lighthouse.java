@@ -5,13 +5,11 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.BarrelBlock;
-import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.LadderBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.SlabType;
@@ -26,7 +24,7 @@ import java.util.List;
  * and the last thing they wrote down.
  * <p>
  * No two the same: red and white, black and white, white gone grey, or bare stone; slim, or
- * broad with floors inside; often the keeper's hut beside it, with their bed still made; and now
+ * broad with floors inside; often the keeper's hut beside it, with their things still in it; and now
  * and then only the stump of one, its top fallen in round its foot.
  */
 final class Lighthouse extends Build {
@@ -189,7 +187,7 @@ final class Lighthouse extends Build {
 
 	/**
 	 * The keeper's hut, against the plinth: stone, a slab roof, one window looking at the water,
-	 * a stove gone cold, and the bed they did not sleep in the last night.
+	 * a stove gone cold, and the straw they slept on, still pressed flat.
 	 */
 	private void hut(int r) {
 		int x0 = r + 2, x1 = r + 6, z0 = -2, z1 = 2;
@@ -228,10 +226,10 @@ final class Lighthouse extends Build {
 		}
 		put(x1 - 1, 4, z0 + 1, cobble);
 		put(x1 - 1, 5, z0 + 1, cobble);
-		// Inside: the bed against the back, a stove, their things in a barrel.
-		BlockState bed = Blocks.RED_BED.defaultBlockState().setValue(BedBlock.FACING, Direction.SOUTH);
-		put(x0 + 1, 1, z1 - 1, bed.setValue(BedBlock.PART, BedPart.HEAD));
-		put(x0 + 1, 1, z1 - 2, bed.setValue(BedBlock.PART, BedPart.FOOT));
+		// Inside: the straw they slept on, against the back; a stove; their things in a barrel.
+		BlockState straw = Blocks.HAY_BLOCK.defaultBlockState().setValue(BlockStateProperties.AXIS, Direction.Axis.Z);
+		put(x0 + 1, 1, z1 - 1, straw);
+		put(x0 + 1, 1, z1 - 2, straw);
 		put(x1 - 1, 1, z0 + 1, facing(Blocks.FURNACE.defaultBlockState(), Direction.WEST));
 		container(x1 - 1, 1, z1 - 1, Blocks.BARREL.defaultBlockState().setValue(BarrelBlock.FACING, Direction.UP), Loot.Kind.HOME);
 		unsettle(x0 + 1, z0 + 1, x1 - 1, z1 - 1, 1, 1);
