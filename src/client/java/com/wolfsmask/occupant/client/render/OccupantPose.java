@@ -18,7 +18,10 @@ import net.minecraft.util.Mth;
  *     and it is perfectly still, winding down to nothing rather than stopping dead; look away and
  *     back, and its head is at a different angle, and you never saw it move.</li>
  *     <li>Nothing ever jumps or stutters: what it does, it does smoothly.</li>
- *     <li>Its mouth is always open. When it is close, it opens further than a mouth goes.</li>
+ *     <li>Its mouth is always open, and never moves. When it is close, it opens further than a
+ *     mouth goes.</li>
+ *     <li>Its eyes do not move with its head. Far back in each black hollow is one tiny white
+ *     point, and wherever you are, whatever its head is doing, that point is on you.</li>
  * </ul>
  * VEILED is early in the story, when it keeps its head down and is harder to make out at a
  * distance; REVEALED is when it looks at you.
@@ -33,6 +36,7 @@ final class OccupantPose {
 	/** Everything below the eyes: the cheeks, the mouth between them, the chin. */
 	private final ModelPart jaw;
 	private final ModelPart hair;
+	private final ModelPart[] pupils;
 	private final ModelPart[] upper = new ModelPart[LEGS];
 	private final ModelPart[] lower = new ModelPart[LEGS];
 	private final float[] upperLength = new float[LEGS];
@@ -47,6 +51,7 @@ final class OccupantPose {
 		this.skull = neck.getChild("skull");
 		this.jaw = skull.getChild("jaw");
 		this.hair = skull.getChild("hair");
+		this.pupils = new ModelPart[]{skull.getChild("left_pupil"), skull.getChild("right_pupil")};
 		for (int i = 0; i < LEGS; i++) {
 			upper[i] = spine.getChild("leg" + i + "_upper");
 			lower[i] = upper[i].getChild("leg" + i + "_lower");
@@ -90,6 +95,25 @@ final class OccupantPose {
 			default -> stand(state.tilt, lookX, lookY, veiled);
 		}
 		legs(state, t);
+		stare(state);
+	}
+
+	/**
+	 * The pupils, on you. Whatever the head has not turned to face you, they make up for, sliding
+	 * across the black towards you, so that they are always looking straight out at you, even
+	 * while nothing else about it moves at all.
+	 */
+	private void stare(OccupantRenderState state) {
+		float yaw = (float) Math.toRadians(state.watchYaw) - (neck.yRot + skull.yRot);
+		float pitch = (float) Math.toRadians(state.watchPitch) - (spine.xRot + neck.xRot + skull.xRot);
+		// Turning the head by an angle carries its front over by minus its sine across, and its
+		// sine down: the pupils go as far as the front of the head would have.
+		float dx = Mth.clamp(-Mth.sin(Mth.clamp(yaw, -1.5f, 1.5f)) * 1.25f, -0.6f, 0.6f);
+		float dy = Mth.clamp(Mth.sin(Mth.clamp(pitch, -1.5f, 1.5f)) * 1.25f, -0.7f, 0.7f);
+		for (ModelPart p : pupils) {
+			p.x += dx;
+			p.y += dy;
+		}
 	}
 
 	/** Standing. The head follows you a beat late and a little too far. */
@@ -121,16 +145,16 @@ final class OccupantPose {
 
 	/** Close enough to touch you. It bends down to your height, and the mouth opens. */
 	private void loom(float lookX, float lookY) {
-		jaw.yScale = 1.3f;                          // the face pulls longer, around the mouth
+		jaw.yScale = 1.45f;                         // the face pulls longer than a face goes
 		spine.xRot += 0.55f;
 		neck.xRot += -0.35f + lookX * 0.3f;
 		skull.xRot = 0.45f + lookX * 0.4f;
 		skull.yRot = lookY * 0.5f;
 	}
 
-	/** Coming for you. Bent forward into it, face first, mouth working. */
+	/** Coming for you. Bent forward into it, face first, the mouth pulled long and still. */
 	private void chase(float t, float lookX, float lookY) {
-		jaw.yScale = 1.25f + 0.08f * Mth.sin(t * 0.9f);
+		jaw.yScale = 1.3f;
 		spine.xRot += 0.35f;
 		neck.xRot += -0.4f;
 		skull.xRot = 0.3f + lookX * 0.3f;

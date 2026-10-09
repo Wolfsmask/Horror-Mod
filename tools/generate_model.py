@@ -143,36 +143,45 @@ def leg_root_height(rise):
 # written for, and the face's boxes take FACE_TS of the usual texture scale, which gives them
 # 1 / FACE_TS times as much of it again. Every face dimension is a multiple of 1/8, so each one's
 # texture lands on whole texels.
+#
+# What it should be: not a monster's face. A mask: white, smooth, rigid as porcelain, with nothing
+# on it a face should have but two great black holes and a mouth, and nothing in those but, far
+# back in each hole, one tiny white point that is always, exactly, on you.
 SCALE = 4
 FACE_TS = 0.5
-FACE_KINDS = ("skin", "socket", "cavity", "fang")
+FACE_KINDS = ("skin", "socket", "cavity", "pupil")
 
 # Where the eyes are, in the skull's own space (x across, y down, the face at -z), and how far the
-# black of them reaches: big and round, as in the drawings of Father Fester. The hollow itself is
-# smaller than the black, so its corners never show; the paint makes the round.
+# black of them reaches. The hollow itself is smaller than the black, so its corners never show;
+# the paint makes the round.
 EYE_X, EYE_Y = 1.75, -5.675
-EYE_RX, EYE_RY = 1.4, 1.75
-# The mouth, row by row down the jaw (1 px each): how far the cheek reaches out, how far in the
-# opening comes, and how far forward the skin stands. Wide in the middle, closing to a point. The
-# front of the whole face is one flat plane, like a mask: every step back in it showed in game as a
-# dark line across the face, so the hollows of the cheeks are in the paint instead.
-JAW_ROWS = [
-    # outer, opening, front
-    (3.5, 0.0, -3.0),         # skin between the nose and the mouth: closed
-    (3.5, 0.625, -3.0),
-    (3.5, 1.125, -3.0),
-    (3.375, 1.375, -3.0),     # the cheeks fall in here: hollow
-    (3.375, 1.5, -3.0),
-    (3.25, 1.5, -3.0),
-    (3.125, 1.5, -3.0),
-    (3.0, 1.25, -3.0),
-    (2.75, 0.875, -3.0),
-    (2.5, 0.0, -3.0),         # the bottom of it is only paint
-]
-JAW_BACK = 0.375
-# The mouth as it is seen: an oval, painted. Every row's opening lies inside it, so the steps of
-# the rows never show; the paint is what makes it round.
-MOUTH_Y, MOUTH_RX, MOUTH_RY = 5.25, 1.65, 4.75
+EYE_RX, EYE_RY = 1.45, 1.8
+# Where the back of each hollow is; and where the pupils hang, in the black between that and the
+# face: near enough the front that the rim of the hollow never hides them, from wherever they are
+# looked at.
+EYE_BACK = -1.75
+PUPIL_Z = -2.45
+
+# The jaw, row by row (1 px each): how far the face reaches out, and the front of it, which is one
+# flat plane like a mask's (every step back in it showed in game as a dark line across the face).
+# Far too long: the mouth has pulled it down.
+JAW_OUTER = [3.5, 3.5, 3.375, 3.375, 3.25, 3.25, 3.125, 3.0, 2.875, 2.75, 2.625, 2.375, 2.125]
+FACE_FRONT = -3.0
+# The jaw is a shell, in front of the neck: as deep as a mask is.
+JAW_BACK = -0.875
+# The mouth as it is seen: a long narrow oval, painted. Each row is open only inside it, so the
+# steps of the rows never show; the paint is what makes it round.
+MOUTH_Y, MOUTH_RX, MOUTH_RY = 6.6, 1.35, 5.85
+
+
+def _opening(r):
+    """How far the mouth opens either side of the middle in jaw row r: inside the oval, or shut."""
+    widest = min(MOUTH_RX * math.sqrt(max(0.0, 1.0 - ((y - MOUTH_Y) / MOUTH_RY) ** 2)) for y in (r, r + 1))
+    o = math.floor((widest - 0.0625) * 8.0) / 8.0
+    return o if o >= 0.25 else 0.0
+
+
+JAW_ROWS = [(outer, _opening(r), FACE_FRONT) for r, outer in enumerate(JAW_OUTER)]
 
 
 def tex_scale(kind):
@@ -182,8 +191,8 @@ def tex_scale(kind):
 def skull_boxes():
     """
     Above the mouth: a bald, swollen crown, wider than the face below it, like an egg; under it
-    two big round hollows for eyes either side of a broad flat bridge, a pixel deep; then the
-    face narrows into the cheeks, with no nose.
+    two big round hollows for eyes either side of a broad flat bridge, a pixel deep; then nothing
+    at all where a nose should be.
     """
     return [
         ("skin", -1.75, -11.05, -2.0, 3.5, 0.5, 4.25),
@@ -192,56 +201,41 @@ def skull_boxes():
         ("skin", -3.75, -9.55, -2.875, 7.5, 0.5, 5.75),
         ("skin", -3.875, -9.05, -3.0, 7.75, 2.25, 6.0),             # the forehead, at its widest
         ("skin", -3.875, -6.8, -3.0, 1.25, 2.25, 6.0),              # beside the left eye
-        ("socket", -2.625, -6.8, -1.75, 1.75, 2.25, 4.75),          # the left eye: a hollow
+        ("socket", -2.625, -6.8, EYE_BACK, 1.75, 2.25, 4.75),       # the left eye: a hollow
         ("skin", -0.875, -6.8, -3.0, 1.75, 2.25, 6.0),              # the bridge between them
-        ("socket", 0.875, -6.8, -1.75, 1.75, 2.25, 4.75),           # the right eye
+        ("socket", 0.875, -6.8, EYE_BACK, 1.75, 2.25, 4.75),        # the right eye
         ("skin", 2.625, -6.8, -3.0, 1.25, 2.25, 6.0),
-        ("skin", -3.75, -4.55, -3.0, 7.5, 2.25, 5.875),             # under the eyes, and no nose
+        ("skin", -3.75, -4.55, -3.0, 7.5, 2.25, 5.875),             # under the eyes: nothing
     ]
+
+
+def pupil_boxes():
+    """One tiny white point, hanging in the black of a hollow. It is moved in game."""
+    return [("pupil", -0.1875, -0.1875, -0.155, 0.375, 0.375, 0.125)]
 
 
 def jaw_boxes():
     """
-    The mouth is most of the face: the cheeks run down either side of it, falling in and then
-    narrowing to a small pointed chin, and between them it is open all the way down. Needles all
-    round the inside of it: hanging from the top, pointing in from both sides, and up from the
-    bottom.
+    The face carries on down far too far, narrowing a little, and down the middle of it the mouth
+    is open: long, narrow, empty, black all the way in.
     """
     out = []
     for r, (outer, opening, front) in enumerate(JAW_ROWS):
         if opening == 0.0:
-            # Closed, across the middle. The top one is kept in front of the neck, whose top it
-            # would otherwise share.
-            back = -0.875 if r == 0 else JAW_BACK
-            out.append(("skin", -outer, float(r), front, 2 * outer, 1.0, back - front))
+            out.append(("skin", -outer, float(r), front, 2 * outer, 1.0, JAW_BACK - front))
             continue
         out.append(("skin", -outer, float(r), front, outer - opening, 1.0, JAW_BACK - front))
         out.append(("skin", opening, float(r), front, outer - opening, 1.0, JAW_BACK - front))
-    # The chin: no opening, rounding off, long and narrow but never a point.
-    out.append(("skin", -2.125, 10.0, -3.0, 4.25, 0.75, JAW_BACK + 3.0))
-    out.append(("skin", -1.625, 10.75, -3.0, 3.25, 0.625, JAW_BACK + 3.0))
-    out.append(("skin", -1.0, 11.375, -3.0, 2.0, 0.375, JAW_BACK + 3.0))
-    # Inside: a hollow behind the cheeks, reaching into them so its walls are never seen, and
-    # narrower where the cheeks are, lower down, so it never shows outside them.
-    out.append(("cavity", -1.625, 1.0625, -1.5, 3.25, 8.5, 1.625))
-
-    # The needles. Each its own box, each a little nearer or further than the last, so no two of
-    # them share a plane; all of them well behind the skin of the cheeks and in front of the
-    # hollow, so none of them shares a plane with those either.
-    seq = [0]
-
-    def needle(x, y, w, h):
-        seq[0] += 1
-        z = -1.9 - 0.0137 * seq[0]
-        out.append(("fang", x, y, z, w, h, 0.25))
-
-    # Only a few, far in at the sides: a row of teeth across the top, under the nose, made a
-    # snout of it.
-    for r, left, right in ((3, 0.375, 0.5), (5, 0.5, 0.25), (7, 0.25, 0.375)):
-        opening = JAW_ROWS[r][1]
-        jag = 0.25 * ((r * 0.618) % 1.0)
-        needle(-opening - 0.125, r + 0.25 + jag, left + 0.125, 0.125)       # in from the left
-        needle(opening - right, r + 0.6 - jag * 0.5, right + 0.125, 0.125)  # in from the right
+    rows = float(len(JAW_ROWS))
+    # The chin: rounding off, long and narrow but never a point.
+    out.append(("skin", -1.75, rows, FACE_FRONT, 3.5, 0.75, JAW_BACK - FACE_FRONT))
+    out.append(("skin", -1.25, rows + 0.75, FACE_FRONT, 2.5, 0.625, JAW_BACK - FACE_FRONT))
+    out.append(("skin", -0.75, rows + 1.375, FACE_FRONT, 1.5, 0.375, JAW_BACK - FACE_FRONT))
+    # Inside: a hollow behind it all, reaching into the face either side so its walls are never
+    # seen, and from just under the top of the mouth to into the shut row under the bottom of it.
+    widest = max(o for _out, o, _f in JAW_ROWS) + 0.125
+    last = max(r for r, (_o, o, _f) in enumerate(JAW_ROWS) if o > 0.0)
+    out.append(("cavity", -widest, 1.0625, -1.5, 2 * widest, last + 1.0, 0.5))
     return out
 
 
@@ -279,6 +273,9 @@ def parts():
         # for the eyes and a mouth ringed with needles, at eight times the texture of the rest.
         ("skull", "neck", (0, -11.0 + FACE_MID, -0.4), (0, 0, 0), skull_boxes()),
         ("jaw", "skull", (0, -FACE_MID, 0), (0, 0, 0), jaw_boxes()),
+        # The pupils: their own bones, so that in game they can be moved to stay on you.
+        ("left_pupil", "skull", (EYE_X, EYE_Y, PUPIL_Z), (0, 0, 0), pupil_boxes()),
+        ("right_pupil", "skull", (-EYE_X, EYE_Y, PUPIL_Z), (0, 0, 0), pupil_boxes()),
         # No loose hairs standing up off the crown: in blocks, anything sticking up off a head
         # reads as horns or antennae, however short it is.
         ("hair", "skull", (0, -FACE_MID, 0), (0, 0, 0), _cowl_strands()),
@@ -568,18 +565,13 @@ def paint_texture(boxes, placed):
 
 # --------------------------------------------------------------------------- painting the face
 
-SKIN_F = np.array([206, 201, 188], float)      # pale as a thing kept from the light, a little grey
-SHADE_F = np.array([116, 114, 102], float)     # where it turns away, faintly green
-BRUISE_F = np.array([70, 52, 62], float)       # round the eyes
-VEIN_F = np.array([96, 90, 118], float)
-BLOOD_F = np.array([40, 6, 8], float)          # what has run from the eyes, long dried
-WET_F = np.array([126, 24, 22], float)         # the lips, and the torn corners
-GUM_F = np.array([110, 30, 28], float)
-BLACK_F = np.array([6, 4, 4], float)
-THROAT_F = np.array([134, 34, 34], float)      # far down inside the mouth, red
-ROOT_F = np.array([118, 96, 64], float)
-TIP_F = np.array([196, 184, 150], float)
-GLINT_F = np.array([196, 188, 168], float)     # something, far back in each eye
+PORCELAIN = np.array([236, 234, 229], float)   # white, cold, with no life in it
+PORCELAIN_SHADE = np.array([178, 178, 180], float)
+PORCELAIN_GLAZE = np.array([250, 250, 247], float)
+VOID = np.array([3, 3, 4], float)              # the eyes, and the mouth: nothing
+CRACK = np.array([34, 32, 36], float)          # hairline fractures, running from the eyes
+CRACK_EDGE = np.array([206, 206, 210], float)  # the chipped glaze either side of one
+PUPIL = np.array([255, 255, 252], float)
 
 _NOISE = np.random.default_rng(77).random((24, 24, 24))
 
@@ -615,164 +607,116 @@ def mix(col, target, amount):
 
 
 def _polyline_distance(px, py, pts):
-    """Distance from each point to a polyline, and how far along it (0..1) the nearest point is."""
+    """Distance from each point to a polyline."""
     best = np.full(px.shape, np.inf)
-    along = np.zeros(px.shape)
-    total = sum(np.hypot(b[0] - a[0], b[1] - a[1]) for a, b in zip(pts, pts[1:]))
-    walked = 0.0
     for a, b in zip(pts, pts[1:]):
         ax, ay = a
         bx, by = b
         dx, dy = bx - ax, by - ay
-        ln2 = dx * dx + dy * dy
-        t = np.clip(((px - ax) * dx + (py - ay) * dy) / ln2, 0, 1)
-        d = np.hypot(px - (ax + t * dx), py - (ay + t * dy))
-        closer = d < best
-        best = np.where(closer, d, best)
-        along = np.where(closer, (walked + t * math.sqrt(ln2)) / total, along)
-        walked += math.sqrt(ln2)
-    return best, along
+        t = np.clip(((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy), 0, 1)
+        best = np.minimum(best, np.hypot(px - (ax + t * dx), py - (ay + t * dy)))
+    return best
 
 
-def _wander(seed, start, step, n, drift):
-    """A path that wanders: for veins, tears and the like."""
+def _fracture(seed, start, heading, length, depth=0):
+    """
+    A hairline crack: a run of short straight lengths, each turning a little, as glaze breaks, with
+    now and then a finer one branching off it. Returns a list of (polyline, width).
+    """
     r = np.random.default_rng(seed)
-    pts = [start]
     x, y = start
-    for k in range(n):
-        x += drift[0] * step + r.normal(0, step * 0.35)
-        y += drift[1] * step + r.normal(0, step * 0.12)
+    pts = [(x, y)]
+    walked = 0.0
+    out = []
+    while walked < length:
+        step = 0.22 + 0.25 * r.random()
+        heading += r.normal(0, 0.45)
+        x += math.sin(heading) * step
+        y += math.cos(heading) * step
+        walked += step
         pts.append((x, y))
-    return pts
+        if depth < 1 and r.random() < 0.07:
+            side = 1 if r.random() < 0.5 else -1
+            out += _fracture(seed * 7 + len(pts), (x, y), heading + side * (0.6 + 0.5 * r.random()),
+                             length * (0.25 + 0.2 * r.random()), depth + 1)
+    out.append((pts, 0.05 if depth == 0 else 0.035))
+    return out
 
 
-# Dried runs down from the bottom of each eye, over the cheek and down the side of the mouth.
-TEARS = []
-for side in (-1, 1):
-    for k, (off, length, width) in enumerate(((-0.55, 5.8, 0.15), (0.05, 8.2, 0.19), (0.5, 4.2, 0.12))):
-        x0 = side * (EYE_X + off)
-        TEARS.append((_wander(400 + k + (10 if side > 0 else 0), (x0, EYE_Y + EYE_RY - 0.35), 0.45,
-                              int(length / 0.45), (side * 0.03, 1.0)), width))
-# Veins up the temples and across the swollen crown.
-VEINS = []
-for side in (-1, 1):
-    for k in range(3):
-        start = (side * (3.2 - 0.35 * k), -7.2 - 0.6 * k)
-        VEINS.append(_wander(500 + k + (10 if side > 0 else 0), start, 0.35, 9, (-side * 0.45, -0.9)))
+# Where it has cracked: down from the bottom of each eye, over the cheek, the way tears would run;
+# one up from the left eye into the brow; one from the bottom of the mouth. In face space (x, y).
+FRACTURES = []
+for side, seed in ((-1, 11), (1, 12)):
+    FRACTURES += _fracture(seed, (side * (EYE_X + 0.25), EYE_Y + EYE_RY * 0.98), side * 0.22, 5.5)
+FRACTURES += _fracture(52, (EYE_X + 0.95, EYE_Y + EYE_RY * 0.7), 0.55, 2.2)
+FRACTURES += _fracture(41, (-(EYE_X + 0.3), EYE_Y - EYE_RY * 0.97), math.pi - 0.35, 2.4)
 
 
 def skin_colour(p, n, owner):
-    """The skin at points p (skull space), on a face whose outward direction is n."""
+    """The porcelain at points p (skull space), on a face whose outward direction is n."""
     x, y, z = p[:, 0], p[:, 1], p[:, 2]
     ax = np.abs(x)
-    col = SKIN_F * (1.0 + 0.10 * (vnoise(p, 0.55) - 0.5) + 0.06 * (vnoise(p, 2.3) - 0.5))[:, None]
+    # Barely any grain at all: it should look made, not grown.
+    col = PORCELAIN * (1.0 + 0.018 * (vnoise(p, 0.45) - 0.5))[:, None]
     front = n[2] < -0.5
 
-    # Where it turns away from you, it darkens.
     if front:
-        col = mix(col, SHADE_F, 0.42 * smooth(2.4, 3.9, ax) ** 1.3)
-        col = mix(col, SHADE_F, 0.35 * smooth(-9.4, -10.9, y))             # the crown curving over
+        # Lit the way glaze is: a soft shine down the middle, falling away at the edges.
+        col = mix(col, PORCELAIN_SHADE, 0.30 * smooth(2.6, 3.9, ax) ** 1.4)
+        col = mix(col, PORCELAIN_SHADE, 0.22 * smooth(-9.6, -11.0, y))
+        col = mix(col, PORCELAIN_GLAZE, 0.5 * np.exp(-((x / 1.6) ** 2 + ((y + 8.0) / 1.0) ** 2)))
     elif n[1] < -0.5:
-        col = mix(col, SHADE_F, 0.12 + 0.15 * vnoise(p, 1.4))               # the top of the head
+        col = mix(col, PORCELAIN_SHADE, 0.12)
     elif n[1] > 0.5:
-        col = mix(col, SHADE_F * 0.55, 0.65)                                 # undersides
+        col = mix(col, PORCELAIN_SHADE * 0.6, 0.6)
     else:
-        col = mix(col, SHADE_F, 0.28 + 0.12 * smooth(0.0, 2.5, z))          # the sides
+        col = mix(col, PORCELAIN_SHADE, 0.25 + 0.15 * smooth(-3.0, 0.0, z))
 
-    # Veins, faint, under the skin of the temples and the crown.
-    if front or abs(n[0]) > 0.5:
-        u = x if front else np.sign(n[0]) * (3.9 + 0.35 * (z + 3.0))
-        for pts in VEINS:
-            d, _ = _polyline_distance(u, y, pts)
-            col = mix(col, VEIN_F, 0.38 * smooth(0.11, 0.03, d))
-
-    # The black of the eyes, round, spreading into a bruise round them.
+    # The eyes: black, with a hard edge, like holes cut in a mask.
     ex = (ax - EYE_X) / EYE_RX
     ey = (y - EYE_Y) / EYE_RY
     r = np.sqrt(ex * ex + ey * ey)
-    col = mix(col, BRUISE_F, 0.75 * smooth(1.55, 1.05, r))
-    col = mix(col, BLACK_F, smooth(1.02, 0.9, r))
+    col = mix(col, PORCELAIN_SHADE * 0.75, 0.6 * smooth(1.12, 1.0, r))
+    col = mix(col, VOID, smooth(1.0, 0.985, r))
     # Inside the hollows (their walls, the brow over them, the ledge under them): black.
-    hollow = (ax > 0.86) & (ax < 2.64) & (y > -6.82) & (y < -4.53) & (z > -2.86)
-    col[hollow] = mix(col[hollow], BLACK_F, np.ones(hollow.sum()))
+    hollow = (ax > 0.86) & (ax < 2.64) & (y > -6.82) & (y < -4.53) & (z > -2.98)
+    col[hollow] = np.tile(VOID, (int(hollow.sum()), 1))
 
     if front:
-        # Two slits where a nose should be.
-        nx = (ax - 0.3) / 0.13
-        ny = (y + 3.2) / 0.17
-        col = mix(col, (40, 26, 26), 0.85 * smooth(1.1, 0.6, np.sqrt(nx * nx + ny * ny)))
-        col = mix(col, SHADE_F, 0.3 * np.exp(-((x / 0.7) ** 2 + ((y + 3.35) / 0.5) ** 2)))
-        # The cheekbones catch the light; under them the face falls in.
-        cb = np.exp(-(((ax - 2.55) / 0.7) ** 2 + ((y + 3.4) / 0.55) ** 2))
-        col = col * (1.0 + 0.12 * cb)[:, None]
-        col = mix(col, SHADE_F, 0.38 * np.exp(-(((ax - 2.6) / 0.6) ** 2 + ((y - 1.6) / 1.9) ** 2)))
-        # What has run from the eyes.
-        for pts, width in TEARS:
-            d, along = _polyline_distance(x, y, pts)
-            w = width * (1.0 - 0.55 * along)
-            col = mix(col, BLOOD_F, (0.92 - 0.45 * along) * smooth(w, w * 0.35, d))
+        # Hairline fractures.
+        for pts, width in FRACTURES:
+            d = _polyline_distance(x, y, pts)
+            col = mix(col, CRACK_EDGE, 0.55 * smooth(width * 2.6, width * 1.2, d))
+            col = mix(col, CRACK, smooth(width, width * 0.35, d))
 
-    # The edge of the mouth: lips, thin, wet and dark.
     if owner == "jaw":
         jy = y + FACE_MID
         if front:
+            # The mouth: a hard-edged hole, like the eyes, and nothing inside it.
             e = np.sqrt((x / MOUTH_RX) ** 2 + ((jy - MOUTH_Y) / MOUTH_RY) ** 2)
-            inside = mouth_inside(x, jy)
-            col = mix(col, WET_F * 0.75, 0.9 * smooth(1.09, 1.0, e))             # the lips: thin, wet
-            col = mix(col, inside, smooth(1.0, 0.97, e))
+            col = mix(col, PORCELAIN_SHADE * 0.75, 0.6 * smooth(1.08, 1.0, e))
+            col = mix(col, VOID, smooth(1.0, 0.99, e))
         elif not (n[2] > 0.5):
-            # Facing into the mouth: gums, darkening the further in they go.
-            gum = mix(np.tile(GUM_F, (len(p), 1)), BLACK_F, smooth(-2.6, -1.4, z))
-            near = (jy < len(JAW_ROWS) + 0.01) & (ax < 2.2)
-            col[near] = gum[near]
+            # Facing into the mouth: black.
+            near = ax < MOUTH_RX + 0.05
+            col[near] = np.tile(VOID, (int(near.sum()), 1))
     elif n[1] > 0.5:
         # The roof of the mouth, seen from below through it.
-        roof = (ax < 1.7) & (y > -2.35)
-        col[roof] = mix(col[roof], GUM_F * 0.6, np.ones(roof.sum()))
+        roof = (ax < MOUTH_RX) & (y > -2.35)
+        col[roof] = np.tile(VOID, (int(roof.sum()), 1))
     return col
-
-
-def mouth_inside(x, jy):
-    """The colour inside the mouth, by where: black, and red far down."""
-    col = mix(np.tile(BLACK_F, (len(x), 1)), THROAT_F, 0.95 * smooth(3.5, 9.4, jy) ** 1.2)
-    return col * (0.85 + 0.15 * np.sin(x * 7.0) ** 2)[:, None]               # ridges down the throat
 
 
 def face_texels(kind, owner, box, p, n):
     """Colour and glow (0-255) for the points p of one face of a box of the face."""
-    x, y, z = p[:, 0], p[:, 1], p[:, 2]
-    glow = np.full(len(p), float(SHEEN))
-    if kind == "socket":
-        col = np.tile(BLACK_F, (len(p), 1))
-        glow[:] = 0
-        # Far back in each, something pale, very small, looking at you.
-        gx = np.abs(x) - (EYE_X - 0.18)
-        gy = y - (EYE_Y + 0.08)
-        g = np.sqrt(gx * gx + gy * gy)
-        if n[2] < -0.5:
-            col = mix(col, GLINT_F, smooth(0.13, 0.07, g))
-            glow = np.maximum(glow, 170 * smooth(0.13, 0.06, g))
-        return col, glow
-    if kind == "cavity":
-        col = mouth_inside(x, y + FACE_MID)
-        if n[1] < -0.5:
-            col = mix(col, (36, 8, 8), np.full(len(p), 0.8))
-        glow[:] = 0
-        return col, glow
-    if kind == "fang":
-        _k, bx, by, bz, w, h, d = box
-        if h > w:   # hanging down, or standing up from the bottom
-            t = (y - (by - FACE_MID)) / h if by < 5 else ((by - FACE_MID + h) - y) / h
-        else:       # pointing in from a side
-            t = (x - bx) / w if bx < 0 else ((bx + w) - x) / w
-        t = np.clip(t, 0, 1)
-        col = mix(np.tile(ROOT_F, (len(p), 1)), TIP_F, t ** 0.6)
-        col = col * (0.9 + 0.2 * vnoise(p, 6.0))[:, None]
-        glow[:] = 20 + 30 * t
-        return col, glow
+    if kind == "pupil":
+        # White, and always shining: in the dark they are all there is to see of it.
+        return np.tile(PUPIL, (len(p), 1)), np.full(len(p), 255.0)
+    if kind in ("socket", "cavity"):
+        return np.tile(VOID, (len(p), 1)), np.zeros(len(p))
     col = skin_colour(p, n, owner)
-    # Dark things do not shine.
-    glow = SHEEN * np.clip(col.mean(axis=1) / 190.0, 0.0, 1.0) ** 1.5
+    # The mask shows faintly in the dark; what is black does not.
+    glow = SHEEN * np.clip(col.mean(axis=1) / 200.0, 0.0, 1.0) ** 1.5
     return col, glow
 
 
