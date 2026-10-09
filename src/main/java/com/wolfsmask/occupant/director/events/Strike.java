@@ -8,6 +8,7 @@ import com.wolfsmask.occupant.registry.ModSounds;
 import com.wolfsmask.occupant.util.Cues;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 
@@ -35,6 +36,10 @@ public final class Strike {
 	private static final String[] NOW = {"Mine.", "Nothing saves you from me.", "No one else. Only me.",
 			"You were always mine."};
 
+	/** Who its leg is going into this moment (on peaceful the blow cannot be its own, and is not saved from). */
+	@org.jetbrains.annotations.Nullable
+	private static ServerPlayer striking;
+
 	private final Haunt haunt;
 	private final OccupantEntity entity;
 	private int t = -1;
@@ -59,6 +64,24 @@ public final class Strike {
 	public static float amount(int act, float health) {
 		float amount = damage(act);
 		return act < 4 ? Math.max(0.0f, Math.min(amount, health - 1.0f)) : amount;
+	}
+
+	/**
+	 * What to hurt them by for the game to take {@code amount} after it has scaled a monster's
+	 * blow for {@code difficulty} (on easy half and one more, never more than the blow itself; on
+	 * hard half again).
+	 */
+	public static float beforeDifficulty(float amount, Difficulty difficulty) {
+		return switch (difficulty) {
+			case EASY -> amount <= 2.0f ? amount : 2.0f * (amount - 1.0f);
+			case HARD -> amount * 2.0f / 3.0f;
+			default -> amount;
+		};
+	}
+
+	/** Whether this is its leg going into {@code player}, now: nothing saves them from that. */
+	public static boolean isStriking(ServerPlayer player) {
+		return striking == player;
 	}
 
 	/** Whether the leg went in. */
@@ -88,7 +111,19 @@ public final class Strike {
 		int act = haunt.data.act;
 		haunt.data.encounters++;
 		float amount = amount(act, p.getHealth());
-		if (amount > 0.0f) p.hurtServer(p.level(), p.damageSources().mobAttack(entity), amount);
+		if (amount > 0.0f) {
+			// Exactly that, whatever the difficulty: the game halves what a monster does on easy, adds
+			// half on hard (which would make the warning in the third act a killing blow) and takes
+			// all of it away on peaceful, where nothing else is allowed to hurt them and it still does.
+			Difficulty difficulty = p.level().getDifficulty();
+			striking = p;
+			try {
+				if (difficulty == Difficulty.PEACEFUL) p.hurtServer(p.level(), p.damageSources().generic(), amount);
+				else p.hurtServer(p.level(), p.damageSources().mobAttack(entity), beforeDifficulty(amount, difficulty));
+			} finally {
+				striking = null;
+			}
+		}
 		p.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 120, 0, false, false));
 		com.wolfsmask.occupant.story.Achievements.grant(p, com.wolfsmask.occupant.story.Achievements.ONLY_ME);
 		Cues.effect(p, ScreenEffectPayload.STATIC, 14, 0.7f);

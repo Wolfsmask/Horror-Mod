@@ -100,6 +100,12 @@ public final class OccupantGameTests {
 		helper.assertTrue(Strike.amount(3, 5.0f) <= 4.0f, "In the third act it should always leave them alive");
 		helper.assertTrue(Strike.amount(3, 1.0f) == 0.0f, "Even at their last half heart");
 		helper.assertTrue(Strike.amount(4, 5.0f) >= 5.0f, "In the last act it can kill them");
+		// The game scales a monster's blow by difficulty: what it is hurt by undoes that exactly.
+		helper.assertTrue(Math.abs(Strike.beforeDifficulty(7.0f, net.minecraft.world.Difficulty.EASY) / 2.0f + 1.0f - 7.0f) < 1.0e-4f,
+				"On easy the game should take exactly what it means to");
+		helper.assertTrue(Math.abs(Strike.beforeDifficulty(7.0f, net.minecraft.world.Difficulty.HARD) * 1.5f - 7.0f) < 1.0e-4f,
+				"On hard the game should take exactly what it means to, so the third act's never kills");
+		helper.assertTrue(Strike.beforeDifficulty(1.5f, net.minecraft.world.Difficulty.EASY) == 1.5f, "A small blow on easy stays as it is");
 
 		OccupantEntity e = helper.spawn(ModEntities.OCCUPANT, 1, 2, 1);
 		boolean dies = com.wolfsmask.occupant.director.Mercy.allowDeath(player, player.damageSources().mobAttack(e));

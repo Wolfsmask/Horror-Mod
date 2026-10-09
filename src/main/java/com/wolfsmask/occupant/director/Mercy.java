@@ -77,7 +77,7 @@ public final class Mercy {
 		// /kill is their own choice, and always works, even in the middle of it saving them.
 		if (source.is(DamageTypes.GENERIC_KILL)) return true;
 		// Nothing saves them from it: that is what it saved them from everything else for.
-		if (source.getEntity() instanceof OccupantEntity) return true;
+		if (source.getEntity() instanceof OccupantEntity || com.wolfsmask.occupant.director.events.Strike.isStriking(player)) return true;
 		Haunt h = director.haunt(player);
 		HauntData d = h.data;
 		if (!d.introduced || d.paused || d.ending == LastNightEnding.FOUND) return true;
