@@ -1,16 +1,41 @@
-=== net.minecraft.client.model.geom.builders.CubeListBuilder (-public)
-public class client.model.geom.builders.CubeListBuilder {
-  public client.model.geom.builders.CubeListBuilder addBox(String, float, float, float, int, int, int, client.model.geom.builders.CubeDeformation, int, int);
-  public client.model.geom.builders.CubeListBuilder addBox(String, float, float, float, int, int, int, int, int);
-  public client.model.geom.builders.CubeListBuilder addBox(float, float, float, float, float, float);
-  public client.model.geom.builders.CubeListBuilder addBox(float, float, float, float, float, float, Set<core.Direction>);
-  public client.model.geom.builders.CubeListBuilder addBox(String, float, float, float, float, float, float);
-  public client.model.geom.builders.CubeListBuilder addBox(String, float, float, float, float, float, float, client.model.geom.builders.CubeDeformation);
-  public client.model.geom.builders.CubeListBuilder addBox(float, float, float, float, float, float, boolean);
-  public client.model.geom.builders.CubeListBuilder addBox(float, float, float, float, float, float, client.model.geom.builders.CubeDeformation, float, float);
-  public client.model.geom.builders.CubeListBuilder addBox(float, float, float, float, float, float, client.model.geom.builders.CubeDeformation);
-=== net.minecraft.client.model.geom.builders.CubeDeformation (-public)
-public class client.model.geom.builders.CubeDeformation {
-  public static final client.model.geom.builders.CubeDeformation NONE;
-  public client.model.geom.builders.CubeDeformation(float, float, float);
-  public client.model.geom.builders.CubeDeformation(float);
+=== net.minecraft.client.model.geom.builders.CubeDefinition (code: bake)
+  public client.model.geom.ModelPart$Cube bake(int, int);
+    Code:
+         0: new           #49                 // class net/minecraft/client/model/geom/ModelPart$Cube
+         5: getfield      #18                 // Field texCoord:Lnet/minecraft/client/model/geom/builders/UVPair;
+         8: invokevirtual #51                 // Method net/minecraft/client/model/geom/builders/UVPair.u:()F
+        11: f2i
+        13: getfield      #18                 // Field texCoord:Lnet/minecraft/client/model/geom/builders/UVPair;
+        16: invokevirtual #55                 // Method net/minecraft/client/model/geom/builders/UVPair.v:()F
+        19: f2i
+        21: getfield      #27                 // Field origin:Lorg/joml/Vector3fc;
+        24: invokeinterface #58,  1           // InterfaceMethod org/joml/Vector3fc.x:()F
+        30: getfield      #27                 // Field origin:Lorg/joml/Vector3fc;
+        33: invokeinterface #63,  1           // InterfaceMethod org/joml/Vector3fc.y:()F
+        39: getfield      #27                 // Field origin:Lorg/joml/Vector3fc;
+        42: invokeinterface #66,  1           // InterfaceMethod org/joml/Vector3fc.z:()F
+        48: getfield      #31                 // Field dimensions:Lorg/joml/Vector3fc;
+        51: invokeinterface #58,  1           // InterfaceMethod org/joml/Vector3fc.x:()F
+        57: getfield      #31                 // Field dimensions:Lorg/joml/Vector3fc;
+        60: invokeinterface #63,  1           // InterfaceMethod org/joml/Vector3fc.y:()F
+        66: getfield      #31                 // Field dimensions:Lorg/joml/Vector3fc;
+        69: invokeinterface #66,  1           // InterfaceMethod org/joml/Vector3fc.z:()F
+        75: getfield      #34                 // Field grow:Lnet/minecraft/client/model/geom/builders/CubeDeformation;
+        78: getfield      #69                 // Field net/minecraft/client/model/geom/builders/CubeDeformation.growX:F
+        82: getfield      #34                 // Field grow:Lnet/minecraft/client/model/geom/builders/CubeDeformation;
+        85: getfield      #75                 // Field net/minecraft/client/model/geom/builders/CubeDeformation.growY:F
+        89: getfield      #34                 // Field grow:Lnet/minecraft/client/model/geom/builders/CubeDeformation;
+        92: getfield      #78                 // Field net/minecraft/client/model/geom/builders/CubeDeformation.growZ:F
+        96: getfield      #38                 // Field mirror:Z
+       100: i2f
+       102: getfield      #42                 // Field texScale:Lnet/minecraft/client/model/geom/builders/UVPair;
+       105: invokevirtual #51                 // Method net/minecraft/client/model/geom/builders/UVPair.u:()F
+       108: fmul
+       110: i2f
+       112: getfield      #42                 // Field texScale:Lnet/minecraft/client/model/geom/builders/UVPair;
+       115: invokevirtual #55                 // Method net/minecraft/client/model/geom/builders/UVPair.v:()F
+       118: fmul
+       120: getfield      #45                 // Field visibleFaces:Ljava/util/Set;
+       123: invokespecial #81                 // Method net/minecraft/client/model/geom/ModelPart$Cube."<init>":(IIFFFFFFFFFZFFLjava/util/Set;)V
+       126: areturn
+}
