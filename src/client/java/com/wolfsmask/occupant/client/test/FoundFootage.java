@@ -323,6 +323,10 @@ final class FoundFootage {
 		TestServerContext server = game.getServer();
 		BlockPos floor = server.computeOnServer(s -> ForestGallery.clearing(s.overworld(), woods[0].offset(60, 0, 60)));
 		if (floor == null) return;
+		// In the game as it is played (the plates before this are taken as a spectator, whom it
+		// leaves alone), and seeing only what the night lets them.
+		server.runCommand("gamemode survival @p");
+		server.runCommand("effect clear @p");
 		server.runOnServer(s -> Cinematic.fellTrees(s.overworld(), floor, 12));
 		Vec3 eye = server.computeOnServer(s -> new Vec3(floor.getX() + 0.5,
 				Cinematic.ground(s.overworld(), floor.getX(), floor.getZ()) + Cinematic.EYE, floor.getZ() + 0.5));
