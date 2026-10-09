@@ -1,4 +1,3 @@
-@mc 1.20.1 1.21.1 1.21.11 26.1.2 26.2 26.3 26.4-snapshot-2
-# Round 48: boxes with more texture than their size (a sharper face), on every version.
-net.minecraft.client.model.geom.builders.CubeListBuilder addBox\(
-net.minecraft.client.model.geom.builders.CubeDeformation (CubeDeformation\(|NONE)
+@mc 1.20.1 26.2
+# Round 49: how a box's texture scale is used when it is baked.
+@code net.minecraft.client.model.geom.builders.CubeDefinition bake
