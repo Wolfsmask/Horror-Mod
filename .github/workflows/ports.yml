@@ -72,7 +72,14 @@ jobs:
               | sed -E 's#^.*/(build/versioned|src)/[a-z]+/(java/)?##' | head -n 1200 || true
             grep -E "What went wrong|Could not|^> " build.log | head -n 20 || true
             if [ -f jar.log ]; then echo "=== jar"; tail -n 25 jar.log; fi
-            if [ -f test.log ]; then grep -E "GAME TESTS COMPLETE|required tests failed|  - occupant|\[gametest\]" test.log | head -n 30; fi
+            if [ -f test.log ]; then
+              grep -E "GAME TESTS COMPLETE|required tests failed|  - occupant|\[gametest\]" test.log | head -n 30
+              # The tests never got going: why.
+              if ! grep -q "GAME TESTS COMPLETE" test.log; then
+                echo "=== the game tests never finished"
+                grep -E "Exception|Caused by|Couldn't|Failed to|failed to" test.log | head -n 30 || true
+              fi
+            fi
           } > "$OUT/result.txt"
           if [ "${{ steps.tests.outcome }}" = "success" ] && [ "${{ steps.jar.outcome }}" = "success" ]; then
             cp build/libs/occupant-*.jar "$OUT/" 2>/dev/null || true
