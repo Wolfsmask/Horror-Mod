@@ -50,8 +50,7 @@ public final class DeadVillages {
 		boolean villager = Kinds.is(entity, "villager");
 		boolean golem = Kinds.is(entity, "iron_golem");
 		if (!villager && !golem) return;
-		if (entity.getTags().contains(SEEN)) return;
-		entity.addTag(SEEN);
+		if (!entity.addTag(SEEN)) return;              // already looked at (the tag was there)
 		if (!OccupantConfig.get().enabled || !OccupantConfig.get().deadVillages || level.dimension() != net.minecraft.world.level.Level.OVERWORLD) return;
 		StructureStart village = level.structureManager().getStructureWithPieceAt(entity.blockPosition(), StructureTags.VILLAGE);
 		if (village == null || !village.isValid()) return;

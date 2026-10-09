@@ -65,6 +65,8 @@ final class FoundFootage {
 			shot("rescue", () -> rescue(context, game, woods));
 			shot("plates", () -> plates(context, game, spawn));
 			shot("struck", () -> struck(context, game, woods));
+			shot("roof", () -> found(context, game, woods, true));
+			shot("hole", () -> found(context, game, woods, false));
 		} catch (RuntimeException | AssertionError e) {
 			Occupant.LOGGER.warn("[client-gametest] found footage stopped early", e);
 		} finally {
@@ -383,6 +385,68 @@ final class FoundFootage {
 				HauntData d = Director.get().data(p);
 				d.setAct(actBefore[0]);
 				d.paused = true;
+				p.setHealth(p.getMaxHealth());
+			});
+		}
+	}
+
+	/**
+	 * Found hiding. In a hut: the blows on the roof, the roof coming off, it looking in. In a hole
+	 * under the ground: the blows from above, the ground over them gone, it looking down in.
+	 */
+	private static void found(ClientGameTestContext context, TestSingleplayerContext game, BlockPos[] woods, boolean hut) {
+		TestServerContext server = game.getServer();
+		BlockPos floor = server.computeOnServer(s -> ForestGallery.clearing(s.overworld(), woods[0].offset(hut ? -60 : 40, 0, hut ? -60 : -80)));
+		if (floor == null) return;
+		server.runOnServer(s -> Cinematic.fellTrees(s.overworld(), floor, 12));
+		server.runCommand("gamemode survival @p");
+		server.runCommand("effect clear @p");
+		int y = server.computeOnServer(s -> Cinematic.ground(s.overworld(), floor.getX(), floor.getZ()));
+		int x = floor.getX(), z = floor.getZ();
+		Vec3 eye;
+		if (hut) {
+			server.runCommand(String.format(Locale.ROOT, "fill %d %d %d %d %d %d minecraft:spruce_planks hollow", x - 3, y - 1, z - 3, x + 3, y + 3, z + 3));
+			server.runCommand(String.format(Locale.ROOT, "setblock %d %d %d minecraft:glass", x, y + 1, z - 3));
+			eye = new Vec3(x + 0.5, y + Cinematic.EYE, z + 0.5);
+		} else {
+			// Four blocks down, the ground closed over them.
+			server.runCommand(String.format(Locale.ROOT, "fill %d %d %d %d %d %d minecraft:air", x, y - 5, z, x, y - 4, z));
+			eye = new Vec3(x + 0.5, y - 5 + Cinematic.EYE, z + 0.5);
+		}
+		Cinematic.camera(context, game, eye, eye.add(0.0, 0.0, 4.0), 18000);
+		boolean begun = server.computeOnServer(s -> {
+			ServerPlayer p = Cinematic.player(s);
+			HauntData d = Director.get().data(p);
+			d.paused = false;
+			d.introduced = true;
+			p.setHealth(p.getMaxHealth());
+			com.wolfsmask.occupant.director.Hiding.Where where = com.wolfsmask.occupant.director.Hiding.where(p);
+			Occupant.LOGGER.info("[client-gametest] found: hiding {} ({})", where, hut ? "hut" : "hole");
+			Director.get().stopCurrent(p);
+			Director.get().beginNow(p, com.wolfsmask.occupant.director.events.Found.ID,
+					com.wolfsmask.occupant.director.events.Found.begin(Director.get().haunt(p), p, where));
+			return true;
+		});
+		if (!begun) return;
+		String name = hut ? "found-roof" : "found-hole";
+		int[] at = hut ? new int[]{24, 52, 70, 96} : new int[]{18, 36, 56, 76};
+		int waited = 0;
+		try {
+			for (int i = 0; i < at.length; i++) {
+				// In the server's own ticks, as it falls behind on a slow machine.
+				long from = server.computeOnServer(s -> (long) s.getTickCount());
+				for (int n = 0; n < 2400 && server.computeOnServer(s -> (long) s.getTickCount()) - from < at[i] - waited; n++) context.waitTick();
+				waited = at[i];
+				OccupantClientGameTest.shoot(context, name + "-" + (i + 1));
+			}
+			for (int i = 0; i < 400 && server.computeOnServer(s -> Director.get().haunt(Cinematic.player(s)).isBusy()); i++) context.waitTick();
+		} finally {
+			context.runOnClient(mc -> mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON));
+			server.runOnServer(s -> {
+				ServerPlayer p = Cinematic.player(s);
+				HauntData d = Director.get().data(p);
+				d.paused = true;
+				d.cooldowns.remove(com.wolfsmask.occupant.director.events.Found.CAUGHT);
 				p.setHealth(p.getMaxHealth());
 			});
 		}
