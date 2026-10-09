@@ -49,6 +49,11 @@ final class ForestGallery {
 			server.runCommand("gamerule send_command_feedback false");
 			server.runCommand("difficulty peaceful");
 			server.runCommand("weather clear");
+			// The camera is the player, put down wherever each picture is taken from, in survival: a
+			// spot a little off the ground must not kill them and leave every picture after it of the
+			// death screen. (Its name changed in 26.1; whichever this version does not know is refused.)
+			server.runCommand("gamerule fallDamage false");
+			server.runCommand("gamerule fall_damage false");
 			// What anyone has on them an hour in.
 			server.runCommand("item replace entity @p hotbar.0 with minecraft:iron_axe");
 			server.runCommand("item replace entity @p hotbar.1 with minecraft:torch 23");

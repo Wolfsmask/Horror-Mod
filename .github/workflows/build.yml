@@ -149,7 +149,9 @@ jobs:
           find build/clientGametest -iname "*.png" | head -n 40 > "$OUT/files.txt" || true
           {
             echo "# Client game test on $GITHUB_SHA ($(date -u +%FT%TZ)): ${{ job.status }}"
-            grep -E "client-gametest|Exception|Error|AssertionError|FAILED|Occupant|occupant" client.log | grep -v "DEBUG" | head -n 120
+            # Not the compiler's deprecation warnings, which name the mod's own files and would fill it.
+            grep -E "client-gametest|Exception|Error|AssertionError|FAILED|Occupant|occupant|fell |died|was slain|was killed|drowned|burned|suffocated|starved" client.log \
+              | grep -v "DEBUG" | grep -v "warning: \[" | head -n 300
             echo "--- tail ---"
             tail -n 60 client.log
           } > "$OUT/result.txt"

@@ -370,6 +370,9 @@ final class FoundFootage {
 
 	private static void settle(ClientGameTestContext context, String name) {
 		context.waitTicks(30);
+		if (context.computeOnClient(mc -> mc.player == null || mc.player.isDeadOrDying())) {
+			Occupant.LOGGER.warn("[client-gametest] {}: the player is dead, so this is a picture of the death screen", name);
+		}
 		Occupant.LOGGER.info("[client-gametest] {}: {} in sight", name, context.computeOnClient(OccupantClientGameTest::seen));
 		OccupantClientGameTest.shoot(context, name);
 	}
