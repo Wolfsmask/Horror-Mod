@@ -58,9 +58,13 @@ public final class BehindYouEvent extends HorrorEvent {
 		Vec3 back = Sight.flatLook(p).scale(-1);
 		for (int attempt = 0; attempt < 12; attempt++) {
 			Vec3 dir = Sight.rotateY(back, (ctx.random.nextDouble() - 0.5) * 50.0);
-			Vec3 at = p.position().add(dir.scale(1.7 + ctx.random.nextDouble() * 0.8));
+			// Close behind them, but not so close that one of its legs, braced forward past them,
+			// would be in front of their eyes: then it could never arrive unseen, and never come.
+			Vec3 at = p.position().add(dir.scale(2.4 + ctx.random.nextDouble() * 0.8));
 			BlockPos feet = Spots.groundNear(ctx.world, Mth.floor(at.x), Mth.floor(p.getY()), Mth.floor(at.z), 1);
 			if (feet == null) continue;
+			double away = Math.hypot(feet.getX() + 0.5 - p.getX(), feet.getZ() + 0.5 - p.getZ());
+			if (away < 2.2 || away > 3.6) continue;
 			Vec3 head = Vec3.atBottomCenterOf(feet).add(0, 1.7, 0);
 			if (Sight.angleTo(p, head) < 110.0 || !Sight.hasLineOfSight(p, head)) continue;
 
