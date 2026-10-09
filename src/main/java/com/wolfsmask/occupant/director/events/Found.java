@@ -40,8 +40,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * It found them hiding, after it told them not to. Everything alive round them drops dead, and
- * the dark comes in. Then, depending on where they hid:
+ * It found them hiding, after it told them not to. Everything alive round them drops dead. Then,
+ * depending on where they hid:
  * <ul>
  *   <li>in a house, it is outside, and it takes the roof off, all of it, while they watch, and
  *   looks in at them;</li>
@@ -66,7 +66,6 @@ public final class Found {
 		killEverything(p, level);
 		Cues.effect(p, ScreenEffectPayload.SILENCE, 0, 1f);
 		Cues.soundAtEars(p, ModSounds.DRONE, SoundSource.AMBIENT, 1.0f, 0.7f);
-		p.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 400, 0, false, false));
 		Sequence s = switch (where) {
 			case HOUSE -> RoofOff.create(h, p);
 			case HOLE -> DugOut.create(h, p);
@@ -100,6 +99,8 @@ public final class Found {
 		if (spot == null) return null;
 		OccupantEntity e = h.spawnOccupant(p, spot, OccupantEntity.Mode.CHASE, OccupantEntity.Form.REVEALED);
 		if (e == null) return null;
+		// The dark comes in (where it takes the roof off or digs them out, they are meant to see it).
+		p.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 400, 0, false, false));
 		HuntEvent.Hunt hunt = new HuntEvent.Hunt(h, e, 0, false, (who, it, since) -> caught(h, who, since));
 		hunt.runAtOnce();
 		Cues.whisper(p, "Found you.", 60);
