@@ -163,8 +163,26 @@ public final class Sight {
 		boolean inCone = angleTo(player, base.add(0, h * 0.5, 0)) < degrees
 				|| angleTo(player, base.add(0, h * 0.9, 0)) < degrees
 				|| angleTo(player, base.add(0, h * 0.1, 0)) < degrees;
-		return inCone && canSeeAnyPart(player, entity);
+		if (inCone && canSeeAnyPart(player, entity)) return true;
+		if (!(entity instanceof OccupantEntity)) return false;
+		// Its legs reach out all round it, braced on whatever is there: with its body just out of
+		// view beside them, one braced forward along their side can be at the edge of the screen.
+		Vec3 eye = player.getEyePosition();
+		Vec3 to = new Vec3(base.x - eye.x, 0.0, base.z - eye.z);
+		if (to.lengthSqr() < 1.0e-4) return false;
+		to = to.normalize();
+		Vec3 side = new Vec3(-to.z, 0.0, to.x);
+		double reach = h * LEG_REACH;
+		for (Vec3 out : new Vec3[]{side, side.scale(-1.0), to, to.scale(-1.0)}) {
+			Vec3 leg = base.add(out.scale(reach)).add(0.0, h * 0.35, 0.0);
+			if (leg.distanceTo(eye) < 1.0) continue;                 // that one is beside them, not in view
+			if (angleTo(player, leg) < degrees && hasLineOfSight(player, leg)) return true;
+		}
+		return false;
 	}
+
+	/** How far out from its body its legs reach, braced, as a share of how tall it is drawn. */
+	private static final double LEG_REACH = 0.55;
 
 	/** Could this entity be on the player's screen right now (inside the view cone and unobstructed)? */
 	public static boolean isOnScreen(ServerPlayer player, Entity entity) {
