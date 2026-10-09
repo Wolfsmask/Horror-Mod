@@ -56,6 +56,8 @@
   "advancements.occupant.every_word.description": "Trouver le dernier camp du survivant",
   "advancements.occupant.down_there.title": "N'y descendez pas",
   "advancements.occupant.down_there.description": "Trouver où il dort",
+  "advancements.occupant.only_me.title": "Rien que moi",
+  "advancements.occupant.only_me.description": "Être blessé par lui. Rien d'autre n'en a le droit",
   "advancements.occupant.last_night.title": "La dernière nuit",
   "advancements.occupant.last_night.description": "Aller jusqu'au bout de la dernière nuit",
   "advancements.occupant.ending_found.title": "Ce qu'il en reste",

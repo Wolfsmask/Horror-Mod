@@ -20,6 +20,8 @@ public final class Achievements {
 	public static final String EVERY_WORD = "every_word";
 	public static final String SLEEPLESS = "sleepless";
 	public static final String DOWN_THERE = "down_there";
+	/** The first time its leg goes through them. */
+	public static final String ONLY_ME = "only_me";
 	public static final String LAST_NIGHT = "last_night";
 	public static final String ENDING_FOUND = "ending_found";
 	public static final String ENDING_HID = "ending_hid";

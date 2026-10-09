@@ -29,7 +29,8 @@ public final class SurvivorLog {
 			"Day 12.\n\nIt has a face like ours. Mostly.\n\nThe mouth doesn't stop.",
 			"Day 14.\n\nSomeone knocked tonight. Three times, then three more.\n\nNobody else lives within a day's walk of here.",
 			"Day 15.\n\nI tried to leave. Every path came back round to here.\n\nIt is always standing at the edge of what I can see.",
-			"Day 16.\n\nI don't think it wants to kill me.\n\nI think it wants to BE me. It practises my walk at night.",
+			"Day 16.\n\nI don't think it wants to kill me.\n\nI think it wants to BE me. It practises my walk at night.\f"
+					+ "Day 16, later.\n\nIt hurt me tonight. One of its legs, through my shoulder and out again, before I saw it move.\n\nIt didn't kill me. It was careful.\n\nAs if it was making sure I was still worth keeping.",
 			"Day 17.\n\nDon't sleep in the dark rooms. Don't go down the hallway.\n\nIf it is in the hallway, it has already seen you.\f"
 					+ "Later.\n\nIt's watching me write this. I can see it in the window glass.\n\nIt's smiling.",
 			"Day 18.\n\nI'm going. I've moved everything I have left to a camp of my own, out where it can't stand behind the trees.\n\n{camp}\n\nIf I don't come back, that's where I'll be.",
@@ -88,7 +89,7 @@ public final class SurvivorLog {
 	public static ItemStack finalEntry(String reader) {
 		return Compat.writtenBook("Survivor's log, the last page", AUTHOR, List.of(
 				"Last day.\n\nIt stood at the edge of the camp all night and I sat by the fire and let it look.\n\nI think it has what it needs now.",
-				"It isn't going to kill anyone.\n\nIt's going to wear them.\n\nIf you are reading this, it has started on you. "
+				"It never wanted to kill me. It wanted to be me.\n\nNow it knows how, and it doesn't need me any more.\n\nIf you are reading this, it has started on you. "
 						+ "Don't let it see you read.\n\nI'm sorry, " + reader + ". I'm so sorry."));
 	}
 

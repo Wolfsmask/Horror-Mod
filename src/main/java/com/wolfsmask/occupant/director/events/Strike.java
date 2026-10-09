@@ -90,6 +90,7 @@ public final class Strike {
 		float amount = amount(act, p.getHealth());
 		if (amount > 0.0f) p.hurtServer(p.level(), p.damageSources().mobAttack(entity), amount);
 		p.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 120, 0, false, false));
+		com.wolfsmask.occupant.story.Achievements.grant(p, com.wolfsmask.occupant.story.Achievements.ONLY_ME);
 		Cues.effect(p, ScreenEffectPayload.STATIC, 14, 0.7f);
 		String[] lines = act >= 4 ? NOW : NOT_YET;
 		if (p.isAlive()) Cues.whisper(p, lines[p.getRandom().nextInt(lines.length)], 80);

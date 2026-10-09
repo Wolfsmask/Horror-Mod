@@ -56,6 +56,8 @@
   "advancements.occupant.every_word.description": "Encontrar el último campamento del superviviente",
   "advancements.occupant.down_there.title": "No bajes ahí",
   "advancements.occupant.down_there.description": "Encontrar dónde duerme",
+  "advancements.occupant.only_me.title": "Solo yo",
+  "advancements.occupant.only_me.description": "Que te haga daño. Nadie más tiene permitido hacerlo",
   "advancements.occupant.last_night.title": "La última noche",
   "advancements.occupant.last_night.description": "Llegar al final de la última noche",
   "advancements.occupant.ending_found.title": "Lo que quedó",

@@ -149,6 +149,18 @@ processResources {
 	filesMatching("data/occupant/advancement*/root.json") {
 		expand "adv_background": advBackground
 	}
+	// 1.20.1 reads advancements from "advancements" (since 1.21, "advancement"), and names an
+	// icon's item "item" (since 1.20.5, "id"): without this it had none of them at all.
+	if (mc == '1.20.1') {
+		from("src/main/resources/data/occupant/advancement") {
+			into "data/occupant/advancements"
+			filesMatching("root.json") {
+				expand "adv_background": advBackground
+			}
+			filter { String line -> line.replace('"id": "minecraft:', '"item": "minecraft:') }
+		}
+		exclude "data/occupant/advancement/**"
+	}
 	def mixinJava = "JAVA_${javaRelease}"
 	inputs.property "mixin_java", mixinJava
 	filesMatching("*.mixins.json") {

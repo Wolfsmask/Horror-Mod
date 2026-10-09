@@ -64,7 +64,7 @@ public final class HuntEvent extends HorrorEvent {
 			Vec3 base = Vec3.atBottomCenterOf(pos);
 			return Math.abs(pos.getY() - p.getBlockY()) <= 6
 					&& ctx.throughFog(pos)
-					&& Spots.isDark(ctx.world, pos.above())
+					&& (ctx.attack || Spots.isDark(ctx.world, pos.above()))     // come to hurt them, by day too
 					&& Spots.awayFromOthers(p, base, 24)
 					&& Sight.hasLineOfSight(p, base.add(0, 1.6, 0))
 					&& Sight.hasLineOfSight(p, base.add(0, 0.9, 0));

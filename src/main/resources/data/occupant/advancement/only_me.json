@@ -1,0 +1,23 @@
+{
+  "parent": "occupant:not_alone",
+  "display": {
+    "icon": {
+      "id": "minecraft:bone"
+    },
+    "title": {
+      "translate": "advancements.occupant.only_me.title"
+    },
+    "description": {
+      "translate": "advancements.occupant.only_me.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": true
+  },
+  "criteria": {
+    "granted": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

@@ -12,6 +12,16 @@ echo "jar: $JAR"
 CONFIG=$(unzip -p "$JAR" occupant.client.mixins.json) || { echo "no mixin config in the jar"; exit 1; }
 echo "$CONFIG"
 echo "$CONFIG" | grep -q '"JAVA_[0-9]*"' || { echo "the mixin config's Java level was never filled in"; exit 1; }
+# The advancements, where this version reads them ("advancements" before 1.21), filled in.
+ADV=advancement
+[ "$MC" = "1.20.1" ] && ADV=advancements
+ROOT=$(unzip -p "$JAR" "data/occupant/$ADV/root.json") || { echo "no advancements in data/occupant/$ADV"; exit 1; }
+if echo "$ROOT" | grep -q '[$]{'; then echo "the root advancement's background was never filled in"; exit 1; fi
+if [ "$MC" = "1.20.1" ]; then
+	echo "$ROOT" | grep -q '"item"' || { echo "1.20.1 names an advancement icon's item \"item\""; exit 1; }
+	if unzip -l "$JAR" | grep -q "data/occupant/advancement/"; then echo "the 1.21 advancement folder is in the 1.20.1 jar"; exit 1; fi
+fi
+echo "advancements: data/occupant/$ADV/ ($(unzip -l "$JAR" | grep -c "data/occupant/$ADV/.*json") files)"
 case "$MC" in
 	1.*) ;;
 	*) echo "unobfuscated version: the game's own names are the real ones"; exit 0 ;;

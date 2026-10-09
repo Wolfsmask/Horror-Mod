@@ -537,7 +537,7 @@ public final class Director {
 
 		// From the third act it hurts them, every so often, whatever the dread, the hour or where
 		// they are: it saves them from everything else so that only it gets to.
-		if (attackDue(d, cfg) && attack(h, player, s, cfg)) return;
+		if (attackDue(d, cfg) && attack(h, player, s, cfg, false)) return;
 
 		// Too long since it was seen: something it can be seen in comes first, if anything fits.
 		if (sightingDue(h, cfg)) {
@@ -595,17 +595,18 @@ public final class Director {
 	/**
 	 * It comes to hurt them: out in the open it hunts them, if it has not lately; anywhere, it is
 	 * right behind them. False if neither can happen here and now (it is still due, and tried again
-	 * next time). The fright-only versions of these keep their own cooldowns and rules.
+	 * next time). The fright-only versions of these keep their own cooldowns and rules. Forced (by
+	 * a command), what they are doing is not asked, only whether there is somewhere it can be.
 	 */
-	private boolean attack(Haunt h, ServerPlayer player, Situation s, OccupantConfig cfg) {
+	private boolean attack(Haunt h, ServerPlayer player, Situation s, OccupantConfig cfg, boolean forced) {
 		HauntData d = h.data;
-		EventContext ctx = new EventContext(player, h, s, false);
+		EventContext ctx = new EventContext(player, h, s, forced);
 		ctx.attack = true;
 		for (String id : ATTACKS) {
 			HorrorEvent e = Events.byId(id);
 			if (e == null || disabledEvents.contains(id) || d.act < e.minAct()) continue;
 			if (id.equals("hunt") && (!cfg.chases || d.isOnCooldown(id))) continue;
-			if (!e.fits(ctx) || !tryBegin(h, e, ctx)) continue;
+			if (!forced && !e.fits(ctx) || !tryBegin(h, e, ctx)) continue;
 			d.cooldowns.put(ATTACK_DUE, d.playTicks + (long) ((d.act >= 4 ? 6 : 9) * MINUTE / Pacing.frequency(cfg)));
 			h.quietSeconds = 0;
 			h.chain = 0;
@@ -790,7 +791,7 @@ public final class Director {
 	public TriggerResult attackNow(ServerPlayer player) {
 		Haunt h = haunt(player);
 		endSequence(h);
-		return attack(h, player, h.capture(player), OccupantConfig.get()) ? TriggerResult.STARTED : TriggerResult.NO_SPOT;
+		return attack(h, player, h.capture(player), OccupantConfig.get(), true) ? TriggerResult.STARTED : TriggerResult.NO_SPOT;
 	}
 
 	/** Starts something that is not one of the events, now, over whatever was happening. */
