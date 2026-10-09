@@ -92,33 +92,31 @@ public final class LegGait {
 
 	/** Which way the body was last drawn facing, in radians. */
 	private double drawnYaw;
-
 	/**
-	 * Up the body, in model pixels: from the hips to the root of the spine, from there to the base
-	 * of the neck, and from there to the middle of the mouth; and how far the mouth is in front of
-	 * the body's line. Measured off the model generate_model.py builds.
+	 * How the body is bent as it is drawn, as {@link OccupantPose} bends it (less its slow drift,
+	 * and where its head is looking): the spine forward and to the side, and the neck. The legs
+	 * leave the body all the way up the trunk, so where each one starts depends on it.
 	 */
-	private static final double SPINE_ROOT_PX = OccupantGeometry.HIPS_HEIGHT + 1.0;
-	private static final double TRUNK_PX = 31.5;
-	private static final double HEAD_PX = 6.2;
-	private static final double MOUTH_AHEAD_PX = 3.0;
+	private double spineX = OccupantPose.SPINE_REST;
+	private double spineZ;
+	private double neckX;
+	/** How far the hips are dropped, in model pixels, as last drawn. */
+	private float drawnDrop;
 
 	/**
 	 * Where the middle of its mouth is drawn, in the world, as of the last frame it was drawn: as
-	 * tall and as folded as it was, wherever its body had got to. Null until it has been drawn.
+	 * tall, as folded and as bent as it was, wherever its body had got to. Null until it has been
+	 * drawn.
 	 */
 	@Nullable
 	public static Vec3 mouth(OccupantEntity entity) {
 		LegGait g = GAITS.get(entity);
 		if (g == null || g.body == null || Float.isNaN(g.fitScale)) return null;
-		double px = g.fitScale / 16.0;
-		// Folded as OccupantPose folds it: hips dropped, the spine bent over, the neck most of the way back up.
-		double bend = OccupantFit.CROUCH_BEND * g.fitCrouch;
-		double headBend = bend * 0.25;
-		double up = (SPINE_ROOT_PX - OccupantFit.CROUCH_DROP * g.fitCrouch + TRUNK_PX * Math.cos(bend)
-				+ HEAD_PX * Math.cos(headBend)) * px;
-		double ahead = (TRUNK_PX * Math.sin(bend) + HEAD_PX * Math.sin(headBend) + MOUTH_AHEAD_PX) * px;
-		return g.body.add(-Math.sin(g.drawnYaw) * ahead, up, Math.cos(g.drawnYaw) * ahead);
+		// From the base of the neck to the mouth, turned by the neck, then on from the root of the spine.
+		float[] n = OccupantGeometry.NECK_TO_MOUTH, s = OccupantGeometry.SPINE_TO_NECK;
+		double c = Math.cos(g.neckX), sn = Math.sin(g.neckX);
+		return g.fromSpine(s[0] + n[0], s[1] + n[1] * c - n[2] * sn, s[2] + n[1] * sn + n[2] * c,
+				g.fitScale / 16.0, g.drawnDrop);
 	}
 
 	static LegGait of(OccupantEntity entity) {
@@ -165,13 +163,15 @@ public final class LegGait {
 		double px = scale / 16.0;                             // model pixels to blocks
 		double yaw = Math.toRadians(state.bodyRot);
 		drawnYaw = yaw;
+		drawnDrop = dropPx;
+		bend(state);
 		boolean arrived = false;
 		if (fresh) {
 			// Arrived from nowhere: already standing, every leg already braced.
 			arrived = true;
 			body = real;
 			for (int i = 0; i < LEGS; i++) {
-				foot[i] = findHold(i, level, yaw, OccupantGeometry.LEG_LENGTH[i] * px, rootY(i, px, dropPx));
+				foot[i] = findHold(i, level, yaw, OccupantGeometry.LEG_LENGTH[i] * px, root(i, px, dropPx));
 				swingStart[i] = -1.0f;
 				drawn[i] = null;
 				bendNow[i] = null;
@@ -237,6 +237,7 @@ public final class LegGait {
 		float ease = (float) (1.0 - Math.exp(-0.2 * dt));
 		leanForward += (wantF - leanForward) * ease;
 		leanSide += (wantS - leanSide) * ease;
+		bend(state);
 
 		// Legs.
 		int swinging = 0;
@@ -255,14 +256,13 @@ public final class LegGait {
 				continue;
 			}
 			double reach = OccupantGeometry.LEG_LENGTH[i] * px;
-			double hipY = rootY(i, px, dropPx);
-			Vec3 hip = new Vec3(body.x, hipY, body.z);
+			Vec3 hip = root(i, px, dropPx);
 			double score;
 			if (foot[i] == null) {
 				score = recheck ? 0.4 : 0.0;                  // a free leg feels about now and then
 			} else {
 				double stretch = foot[i].distanceTo(hip) / reach;
-				Vec3 ideal = ideal(i, yaw, reach, hipY - body.y);
+				Vec3 ideal = ideal(i, yaw, reach, hip);
 				double drift = ideal == null ? 0.0 : Math.hypot(foot[i].x - ideal.x, foot[i].z - ideal.z) / reach;
 				score = Math.max((stretch - 0.9) * 10.0, drift - 0.55);
 				if (recheck && !heldBy(level, foot[i])) score = 2.0;   // what it held is gone
@@ -274,11 +274,11 @@ public final class LegGait {
 		}
 		int maxSwinging = chasing ? 3 : 2;
 		if (worst >= 0 && worstScore > 0.0 && swinging < maxSwinging) {
-			replant(worst, level, yaw, px, rootY(worst, px, dropPx), chasing ? 2.0f : 3.0f);
+			replant(worst, level, yaw, px, root(worst, px, dropPx), chasing ? 2.0f : 3.0f);
 		} else if (now >= nextFidget && swinging == 0 && lag < 0.1 && !watched && !anyHeld) {
 			// Standing still, every so often one leg lets go and takes a new grip, slowly.
 			int i = (int) (rand(5, (int) now) * LEGS) % LEGS;
-			replant(i, level, yaw, px, rootY(i, px, dropPx), 9.0f);
+			replant(i, level, yaw, px, root(i, px, dropPx), 9.0f);
 			nextFidget = now + 90.0f + rand(9, (int) now) * 220.0f;
 		}
 
@@ -298,7 +298,7 @@ public final class LegGait {
 				at = new Vec3(Mth.lerp(e, from[i].x, at.x), Mth.lerp(e, from[i].y, at.y) + lift, Mth.lerp(e, from[i].z, at.z));
 			}
 			double reach = OccupantGeometry.LEG_LENGTH[i] * px;
-			Vec3 hip = new Vec3(body.x, rootY(i, px, dropPx), body.z);
+			Vec3 hip = root(i, px, dropPx);
 			boolean holding = holdAt[i] != null;
 			if (holding) {
 				// Into it, fast, harder at the end than at the start, and from then on exactly in it,
@@ -393,7 +393,7 @@ public final class LegGait {
 				double best = Double.NEGATIVE_INFINITY;
 				for (int i = 0; i < LEGS; i++) {
 					if (holds[i] >= 0) continue;
-					Vec3 hip = new Vec3(body.x, rootY(i, px, dropPx), body.z);
+					Vec3 hip = root(i, px, dropPx);
 					Vec3 to = centre.subtract(hip);
 					Vec3 flat = new Vec3(to.x, 0.0, to.z);
 					double score = flat.lengthSqr() < 1.0e-6 ? 0.0 : outward(i, yaw).dot(flat.normalize());
@@ -411,7 +411,7 @@ public final class LegGait {
 				lingerUntil[leg] = 0.0f;
 			}
 			// In at the back and out through the front, well past it, so the point is seen.
-			Vec3 hip = new Vec3(body.x, rootY(leg, px, dropPx), body.z);
+			Vec3 hip = root(leg, px, dropPx);
 			Vec3 through = centre.subtract(hip);
 			holdAt[leg] = through.lengthSqr() < 1.0e-4 ? centre
 					: centre.add(through.normalize().scale(held.getBbWidth() * 0.5 + 0.55));
@@ -439,21 +439,50 @@ public final class LegGait {
 		return cos > Math.cos(Math.min(Math.PI, halfDiagonal + margin));
 	}
 
-	/** Where leg i leaves the body, as a height in the world. */
-	private double rootY(int i, double px, float dropPx) {
-		return body.y + (OccupantGeometry.LEG_ROOT_HEIGHT[i] - dropPx) * px;
+	/** This frame's bend of the body, as {@link OccupantPose} will draw it. */
+	private void bend(OccupantRenderState state) {
+		boolean veiled = state.form == OccupantEntity.Form.VEILED;
+		spineX = OccupantPose.SPINE_REST + OccupantFit.CROUCH_BEND * fitCrouch + leanForward * OccupantPose.LEAN_FORWARD
+				+ OccupantPose.spineBend(state.mode, veiled);
+		spineZ = -leanSide * OccupantPose.LEAN_SIDE;
+		neckX = -OccupantFit.CROUCH_BEND * 0.75f * fitCrouch + OccupantPose.neckBend(state.mode, veiled);
+	}
+
+	/** Where leg i leaves the body, in the world: up the trunk, wherever the bent body has taken it. */
+	private Vec3 root(int i, double px, float dropPx) {
+		double up = OccupantGeometry.LEG_ROOT_HEIGHT[i] - OccupantGeometry.SPINE_ROOT_HEIGHT;
+		return fromSpine(0.0, -up, 0.0, px, dropPx);
+	}
+
+	/**
+	 * A point given in the spine's own frame (model pixels from its root: y down, -z in front), in
+	 * the world: turned by the spine's bend, from the root of the spine over the dropped hips, and
+	 * then as the renderer draws the model (scaled, flipped and turned to face its way).
+	 */
+	private Vec3 fromSpine(double x, double y, double z, double px, float dropPx) {
+		// Turned as ModelPart turns it: X first, then Z (the spine is never turned about Y).
+		double cx = Math.cos(spineX), sx = Math.sin(spineX);
+		double y1 = y * cx - z * sx, z1 = y * sx + z * cx;
+		double cz = Math.cos(spineZ), sz = Math.sin(spineZ);
+		double mx = x * cz - y1 * sz, my = x * sz + y1 * cz;
+		// Model to world: up from the ground, and the flip and the turn undone.
+		double up = (OccupantGeometry.SPINE_ROOT_HEIGHT - dropPx - my) * px;
+		double ax = -mx * px, az = z1 * px;
+		double theta = Math.PI - drawnYaw;
+		double c = Math.cos(theta), sn = Math.sin(theta);
+		return body.add(ax * c + az * sn, up, -ax * sn + az * c);
 	}
 
 	/** Sends leg i off to a new hold, if it can find one; otherwise it hangs free. */
-	private void replant(int i, Level level, double yaw, double px, double hipY, float duration) {
+	private void replant(int i, Level level, double yaw, double px, Vec3 hip, float duration) {
 		double reach = OccupantGeometry.LEG_LENGTH[i] * px;
-		Vec3 hold = findHold(i, level, yaw, reach, hipY);
+		Vec3 hold = findHold(i, level, yaw, reach, hip);
 		if (hold == null) {
 			foot[i] = null;
 			return;
 		}
 		// From wherever the leg is drawn now, so it never starts its reach from somewhere else.
-		from[i] = drawn[i] != null ? drawn[i] : foot[i] != null ? foot[i] : new Vec3(body.x, hipY - reach * 0.5, body.z);
+		from[i] = drawn[i] != null ? drawn[i] : foot[i] != null ? foot[i] : hip.add(0.0, -reach * 0.5, 0.0);
 		foot[i] = hold;
 		swingStart[i] = lastTime;
 		swingTime[i] = duration;
@@ -470,12 +499,13 @@ public final class LegGait {
 	}
 
 	/** Where on flat ground leg i would rest, ignoring what is actually there. */
-	private Vec3 ideal(int i, double yaw, double reach, double hipHeight) {
+	private Vec3 ideal(int i, double yaw, double reach, Vec3 hip) {
+		double hipHeight = hip.y - body.y;
 		double across = Math.sqrt(Math.max(0.0, reach * reach - hipHeight * hipHeight));
 		if (across < 0.2) return null;
 		Vec3 d = outward(i, yaw);
 		double r = across * (0.35 + 0.5 * rand(i, 7));
-		return new Vec3(body.x + d.x * r, body.y, body.z + d.z * r);
+		return new Vec3(hip.x + d.x * r, body.y, hip.z + d.z * r);
 	}
 
 	/**
@@ -484,16 +514,15 @@ public final class LegGait {
 	 * only ever reach high; with nothing beside it to brace on, those hang free rather than join
 	 * the others on the ground, so out in the open it does not stand on a ring of legs.
 	 */
-	private Vec3 findHold(int i, Level level, double yaw, double reach, double hipY) {
+	private Vec3 findHold(int i, Level level, double yaw, double reach, Vec3 hip) {
 		Vec3 d = outward(i, yaw);
 		// The legs highest up the body reach for walls and ceilings, not the floor.
 		boolean high = OccupantGeometry.LEG_ROOT_HEIGHT[i] > OccupantGeometry.HIPS_HEIGHT + 17.0f;
-		double height = (high ? 0.9 + 0.9 * rand(i, 11) : 0.15 + 0.6 * rand(i, 13)) * (hipY - body.y);
-		Vec3 hip = new Vec3(body.x, hipY, body.z);
+		double height = (high ? 0.9 + 0.9 * rand(i, 11) : 0.15 + 0.6 * rand(i, 13)) * (hip.y - body.y);
 
 		// Something beside it.
 		for (double t = 0.3; t <= reach * 0.95; t += 0.2) {
-			Vec3 p = new Vec3(body.x + d.x * t, body.y + height, body.z + d.z * t);
+			Vec3 p = new Vec3(hip.x + d.x * t, body.y + height, hip.z + d.z * t);
 			if (solidAt(level, p)) {
 				Vec3 face = new Vec3(p.x - d.x * 0.06, p.y, p.z - d.z * 0.06);
 				if (face.distanceTo(hip) <= reach * 0.97 && lineClear(level, hip, face)) return face;
@@ -503,7 +532,7 @@ public final class LegGait {
 		if (high) {
 			// Overhead, in a cramped space: brace against the ceiling.
 			for (double up = 0.5; up <= reach * 0.9; up += 0.25) {
-				Vec3 p = new Vec3(body.x + d.x * 0.6, hipY + up, body.z + d.z * 0.6);
+				Vec3 p = new Vec3(hip.x + d.x * 0.6, hip.y + up, hip.z + d.z * 0.6);
 				if (solidAt(level, p)) {
 					Vec3 face = new Vec3(p.x, Math.floor(p.y) - 0.04, p.z);
 					return face.distanceTo(hip) <= reach * 0.97 && lineClear(level, hip, face) ? face : null;
@@ -513,7 +542,7 @@ public final class LegGait {
 		}
 
 		// The ground.
-		Vec3 g = ideal(i, yaw, reach, hipY - body.y);
+		Vec3 g = ideal(i, yaw, reach, hip);
 		if (g == null) return null;
 		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 		int top = Mth.floor(body.y + 1.0);

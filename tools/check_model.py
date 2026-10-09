@@ -232,6 +232,59 @@ def check_ground(boxes, parents):
     return problems
 
 
+def check_legs():
+    """
+    The legs are aimed in game by OccupantGeometry.LEG_UPPER, LEG_LENGTH and LEG_TIP, not by the
+    bones themselves, so those have to be what was built: where the knee is, and where the hooked
+    point is in the shin's frame. If they drift, every planted leg misses what it is planted on.
+    """
+    import math
+    src = GEOM.read_text()
+    problems = []
+
+    def floats(name):
+        m = re.search(name + r' = \{([^}]*)\}', src)
+        return None if m is None else [float(v) for v in m.group(1).replace("f", "").split(",")]
+
+    upper_len, length, tip = floats("LEG_UPPER"), floats("LEG_LENGTH"), floats("LEG_TIP")
+    legs = re.search(r'LEGS = (\d+);', src)
+    if None in (upper_len, length, tip) or legs is None:
+        return ["OccupantGeometry is missing LEGS, LEG_UPPER, LEG_LENGTH or LEG_TIP"]
+    n = int(legs.group(1))
+    if len(upper_len) != n or len(length) != n or len(tip) != 3 * n:
+        return ["LEG_UPPER, LEG_LENGTH and LEG_TIP do not have one entry (three for LEG_TIP) per leg"]
+    poses, first_box = {}, {}
+    for m in PART_RE.finditer(src):
+        _parent, name, cubes, pose = m.groups()
+        poses[name] = [float(v) for v in NUM_RE.findall(pose)] if "ZERO" not in pose else [0.0] * 3
+        found = BOX_RE.search(cubes)
+        if found:
+            first_box[name] = [float(v) for v in NUM_RE.findall(found.group(2))][:6]
+    for i in range(n):
+        lower, claw = poses.get("leg%d_lower" % i), poses.get("leg%d_claw" % i)
+        if lower is None or claw is None or ("leg%d_claw" % i) not in first_box:
+            problems.append("leg%d has no shin or no point" % i)
+            continue
+        if abs(lower[1] - upper_len[i]) > 0.02:
+            problems.append("leg%d: LEG_UPPER says %.2f but the knee is at %.2f" % (i, upper_len[i], lower[1]))
+        rx, ry, rz = (claw[3:6] + [0.0, 0.0, 0.0])[:3]
+        x, y, z, w, h, d = first_box["leg%d_claw" % i]
+        v = [x + w / 2, y + h, z + d / 2]
+        # Minecraft turns a part about Z, then Y, then X: X is applied to the point first.
+        v = [v[0], v[1] * math.cos(rx) - v[2] * math.sin(rx), v[1] * math.sin(rx) + v[2] * math.cos(rx)]
+        v = [v[0] * math.cos(ry) + v[2] * math.sin(ry), v[1], -v[0] * math.sin(ry) + v[2] * math.cos(ry)]
+        v = [v[0] * math.cos(rz) - v[1] * math.sin(rz), v[0] * math.sin(rz) + v[1] * math.cos(rz), v[2]]
+        real = [claw[0] + v[0], claw[1] + v[1], claw[2] + v[2]]
+        said = tip[3 * i:3 * i + 3]
+        if max(abs(a - b) for a, b in zip(real, said)) > 0.02:
+            problems.append("leg%d: LEG_TIP says (%.2f, %.2f, %.2f) but the point is at (%.2f, %.2f, %.2f)"
+                            % ((i,) + tuple(said) + tuple(real)))
+        reach = lower[1] + math.sqrt(sum(c * c for c in real))
+        if abs(reach - length[i]) > 0.03:
+            problems.append("leg%d: LEG_LENGTH says %.2f but root to point is %.2f" % (i, length[i], reach))
+    return problems
+
+
 def check_tree(parents):
     """Every bone has to hang off something that exists, or the mesh cannot be built."""
     bad = []
@@ -258,6 +311,13 @@ def main():
         problems += len(ground)
         print("\nNOT STANDING ON THE GROUND:")
         for g in ground:
+            print("  " + g)
+
+    legs = check_legs()
+    if legs:
+        problems += len(legs)
+        print("\nLEGS AIMED WRONG (what the game aims them by is not what was built):")
+        for g in legs:
             print("  " + g)
 
     orphans = check_tree(parents)

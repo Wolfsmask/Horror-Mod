@@ -280,6 +280,31 @@ def parts():
 
 
 
+def leg_tips(ps):
+    """
+    Where each leg's point is, in its shin's own frame (the shin hangs along +y from the knee).
+    The point is hooked off at an angle of its own, so it is not on the shin's line: the leg is
+    aimed by this, so that in game the point itself lands where the leg is planted.
+    """
+    bone = {n: (piv, rot, own) for n, _p, piv, rot, own in ps}
+    tips = []
+    for i in range(LEGS):
+        # As the Java has them, to two places: that is what the game turns the point by.
+        piv, rot, own = bone[f"leg{i}_claw"]
+        px, py, pz = (round(float(v), 2) for v in piv)
+        rx, ry, rz = (round(float(v), 2) for v in rot)
+        x, y, z, w, h, d = (round(float(v), 2) for v in own[0][1:])
+        cx, cy, cz = np.cos([rx, ry, rz])
+        sx, sy, sz = np.sin([rx, ry, rz])
+        # Minecraft turns a part about Z, then Y, then X.
+        rot_x = np.array([[1, 0, 0], [0, cx, -sx], [0, sx, cx]])
+        rot_y = np.array([[cy, 0, sy], [0, 1, 0], [-sy, 0, cy]])
+        rot_z = np.array([[cz, -sz, 0], [sz, cz, 0], [0, 0, 1]])
+        end = rot_z @ rot_y @ rot_x @ np.array([x + w / 2, y + h, z + d / 2])
+        tips.append((px + float(end[0]), py + float(end[1]), pz + float(end[2])))
+    return tips
+
+
 def _world_origins(ps):
     """Where each bone sits once the whole tree is assembled."""
     pivot = {n: piv for n, _p, piv, _r, _b in ps}
@@ -644,12 +669,23 @@ public final class OccupantGeometry {
 \tpublic static final int LEGS = %d;
 \t/** Each leg's direction out from the body, in radians (model x = sin, model z = cos). */
 \tpublic static final float[] LEG_ANGLE = {%s};
-\t/** Each leg's full length, root to point, in model pixels. */
+\t/** Each leg's full length, root to point, in model pixels: the thigh, and from the knee to the point. */
 \tpublic static final float[] LEG_LENGTH = {%s};
+\t/**
+\t * Where each leg's point is in its shin's own frame (x, y, z for each leg in turn), in model
+\t * pixels: the shin hangs along +y from the knee, and the hooked point is off that line.
+\t */
+\tpublic static final float[] LEG_TIP = {%s};
 \t/** How high each leg leaves the body, above the ground, standing upright, in model pixels. */
 \tpublic static final float[] LEG_ROOT_HEIGHT = {%s};
 \t/** Each leg's thigh, root to knee, in model pixels: where the knee is when the leg is solved. */
 \tpublic static final float[] LEG_UPPER = {%s};
+\t/** How high the root of the spine (what the body bends about) is above the ground, standing upright. */
+\tpublic static final float SPINE_ROOT_HEIGHT = %sf;
+\t/** From the root of the spine to the base of the neck, in the spine's own frame, in model pixels. */
+\tpublic static final float[] SPINE_TO_NECK = {%s};
+\t/** From the base of the neck to the middle of the mouth, at the front of the face, in the neck's frame. */
+\tpublic static final float[] NECK_TO_MOUTH = {%s};
 
 \tprivate OccupantGeometry() {
 \t}
@@ -672,12 +708,27 @@ def write_java(ps, boxes, placed):
               if not name.startswith("leg"))
     height = GROUND - top
     layout = leg_layout()
+    tips = leg_tips(ps)
+    # Up the body to the mouth, for where its breath comes from and where its face is.
+    pivot_of = {n: piv for n, _p, piv, _r, _b in ps}
+    spine_to_neck = [pivot_of["yoke"][k] + pivot_of["neck"][k] for k in range(3)]
+    jaw = next(own for n, _p, _piv, _r, own in ps if n == "jaw")
+    _k, mx, my, _mz, mw, mh, _md = next(b for b in jaw if b[0] == "mouth")
+    front = min(b[3] for b in jaw)
+    neck_to_mouth = [pivot_of["skull"][0] + pivot_of["jaw"][0] + mx + mw / 2,
+                     pivot_of["skull"][1] + pivot_of["jaw"][1] + my + mh / 2,
+                     pivot_of["skull"][2] + pivot_of["jaw"][2] + front]
     lines = [HEADER % (", ".join('"%s"' % n for n in SHROUD), num(height).rstrip("f"),
                        num(HIPS_HEIGHT).rstrip("f"), LEGS,
                        ", ".join("%.4ff" % a for a, *_ in layout),
-                       ", ".join(num(u + l + c) for _a, _y, u, l, c in layout),
+                       ", ".join(num(u + float(np.linalg.norm(t)))
+                                 for (_a, _y, u, _l, _c), t in zip(layout, tips)),
+                       ", ".join(num(v) for t in tips for v in t),
                        ", ".join(num(leg_root_height(r)) for _a, r, _u, _l, _c in layout),
-                       ", ".join(num(u) for _a, _r, u, _l, _c in layout))]
+                       ", ".join(num(u) for _a, _r, u, _l, _c in layout),
+                       num(HIPS_HEIGHT - pivot_of["spine"][1]).rstrip("f"),
+                       ", ".join(num(v) for v in spine_to_neck),
+                       ", ".join(num(v) for v in neck_to_mouth))]
     box_at = {}
     for i, (owner, *_rest) in enumerate(boxes):
         box_at.setdefault(owner, []).append(i)

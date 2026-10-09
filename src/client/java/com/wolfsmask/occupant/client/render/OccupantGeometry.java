@@ -22,12 +22,23 @@ public final class OccupantGeometry {
 	public static final int LEGS = 10;
 	/** Each leg's direction out from the body, in radians (model x = sin, model z = cos). */
 	public static final float[] LEG_ANGLE = {0.3142f, 1.0912f, 1.3516f, 2.3733f, 2.7899f, 3.3368f, 4.2969f, 4.5178f, 5.4146f, 6.0547f};
-	/** Each leg's full length, root to point, in model pixels. */
-	public static final float[] LEG_LENGTH = {62.11f, 79.74f, 69.28f, 83.91f, 73.44f, 68.97f, 80.60f, 73.13f, 84.77f, 77.30f};
+	/** Each leg's full length, root to point, in model pixels: the thigh, and from the knee to the point. */
+	public static final float[] LEG_LENGTH = {61.57f, 79.31f, 68.68f, 83.48f, 73.01f, 68.30f, 80.08f, 72.47f, 84.41f, 76.60f};
+	/**
+	 * Where each leg's point is in its shin's own frame (x, y, z for each leg in turn), in model
+	 * pixels: the shin hangs along +y from the knee, and the hooked point is off that line.
+	 */
+	public static final float[] LEG_TIP = {-1.71f, 34.44f, -2.11f, -1.71f, 43.54f, -1.66f, 1.18f, 37.57f, 2.56f, 1.64f, 46.72f, 1.71f, -0.89f, 40.95f, 2.23f, -1.51f, 37.91f, 2.55f, -0.93f, 44.03f, -2.45f, 1.68f, 41.11f, 2.39f, 1.32f, 47.41f, 1.72f, -1.60f, 41.24f, 2.56f};
 	/** How high each leg leaves the body, above the ground, standing upright, in model pixels. */
 	public static final float[] LEG_ROOT_HEIGHT = {44.30f, 60.37f, 50.44f, 66.51f, 56.58f, 46.64f, 62.71f, 52.78f, 68.85f, 58.92f};
 	/** Each leg's thigh, root to knee, in model pixels: where the knee is when the leg is solved. */
 	public static final float[] LEG_UPPER = {27.02f, 35.71f, 31.01f, 36.70f, 31.99f, 30.28f, 35.97f, 31.26f, 36.96f, 35.25f};
+	/** How high the root of the spine (what the body bends about) is above the ground, standing upright. */
+	public static final float SPINE_ROOT_HEIGHT = 45.0f;
+	/** From the root of the spine to the base of the neck, in the spine's own frame, in model pixels. */
+	public static final float[] SPINE_TO_NECK = {0.0f, -31.50f, 0.40f};
+	/** From the base of the neck to the middle of the mouth, at the front of the face, in the neck's frame. */
+	public static final float[] NECK_TO_MOUTH = {0.0f, -6.20f, -3.35f};
 
 	private OccupantGeometry() {
 	}

@@ -36,8 +36,15 @@ final class OccupantPose {
 	private final ModelPart[] upper = new ModelPart[LEGS];
 	private final ModelPart[] lower = new ModelPart[LEGS];
 	private final float[] upperLength = new float[LEGS];
-	/** Shin and point together: the point carries straight on from the shin. */
+	/** Knee to point. */
 	private final float[] lowerLength = new float[LEGS];
+	/**
+	 * For each leg, the turn (a row-major 3x3) that takes the line from its knee to its point onto
+	 * the shin's own line. The point is hooked off at an angle of its own, so the shin is aimed as
+	 * though it carried straight on to its point, and then turned back by this: then the point,
+	 * not the line, lands where the leg is planted.
+	 */
+	private final float[][] unhook = new float[LEGS][];
 
 	OccupantPose(ModelPart root) {
 		this.hips = root.getChild("hips");
@@ -52,8 +59,23 @@ final class OccupantPose {
 			lower[i] = upper[i].getChild("leg" + i + "_lower");
 			lower[i].getChild("leg" + i + "_claw");   // it has to be there; it is carried along
 			upperLength[i] = lower[i].y;                 // the knee sits at the end of the thigh
-			lowerLength[i] = OccupantGeometry.LEG_LENGTH[i] - upperLength[i];
+			float tx = OccupantGeometry.LEG_TIP[i * 3], ty = OccupantGeometry.LEG_TIP[i * 3 + 1];
+			float tz = OccupantGeometry.LEG_TIP[i * 3 + 2];
+			lowerLength[i] = Mth.sqrt(tx * tx + ty * ty + tz * tz);
+			unhook[i] = ontoY(tx / lowerLength[i], ty / lowerLength[i], tz / lowerLength[i]);
 		}
+	}
+
+	/** The smallest turn that takes the unit vector (ax, ay, az) onto +y, as a row-major 3x3. */
+	private static float[] ontoY(float ax, float ay, float az) {
+		float s = Mth.sqrt(ax * ax + az * az);
+		if (s < 1.0e-6f) return new float[]{1, 0, 0, 0, 1, 0, 0, 0, 1};
+		// About the axis (a x y) / |a x y| = (-az, 0, ax) / s, by the angle whose sine is s and cosine ay.
+		float ux = -az / s, uz = ax / s, k = 1.0f - ay;
+		return new float[]{
+				1.0f + k * (ux * ux - 1.0f), -s * uz, k * ux * uz,
+				s * uz, ay, -s * ux,
+				k * ux * uz, s * ux, 1.0f + k * (uz * uz - 1.0f)};
 	}
 
 	/**
@@ -68,7 +90,7 @@ final class OccupantPose {
 
 		// A drift so slow you cannot tell whether it moved or you did.
 		float drift = Mth.sin(t * 0.013f);
-		spine.xRot = 0.03f + 0.012f * drift;
+		spine.xRot = SPINE_REST + 0.012f * drift;
 		// The hair lags behind the head and settles slowly, as if it were in water.
 		hair.xRot = 0.025f * Mth.sin(t * 0.021f + 1.3f);
 		hair.zRot = 0.03f * Mth.sin(t * 0.017f);
@@ -81,23 +103,55 @@ final class OccupantPose {
 		neck.xRot -= OccupantFit.CROUCH_BEND * 0.75f * crouch;
 
 		// Each shove carries it, and the body goes with it and then comes back upright.
-		spine.xRot += state.leanForward * 0.6f;
-		spine.zRot -= state.leanSide * 0.5f;
+		spine.xRot += state.leanForward * LEAN_FORWARD;
+		spine.zRot -= state.leanSide * LEAN_SIDE;
+
+		// How it is standing bends it further, and its neck back up, or down.
+		spine.xRot += spineBend(state.mode, veiled);
+		neck.xRot += neckBend(state.mode, veiled);
 
 		switch (state.mode) {
 			case CHASE -> chase(t, lookX, lookY);
 			case AMBUSH -> loom(lookX, lookY);
-			default -> stand(state.tilt, lookX, lookY, veiled);
+			default -> stand(state.tilt, lookX, lookY);
 		}
 		legs(state, t);
 	}
 
+	/** How far its body is bent forward when nothing is bending it. */
+	static final float SPINE_REST = 0.03f;
+	/** How far a shove leans it, forward and to the side, for each block of the shove. */
+	static final float LEAN_FORWARD = 0.6f;
+	static final float LEAN_SIDE = 0.5f;
+
+	/**
+	 * How far the way it is standing bends its body forward, on top of folding down and its shoves:
+	 * coming for you, bent into it; close enough to touch you, bent down to your height; early on,
+	 * keeping its head down, which makes the shape harder to read.
+	 */
+	static float spineBend(OccupantEntity.Mode mode, boolean veiled) {
+		return switch (mode) {
+			case CHASE -> 0.35f;
+			case AMBUSH -> 0.55f;
+			default -> veiled ? 0.12f : 0.0f;
+		};
+	}
+
+	/** And how far its neck bends forward with that (back, below nothing), before it looks at you. */
+	static float neckBend(OccupantEntity.Mode mode, boolean veiled) {
+		return switch (mode) {
+			case CHASE -> -0.4f;
+			case AMBUSH -> -0.35f;
+			default -> veiled ? 0.3f : -0.05f;
+		};
+	}
+
 	/** Standing. The head follows you a beat late and a little too far. */
-	private void stand(float tilt, float lookX, float lookY, boolean veiled) {
+	private void stand(float tilt, float lookX, float lookY) {
 		// The neck carries most of the turn, so the body stays squarely facing wherever it was.
 		neck.yRot = lookY * 0.45f;
 		skull.yRot = lookY * 0.55f;
-		neck.xRot += lookX * 0.3f - 0.05f;
+		neck.xRot += lookX * 0.3f;
 		skull.xRot = lookX * 0.6f;
 
 		// Every so often, while you were not looking, the head has gone somewhere else, tilted,
@@ -112,18 +166,12 @@ final class OccupantPose {
 		lean *= 1.0f + 0.3f * Math.max(0, Math.min(3, com.wolfsmask.occupant.client.PauseLines.act() - 1));
 		neck.zRot = lean * 0.35f;
 		skull.zRot = lean * 0.65f;
-		if (veiled) {
-			// Early on it keeps its head down, which makes the shape harder to read.
-			spine.xRot += 0.12f;
-			neck.xRot += 0.35f;
-		}
 	}
 
 	/** Close enough to touch you. It bends down to your height, and the mouth opens. */
 	private void loom(float lookX, float lookY) {
 		jaw.yScale = 1.3f;                          // the face pulls longer, around the mouth
-		spine.xRot += 0.55f;
-		neck.xRot += -0.35f + lookX * 0.3f;
+		neck.xRot += lookX * 0.3f;
 		skull.xRot = 0.45f + lookX * 0.4f;
 		skull.yRot = lookY * 0.5f;
 	}
@@ -131,8 +179,6 @@ final class OccupantPose {
 	/** Coming for you. Bent forward into it, face first, mouth working. */
 	private void chase(float t, float lookX, float lookY) {
 		jaw.yScale = 1.25f + 0.08f * Mth.sin(t * 0.9f);
-		spine.xRot += 0.35f;
-		neck.xRot += -0.4f;
 		skull.xRot = 0.3f + lookX * 0.3f;
 		skull.yRot = lookY * 0.3f;
 	}
@@ -191,6 +237,7 @@ final class OccupantPose {
 				upper[i].yRot = 0.0f;
 				lower[i].xRot = 0.0f;
 				lower[i].yRot = 0.0f;
+				lower[i].zRot = 0.0f;
 			}
 		}
 	}
@@ -198,7 +245,8 @@ final class OccupantPose {
 	/**
 	 * Two-bone reach from the hip (px, py, pz) to (tx, ty, tz), all in the hips' frame, with the
 	 * knee bent towards (kx, ky, kz). Each bone hangs along +y at rest and is turned by X then Y,
-	 * which is the order ModelPart applies them in (Z then Y then X, with Z left at zero).
+	 * which is the order ModelPart applies them in (Z then Y then X, with Z left at zero). The
+	 * thigh is aimed along its own line at the knee; the shin so that its point lands on the target.
 	 */
 	private boolean solve(int i, float px, float py, float pz, float tx, float ty, float tz,
 						  float kx, float ky, float kz) {
@@ -244,13 +292,26 @@ final class OccupantPose {
 		float x2 = (float) Math.acos(Mth.clamp(wy, -1.0f, 1.0f));
 		float y2 = (float) Mth.atan2(vx, wz);
 
-		if (!Float.isFinite(x1 + y1 + x2 + y2)) return false;
+		// That aims the shin's own line at the target. Its point is off that line, so the shin is
+		// turned back by the hook first: (Y by y2, then X by x2) times unhook, as Z, Y, X angles.
+		float cx2 = Mth.cos(x2), sx2 = Mth.sin(x2), cy2 = Mth.cos(y2), sy2 = Mth.sin(y2);
+		float[] u = unhook[i];
+		float m00 = cy2 * u[0] + sy2 * sx2 * u[3] + sy2 * cx2 * u[6];
+		float m10 = cx2 * u[3] - sx2 * u[6];
+		float m20 = -sy2 * u[0] + cy2 * sx2 * u[3] + cy2 * cx2 * u[6];
+		float m21 = -sy2 * u[1] + cy2 * sx2 * u[4] + cy2 * cx2 * u[7];
+		float m22 = -sy2 * u[2] + cy2 * sx2 * u[5] + cy2 * cx2 * u[8];
+		float lx = (float) Mth.atan2(m21, m22);
+		float ly = (float) Math.asin(Mth.clamp(-m20, -1.0f, 1.0f));
+		float lz = (float) Mth.atan2(m10, m00);
+
+		if (!Float.isFinite(x1 + y1 + lx + ly + lz)) return false;
 		upper[i].xRot = x1;
 		upper[i].yRot = y1;
 		upper[i].zRot = 0.0f;
-		lower[i].xRot = x2;
-		lower[i].yRot = y2;
-		lower[i].zRot = 0.0f;
+		lower[i].xRot = lx;
+		lower[i].yRot = ly;
+		lower[i].zRot = lz;
 		return true;
 	}
 }
