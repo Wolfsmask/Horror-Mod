@@ -79,6 +79,10 @@ public final class BehindYouEvent extends HorrorEvent {
 		private Strike strike;
 		/** When it was really there, behind them; -1 before then. */
 		private int thereAt = -1;
+		/** When they turned and saw it; -1 if they have not. */
+		private int seenAt = -1;
+		/** As far off as a leg reaches somebody from, with a little to spare: no nearer, no strike. */
+		private static final double REACH = 2.6;
 
 		Ambush(Haunt haunt, OccupantEntity entity, boolean attack) {
 			super(haunt, entity);
@@ -119,7 +123,8 @@ public final class BehindYouEvent extends HorrorEvent {
 
 		/**
 		 * Come to hurt them. It keeps close behind them, silently; a breath at their ear; and when
-		 * they turn round, or a few seconds after if they never do, the leg.
+		 * they turn round, or a few seconds after if they never do, the leg. Only ever from where a
+		 * leg can reach them: seen from further off, it comes for them first, fast.
 		 */
 		private boolean closeIn(ServerPlayer p) {
 			if (entity.isConcealed()) return age < 300;    // not there yet: it never arrives in sight
@@ -128,12 +133,16 @@ public final class BehindYouEvent extends HorrorEvent {
 			double dist = entity.distanceTo(p);
 			if (there == 12) Cues.sound(p, ModSounds.BREATH, SoundSource.HOSTILE, entity.getEyePosition(), 0.8f, 0.9f);
 			boolean turned = Sight.angleTo(p, entity.getEyePosition()) <= 55.0 && Sight.canSeeAnyPart(p, entity);
-			if (turned || there >= 60 || dist < 1.2) {
+			if (turned && seenAt < 0) seenAt = age;
+			boolean due = seenAt >= 0 || there >= 60 || dist < 1.2;
+			if (due && dist <= REACH) {
 				strike = new Strike(haunt, entity);
 				return strike.tick(p);
 			}
 			if (dist > 9.0) return false;                 // they ran: it will not wait as long next time
-			if (dist > 2.4 && age % 5 == 0) entity.chase(p, 1.15);
+			// Seen, or done waiting: straight at them. Otherwise it keeps close behind, at a walk.
+			if (due && age % 3 == 0) entity.chase(p, 1.6);
+			else if (dist > 2.4 && age % 5 == 0) entity.chase(p, 1.15);
 			return age < 600;
 		}
 
