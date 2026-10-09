@@ -26,6 +26,11 @@ public class OccupantRenderState extends HumanoidRenderState {
 	/** Which way each knee bends to stay out of the blocks, in model space; used where set. */
 	public final float[] legBend = new float[OccupantGeometry.LEGS * 3];
 	public final boolean[] legBendSet = new boolean[OccupantGeometry.LEGS];
+	/**
+	 * How far down it looks, in radians, from its face; NaN until worked out. The game aims its head
+	 * from where a person's eyes would be, and its face is far above that.
+	 */
+	public float facePitch = Float.NaN;
 	/** Its own clock, in ticks, which stands still while it is being looked at. */
 	public float clock;
 	/** The angle its head is held at, -1 to 1; changed only while it is not being looked at. */

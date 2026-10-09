@@ -39,6 +39,8 @@ public final class OccupantGeometry {
 	public static final float[] SPINE_TO_NECK = {0.0f, -31.50f, 0.40f};
 	/** From the base of the neck to the middle of the mouth, at the front of the face, in the neck's frame. */
 	public static final float[] NECK_TO_MOUTH = {0.0f, -6.20f, -3.35f};
+	/** From the base of the neck to between its eyes, at the front of the face, in the neck's frame. */
+	public static final float[] NECK_TO_EYES = {0.0f, -14.0f, -3.40f};
 
 	private OccupantGeometry() {
 	}

@@ -273,9 +273,9 @@ public class OccupantEntity extends PathfinderMob {
 	 * so it is never seen simply blinking out of the world.
 	 */
 	public void vanishFrom(@Nullable ServerPlayer player) {
+		// Any of it in sight counts, as it is drawn: over a wall, its head may be all of it there is.
 		if (!vanished && player != null && !isConcealed() && player.level() == this.level()
-				&& this.distanceTo(player) < 112.0 && com.wolfsmask.occupant.util.Sight.isOnScreen(player, this)
-				&& com.wolfsmask.occupant.util.Sight.hasLineOfSight(player, this.getEyePosition())) {
+				&& this.distanceTo(player) < 112.0 && com.wolfsmask.occupant.util.Sight.isOnScreen(player, this)) {
 			com.wolfsmask.occupant.util.Cues.effect(player, com.wolfsmask.occupant.network.ScreenEffectPayload.FLICKER, 5, 1f);
 		}
 		vanish();

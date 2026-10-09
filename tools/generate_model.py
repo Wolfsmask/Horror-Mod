@@ -686,6 +686,8 @@ public final class OccupantGeometry {
 \tpublic static final float[] SPINE_TO_NECK = {%s};
 \t/** From the base of the neck to the middle of the mouth, at the front of the face, in the neck's frame. */
 \tpublic static final float[] NECK_TO_MOUTH = {%s};
+\t/** From the base of the neck to between its eyes, at the front of the face, in the neck's frame. */
+\tpublic static final float[] NECK_TO_EYES = {%s};
 
 \tprivate OccupantGeometry() {
 \t}
@@ -718,6 +720,10 @@ def write_java(ps, boxes, placed):
     neck_to_mouth = [pivot_of["skull"][0] + pivot_of["jaw"][0] + mx + mw / 2,
                      pivot_of["skull"][1] + pivot_of["jaw"][1] + my + mh / 2,
                      pivot_of["skull"][2] + pivot_of["jaw"][2] + front]
+    # The eyes are painted on the front of the face, two rows from three below its top (paint_face).
+    skull = next(own for n, _p, _piv, _r, own in ps if n == "skull")
+    _k, fx, fy, fz, fw, _fh, _fd = next(b for b in skull if b[0] == "face")
+    neck_to_eyes = [pivot_of["skull"][0] + fx + fw / 2, pivot_of["skull"][1] + fy + 4.0, pivot_of["skull"][2] + fz]
     lines = [HEADER % (", ".join('"%s"' % n for n in SHROUD), num(height).rstrip("f"),
                        num(HIPS_HEIGHT).rstrip("f"), LEGS,
                        ", ".join("%.4ff" % a for a, *_ in layout),
@@ -728,7 +734,8 @@ def write_java(ps, boxes, placed):
                        ", ".join(num(u) for _a, _r, u, _l, _c in layout),
                        num(HIPS_HEIGHT - pivot_of["spine"][1]).rstrip("f"),
                        ", ".join(num(v) for v in spine_to_neck),
-                       ", ".join(num(v) for v in neck_to_mouth))]
+                       ", ".join(num(v) for v in neck_to_mouth),
+                       ", ".join(num(v) for v in neck_to_eyes))]
     box_at = {}
     for i, (owner, *_rest) in enumerate(boxes):
         box_at.setdefault(owner, []).append(i)

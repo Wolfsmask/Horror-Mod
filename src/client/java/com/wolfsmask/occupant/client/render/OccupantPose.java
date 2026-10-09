@@ -113,7 +113,9 @@ final class OccupantPose {
 		switch (state.mode) {
 			case CHASE -> chase(t, lookX, lookY);
 			case AMBUSH -> loom(lookX, lookY);
-			default -> stand(state.tilt, lookX, lookY);
+			// Standing, it looks at them from its own face (see LegGait); bent to them, or coming for
+			// them, its face is already brought down to them, and the game's aim is what it was made for.
+			default -> stand(state.tilt, Float.isNaN(state.facePitch) ? lookX : state.facePitch, lookY);
 		}
 		legs(state, t);
 	}

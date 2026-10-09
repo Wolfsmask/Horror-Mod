@@ -357,6 +357,22 @@ public final class LegGait {
 			state.legTarget[i * 3 + 1] = my;
 			state.legTarget[i * 3 + 2] = mz;
 		}
+
+		// How far down it looks. The game aims its head from a person's eye height, at whoever it is
+		// looking at; its face is far above that, so close to it would stare out over their head.
+		// Which way round it looks stays the game's; how far down is worked out again from its eyes:
+		// at what the game's aim points at, as far off as whoever is watching.
+		state.facePitch = Float.NaN;
+		Entity viewer = net.minecraft.client.Minecraft.getInstance().player;
+		if (viewer != null) {
+			float[] n = OccupantGeometry.NECK_TO_EYES, sp = OccupantGeometry.SPINE_TO_NECK;
+			double nc = Math.cos(neckX), ns = Math.sin(neckX);
+			Vec3 eyes = fromSpine(sp[0] + n[0], sp[1] + n[1] * nc - n[2] * ns, sp[2] + n[1] * ns + n[2] * nc, px, dropPx);
+			double away = Math.max(0.5, Math.hypot(viewer.getX() - real.x, viewer.getZ() - real.z));
+			double aimedAt = real.y + entity.getEyeHeight() - Math.tan(Math.toRadians(entity.getXRot())) * away;
+			double fromEyes = Math.max(0.5, Math.hypot(viewer.getX() - eyes.x, viewer.getZ() - eyes.z));
+			state.facePitch = (float) Mth.clamp(Math.atan2(eyes.y - aimedAt, fromEyes), -1.05, 1.05);
+		}
 	}
 
 	/**
