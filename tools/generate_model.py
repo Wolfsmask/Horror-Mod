@@ -158,18 +158,21 @@ EYE_RX, EYE_RY = 1.4, 1.75
 # dark line across the face, so the hollows of the cheeks are in the paint instead.
 JAW_ROWS = [
     # outer, opening, front
-    (3.5, 1.25, -3.0),
-    (3.375, 1.625, -3.0),
-    (3.25, 1.875, -3.0),
-    (3.125, 2.0, -3.0),       # the cheeks fall in here: hollow
-    (3.0, 1.875, -3.0),
-    (2.875, 1.75, -3.0),
-    (2.625, 1.5, -3.0),
-    (2.375, 1.25, -3.0),
-    (2.125, 0.875, -3.0),
-    (1.875, 0.5, -3.0),
+    (3.5, 0.0, -3.0),         # skin between the nose and the mouth: closed
+    (3.5, 0.625, -3.0),
+    (3.5, 1.125, -3.0),
+    (3.375, 1.375, -3.0),     # the cheeks fall in here: hollow
+    (3.375, 1.5, -3.0),
+    (3.25, 1.5, -3.0),
+    (3.125, 1.5, -3.0),
+    (3.0, 1.25, -3.0),
+    (2.75, 0.875, -3.0),
+    (2.5, 0.0, -3.0),         # the bottom of it is only paint
 ]
 JAW_BACK = 0.375
+# The mouth as it is seen: an oval, painted. Every row's opening lies inside it, so the steps of
+# the rows never show; the paint is what makes it round.
+MOUTH_Y, MOUTH_RX, MOUTH_RY = 5.25, 1.65, 4.75
 
 
 def tex_scale(kind):
@@ -206,16 +209,21 @@ def jaw_boxes():
     """
     out = []
     for r, (outer, opening, front) in enumerate(JAW_ROWS):
+        if opening == 0.0:
+            # Closed, across the middle. The top one is kept in front of the neck, whose top it
+            # would otherwise share.
+            back = -0.875 if r == 0 else JAW_BACK
+            out.append(("skin", -outer, float(r), front, 2 * outer, 1.0, back - front))
+            continue
         out.append(("skin", -outer, float(r), front, outer - opening, 1.0, JAW_BACK - front))
         out.append(("skin", opening, float(r), front, outer - opening, 1.0, JAW_BACK - front))
-    # The chin: no opening, narrowing to a point.
-    out.append(("skin", -1.5, 10.0, -3.0, 3.0, 0.75, JAW_BACK + 3.0))
-    out.append(("skin", -1.0, 10.75, -3.0, 2.0, 0.625, JAW_BACK + 3.0))
-    out.append(("skin", -0.5, 11.375, -3.0, 1.0, 0.375, JAW_BACK + 3.0))
+    # The chin: no opening, rounding off, long and narrow but never a point.
+    out.append(("skin", -2.125, 10.0, -3.0, 4.25, 0.75, JAW_BACK + 3.0))
+    out.append(("skin", -1.625, 10.75, -3.0, 3.25, 0.625, JAW_BACK + 3.0))
+    out.append(("skin", -1.0, 11.375, -3.0, 2.0, 0.375, JAW_BACK + 3.0))
     # Inside: a hollow behind the cheeks, reaching into them so its walls are never seen, and
     # narrower where the cheeks are, lower down, so it never shows outside them.
-    out.append(("cavity", -2.125, 0.125, -1.5, 4.25, 6.375, 1.625))     # split between rows, not on one
-    out.append(("cavity", -1.625, 6.5, -1.5, 3.25, 3.125, 1.625))
+    out.append(("cavity", -1.625, 1.0625, -1.5, 3.25, 8.5, 1.625))
 
     # The needles. Each its own box, each a little nearer or further than the last, so no two of
     # them share a plane; all of them well behind the skin of the cheeks and in front of the
@@ -227,16 +235,13 @@ def jaw_boxes():
         z = -1.9 - 0.0137 * seq[0]
         out.append(("fang", x, y, z, w, h, 0.25))
 
-    for x, length in ((-1.0, 1.25), (-0.67, 0.875), (-0.33, 1.5), (0.0, 1.0), (0.33, 1.625), (0.67, 0.75),
-                      (1.0, 1.125)):
-        needle(x - 0.125, 0.125, 0.25, length)                       # hanging from the top
-    for r, left, right in ((1, 0.625, 0.5), (3, 0.5, 0.75), (5, 0.75, 0.375), (7, 0.375, 0.625)):
+    # Only a few, far in at the sides: a row of teeth across the top, under the nose, made a
+    # snout of it.
+    for r, left, right in ((3, 0.375, 0.5), (5, 0.5, 0.25), (7, 0.25, 0.375)):
         opening = JAW_ROWS[r][1]
         jag = 0.25 * ((r * 0.618) % 1.0)
         needle(-opening - 0.125, r + 0.25 + jag, left + 0.125, 0.125)       # in from the left
         needle(opening - right, r + 0.6 - jag * 0.5, right + 0.125, 0.125)  # in from the right
-    for x, length in ((-0.3, 0.875), (0.05, 1.25), (0.38, 0.75)):
-        needle(x - 0.125, 10.0 - length, 0.25, length + 0.125)       # up from the bottom
     return out
 
 
@@ -573,7 +578,7 @@ GUM_F = np.array([110, 30, 28], float)
 BLACK_F = np.array([6, 4, 4], float)
 THROAT_F = np.array([134, 34, 34], float)      # far down inside the mouth, red
 ROOT_F = np.array([118, 96, 64], float)
-TIP_F = np.array([238, 232, 210], float)
+TIP_F = np.array([196, 184, 150], float)
 GLINT_F = np.array([196, 188, 168], float)     # something, far back in each eye
 
 _NOISE = np.random.default_rng(77).random((24, 24, 24))
@@ -654,11 +659,6 @@ for side in (-1, 1):
     for k in range(3):
         start = (side * (3.2 - 0.35 * k), -7.2 - 0.6 * k)
         VEINS.append(_wander(500 + k + (10 if side > 0 else 0), start, 0.35, 9, (-side * 0.45, -0.9)))
-# The corners of the mouth, torn up towards the eyes, as if it had been opened wider than it goes.
-TEARS_MOUTH = [
-    ([(side * 1.2, -2.2), (side * 1.7, -2.6), (side * 2.15, -2.85), (side * 2.5, -3.15)], 0.08)
-    for side in (-1, 1)
-]
 
 
 def skin_colour(p, n, owner):
@@ -698,9 +698,10 @@ def skin_colour(p, n, owner):
 
     if front:
         # Two slits where a nose should be.
-        nx = (ax - 0.42) / 0.12
-        ny = (y + 3.05 + 0.25 * (ax - 0.42)) / 0.36
-        col = mix(col, (24, 12, 12), 0.92 * smooth(1.1, 0.7, np.sqrt(nx * nx + ny * ny)))
+        nx = (ax - 0.3) / 0.13
+        ny = (y + 3.2) / 0.17
+        col = mix(col, (40, 26, 26), 0.85 * smooth(1.1, 0.6, np.sqrt(nx * nx + ny * ny)))
+        col = mix(col, SHADE_F, 0.3 * np.exp(-((x / 0.7) ** 2 + ((y + 3.35) / 0.5) ** 2)))
         # The cheekbones catch the light; under them the face falls in.
         cb = np.exp(-(((ax - 2.55) / 0.7) ** 2 + ((y + 3.4) / 0.55) ** 2))
         col = col * (1.0 + 0.12 * cb)[:, None]
@@ -710,21 +711,15 @@ def skin_colour(p, n, owner):
             d, along = _polyline_distance(x, y, pts)
             w = width * (1.0 - 0.55 * along)
             col = mix(col, BLOOD_F, (0.92 - 0.45 * along) * smooth(w, w * 0.35, d))
-        # The torn corners of the mouth.
-        for pts, width in TEARS_MOUTH:
-            d, _ = _polyline_distance(x, y, pts)
-            col = mix(col, WET_F, 0.9 * smooth(width * 1.9, width, d))
-            col = mix(col, BLOOD_F, smooth(width, width * 0.3, d))
 
     # The edge of the mouth: lips, thin, wet and dark.
     if owner == "jaw":
         jy = y + FACE_MID
-        row = np.clip(np.floor(jy).astype(int), 0, len(JAW_ROWS) - 1)
-        opening = np.array([r_[1] for r_ in JAW_ROWS])[row]
-        edge = ax - opening
-        inside_mouth = (jy < len(JAW_ROWS)) & (edge < 0.32)
         if front:
-            col[inside_mouth] = mix(col[inside_mouth], WET_F * 0.8, 0.85 * smooth(0.32, 0.05, edge[inside_mouth]))
+            e = np.sqrt((x / MOUTH_RX) ** 2 + ((jy - MOUTH_Y) / MOUTH_RY) ** 2)
+            inside = mouth_inside(x, jy)
+            col = mix(col, WET_F * 0.75, 0.9 * smooth(1.09, 1.0, e))             # the lips: thin, wet
+            col = mix(col, inside, smooth(1.0, 0.97, e))
         elif not (n[2] > 0.5):
             # Facing into the mouth: gums, darkening the further in they go.
             gum = mix(np.tile(GUM_F, (len(p), 1)), BLACK_F, smooth(-2.6, -1.4, z))
@@ -735,6 +730,12 @@ def skin_colour(p, n, owner):
         roof = (ax < 1.7) & (y > -2.35)
         col[roof] = mix(col[roof], GUM_F * 0.6, np.ones(roof.sum()))
     return col
+
+
+def mouth_inside(x, jy):
+    """The colour inside the mouth, by where: black, and red far down."""
+    col = mix(np.tile(BLACK_F, (len(x), 1)), THROAT_F, 0.95 * smooth(3.5, 9.4, jy) ** 1.2)
+    return col * (0.85 + 0.15 * np.sin(x * 7.0) ** 2)[:, None]               # ridges down the throat
 
 
 def face_texels(kind, owner, box, p, n):
@@ -753,9 +754,7 @@ def face_texels(kind, owner, box, p, n):
             glow = np.maximum(glow, 170 * smooth(0.13, 0.06, g))
         return col, glow
     if kind == "cavity":
-        jy = y + FACE_MID
-        col = mix(np.tile(BLACK_F, (len(p), 1)), THROAT_F, 0.95 * smooth(3.5, 9.4, jy) ** 1.2)
-        col = col * (0.85 + 0.15 * np.sin(x * 7.0) ** 2)[:, None]            # ridges down the throat
+        col = mouth_inside(x, y + FACE_MID)
         if n[1] < -0.5:
             col = mix(col, (36, 8, 8), np.full(len(p), 0.8))
         glow[:] = 0
