@@ -1,6 +1,22 @@
 @mc 1.20.1 1.21.1 1.21.11 26.1.2 26.2 26.3
-# Round 51: telling a vanilla village or outpost is round a chunk, during world generation.
-net.minecraft.world.level.chunk.ChunkAccess Reference|hasAny
-net.minecraft.world.level.levelgen.structure.Structure step
-net.minecraft.world.level.WorldGenLevel getLevel
-net.minecraft.world.level.block.state.BlockBehaviour$BlockStateBase blocksMotion|canBeReplaced
+# Round 52: moving a player in a scene, killing mobs, tinting and thinning the land, dead villages.
+net.minecraft.server.level.ServerPlayer teleport|setNoGravity
+net.minecraft.world.entity.Entity teleportTo|kill\(|discard|setNoGravity|hurtMarked
+net.minecraft.server.network.ServerGamePacketListenerImpl teleport
+net.fabricmc.fabric.api.biome.v1.BiomeModificationContext$EffectsContext set
+net.fabricmc.fabric.api.biome.v1.BiomeModificationContext$GenerationSettingsContext remove
+net.fabricmc.fabric.api.biome.v1.BiomeModificationContext$AttributesContext .
+net.fabricmc.fabric.api.biome.v1.BiomeModificationContext .
+net.fabricmc.fabric.api.biome.v1.BiomeModification add
+net.fabricmc.fabric.api.biome.v1.ModificationPhase .
+net.minecraft.world.level.StructureManager getStructureWithPieceAt|getStructureAt
+net.minecraft.server.level.ServerLevel structureManager
+net.minecraft.world.entity.item.ItemEntity setUnlimitedLifetime|setNeverPickUp|setPickUpDelay
+net.minecraft.world.entity.ai.navigation.PathNavigation setSpeedModifier|getPath\(|moveTo
+net.minecraft.world.level.pathfinder.Path getTarget|isDone
+net.minecraft.world.level.Level destroyBlock
+net.minecraft.tags.StructureTags VILLAGE
+net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents ENTITY_LOAD
+net.minecraft.data.worldgen.placement.VegetationPlacements FLOWER|SUNFLOWER|FOREST
+@data worldgen/placed_feature/(flower_default|dark_oak_checked|trees_plains)\.json
+@data worldgen/configured_feature/(dark_oak|spruce)\.json
