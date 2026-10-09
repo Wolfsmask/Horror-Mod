@@ -448,15 +448,21 @@ public final class LegGait {
 		net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
 		if (mc.player == null) return false;
 		Vec3 eye = mc.player.getEyePosition();
-		Vec3 to = at.add(0.0, 1.4 * scale, 0.0).subtract(eye);
-		double dist = to.length();
-		if (dist < 1.0e-3) return true;
+		Vec3 look = mc.player.getViewVector(1.0f);
 		double aspect = Math.max(1.0, (double) mc.getWindow().getWidth() / Math.max(1, mc.getWindow().getHeight()));
 		double halfV = Math.toRadians(mc.options.fov().get() * 0.5);
 		double halfDiagonal = Math.atan(Math.tan(halfV) * Math.sqrt(1.0 + aspect * aspect));
-		double margin = Math.atan(2.0 * scale / dist) + Math.toRadians(8.0);
-		double cos = to.scale(1.0 / dist).dot(mc.player.getViewVector(1.0f));
-		return cos > Math.cos(Math.min(Math.PI, halfDiagonal + margin));
+		// All the way up it, as tall as it is drawn: from close by, looking up at its face, its feet
+		// are off the bottom of the screen; each with a margin for how far its legs reach out.
+		double tall = scale * OccupantGeometry.HEIGHT / 16.0;
+		for (double up : new double[]{0.15, 0.5, 0.9}) {
+			Vec3 to = at.add(0.0, tall * up, 0.0).subtract(eye);
+			double dist = to.length();
+			if (dist < 1.0e-3) return true;
+			double margin = Math.atan(tall * 0.55 / dist) + Math.toRadians(8.0);
+			if (to.scale(1.0 / dist).dot(look) > Math.cos(Math.min(Math.PI, halfDiagonal + margin))) return true;
+		}
+		return false;
 	}
 
 	/** This frame's bend of the body, as {@link OccupantPose} will draw it. */

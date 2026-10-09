@@ -27,22 +27,30 @@ public final class Spots {
 	private Spots() {
 	}
 
+	/** Clear blocks it needs over its feet to stand anywhere: it is never drawn under 2.6 tall. */
+	public static final int HEADROOM = 3;
+
 	/** Never touches chunks that are not already loaded (that would stall the server). */
 	public static boolean isLoaded(ServerLevel world, BlockPos pos) {
 		return world.isInWorldBounds(pos)
 				&& world.hasChunk(SectionPos.blockToSectionCoord(pos.getX()), SectionPos.blockToSectionCoord(pos.getZ()));
 	}
 
-	/** Could the Occupant stand with its feet in this block? */
+	/**
+	 * Could the Occupant stand with its feet in this block? It folds down into low places, but is
+	 * never drawn less than 2.6 blocks tall (it must never look like a person), so it needs three
+	 * clear blocks above its feet, not a person's two: in a tunnel dug two high its head would be
+	 * through the roof.
+	 */
 	public static boolean canStand(ServerLevel world, BlockPos feet) {
-		if (!isLoaded(world, feet) || !world.isInWorldBounds(feet.above(2))) return false;
+		if (!isLoaded(world, feet) || !world.isInWorldBounds(feet.above(HEADROOM))) return false;
 
 		BlockPos below = feet.below();
 		BlockState floor = world.getBlockState(below);
 		if (!floor.isFaceSturdy(world, below, Direction.UP)) return false;
 		if (floor.is(BlockTags.LEAVES) || floor.is(Blocks.MAGMA_BLOCK) || floor.is(Blocks.CACTUS)) return false;
 
-		for (int i = 0; i < 2; i++) {
+		for (int i = 0; i < HEADROOM; i++) {
 			BlockPos p = feet.above(i);
 			BlockState s = world.getBlockState(p);
 			if (!s.getCollisionShape(world, p).isEmpty()) return false;
