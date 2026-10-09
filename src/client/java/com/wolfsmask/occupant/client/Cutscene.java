@@ -1,5 +1,6 @@
 package com.wolfsmask.occupant.client;
 
+import com.wolfsmask.occupant.client.render.LegGait;
 import com.wolfsmask.occupant.entity.OccupantEntity;
 import com.wolfsmask.occupant.util.Sight;
 import net.minecraft.client.KeyMapping;
@@ -120,7 +121,11 @@ public final class Cutscene {
 			}
 		}
 		if (it == null) return null;
-		Vec3 face = it.position().add(0.0, it.getBbHeight() * Sight.DRAWN_HEIGHT_FACTOR * 0.62, 0.0);
+		// Its face, as it is drawn (a little above the middle of its mouth); before it has been
+		// drawn, about where its face will be.
+		Vec3 mouth = LegGait.mouth(it);
+		Vec3 face = mouth != null ? mouth.add(0.0, 0.3, 0.0)
+				: it.position().add(0.0, it.getBbHeight() * Sight.DRAWN_HEIGHT_FACTOR * 0.88, 0.0);
 		int focus = it.getFocus();
 		if (focus >= 0) {
 			Entity f = player.level().getEntity(focus);

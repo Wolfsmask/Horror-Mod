@@ -30,7 +30,7 @@ import java.util.WeakHashMap;
  * All of this is client-side and cosmetic: the entity itself moves exactly as the server says,
  * and nothing here touches the world beyond reading which blocks are solid.
  */
-final class LegGait {
+public final class LegGait {
 	private static final Map<OccupantEntity, LegGait> GAITS = new WeakHashMap<>();
 	private static final int LEGS = OccupantGeometry.LEGS;
 	/** How far the drawn body may lag behind the real one, in blocks. */
@@ -90,6 +90,37 @@ final class LegGait {
 	/** Where each holding leg's point is this frame, or null. */
 	private final Vec3[] holdAt = new Vec3[LEGS];
 
+	/** Which way the body was last drawn facing, in radians. */
+	private double drawnYaw;
+
+	/**
+	 * Up the body, in model pixels: from the hips to the root of the spine, from there to the base
+	 * of the neck, and from there to the middle of the mouth; and how far the mouth is in front of
+	 * the body's line. Measured off the model generate_model.py builds.
+	 */
+	private static final double SPINE_ROOT_PX = OccupantGeometry.HIPS_HEIGHT + 1.0;
+	private static final double TRUNK_PX = 31.5;
+	private static final double HEAD_PX = 6.2;
+	private static final double MOUTH_AHEAD_PX = 3.0;
+
+	/**
+	 * Where the middle of its mouth is drawn, in the world, as of the last frame it was drawn: as
+	 * tall and as folded as it was, wherever its body had got to. Null until it has been drawn.
+	 */
+	@Nullable
+	public static Vec3 mouth(OccupantEntity entity) {
+		LegGait g = GAITS.get(entity);
+		if (g == null || g.body == null || Float.isNaN(g.fitScale)) return null;
+		double px = g.fitScale / 16.0;
+		// Folded as OccupantPose folds it: hips dropped, the spine bent over, the neck most of the way back up.
+		double bend = OccupantFit.CROUCH_BEND * g.fitCrouch;
+		double headBend = bend * 0.25;
+		double up = (SPINE_ROOT_PX - OccupantFit.CROUCH_DROP * g.fitCrouch + TRUNK_PX * Math.cos(bend)
+				+ HEAD_PX * Math.cos(headBend)) * px;
+		double ahead = (TRUNK_PX * Math.sin(bend) + HEAD_PX * Math.sin(headBend) + MOUTH_AHEAD_PX) * px;
+		return g.body.add(-Math.sin(g.drawnYaw) * ahead, up, Math.cos(g.drawnYaw) * ahead);
+	}
+
 	static LegGait of(OccupantEntity entity) {
 		return GAITS.computeIfAbsent(entity, e -> new LegGait(e.getId()));
 	}
@@ -133,6 +164,7 @@ final class LegGait {
 
 		double px = scale / 16.0;                             // model pixels to blocks
 		double yaw = Math.toRadians(state.bodyRot);
+		drawnYaw = yaw;
 		boolean arrived = false;
 		if (fresh) {
 			// Arrived from nowhere: already standing, every leg already braced.

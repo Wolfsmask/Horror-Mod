@@ -1,5 +1,6 @@
 package com.wolfsmask.occupant.client;
 
+import com.wolfsmask.occupant.client.render.LegGait;
 import com.wolfsmask.occupant.entity.OccupantEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -71,15 +72,23 @@ public final class ClientScares {
 		}
 	}
 
-	/** In cold air, now and then, its breath. */
+	/**
+	 * Whether it breathes in cold air. The client test turns it off while it photographs it: a
+	 * puff of cloud across its face spoils the picture.
+	 */
+	public static boolean breath = true;
+
+	/** In cold air, now and then, its breath: out of its mouth, wherever that is drawn. */
 	private static void breathe(Minecraft mc, OccupantEntity e) {
-		if ((e.tickCount + e.getId()) % 45 != 0) return;
-		BlockPos head = BlockPos.containing(e.getX(), e.getY() + 3.0, e.getZ());
+		if (!breath || (e.tickCount + e.getId()) % 45 != 0) return;
+		Vec3 mouth = LegGait.mouth(e);
+		if (mouth == null) return;
+		BlockPos head = BlockPos.containing(mouth);
 		if (mc.level.getBiome(head).value().getBaseTemperature() > 0.25f && head.getY() < 140) return;
-		Vec3 facing = Vec3.directionFromRotation(0, e.getYHeadRot()).scale(0.35);
+		Vec3 facing = Vec3.directionFromRotation(0, e.getYHeadRot()).scale(0.15);
 		for (int i = 0; i < 4; i++) {
-			mc.level.addParticle(ParticleTypes.CLOUD, e.getX() + facing.x, e.getY() + 2.8, e.getZ() + facing.z,
-					facing.x * 0.05, 0.01, facing.z * 0.05);
+			mc.level.addParticle(ParticleTypes.CLOUD, mouth.x + facing.x, mouth.y, mouth.z + facing.z,
+					facing.x * 0.3, 0.01, facing.z * 0.3);
 		}
 	}
 

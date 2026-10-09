@@ -81,10 +81,16 @@ final class ForestGallery {
 			// where the world began.
 			house(context, game, new BlockPos[]{woods[0], woods[1], spawn});
 
-			// And the stills for the mod's page, in the same world.
-			Cinematic.run(context, game, woods, spawn);
-			// And the ones that look like a player's own screenshots.
-			FoundFootage.run(context, game, woods, spawn);
+			// And the stills for the mod's page, in the same world, without its breath: a puff of
+			// cloud across its face spoils the picture.
+			context.runOnClient(mc -> com.wolfsmask.occupant.client.ClientScares.breath = false);
+			try {
+				Cinematic.run(context, game, woods, spawn);
+				// And the ones that look like a player's own screenshots.
+				FoundFootage.run(context, game, woods, spawn);
+			} finally {
+				context.runOnClient(mc -> com.wolfsmask.occupant.client.ClientScares.breath = true);
+			}
 		} catch (RuntimeException | AssertionError e) {
 			Occupant.LOGGER.warn("[client-gametest] forest gallery stopped early", e);
 		}
