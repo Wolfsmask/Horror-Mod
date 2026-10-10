@@ -20,6 +20,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.Enemy;
@@ -393,9 +394,12 @@ public final class TakenEnding implements Sequence {
 		for (int k = 0; k < CANDLES_OUT.length; k++) {
 			if (t == CANDLES_OUT[k]) candle(p, o, CANDLES[k], false);
 		}
+		// With the last of them, the dark: real dark, whatever their brightness is set to, but for
+		// the pale of its face, and the two specks in the black of its eyes.
+		if (t == CANDLES_OUT[CANDLES_OUT.length - 1]) p.addEffect(new MobEffectInstance(MobEffects.DARKNESS, FLARE - t + 4, 0, false, false));
 		if (t == CLOSE && entity != null) {
 			// While the dark is complete: right in front of them, between them and the wall.
-			Vec3 at = new Vec3(o.getX() + 2.1, o.getY(), o.getZ() + 0.5);
+			Vec3 at = new Vec3(o.getX() + 1.7, o.getY(), o.getZ() + 0.5);
 			float yaw = com.wolfsmask.occupant.util.Sight.yawBetween(at, p.position());
 			entity.halt();
 			entity.snapTo(at.x, at.y, at.z, yaw, 0.0f);
@@ -412,6 +416,7 @@ public final class TakenEnding implements Sequence {
 			if (entity != null) Cues.sound(p, ModSounds.BREATH, SoundSource.HOSTILE, entity.getEyePosition(), 1.0f, 0.6f);
 		}
 		if (t == FLARE) {
+			p.removeEffect(MobEffects.DARKNESS);
 			candle(p, o, -2, true);
 			candle(p, o, 2, true);
 			Cues.effect(p, ScreenEffectPayload.STATIC, 8, 0.45f);
@@ -420,6 +425,8 @@ public final class TakenEnding implements Sequence {
 		if (t == FLARE_OUT) {
 			candle(p, o, -2, false);
 			candle(p, o, 2, false);
+			// And it goes, in the dark.
+			p.addEffect(new MobEffectInstance(MobEffects.DARKNESS, BLACK - t + 10, 0, false, false));
 		}
 		if (t >= TURN && t < LEAVES && entity != null && !entity.isPathing()) entity.faceTowards(p.getEyePosition());
 		if (t == LEAVES && entity != null) {
@@ -457,6 +464,7 @@ public final class TakenEnding implements Sequence {
 	// ------------------------------------------------------------------ the end of it
 
 	private void black(ServerPlayer p) {
+		p.removeEffect(MobEffects.DARKNESS);
 		Cues.effect(p, ScreenEffectPayload.BLACKOUT, WAKE - BLACK, 1f);
 		Cues.effect(p, ScreenEffectPayload.SILENCE, 0, 1f);
 		if (entity != null) entity.vanish();

@@ -69,7 +69,7 @@ final class FoundFootage {
 			shot("roof", () -> found(context, game, woods, true));
 			shot("hole", () -> found(context, game, woods, false));
 			shot("taken", () -> taken(context, game, woods));
-			shot("walk", () -> walk(context, game, woods));
+			shot("walk", () -> walk(context, game, spawn));
 		} catch (RuntimeException | AssertionError e) {
 			Occupant.LOGGER.warn("[client-gametest] found footage stopped early", e);
 		} finally {
@@ -460,11 +460,22 @@ final class FoundFootage {
 	 * running straight at it. Small pictures, to be put together into moving ones and looked at for
 	 * anything that jerks, slides or snaps back.
 	 */
-	private static void walk(ClientGameTestContext context, TestSingleplayerContext game, BlockPos[] woods) {
+	private static void walk(ClientGameTestContext context, TestSingleplayerContext game, BlockPos spawn) {
 		TestServerContext server = game.getServer();
-		BlockPos floor = server.computeOnServer(s -> ForestGallery.clearing(s.overworld(), woods[0].offset(-40, 0, 80)));
-		if (floor == null) return;
-		server.runOnServer(s -> Cinematic.fellTrees(s.overworld(), floor, 16));
+		// Out in the open where the world began, on bare flat ground: nothing over it to fold under,
+		// nothing in its way.
+		BlockPos floor = spawn.offset(24, 0, 24);
+		server.runOnServer(s -> {
+			ServerLevel level = s.overworld();
+			int y = Cinematic.ground(level, floor.getX(), floor.getZ());
+			for (int x = -14; x <= 14; x++) {
+				for (int z = -4; z <= 24; z++) {
+					BlockPos g = new BlockPos(floor.getX() + x, y - 1, floor.getZ() + z);
+					level.setBlock(g, Blocks.GRASS_BLOCK.defaultBlockState(), 2);
+					for (int up = 1; up <= 14; up++) level.setBlock(g.above(up), Blocks.AIR.defaultBlockState(), 2);
+				}
+			}
+		});
 		server.runCommand("gamemode survival @p");
 		server.runCommand("effect clear @p");
 		int y = server.computeOnServer(s -> Cinematic.ground(s.overworld(), floor.getX(), floor.getZ()));
