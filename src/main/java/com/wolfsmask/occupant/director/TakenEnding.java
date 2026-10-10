@@ -286,7 +286,9 @@ public final class TakenEnding implements Sequence {
 				if (!world.getBlockState(back).isFaceSturdy(world, back, Direction.WEST)) set(world, back, Blocks.DEEPSLATE.defaultBlockState());
 			}
 		}
-		seal(world, o.offset(-2, -2, -5), o.offset(5, 4, 5));
+		// Wide of it as well: where it goes when it leaves, and the hollow round them, so no lava
+		// lights the dark when the candles are out.
+		seal(world, o.offset(-12, -3, -9), o.offset(6, 7, 9));
 		int k = 0;
 		for (int row = 0; row < ROWS; row++) {
 			for (int col = 0; col < COLUMNS; col++, k++) {
