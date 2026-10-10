@@ -317,18 +317,20 @@ public final class ScreenEffects {
 
 		// Drawn after the blackout, so a line can surface in the dark and be the only thing there.
 		if (cfg.screenText) drawWhisper(ctx, w, h, tickDelta, cfg);
-		drawTitles(ctx, w, h, tickDelta);
+		drawTitles(ctx, w, h, tickDelta, Cutscene.active() && dark < 0.5f);
 		drawIntro(ctx, w, h, tickDelta);
 	}
 
 	/**
 	 * The words at the end of everything: the title large across the middle, rising slowly out of
 	 * the dark and sinking back; the line under it the same, smaller, in the colour of old blood
-	 * when it is the only thing there, grey under a title.
+	 * when it is the only thing there, grey under a title. In a scene they can still see, low down,
+	 * the way a film has its words: the middle is where what they are being made to look at is.
 	 */
-	private static void drawTitles(GuiGraphicsExtractor ctx, int w, int h, float tickDelta) {
+	private static void drawTitles(GuiGraphicsExtractor ctx, int w, int h, float tickDelta, boolean low) {
 		Font font = Minecraft.getInstance().font;
 		boolean titled = titleAge < titleLength && !titleText.isEmpty();
+		int middle = low ? Math.round(h * 0.74f) : h / 2;
 		if (titled) {
 			float b = titleBrightness(titleAge + tickDelta, titleLength);
 			if (b > 0.02f) {
@@ -336,7 +338,7 @@ public final class ScreenEffects {
 				Component line = Component.literal(titleText).withStyle(Style.EMPTY.withColor(TextColor.fromRgb(v << 16 | v << 8 | Math.min(255, v + 6))));
 				float scale = 2.0f;
 				GuiCompat.push(ctx);
-				GuiCompat.translate(ctx, (w - font.width(titleText) * scale) / 2f, h / 2f - 22f);
+				GuiCompat.translate(ctx, (w - font.width(titleText) * scale) / 2f, middle - 22f);
 				GuiCompat.scale(ctx, scale);
 				GuiCompat.text(ctx, 0, 0, line);
 				GuiCompat.pop(ctx);
@@ -348,7 +350,7 @@ public final class ScreenEffects {
 				int r = (int) Mth.lerp(b, 12f, titled ? 165f : 175f);
 				int colour = titled ? (r << 16 | r << 8 | Math.min(255, r + 6)) : (r << 16 | (r * 2 / 5) << 8 | (r * 2 / 5));
 				Component line = Component.literal(subText).withStyle(Style.EMPTY.withColor(TextColor.fromRgb(colour)));
-				GuiCompat.text(ctx, (w - font.width(subText)) / 2, titled ? h / 2 + 10 : h / 2 + 22, line);
+				GuiCompat.text(ctx, (w - font.width(subText)) / 2, titled ? middle + 10 : middle + (low ? 0 : 22), line);
 			}
 		}
 	}
