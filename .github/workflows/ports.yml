@@ -57,8 +57,16 @@ jobs:
         run: |
           mkdir -p build/gametest
           echo "eula=true" > build/gametest/eula.txt
+          # Stuck: where, in every thread of the game, after eight minutes (they take two); then it is stopped.
+          ( sleep 480
+            for pid in $(jps -l | grep -vi -e gradle -e jps | awk '{print $1}'); do jstack "$pid" >> threads.txt 2>&1 || true; done
+            for pid in $(jps -l | grep -vi -e gradle -e jps | awk '{print $1}'); do kill "$pid" 2>/dev/null || true; done ) &
+          watchdog=$!
           set -o pipefail
-          ./gradlew runGametest -Pmc=${{ matrix.mc }} --console=plain 2>&1 | tee test.log
+          status=0
+          ./gradlew runGametest -Pmc=${{ matrix.mc }} --console=plain 2>&1 | tee test.log || status=$?
+          kill "$watchdog" 2>/dev/null || true
+          exit "$status"
 
       - name: Record the result
         if: always()
@@ -77,7 +85,12 @@ jobs:
               # The tests never got going: why.
               if ! grep -q "GAME TESTS COMPLETE" test.log; then
                 echo "=== the game tests never finished"
-                grep -E "Exception|Caused by|Couldn't|Failed to|failed to" test.log | head -n 30 || true
+                grep -E "\[gametest-step\]" test.log | tail -n 4 || true
+                if [ -s threads.txt ]; then
+                  echo "=== where the server was stuck"
+                  awk '/^"Server thread"/{p=1} p{print; if (++n > 70) exit}' threads.txt
+                fi
+                grep -E "Exception|Caused by|Couldn't|Failed to|failed to|OutOfMemory" test.log | head -n 30 || true
               fi
             fi
           } > "$OUT/result.txt"

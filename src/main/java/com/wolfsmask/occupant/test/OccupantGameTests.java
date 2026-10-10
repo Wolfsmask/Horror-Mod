@@ -1088,6 +1088,7 @@ public final class OccupantGameTests {
 		for (int i = 0; i < events.size(); i++) {
 			String id = events.get(i).id();
 			helper.runAtTickTime(40 + (long) i * TICKS_PER_EVENT, () -> {
+				Occupant.LOGGER.info("[gametest-step] every event: {}", id);
 				data.dread = 100f;
 				data.lastPeakAt = -1;
 				data.calmUntil = 0;

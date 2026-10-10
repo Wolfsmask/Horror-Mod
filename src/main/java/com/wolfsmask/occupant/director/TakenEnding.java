@@ -347,7 +347,7 @@ public final class TakenEnding implements Sequence {
 		}
 		p.setHealth(p.getMaxHealth());
 		p.resetFallDistance();
-		Cues.lookAt(p, face(signAt(o, 0, 0)));
+		Cues.lookAt(p, face(signAt(o, ROWS / 2, 0)));
 	}
 
 	/** One tick in its lair. */
@@ -362,6 +362,8 @@ public final class TakenEnding implements Sequence {
 			}
 			if (entity != null) {
 				entity.setConcealed(false);
+				// As it holds them when it has them: and without the static of its stare, so the names can be read.
+				entity.setMode(OccupantEntity.Mode.AMBUSH);
 				entity.setGazeLocked(true);
 				entity.faceTowards(p.getEyePosition());
 			}
@@ -374,7 +376,7 @@ public final class TakenEnding implements Sequence {
 			// Along the names, left to right, slowly.
 			double f = (t - PAN_FROM) / (double) (PAN_TO - PAN_FROM);
 			f = f * f * (3.0 - 2.0 * f);
-			Vec3 left = face(signAt(o, 0, 0)), right = face(signAt(o, ROWS - 1, COLUMNS - 1));
+			Vec3 left = face(signAt(o, ROWS / 2, 0)), right = face(signAt(o, ROWS / 2, COLUMNS - 1));
 			Cues.lookAt(p, new Vec3(left.x, Mth.lerp(f, left.y, right.y), Mth.lerp(f, left.z, right.z)));
 		}
 		if (t == SUB_KEEPS) Cues.title(p, "It keeps everyone it takes.", 90, true);
@@ -383,7 +385,7 @@ public final class TakenEnding implements Sequence {
 		if (t >= WRITE_FROM && (t - WRITE_FROM) % WRITE_EVERY == 0) write(p, o, (t - WRITE_FROM) / WRITE_EVERY + 1);
 		if (t == SUB_LEARNED) {
 			Cues.title(p, seen >= 8 ? "Every time you looked at it, it learned more of you."
-					: "You hardly ever looked at it. It never needed you to.", 110, true);
+					: "You hardly ever looked at it. It never needed you to.", 75, true);
 		}
 		if (t == TURN) {
 			Cues.lookFree(p);

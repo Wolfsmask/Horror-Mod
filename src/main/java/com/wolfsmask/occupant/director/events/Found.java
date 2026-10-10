@@ -198,6 +198,7 @@ public final class Found {
 				from = p.position();
 				to = holdPoint(p);
 				entity.halt();
+				entity.setMode(OccupantEntity.Mode.AMBUSH);
 				entity.setHeld(List.of(p));
 				Cues.sound(p, SoundEvents.TRIDENT_HIT, SoundSource.HOSTILE, p.getEyePosition(), 1.0f, 0.55f);
 				Cues.effect(p, ScreenEffectPayload.STATIC, 8, 0.5f);
