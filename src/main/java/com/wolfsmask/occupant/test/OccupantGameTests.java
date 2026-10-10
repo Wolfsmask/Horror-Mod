@@ -948,11 +948,6 @@ public final class OccupantGameTests {
 		});
 	}
 
-	/**
-	 * A monster of this kind at {@code at}, by the game's own command (its entity type is not
-	 * reachable by name on every version), or null if it could not be put there.
-	 */
-	@org.jetbrains.annotations.Nullable
 	/** Ground it can stand on in this test's own place, near {@code relative}; null if there is none. */
 	@org.jetbrains.annotations.Nullable
 	private static BlockPos groundFor(GameTestHelper helper, BlockPos relative) {
@@ -968,6 +963,11 @@ public final class OccupantGameTests {
 		return null;
 	}
 
+	/**
+	 * A monster of this kind at {@code at}, by the game's own command (its entity type is not
+	 * reachable by name on every version), or null if it could not be put there.
+	 */
+	@org.jetbrains.annotations.Nullable
 	private static net.minecraft.world.entity.Mob summon(GameTestHelper helper, String kind, BlockPos at) {
 		ServerLevel level = helper.getLevel();
 		MinecraftServer server = level.getServer();
