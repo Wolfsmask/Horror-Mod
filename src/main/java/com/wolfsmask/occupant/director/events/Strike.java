@@ -145,12 +145,15 @@ public final class Strike {
 		return true;
 	}
 
-	/** However it ends: they are let go of, and their view is theirs again. */
+	/**
+	 * However it ends: they are let go of, and their view is theirs again; unless it has taken them
+	 * and this is the end beginning, which goes on being a scene without a break.
+	 */
 	public void release() {
 		haunt.taking(false);
 		ServerPlayer p = held;
 		if (p == null) return;
-		letGo(p, true);
+		letGo(p, !(taken && t >= OVER));
 		held = null;
 	}
 

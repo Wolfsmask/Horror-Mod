@@ -124,15 +124,15 @@ public final class Found {
 	/**
 	 * After the black: they wake where they sleep with some of their things gone, and are told why
 	 * (more gone, the second time). Caught again at the very end of the story, they do not wake at
-	 * home: it takes them.
+	 * home: it takes them. True if it has taken them (the end begins once this is over).
 	 */
-	static void punish(Haunt h, ServerPlayer p) {
+	static boolean punish(Haunt h, ServerPlayer p) {
 		HauntData d = h.data;
 		boolean again = d.cooldowns.containsKey(CAUGHT);
 		if (again && TakenEnding.ready(d)) {
 			d.cooldowns.remove(CAUGHT);
 			TakenEnding.begin(h);
-			return;
+			return true;
 		}
 		d.cooldowns.put(CAUGHT, Long.MAX_VALUE);
 		takeThings(p, again ? 4 : 2);
@@ -140,6 +140,7 @@ public final class Found {
 		String line = again ? "It told you. It doesn't want you to do that." : "It doesn't want you to do that.";
 		Cues.whisper(p, line, 160);
 		Cues.message(p, Component.literal(line).withStyle(ChatFormatting.DARK_RED, ChatFormatting.ITALIC));
+		return false;
 	}
 
 	/** {@code least} or one more of whatever they carry, gone. */
@@ -443,10 +444,10 @@ public final class Found {
 				Cues.effect(p, ScreenEffectPayload.BLACKOUT, 110, 1f);
 				Cues.effect(p, ScreenEffectPayload.SILENCE, 0, 1f);
 			}
-			if (t == PUNISH) {
+			// Taken, it does not let go: it is still holding them up when the end begins.
+			if (t == PUNISH && !punish(haunt, p)) {
 				lift.release();
 				Cues.effect(p, ScreenEffectPayload.CUTSCENE, 0, 0f);
-				punish(haunt, p);
 			}
 			return t < OVER;
 		}
@@ -569,10 +570,10 @@ public final class Found {
 				Cues.effect(p, ScreenEffectPayload.BLACKOUT, 110, 1f);
 				Cues.effect(p, ScreenEffectPayload.SILENCE, 0, 1f);
 			}
-			if (t == PUNISH) {
+			// Taken, it does not let go: it is still holding them up when the end begins.
+			if (t == PUNISH && !punish(haunt, p)) {
 				lift.release();
 				Cues.effect(p, ScreenEffectPayload.CUTSCENE, 0, 0f);
-				punish(haunt, p);
 			}
 			return t < OVER;
 		}
