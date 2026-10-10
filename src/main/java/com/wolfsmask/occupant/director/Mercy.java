@@ -662,6 +662,8 @@ public final class Mercy {
 		/** How far, at most, it drags them, and how far ahead of them it walks. */
 		private static final int FURTHEST = 9;
 		private static final double AHEAD = 1.7;
+		/** How far off it stands while it holds the bottle to their mouth. */
+		private static final double BOTTLE_FROM = 2.4;
 		/** Ticks into a bottle flash when they drink. */
 		private static final int DRINK = 18;
 
@@ -791,11 +793,13 @@ public final class Mercy {
 				Cues.sound(p, SoundEvents.TRIDENT_HIT, SoundSource.HOSTILE, p.getEyePosition(), 0.7f, 0.5f);
 				return;
 			}
-			// Over them, closer than it walks, a bottle on the end of a leg at their mouth.
-			Vec3 over = p.position().add(way.scale(1.2));
+			// Over them, a bottle on the end of a leg at their mouth: far enough off that its face
+			// and the bottle are both in what they see.
+			Vec3 over = p.position().add(way.scale(BOTTLE_FROM));
 			it.setPos(over.x, it.getY(), over.z);
 			it.setDeltaMovement(Vec3.ZERO);
-			Vec3 mouth = p.getEyePosition().add(way.scale(0.45)).add(0.0, -0.3, 0.0);
+			Vec3 eye = p.getEyePosition();
+			Vec3 mouth = eye.add(way.scale(0.55)).add(0.0, -0.12, 0.0);
 			ServerLevel level = Compat.level(p);
 			net.minecraft.world.entity.item.ItemEntity b = new net.minecraft.world.entity.item.ItemEntity(level, mouth.x, mouth.y, mouth.z, Compat.healingPotion());
 			b.setNoGravity(true);
@@ -806,9 +810,11 @@ public final class Mercy {
 				bottle = b;
 				it.setHeld(List.of(b));
 			}
-			// Their eyes up, to its face, the bottle at the bottom of what they see.
-			double face = Sight.drawnBlocks(1.2, it.getAct()) * 0.86;
-			Cues.lookAt(p, over.add(0.0, face - (over.y - it.getY()), 0.0).lerp(mouth, 0.35));
+			// Their eyes half way between its face, up over them, and the bottle at their mouth: the
+			// face at the top of what they see, the bottle at the bottom.
+			double face = it.getY() + Sight.drawnBlocks(BOTTLE_FROM, it.getAct()) * 0.86 - eye.y;
+			double up = (Math.atan2(face, BOTTLE_FROM) + Math.atan2(mouth.y - eye.y, 0.55)) / 2.0;
+			Cues.lookAt(p, eye.add(way.scale(2.0)).add(0.0, 2.0 * Math.tan(up), 0.0));
 		}
 
 		/**
@@ -861,7 +867,8 @@ public final class Mercy {
 				float health = Math.min(p.getMaxHealth(), p.getHealth() + p.getMaxHealth() * 0.45f);
 				p.setHealth(health);
 				p.getFoodData().setFoodLevel(Math.min(20, p.getFoodData().getFoodLevel() + 8));
-				Compat.level(p).sendParticles(ParticleTypes.HEART, p.getX(), p.getY() + 1.9, p.getZ(), 4, 0.3, 0.2, 0.3, 0.02);
+				// Seen by anyone watching; under where they are looking themselves.
+				Compat.level(p).sendParticles(ParticleTypes.HEART, p.getX(), p.getY() + 0.9, p.getZ(), 3, 0.35, 0.2, 0.35, 0.02);
 			}
 			if (in == SHOT - 1) lookAway(p);
 		}
