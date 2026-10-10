@@ -65,6 +65,29 @@ public final class Cues {
 		ServerPlayNetworking.send(player, new WhisperPayload(text, durationTicks, corner));
 	}
 
+	/**
+	 * The title of an ending, large across the middle of the screen ({@code under}: the line
+	 * beneath it instead). Shown whatever the whispers are set to: it is the end of the story.
+	 */
+	public static void title(ServerPlayer player, String line, int durationTicks, boolean under) {
+		if (!ServerPlayNetworking.canSend(player, WhisperPayload.TYPE)) return;
+		String text = line.replace("{player}", player.getName().getString());
+		if (text.length() > WhisperPayload.MAX_LENGTH) text = text.substring(0, WhisperPayload.MAX_LENGTH);
+		ServerPlayNetworking.send(player, new WhisperPayload(text, durationTicks, under ? WhisperPayload.SUBTITLE : WhisperPayload.TITLE));
+	}
+
+	/** The scene they are watching looks at this place, until {@link #lookFree}. */
+	public static void lookAt(ServerPlayer player, Vec3 at) {
+		effect(player, ScreenEffectPayload.LOOK_X, (int) Math.round(at.x * 8.0), 1f);
+		effect(player, ScreenEffectPayload.LOOK_Y, (int) Math.round(at.y * 8.0), 1f);
+		effect(player, ScreenEffectPayload.LOOK_Z, (int) Math.round(at.z * 8.0), 1f);
+	}
+
+	/** The scene they are watching looks at the Occupant again. */
+	public static void lookFree(ServerPlayer player) {
+		effect(player, ScreenEffectPayload.LOOK_FREE, 0, 1f);
+	}
+
 	public static void message(ServerPlayer player, Component text) {
 		player.sendSystemMessage(text);
 	}

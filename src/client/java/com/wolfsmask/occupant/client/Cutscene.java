@@ -39,6 +39,10 @@ public final class Cutscene {
 	/** How far the bands have come in, 0 to 1. */
 	private static float bands;
 	private static long lastBands;
+	/** A place the server has said to look at instead of the Occupant, and the parts of the next one as they come. */
+	@Nullable
+	private static Vec3 fixed;
+	private static double nextX, nextY;
 
 	private Cutscene() {
 	}
@@ -68,7 +72,19 @@ public final class Cutscene {
 	static void reset() {
 		active = false;
 		target = null;
+		fixed = null;
 		bands = 0.0f;
+	}
+
+	/** The server's word on what to look at: a place, a part at a time (x, y, then z), or null for the Occupant again. */
+	static void look(int part, int eighths) {
+		double v = eighths / 8.0;
+		switch (part) {
+			case 0 -> nextX = v;
+			case 1 -> nextY = v;
+			case 2 -> fixed = new Vec3(nextX, nextY, v);
+			default -> fixed = null;
+		}
 	}
 
 	/** Every tick: what to look at now, and the keys let go of. */
@@ -87,6 +103,7 @@ public final class Cutscene {
 	/** Over: and a key they have held down all through it counts again, without pressing it anew. */
 	private static void finish(Minecraft mc) {
 		active = false;
+		fixed = null;
 		// Only while they are in the world (no screen open, the mouse theirs to look with).
 		if (mc.mouseHandler.isMouseGrabbed()) KeyMapping.setAll();
 	}
@@ -110,6 +127,7 @@ public final class Cutscene {
 	 */
 	@Nullable
 	private static Vec3 lookAt(LocalPlayer player) {
+		if (fixed != null) return fixed;
 		OccupantEntity it = null;
 		double best = 64.0 * 64.0;
 		for (OccupantEntity e : player.level().getEntitiesOfClass(OccupantEntity.class, player.getBoundingBox().inflate(64.0),

@@ -24,6 +24,11 @@ public final class Haunt {
 
 	@Nullable
 	Sequence active;
+	/** What begins the moment the one that is running is over (it has taken them: the end), and its id. */
+	@Nullable
+	Sequence queued;
+	@Nullable
+	String queuedId;
 	/** The fog this player's client was last told to show (blocks; 0 = none), or -1 before the first time. */
 	float fogSent = -1.0f;
 	/** The act this player's client was last told, or -1 before the first time. */
@@ -43,7 +48,8 @@ public final class Haunt {
 	long lastShownAt;
 	/** When something that could show it last began, in ticks of play. */
 	long lastShowTriedAt = -1;
-	/** Seconds in a row under a roof or underground, and when it last asked why (ticks of play). */
+	/** When they last looked right at it, in ticks of play: on their screen is not the same as seen. */
+	long lastSeenAt;
 	/** Seconds hidden away (a house, a hole, under the ground), out of the open, and seconds since back in it. */
 	int hiddenSeconds;
 	int outFor;
@@ -114,6 +120,7 @@ public final class Haunt {
 
 	Haunt(UUID uuid, HauntData data, RandomSource random) {
 		this.lastShownAt = data.playTicks;
+		this.lastSeenAt = data.playTicks;
 		this.uuid = uuid;
 		this.data = data;
 		// After logging in, let the player settle before anything happens.
@@ -127,6 +134,18 @@ public final class Haunt {
 	/** It is on their screen now: whether or not they look straight at it, it has been seen. */
 	public void markShown() {
 		lastShownAt = data.playTicks;
+	}
+
+	/** They are looking right at it. */
+	public void markSeen() {
+		lastSeenAt = data.playTicks;
+		lastShownAt = data.playTicks;
+	}
+
+	/** Begins {@code sequence} the moment whatever is running now is over. */
+	public void queue(String id, Sequence sequence) {
+		queued = sequence;
+		queuedId = id;
 	}
 
 	@Nullable

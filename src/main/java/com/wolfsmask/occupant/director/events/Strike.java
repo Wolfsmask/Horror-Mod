@@ -4,6 +4,7 @@ import com.wolfsmask.occupant.OccupantConfig;
 import com.wolfsmask.occupant.compat.Compat;
 import com.wolfsmask.occupant.director.Haunt;
 import com.wolfsmask.occupant.director.HauntData;
+import com.wolfsmask.occupant.director.TakenEnding;
 import com.wolfsmask.occupant.entity.OccupantEntity;
 import com.wolfsmask.occupant.network.ScreenEffectPayload;
 import com.wolfsmask.occupant.registry.ModSounds;
@@ -26,10 +27,11 @@ import java.util.List;
 /**
  * It has them. Its leg goes in at their back and out of their chest, and it lifts them off the
  * ground on it, up to its face, and holds them there, close, while they watch (nothing they press
- * does anything). Its other legs go in, one after another. Then it is over: the first time it
- * lets them drop, at their last half heart, to show them it could have; after that, and always in
- * the last act, it does not let them go. It saves them from everything else so that it is the
- * only thing that ever gets to do this.
+ * does anything). Its other legs go in, one after another. Then it is over: it lets them drop, at
+ * their last half heart, to show them it could have. Only at the very end of the story (see
+ * {@link TakenEnding#ready}) does it not let them go: it takes them, and the ending begins. It
+ * never simply kills them. It saves them from everything else so that it is the only thing that
+ * ever gets to do this.
  * <p>
  * Run a tick at a time, from a sequence, once it is close enough to reach them.
  */
@@ -48,9 +50,9 @@ public final class Strike {
 	public static final String SPARED = "spared";
 
 	/** What it says, holding them up: the time it lets them go, and the time it does not. */
-	private static final String[] NOT_YET = {"Not yet.", "I could have.", "Next time I won't stop.",
+	private static final String[] NOT_YET = {"Not yet.", "I could have.", "Not yet. Soon.",
 			"You felt that. Good.", "I kept you alive for this."};
-	private static final String[] NOW = {"Mine.", "Nothing saves you from me.", "No one else. Only me.",
+	private static final String[] NOW = {"Mine.", "You're coming with me.", "No one else. Only me.",
 			"You were always mine."};
 
 	/** Who its leg is going into this moment (on peaceful the blow cannot be its own, and is not saved from). */
@@ -62,6 +64,8 @@ public final class Strike {
 	private int t = -1;
 	private boolean landed;
 	private boolean lethal;
+	/** It has taken them: the ending begins once this is over. */
+	private boolean taken;
 	/** Whom it has, for letting go of however this ends. */
 	@Nullable
 	private ServerPlayer held;
@@ -73,9 +77,9 @@ public final class Strike {
 		this.entity = entity;
 	}
 
-	/** Whether this one kills: always in the last act, and from the second time it has them. */
+	/** Whether this time it does not let them go, but takes them: only at the very end of the story. */
 	public static boolean lethal(HauntData d) {
-		return d.act >= 4 || d.cooldowns.containsKey(SPARED);
+		return TakenEnding.ready(d);
 	}
 
 	/** How much the first leg takes: enough to feel, never enough to end it before it is done. */
@@ -134,6 +138,7 @@ public final class Strike {
 		}
 		if (t >= OVER) {
 			release();
+			if (taken) TakenEnding.begin(haunt);
 			return false;
 		}
 		return true;
@@ -237,9 +242,9 @@ public final class Strike {
 
 	private void last(ServerPlayer p) {
 		if (lethal) {
-			// All of them at once, and it does not stop.
-			hurt(p, 1000.0f);
-			if (p.isAlive()) haunt.data.cooldowns.remove(SPARED);   // a totem: they are owed nothing now
+			// All of them at once, and it does not stop; and it does not let go. It takes them.
+			hurt(p, Math.max(0.0f, p.getHealth() - 1.0f));
+			taken = true;
 		} else {
 			// Down to their last half heart, and dropped: it wanted them to know.
 			hurt(p, Math.max(0.0f, p.getHealth() - 1.0f));

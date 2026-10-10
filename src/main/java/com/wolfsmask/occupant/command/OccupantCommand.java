@@ -83,6 +83,9 @@ public final class OccupantCommand {
 				.then(literal("found")
 						.then(argument("player", EntityArgument.player())
 								.executes(OccupantCommand::found)))
+				.then(literal("ending")
+						.then(argument("player", EntityArgument.player())
+								.executes(OccupantCommand::ending)))
 				.then(literal("act")
 						.then(argument("player", EntityArgument.player())
 								.then(argument("act", IntegerArgumentType.integer(0, HauntData.MAX_ACT))
@@ -314,6 +317,16 @@ public final class OccupantCommand {
 			default -> "It is hunting them through the dark.";
 		};
 		ctx.getSource().sendSuccess(() -> Component.literal("It found " + p.getName().getString() + ". " + how), false);
+		return 1;
+	}
+
+	/** The end of the story, now: it takes them to its lair (see TakenEnding). */
+	private static int ending(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+		Director dir = director(ctx.getSource());
+		if (dir == null) return 0;
+		ServerPlayer p = EntityArgument.getPlayer(ctx, "player");
+		dir.beginNow(p, com.wolfsmask.occupant.director.TakenEnding.ID, new com.wolfsmask.occupant.director.TakenEnding(dir.haunt(p)));
+		ctx.getSource().sendSuccess(() -> Component.literal("It has taken " + p.getName().getString() + "."), false);
 		return 1;
 	}
 

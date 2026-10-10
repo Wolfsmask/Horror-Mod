@@ -40,6 +40,13 @@ public final class ScreenEffects {
 	private static int whisperAge;
 	private static int whisperLength;
 	private static int whisperCorner;
+	/** The words at the end of everything: a title across the middle, large, and a line under it. */
+	private static String titleText = "";
+	private static int titleAge;
+	private static int titleLength;
+	private static String subText = "";
+	private static int subAge;
+	private static int subLength;
 
 	/** How heavy the atmosphere is right now (smoothed): the dark, and how near it is. */
 	private static float atmosphere;
@@ -145,8 +152,11 @@ public final class ScreenEffects {
 		haunted = true;
 		switch (payload.effect()) {
 			case ScreenEffectPayload.BLACKOUT -> {
-				blackoutLength = Math.max(1, payload.duration());
-				blackoutAge = 0;
+				// Already black: it stays black, with no moment of the picture between the two.
+				int already = blackoutAge >= 1 && blackoutAge < blackoutLength - FADE_OUT_TICKS
+						? Mth.ceil(ClientConfig.get().reduceFlashing ? 6f : 1.5f) : 0;
+				blackoutLength = Math.max(1, payload.duration()) + already;
+				blackoutAge = already;
 			}
 			case ScreenEffectPayload.FLICKER -> {
 				flickerLength = Math.max(1, payload.duration());
@@ -165,6 +175,10 @@ public final class ScreenEffects {
 			case ScreenEffectPayload.ACT -> PauseLines.act = Math.round(payload.intensity());
 			case ScreenEffectPayload.JOINED -> joined();
 			case ScreenEffectPayload.CUTSCENE -> Cutscene.start(payload.duration());
+			case ScreenEffectPayload.LOOK_X -> Cutscene.look(0, payload.duration());
+			case ScreenEffectPayload.LOOK_Y -> Cutscene.look(1, payload.duration());
+			case ScreenEffectPayload.LOOK_Z -> Cutscene.look(2, payload.duration());
+			case ScreenEffectPayload.LOOK_FREE -> Cutscene.look(3, 0);
 			default -> {
 			}
 		}
@@ -180,6 +194,18 @@ public final class ScreenEffects {
 
 	/** Show a line of text. It is never written to the chat log: there is nothing to check. */
 	public static void whisper(WhisperPayload payload) {
+		if (payload.corner() == WhisperPayload.TITLE) {
+			titleText = payload.text();
+			titleLength = Math.max(20, payload.duration());
+			titleAge = 0;
+			return;
+		}
+		if (payload.corner() == WhisperPayload.SUBTITLE) {
+			subText = payload.text();
+			subLength = Math.max(20, payload.duration());
+			subAge = 0;
+			return;
+		}
 		whisperText = payload.text();
 		whisperLength = Math.max(20, payload.duration());
 		whisperAge = 0;
@@ -195,6 +221,8 @@ public final class ScreenEffects {
 		proximityStatic = 0f;
 		whisperText = "";
 		whisperAge = whisperLength = 0;
+		titleText = subText = "";
+		titleAge = titleLength = subAge = subLength = 0;
 		introAge = -1;
 		atmosphere = nearness = 0f;
 		ClientFog.reset();
@@ -239,6 +267,8 @@ public final class ScreenEffects {
 		if (flickerAge >= 0 && ++flickerAge >= flickerLength) flickerAge = -1;
 		if (staticAge < staticLength) staticAge++;
 		if (whisperAge < whisperLength) whisperAge++;
+		if (titleAge < titleLength) titleAge++;
+		if (subAge < subLength) subAge++;
 
 		// Static from how near it is; and the atmosphere: how dark it is where the player is
 		// standing, and how near it is.
@@ -287,7 +317,46 @@ public final class ScreenEffects {
 
 		// Drawn after the blackout, so a line can surface in the dark and be the only thing there.
 		if (cfg.screenText) drawWhisper(ctx, w, h, tickDelta, cfg);
+		drawTitles(ctx, w, h, tickDelta);
 		drawIntro(ctx, w, h, tickDelta);
+	}
+
+	/**
+	 * The words at the end of everything: the title large across the middle, rising slowly out of
+	 * the dark and sinking back; the line under it the same, smaller, in the colour of old blood
+	 * when it is the only thing there, grey under a title.
+	 */
+	private static void drawTitles(GuiGraphicsExtractor ctx, int w, int h, float tickDelta) {
+		Font font = Minecraft.getInstance().font;
+		boolean titled = titleAge < titleLength && !titleText.isEmpty();
+		if (titled) {
+			float b = titleBrightness(titleAge + tickDelta, titleLength);
+			if (b > 0.02f) {
+				int v = (int) Mth.lerp(b, 12f, 205f);
+				Component line = Component.literal(titleText).withStyle(Style.EMPTY.withColor(TextColor.fromRgb(v << 16 | v << 8 | Math.min(255, v + 6))));
+				float scale = 2.0f;
+				GuiCompat.push(ctx);
+				GuiCompat.translate(ctx, (w - font.width(titleText) * scale) / 2f, h / 2f - 22f);
+				GuiCompat.scale(ctx, scale);
+				GuiCompat.text(ctx, 0, 0, line);
+				GuiCompat.pop(ctx);
+			}
+		}
+		if (subAge < subLength && !subText.isEmpty()) {
+			float b = titleBrightness(subAge + tickDelta, subLength);
+			if (b > 0.02f) {
+				int r = (int) Mth.lerp(b, 12f, titled ? 165f : 175f);
+				int colour = titled ? (r << 16 | r << 8 | Math.min(255, r + 6)) : (r << 16 | (r * 2 / 5) << 8 | (r * 2 / 5));
+				Component line = Component.literal(subText).withStyle(Style.EMPTY.withColor(TextColor.fromRgb(colour)));
+				GuiCompat.text(ctx, (w - font.width(subText)) / 2, titled ? h / 2 + 10 : h / 2 + 22, line);
+			}
+		}
+	}
+
+	/** Up out of the dark over a second, held, and back down over the last second. */
+	private static float titleBrightness(float age, int length) {
+		float in = Math.min(20f, length / 3f);
+		return Mth.clamp(Math.min(age / in, (length - age) / in), 0f, 1f);
 	}
 
 	/** Black, then a line rising out of it and sinking back, then the world fading up. */

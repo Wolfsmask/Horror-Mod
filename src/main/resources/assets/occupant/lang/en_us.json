@@ -65,5 +65,7 @@
   "advancements.occupant.ending_hid.description": "End the story having hidden from it",
   "advancements.occupant.ending_learned.title": "It Knows How to Be You",
   "advancements.occupant.ending_learned.description": "End the story any other way",
+  "advancements.occupant.ending_taken.title": "Taken",
+  "advancements.occupant.ending_taken.description": "See your own name on its wall",
   "occupant.settings.ask": "Ask how I'm playing: %s"
 }

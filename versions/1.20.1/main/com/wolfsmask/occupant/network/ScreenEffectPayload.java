@@ -39,6 +39,15 @@ public record ScreenEffectPayload(int effect, int duration, float intensity) imp
 	 * doing, nothing they press moves them, and the picture narrows to a band.
 	 */
 	public static final int CUTSCENE = 10;
+	/**
+	 * What a scene looks at, when it is a place and not the Occupant: {@code duration} is that
+	 * place's x (then y, then z), in eighths of a block. The scene turns to it once it has all three.
+	 */
+	public static final int LOOK_X = 11;
+	public static final int LOOK_Y = 12;
+	public static final int LOOK_Z = 13;
+	/** The scene looks at the Occupant again. */
+	public static final int LOOK_FREE = 14;
 
 	public static final PacketType<ScreenEffectPayload> TYPE = PacketType.create(Occupant.id("screen_effect"),
 			buf -> new ScreenEffectPayload(buf.readVarInt(), buf.readVarInt(), buf.readFloat()));

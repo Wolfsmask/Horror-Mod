@@ -26,6 +26,8 @@ public final class Achievements {
 	public static final String ENDING_FOUND = "ending_found";
 	public static final String ENDING_HID = "ending_hid";
 	public static final String ENDING_LEARNED = "ending_learned";
+	/** It took them, and showed them its wall of names. */
+	public static final String ENDING_TAKEN = "ending_taken";
 
 	/** Events that are an advancement the first time they happen. */
 	private static final Map<String, String> BY_EVENT = Map.ofEntries(

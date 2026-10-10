@@ -88,7 +88,7 @@ public final class Mercy {
 
 		// While it is here, in the middle of saving them, nothing else gets them either (an arrow
 		// from further off than it froze, say).
-		if (RESCUE.equals(h.activeId)) {
+		if (RESCUE.equals(h.activeId) || TakenEnding.ID.equals(h.activeId)) {
 			player.setHealth(Math.max(player.getHealth(), 2.0f));
 			return false;
 		}

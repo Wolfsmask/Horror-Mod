@@ -41,6 +41,16 @@ public final class Compat {
 		sign.setText(text, true);
 	}
 
+	/** As {@link #writeSign(SignBlockEntity, String[])}; {@code glowing}: white, and lit from within. */
+	public static void writeSign(SignBlockEntity sign, String[] lines, boolean glowing) {
+		SignText text = new SignText();
+		for (int i = 0; i < 4 && i < lines.length; i++) {
+			text = text.setMessage(i, Component.literal(lines[i]));
+		}
+		if (glowing) text = text.setColor(net.minecraft.world.item.DyeColor.WHITE).setHasGlowingText(true);
+		sign.setText(text, true);
+	}
+
 
 	/** The time of day in the overworld, in ticks since the world began. */
 	public static long dayTime(Level level) {

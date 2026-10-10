@@ -51,6 +51,7 @@ public abstract class ApparitionSequence implements Sequence {
 		}
 		if (looking) {
 			lookTicks++;
+			haunt.markSeen();
 			// What it cannot stand is being looked at. Stared at, it is gone, and sooner the better
 			// they know it: it is most frightening when they do not know it is there.
 			if (lookTicks > stareLimit()) {

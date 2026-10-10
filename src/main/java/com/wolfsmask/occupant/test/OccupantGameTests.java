@@ -85,9 +85,9 @@ public final class OccupantGameTests {
 	}
 
 	/**
-	 * From the third act it hurts them itself: in the third act never all of their health, in the
-	 * last act all of it if it comes to that; nothing saves them from it, as it saves them from
-	 * everything else; and once it has come for them, it comes round again.
+	 * From the third act it hurts them itself, once they have seen it: never all of their health,
+	 * until the very end of the story, when it takes them instead; nothing saves them from it, as it
+	 * saves them from everything else; and once it has come for them, it comes round again.
 	 */
 	@GameTest
 	public void itHurtsYouFromTheThirdAct(GameTestHelper helper) {
@@ -101,12 +101,21 @@ public final class OccupantGameTests {
 		helper.assertTrue(Strike.amount(3, 1.0f) == 0.0f, "Even at their last half heart");
 		HauntData spared = new HauntData();
 		spared.act = 3;
-		helper.assertTrue(!Strike.lethal(spared), "The first time in the third act it lets them go");
+		spared.sightings = 6;
+		spared.playTicks = 20L * 60 * 300;
+		helper.assertTrue(!Strike.lethal(spared), "In the third act it always lets them go");
 		spared.cooldowns.put(Strike.SPARED, Long.MAX_VALUE);
-		helper.assertTrue(Strike.lethal(spared), "The second time it does not");
-		spared.cooldowns.remove(Strike.SPARED);
+		helper.assertTrue(!Strike.lethal(spared), "Even the second time, before the end of the story");
 		spared.act = 4;
-		helper.assertTrue(Strike.lethal(spared), "In the last act it never lets them go");
+		helper.assertTrue(Strike.lethal(spared), "At the end of the story, let go of once already, it takes them");
+		spared.playTicks = 20L * 60 * 20;
+		helper.assertTrue(!Strike.lethal(spared), "Never twenty minutes into a story, however far it has gone");
+		spared.playTicks = 20L * 60 * 300;
+		spared.sightings = 1;
+		helper.assertTrue(!Strike.lethal(spared), "Not if they have hardly ever seen it");
+		spared.sightings = 6;
+		spared.cooldowns.remove(Strike.SPARED);
+		helper.assertTrue(!Strike.lethal(spared), "Not if it has never let them go before");
 		// The game scales a monster's blow by difficulty: what it is hurt by undoes that exactly.
 		helper.assertTrue(Math.abs(Strike.beforeDifficulty(7.0f, net.minecraft.world.Difficulty.EASY) / 2.0f + 1.0f - 7.0f) < 1.0e-4f,
 				"On easy the game should take exactly what it means to");
@@ -121,6 +130,9 @@ public final class OccupantGameTests {
 		HauntData d = director.data(player);
 		d.sightings = 1;
 		d.cooldowns.remove(Director.ATTACK_DUE);
+		d.setAct(3);
+		helper.assertTrue(!Director.attackDue(d, cfg), "It should be looked at more than once before it hurts anyone");
+		d.sightings = 2;
 		d.setAct(2);
 		helper.assertTrue(!Director.attackDue(d, cfg), "It should not hurt anyone before the third act");
 		d.setAct(3);

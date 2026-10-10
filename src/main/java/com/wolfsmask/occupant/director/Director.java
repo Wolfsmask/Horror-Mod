@@ -211,6 +211,16 @@ public final class Director {
 				planFollowUp(h, done, player);
 			}
 		}
+		// What was to begin the moment that was over (the end, when it has taken them).
+		if (h.active == null && h.queued != null) {
+			if (eligible && player.isAlive()) {
+				h.active = h.queued;
+				h.activeId = h.queuedId;
+				h.pending = null;
+			}
+			h.queued = null;
+			h.queuedId = null;
+		}
 
 		// Just come into the world: the way in, only where it haunts them (the client never shows
 		// it by itself, so a server without this mod, or with it switched off, has none).
@@ -362,10 +372,10 @@ public final class Director {
 	}
 
 	/**
-	 * Has it been too long since it was last on their screen? Sounds and signs keep a story
+	 * Has it been too long since they last looked right at it? Sounds and signs keep a story
 	 * going, but it is being seen that people remember: every five minutes or so early on, every
-	 * three by the end. Only being on screen counts: a knock that never shows it, or a figure put
-	 * where they never turn to look, does not.
+	 * three by the end. Only their looking at it counts: a knock that never shows it, or a figure
+	 * at the edge of the fog that they never noticed, does not.
 	 */
 	private static boolean sightingDue(Haunt h, OccupantConfig cfg) {
 		double minutes = switch (h.data.act) {
@@ -377,7 +387,7 @@ public final class Director {
 		// And not one straight after another while they are not looking: the rest of the story
 		// still has to happen in between.
 		if (h.lastShowTriedAt >= 0 && h.data.playTicks - h.lastShowTriedAt < 90 * 20) return false;
-		return h.data.playTicks - h.lastShownAt >= minutes * MINUTE / Pacing.frequency(cfg);
+		return h.data.playTicks - h.lastSeenAt >= minutes * MINUTE / Pacing.frequency(cfg);
 	}
 
 	private boolean isEligible(ServerPlayer player, Haunt h, OccupantConfig cfg) {
@@ -597,10 +607,11 @@ public final class Director {
 
 	/**
 	 * Whether it is due to come and hurt them: from the third act, once its time has come round
-	 * (see ATTACK_DUE), and only once they have seen it at least once.
+	 * (see ATTACK_DUE), and only once they have looked right at it twice: it shows itself before it
+	 * ever lays a leg on them.
 	 */
 	public static boolean attackDue(HauntData d, OccupantConfig cfg) {
-		return cfg.attacks && !cfg.soundOnly && d.act >= 3 && d.sightings > 0 && !d.isOnCooldown(ATTACK_DUE);
+		return cfg.attacks && !cfg.soundOnly && d.act >= 3 && d.sightings >= 2 && !d.isOnCooldown(ATTACK_DUE);
 	}
 
 	/** They got away from it: it comes again sooner than it would have. */
@@ -625,7 +636,7 @@ public final class Director {
 			if (e == null || disabledEvents.contains(id) || d.act < e.minAct()) continue;
 			if (id.equals("hunt") && (!cfg.chases || d.isOnCooldown(id))) continue;
 			if (!forced && !e.fits(ctx) || !tryBegin(h, e, ctx)) continue;
-			d.cooldowns.put(ATTACK_DUE, d.playTicks + (long) ((d.act >= 4 ? 6 : 9) * MINUTE / Pacing.frequency(cfg)));
+			d.cooldowns.put(ATTACK_DUE, d.playTicks + (long) ((d.act >= 4 ? 8 : 12) * MINUTE / Pacing.frequency(cfg)));
 			h.quietSeconds = 0;
 			h.chain = 0;
 			scheduleAfter(h, e, player.getRandom(), cfg);

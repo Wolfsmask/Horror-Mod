@@ -51,6 +51,13 @@ public final class Compat {
 		sign.setText(new SignText(messages, messages, DyeColor.BLACK, false), SignTextSlot.FRONT);
 	}
 
+	/** As {@link #writeSign(SignBlockEntity, String[])}; {@code glowing}: white, and lit from within. */
+	public static void writeSign(SignBlockEntity sign, String[] lines, boolean glowing) {
+		List<Component> messages = new ArrayList<>();
+		for (int i = 0; i < 4; i++) messages.add(Component.literal(i < lines.length ? lines[i] : ""));
+		sign.setText(new SignText(messages, messages, glowing ? DyeColor.WHITE : DyeColor.BLACK, glowing), SignTextSlot.FRONT);
+	}
+
 	/** Where the server-to-client payloads are registered. */
 	public static PayloadTypeRegistry<RegistryFriendlyByteBuf> serverToClient() {
 		return PayloadTypeRegistry.clientboundPlay();

@@ -49,6 +49,16 @@ public final class Compat {
 		sign.setText(text, true);
 	}
 
+	/** As {@link #writeSign(SignBlockEntity, String[])}; {@code glowing}: white, and lit from within. */
+	public static void writeSign(SignBlockEntity sign, String[] lines, boolean glowing) {
+		SignText text = new SignText();
+		for (int i = 0; i < 4 && i < lines.length; i++) {
+			text = text.setMessage(i, Component.literal(lines[i]));
+		}
+		if (glowing) text = text.setColor(net.minecraft.world.item.DyeColor.WHITE).setHasGlowingText(true);
+		sign.setText(text, true);
+	}
+
 	/** Where the server-to-client payloads are registered. */
 	public static PayloadTypeRegistry<RegistryFriendlyByteBuf> serverToClient() {
 		return PayloadTypeRegistry.clientboundPlay();

@@ -67,6 +67,7 @@ final class FoundFootage {
 			shot("struck", () -> struck(context, game, woods));
 			shot("roof", () -> found(context, game, woods, true));
 			shot("hole", () -> found(context, game, woods, false));
+			shot("taken", () -> taken(context, game, woods));
 		} catch (RuntimeException | AssertionError e) {
 			Occupant.LOGGER.warn("[client-gametest] found footage stopped early", e);
 		} finally {
@@ -429,7 +430,7 @@ final class FoundFootage {
 		});
 		if (!begun) return;
 		String name = hut ? "found-roof" : "found-hole";
-		int[] at = hut ? new int[]{24, 52, 80, 106} : new int[]{18, 36, 56, 76};
+		int[] at = hut ? new int[]{24, 52, 106, 140} : new int[]{18, 46, 70, 92};
 		int waited = 0;
 		try {
 			for (int i = 0; i < at.length; i++) {
@@ -447,6 +448,58 @@ final class FoundFootage {
 				HauntData d = Director.get().data(p);
 				d.paused = true;
 				d.cooldowns.remove(com.wolfsmask.occupant.director.events.Found.CAUGHT);
+				p.setHealth(p.getMaxHealth());
+			});
+		}
+	}
+
+	/**
+	 * The end, for the ones it takes: the words in the black, the wall of names in its lair, their
+	 * own name written on it while they watch, it, the credits, and home again.
+	 */
+	private static void taken(ClientGameTestContext context, TestSingleplayerContext game, BlockPos[] woods) {
+		TestServerContext server = game.getServer();
+		BlockPos floor = server.computeOnServer(s -> ForestGallery.clearing(s.overworld(), woods[0].offset(80, 0, 40)));
+		if (floor == null) return;
+		server.runCommand("gamemode survival @p");
+		server.runCommand("effect clear @p");
+		int y = server.computeOnServer(s -> Cinematic.ground(s.overworld(), floor.getX(), floor.getZ()));
+		Vec3 eye = new Vec3(floor.getX() + 0.5, y + Cinematic.EYE, floor.getZ() + 0.5);
+		Cinematic.camera(context, game, eye, eye.add(0.0, 0.0, 4.0), 18000);
+		int[] before = server.computeOnServer(s -> {
+			ServerPlayer p = Cinematic.player(s);
+			HauntData d = Director.get().data(p);
+			int[] was = {d.act, d.ending, d.lastNight ? 1 : 0};
+			d.paused = false;
+			d.introduced = true;
+			p.setHealth(p.getMaxHealth());
+			Director.get().stopCurrent(p);
+			return was;
+		});
+		server.runCommand("occupant ending @p");
+		int[] at = {60, 165, 300, 385, 470, 600, 705, 835, 915, 1085, 1270};
+		String[] names = {"1-dark", "2-dark", "3-wall", "4-names", "5-written", "6-it", "7-leaves", "8-title", "9-credits", "10-thanks", "11-home"};
+		int waited = 0;
+		try {
+			for (int i = 0; i < at.length; i++) {
+				long from = server.computeOnServer(s -> (long) s.getTickCount());
+				for (int n = 0; n < 4000 && server.computeOnServer(s -> (long) s.getTickCount()) - from < at[i] - waited; n++) context.waitTick();
+				waited = at[i];
+				Occupant.LOGGER.info("[client-gametest] taken {}: {}", names[i], server.computeOnServer(s -> {
+					ServerPlayer p = Cinematic.player(s);
+					return Director.get().haunt(p).activeEventId() + " at " + p.blockPosition().toShortString();
+				}));
+				OccupantClientGameTest.shoot(context, "taken-" + names[i]);
+			}
+		} finally {
+			server.runOnServer(s -> {
+				ServerPlayer p = Cinematic.player(s);
+				Director.get().stopCurrent(p);
+				HauntData d = Director.get().data(p);
+				d.setAct(before[0]);
+				d.ending = before[1];
+				d.lastNight = before[2] != 0;
+				d.paused = true;
 				p.setHealth(p.getMaxHealth());
 			});
 		}

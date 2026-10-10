@@ -1,0 +1,23 @@
+{
+  "parent": "occupant:only_me",
+  "display": {
+    "icon": {
+      "id": "minecraft:oak_sign"
+    },
+    "title": {
+      "translate": "advancements.occupant.ending_taken.title"
+    },
+    "description": {
+      "translate": "advancements.occupant.ending_taken.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": true
+  },
+  "criteria": {
+    "granted": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}
