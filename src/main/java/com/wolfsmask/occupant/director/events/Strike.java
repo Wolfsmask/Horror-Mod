@@ -126,7 +126,8 @@ public final class Strike {
 			// It is done with them: the rest is only the dark.
 			letGo(p, false);
 			if (t < BLACK) t = BLACK;
-		} else if (t >= IN && t < LAST) {
+		} else if (t >= IN && t < (taken ? BLACK : LAST)) {
+			// Taken, it does not let go: it is still holding them when the black comes.
 			carry(p);
 		}
 		if (t == IN && p.isAlive()) firstLeg(p);
@@ -245,6 +246,7 @@ public final class Strike {
 			// All of them at once, and it does not stop; and it does not let go. It takes them.
 			hurt(p, Math.max(0.0f, p.getHealth() - 1.0f));
 			taken = true;
+			return;
 		} else {
 			// Down to their last half heart, and dropped: it wanted them to know.
 			hurt(p, Math.max(0.0f, p.getHealth() - 1.0f));

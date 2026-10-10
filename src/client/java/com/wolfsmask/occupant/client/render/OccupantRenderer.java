@@ -34,6 +34,7 @@ public class OccupantRenderer extends CullingRenderer {
 		state.seed = entity.getId();
 		OccupantFit.fit(entity.level(), state, state.x, state.y, state.z);
 		LegGait.of(entity).update(entity, state, state.occupantScale, OccupantFit.CROUCH_DROP * state.crouch);
+		OccupantFit.watch(state, partialTick);
 	}
 
 	@Override

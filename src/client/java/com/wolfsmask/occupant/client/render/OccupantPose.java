@@ -19,6 +19,8 @@ import net.minecraft.util.Mth;
  *     back, and its head is at a different angle, and you never saw it move.</li>
  *     <li>Nothing ever jumps or stutters: what it does, it does smoothly.</li>
  *     <li>Its mouth is always open. When it is close, it opens further than a mouth goes.</li>
+ *     <li>Its eyes do not move with its head. In each black eye is one tiny pale point, and
+ *     wherever you are, whatever its head is doing, that point is on you.</li>
  * </ul>
  * VEILED is early in the story, when it keeps its head down and is harder to make out at a
  * distance; REVEALED is when it looks at you.
@@ -33,6 +35,7 @@ final class OccupantPose {
 	/** Everything below the eyes: the cheeks, the mouth between them, the chin. */
 	private final ModelPart jaw;
 	private final ModelPart hair;
+	private final ModelPart[] pupils;
 	private final ModelPart[] upper = new ModelPart[LEGS];
 	private final ModelPart[] lower = new ModelPart[LEGS];
 	private final float[] upperLength = new float[LEGS];
@@ -54,6 +57,7 @@ final class OccupantPose {
 		this.skull = neck.getChild("skull");
 		this.jaw = skull.getChild("jaw");
 		this.hair = skull.getChild("hair");
+		this.pupils = new ModelPart[]{skull.getChild("left_pupil"), skull.getChild("right_pupil")};
 		for (int i = 0; i < LEGS; i++) {
 			upper[i] = spine.getChild("leg" + i + "_upper");
 			lower[i] = upper[i].getChild("leg" + i + "_lower");
@@ -118,6 +122,25 @@ final class OccupantPose {
 			default -> stand(state.tilt, Float.isNaN(state.facePitch) ? lookX : state.facePitch, lookY);
 		}
 		legs(state, t);
+		stare(state);
+	}
+
+	/**
+	 * The pupils, on you. Whatever the head has not turned to face you, they make up for, sliding
+	 * across the black towards you, so that they are always looking straight out at you, even
+	 * while nothing else about it moves at all.
+	 */
+	private void stare(OccupantRenderState state) {
+		float yaw = (float) Math.toRadians(state.watchYaw) - (neck.yRot + skull.yRot);
+		float pitch = (float) Math.toRadians(state.watchPitch) - (spine.xRot + neck.xRot + skull.xRot);
+		// Turning the head by an angle carries its front over by minus its sine across, and its
+		// sine down: the pupils go as far as the front of the head would have, within the black.
+		float dx = Mth.clamp(-Mth.sin(Mth.clamp(yaw, -1.5f, 1.5f)) * 1.1f, -0.55f, 0.55f);
+		float dy = Mth.clamp(Mth.sin(Mth.clamp(pitch, -1.5f, 1.5f)) * 1.1f, -0.55f, 0.55f);
+		for (ModelPart p : pupils) {
+			p.x += dx;
+			p.y += dy;
+		}
 	}
 
 	/** How far its body is bent forward when nothing is bending it. */

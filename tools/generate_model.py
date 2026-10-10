@@ -53,6 +53,10 @@ LEG_LOWER = 30.0
 LEG_CLAW = 6.0
 # From the bottom of the eyes to the middle of the face (eyes to chin), which is what it tilts about.
 FACE_MID = 2.3
+# The middles of the two black eyes painted on the face (paint_face), in the skull's own space,
+# and the face's front: where the pupils sit, just proud of it.
+EYE_X, EYE_Y = 1.5, -3.0 - FACE_MID
+PUPIL_Z = -3.0
 # How far up the trunk the highest legs leave it, above the hips.
 LEG_RISE = 26.0
 # Nothing is ever taken off. What it is wearing is most of what it is.
@@ -206,6 +210,14 @@ def parts():
         ("skull", "neck", (0, -11.0 + FACE_MID, -0.4), (0, 0, 0), [
             ("face", -3.5, -7.0 - FACE_MID, -3.0, 7, 7, 6),
             ("crown", -2.75, -8.1 - FACE_MID, -2.4, 5.5, 1.1, 4.8),       # rounds off the top of it
+        ]),
+        # In each black eye, one tiny pale point: bones of their own, moved in game so that
+        # wherever you are, whatever its head is doing, they are on you (OccupantPose.stare).
+        ("left_pupil", "skull", (EYE_X, EYE_Y, PUPIL_Z), (0, 0, 0), [
+            ("pupil", -0.25, -0.25, -0.1, 0.5, 0.5, 0.1),
+        ]),
+        ("right_pupil", "skull", (-EYE_X, EYE_Y, PUPIL_Z), (0, 0, 0), [
+            ("pupil", -0.25, -0.25, -0.1, 0.5, 0.5, 0.1),
         ]),
         # The rest of the face is the mouth. The skin carries on down both sides of it, much
         # too far, to a small pointed chin; between them it is open, with a row of small teeth
@@ -442,6 +454,7 @@ SKIN_HI = (219, 205, 193)
 SKIN_LO = (156, 134, 124)
 PIT = (8, 5, 5)             # the eye holes, and the inside of the mouth
 RED = (112, 40, 36)         # the bottom of the mouth, and only there
+PUPIL = (250, 250, 246)
 TOOTH = (206, 193, 176)
 # Its body, the hair and what it wears, are dark as the stone of a cave and flecked like it, so
 # that down there it is hard to tell from the walls.
@@ -458,6 +471,7 @@ def paint_texture(boxes, placed):
     img = np.zeros((TEX_H, TEX_W, 4), dtype=np.uint8)
     dark_mask = np.zeros((TEX_H, TEX_W), dtype=bool)
     limb_mask = np.zeros((TEX_H, TEX_W), dtype=bool)
+    pupils = []
 
     def fill(region, rgb, jitter=6):
         x0, y0, x1, y1 = region
@@ -589,6 +603,15 @@ def paint_texture(boxes, placed):
                 x0, y0, x1, y1 = side
                 limb_mask[y0:y1, x0:x1] = True
 
+        elif kind == "pupil":
+            # Under a pixel across, every face of it falls on the edge of a texel the rounding
+            # does not paint: the whole of its block is the point of light, so nothing it shows
+            # can be empty.
+            import math
+            block = (u, v, u + 2 * (math.ceil(d) + math.ceil(w)), v + math.ceil(d) + math.ceil(h))
+            fill(block, PUPIL, 2)
+            pupils.append(block)
+
         elif kind == "pale":
             for side in f.values():
                 fill(side, SKIN_LO, 7)
@@ -607,6 +630,10 @@ def paint_texture(boxes, placed):
     glow[:, :, 3] = np.where(img[:, :, 3] > 0, SHEEN, 0)
     glow[limb_mask, 3] = SHEEN // 2                      # the legs, fainter than the face
     glow[dark_mask] = 0
+    # The pupils, alone, shine at full strength: in the dark they are all there is to see of it.
+    for x0, y0, x1, y1 in pupils:
+        glow[y0:y1, x0:x1, :3] = PUPIL
+        glow[y0:y1, x0:x1, 3] = 255
 
     Image.fromarray(img, "RGBA").save(TEX / "occupant.png")
     Image.fromarray(glow, "RGBA").save(TEX / "occupant_glow.png")

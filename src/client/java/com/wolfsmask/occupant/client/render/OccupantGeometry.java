@@ -98,6 +98,12 @@ public final class OccupantGeometry {
 				.texOffs(204, 40).addBox(-3.50f, -9.30f, -3.0f, 7.0f, 7.0f, 6.0f)
 				.texOffs(138, 69).addBox(-2.75f, -10.40f, -2.40f, 5.50f, 1.10f, 4.80f), PartPose.offset(0.0f, -8.70f, -0.40f));
 		PartDefinition p_skull = p;
+		p = p_skull.addOrReplaceChild("left_pupil", CubeListBuilder.create()
+				.texOffs(168, 80).addBox(-0.25f, -0.25f, -0.10f, 0.50f, 0.50f, 0.10f), PartPose.offset(1.50f, -5.30f, -3.0f));
+		PartDefinition p_left_pupil = p;
+		p = p_skull.addOrReplaceChild("right_pupil", CubeListBuilder.create()
+				.texOffs(172, 80).addBox(-0.25f, -0.25f, -0.10f, 0.50f, 0.50f, 0.10f), PartPose.offset(-1.50f, -5.30f, -3.0f));
+		PartDefinition p_right_pupil = p;
 		p = p_skull.addOrReplaceChild("jaw", CubeListBuilder.create()
 				.texOffs(4, 69).addBox(1.75f, 0.0f, -2.95f, 1.70f, 6.0f, 3.35f)
 				.texOffs(16, 69).addBox(-3.45f, 0.0f, -2.95f, 1.70f, 6.0f, 3.35f)
@@ -105,10 +111,10 @@ public final class OccupantGeometry {
 				.texOffs(52, 69).addBox(-2.75f, 6.0f, -2.80f, 1.40f, 4.60f, 3.0f)
 				.texOffs(192, 69).addBox(-1.85f, 9.55f, -2.60f, 3.70f, 2.10f, 2.55f)
 				.texOffs(238, 40).addBox(-1.74f, 0.02f, -2.0f, 3.48f, 9.56f, 1.90f)
-				.texOffs(168, 80).addBox(-1.13f, 0.05f, -2.72f, 0.42f, 0.95f, 0.66f)
-				.texOffs(172, 80).addBox(-0.55f, 0.05f, -2.70f, 0.43f, 0.78f, 0.64f)
-				.texOffs(176, 80).addBox(0.04f, 0.05f, -2.71f, 0.41f, 0.92f, 0.65f)
-				.texOffs(180, 80).addBox(0.62f, 0.05f, -2.69f, 0.44f, 0.74f, 0.63f)
+				.texOffs(176, 80).addBox(-1.13f, 0.05f, -2.72f, 0.42f, 0.95f, 0.66f)
+				.texOffs(180, 80).addBox(-0.55f, 0.05f, -2.70f, 0.43f, 0.78f, 0.64f)
+				.texOffs(184, 80).addBox(0.04f, 0.05f, -2.71f, 0.41f, 0.92f, 0.65f)
+				.texOffs(188, 80).addBox(0.62f, 0.05f, -2.69f, 0.44f, 0.74f, 0.63f)
 				.texOffs(152, 80).addBox(-1.74f, 0.0f, -2.86f, 0.53f, 1.55f, 0.79f)
 				.texOffs(156, 80).addBox(1.21f, 0.0f, -2.86f, 0.53f, 1.55f, 0.79f)
 				.texOffs(160, 80).addBox(-1.33f, 8.15f, -2.84f, 0.48f, 1.42f, 0.77f)
@@ -161,7 +167,7 @@ public final class OccupantGeometry {
 				.texOffs(230, 40).addBox(0.35f, 22.80f, -0.24f, 1.01f, 10.60f, 1.01f)
 				.texOffs(160, 69).addBox(-0.01f, 32.90f, -0.31f, 0.88f, 5.13f, 0.88f)
 				.texOffs(42, 80).addBox(-0.38f, 22.50f, -0.64f, 1.61f, 1.25f, 1.55f)
-				.texOffs(184, 80).addBox(1.21f, 23.25f, 0.10f, 0.94f, 0.36f, 0.34f), PartPose.offset(0.0f, 35.71f, 0.0f));
+				.texOffs(192, 80).addBox(1.21f, 23.25f, 0.10f, 0.94f, 0.36f, 0.34f), PartPose.offset(0.0f, 35.71f, 0.0f));
 		PartDefinition p_leg1_lower = p;
 		p = p_leg1_lower.addOrReplaceChild("leg1_claw", CubeListBuilder.create()
 				.texOffs(66, 69).addBox(-0.34f, -0.30f, -0.34f, 0.67f, 6.30f, 0.67f), PartPose.offsetAndRotation(0.0f, 38.03f, 0.0f, -0.28f, 0.0f, 0.30f));
@@ -175,7 +181,7 @@ public final class OccupantGeometry {
 				.texOffs(176, 40).addBox(-1.15f, 14.77f, 0.05f, 1.19f, 12.48f, 1.19f)
 				.texOffs(70, 69).addBox(-0.83f, 26.74f, -0.24f, 1.06f, 5.53f, 1.06f)
 				.texOffs(60, 80).addBox(-1.20f, 14.47f, -0.57f, 1.79f, 1.25f, 1.73f)
-				.texOffs(188, 80).addBox(-1.95f, 15.22f, 0.42f, 1.05f, 0.36f, 0.34f), PartPose.offset(0.0f, 31.01f, 0.0f));
+				.texOffs(196, 80).addBox(-1.95f, 15.22f, 0.42f, 1.05f, 0.36f, 0.34f), PartPose.offset(0.0f, 31.01f, 0.0f));
 		PartDefinition p_leg2_lower = p;
 		p = p_leg2_lower.addOrReplaceChild("leg2_claw", CubeListBuilder.create()
 				.texOffs(78, 69).addBox(-0.37f, -0.30f, -0.37f, 0.74f, 6.30f, 0.74f), PartPose.offsetAndRotation(0.0f, 32.27f, 0.0f, 0.44f, 0.0f, -0.22f));
@@ -189,7 +195,7 @@ public final class OccupantGeometry {
 				.texOffs(200, 40).addBox(-0.45f, 22.29f, -1.21f, 0.93f, 12.92f, 0.93f)
 				.texOffs(82, 69).addBox(-0.39f, 34.71f, -0.77f, 0.80f, 6.50f, 0.80f)
 				.texOffs(68, 80).addBox(-0.76f, 21.99f, -1.11f, 1.53f, 1.25f, 1.47f)
-				.texOffs(194, 80).addBox(-1.35f, 22.74f, -0.92f, 1.20f, 0.36f, 0.34f), PartPose.offset(0.0f, 36.70f, 0.0f));
+				.texOffs(202, 80).addBox(-1.35f, 22.74f, -0.92f, 1.20f, 0.36f, 0.34f), PartPose.offset(0.0f, 36.70f, 0.0f));
 		PartDefinition p_leg3_lower = p;
 		p = p_leg3_lower.addOrReplaceChild("leg3_claw", CubeListBuilder.create()
 				.texOffs(86, 69).addBox(-0.41f, -0.30f, -0.41f, 0.81f, 6.30f, 0.81f), PartPose.offsetAndRotation(0.0f, 41.21f, 0.0f, 0.29f, 0.0f, -0.29f));
@@ -203,7 +209,7 @@ public final class OccupantGeometry {
 				.texOffs(164, 40).addBox(-1.51f, 16.16f, -1.05f, 1.12f, 13.57f, 1.12f)
 				.texOffs(90, 69).addBox(-0.97f, 29.22f, -0.76f, 0.99f, 6.23f, 0.99f)
 				.texOffs(86, 80).addBox(-1.33f, 15.86f, -1.10f, 1.72f, 1.25f, 1.66f)
-				.texOffs(200, 80).addBox(-0.54f, 16.61f, -0.71f, 1.26f, 0.36f, 0.34f), PartPose.offset(0.0f, 31.99f, 0.0f));
+				.texOffs(208, 80).addBox(-0.54f, 16.61f, -0.71f, 1.26f, 0.36f, 0.34f), PartPose.offset(0.0f, 31.99f, 0.0f));
 		PartDefinition p_leg4_lower = p;
 		p = p_leg4_lower.addOrReplaceChild("leg4_claw", CubeListBuilder.create()
 				.texOffs(94, 69).addBox(-0.44f, -0.30f, -0.44f, 0.88f, 6.30f, 0.88f), PartPose.offsetAndRotation(0.0f, 35.45f, 0.0f, 0.38f, 0.0f, 0.16f));
@@ -217,7 +223,7 @@ public final class OccupantGeometry {
 				.texOffs(250, 40).addBox(0.28f, 17.40f, -1.14f, 0.85f, 10.13f, 0.85f)
 				.texOffs(164, 69).addBox(-0.01f, 27.03f, -0.72f, 0.72f, 5.66f, 0.72f)
 				.texOffs(102, 80).addBox(-0.37f, 17.10f, -1.05f, 1.45f, 1.25f, 1.39f)
-				.texOffs(206, 80).addBox(-0.44f, 17.85f, -0.89f, 1.02f, 0.36f, 0.34f), PartPose.offset(0.0f, 30.28f, 0.0f));
+				.texOffs(214, 80).addBox(-0.44f, 17.85f, -0.89f, 1.02f, 0.36f, 0.34f), PartPose.offset(0.0f, 30.28f, 0.0f));
 		PartDefinition p_leg5_lower = p;
 		p = p_leg5_lower.addOrReplaceChild("leg5_claw", CubeListBuilder.create()
 				.texOffs(98, 69).addBox(-0.33f, -0.30f, -0.33f, 0.65f, 6.30f, 0.65f), PartPose.offsetAndRotation(0.0f, 32.69f, 0.0f, 0.44f, 0.0f, 0.28f));
@@ -231,7 +237,7 @@ public final class OccupantGeometry {
 				.texOffs(108, 40).addBox(-0.20f, 15.97f, -1.01f, 1.04f, 17.26f, 1.04f)
 				.texOffs(168, 69).addBox(-0.30f, 32.73f, -0.75f, 0.91f, 5.90f, 0.91f)
 				.texOffs(110, 80).addBox(-0.66f, 15.67f, -1.08f, 1.64f, 1.25f, 1.58f)
-				.texOffs(212, 80).addBox(-1.0f, 16.42f, -0.76f, 1.09f, 0.36f, 0.34f), PartPose.offset(0.0f, 35.97f, 0.0f));
+				.texOffs(220, 80).addBox(-1.0f, 16.42f, -0.76f, 1.09f, 0.36f, 0.34f), PartPose.offset(0.0f, 35.97f, 0.0f));
 		PartDefinition p_leg6_lower = p;
 		p = p_leg6_lower.addOrReplaceChild("leg6_claw", CubeListBuilder.create()
 				.texOffs(102, 69).addBox(-0.36f, -0.30f, -0.36f, 0.72f, 6.30f, 0.72f), PartPose.offsetAndRotation(0.0f, 38.63f, 0.0f, -0.42f, 0.0f, 0.17f));
@@ -245,7 +251,7 @@ public final class OccupantGeometry {
 				.texOffs(124, 40).addBox(-1.75f, 14.37f, -1.04f, 1.22f, 16.64f, 1.22f)
 				.texOffs(106, 69).addBox(-1.12f, 30.51f, -0.76f, 1.09f, 5.36f, 1.09f)
 				.texOffs(128, 80).addBox(-1.48f, 14.07f, -1.10f, 1.82f, 1.25f, 1.76f)
-				.texOffs(218, 80).addBox(-0.68f, 14.82f, -0.60f, 0.87f, 0.36f, 0.34f), PartPose.offset(0.0f, 31.26f, 0.0f));
+				.texOffs(226, 80).addBox(-0.68f, 14.82f, -0.60f, 0.87f, 0.36f, 0.34f), PartPose.offset(0.0f, 31.26f, 0.0f));
 		PartDefinition p_leg7_lower = p;
 		p = p_leg7_lower.addOrReplaceChild("leg7_claw", CubeListBuilder.create()
 				.texOffs(114, 69).addBox(-0.40f, -0.30f, -0.40f, 0.80f, 6.30f, 0.80f), PartPose.offsetAndRotation(0.0f, 35.87f, 0.0f, 0.41f, 0.0f, -0.31f));
@@ -259,7 +265,7 @@ public final class OccupantGeometry {
 				.texOffs(0, 69).addBox(0.83f, 26.67f, -0.51f, 0.96f, 9.25f, 0.96f)
 				.texOffs(118, 69).addBox(0.24f, 35.42f, -0.46f, 0.83f, 6.39f, 0.83f)
 				.texOffs(136, 80).addBox(-0.13f, 26.37f, -0.79f, 1.56f, 1.25f, 1.50f)
-				.texOffs(222, 80).addBox(1.64f, 27.12f, -0.25f, 1.04f, 0.36f, 0.34f), PartPose.offset(0.0f, 36.96f, 0.0f));
+				.texOffs(230, 80).addBox(1.64f, 27.12f, -0.25f, 1.04f, 0.36f, 0.34f), PartPose.offset(0.0f, 36.96f, 0.0f));
 		PartDefinition p_leg8_lower = p;
 		p = p_leg8_lower.addOrReplaceChild("leg8_claw", CubeListBuilder.create()
 				.texOffs(122, 69).addBox(-0.43f, -0.30f, -0.43f, 0.87f, 6.30f, 0.87f), PartPose.offsetAndRotation(0.0f, 41.81f, 0.0f, 0.29f, 0.0f, -0.23f));
@@ -273,7 +279,7 @@ public final class OccupantGeometry {
 				.texOffs(140, 40).addBox(0.07f, 15.36f, -1.21f, 1.15f, 16.12f, 1.15f)
 				.texOffs(126, 69).addBox(-0.24f, 30.98f, -0.82f, 1.02f, 5.07f, 1.02f)
 				.texOffs(144, 80).addBox(-0.60f, 15.06f, -1.16f, 1.75f, 1.25f, 1.69f)
-				.texOffs(228, 80).addBox(0.97f, 15.81f, -0.80f, 0.93f, 0.36f, 0.34f), PartPose.offset(0.0f, 35.25f, 0.0f));
+				.texOffs(236, 80).addBox(0.97f, 15.81f, -0.80f, 0.93f, 0.36f, 0.34f), PartPose.offset(0.0f, 35.25f, 0.0f));
 		PartDefinition p_leg9_lower = p;
 		p = p_leg9_lower.addOrReplaceChild("leg9_claw", CubeListBuilder.create()
 				.texOffs(134, 69).addBox(-0.32f, -0.30f, -0.32f, 0.64f, 6.30f, 0.64f), PartPose.offsetAndRotation(0.0f, 36.05f, 0.0f, 0.44f, 0.0f, 0.30f));

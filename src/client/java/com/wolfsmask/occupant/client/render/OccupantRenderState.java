@@ -35,6 +35,12 @@ public class OccupantRenderState extends HumanoidRenderState {
 	public float clock;
 	/** The angle its head is held at, -1 to 1; changed only while it is not being looked at. */
 	public float tilt;
+	/**
+	 * Where the one watching is, from its face: the turn (relative to its body) and tilt, in
+	 * degrees, its head would need to look straight at them. Its pupils make up the difference.
+	 */
+	public float watchYaw;
+	public float watchPitch;
 	/** Model pixels to blocks, worked out once per frame. */
 	public float occupantScale = 1.0f;
 }

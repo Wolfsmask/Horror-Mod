@@ -5,6 +5,7 @@ import com.wolfsmask.occupant.client.ScreenEffects;
 import com.wolfsmask.occupant.director.Director;
 import com.wolfsmask.occupant.director.HauntData;
 import com.wolfsmask.occupant.director.Mercy;
+import com.wolfsmask.occupant.entity.OccupantEntity;
 import com.wolfsmask.occupant.network.ScreenEffectPayload;
 import com.wolfsmask.occupant.util.Kinds;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
@@ -68,6 +69,7 @@ final class FoundFootage {
 			shot("roof", () -> found(context, game, woods, true));
 			shot("hole", () -> found(context, game, woods, false));
 			shot("taken", () -> taken(context, game, woods));
+			shot("walk", () -> walk(context, game, woods));
 		} catch (RuntimeException | AssertionError e) {
 			Occupant.LOGGER.warn("[client-gametest] found footage stopped early", e);
 		} finally {
@@ -454,6 +456,62 @@ final class FoundFootage {
 	}
 
 	/**
+	 * It walking, a frame every other tick: across the clearing past the camera at a stalk, then
+	 * running straight at it. Small pictures, to be put together into moving ones and looked at for
+	 * anything that jerks, slides or snaps back.
+	 */
+	private static void walk(ClientGameTestContext context, TestSingleplayerContext game, BlockPos[] woods) {
+		TestServerContext server = game.getServer();
+		BlockPos floor = server.computeOnServer(s -> ForestGallery.clearing(s.overworld(), woods[0].offset(-40, 0, 80)));
+		if (floor == null) return;
+		server.runOnServer(s -> Cinematic.fellTrees(s.overworld(), floor, 16));
+		server.runCommand("gamemode survival @p");
+		server.runCommand("effect clear @p");
+		int y = server.computeOnServer(s -> Cinematic.ground(s.overworld(), floor.getX(), floor.getZ()));
+		Vec3 eye = new Vec3(floor.getX() + 0.5, y + Cinematic.EYE, floor.getZ() + 0.5);
+		Cinematic.camera(context, game, eye, eye.add(0.0, -0.4, 6.0), 6000);
+		context.getInput().resizeWindow(640, 360);
+		try {
+			film(context, server, floor, "walk-across", new int[]{-11, 8}, new int[]{11, 8}, OccupantEntity.Mode.STALK, 0.9);
+			film(context, server, floor, "walk-run", new int[]{2, 18}, new int[]{0, 2}, OccupantEntity.Mode.CHASE, 1.6);
+		} finally {
+			server.runCommand("kill " + Cinematic.ALL);
+			context.getInput().resizeWindow(1920, 1080);
+		}
+	}
+
+	/** It walks from one place to another round {@code floor} (x and z, in blocks), filmed as it goes. */
+	private static void film(ClientGameTestContext context, TestServerContext server, BlockPos floor, String name,
+							 int[] from, int[] to, OccupantEntity.Mode mode, double speed) {
+		server.runCommand("kill " + Cinematic.ALL);
+		boolean put = server.computeOnServer(s -> {
+			ServerLevel level = s.overworld();
+			OccupantEntity e = com.wolfsmask.occupant.registry.ModEntities.OCCUPANT.create(level, net.minecraft.world.entity.EntitySpawnReason.COMMAND);
+			if (e == null) return false;
+			e.standAlone(Cinematic.player(s));
+			int x = floor.getX() + from[0], z = floor.getZ() + from[1];
+			e.snapTo(x + 0.5, Cinematic.ground(level, x, z), z + 0.5, 0.0f, 0.0f);
+			e.setMode(mode);
+			e.setForm(OccupantEntity.Form.REVEALED);
+			e.setGazeLocked(false);
+			return level.addFreshEntity(e);
+		});
+		if (!put) return;
+		context.waitTicks(20);                                  // in the world, and settled on its legs
+		server.runOnServer(s -> {
+			ServerLevel level = s.overworld();
+			int x = floor.getX() + to[0], z = floor.getZ() + to[1];
+			for (OccupantEntity e : level.getEntitiesOfClass(OccupantEntity.class, AABB.ofSize(Vec3.atCenterOf(floor), 64, 32, 64), o -> true)) {
+				e.walkTo(new Vec3(x + 0.5, Cinematic.ground(level, x, z), z + 0.5), speed);
+			}
+		});
+		for (int i = 0; i < 36; i++) {
+			context.waitTicks(2);
+			OccupantClientGameTest.shoot(context, String.format(Locale.ROOT, "%s-%02d", name, i));
+		}
+	}
+
+	/**
 	 * The end, for the ones it takes: the words in the black, the wall of names in its lair, their
 	 * own name written on it while they watch, it, the credits, and home again.
 	 */
@@ -477,8 +535,9 @@ final class FoundFootage {
 			return was;
 		});
 		server.runCommand("occupant ending @p");
-		int[] at = {60, 165, 300, 385, 470, 600, 705, 835, 915, 1085, 1270};
-		String[] names = {"1-dark", "2-dark", "3-wall", "4-names", "5-written", "6-it", "7-leaves", "8-title", "9-credits", "10-thanks", "11-home"};
+		int[] at = {60, 165, 300, 385, 470, 568, 592, 612, 657, 720, 850, 930, 1100, 1280};
+		String[] names = {"01-dark", "02-dark", "03-wall", "04-names", "05-written", "06-candles-out", "07-eyes", "08-it",
+				"09-flare", "10-leaves", "11-title", "12-credits", "13-thanks", "14-home"};
 		int waited = 0;
 		try {
 			for (int i = 0; i < at.length; i++) {

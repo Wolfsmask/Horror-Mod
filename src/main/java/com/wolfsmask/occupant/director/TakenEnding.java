@@ -74,12 +74,19 @@ public final class TakenEnding implements Sequence {
 	/** A letter of their name every this many ticks. */
 	private static final int WRITE_EVERY = 3;
 	private static final int SUB_LEARNED = 505;
-	private static final int TURN = 565;
-	private static final int SPEAKS = 590;
-	private static final int LEAVES = 665;
-	private static final int SUB_WEARING = 692;
+	/** The candles go out, one after another, until there is only their name. */
+	private static final int[] CANDLES_OUT = {520, 534, 548, 562};
+	/** In the dark, it is right in front of them; and they turn to it. */
+	private static final int CLOSE = 570;
+	private static final int TURN = 578;
+	private static final int SPEAKS = 600;
+	/** A candle catches again by itself, for a moment: its face, a hand's width from theirs. */
+	private static final int FLARE = 650;
+	private static final int FLARE_OUT = 668;
+	private static final int LEAVES = 680;
+	private static final int SUB_WEARING = 705;
 	// ---- the credits
-	private static final int BLACK = 760;
+	private static final int BLACK = 775;
 	private static final int TITLE = BLACK + 30;
 	private static final int CREDIT_DAYS = BLACK + 62;
 	private static final int CREDIT_SEEN = BLACK + 142;
@@ -105,6 +112,8 @@ public final class TakenEnding implements Sequence {
 			{"the builder", "day 50"}, {"", ""}, {"the boy", "day 6"}};
 	private static final int COLUMNS = 7;
 	private static final int ROWS = 3;
+	/** Where the candles stand at the foot of the wall, across it: the order they go out in. */
+	private static final int[] CANDLES = {-3, 3, -2, 2};
 
 	private final Haunt haunt;
 	private int t;
@@ -293,7 +302,7 @@ public final class TakenEnding implements Sequence {
 				if (world.getBlockEntity(at) instanceof SignBlockEntity sign) Compat.writeSign(sign, new String[]{"", who[0], who[1], ""});
 			}
 		}
-		for (int z : new int[]{-3, -2, 2, 3}) {
+		for (int z : CANDLES) {
 			BlockPos at = o.offset(2, 0, z);
 			world.setBlock(at, Blocks.CANDLE.defaultBlockState().setValue(BlockStateProperties.CANDLES, 2 + Math.abs(z) % 2 * 2)
 					.setValue(BlockStateProperties.LIT, true), 3);
@@ -387,17 +396,36 @@ public final class TakenEnding implements Sequence {
 			Cues.title(p, seen >= 8 ? "Every time you looked at it, it learned more of you."
 					: "You hardly ever looked at it. It never needed you to.", 75, true);
 		}
+		for (int k = 0; k < CANDLES_OUT.length; k++) {
+			if (t == CANDLES_OUT[k]) candle(p, o, CANDLES[k], false);
+		}
+		if (t == CLOSE && entity != null) {
+			// While the dark is complete: right in front of them, between them and the wall.
+			Vec3 at = new Vec3(o.getX() + 2.1, o.getY(), o.getZ() + 0.5);
+			float yaw = com.wolfsmask.occupant.util.Sight.yawBetween(at, p.position());
+			entity.halt();
+			entity.snapTo(at.x, at.y, at.z, yaw, 0.0f);
+			entity.setYHeadRot(yaw);
+			entity.setYBodyRot(yaw);
+		}
 		if (t == TURN) {
+			// Its eyes are all there is to turn to.
 			Cues.lookFree(p);
-			if (entity != null) {
-				Vec3 to = p.position().subtract(entity.position());
-				Vec3 near = entity.position().add(new Vec3(to.x, 0, to.z).scale(0.45));
-				entity.walkTo(near, 0.45);
-			}
+			Cues.sound(p, ModSounds.BREATH, SoundSource.HOSTILE, p.getEyePosition().add(p.getLookAngle().scale(1.5)), 0.7f, 0.5f);
 		}
 		if (t == SPEAKS) {
 			Cues.title(p, "Now I know how to be you.", 100, false);
 			if (entity != null) Cues.sound(p, ModSounds.BREATH, SoundSource.HOSTILE, entity.getEyePosition(), 1.0f, 0.6f);
+		}
+		if (t == FLARE) {
+			candle(p, o, -2, true);
+			candle(p, o, 2, true);
+			Cues.effect(p, ScreenEffectPayload.STATIC, 8, 0.45f);
+			Cues.soundAtEars(p, ModSounds.STATIC, SoundSource.HOSTILE, 0.8f, 0.6f);
+		}
+		if (t == FLARE_OUT) {
+			candle(p, o, -2, false);
+			candle(p, o, 2, false);
 		}
 		if (t >= TURN && t < LEAVES && entity != null && !entity.isPathing()) entity.faceTowards(p.getEyePosition());
 		if (t == LEAVES && entity != null) {
@@ -406,6 +434,18 @@ public final class TakenEnding implements Sequence {
 			entity.walkTo(Vec3.atBottomCenterOf(o.offset(-7, 0, 0)), 0.5);
 		}
 		if (t == SUB_WEARING) Cues.title(p, "It went up into the world, wearing you.", 80, true);
+	}
+
+	/** A candle at the foot of the wall lit (brightly, all four wicks) or put out, with its sound. */
+	private void candle(ServerPlayer p, BlockPos o, int z, boolean lit) {
+		ServerLevel world = server.overworld();
+		BlockPos at = o.offset(2, 0, z);
+		BlockState state = world.getBlockState(at);
+		if (!state.hasProperty(BlockStateProperties.LIT) || !state.hasProperty(BlockStateProperties.CANDLES)) return;
+		world.setBlock(at, lit ? state.setValue(BlockStateProperties.LIT, true).setValue(BlockStateProperties.CANDLES, 4)
+				: state.setValue(BlockStateProperties.LIT, false), 3);
+		Cues.sound(p, lit ? SoundEvents.FLINTANDSTEEL_USE : SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS,
+				Vec3.atCenterOf(at), lit ? 0.6f : 0.35f, lit ? 0.6f : 1.4f);
 	}
 
 	/** Their name, a letter at a time, and how many days they lasted, glowing on the blank sign. */
@@ -438,7 +478,7 @@ public final class TakenEnding implements Sequence {
 		}
 		if (t == CREDIT_OUT) Cues.title(p, "It is out there now, being you.", 80, true);
 		if (t == THANKS) Cues.title(p, "Thank you for playing.", 120, false);
-		if (t == THANKS + 30) Cues.title(p, "The story goes on.", 90, true);
+		if (t == THANKS + 30) Cues.title(p, "One of four endings. The story goes on.", 90, true);
 	}
 
 	/** Home, whole, the story begun again from the start of it; nothing following them for a while. */
