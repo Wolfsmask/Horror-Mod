@@ -418,6 +418,7 @@ public final class Found {
 			this.ceiling = ceiling;
 			this.lift = new Lift(haunt, entity, leader, with);
 			entity.setGazeLocked(true);
+			entity.setUnmoved(true);
 		}
 
 		@Nullable
@@ -632,6 +633,7 @@ public final class Found {
 			this.layers = layers;
 			this.lift = new Lift(haunt, entity, leader, with);
 			entity.setGazeLocked(true);
+			entity.setUnmoved(true);
 		}
 
 		@Nullable

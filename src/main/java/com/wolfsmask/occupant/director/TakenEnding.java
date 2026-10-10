@@ -376,6 +376,7 @@ public final class TakenEnding implements Sequence {
 			}
 			if (entity != null) {
 				entity.setConcealed(false);
+				entity.setUnmoved(true);
 				// As it holds them when it has them: and without the static of its stare, so the names can be read.
 				entity.setMode(OccupantEntity.Mode.AMBUSH);
 				entity.setGazeLocked(true);

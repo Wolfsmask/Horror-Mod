@@ -710,7 +710,9 @@ public final class Mercy {
 					if (DRAGGED[shot]) dragged(p, shot, in);
 					else bottle(p, in);
 				} else if (in == SHOT) {
+					// In the dark between: everything moved to where the next flash finds it.
 					cut(p);
+					if (shot + 1 < DRAGGED.length) setUp(p, DRAGGED[shot + 1]);
 				}
 			}
 			if (t == END) {
@@ -770,6 +772,43 @@ public final class Mercy {
 				teleport(p, home);
 				from = to;
 			}
+			// Still in the black: the first flash set up.
+			setUp(p, DRAGGED[0]);
+		}
+
+		/** Where it, and what it holds, are when the next flash comes up (done in the dark, never seen to jump). */
+		private void setUp(ServerPlayer p, boolean drag) {
+			OccupantEntity it = entity;
+			if (it == null) return;
+			Vec3 way = to.subtract(from);
+			way = way.lengthSqr() < 1.0E-4 ? Sight.flatLook(p) : new Vec3(way.x, 0.0, way.z).normalize();
+			if (drag) {
+				it.setFocus(null);
+				it.setHeld(List.of(p));
+				Vec3 at = p.position().add(way.scale(AHEAD));
+				it.setPos(at.x, it.getY(), at.z);
+				it.setDeltaMovement(Vec3.ZERO);
+				Cues.sound(p, SoundEvents.TRIDENT_HIT, SoundSource.HOSTILE, p.getEyePosition(), 0.7f, 0.5f);
+				return;
+			}
+			// Over them, closer than it walks, a bottle on the end of a leg at their mouth.
+			Vec3 over = p.position().add(way.scale(1.2));
+			it.setPos(over.x, it.getY(), over.z);
+			it.setDeltaMovement(Vec3.ZERO);
+			Vec3 mouth = p.getEyePosition().add(way.scale(0.45)).add(0.0, -0.3, 0.0);
+			ServerLevel level = Compat.level(p);
+			net.minecraft.world.entity.item.ItemEntity b = new net.minecraft.world.entity.item.ItemEntity(level, mouth.x, mouth.y, mouth.z, Compat.healingPotion());
+			b.setNoGravity(true);
+			b.setNeverPickUp();
+			b.setUnlimitedLifetime();
+			b.setDeltaMovement(Vec3.ZERO);
+			if (level.addFreshEntity(b)) {
+				bottle = b;
+				it.setHeld(List.of(b));
+			}
+			// Their eyes up, to its face, the bottle at the bottom of what they see.
+			double face = Sight.drawnBlocks(1.2, it.getAct()) * 0.86;
+			Cues.lookAt(p, over.add(0.0, face - (over.y - it.getY()), 0.0).lerp(mouth, 0.35));
 		}
 
 		/**
@@ -792,12 +831,7 @@ public final class Mercy {
 			if (v.length() > 0.5) v = v.normalize().scale(0.5);
 			p.setDeltaMovement(v.x * 0.8, Math.min(p.getDeltaMovement().y, 0.0), v.z * 0.8);
 			p.hurtMarked = true;
-			if (in == 0) {
-				it.setFocus(null);
-				it.setHeld(List.of(p));
-				Cues.sound(p, SoundEvents.TRIDENT_HIT, SoundSource.HOSTILE, p.getEyePosition(), 0.7f, 0.5f);
-			}
-			// It walks backwards, ahead of them, towards their bed: never between them and it.
+			// It walks backwards ahead of them towards their bed, watching them come.
 			Vec3 way = to.subtract(from);
 			way = way.lengthSqr() < 1.0E-4 ? Sight.flatLook(p) : new Vec3(way.x, 0.0, way.z).normalize();
 			Vec3 at = p.position().add(way.scale(AHEAD));
@@ -816,30 +850,7 @@ public final class Mercy {
 			if (it == null) return;
 			p.setDeltaMovement(0.0, Math.min(p.getDeltaMovement().y, 0.0), 0.0);
 			p.hurtMarked = true;
-			Vec3 toIt = new Vec3(it.getX() - p.getX(), 0.0, it.getZ() - p.getZ());
-			toIt = toIt.lengthSqr() < 1.0E-4 ? Sight.flatLook(p) : toIt.normalize();
-			if (in == 0) {
-				// Over them: closer than it walks.
-				Vec3 over = p.position().add(toIt.scale(1.2));
-				it.setPos(over.x, it.getY(), over.z);
-				it.setDeltaMovement(Vec3.ZERO);
-				Vec3 mouth = p.getEyePosition().add(toIt.scale(0.45)).add(0.0, -0.3, 0.0);
-				ServerLevel level = Compat.level(p);
-				net.minecraft.world.entity.item.ItemEntity b = new net.minecraft.world.entity.item.ItemEntity(level, mouth.x, mouth.y, mouth.z, Compat.healingPotion());
-				b.setNoGravity(true);
-				b.setNeverPickUp();
-				b.setUnlimitedLifetime();
-				b.setInvulnerable(true);
-				b.setDeltaMovement(Vec3.ZERO);
-				if (level.addFreshEntity(b)) {
-					bottle = b;
-					it.setHeld(List.of(b));
-				}
-				// Their eyes up, to its face, the bottle at the bottom of what they see.
-				double face = Sight.drawnBlocks(1.2, it.getAct()) * 0.86;
-				Cues.lookAt(p, it.position().add(0.0, face, 0.0).lerp(mouth, 0.35));
-				Cues.sound(p, ModSounds.BREATH, SoundSource.HOSTILE, it.getEyePosition(), 0.8f, 0.6f);
-			}
+			if (in == 0) Cues.sound(p, ModSounds.BREATH, SoundSource.HOSTILE, it.getEyePosition(), 0.8f, 0.6f);
 			net.minecraft.world.entity.item.ItemEntity b = bottle;
 			if (b != null && !b.isRemoved()) b.setDeltaMovement(Vec3.ZERO);
 			if (in == DRINK) {

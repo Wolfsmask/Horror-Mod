@@ -708,11 +708,12 @@ public final class OccupantGameTests {
 		BlockPos stand = helper.absolutePos(new BlockPos(1, 2, 1));
 		a.snapTo(stand.getX() + 0.5, stand.getY(), stand.getZ() + 0.5, 0.0f, 0.0f);
 		b.snapTo(stand.getX() + 2.5, stand.getY(), stand.getZ() + 0.5, 0.0f, 0.0f);
-		OccupantEntity theirs = director.haunt(a).spawnOccupant(a, helper.absolutePos(new BlockPos(3, 2, 3)),
-				OccupantEntity.Mode.STARE, OccupantEntity.Form.VEILED);
+		BlockPos spot = groundFor(helper, new BlockPos(4, 2, 1));
+		helper.assertTrue(spot != null, "No ground to stand it on");
+		OccupantEntity theirs = director.haunt(a).spawnOccupant(a, spot, OccupantEntity.Mode.STARE, OccupantEntity.Form.VEILED);
 		helper.assertTrue(theirs != null, "It should come for the first of them");
-		OccupantEntity second = director.haunt(b).spawnOccupant(b, helper.absolutePos(new BlockPos(1, 2, 3)),
-				OccupantEntity.Mode.STARE, OccupantEntity.Form.VEILED);
+		// The very same ground, so the only thing stopping it is that it is already out.
+		OccupantEntity second = director.haunt(b).spawnOccupant(b, spot, OccupantEntity.Mode.STARE, OccupantEntity.Form.VEILED);
 		Occupant.LOGGER.info("[gametest] one of it: second {}, seen by the other {}", second, theirs.broadcastToPlayer(b));
 		helper.assertTrue(second == null, "There should not be a second of it near the first");
 		helper.assertTrue(theirs.broadcastToPlayer(b), "The other should see it too");
@@ -733,8 +734,9 @@ public final class OccupantGameTests {
 		BlockPos stand = helper.absolutePos(new BlockPos(1, 2, 1));
 		a.snapTo(stand.getX() + 0.5, stand.getY(), stand.getZ() + 0.5, 0.0f, 0.0f);
 		b.snapTo(stand.getX() + 2.5, stand.getY(), stand.getZ() + 0.5, 0.0f, 0.0f);
-		OccupantEntity it = director.haunt(a).spawnOccupant(a, helper.absolutePos(new BlockPos(3, 2, 3)),
-				OccupantEntity.Mode.STARE, OccupantEntity.Form.VEILED);
+		BlockPos spot = groundFor(helper, new BlockPos(4, 2, 1));
+		helper.assertTrue(spot != null, "No ground to stand it on");
+		OccupantEntity it = director.haunt(a).spawnOccupant(a, spot, OccupantEntity.Mode.STARE, OccupantEntity.Form.VEILED);
 		helper.assertTrue(it != null, "It should come for the first of them");
 		director.beginNow(a, "test_scene", new com.wolfsmask.occupant.director.Sequence() {
 			private int t;
@@ -951,6 +953,21 @@ public final class OccupantGameTests {
 	 * reachable by name on every version), or null if it could not be put there.
 	 */
 	@org.jetbrains.annotations.Nullable
+	/** Ground it can stand on in this test's own place, near {@code relative}; null if there is none. */
+	@org.jetbrains.annotations.Nullable
+	private static BlockPos groundFor(GameTestHelper helper, BlockPos relative) {
+		BlockPos at = helper.absolutePos(relative);
+		for (int r = 0; r <= 2; r++) {
+			for (int dx = -r; dx <= r; dx++) {
+				for (int dz = -r; dz <= r; dz++) {
+					BlockPos g = com.wolfsmask.occupant.util.Spots.groundNear(helper.getLevel(), at.getX() + dx, at.getY(), at.getZ() + dz, 2);
+					if (g != null) return g;
+				}
+			}
+		}
+		return null;
+	}
+
 	private static net.minecraft.world.entity.Mob summon(GameTestHelper helper, String kind, BlockPos at) {
 		ServerLevel level = helper.getLevel();
 		MinecraftServer server = level.getServer();

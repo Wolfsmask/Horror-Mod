@@ -164,6 +164,8 @@ public final class Strike {
 		haunt.taking(lethal);
 		entity.halt();
 		entity.setMode(OccupantEntity.Mode.AMBUSH);
+		// From here no one's blow stops it, theirs or a friend's: it is too late for that.
+		entity.setUnmoved(true);
 		entity.setFocus(null);
 		entity.faceTowards(p.getEyePosition());
 		entity.setHeld(List.of(p));

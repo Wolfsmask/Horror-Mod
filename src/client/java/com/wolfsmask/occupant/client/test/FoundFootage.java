@@ -70,6 +70,7 @@ final class FoundFootage {
 			shot("hole", () -> found(context, game, woods, false));
 			shot("taken", () -> taken(context, game, woods));
 			shot("walk", () -> walk(context, game, spawn));
+			shot("brought", () -> brought(context, game, spawn));
 		} catch (RuntimeException | AssertionError e) {
 			Occupant.LOGGER.warn("[client-gametest] found footage stopped early", e);
 		} finally {
@@ -488,6 +489,51 @@ final class FoundFootage {
 		} finally {
 			server.runCommand("kill " + Cinematic.ALL);
 			context.getInput().resizeWindow(1920, 1080);
+		}
+	}
+
+	/**
+	 * Fallen to their death, and caught: in flashes, with the dark between, it drags them home along
+	 * the ground on a leg and feeds them a potion; then they are at their bed, whole. From their
+	 * own eyes, on the open ground the walk was filmed on.
+	 */
+	private static void brought(ClientGameTestContext context, TestSingleplayerContext game, BlockPos spawn) {
+		TestServerContext server = game.getServer();
+		BlockPos floor = spawn.offset(24, 0, 24);
+		int y = server.computeOnServer(s -> Cinematic.ground(s.overworld(), floor.getX(), floor.getZ()));
+		Vec3 eye = new Vec3(floor.getX() + 0.5, y + Cinematic.EYE, floor.getZ() + 6.5);
+		Cinematic.camera(context, game, eye, eye.add(0.0, -0.3, 6.0), 12500);
+		server.runCommand("gamemode survival @p");
+		server.runCommand("effect clear @p");
+		boolean begun = server.computeOnServer(s -> {
+			ServerPlayer p = Cinematic.player(s);
+			com.wolfsmask.occupant.compat.Compat.setRespawn(p, p.blockPosition());
+			HauntData d = Director.get().data(p);
+			d.paused = false;
+			d.introduced = true;
+			Mercy.allowAgain(p);
+			p.setHealth(1.0f);
+			return !Mercy.allowDeath(p, p.damageSources().fellOutOfWorld());
+		});
+		Occupant.LOGGER.info("[client-gametest] brought: begun {}", begun);
+		if (!begun) return;
+		int[] at = {22, 52, 68, 96, 128, 140, 172, 236};
+		String[] names = {"dragged", "bottle", "drink", "dragged-again", "bottle-again", "drink-again", "last-stretch", "awake"};
+		try {
+			int waited = 0;
+			for (int i = 0; i < at.length; i++) {
+				context.waitTicks(at[i] - waited);
+				waited = at[i];
+				Occupant.LOGGER.info("[client-gametest] brought {}: health {}, {} in sight", names[i],
+						context.computeOnClient(mc -> mc.player == null ? -1.0f : mc.player.getHealth()), context.computeOnClient(OccupantClientGameTest::seen));
+				OccupantClientGameTest.shoot(context, "brought-" + (i + 1) + "-" + names[i]);
+			}
+		} finally {
+			server.runOnServer(s -> {
+				ServerPlayer p = Cinematic.player(s);
+				Director.get().data(p).paused = true;
+				p.setHealth(p.getMaxHealth());
+			});
 		}
 	}
 
