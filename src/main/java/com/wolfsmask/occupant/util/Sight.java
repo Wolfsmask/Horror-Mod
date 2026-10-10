@@ -51,6 +51,7 @@ public final class Sight {
 	 * panes and bars are seen through, as a player sees through them; leaves and walls are not.
 	 */
 	public static boolean hasLineOfSight(ServerPlayer player, Vec3 point) {
+		if (!loadedAlong(player, player.getEyePosition(), point)) return false;
 		BlockHitResult hit = player.level().clip(new ClipContext(
 				player.getEyePosition(), point, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, player));
 		return hit.getType() == HitResult.Type.MISS;
@@ -194,12 +195,51 @@ public final class Sight {
 	public static boolean isHidden(ServerPlayer player, BlockPos pos) {
 		Vec3 center = Vec3.atCenterOf(pos);
 		if (angleTo(player, center) >= OUT_OF_VIEW_DEGREES) return true;
+		if (!loadedAlong(player, player.getEyePosition(), center)) return true;
 		BlockHitResult hit = player.level().clip(new ClipContext(
 				player.getEyePosition(), center, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, player));
 		if (hit.getType() == HitResult.Type.MISS) return false;
 		BlockPos hitPos = hit.getBlockPos();
 		if (hitPos.equals(pos)) return false;
 		return player.level().getBlockState(hitPos).isSolidRender();
+	}
+
+	/**
+	 * Whether every chunk a straight line from {@code from} to {@code to} passes through is loaded.
+	 * Looking along a line reads every block on it, and reading a block in a chunk that is not
+	 * loaded makes the server load it, or make it, there and then: a look across the world must
+	 * never do that. Nobody can see through land that is not there for them anyway.
+	 */
+	public static boolean loadedAlong(ServerPlayer player, Vec3 from, Vec3 to) {
+		net.minecraft.world.level.Level level = player.level();
+		double x0 = from.x / 16.0, z0 = from.z / 16.0, x1 = to.x / 16.0, z1 = to.z / 16.0;
+		int cx = Mth.floor(x0), cz = Mth.floor(z0);
+		int ex = Mth.floor(x1), ez = Mth.floor(z1);
+		double dx = x1 - x0, dz = z1 - z0;
+		int stepX = dx > 0 ? 1 : -1, stepZ = dz > 0 ? 1 : -1;
+		double tDeltaX = dx == 0 ? Double.MAX_VALUE : Math.abs(1.0 / dx);
+		double tDeltaZ = dz == 0 ? Double.MAX_VALUE : Math.abs(1.0 / dz);
+		double tMaxX = dx == 0 ? Double.MAX_VALUE : (dx > 0 ? cx + 1 - x0 : x0 - cx) * tDeltaX;
+		double tMaxZ = dz == 0 ? Double.MAX_VALUE : (dz > 0 ? cz + 1 - z0 : z0 - cz) * tDeltaZ;
+		// Chunk by chunk along it (and the ones either side where it passes a corner).
+		for (int n = 0; n < 256; n++) {
+			if (!level.hasChunk(cx, cz)) return false;
+			if (cx == ex && cz == ez) return true;
+			if (Math.abs(tMaxX - tMaxZ) < 1.0e-9) {
+				if (!level.hasChunk(cx + stepX, cz) || !level.hasChunk(cx, cz + stepZ)) return false;
+				tMaxX += tDeltaX;
+				tMaxZ += tDeltaZ;
+				cx += stepX;
+				cz += stepZ;
+			} else if (tMaxX < tMaxZ) {
+				tMaxX += tDeltaX;
+				cx += stepX;
+			} else {
+				tMaxZ += tDeltaZ;
+				cz += stepZ;
+			}
+		}
+		return false;
 	}
 
 	/** Unit vector pointing where the player is looking, flattened onto the ground. */
