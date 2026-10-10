@@ -80,11 +80,12 @@ public final class Found {
 
 	/**
 	 * Everything alive round them, dead where it stands: the monsters, the animals, the village.
-	 * Not their own animals, nor anything they have named, nor the great ones.
+	 * Not their own animals (tamed, on a lead, ridden), nor anything they have named, nor the great ones.
 	 */
 	private static void killEverything(ServerPlayer p, ServerLevel level) {
 		List<Mob> all = level.getEntitiesOfClass(Mob.class, p.getBoundingBox().inflate(48.0),
 				x -> x.isAlive() && !(x instanceof OccupantEntity) && x.getMaxHealth() <= 100.0f && !x.hasCustomName()
+						&& !x.isLeashed() && !x.isVehicle() && !x.isPassenger()
 						&& !(x instanceof TamableAnimal t && t.isTame()));
 		for (Mob m : all) m.hurtServer(level, m.damageSources().generic(), 1000.0f);
 		if (!all.isEmpty()) Cues.sound(p, ModSounds.STATIC, SoundSource.HOSTILE, p.getEyePosition(), 0.6f, 0.5f);

@@ -58,6 +58,11 @@ public final class TakenEnding implements Sequence {
 	public static final String ID = "taken";
 	/** How the story ended, in {@link HauntData#ending}: it took them. */
 	public static final int TAKEN = 3;
+	/**
+	 * Kept (as a cooldown that never runs out, so it is saved) from the moment it takes them until
+	 * they are home: if they leave the world in the middle of it, they come back home, not to its lair.
+	 */
+	static final String UNDER = "taken_under";
 
 	// ---- the dark: carried
 	private static final int LINE_1 = 40;
@@ -183,6 +188,7 @@ public final class TakenEnding implements Sequence {
 		days = "day " + dayCount;
 		seen = d.sightings;
 		d.ending = TAKEN;
+		d.cooldowns.put(UNDER, Long.MAX_VALUE);
 		// Black from here until the candles: the strike's own black runs straight on into it.
 		Cues.effect(p, ScreenEffectPayload.BLACKOUT, LIGHT, 1f);
 		Cues.effect(p, ScreenEffectPayload.SILENCE, 0, 1f);
@@ -493,6 +499,7 @@ public final class TakenEnding implements Sequence {
 		d.cooldowns.remove(Strike.SPARED);
 		d.cooldowns.remove(Found.CAUGHT);
 		d.cooldowns.remove(Director.ATTACK_DUE);
+		d.cooldowns.remove(UNDER);
 		d.setAct(1);
 		haunt.nextEventIn = 20 * 60 * 3;
 		if (server != null) haunt.liftFog(server.getTickCount() + LIFTED_FOR);
@@ -500,6 +507,18 @@ public final class TakenEnding implements Sequence {
 		Achievements.grant(p, Achievements.ENDING_TAKEN);
 		Director director = Director.get();
 		if (director != null) director.markDirty();
+	}
+
+	/**
+	 * Back in the world, having left it in the middle of the end (it could not bring them home
+	 * while they were gone): home now, and the story begun again, as if they had seen it through.
+	 */
+	static void recover(Haunt h, ServerPlayer p) {
+		if (!h.data.cooldowns.containsKey(UNDER) || !p.isAlive()) return;
+		TakenEnding e = new TakenEnding(h);
+		e.server = Compat.level(p).getServer();
+		e.home(p);
+		Director.debug("{} came back from the end, and was sent home", p.getName().getString());
 	}
 
 	private void wake(ServerPlayer p) {

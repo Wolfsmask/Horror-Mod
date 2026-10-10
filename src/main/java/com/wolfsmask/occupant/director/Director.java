@@ -163,6 +163,7 @@ public final class Director {
 				// Inside the guard: building a player's story state reads the save file, and a
 				// failure there must not take the server tick down with it.
 				h = haunt(player);
+				if (!h.joinSent) rejoined(h, player);
 				if (woke.remove(player.getUUID())) wakeUp(h, player);
 				tickPlayer(h, player, cfg);
 			} catch (Exception | LinkageError e) {
@@ -188,6 +189,19 @@ public final class Director {
 		}
 
 		if (server.getTickCount() % 100 == 0) save.setDirty();
+	}
+
+	/**
+	 * Just come into the world: whatever a scene left half done when they last went (it could
+	 * only put it right while they were here) put right now. Held up on its legs, they had no
+	 * weight, and that is kept with them; taken, they were in its lair.
+	 */
+	private void rejoined(Haunt h, ServerPlayer player) {
+		if (player.isNoGravity() && !player.isSpectator()) {
+			player.setNoGravity(false);
+			player.resetFallDistance();
+		}
+		TakenEnding.recover(h, player);
 	}
 
 	/** Waking up is not always a relief. Run a tick later, once the player is really in the world. */
