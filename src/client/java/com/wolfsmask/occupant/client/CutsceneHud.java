@@ -18,9 +18,14 @@ final class CutsceneHud {
 				VanillaHudElements.HEALTH_BAR, VanillaHudElements.FOOD_BAR, VanillaHudElements.AIR_BAR,
 				VanillaHudElements.MOUNT_HEALTH, VanillaHudElements.INFO_BAR, VanillaHudElements.EXPERIENCE_LEVEL,
 				VanillaHudElements.HELD_ITEM_TOOLTIP)) {
-			HudElementRegistry.replaceElement(id, original -> (graphics, deltaTracker) -> {
-				if (!Cutscene.active()) original.extractRenderState(graphics, deltaTracker);
-			});
+			try {
+				HudElementRegistry.replaceElement(id, original -> (graphics, deltaTracker) -> {
+					if (!Cutscene.active()) original.extractRenderState(graphics, deltaTracker);
+				});
+			} catch (RuntimeException e) {
+				// Gone already (another mod's HUD in its place): that part stays in a scene, nothing more.
+				com.wolfsmask.occupant.Occupant.LOGGER.debug("No {} on the HUD to leave out of a scene", id, e);
+			}
 		}
 	}
 }

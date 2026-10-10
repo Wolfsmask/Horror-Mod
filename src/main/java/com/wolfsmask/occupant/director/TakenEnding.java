@@ -62,7 +62,7 @@ public final class TakenEnding implements Sequence {
 	 * Kept (as a cooldown that never runs out, so it is saved) from the moment it takes them until
 	 * they are home: if they leave the world in the middle of it, they come back home, not to its lair.
 	 */
-	static final String UNDER = "taken_under";
+	public static final String UNDER = "taken_under";
 
 	// ---- the dark: carried
 	private static final int LINE_1 = 40;
@@ -246,7 +246,7 @@ public final class TakenEnding implements Sequence {
 		}
 		wall(world, o);
 		// Nothing else down here with them.
-		for (Mob m : world.getEntitiesOfClass(Mob.class, new AABB(o).inflate(28.0), m -> m instanceof Enemy && !(m instanceof OccupantEntity))) {
+		for (Mob m : world.getEntitiesOfClass(Mob.class, new AABB(o).inflate(28.0), m -> m instanceof Enemy && !(m instanceof OccupantEntity) && !m.hasCustomName())) {
 			m.discard();
 		}
 		return o;

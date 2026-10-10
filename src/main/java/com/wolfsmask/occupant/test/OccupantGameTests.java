@@ -646,6 +646,52 @@ public final class OccupantGameTests {
 	}
 
 	/**
+	 * Gone from the world in the middle of the end (in its lair, held up off the ground): back in
+	 * it, they are home, on their own weight again, and the story has begun again.
+	 */
+	@GameTest(maxTicks = 60)
+	public void leavingInTheMiddleOfTheEndComesBackHome(GameTestHelper helper) {
+		Director director = Director.get();
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		OccupantConfig.get().hauntCreative = true;
+		HauntData data = director.data(player);
+		data.introduced = true;
+		data.setAct(HauntData.MAX_ACT);
+		data.cooldowns.put(com.wolfsmask.occupant.director.TakenEnding.UNDER, Long.MAX_VALUE);
+		BlockPos home = helper.absolutePos(new BlockPos(1, 2, 1)).offset(40, 0, 40);
+		com.wolfsmask.occupant.compat.Compat.setRespawn(player, home);
+		player.setNoGravity(true);
+		helper.runAtTickTime(10, () -> {
+			double away = Math.sqrt(Math.pow(player.getX() - (home.getX() + 0.5), 2) + Math.pow(player.getZ() - (home.getZ() + 0.5), 2));
+			Occupant.LOGGER.info("[gametest] back from the end: {} from home, weightless {}, act {}, still under {}", away,
+					player.isNoGravity(), data.act, data.cooldowns.containsKey(com.wolfsmask.occupant.director.TakenEnding.UNDER));
+			helper.assertTrue(!player.isNoGravity(), "They should not come back weightless");
+			helper.assertTrue(away < 8.0, "They should come back at home, not " + away + " blocks from it");
+			helper.assertTrue(data.act == 1, "The story should have begun again, not be at act " + data.act);
+			helper.assertTrue(!data.cooldowns.containsKey(com.wolfsmask.occupant.director.TakenEnding.UNDER),
+					"Once home, they should no longer be kept as taken");
+			helper.succeed();
+		});
+	}
+
+	/** Held up on its legs and carried past a block they choke in: that is not what kills them. */
+	@GameTest
+	public void nothingElseKillsThemWhileItHoldsThem(GameTestHelper helper) {
+		Director director = Director.get();
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		OccupantConfig.get().hauntCreative = true;
+		HauntData data = director.data(player);
+		data.introduced = true;
+		data.setAct(HauntData.MAX_ACT);
+		player.setNoGravity(true);
+		player.setHealth(1.0f);
+		boolean allowed = com.wolfsmask.occupant.director.Mercy.allowDeath(player, player.damageSources().inWall());
+		player.setNoGravity(false);
+		helper.assertTrue(!allowed, "Choking in a wall while it holds them up should not kill them");
+		helper.succeed();
+	}
+
+	/**
 	 * The rescue, run to its end: a leg goes into the monster, it is lifted off the ground, and only
 	 * then dies, and then it is gone.
 	 */
