@@ -213,7 +213,8 @@ public final class Director {
 		}
 		// What was to begin the moment that was over (the end, when it has taken them).
 		if (h.active == null && h.queued != null) {
-			if (eligible && player.isAlive()) {
+			// The credits run even when the ending was that it let them go.
+			if (player.isAlive() && (eligible || Credits.ID.equals(h.queuedId))) {
 				h.active = h.queued;
 				h.activeId = h.queuedId;
 				h.pending = null;
@@ -392,7 +393,8 @@ public final class Director {
 
 	private boolean isEligible(ServerPlayer player, Haunt h, OccupantConfig cfg) {
 		if (!cfg.enabled || h.data.paused) return false;
-		if (h.data.ending == LastNightEnding.FOUND) return false;     // it let them go
+		// It let them go: nothing more, but the end of the story.
+		if (h.data.ending == LastNightEnding.FOUND && !Credits.ID.equals(h.activeId)) return false;
 		if (player.isSpectator() || player.isDeadOrDying()) return false;
 		if (player.isCreative() && !cfg.hauntCreative) return false;
 		return Haunt.worldAllowed(player);

@@ -111,6 +111,8 @@ public final class LastNightEvent extends HorrorEvent {
 				if (age == endAt - 1) {
 					entity.discard();
 					LastNightEnding.play(player, haunt, which);
+					// When the words have been read: the credits, in the black.
+					haunt.queue(com.wolfsmask.occupant.director.Credits.ID, new com.wolfsmask.occupant.director.Credits(140, which));
 				}
 				return age < endAt;
 			}

@@ -87,13 +87,8 @@ public final class TakenEnding implements Sequence {
 	private static final int SUB_WEARING = 705;
 	// ---- the credits
 	private static final int BLACK = 775;
-	private static final int TITLE = BLACK + 30;
-	private static final int CREDIT_DAYS = BLACK + 62;
-	private static final int CREDIT_SEEN = BLACK + 142;
-	private static final int CREDIT_OUT = BLACK + 222;
-	private static final int THANKS = BLACK + 300;
 	private static final int HOME = BLACK + 340;
-	private static final int WAKE = BLACK + 440;
+	private static final int WAKE = BLACK + Credits.LENGTH;
 	private static final int STING = WAKE + 60;
 	private static final int OVER = STING + 10;
 	/** No fog at all for a quarter of an hour after. */
@@ -183,8 +178,7 @@ public final class TakenEnding implements Sequence {
 		server = Compat.level(p).getServer();
 		HauntData d = haunt.data;
 		name = p.getName().getString();
-		ServerLevel overworld = server.overworld();
-		dayCount = Math.max(1L, Compat.dayTime(overworld) / 24000L + 1L);
+		dayCount = Credits.days(p);
 		days = "day " + dayCount;
 		seen = d.sightings;
 		d.ending = TAKEN;
@@ -470,15 +464,7 @@ public final class TakenEnding implements Sequence {
 	}
 
 	private void credits(ServerPlayer p) {
-		if (t == TITLE) Cues.title(p, "THE OCCUPANT", 150, false);
-		if (t == CREDIT_DAYS) Cues.title(p, name + " lasted " + dayCount + (dayCount == 1 ? " day." : " days."), 80, true);
-		if (t == CREDIT_SEEN) {
-			String times = seen == 1 ? "once" : seen + " times";
-			Cues.title(p, "You saw it " + times + ". It saw you every time.", 80, true);
-		}
-		if (t == CREDIT_OUT) Cues.title(p, "It is out there now, being you.", 80, true);
-		if (t == THANKS) Cues.title(p, "Thank you for playing.", 120, false);
-		if (t == THANKS + 30) Cues.title(p, "One of four endings. The story goes on.", 90, true);
+		if (t >= BLACK) Credits.roll(p, t - BLACK, name, dayCount, seen, TAKEN);
 	}
 
 	/** Home, whole, the story begun again from the start of it; nothing following them for a while. */
