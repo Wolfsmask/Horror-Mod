@@ -99,10 +99,10 @@ public final class OccupantGeometry {
 				.texOffs(138, 69).addBox(-2.75f, -10.40f, -2.40f, 5.50f, 1.10f, 4.80f), PartPose.offset(0.0f, -8.70f, -0.40f));
 		PartDefinition p_skull = p;
 		p = p_skull.addOrReplaceChild("left_pupil", CubeListBuilder.create()
-				.texOffs(168, 80).addBox(-0.25f, -0.25f, -0.10f, 0.50f, 0.50f, 0.10f), PartPose.offset(1.50f, -5.30f, -3.0f));
+				.texOffs(168, 80).addBox(-0.12f, -0.12f, -0.10f, 0.25f, 0.25f, 0.10f), PartPose.offset(1.50f, -5.30f, -3.0f));
 		PartDefinition p_left_pupil = p;
 		p = p_skull.addOrReplaceChild("right_pupil", CubeListBuilder.create()
-				.texOffs(172, 80).addBox(-0.25f, -0.25f, -0.10f, 0.50f, 0.50f, 0.10f), PartPose.offset(-1.50f, -5.30f, -3.0f));
+				.texOffs(172, 80).addBox(-0.12f, -0.12f, -0.10f, 0.25f, 0.25f, 0.10f), PartPose.offset(-1.50f, -5.30f, -3.0f));
 		PartDefinition p_right_pupil = p;
 		p = p_skull.addOrReplaceChild("jaw", CubeListBuilder.create()
 				.texOffs(4, 69).addBox(1.75f, 0.0f, -2.95f, 1.70f, 6.0f, 3.35f)

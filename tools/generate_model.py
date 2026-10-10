@@ -211,13 +211,14 @@ def parts():
             ("face", -3.5, -7.0 - FACE_MID, -3.0, 7, 7, 6),
             ("crown", -2.75, -8.1 - FACE_MID, -2.4, 5.5, 1.1, 4.8),       # rounds off the top of it
         ]),
-        # In each black eye, one tiny pale point: bones of their own, moved in game so that
+        # In each black eye, one speck of white, the smallest thing on it: the rest is void.
+        # Bones of their own, moved in game so that
         # wherever you are, whatever its head is doing, they are on you (OccupantPose.stare).
         ("left_pupil", "skull", (EYE_X, EYE_Y, PUPIL_Z), (0, 0, 0), [
-            ("pupil", -0.25, -0.25, -0.1, 0.5, 0.5, 0.1),
+            ("pupil", -0.125, -0.125, -0.1, 0.25, 0.25, 0.1),
         ]),
         ("right_pupil", "skull", (-EYE_X, EYE_Y, PUPIL_Z), (0, 0, 0), [
-            ("pupil", -0.25, -0.25, -0.1, 0.5, 0.5, 0.1),
+            ("pupil", -0.125, -0.125, -0.1, 0.25, 0.25, 0.1),
         ]),
         # The rest of the face is the mouth. The skin carries on down both sides of it, much
         # too far, to a small pointed chin; between them it is open, with a row of small teeth
