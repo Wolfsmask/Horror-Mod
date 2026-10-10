@@ -40,6 +40,7 @@ public final class OccupantClient implements ClientModInitializer {
 		// Under everything else on the HUD: it belongs to the world, not to the hotbar.
 		HudElementRegistry.addFirst(Occupant.id("atmosphere"), (graphics, deltaTracker) ->
 				ScreenEffects.renderAtmosphere(graphics, deltaTracker.getGameTimeDeltaPartialTick(false)));
+		CutsceneHud.register();
 		TitleAtmosphere.register();
 		PauseLines.register();
 		SettingsScreen.register();
