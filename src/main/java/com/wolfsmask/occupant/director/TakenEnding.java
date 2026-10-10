@@ -194,6 +194,8 @@ public final class TakenEnding implements Sequence {
 		Cues.effect(p, ScreenEffectPayload.SILENCE, 0, 1f);
 		Cues.effect(p, ScreenEffectPayload.CUTSCENE, OVER + 40, 1f);
 		Cues.lookFree(p);
+		// The others near, who watched it hold them: it has them now, and they are gone.
+		Cues.whisperToOthers(p, "It took {player}.", 140);
 		haunt.releaseFog();
 		haunt.liftFog(server.getTickCount() + LIFTED_FOR + OVER);
 		p.removeEffect(MobEffects.DARKNESS);
@@ -369,7 +371,7 @@ public final class TakenEnding implements Sequence {
 		p.resetFallDistance();
 		if (t == ARRIVE + 4) {
 			for (int[] at : new int[][]{{1, 3}, {1, -3}, {0, 3}}) {
-				entity = haunt.spawnOccupant(p, o.offset(at[0], 0, at[1]), OccupantEntity.Mode.STARE, OccupantEntity.Form.REVEALED);
+				entity = haunt.spawnOccupant(p, o.offset(at[0], 0, at[1]), OccupantEntity.Mode.STARE, OccupantEntity.Form.REVEALED, true);
 				if (entity != null) break;
 			}
 			if (entity != null) {

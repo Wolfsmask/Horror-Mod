@@ -43,4 +43,6 @@ public class OccupantRenderState extends HumanoidRenderState {
 	public float watchPitch;
 	/** Model pixels to blocks, worked out once per frame. */
 	public float occupantScale = 1.0f;
+	/** How far into the story of the one it came for: drawn at that, the same for everyone who sees it. */
+	public int act;
 }

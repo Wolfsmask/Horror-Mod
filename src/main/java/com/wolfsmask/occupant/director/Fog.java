@@ -46,7 +46,10 @@ public final class Fog {
 		if (cfg.fogClosesIn && Compat.level(player).getServer().getTickCount() < haunt.greyUntil) end = Math.min(end, GREY_DAY);
 		int view = Compat.viewDistance(player);
 		if (view > 2) end = Math.min(end, view * 16.0f);
-		end = haunt.fogAfterEvents(end, Compat.level(player).getServer().getTickCount());
+		long now = Compat.level(player).getServer().getTickCount();
+		end = haunt.fogAfterEvents(end, now);
+		// In someone else's scene near them: the fog it brings for them, it brings for these too.
+		if (end > 0 && haunt.active instanceof Watching w) end = w.leader().fogAfterEvents(end, now);
 		return end <= 0 ? 0.0f : Math.max(FogLine.NEAREST, end);
 	}
 

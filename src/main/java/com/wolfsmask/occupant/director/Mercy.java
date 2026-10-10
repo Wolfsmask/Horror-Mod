@@ -5,6 +5,7 @@ import com.wolfsmask.occupant.OccupantConfig;
 import com.wolfsmask.occupant.compat.Compat;
 import com.wolfsmask.occupant.entity.OccupantEntity;
 import com.wolfsmask.occupant.network.ScreenEffectPayload;
+import com.wolfsmask.occupant.registry.ModSounds;
 import com.wolfsmask.occupant.util.Cues;
 import com.wolfsmask.occupant.util.Sight;
 import com.wolfsmask.occupant.util.Spots;
@@ -55,6 +56,8 @@ public final class Mercy {
 	 */
 	private static final long FALLS_AGAIN_AFTER = 20L * 3;
 	private static final String RESCUE = "mercy";
+	/** Caught falling, and brought home. */
+	private static final String BROUGHT = "brought";
 	private static final String[] FALL_NOTES = {"It doesn't like that.", "Not like that.",
 			"You don't get to leave that way.", "It caught you. It will always catch you."};
 	private static final String[] ONE = {"I can't have you dying like that.", "Not to that. Never to that.",
@@ -91,7 +94,8 @@ public final class Mercy {
 		// Nor while it has them for the last time, before the end has begun; nor while it is holding
 		// them up at all (nothing but its own scenes takes a player's weight away), carried past
 		// whatever they might choke in.
-		if (RESCUE.equals(h.activeId) || TakenEnding.ID.equals(h.activeId) || h.taking || player.isNoGravity()) {
+		if (RESCUE.equals(h.activeId) || BROUGHT.equals(h.activeId) || TakenEnding.ID.equals(h.activeId) || h.taking
+				|| player.isNoGravity()) {
 			player.setHealth(Math.max(player.getHealth(), 2.0f));
 			return false;
 		}
@@ -132,18 +136,35 @@ public final class Mercy {
 		h.mercyFallAt = -1;
 	}
 
-	/** Black, and back at their bed, whole, as if they had only been asleep, with a note. */
+	/**
+	 * Black, and back at their bed: and then, in flashes, what it did (see {@link Brought}). If it
+	 * cannot be there for it (sound only, or it is out for someone else near), as if they had only
+	 * been asleep: whole, with a note.
+	 */
 	private static void caughtFalling(ServerPlayer player, Director director, Haunt h) {
+		player.clearFire();
+		player.setAirSupply(player.getMaxAirSupply());
+		player.resetFallDistance();
+		player.setDeltaMovement(Vec3.ZERO);
+		Cues.effectOnly(player, ScreenEffectPayload.BLACKOUT, 40, 1f);
+		Cues.effectOnly(player, ScreenEffectPayload.SILENCE, 0, 1f);
+		sendHome(player);
+		if (!OccupantConfig.get().soundOnly) {
+			// Barely alive: what it gives them brings them back.
+			player.setHealth(Math.min(player.getMaxHealth(), 3.0f));
+			director.beginNow(player, BROUGHT, new Brought(h));
+			return;
+		}
+		wholeAgain(player);
+	}
+
+	/** Whole, fed, and a note in their pocket. */
+	private static void wholeAgain(ServerPlayer player) {
 		player.setHealth(player.getMaxHealth());
 		player.getFoodData().setFoodLevel(20);
 		player.getFoodData().setSaturation(5.0f);
 		player.clearFire();
 		player.setAirSupply(player.getMaxAirSupply());
-		player.resetFallDistance();
-		player.setDeltaMovement(Vec3.ZERO);
-		Cues.effect(player, ScreenEffectPayload.BLACKOUT, 70, 1f);
-		Cues.effect(player, ScreenEffectPayload.SILENCE, 0, 1f);
-		sendHome(player);
 		String note = FALL_NOTES[player.getRandom().nextInt(FALL_NOTES.length)];
 		ItemStack book = Compat.writtenBook("A note", "?", List.of(note));
 		if (!player.getInventory().add(book)) {
@@ -238,6 +259,12 @@ public final class Mercy {
 		private static final int AFTER_DEATH = 28;
 		/** At most this many turns at being looked at and gone: in a crowd, the rest go all together, last. */
 		private static final int VANISH_TURNS = 10;
+		/** How near anyone else may come to it while it is busy, before it puts them down. */
+		private static final double TOO_CLOSE = 3.2;
+		/** How long putting them down takes; and how long before it will do it to the same one again. */
+		private static final int PUSH_FOR = 18;
+		private static final int PUSH_AGAIN = 45;
+		private static final String[] WAIT = {"Wait your turn.", "I said wait.", "Your turn is coming."};
 
 		private final ServerPlayer player;
 		/** Where the monsters are (and stay, whatever happens to them: through a portal, say). */
@@ -263,6 +290,12 @@ public final class Mercy {
 		@Nullable
 		private OccupantEntity entity;
 		private int age;
+		/** Whoever it is putting down now, and since when; when it last did it to each, and how often. */
+		@Nullable
+		private java.util.UUID pushing;
+		private int pushStart;
+		private final java.util.Map<java.util.UUID, Integer> pushedAt = new java.util.HashMap<>();
+		private final java.util.Map<java.util.UUID, Integer> pushes = new java.util.HashMap<>();
 
 		Rescue(Haunt haunt, ServerPlayer player, List<Mob> monsters, Mob attacker) {
 			this.player = player;
@@ -340,6 +373,7 @@ public final class Mercy {
 				if (entity != null) {
 					entity.setFootsteps(false);
 					entity.setGazeLocked(true);
+					entity.setUnmoved(true);
 				}
 			}
 			if (entity == null) {
@@ -392,6 +426,8 @@ public final class Mercy {
 				if (entity.hasVanished()) entity = null;
 				else entity.keepAlive();
 			}
+			// Anyone else coming up to it while it is busy is put down, and it goes on.
+			if (entity != null && age > APPEAR && age < gone) keepBack(p);
 			// 1. It is there, already facing them.
 			if (age == APPEAR && entity != null && entity.isConcealed()) {
 				entity.faceTowards(p.getEyePosition());
@@ -477,6 +513,67 @@ public final class Mercy {
 			return age < over;
 		}
 
+		/**
+		 * Someone else, coming up to it while it saves them. Without letting go of anything it holds,
+		 * a spare leg comes down on them: they are thrown back onto the ground, and it tells them to
+		 * wait their turn. Its eyes go to them and back, and it carries on as if they had never come.
+		 */
+		private void keepBack(ServerPlayer saved) {
+			OccupantEntity it = entity;
+			if (it == null) return;
+			if (pushing == null) {
+				for (ServerPlayer o : Party.others(saved, 24.0)) {
+					if (flat(o.position(), it.position()) > TOO_CLOSE || Math.abs(o.getY() - it.getY()) > 3.0) continue;
+					Integer last = pushedAt.get(o.getUUID());
+					if (last != null && age - last < PUSH_AGAIN) continue;
+					pushing = o.getUUID();
+					pushStart = age;
+					pushedAt.put(o.getUUID(), age);
+					break;
+				}
+				if (pushing == null) return;
+			}
+			ServerPlayer o = level.getServer().getPlayerList().getPlayer(pushing);
+			int k = age - pushStart;
+			if (o == null || !o.isAlive() || o.level() != level || k > PUSH_FOR) {
+				// Done with them: what it holds, it holds as before, and its eyes go back to the one it is saving.
+				it.setHeld(holding);
+				it.setGazeLocked(true);
+				pushing = null;
+				return;
+			}
+			if (k == 0) {
+				// A spare leg, as well as the ones it has through them: it lets go of nothing.
+				List<net.minecraft.world.entity.Entity> legs = new ArrayList<>(holding);
+				legs.add(o);
+				it.setHeld(legs);
+				it.setGazeLocked(false);
+				Cues.sound(saved, ModSounds.BREATH, SoundSource.HOSTILE, it.getEyePosition(), 0.8f, 0.55f);
+			}
+			if (k < PUSH_FOR - 4) it.getLookControl().setLookAt(o, 40.0f, 40.0f);
+			if (k == 4) {
+				// Down: back off its feet, away from it, and onto the ground.
+				Vec3 away = o.position().subtract(it.position());
+				away = new Vec3(away.x, 0.0, away.z);
+				away = away.lengthSqr() < 1.0E-4 ? Sight.flatLook(o).scale(-1.0) : away.normalize();
+				o.setDeltaMovement(away.x * 0.85, 0.32, away.z * 0.85);
+				o.hurtMarked = true;
+				Cues.sound(saved, SoundEvents.ZOMBIE_ATTACK_WOODEN_DOOR, SoundSource.HOSTILE, o.position(), 0.9f, 0.45f);
+				Cues.sound(saved, SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, o.position(), 1.0f, 0.6f);
+				Cues.effectOnly(o, ScreenEffectPayload.STATIC, 8, 0.5f);
+			}
+			if (k == 7) {
+				// Slammed down onto the ground: it means it.
+				o.setDeltaMovement(o.getDeltaMovement().x * 0.4, -0.9, o.getDeltaMovement().z * 0.4);
+				o.hurtMarked = true;
+				o.resetFallDistance();
+			}
+			if (k == 9) {
+				int n = pushes.merge(o.getUUID(), 1, Integer::sum);
+				Cues.whisper(o, WAIT[Math.min(n, WAIT.length) - 1], 70);
+			}
+		}
+
 		private static double flat(Vec3 a, Vec3 b) {
 			double dx = a.x - b.x, dz = a.z - b.z;
 			return Math.sqrt(dx * dx + dz * dz);
@@ -536,6 +633,267 @@ public final class Mercy {
 
 		@Nullable
 		@Override
+		public OccupantEntity occupant() {
+			return entity;
+		}
+	}
+
+	/**
+	 * Caught falling, they see what it does instead of letting them die, in flashes, with the dark
+	 * between: dragged along the ground towards their bed on a leg through them; its face over
+	 * them, a bottle held to their mouth on the end of a leg, and they drink; dragged again; the
+	 * bottle again; dragged the last of the way. Then black, and they are at their bed, whole, and it
+	 * is gone, and there is a note. Anyone near sees it all happen.
+	 * <p>
+	 * If it cannot be there for it (somewhere it cannot stand, or out already for someone else
+	 * near), the flashes are only the dark, and they wake whole, the same.
+	 */
+	private static final class Brought implements Sequence {
+		/** Each flash, and the dark between them. */
+		private static final int SHOT = 30;
+		private static final int CUT = 5;
+		/** The flashes, in order: dragged (true), or the bottle (false). */
+		private static final boolean[] DRAGGED = {true, false, true, false, true};
+		/** In the black first, while it is made ready; the first flash comes up out of it. */
+		private static final int FIRST = 10;
+		private static final int END = FIRST + DRAGGED.length * (SHOT + CUT);
+		private static final int HOME = END + 8;
+		private static final int OVER = END + 34;
+		/** How far, at most, it drags them, and how far ahead of them it walks. */
+		private static final int FURTHEST = 9;
+		private static final double AHEAD = 1.7;
+		/** Ticks into a bottle flash when they drink. */
+		private static final int DRINK = 18;
+
+		private final Haunt haunt;
+		@Nullable
+		private MinecraftServer server;
+		@Nullable
+		private java.util.UUID who;
+		@Nullable
+		private OccupantEntity entity;
+		@Nullable
+		private net.minecraft.world.entity.item.ItemEntity bottle;
+		/** Where the dragging begins, and where it ends: at their bed. */
+		private Vec3 from = Vec3.ZERO;
+		private Vec3 to = Vec3.ZERO;
+		/** How far along the way they have been dragged, 0 to 1. */
+		private double along;
+		private int t;
+
+		Brought(Haunt haunt) {
+			this.haunt = haunt;
+		}
+
+		@Override
+		public boolean tick(ServerPlayer p) {
+			t++;
+			p.resetFallDistance();
+			if (t == 1) {
+				server = Compat.level(p).getServer();
+				who = p.getUUID();
+				// Theirs alone to watch: the others near see it in the world.
+				Cues.effectOnly(p, ScreenEffectPayload.CUTSCENE, OVER + 40, 1f);
+				Cues.effectOnly(p, ScreenEffectPayload.BLACKOUT, FIRST + 4, 1f);
+			}
+			// A tick on, once they are really home: the way it brings them, and it.
+			if (t == 2) ready(p);
+			if (entity != null) {
+				if (entity.hasVanished()) entity = null;
+				else entity.keepAlive();
+			}
+			if (t >= FIRST && t < END) {
+				int k = t - FIRST;
+				int shot = k / (SHOT + CUT);
+				int in = k % (SHOT + CUT);
+				if (in < SHOT) {
+					if (DRAGGED[shot]) dragged(p, shot, in);
+					else bottle(p, in);
+				} else if (in == SHOT) {
+					cut(p);
+				}
+			}
+			if (t == END) {
+				Cues.effectOnly(p, ScreenEffectPayload.BLACKOUT, OVER - END + 10, 1f);
+				lookAway(p);
+				gone();
+			}
+			if (t == HOME) {
+				// At their bed, standing, whole; and its note.
+				sendHome(p);
+				wholeAgain(p);
+			}
+			if (t == OVER) Cues.effectOnly(p, ScreenEffectPayload.CUTSCENE, 0, 0f);
+			return t < OVER;
+		}
+
+		/** The way back to their bed it drags them along (the longest level run of ground, up to nine blocks), and it, ahead. */
+		private void ready(ServerPlayer p) {
+			ServerLevel level = Compat.level(p);
+			BlockPos home = p.blockPosition();
+			to = p.position();
+			Vec3 best = null;
+			int bestLen = 0;
+			float turn = p.getRandom().nextFloat() * 45.0f;
+			for (int k = 0; k < 8; k++) {
+				Vec3 dir = Sight.rotateY(new Vec3(0.0, 0.0, 1.0), turn + k * 45.0f);
+				int len = 0;
+				for (int i = 1; i <= FURTHEST; i++) {
+					BlockPos at = Spots.groundNear(level, Mth.floor(to.x + dir.x * i), home.getY(), Mth.floor(to.z + dir.z * i), 0);
+					if (at == null) break;
+					len = i;
+				}
+				if (len > bestLen) {
+					bestLen = len;
+					best = dir;
+				}
+			}
+			if (best == null || bestLen < 3) {
+				// Nowhere to drag them: it is there, with them, where they are.
+				best = Sight.flatLook(p);
+				bestLen = 0;
+			}
+			from = to.add(best.scale(bestLen));
+			if (bestLen > 0) teleport(p, BlockPos.containing(from));
+			Vec3 ahead = from.add(best.scale(-AHEAD));
+			BlockPos feet = Spots.groundNear(level, Mth.floor(ahead.x), home.getY(), Mth.floor(ahead.z), 2);
+			if (feet == null) feet = Spots.groundNear(level, Mth.floor(from.x + best.x * AHEAD), home.getY(), Mth.floor(from.z + best.z * AHEAD), 2);
+			if (feet != null) entity = haunt.spawnOccupant(p, feet, OccupantEntity.Mode.AMBUSH, OccupantEntity.Form.REVEALED);
+			if (entity != null) {
+				// They are in the black: it is simply there when they can see.
+				entity.setConcealed(false);
+				entity.setGazeLocked(true);
+				entity.setUnmoved(true);
+				entity.setFootsteps(true);
+			} else if (bestLen > 0) {
+				// It cannot be there for it: they stay where they woke, and the flashes are only the dark.
+				teleport(p, home);
+				from = to;
+			}
+		}
+
+		/**
+		 * Dragged: along the ground towards their bed, on a leg through them, it walking backwards
+		 * ahead of them, watching them come.
+		 */
+		private void dragged(ServerPlayer p, int shot, int in) {
+			int drags = 0, before = 0;
+			for (int i = 0; i < DRAGGED.length; i++) {
+				if (!DRAGGED[i]) continue;
+				if (i < shot) before++;
+				drags++;
+			}
+			OccupantEntity it = entity;
+			if (it == null) return;
+			double f = Mth.clamp((before + in / (double) SHOT) / drags, 0.0, 1.0);
+			along = Math.max(along, f);
+			Vec3 want = from.lerp(to, along);
+			Vec3 v = new Vec3(want.x - p.getX(), 0.0, want.z - p.getZ());
+			if (v.length() > 0.5) v = v.normalize().scale(0.5);
+			p.setDeltaMovement(v.x * 0.8, Math.min(p.getDeltaMovement().y, 0.0), v.z * 0.8);
+			p.hurtMarked = true;
+			if (in == 0) {
+				it.setFocus(null);
+				it.setHeld(List.of(p));
+				Cues.sound(p, SoundEvents.TRIDENT_HIT, SoundSource.HOSTILE, p.getEyePosition(), 0.7f, 0.5f);
+			}
+			// It walks backwards, ahead of them, towards their bed: never between them and it.
+			Vec3 way = to.subtract(from);
+			way = way.lengthSqr() < 1.0E-4 ? Sight.flatLook(p) : new Vec3(way.x, 0.0, way.z).normalize();
+			Vec3 at = p.position().add(way.scale(AHEAD));
+			it.setPos(at.x, it.getY() + Mth.clamp(p.getY() - it.getY(), -0.2, 0.2), at.z);
+			it.setDeltaMovement(Vec3.ZERO);
+			if (in % 7 == 3) {
+				BlockPos under = p.blockPosition().below();
+				Cues.sound(p, Compat.level(p).getBlockState(under).getSoundType().getStepSound(), SoundSource.PLAYERS,
+						p.position(), 0.6f, 0.6f);
+			}
+		}
+
+		/** Its face, over them, and a bottle on the end of a leg, held to their mouth; and they drink. */
+		private void bottle(ServerPlayer p, int in) {
+			OccupantEntity it = entity;
+			if (it == null) return;
+			p.setDeltaMovement(0.0, Math.min(p.getDeltaMovement().y, 0.0), 0.0);
+			p.hurtMarked = true;
+			Vec3 toIt = new Vec3(it.getX() - p.getX(), 0.0, it.getZ() - p.getZ());
+			toIt = toIt.lengthSqr() < 1.0E-4 ? Sight.flatLook(p) : toIt.normalize();
+			if (in == 0) {
+				// Over them: closer than it walks.
+				Vec3 over = p.position().add(toIt.scale(1.2));
+				it.setPos(over.x, it.getY(), over.z);
+				it.setDeltaMovement(Vec3.ZERO);
+				Vec3 mouth = p.getEyePosition().add(toIt.scale(0.45)).add(0.0, -0.3, 0.0);
+				ServerLevel level = Compat.level(p);
+				net.minecraft.world.entity.item.ItemEntity b = new net.minecraft.world.entity.item.ItemEntity(level, mouth.x, mouth.y, mouth.z, Compat.healingPotion());
+				b.setNoGravity(true);
+				b.setNeverPickUp();
+				b.setUnlimitedLifetime();
+				b.setInvulnerable(true);
+				b.setDeltaMovement(Vec3.ZERO);
+				if (level.addFreshEntity(b)) {
+					bottle = b;
+					it.setHeld(List.of(b));
+				}
+				// Their eyes up, to its face, the bottle at the bottom of what they see.
+				double face = Sight.drawnBlocks(1.2, it.getAct()) * 0.86;
+				Cues.lookAt(p, it.position().add(0.0, face, 0.0).lerp(mouth, 0.35));
+				Cues.sound(p, ModSounds.BREATH, SoundSource.HOSTILE, it.getEyePosition(), 0.8f, 0.6f);
+			}
+			net.minecraft.world.entity.item.ItemEntity b = bottle;
+			if (b != null && !b.isRemoved()) b.setDeltaMovement(Vec3.ZERO);
+			if (in == DRINK) {
+				Cues.sound(p, SoundEvents.GENERIC_DRINK, SoundSource.PLAYERS, p.getEyePosition(), 1.0f, 0.9f);
+				if (b != null) b.discard();
+				bottle = null;
+				it.setHeld(List.of());
+				float health = Math.min(p.getMaxHealth(), p.getHealth() + p.getMaxHealth() * 0.45f);
+				p.setHealth(health);
+				p.getFoodData().setFoodLevel(Math.min(20, p.getFoodData().getFoodLevel() + 8));
+				Compat.level(p).sendParticles(ParticleTypes.HEART, p.getX(), p.getY() + 1.9, p.getZ(), 4, 0.3, 0.2, 0.3, 0.02);
+			}
+			if (in == SHOT - 1) lookAway(p);
+		}
+
+		/** The dark between two flashes: a stutter of the light, and the static. */
+		private void cut(ServerPlayer p) {
+			Cues.effectOnly(p, ScreenEffectPayload.FLICKER, CUT + 1, 1f);
+			Cues.effectOnly(p, ScreenEffectPayload.STATIC, CUT, 0.45f);
+		}
+
+		private void lookAway(ServerPlayer p) {
+			Cues.lookFree(p);
+		}
+
+		/** It, and its bottle, gone. */
+		private void gone() {
+			if (bottle != null) bottle.discard();
+			bottle = null;
+			if (entity != null) entity.vanish();
+			entity = null;
+		}
+
+		@Override
+		public void end() {
+			gone();
+			// Cut short: home, whole, and their view their own again.
+			if (t >= HOME || server == null || who == null) return;
+			ServerPlayer p = server.getPlayerList().getPlayer(who);
+			if (p == null) return;
+			try {
+				if (p.isAlive()) {
+					sendHome(p);
+					wholeAgain(p);
+				}
+				Cues.lookFree(p);
+				Cues.effectOnly(p, ScreenEffectPayload.CUTSCENE, 0, 0f);
+			} catch (RuntimeException e) {
+				Occupant.LOGGER.warn("Could not bring {} home", p.getName().getString(), e);
+			}
+		}
+
+		@Override
+		@Nullable
 		public OccupantEntity occupant() {
 			return entity;
 		}

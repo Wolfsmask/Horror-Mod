@@ -79,7 +79,8 @@ public final class Strike {
 
 	/** Whether this time it does not let them go, but takes them: only at the very end of the story. */
 	public static boolean lethal(HauntData d) {
-		return TakenEnding.ready(d);
+		// One at a time: while it is taking someone else, it lets this one go.
+		return TakenEnding.ready(d) && !com.wolfsmask.occupant.director.Director.someoneTaken();
 	}
 
 	/** How much the first leg takes: enough to feel, never enough to end it before it is done. */

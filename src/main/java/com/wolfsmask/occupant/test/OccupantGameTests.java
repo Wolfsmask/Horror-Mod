@@ -564,6 +564,8 @@ public final class OccupantGameTests {
 		Occupant.LOGGER.info("[gametest] mercy: fall allowed {}, health {}, creative {}, introduced {}", fall, player.getHealth(),
 				player.isCreative(), director.haunt(player).data.introduced);
 		helper.assertTrue(!fall && player.getHealth() > 1.0f, "A fatal fall should be caught (" + fall + ", " + player.getHealth() + ")");
+		// Brought home from the fall: done with that, for the monster's part of this.
+		director.stopCurrent(player);
 
 		// By the game's own command: the zombie's entity type is not reachable by name on every version.
 		level.getServer().getCommands().performPrefixedCommand(level.getServer().createCommandSourceStack().withSuppressedOutput(),
@@ -589,9 +591,9 @@ public final class OccupantGameTests {
 
 	/**
 	 * The void never takes them, however often they fall into it: each time they are caught, and
-	 * wake whole, fed and with all their health, not just alive.
+	 * (once it has fed them, and dragged them home) wake whole, fed and with all their health.
 	 */
-	@GameTest(maxTicks = 200)
+	@GameTest(maxTicks = 320)
 	public void theVoidNeverTakesThem(GameTestHelper helper) {
 		Director director = Director.get();
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
@@ -604,13 +606,17 @@ public final class OccupantGameTests {
 		boolean first = com.wolfsmask.occupant.director.Mercy.allowDeath(player, player.damageSources().fellOutOfWorld());
 		Occupant.LOGGER.info("[gametest] void: allowed {}, health {} of {}, food {}", first, player.getHealth(),
 				player.getMaxHealth(), player.getFoodData().getFoodLevel());
-		helper.assertTrue(!first, "Falling out of the world should be caught");
-		helper.assertTrue(player.getHealth() >= player.getMaxHealth() - 0.01f && player.getFoodData().getFoodLevel() == 20,
-				"They should wake whole: health " + player.getHealth() + ", food " + player.getFoodData().getFoodLevel());
+		helper.assertTrue(!first && player.getHealth() > 0.0f, "Falling out of the world should be caught");
 		helper.runAfterDelay(80, () -> {
 			player.setHealth(1.0f);
 			boolean again = com.wolfsmask.occupant.director.Mercy.allowDeath(player, player.damageSources().fellOutOfWorld());
 			helper.assertTrue(!again, "Falling out of the world again, a few seconds later, should be caught again");
+		});
+		helper.runAfterDelay(260, () -> {
+			Occupant.LOGGER.info("[gametest] void: after being brought home, health {} of {}, food {}, still in it {}", player.getHealth(),
+					player.getMaxHealth(), player.getFoodData().getFoodLevel(), director.haunt(player).activeEventId());
+			helper.assertTrue(player.getHealth() >= player.getMaxHealth() - 0.01f && player.getFoodData().getFoodLevel() == 20,
+					"They should wake whole: health " + player.getHealth() + ", food " + player.getFoodData().getFoodLevel());
 			helper.succeed();
 		});
 	}
@@ -689,6 +695,114 @@ public final class OccupantGameTests {
 		player.setNoGravity(false);
 		helper.assertTrue(!allowed, "Choking in a wall while it holds them up should not kill them");
 		helper.succeed();
+	}
+
+	/** Two of them together: it is out for one, so there is no second of it for the other, and the other sees the first. */
+	@GameTest(maxTicks = 40)
+	public void thereIsOnlyOneOfIt(GameTestHelper helper) {
+		Director director = Director.get();
+		ServerPlayer a = helper.makeMockServerPlayerInLevel();
+		ServerPlayer b = helper.makeMockServerPlayerInLevel();
+		com.wolfsmask.occupant.director.Party.testParty(7001, a, b);
+		OccupantConfig.get().hauntCreative = true;
+		BlockPos stand = helper.absolutePos(new BlockPos(1, 2, 1));
+		a.snapTo(stand.getX() + 0.5, stand.getY(), stand.getZ() + 0.5, 0.0f, 0.0f);
+		b.snapTo(stand.getX() + 2.5, stand.getY(), stand.getZ() + 0.5, 0.0f, 0.0f);
+		OccupantEntity theirs = director.haunt(a).spawnOccupant(a, helper.absolutePos(new BlockPos(3, 2, 3)),
+				OccupantEntity.Mode.STARE, OccupantEntity.Form.VEILED);
+		helper.assertTrue(theirs != null, "It should come for the first of them");
+		OccupantEntity second = director.haunt(b).spawnOccupant(b, helper.absolutePos(new BlockPos(1, 2, 3)),
+				OccupantEntity.Mode.STARE, OccupantEntity.Form.VEILED);
+		Occupant.LOGGER.info("[gametest] one of it: second {}, seen by the other {}", second, theirs.broadcastToPlayer(b));
+		helper.assertTrue(second == null, "There should not be a second of it near the first");
+		helper.assertTrue(theirs.broadcastToPlayer(b), "The other should see it too");
+		theirs.vanish();
+		helper.succeed();
+	}
+
+	/** It is there for one of them: the one near them is in it too, their own story waiting, until it is over. */
+	@GameTest(maxTicks = 160)
+	public void friendsNearItWatch(GameTestHelper helper) {
+		Director director = Director.get();
+		ServerPlayer a = helper.makeMockServerPlayerInLevel();
+		ServerPlayer b = helper.makeMockServerPlayerInLevel();
+		com.wolfsmask.occupant.director.Party.testParty(7002, a, b);
+		OccupantConfig.get().hauntCreative = true;
+		director.data(a).introduced = true;
+		director.data(b).introduced = true;
+		BlockPos stand = helper.absolutePos(new BlockPos(1, 2, 1));
+		a.snapTo(stand.getX() + 0.5, stand.getY(), stand.getZ() + 0.5, 0.0f, 0.0f);
+		b.snapTo(stand.getX() + 2.5, stand.getY(), stand.getZ() + 0.5, 0.0f, 0.0f);
+		OccupantEntity it = director.haunt(a).spawnOccupant(a, helper.absolutePos(new BlockPos(3, 2, 3)),
+				OccupantEntity.Mode.STARE, OccupantEntity.Form.VEILED);
+		helper.assertTrue(it != null, "It should come for the first of them");
+		director.beginNow(a, "test_scene", new com.wolfsmask.occupant.director.Sequence() {
+			private int t;
+
+			@Override
+			public boolean tick(ServerPlayer p) {
+				it.keepAlive();
+				return ++t < 70;
+			}
+
+			@Override
+			public void end() {
+				it.vanish();
+			}
+
+			@Override
+			public OccupantEntity occupant() {
+				return it;
+			}
+		});
+		helper.runAfterDelay(20, () -> {
+			String doing = director.haunt(b).activeEventId();
+			Occupant.LOGGER.info("[gametest] friends: the other is {}", doing);
+			helper.assertTrue("watching".equals(doing), "The one near should be in it too, not " + doing);
+		});
+		helper.runAfterDelay(110, () -> {
+			String doing = director.haunt(b).activeEventId();
+			helper.assertTrue(doing == null, "Once it is over, the one near should be let go, not " + doing);
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * Someone else walks up to it while it is saving their friend: a spare leg puts them down (it
+	 * says to wait their turn), and it still finishes saving the friend.
+	 */
+	@GameTest(maxTicks = 160)
+	public void itTellsOthersToWaitTheirTurn(GameTestHelper helper) {
+		Director director = Director.get();
+		ServerLevel level = helper.getLevel();
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		ServerPlayer other = helper.makeMockServerPlayerInLevel();
+		com.wolfsmask.occupant.director.Party.testParty(7003, player, other);
+		OccupantConfig.get().hauntCreative = true;
+		HauntData data = director.data(player);
+		data.introduced = true;
+		data.setAct(2);
+		BlockPos stand = helper.absolutePos(new BlockPos(2, 2, 1));
+		player.snapTo(stand.getX() + 0.5, stand.getY(), stand.getZ() + 0.5, 0.0f, 0.0f);
+		net.minecraft.world.entity.Mob zombie = summon(helper, "zombie", stand.east(2));
+		helper.assertTrue(zombie != null, "Could not summon a zombie");
+		player.setHealth(1.0f);
+		helper.assertTrue(!com.wolfsmask.occupant.director.Mercy.allowDeath(player, player.damageSources().mobAttack(zombie)),
+				"A zombie's killing blow should be stopped");
+		java.util.List<OccupantEntity> come = level.getEntitiesOfClass(OccupantEntity.class, player.getBoundingBox().inflate(16.0),
+				e -> e.isHaunting(player));
+		helper.assertTrue(!come.isEmpty(), "It should come to save them");
+		OccupantEntity it = come.get(0);
+		// Right up to it.
+		other.snapTo(it.getX() + 1.0, it.getY(), it.getZ() + 0.5, 0.0f, 0.0f);
+		boolean[] pushed = {false};
+		helper.onEachTick(() -> {
+			for (int id : it.getHeld()) pushed[0] |= id == other.getId();
+		});
+		helper.succeedWhen(() -> {
+			helper.assertTrue(pushed[0], "A spare leg should come down on the one who walked up to it");
+			helper.assertTrue(!zombie.isAlive(), "And it should still finish saving the other");
+		});
 	}
 
 	/**

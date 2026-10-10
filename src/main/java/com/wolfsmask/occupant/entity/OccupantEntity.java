@@ -39,11 +39,12 @@ import java.util.UUID;
  * {@link #keepAlive()} every tick. The entity itself only enforces the rules that keep it
  * from ever "breaking":
  * <ul>
- *     <li>Only the player it is haunting can see it ({@link #broadcastToPlayer}).</li>
+ *     <li>Everyone near sees it: it is one thing in one world. It comes for one player at a time
+ *     (its target), but it is only ever there once none of them is looking.</li>
  *     <li>It is never saved to disk (see ModEntities) and removes itself if nothing controls it.</li>
  *     <li>A player's blow makes it vanish instantly, and nothing else touches it: it cannot be
  *     killed, farmed, trapped or pushed.</li>
- *     <li>It makes no sound of its own; footsteps are sent to its target only.</li>
+ *     <li>It makes no sound of its own; its footsteps are heard by whoever is near.</li>
  * </ul>
  */
 public class OccupantEntity extends PathfinderMob {
@@ -64,6 +65,11 @@ public class OccupantEntity extends PathfinderMob {
 	private static final EntityDataAccessor<String> HELD = SynchedEntityData.defineId(OccupantEntity.class, EntityDataSerializers.STRING);
 	/** Where the eyes of whoever is watching are drawn, by entity id; -1 for the whole of what it is doing. */
 	private static final EntityDataAccessor<Integer> FOCUS = SynchedEntityData.defineId(OccupantEntity.class, EntityDataSerializers.INT);
+	/**
+	 * How far into the story of the one it came for (it grows with it): drawn the same size for
+	 * everyone who sees it, so whoever it is holding is at its face whoever watches.
+	 */
+	private static final EntityDataAccessor<Byte> ACT = SynchedEntityData.defineId(OccupantEntity.class, EntityDataSerializers.BYTE);
 
 	/** Ticks out of their sight before it is there: long enough for their screen to catch up. */
 	private static final int REVEAL_AFTER = 6;
@@ -98,6 +104,8 @@ public class OccupantEntity extends PathfinderMob {
 	 * the promise that one is never left standing around in a world holds.
 	 */
 	private boolean placedByHand;
+	/** In the middle of something (saving someone, lifting them, taking them): a blow does not stop it. */
+	private boolean unmoved;
 
 	public OccupantEntity(EntityType<? extends OccupantEntity> type, Level level) {
 		super(type, level);
@@ -132,6 +140,7 @@ public class OccupantEntity extends PathfinderMob {
 		builder.define(CONCEALED, false);
 		builder.define(HELD, "");
 		builder.define(FOCUS, -1);
+		builder.define(ACT, (byte) 0);
 	}
 
 	// ------------------------------------------------------------------ state
@@ -227,6 +236,21 @@ public class OccupantEntity extends PathfinderMob {
 		return targetUuid != null && targetUuid.equals(player.getUUID());
 	}
 
+	/** Who it came for, if anyone. */
+	@Nullable
+	public UUID hauntedId() {
+		return targetUuid;
+	}
+
+	/** How far into their story the one it came for is: what it is drawn at, for everyone. 0 if not known. */
+	public int getAct() {
+		return this.entityData.get(ACT);
+	}
+
+	public void setAct(int act) {
+		this.entityData.set(ACT, (byte) Mth.clamp(act, 0, 4));
+	}
+
 	/**
 	 * Haunt this player without the Director: it stands, stares, and leaves by itself.
 	 * Used by /occupant here, and by anything summoned with a command or a spawn egg.
@@ -240,6 +264,11 @@ public class OccupantEntity extends PathfinderMob {
 	/** True for one spawned by /summon or a spawn egg, which drives itself. */
 	public boolean isSummoned() {
 		return summoned;
+	}
+
+	/** In the middle of something no blow stops (it still goes when it is done). */
+	public void setUnmoved(boolean unmoved) {
+		this.unmoved = unmoved;
 	}
 
 	/** Called every tick by whichever sequence is controlling it. */
@@ -260,11 +289,26 @@ public class OccupantEntity extends PathfinderMob {
 		return vanished || this.isRemoved();
 	}
 
-	/** Gone. No particles, no sound: was it ever there? */
+	/**
+	 * Gone. No particles, no sound: was it ever there? Anyone who had it on their screen sees the
+	 * light stutter as it goes, so it is never seen simply blinking out.
+	 */
 	public void vanish() {
 		if (!vanished) {
 			vanished = true;
+			flickerForOnlookers();
 			this.discard();
+		}
+	}
+
+	private void flickerForOnlookers() {
+		if (isConcealed() || !(this.level() instanceof ServerLevel level)) return;
+		for (ServerPlayer p : level.players()) {
+			// Any of it in sight counts, as it is drawn: over a wall, its head may be all of it there is.
+			if (p.isSpectator() || this.distanceTo(p) >= 112.0 || !com.wolfsmask.occupant.util.Sight.isOnScreen(p, this)) continue;
+			if (targetUuid != null && !p.getUUID().equals(targetUuid)
+					&& !com.wolfsmask.occupant.director.Party.couldMeet(targetUuid, p.getUUID())) continue;
+			com.wolfsmask.occupant.util.Cues.effectOnly(p, com.wolfsmask.occupant.network.ScreenEffectPayload.FLICKER, 5, 1f);
 		}
 	}
 
@@ -273,11 +317,7 @@ public class OccupantEntity extends PathfinderMob {
 	 * so it is never seen simply blinking out of the world.
 	 */
 	public void vanishFrom(@Nullable ServerPlayer player) {
-		// Any of it in sight counts, as it is drawn: over a wall, its head may be all of it there is.
-		if (!vanished && player != null && !isConcealed() && player.level() == this.level()
-				&& this.distanceTo(player) < 112.0 && com.wolfsmask.occupant.util.Sight.isOnScreen(player, this)) {
-			com.wolfsmask.occupant.util.Cues.effect(player, com.wolfsmask.occupant.network.ScreenEffectPayload.FLICKER, 5, 1f);
-		}
+		// Whoever has it on their screen (not only the one it came for) sees it go in a stutter.
 		vanish();
 	}
 
@@ -376,7 +416,7 @@ public class OccupantEntity extends PathfinderMob {
 			lastTargetYaw = yaw;
 			turning = Math.max(turning * 0.85f, turn);
 			double cone = Sight.OUT_OF_VIEW_DEGREES + Math.min(70.0, turning * 3.0);
-			unseenFor = Sight.couldBeSeen(target, this, cone) ? 0 : unseenFor + 1;
+			unseenFor = Sight.couldBeSeen(target, this, cone) || seenByOthers(target) ? 0 : unseenFor + 1;
 			if (unseenFor >= REVEAL_AFTER) {
 				faceTowards(target.getEyePosition());
 				setConcealed(false);
@@ -384,6 +424,14 @@ public class OccupantEntity extends PathfinderMob {
 		}
 
 		if (footsteps) tickFootsteps(target);
+	}
+
+	/** Whether anyone else near could see it now: it is never there in front of any of them. */
+	private boolean seenByOthers(ServerPlayer target) {
+		for (ServerPlayer o : com.wolfsmask.occupant.director.Party.others(target, 160.0)) {
+			if (Sight.couldBeSeen(o, this, Sight.OUT_OF_VIEW_DEGREES)) return true;
+		}
+		return false;
 	}
 
 	/**
@@ -426,10 +474,10 @@ public class OccupantEntity extends PathfinderMob {
 
 	// ------------------------------------------------------------------ rules that keep it unbreakable
 
-	/** Only the haunted player's client is ever told this entity exists. */
+	/** Everyone near is told it is there: it is one thing, in one world (it only shows itself once none of them is looking). */
 	@Override
 	public boolean broadcastToPlayer(ServerPlayer player) {
-		return isHaunting(player);
+		return isHaunting(player) || targetUuid == null || com.wolfsmask.occupant.director.Party.couldMeet(targetUuid, player.getUUID());
 	}
 
 	@Override
@@ -439,6 +487,8 @@ public class OccupantEntity extends PathfinderMob {
 		boolean struck = source.getEntity() instanceof net.minecraft.world.entity.player.Player;
 		boolean removed = source.is(net.minecraft.world.damagesource.DamageTypes.GENERIC_KILL)
 				|| source.is(net.minecraft.world.damagesource.DamageTypes.FELL_OUT_OF_WORLD);
+		// Holding someone up on its legs, it is in the middle of something, and a blow does not stop it.
+		if (struck && !removed && (unmoved || getHeld().length > 0)) return false;
 		if (!this.isRemoved() && (struck || removed)) {
 			if (source.getEntity() instanceof ServerPlayer player && isHaunting(player)) {
 				Cues.sound(player, ModSounds.STATIC, SoundSource.HOSTILE, this.getEyePosition(), 0.8f, 1.0f);

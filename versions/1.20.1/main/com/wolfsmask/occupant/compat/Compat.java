@@ -101,6 +101,11 @@ public final class Compat {
 		return copy;
 	}
 
+	/** A potion of healing, the bottle red. */
+	public static ItemStack healingPotion() {
+		return net.minecraft.world.item.alchemy.PotionUtils.setPotion(new ItemStack(Items.POTION), net.minecraft.world.item.alchemy.Potions.HEALING);
+	}
+
 	/** A finished written book. */
 	public static ItemStack writtenBook(String title, String author, java.util.List<String> pages) {
 		ItemStack book = new ItemStack(Items.WRITTEN_BOOK);

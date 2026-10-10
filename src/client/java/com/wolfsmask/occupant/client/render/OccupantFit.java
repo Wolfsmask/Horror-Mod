@@ -34,7 +34,7 @@ final class OccupantFit {
 		// Its full height, standing up, from this far off, so far into the story (the same the
 		// server reckons with when it asks whether it could be seen). It does not fit in most of
 		// the places the story puts it, so it folds down into them rather than shrinking.
-		float blocks = Sight.drawnBlocks(Math.sqrt(state.distanceToCameraSq), com.wolfsmask.occupant.client.PauseLines.act());
+		float blocks = Sight.drawnBlocks(Math.sqrt(state.distanceToCameraSq), state.act);
 		float room = state.headroom - 0.15f;
 		double yaw = Math.toRadians(state.bodyRot);
 

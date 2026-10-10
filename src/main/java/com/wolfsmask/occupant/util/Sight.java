@@ -120,9 +120,14 @@ public final class Sight {
 	 * for them (its head may be all there is to see over a hill or a wall), anything else as it is.
 	 */
 	public static double drawnHeight(ServerPlayer player, Entity entity) {
-		if (!(entity instanceof OccupantEntity)) return entity.getBbHeight();
-		Director director = Director.get();
-		return drawnBlocks(player.distanceTo(entity), director == null ? 0 : director.actOf(player));
+		if (!(entity instanceof OccupantEntity o)) return entity.getBbHeight();
+		// As far into the story as the one it came for: everyone sees it the same size.
+		int act = o.getAct();
+		if (act <= 0) {
+			Director director = Director.get();
+			act = director == null ? 0 : director.actOf(player);
+		}
+		return drawnBlocks(player.distanceTo(entity), act);
 	}
 
 	/** Line of sight to any of its head, chest, middle or knees, as it is drawn. */

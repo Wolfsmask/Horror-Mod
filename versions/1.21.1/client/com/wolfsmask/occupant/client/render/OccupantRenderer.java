@@ -45,6 +45,7 @@ public class OccupantRenderer extends CullingRenderer {
 		state.mode = entity.getMode();
 		state.form = entity.getForm();
 		state.seed = entity.getId();
+		state.act = entity.getAct() > 0 ? entity.getAct() : com.wolfsmask.occupant.client.PauseLines.act();
 		OccupantFit.fit(entity.level(), state, state.x, state.y, state.z);
 		LegGait.of(entity).update(entity, state, state.occupantScale, OccupantFit.CROUCH_DROP * state.crouch);
 		OccupantFit.watch(state, partialTick);

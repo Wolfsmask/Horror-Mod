@@ -16,6 +16,9 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * It does not like it when you hide. Shut away from it (in a house, down a hole, under the ground)
  * long enough, and it says so; a minute more, and it says that is the last time it will; half a
@@ -25,6 +28,9 @@ import net.minecraft.world.level.levelgen.Heightmap;
  * <p>
  * Asleep in a bed is not hiding. From the second act; and after it has come for them, not again
  * for a while.
+ * <p>
+ * Hidden together (near each other, the same kind of place), it is one count for all of them, and
+ * one of them it speaks to for them all; when it comes, it comes once, for everyone there.
  */
 public final class Hiding {
 	/** Where they are, hidden: nowhere (they are out in the open), indoors, in a hole, or deep down. */
@@ -36,6 +42,8 @@ public final class Hiding {
 	static final int COMES = 120;
 	/** Back out in the open this long, and it starts counting again from nothing. */
 	private static final int FORGIVEN_AFTER = 8;
+	/** Hidden within this of each other, they are hidden together. */
+	private static final double TOGETHER = 10.0;
 	/** After it has come for them, not again for this long, in ticks of play. */
 	private static final long CALM = 20L * 60 * 6;
 	/** How much ground over their head still counts as a hole rather than the deep: four blocks of it. */
@@ -57,26 +65,66 @@ public final class Hiding {
 			return;
 		}
 		h.outFor = 0;
-		if (player.isSleeping() || !cfg.hidingPunished || d.act < 2 || d.playTicks < h.hideCalmUntil) return;
-		// While something else is happening to them, the clock stops.
-		if (h.active != null) return;
+		if (!counting(player, h, cfg)) return;
+		int before = h.hiddenSeconds;
 		h.hiddenSeconds++;
+		// Hidden with others: one count for them all (as long as the longest of them has hidden), and
+		// it speaks to one of them for all of them: the others keep the count and say nothing.
+		List<ServerPlayer> with = hiddenWith(player, where, director);
+		ServerPlayer lead = player;
+		for (ServerPlayer o : with) {
+			if (counting(o, director.haunt(o), cfg) && o.getUUID().compareTo(lead.getUUID()) < 0) lead = o;
+		}
+		if (lead != player) {
+			h.hiddenSeconds = Math.max(h.hiddenSeconds, director.haunt(lead).hiddenSeconds);
+			return;
+		}
+		for (ServerPlayer o : with) h.hiddenSeconds = Math.max(h.hiddenSeconds, director.haunt(o).hiddenSeconds);
 		int n = h.hiddenSeconds;
-		if (n == WARN) {
+		if (before < WARN && n >= WARN && n < LAST_WARNING) {
 			say(player, WARNINGS, cfg);
 			d.addDread(4f);
-		} else if (n == LAST_WARNING) {
+			for (ServerPlayer o : with) director.haunt(o).data.addDread(4f);
+		} else if (before < LAST_WARNING && n >= LAST_WARNING && n < COMES) {
 			say(player, LAST, cfg);
 			Cues.soundAtEars(player, ModSounds.KNOCK, SoundSource.HOSTILE, 0.9f, 0.7f);
 			d.addDread(8f);
+			for (ServerPlayer o : with) director.haunt(o).data.addDread(8f);
 		} else if (n >= COMES) {
 			h.hiddenSeconds = 0;
 			h.hideCalmUntil = d.playTicks + CALM;
+			// Everyone hidden there with them: whatever comes, comes for them too, and then they are
+			// let be a while, the same as the one it came for.
+			for (ServerPlayer o : with) {
+				Haunt theirs = director.haunt(o);
+				theirs.hiddenSeconds = 0;
+				theirs.hideCalmUntil = theirs.data.playTicks + CALM;
+			}
 			// In sound-only mode it is never seen: only what it said.
 			if (cfg.soundOnly) return;
-			Sequence found = Found.begin(h, player, where);
+			Sequence found = Found.begin(h, player, where, with);
 			if (found != null) director.beginNow(player, Found.ID, found);
 		}
+	}
+
+	/** Whether its count runs for them now: hidden, awake, far enough into the story, nothing else happening to them. */
+	private static boolean counting(ServerPlayer player, Haunt h, OccupantConfig cfg) {
+		if (player.isSleeping() || !cfg.hidingPunished || h.data.act < 2 || h.data.playTicks < h.hideCalmUntil) return false;
+		// While something else is happening to them, the clock stops.
+		return h.active == null;
+	}
+
+	/** The others hidden near them, in the same kind of place (not asleep, not out in the open). */
+	private static List<ServerPlayer> hiddenWith(ServerPlayer player, Where where, Director director) {
+		List<ServerPlayer> out = new ArrayList<>();
+		for (ServerPlayer o : Party.others(player, TOGETHER)) {
+			if (o.isSleeping() || where(o) != where) continue;
+			Haunt theirs = director.haunt(o);
+			// Already in the middle of something else of its (their own visit, say): not with them in this.
+			if (theirs.active != null && !(theirs.active instanceof Watching)) continue;
+			out.add(o);
+		}
+		return out;
 	}
 
 	private static void say(ServerPlayer player, String[] lines, OccupantConfig cfg) {
@@ -84,7 +132,7 @@ public final class Hiding {
 		if (cfg.screenWhispers) {
 			Cues.whisper(player, line, 110);
 		} else {
-			Cues.message(player, Component.literal(line).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+			Cues.messageNear(player, Component.literal(line).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
 		}
 	}
 

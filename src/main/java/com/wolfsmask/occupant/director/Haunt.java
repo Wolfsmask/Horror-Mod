@@ -50,6 +50,8 @@ public final class Haunt {
 	long lastShowTriedAt = -1;
 	/** When they last looked right at it, in ticks of play: on their screen is not the same as seen. */
 	long lastSeenAt;
+	/** The last of it, there for someone else, that they looked right at (its entity id): seen once. */
+	int lastSeenTheirs = -1;
 	/** Seconds hidden away (a house, a hole, under the ground), out of the open, and seconds since back in it. */
 	int hiddenSeconds;
 	int outFor;
@@ -205,14 +207,23 @@ public final class Haunt {
 	}
 
 	/**
-	 * Put the Occupant into the world at {@code feet}, visible only to {@code player}.
-	 * Returns null (and leaves no trace) if anything about it would be wrong.
+	 * Put the Occupant into the world at {@code feet}, come for {@code player} (seen by everyone
+	 * near). Returns null (and leaves no trace) if anything about it would be wrong: above all if it
+	 * is already out near them for someone else, for there is only one of it.
 	 */
 	@Nullable
 	public OccupantEntity spawnOccupant(ServerPlayer player, BlockPos feet, OccupantEntity.Mode mode,
 										OccupantEntity.Form form) {
+		return spawnOccupant(player, feet, mode, form, false);
+	}
+
+	/** As above; {@code home}: in its own lair, at the end, where it is, whoever else's it is out there. */
+	@Nullable
+	public OccupantEntity spawnOccupant(ServerPlayer player, BlockPos feet, OccupantEntity.Mode mode,
+										OccupantEntity.Form form, boolean home) {
 		ServerLevel world = Compat.level(player);
 		if (!Spots.canStand(world, feet)) return null;
+		if (!home && alreadyOut(world, player, Vec3.atBottomCenterOf(feet))) return null;
 		// Never in the fog where it can be seen: there it would only be a smudge. (Somewhere out of
 		// sight, waiting to be come across, the fog does not matter.)
 		if (Vec3.atBottomCenterOf(feet).distanceTo(player.position()) > Fog.seenUpTo(player, this)
@@ -227,11 +238,24 @@ public final class Haunt {
 		e.setYBodyRot(yaw);
 		e.setMode(mode);
 		e.setForm(form);
+		e.setAct(data.act);
 		// It always arrives unseen, and is only there once they have been looking away for a
 		// moment: what the server knows of where they look is a moment behind their screen.
 		e.setConcealed(true);
 		if (!world.addFreshEntity(e)) return null;
 		return e;
+	}
+
+	/** It is out already, for someone else, near enough to them or to where it would be to be seen with it. */
+	private static boolean alreadyOut(ServerLevel world, ServerPlayer player, Vec3 at) {
+		net.minecraft.world.phys.AABB around = player.getBoundingBox().minmax(new net.minecraft.world.phys.AABB(at, at)).inflate(Party.ONE_OF_IT);
+		for (OccupantEntity e : world.getEntitiesOfClass(OccupantEntity.class, around, x -> !x.isRemoved() && !x.hasVanished())) {
+			java.util.UUID theirs = e.hauntedId();
+			if (theirs == null || theirs.equals(player.getUUID())) continue;
+			if (!Party.couldMeet(player.getUUID(), theirs)) continue;
+			if (e.position().distanceTo(player.position()) <= Party.ONE_OF_IT || e.position().distanceTo(at) <= Party.ONE_OF_IT) return true;
+		}
+		return false;
 	}
 
 	/** Brings the fog in to {@code blocks}, until {@link #releaseFog}. */

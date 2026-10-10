@@ -127,7 +127,7 @@ final class Unnoticed {
 			Cues.whisper(player, line, 80 + 20 * tier);
 		} else if (style == 1 || !cfg.fakeMessages) {
 			String lead = THOUGHTS[random.nextInt(THOUGHTS.length)];
-			Cues.message(player, Component.literal(lead + " ").append(Component.literal(lowerFirst(line)))
+			Cues.messageNear(player, Component.literal(lead + " ").append(Component.literal(lowerFirst(line)))
 					.withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
 		} else {
 			// In their own name, as if they had said it.

@@ -204,6 +204,65 @@ public final class Director {
 		TakenEnding.recover(h, player);
 	}
 
+	/**
+	 * A scene of someone near them that they are in too: it, there, doing something (or about to)
+	 * to someone close by. Not another's watching of one, not the end of another's story.
+	 */
+	private void watch(Haunt h, ServerPlayer player) {
+		for (ServerPlayer o : Party.others(player, Party.NEAR)) {
+			Haunt other = haunts.get(o.getUUID());
+			if (other == null || other.active == null || other.active instanceof Watching) continue;
+			if (other.active.occupant() == null && !com.wolfsmask.occupant.director.events.Found.ID.equals(other.activeId)) continue;
+			if (TakenEnding.ID.equals(other.activeId) || Credits.ID.equals(other.activeId)) continue;
+			h.active = new Watching(other, other.active, server);
+			h.activeId = Watching.ID;
+			h.pending = null;
+			debug("{}: watching what it is doing to {}", player.getName().getString(), o.getName().getString());
+			return;
+		}
+	}
+
+	/**
+	 * It, there for someone else near them, and they look right at it: they have seen it, as
+	 * surely as if it had come for them (once for each time it is there).
+	 */
+	private void noticeTheirs(Haunt h, ServerPlayer player) {
+		net.minecraft.server.level.ServerLevel level = Compat.level(player);
+		for (OccupantEntity e : level.getEntitiesOfClass(OccupantEntity.class, player.getBoundingBox().inflate(Party.ONE_OF_IT),
+				x -> !x.isRemoved() && !x.isConcealed() && !x.isHaunting(player))) {
+			UUID theirs = e.hauntedId();
+			if (theirs == null || !Party.couldMeet(player.getUUID(), theirs)) continue;
+			if (!com.wolfsmask.occupant.util.Sight.isLookingAt(player, e)) continue;
+			h.markSeen();
+			if (h.lastSeenTheirs != e.getId()) {
+				h.lastSeenTheirs = e.getId();
+				h.data.sightings++;
+				com.wolfsmask.occupant.story.Achievements.grant(player, com.wolfsmask.occupant.story.Achievements.NOT_ALONE);
+			}
+		}
+	}
+
+	/**
+	 * Whether {@code player} is in a scene of their own (it is there for them, or it is the end of
+	 * their story): another's scene does not take their eyes from it.
+	 */
+	public boolean inOwnScene(ServerPlayer player) {
+		Haunt h = haunts.get(player.getUUID());
+		if (h == null || h.active == null || h.active instanceof Watching) return false;
+		return h.active.occupant() != null || TakenEnding.ID.equals(h.activeId) || Credits.ID.equals(h.activeId)
+				|| com.wolfsmask.occupant.director.events.Found.ID.equals(h.activeId);
+	}
+
+	/** Whether it is taking anyone now, or about to: it takes one at a time. */
+	public static boolean someoneTaken() {
+		Director d = instance;
+		if (d == null) return false;
+		for (Haunt h : d.haunts.values()) {
+			if (TakenEnding.ID.equals(h.activeId) || TakenEnding.ID.equals(h.queuedId) || h.taking) return true;
+		}
+		return false;
+	}
+
 	/** Waking up is not always a relief. Run a tick later, once the player is really in the world. */
 	private void wakeUp(Haunt h, ServerPlayer player) {
 		if (h.isBusy()) return;
@@ -216,13 +275,21 @@ public final class Director {
 		Rules.check(player, h, cfg);
 		boolean eligible = isEligible(player, h, cfg);
 
+		// Something is there for someone near them: they are in it too, and nothing of their own begins.
+		if (h.active == null && h.queued == null && eligible && player.isAlive() && player.tickCount % 4 == 0) watch(h, player);
 		if (h.active != null) {
 			if (!eligible || !player.isAlive()) {
 				endSequence(h);
 			} else if (!h.active.tick(player)) {
 				String done = h.activeId;
 				endSequence(h);
-				planFollowUp(h, done, player);
+				if (Watching.ID.equals(done)) {
+					// Theirs is over: their own story is quiet a while, not straight on with something else.
+					h.nextEventIn = Math.max(h.nextEventIn, 20 * 60);
+					h.quietSeconds = 0;
+				} else {
+					planFollowUp(h, done, player);
+				}
 			}
 		}
 		// What was to begin the moment that was over (the end, when it has taken them).
@@ -257,6 +324,7 @@ public final class Director {
 
 		if (!eligible) return;
 		h.data.playTicks++;
+		if (player.tickCount % 5 == 2) noticeTheirs(h, player);
 		Trifles.tick(player, h, cfg);
 
 		// The first time in this world, once they are actually in it: black, and it tells them.
@@ -751,6 +819,12 @@ public final class Director {
 			}
 		}
 		save.setDirty();
+		// What happens to one of them happens in front of the others near them: they share it, and
+		// their own next thing waits, so a group is not haunted twice as often as one alone.
+		for (ServerPlayer o : Party.others(ctx.player, Party.NEAR)) {
+			Haunt other = haunts.get(o.getUUID());
+			if (other != null) other.nextEventIn = Math.max(other.nextEventIn, 20 * 45);
+		}
 		debug("{}: started {} (act {}, dread {})", ctx.player.getName().getString(), e.id(), d.act, (int) d.dread);
 		com.wolfsmask.occupant.story.Achievements.onEvent(ctx.player, e.id());
 		return true;

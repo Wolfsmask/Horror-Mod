@@ -143,7 +143,7 @@ public final class Cutscene {
 		// drawn, about where its face will be.
 		Vec3 mouth = LegGait.mouth(it);
 		Vec3 face = mouth != null ? mouth.add(0.0, 0.3, 0.0)
-				: it.position().add(0.0, Sight.drawnBlocks(it.distanceTo(player), PauseLines.act()) * 0.88, 0.0);
+				: it.position().add(0.0, Sight.drawnBlocks(it.distanceTo(player), it.getAct() > 0 ? it.getAct() : PauseLines.act()) * 0.88, 0.0);
 		int focus = it.getFocus();
 		if (focus >= 0) {
 			Entity f = player.level().getEntity(focus);

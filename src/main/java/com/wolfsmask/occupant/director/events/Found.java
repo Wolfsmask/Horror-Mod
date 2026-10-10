@@ -1,6 +1,7 @@
 package com.wolfsmask.occupant.director.events;
 
 import com.wolfsmask.occupant.compat.Compat;
+import com.wolfsmask.occupant.director.Director;
 import com.wolfsmask.occupant.director.Haunt;
 import com.wolfsmask.occupant.director.HauntData;
 import com.wolfsmask.occupant.director.Hiding;
@@ -17,6 +18,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -36,9 +38,12 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * It found them hiding, after it told them not to. Everything alive round them drops dead. Then,
@@ -54,6 +59,10 @@ import java.util.Set;
  * to its face. Then black, and they wake where they sleep (or where the world began) with some of
  * what they had gone, and the words. Caught again at the very end of the story, it takes them
  * (see {@link TakenEnding}).
+ * <p>
+ * Hidden there together, it comes once, for all of them: whoever is in the same room, or down the
+ * same hole, is lifted out with the one it came for, a leg through each, and wakes at home with
+ * them; anyone hidden somewhere else near watches it, and is let off for a while.
  */
 public final class Found {
 	public static final String ID = "found";
@@ -65,17 +74,51 @@ public final class Found {
 
 	/** What happens now they have been found, where they are; never null. */
 	public static Sequence begin(Haunt h, ServerPlayer p, Hiding.Where where) {
+		return begin(h, p, where, List.of());
+	}
+
+	/**
+	 * What happens now they have been found, where they are, with {@code with} hidden near them
+	 * (those in the very same place go the same way as them); never null.
+	 */
+	public static Sequence begin(Haunt h, ServerPlayer p, Hiding.Where where, List<ServerPlayer> with) {
 		ServerLevel level = Compat.level(p);
 		killEverything(p, level);
-		Cues.effect(p, ScreenEffectPayload.SILENCE, 0, 1f);
+		List<ServerPlayer> all = new ArrayList<>(with);
+		all.add(p);
+		Cues.effectFor(all, ScreenEffectPayload.SILENCE, 0, 1f);
 		Cues.soundAtEars(p, ModSounds.DRONE, SoundSource.AMBIENT, 1.0f, 0.7f);
 		Sequence s = switch (where) {
-			case HOUSE -> RoofOff.create(h, p);
-			case HOLE -> DugOut.create(h, p);
+			case HOUSE -> RoofOff.create(h, p, with);
+			case HOLE -> DugOut.create(h, p, with);
 			default -> null;
 		};
-		if (s == null) s = hunt(h, p);
-		return s != null ? s : new Taken(h);
+		if (s == null) s = hunt(h, p, with);
+		return s != null ? s : new Taken(h, ids(with));
+	}
+
+	private static List<UUID> ids(List<ServerPlayer> players) {
+		List<UUID> out = new ArrayList<>();
+		for (ServerPlayer o : players) out.add(o.getUUID());
+		return out;
+	}
+
+	/** Those of {@code with} still here (in the world with {@code p}, alive, within {@code range} of them). */
+	private static List<ServerPlayer> stillHere(ServerPlayer p, List<UUID> with, double range) {
+		MinecraftServer server = Compat.level(p).getServer();
+		List<ServerPlayer> out = new ArrayList<>();
+		for (UUID u : with) {
+			ServerPlayer o = server.getPlayerList().getPlayer(u);
+			if (o != null && o != p && o.isAlive() && o.level() == p.level() && o.distanceTo(p) <= range) out.add(o);
+		}
+		return out;
+	}
+
+	/** {@code o}'s own story, to be punished in. */
+	@Nullable
+	private static Haunt hauntOf(ServerPlayer o) {
+		Director director = Director.get();
+		return director == null ? null : director.haunt(o);
 	}
 
 	/**
@@ -93,7 +136,8 @@ public final class Found {
 
 	/** Deep down, or anywhere it cannot do the rest: it hunts them, and the dark comes in. */
 	@Nullable
-	private static Sequence hunt(Haunt h, ServerPlayer p) {
+	private static Sequence hunt(Haunt h, ServerPlayer p, List<ServerPlayer> with) {
+		List<UUID> others = ids(with);
 		boolean open = Compat.level(p).canSeeSky(p.blockPosition().above());
 		BlockPos spot = Spots.aroundPlayer(p, p.getRandom(), 10, 22, 60, 180, open, 50,
 				pos -> Math.abs(pos.getY() - p.getBlockY()) <= 6 && Sight.isHidden(p, pos.above()));
@@ -105,19 +149,21 @@ public final class Found {
 		if (e == null) return null;
 		// The dark comes in (where it takes the roof off or digs them out, they are meant to see it).
 		p.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 400, 0, false, false));
-		HuntEvent.Hunt hunt = new HuntEvent.Hunt(h, e, 0, false, (who, it, since) -> caught(h, who, since));
+		for (ServerPlayer o : with) o.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 400, 0, false, false));
+		HuntEvent.Hunt hunt = new HuntEvent.Hunt(h, e, 0, false, (who, it, since) -> caught(h, who, since, others));
 		hunt.runAtOnce();
 		Cues.whisper(p, "Found you.", 60);
 		return hunt;
 	}
 
-	/** It has reached them, in the dark: a breath, black, and then what comes of it. */
-	private static boolean caught(Haunt h, ServerPlayer p, int since) {
+	/** It has reached them, in the dark: a breath, black, and then what comes of it, for them and those down there with them. */
+	private static boolean caught(Haunt h, ServerPlayer p, int since, List<UUID> with) {
 		if (since == 0) {
 			Cues.sound(p, ModSounds.BREATH, SoundSource.HOSTILE, p.getEyePosition(), 1.0f, 0.6f);
 			Cues.effect(p, ScreenEffectPayload.BLACKOUT, 110, 1f);
+			Cues.effectFor(stillHere(p, with, 24.0), ScreenEffectPayload.BLACKOUT, 110, 1f);
 		}
-		if (since == 12) punish(h, p);
+		if (since == 12) punishAll(h, p, stillHere(p, with, 24.0), null);
 		return since < 30;
 	}
 
@@ -129,7 +175,7 @@ public final class Found {
 	static boolean punish(Haunt h, ServerPlayer p) {
 		HauntData d = h.data;
 		boolean again = d.cooldowns.containsKey(CAUGHT);
-		if (again && TakenEnding.ready(d)) {
+		if (again && TakenEnding.ready(d) && !Director.someoneTaken()) {
 			d.cooldowns.remove(CAUGHT);
 			TakenEnding.begin(h);
 			return true;
@@ -138,9 +184,25 @@ public final class Found {
 		takeThings(p, again ? 4 : 2);
 		Mercy.sendHome(p);
 		String line = again ? "It told you. It doesn't want you to do that." : "It doesn't want you to do that.";
-		Cues.whisper(p, line, 160);
-		Cues.message(p, Component.literal(line).withStyle(ChatFormatting.DARK_RED, ChatFormatting.ITALIC));
+		Cues.whisperOnly(p, line, 160);
+		Cues.messageOnly(p, Component.literal(line).withStyle(ChatFormatting.DARK_RED, ChatFormatting.ITALIC));
 		return false;
+	}
+
+	/**
+	 * The one it came for and everyone with them, each punished in their own story (and each let go
+	 * of, if it has them up on its legs, unless it is taking them). True if it has taken the one it
+	 * came for.
+	 */
+	static boolean punishAll(Haunt h, ServerPlayer p, List<ServerPlayer> with, @Nullable Lift lift) {
+		boolean taken = punish(h, p);
+		if (!taken && lift != null) lift.release(p);
+		for (ServerPlayer o : with) {
+			Haunt theirs = hauntOf(o);
+			boolean them = theirs != null && punish(theirs, o);
+			if (!them && lift != null) lift.release(o);
+		}
+		return taken;
 	}
 
 	/** {@code least} or one more of whatever they carry, gone. */
@@ -181,64 +243,122 @@ public final class Found {
 
 		private final Haunt haunt;
 		private final OccupantEntity entity;
+		/** Everyone it lifts: the one it came for first, then whoever hid there with them. */
+		private final List<UUID> who = new ArrayList<>();
+		/** Where each of them came up from, and where they are held. */
+		private final Map<UUID, Vec3[]> path = new HashMap<>();
+		/** Those let go of already. */
+		private final Set<UUID> let = new HashSet<>();
 		private int t = -1;
-		private Vec3 from = Vec3.ZERO;
-		private Vec3 to = Vec3.ZERO;
-		/** Whom it has, for letting go of however this ends. */
-		@Nullable
-		private ServerPlayer held;
 
-		Lift(Haunt haunt, OccupantEntity entity) {
+		Lift(Haunt haunt, OccupantEntity entity, UUID leader, List<UUID> with) {
 			this.haunt = haunt;
 			this.entity = entity;
+			who.add(leader);
+			for (UUID u : with) if (!u.equals(leader)) who.add(u);
 		}
 
-		void tick(ServerPlayer p) {
+		/** Whoever of them is still here to hold (alive, in its world), the one it came for first. */
+		List<ServerPlayer> here(ServerPlayer leader) {
+			MinecraftServer server = Compat.level(leader).getServer();
+			List<ServerPlayer> out = new ArrayList<>();
+			for (UUID u : who) {
+				if (let.contains(u)) continue;
+				ServerPlayer p = u.equals(leader.getUUID()) ? leader : server.getPlayerList().getPlayer(u);
+				if (p != null && p.isAlive() && p.level() == entity.level()) out.add(p);
+			}
+			return out;
+		}
+
+		/** Everyone it lifts but the one it came for, as they are now. */
+		List<ServerPlayer> others(ServerPlayer leader) {
+			List<ServerPlayer> out = new ArrayList<>(here(leader));
+			out.remove(leader);
+			return out;
+		}
+
+		void tick(ServerPlayer leader) {
 			t++;
-			held = p;
+			List<ServerPlayer> them = here(leader);
 			if (t == 0) {
-				from = p.position();
-				to = holdPoint(p);
 				entity.halt();
 				entity.setMode(OccupantEntity.Mode.AMBUSH);
-				entity.setHeld(List.of(p));
-				Cues.sound(p, SoundEvents.TRIDENT_HIT, SoundSource.HOSTILE, p.getEyePosition(), 1.0f, 0.55f);
-				Cues.effect(p, ScreenEffectPayload.STATIC, 8, 0.5f);
+				entity.setHeld(them);
+				for (int k = 0; k < them.size(); k++) {
+					ServerPlayer p = them.get(k);
+					path.put(p.getUUID(), new Vec3[]{p.position(), holdPoint(p, k, them.size())});
+					Cues.sound(p, SoundEvents.TRIDENT_HIT, SoundSource.HOSTILE, p.getEyePosition(), 1.0f, 0.55f + 0.04f * k);
+				}
+				Cues.effect(leader, ScreenEffectPayload.STATIC, 8, 0.5f);
 			}
 			double f = Math.min(1.0, t / (double) RISE);
 			double up = 1.0 - (1.0 - f) * (1.0 - f);
 			double g = Mth.clamp((f - 0.3) / 0.7, 0.0, 1.0);
 			double over = g * g * (3.0 - 2.0 * g);
 			double sway = Math.sin(t * 0.21) * 0.04;
-			Vec3 want = new Vec3(Mth.lerp(over, from.x, to.x) + sway, Mth.lerp(up, from.y, to.y), Mth.lerp(over, from.z, to.z) - sway);
-			Vec3 v = want.subtract(p.position());
-			if (v.length() > 0.9) v = v.normalize().scale(0.9);
-			p.setNoGravity(true);
-			p.setDeltaMovement(v.scale(0.6));
-			p.hurtMarked = true;
-			p.resetFallDistance();
-			entity.faceTowards(p.getEyePosition());
+			for (ServerPlayer p : them) {
+				Vec3[] way = path.get(p.getUUID());
+				if (way == null) continue;
+				Vec3 from = way[0], to = way[1];
+				Vec3 want = new Vec3(Mth.lerp(over, from.x, to.x) + sway, Mth.lerp(up, from.y, to.y), Mth.lerp(over, from.z, to.z) - sway);
+				Vec3 v = want.subtract(p.position());
+				if (v.length() > 0.9) v = v.normalize().scale(0.9);
+				p.setNoGravity(true);
+				p.setDeltaMovement(v.scale(0.6));
+				p.hurtMarked = true;
+				p.resetFallDistance();
+			}
+			entity.faceTowards(leader.getEyePosition());
 		}
 
-		/** Its leg out of them; they are theirs again (they are somewhere else by now, most likely). */
-		void release() {
-			ServerPlayer p = held;
-			held = null;
-			entity.setHeld(List.of());
-			if (p == null) return;
+		/** Those it has let go of (not taken), still here: their view is theirs again. */
+		List<ServerPlayer> letGo(ServerPlayer leader) {
+			MinecraftServer server = Compat.level(leader).getServer();
+			List<ServerPlayer> out = new ArrayList<>();
+			for (UUID u : who) {
+				if (!let.contains(u)) continue;
+				ServerPlayer p = u.equals(leader.getUUID()) ? leader : server.getPlayerList().getPlayer(u);
+				if (p != null) out.add(p);
+			}
+			return out;
+		}
+
+		/** Its leg out of {@code p}: theirs again. */
+		void release(ServerPlayer p) {
+			let.add(p.getUUID());
+			if (!path.containsKey(p.getUUID())) return;
 			p.setNoGravity(false);
 			p.resetFallDistance();
 		}
 
-		/** Just in front of its face, their eyes level with its own, or as high as there is room for. */
-		private Vec3 holdPoint(ServerPlayer p) {
+		/** Its legs out of all of them (they are somewhere else by now, most likely). */
+		void release(MinecraftServer server) {
+			entity.setHeld(List.of());
+			for (UUID u : who) {
+				ServerPlayer p = server.getPlayerList().getPlayer(u);
+				if (p == null || !path.containsKey(u)) continue;
+				p.setNoGravity(false);
+				p.resetFallDistance();
+			}
+		}
+
+		/**
+		 * Just in front of its face, their eyes level with its own, or as high as there is room
+		 * for; with others, the one it came for in the middle and the rest either side, a little lower.
+		 */
+		private Vec3 holdPoint(ServerPlayer p, int k, int of) {
 			ServerLevel level = Compat.level(p);
 			Vec3 base = entity.position();
 			Vec3 toThem = new Vec3(p.getX() - base.x, 0.0, p.getZ() - base.z);
 			double flat = toThem.length();
 			Vec3 dir = flat < 1.0e-3 ? Sight.flatLook(p).scale(-1.0) : toThem.scale(1.0 / flat);
-			double face = Sight.drawnBlocks(Math.max(1.0, flat), haunt.data.act) * 0.86;
-			Vec3 want = new Vec3(base.x + dir.x * Math.min(1.5, flat), base.y + face - p.getEyeHeight(), base.z + dir.z * Math.min(1.5, flat));
+			double face = Sight.drawnBlocks(Math.max(1.0, flat), entity.getAct()) * 0.86;
+			// Side by side across its front: the first in the middle, then right, left, further right...
+			double side = k == 0 ? 0.0 : ((k + 1) / 2) * (k % 2 == 1 ? 0.95 : -0.95);
+			Vec3 across = new Vec3(-dir.z, 0.0, dir.x).scale(side);
+			double reach = Math.min(1.5, Math.max(flat, 1.0));
+			Vec3 want = new Vec3(base.x + dir.x * reach + across.x, base.y + face - p.getEyeHeight() - Math.abs(side) * 0.3,
+					base.z + dir.z * reach + across.z);
 			// No higher than there is room for, over where they will be.
 			double top = want.y;
 			for (double y = Math.max(p.getY(), base.y); y <= top; y += 0.25) {
@@ -287,7 +407,8 @@ public final class Found {
 		private int t;
 		private int next;
 
-		private RoofOff(Haunt haunt, OccupantEntity entity, ServerLevel level, List<BlockPos> roof, BlockPos wall, Vec3 inside, int ceiling) {
+		private RoofOff(Haunt haunt, OccupantEntity entity, ServerLevel level, List<BlockPos> roof, BlockPos wall, Vec3 inside, int ceiling,
+						UUID leader, List<UUID> with) {
 			this.haunt = haunt;
 			this.entity = entity;
 			this.level = level;
@@ -295,12 +416,12 @@ public final class Found {
 			this.wall = wall;
 			this.inside = inside;
 			this.ceiling = ceiling;
-			this.lift = new Lift(haunt, entity);
+			this.lift = new Lift(haunt, entity, leader, with);
 			entity.setGazeLocked(true);
 		}
 
 		@Nullable
-		static Sequence create(Haunt h, ServerPlayer p) {
+		static Sequence create(Haunt h, ServerPlayer p, List<ServerPlayer> with) {
 			ServerLevel level = Compat.level(p);
 			BlockPos head = p.blockPosition().above();
 			// The room: the open space round them at the height of their head, out to its walls.
@@ -376,7 +497,13 @@ public final class Found {
 			}
 			double dx = from.x - (near.getX() + 0.5), dz = from.z - (near.getZ() + 0.5);
 			Direction out = Math.abs(dx) > Math.abs(dz) ? (dx > 0 ? Direction.EAST : Direction.WEST) : (dz > 0 ? Direction.SOUTH : Direction.NORTH);
-			return new RoofOff(h, e, level, roof, near.relative(out), Vec3.atBottomCenterOf(near), ceiling);
+			// Whoever is in the same room with them: it lifts them out too.
+			List<UUID> inRoom = new ArrayList<>();
+			for (ServerPlayer o : with) {
+				BlockPos theirs = o.blockPosition().above();
+				if (room.contains(BlockPos.asLong(theirs.getX(), 0, theirs.getZ())) && Math.abs(theirs.getY() - head.getY()) <= 2) inRoom.add(o.getUUID());
+			}
+			return new RoofOff(h, e, level, roof, near.relative(out), Vec3.atBottomCenterOf(near), ceiling, p.getUUID(), inRoom);
 		}
 
 		/** On top of what is left of the wall, leaning a little in over the room; null if there is no wall to climb. */
@@ -398,7 +525,8 @@ public final class Found {
 			if (entity.hasVanished()) return false;
 			entity.keepAlive();
 			if (t == 1) {
-				Cues.effect(p, ScreenEffectPayload.CUTSCENE, OVER + 40, 1f);
+				// Everyone it is coming for watches it: their view drawn round to it, nothing they press doing anything.
+				Cues.effectFor(lift.here(p), ScreenEffectPayload.CUTSCENE, OVER + 40, 1f);
 				Cues.whisper(p, "Found you.", 60);
 			}
 			if (t == 10 || t == 22 || t == 34) {
@@ -441,13 +569,14 @@ public final class Found {
 			if (t >= LIFT && t < PUNISH) lift.tick(p);
 			if (t == LIFT + Lift.RISE) Cues.sound(p, ModSounds.BREATH, SoundSource.HOSTILE, entity.getEyePosition(), 1.0f, 0.5f);
 			if (t == BLACK) {
-				Cues.effect(p, ScreenEffectPayload.BLACKOUT, 110, 1f);
-				Cues.effect(p, ScreenEffectPayload.SILENCE, 0, 1f);
+				Cues.effectFor(lift.here(p), ScreenEffectPayload.BLACKOUT, 110, 1f);
+				Cues.effectFor(lift.here(p), ScreenEffectPayload.SILENCE, 0, 1f);
 			}
-			// Taken, it does not let go: it is still holding them up when the end begins.
-			if (t == PUNISH && !punish(haunt, p)) {
-				lift.release();
-				Cues.effect(p, ScreenEffectPayload.CUTSCENE, 0, 0f);
+			// Every one of them it holds, punished, and let go of. Taken, it does not let go: it is
+			// still holding them up when the end begins.
+			if (t == PUNISH) {
+				punishAll(haunt, p, lift.others(p), lift);
+				Cues.effectFor(lift.letGo(p), ScreenEffectPayload.CUTSCENE, 0, 0f);
 			}
 			return t < OVER;
 		}
@@ -461,7 +590,7 @@ public final class Found {
 
 		@Override
 		public void end() {
-			lift.release();
+			lift.release(level.getServer());
 			entity.vanish();
 		}
 
@@ -496,17 +625,17 @@ public final class Found {
 		private int t;
 		private int next;
 
-		private DugOut(Haunt haunt, OccupantEntity entity, ServerLevel level, List<List<BlockPos>> layers) {
+		private DugOut(Haunt haunt, OccupantEntity entity, ServerLevel level, List<List<BlockPos>> layers, UUID leader, List<UUID> with) {
 			this.haunt = haunt;
 			this.entity = entity;
 			this.level = level;
 			this.layers = layers;
-			this.lift = new Lift(haunt, entity);
+			this.lift = new Lift(haunt, entity, leader, with);
 			entity.setGazeLocked(true);
 		}
 
 		@Nullable
-		static Sequence create(Haunt h, ServerPlayer p) {
+		static Sequence create(Haunt h, ServerPlayer p, List<ServerPlayer> with) {
 			ServerLevel level = Compat.level(p);
 			BlockPos head = p.blockPosition().above();
 			int top = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, head.getX(), head.getZ());
@@ -530,7 +659,14 @@ public final class Found {
 			if (feet == null || feet.getY() < top - 2) return null;
 			OccupantEntity e = h.spawnOccupant(p, feet, OccupantEntity.Mode.STARE, OccupantEntity.Form.REVEALED);
 			if (e == null) return null;
-			return new DugOut(h, e, level, layers);
+			// Whoever is down the same hole with them: it lifts them out too.
+			List<UUID> inHole = new ArrayList<>();
+			for (ServerPlayer o : with) {
+				BlockPos theirs = o.blockPosition().above();
+				if (Math.abs(theirs.getX() - head.getX()) <= 1 && Math.abs(theirs.getZ() - head.getZ()) <= 1
+						&& Math.abs(theirs.getY() - head.getY()) <= 3) inHole.add(o.getUUID());
+			}
+			return new DugOut(h, e, level, layers, p.getUUID(), inHole);
 		}
 
 		@Override
@@ -540,7 +676,8 @@ public final class Found {
 			entity.keepAlive();
 			if (t < LIFT) entity.faceTowards(p.getEyePosition());
 			if (t == 1) {
-				Cues.effect(p, ScreenEffectPayload.CUTSCENE, OVER + 40, 1f);
+				// Everyone it is coming for watches it: their view drawn round to it, nothing they press doing anything.
+				Cues.effectFor(lift.here(p), ScreenEffectPayload.CUTSCENE, OVER + 40, 1f);
 				Cues.whisper(p, "Found you.", 60);
 			}
 			if (t >= LIFT && t < PUNISH) lift.tick(p);
@@ -567,20 +704,21 @@ public final class Found {
 				Cues.sound(p, ModSounds.BREATH, SoundSource.HOSTILE, entity.getEyePosition(), 1.0f, 0.6f);
 			}
 			if (t == BLACK) {
-				Cues.effect(p, ScreenEffectPayload.BLACKOUT, 110, 1f);
-				Cues.effect(p, ScreenEffectPayload.SILENCE, 0, 1f);
+				Cues.effectFor(lift.here(p), ScreenEffectPayload.BLACKOUT, 110, 1f);
+				Cues.effectFor(lift.here(p), ScreenEffectPayload.SILENCE, 0, 1f);
 			}
-			// Taken, it does not let go: it is still holding them up when the end begins.
-			if (t == PUNISH && !punish(haunt, p)) {
-				lift.release();
-				Cues.effect(p, ScreenEffectPayload.CUTSCENE, 0, 0f);
+			// Every one of them it holds, punished, and let go of. Taken, it does not let go: it is
+			// still holding them up when the end begins.
+			if (t == PUNISH) {
+				punishAll(haunt, p, lift.others(p), lift);
+				Cues.effectFor(lift.letGo(p), ScreenEffectPayload.CUTSCENE, 0, 0f);
 			}
 			return t < OVER;
 		}
 
 		@Override
 		public void end() {
-			lift.release();
+			lift.release(level.getServer());
 			entity.vanish();
 		}
 
@@ -596,10 +734,13 @@ public final class Found {
 	/** Nowhere for it to be seen: only its breath, black, and what comes of it. */
 	static final class Taken implements Sequence {
 		private final Haunt haunt;
+		/** Whoever hid there with them: what comes of it comes for them too. */
+		private final List<UUID> with;
 		private int t;
 
-		Taken(Haunt haunt) {
+		Taken(Haunt haunt, List<UUID> with) {
 			this.haunt = haunt;
+			this.with = with;
 		}
 
 		@Override
@@ -608,8 +749,9 @@ public final class Found {
 			if (t == 1) {
 				Cues.soundAtEars(p, ModSounds.BREATH, SoundSource.HOSTILE, 1.0f, 0.6f);
 				Cues.effect(p, ScreenEffectPayload.BLACKOUT, 110, 1f);
+				Cues.effectFor(stillHere(p, with, 24.0), ScreenEffectPayload.BLACKOUT, 110, 1f);
 			}
-			if (t == 12) punish(haunt, p);
+			if (t == 12) punishAll(haunt, p, stillHere(p, with, 24.0), null);
 			return t < 30;
 		}
 	}

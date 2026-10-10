@@ -119,7 +119,7 @@ final class OccupantPose {
 			case AMBUSH -> loom(lookX, lookY);
 			// Standing, it looks at them from its own face (see LegGait); bent to them, or coming for
 			// them, its face is already brought down to them, and the game's aim is what it was made for.
-			default -> stand(state.tilt, Float.isNaN(state.facePitch) ? lookX : state.facePitch, lookY);
+			default -> stand(state.tilt, Float.isNaN(state.facePitch) ? lookX : state.facePitch, lookY, state.act);
 		}
 		legs(state, t);
 		stare(state);
@@ -172,7 +172,7 @@ final class OccupantPose {
 	}
 
 	/** Standing. The head follows you a beat late and a little too far. */
-	private void stand(float tilt, float lookX, float lookY) {
+	private void stand(float tilt, float lookX, float lookY, int act) {
 		// The neck carries most of the turn, so the body stays squarely facing wherever it was.
 		neck.yRot = lookY * 0.45f;
 		skull.yRot = lookY * 0.55f;
@@ -188,7 +188,7 @@ final class OccupantPose {
 			lean = -0.42f;                          // well over to one side, and held there
 		}
 		// The further the story has gone, the further over its head goes: it no longer pretends.
-		lean *= 1.0f + 0.3f * Math.max(0, Math.min(3, com.wolfsmask.occupant.client.PauseLines.act() - 1));
+		lean *= 1.0f + 0.3f * Math.max(0, Math.min(3, act - 1));
 		neck.zRot = lean * 0.35f;
 		skull.zRot = lean * 0.65f;
 	}
