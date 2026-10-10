@@ -147,6 +147,7 @@ public final class Strike {
 
 	/** However it ends: they are let go of, and their view is theirs again. */
 	public void release() {
+		haunt.taking(false);
 		ServerPlayer p = held;
 		if (p == null) return;
 		letGo(p, true);
@@ -156,6 +157,7 @@ public final class Strike {
 	private void begin(ServerPlayer p) {
 		HauntData d = haunt.data;
 		lethal = lethal(d);
+		haunt.taking(lethal);
 		entity.halt();
 		entity.setMode(OccupantEntity.Mode.AMBUSH);
 		entity.setFocus(null);

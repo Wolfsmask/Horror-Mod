@@ -142,6 +142,16 @@ public final class Haunt {
 		lastShownAt = data.playTicks;
 	}
 
+	/**
+	 * Whether it has them, this time not to let go (see {@link com.wolfsmask.occupant.director.events.Strike}):
+	 * from then until the end begins, nothing else gets to kill them.
+	 */
+	boolean taking;
+
+	public void taking(boolean taking) {
+		this.taking = taking;
+	}
+
 	/** Begins {@code sequence} the moment whatever is running now is over. */
 	public void queue(String id, Sequence sequence) {
 		queued = sequence;

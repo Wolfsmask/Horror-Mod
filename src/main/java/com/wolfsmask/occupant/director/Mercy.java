@@ -88,7 +88,10 @@ public final class Mercy {
 
 		// While it is here, in the middle of saving them, nothing else gets them either (an arrow
 		// from further off than it froze, say).
-		if (RESCUE.equals(h.activeId) || TakenEnding.ID.equals(h.activeId)) {
+		// Nor while it has them for the last time, before the end has begun; nor while it is holding
+		// them up at all (nothing but its own scenes takes a player's weight away), carried past
+		// whatever they might choke in.
+		if (RESCUE.equals(h.activeId) || TakenEnding.ID.equals(h.activeId) || h.taking || player.isNoGravity()) {
 			player.setHealth(Math.max(player.getHealth(), 2.0f));
 			return false;
 		}
