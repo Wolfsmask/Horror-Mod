@@ -783,7 +783,10 @@ public final class OccupantGameTests {
 		// Facing each other across this test's floor, a little over four blocks apart, and held
 		// there (a mock player is not held still between ticks on every version). Where a player
 		// looks is where their head points.
-		BlockPos from = helper.absolutePos(new BlockPos(0, 2, 0));
+		// On the floor, as they would be: it stands on their level, never on a ledge above or below.
+		BlockPos ground = groundFor(helper, new BlockPos(0, 2, 0));
+		helper.assertTrue(ground != null, "No floor to stand them on");
+		BlockPos from = new BlockPos(helper.absolutePos(new BlockPos(0, 2, 0)).getX(), ground.getY(), helper.absolutePos(new BlockPos(0, 2, 0)).getZ());
 		float[] look = {-45.0f, 135.0f, 0.0f};          // a's yaw, b's yaw, b's pitch
 		Runnable hold = () -> {
 			a.snapTo(from.getX() + 0.5, from.getY(), from.getZ() + 0.5, look[0], 0.0f);
