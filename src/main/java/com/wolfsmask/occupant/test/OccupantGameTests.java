@@ -806,10 +806,24 @@ public final class OccupantGameTests {
 			// The one it came for looks away a moment, so it is there when they look back.
 			look[0] = 135.0f;
 		});
+		String[] seen = {"-"};
+		int[] ticks = {0};
+		helper.onEachTick(() -> {
+			ticks[0]++;
+			// What happened to it, tick by tick, for the message if it goes wrong.
+			List<OccupantEntity> any = level.getEntitiesOfClass(OccupantEntity.class, new AABB(b.blockPosition()).inflate(12.0), e -> true);
+			String now = director.haunt(a).activeEventId() + (any.isEmpty() ? " none" : any.stream()
+					.map(e -> String.format(java.util.Locale.ROOT, " [%s%s%s %.1f from b, b %.0f deg, a %.0f deg]",
+							e.isRemoved() ? "removed " : "", e.hasVanished() ? "vanished " : "", e.isConcealed() ? "concealed" : "shown",
+							e.distanceTo(b), com.wolfsmask.occupant.util.Sight.angleTo(b, e.getEyePosition()),
+							com.wolfsmask.occupant.util.Sight.angleTo(a, e.getEyePosition())))
+					.reduce("", String::concat));
+			if (!now.equals(seen[0].substring(seen[0].lastIndexOf('|') + 1))) seen[0] = seen[0] + " @" + ticks[0] + "|" + now;
+		});
 		helper.runAfterDelay(30, () -> {
 			OccupantEntity it = behind(level, b);
-			helper.assertTrue(it != null && !it.isConcealed(), "It should be standing there by now");
-			helper.assertTrue(id.equals(director.haunt(a).activeEventId()), "It should still be there while the friend has not turned");
+			helper.assertTrue(it != null && !it.isConcealed(), "It should be standing there by now:" + seen[0]);
+			helper.assertTrue(id.equals(director.haunt(a).activeEventId()), "It should still be there while the friend has not turned:" + seen[0]);
 			// The friend turns round, right to its face.
 			net.minecraft.world.phys.Vec3 to = it.getEyePosition().subtract(b.getEyePosition());
 			look[1] = (float) Math.toDegrees(Math.atan2(-to.x, to.z));
