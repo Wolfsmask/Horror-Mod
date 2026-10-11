@@ -813,10 +813,13 @@ public final class OccupantGameTests {
 			// What happened to it, tick by tick, for the message if it goes wrong.
 			List<OccupantEntity> any = level.getEntitiesOfClass(OccupantEntity.class, new AABB(b.blockPosition()).inflate(12.0), e -> true);
 			String now = director.haunt(a).activeEventId() + (any.isEmpty() ? " none" : any.stream()
-					.map(e -> String.format(java.util.Locale.ROOT, " [%s%s%s %.1f from b, b %.0f deg, a %.0f deg]",
+					.map(e -> String.format(java.util.Locale.ROOT, " [%s%s%s %.1f from b, b %.0f deg, a %.0f deg, seen by a %s/%s b %s, a yaw %.0f at %.1f %.1f, it at %.1f %.1f]",
 							e.isRemoved() ? "removed " : "", e.hasVanished() ? "vanished " : "", e.isConcealed() ? "concealed" : "shown",
 							e.distanceTo(b), com.wolfsmask.occupant.util.Sight.angleTo(b, e.getEyePosition()),
-							com.wolfsmask.occupant.util.Sight.angleTo(a, e.getEyePosition())))
+							com.wolfsmask.occupant.util.Sight.angleTo(a, e.getEyePosition()),
+							com.wolfsmask.occupant.util.Sight.couldBeSeen(a, e, 80.0), com.wolfsmask.occupant.util.Sight.couldBeSeen(a, e, 150.0),
+							com.wolfsmask.occupant.util.Sight.couldBeSeen(b, e, 80.0), a.getYRot(),
+							a.getX() - from.getX(), a.getZ() - from.getZ(), e.getX() - from.getX(), e.getZ() - from.getZ()))
 					.reduce("", String::concat));
 			if (!now.equals(seen[0].substring(seen[0].lastIndexOf('|') + 1))) seen[0] = seen[0] + " @" + ticks[0] + "|" + now;
 		});
