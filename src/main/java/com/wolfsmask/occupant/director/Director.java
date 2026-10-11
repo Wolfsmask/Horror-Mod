@@ -279,6 +279,7 @@ public final class Director {
 		else if (!gave && roll < 0.58f) trigger(player, com.wolfsmask.occupant.director.events.GraveEvent.ID, false);
 		else if (roll < 0.7f) trigger(player, com.wolfsmask.occupant.director.events.SleepTalkEvent.ID, false);
 		else if (!gave && roll < 0.8f) trigger(player, com.wolfsmask.occupant.director.events.VisitorEvent.ID, false);
+		else if (roll < 0.88f) trigger(player, com.wolfsmask.occupant.director.events.RedLightEvent.ID, false);
 	}
 
 	private void tickPlayer(Haunt h, ServerPlayer player, OccupantConfig cfg) {

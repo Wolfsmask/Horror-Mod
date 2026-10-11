@@ -60,6 +60,7 @@ public final class Events {
 			new BehindYouEvent(),
 			new WakeEvent(),
 			new GraveEvent(),
+			new RedLightEvent(),
 			// Act 4: it hunts, and once, the last night
 			new HuntEvent(),
 			new LastNightEvent()
