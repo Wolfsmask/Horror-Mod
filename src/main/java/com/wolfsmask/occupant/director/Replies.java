@@ -63,6 +63,40 @@ final class Replies {
 		d.cooldowns.put(LEFT, d.playTicks + 20L * 60 * 20);
 	}
 
+	/** When they were last here, by the clock on the wall (kept with what it remembers of them). */
+	private static final String HERE = "last_here";
+
+	/** Each second they are here: the time, so it knows how long they were gone. */
+	static void here(HauntData d) {
+		d.cooldowns.put(HERE, System.currentTimeMillis());
+	}
+
+	/**
+	 * Just come back into the world: if they were gone a long while (hours, days, by the real
+	 * clock), a little after they arrive, it tells them how long it waited.
+	 */
+	static void cameBack(Haunt h, ServerPlayer player) {
+		HauntData d = h.data;
+		Long last = d.cooldowns.get(HERE);
+		if (last == null || d.act < 2 || h.reply != null || !OccupantConfig.get().screenWhispers) return;
+		long hours = (System.currentTimeMillis() - last) / 3_600_000L;
+		RandomSource random = player.getRandom();
+		if (hours < 3 || random.nextFloat() >= 0.75f) return;
+		long days = hours / 24;
+		String[] lines = days >= 1
+				? new String[]{"You were gone " + count((int) days) + (days == 1 ? " day" : " days") + ". It waited.",
+				"It waited " + count((int) days) + (days == 1 ? " day" : " days") + " for you.", "It stood where you left it. The whole time."}
+				: new String[]{"You were gone " + count((int) hours) + " hours. It waited.", "It counted the hours. " + capital(count((int) hours)) + ".",
+				"It stood where you left it."};
+		h.reply = lines[random.nextInt(lines.length)];
+		// After the way in, once they have had a moment to look round.
+		h.replyAt = d.playTicks + 20 * 15;
+	}
+
+	private static String capital(String s) {
+		return s.isEmpty() ? s : Character.toUpperCase(s.charAt(0)) + s.substring(1);
+	}
+
 	private static String count(int n) {
 		String[] words = {"no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"};
 		return n >= 0 && n < words.length ? words[n] : Integer.toString(n);

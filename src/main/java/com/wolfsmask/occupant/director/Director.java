@@ -206,6 +206,7 @@ public final class Director {
 			player.resetFallDistance();
 		}
 		TakenEnding.recover(h, player);
+		Replies.cameBack(h, player);
 	}
 
 	/**
@@ -343,6 +344,7 @@ public final class Director {
 		if (player.tickCount % 5 == 2) noticeTheirs(h, player);
 		Trifles.tick(player, h, cfg);
 		Replies.tick(h, player);
+		if (player.tickCount % 20 == 3) Replies.here(h.data);
 
 		// The first time in this world, once they are actually in it: black, and it tells them.
 		if (!h.data.introduced && player.tickCount > 60) {
