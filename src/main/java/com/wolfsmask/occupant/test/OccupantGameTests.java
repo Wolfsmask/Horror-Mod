@@ -780,20 +780,31 @@ public final class OccupantGameTests {
 		director.data(a).introduced = true;
 		director.data(b).introduced = true;
 		director.data(a).setAct(2);
-		// Facing each other across this test's floor, a little over five blocks apart.
-		BlockPos from = helper.absolutePos(new BlockPos(1, 2, 1));
-		a.snapTo(from.getX() + 0.5, from.getY(), from.getZ() + 0.5, -45.0f, 0.0f);
-		b.snapTo(from.getX() + 4.5, from.getY(), from.getZ() + 4.5, 135.0f, 0.0f);
+		// Facing each other across this test's floor, a little over five blocks apart, and held
+		// there (a mock player is not held still between ticks on every version). Where a player
+		// looks is where their head points.
+		BlockPos from = helper.absolutePos(new BlockPos(0, 2, 0));
+		float[] look = {-45.0f, 135.0f, 0.0f};          // a's yaw, b's yaw, b's pitch
+		Runnable hold = () -> {
+			a.snapTo(from.getX() + 0.5, from.getY(), from.getZ() + 0.5, look[0], 0.0f);
+			a.setYHeadRot(look[0]);
+			b.snapTo(from.getX() + 4.5, from.getY(), from.getZ() + 4.5, look[1], look[2]);
+			b.setYHeadRot(look[1]);
+		};
+		hold.run();
+		helper.onEachTick(hold);
 		String id = com.wolfsmask.occupant.director.events.BehindFriendEvent.ID;
 		helper.runAfterDelay(5, () -> {
+			hold.run();
 			Director.TriggerResult result = director.trigger(a, id, true);
-			helper.assertTrue(result == Director.TriggerResult.STARTED, "It should find a place behind the friend, not " + result);
+			helper.assertTrue(result == Director.TriggerResult.STARTED, "It should find a place behind the friend, not " + result
+					+ " (the friend looking " + b.getViewVector(1.0f) + ")");
 			OccupantEntity it = behind(level, b);
 			helper.assertTrue(it != null, "It should be there, for the one it came for");
 			net.minecraft.world.phys.Vec3 toIt = it.position().subtract(b.position());
 			helper.assertTrue(toIt.dot(b.getViewVector(1.0f)) < 0.0, "It should stand behind the friend, out of their sight");
 			// The one it came for looks away a moment, so it is there when they look back.
-			a.snapTo(a.getX(), a.getY(), a.getZ(), 135.0f, 0.0f);
+			look[0] = 135.0f;
 		});
 		helper.runAfterDelay(30, () -> {
 			OccupantEntity it = behind(level, b);
@@ -801,9 +812,9 @@ public final class OccupantGameTests {
 			helper.assertTrue(id.equals(director.haunt(a).activeEventId()), "It should still be there while the friend has not turned");
 			// The friend turns round, right to its face.
 			net.minecraft.world.phys.Vec3 to = it.getEyePosition().subtract(b.getEyePosition());
-			float yaw = (float) Math.toDegrees(Math.atan2(-to.x, to.z));
-			float pitch = (float) -Math.toDegrees(Math.atan2(to.y, Math.sqrt(to.x * to.x + to.z * to.z)));
-			b.snapTo(b.getX(), b.getY(), b.getZ(), yaw, pitch);
+			look[1] = (float) Math.toDegrees(Math.atan2(-to.x, to.z));
+			look[2] = (float) -Math.toDegrees(Math.atan2(to.y, Math.sqrt(to.x * to.x + to.z * to.z)));
+			hold.run();
 		});
 		helper.runAfterDelay(45, () -> {
 			String doing = director.haunt(a).activeEventId();
