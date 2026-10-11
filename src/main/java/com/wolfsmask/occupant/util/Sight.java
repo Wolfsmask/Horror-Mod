@@ -190,6 +190,11 @@ public final class Sight {
 	/** How far out from its body its legs reach, braced, as a share of how tall it is drawn. */
 	private static final double LEG_REACH = 0.55;
 
+	/** How far its braced legs reach out from its body, seen from {@code distance}, so far into the story. */
+	public static double legReach(double distance, int act) {
+		return drawnBlocks(distance, act) * LEG_REACH;
+	}
+
 	/** Could this entity be on the player's screen right now (inside the view cone and unobstructed)? */
 	public static boolean isOnScreen(ServerPlayer player, Entity entity) {
 		Vec3 center = entity.position().add(0, drawnHeight(player, entity) * 0.5, 0);

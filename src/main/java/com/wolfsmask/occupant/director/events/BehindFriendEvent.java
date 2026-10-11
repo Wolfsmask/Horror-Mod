@@ -24,15 +24,15 @@ import org.jetbrains.annotations.Nullable;
 import java.util.UUID;
 
 /**
- * With a friend: they are facing you, talking, or just standing there, and right behind them, a
- * step back, it is standing too, looking at you over their shoulder. They do not know. If you
+ * With a friend: they are facing you, talking, or just standing there, and right behind them, a few
+ * steps back, it is standing too, looking at you over their shoulder. They do not know. If you
  * look long enough, they hear it breathe. If they turn round, it is gone (the light stutters for
  * anyone who had it in sight), and there was never anything there.
  */
 public final class BehindFriendEvent extends HorrorEvent {
 	public static final String ID = "behind_friend";
-	/** How far off the friend can be, and how far back behind them it stands. */
-	private static final double NEAREST = 5.0;
+	/** How far off the friend can be. */
+	private static final double NEAREST = 4.0;
 	private static final double FURTHEST = 26.0;
 	/** The friend must be facing them, about: what is behind the friend, the friend cannot see. */
 	private static final double FACING_WITHIN = 55.0;
@@ -74,13 +74,19 @@ public final class BehindFriendEvent extends HorrorEvent {
 		ServerPlayer friend = friend(p);
 		if (friend == null) return null;
 		ServerLevel level = Compat.level(p);
-		// Straight back from where the friend is looking, a step or two, a little to one side or the other.
+		// Straight back from where the friend is looking, a little to one side or the other: right
+		// behind them, but far enough back that none of its braced legs reaches past them, where
+		// they would have it in sight (it is never there in front of anyone).
 		Vec3 back = Sight.flatLook(friend).scale(-1.0);
+		double reach = Sight.legReach(4.0, ctx.data.act);
 		for (int tries = 0; tries < 8; tries++) {
-			double d = 1.8 + ctx.random.nextDouble() * 1.4;
+			double d = reach + 0.8 + ctx.random.nextDouble() * 1.2;
 			Vec3 at = friend.position().add(Sight.rotateY(back, (ctx.random.nextDouble() - 0.5) * 50.0).scale(d));
 			BlockPos feet = Spots.groundNear(level, Mth.floor(at.x), friend.getBlockY(), Mth.floor(at.z), 2);
-			if (feet == null || Math.abs(feet.getY() - friend.getBlockY()) > 2) continue;
+			// On their level, and still far enough back once on a block.
+			if (feet == null || Math.abs(feet.getY() - friend.getBlockY()) > 1) continue;
+			Vec3 stands = Vec3.atBottomCenterOf(feet);
+			if (Math.hypot(stands.x - friend.getX(), stands.z - friend.getZ()) < reach + 0.6) continue;
 			// Out of the friend's sight, wherever it is.
 			if (Sight.angleTo(friend, Vec3.atCenterOf(feet.above())) < 100.0) continue;
 			OccupantEntity e = ctx.haunt.spawnOccupant(p, feet, OccupantEntity.Mode.STARE, ctx.haunt.pickForm(ctx.random));

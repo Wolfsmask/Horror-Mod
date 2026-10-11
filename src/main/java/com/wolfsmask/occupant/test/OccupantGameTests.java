@@ -780,7 +780,7 @@ public final class OccupantGameTests {
 		director.data(a).introduced = true;
 		director.data(b).introduced = true;
 		director.data(a).setAct(2);
-		// Facing each other across this test's floor, a little over five blocks apart, and held
+		// Facing each other across this test's floor, a little over four blocks apart, and held
 		// there (a mock player is not held still between ticks on every version). Where a player
 		// looks is where their head points.
 		BlockPos from = helper.absolutePos(new BlockPos(0, 2, 0));
@@ -788,7 +788,7 @@ public final class OccupantGameTests {
 		Runnable hold = () -> {
 			a.snapTo(from.getX() + 0.5, from.getY(), from.getZ() + 0.5, look[0], 0.0f);
 			a.setYHeadRot(look[0]);
-			b.snapTo(from.getX() + 4.5, from.getY(), from.getZ() + 4.5, look[1], look[2]);
+			b.snapTo(from.getX() + 3.5, from.getY(), from.getZ() + 3.5, look[1], look[2]);
 			b.setYHeadRot(look[1]);
 		};
 		hold.run();
