@@ -821,6 +821,7 @@ public final class OccupantGameTests {
 			if (!now.equals(seen[0].substring(seen[0].lastIndexOf('|') + 1))) seen[0] = seen[0] + " @" + ticks[0] + "|" + now;
 		});
 		helper.runAfterDelay(30, () -> {
+			Occupant.LOGGER.info("[gametest] behind a friend, at 30:{}", seen[0]);
 			OccupantEntity it = behind(level, b);
 			helper.assertTrue(it != null && !it.isConcealed(), "It should be standing there by now:" + seen[0]);
 			helper.assertTrue(id.equals(director.haunt(a).activeEventId()), "It should still be there while the friend has not turned:" + seen[0]);
@@ -831,8 +832,9 @@ public final class OccupantGameTests {
 			hold.run();
 		});
 		helper.runAfterDelay(45, () -> {
+			Occupant.LOGGER.info("[gametest] behind a friend, at 45:{}", seen[0]);
 			String doing = director.haunt(a).activeEventId();
-			helper.assertTrue(!id.equals(doing), "Turned round to, it should be gone, not still " + doing);
+			helper.assertTrue(!id.equals(doing), "Turned round to, it should be gone, not still " + doing + ":" + seen[0]);
 			helper.assertTrue(behind(level, b) == null, "Nothing should be left behind them");
 			helper.succeed();
 		});
