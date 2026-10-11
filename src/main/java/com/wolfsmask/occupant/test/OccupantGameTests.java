@@ -820,8 +820,10 @@ public final class OccupantGameTests {
 					.reduce("", String::concat));
 			if (!now.equals(seen[0].substring(seen[0].lastIndexOf('|') + 1))) seen[0] = seen[0] + " @" + ticks[0] + "|" + now;
 		});
-		helper.runAfterDelay(30, () -> {
-			Occupant.LOGGER.info("[gametest] behind a friend, at 30:{}", seen[0]);
+		// A quick turn away widens what counts as in view for a while (so it is never caught arriving
+		// as they spin round): it can take a second or more after that before it is there.
+		helper.runAfterDelay(60, () -> {
+			Occupant.LOGGER.info("[gametest] behind a friend, at 60:{}", seen[0]);
 			OccupantEntity it = behind(level, b);
 			helper.assertTrue(it != null && !it.isConcealed(), "It should be standing there by now:" + seen[0]);
 			helper.assertTrue(id.equals(director.haunt(a).activeEventId()), "It should still be there while the friend has not turned:" + seen[0]);
@@ -831,8 +833,8 @@ public final class OccupantGameTests {
 			look[2] = (float) -Math.toDegrees(Math.atan2(to.y, Math.sqrt(to.x * to.x + to.z * to.z)));
 			hold.run();
 		});
-		helper.runAfterDelay(45, () -> {
-			Occupant.LOGGER.info("[gametest] behind a friend, at 45:{}", seen[0]);
+		helper.runAfterDelay(75, () -> {
+			Occupant.LOGGER.info("[gametest] behind a friend, at 75:{}", seen[0]);
 			String doing = director.haunt(a).activeEventId();
 			helper.assertTrue(!id.equals(doing), "Turned round to, it should be gone, not still " + doing + ":" + seen[0]);
 			helper.assertTrue(behind(level, b) == null, "Nothing should be left behind them");
