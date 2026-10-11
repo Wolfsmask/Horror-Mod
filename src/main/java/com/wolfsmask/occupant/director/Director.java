@@ -336,6 +336,7 @@ public final class Director {
 		h.data.playTicks++;
 		if (player.tickCount % 5 == 2) noticeTheirs(h, player);
 		Trifles.tick(player, h, cfg);
+		Replies.tick(h, player);
 
 		// The first time in this world, once they are actually in it: black, and it tells them.
 		if (!h.data.introduced && player.tickCount > 60) {
@@ -894,7 +895,9 @@ public final class Director {
 	public void onChat(ServerPlayer player, String message) {
 		String m = message.strip();
 		if (m.length() < 2 || m.length() > 60 || m.startsWith("/") || m.contains("://")) return;
-		haunt(player).data.rememberChat(m);
+		Haunt h = haunt(player);
+		h.data.rememberChat(m);
+		if (isEligible(player, h, OccupantConfig.get())) Replies.heard(h, player, m);
 	}
 
 	/** Start an event right now (used by hooks and /occupant trigger). */

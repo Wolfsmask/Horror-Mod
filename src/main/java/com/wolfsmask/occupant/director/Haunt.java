@@ -72,6 +72,10 @@ public final class Haunt {
 	long skullDay = -1;
 	long chestDay = -1;
 	long doorAgainAt;
+	/** What it says back to something they asked in the chat (see Replies), and when, in ticks of play. */
+	@Nullable
+	String reply;
+	long replyAt;
 	/** Something answers the note they played, or the bell they rang: when, and which. */
 	long answerAt;
 	boolean answerBell;

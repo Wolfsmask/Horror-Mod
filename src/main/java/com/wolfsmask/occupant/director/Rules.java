@@ -34,6 +34,8 @@ final class Rules {
 	static void check(ServerPlayer player, Haunt h, OccupantConfig cfg) {
 		HauntData d = h.data;
 		if (!cfg.enabled || !cfg.keepToTheRules || d.paused || !d.introduced || d.ending == LastNightEnding.FOUND) return;
+		// Another copy of the mod in their game: they were told it leaves them alone, and it does.
+		if (!Party.sameMod(player)) return;
 		MinecraftServer server = Compat.level(player).getServer();
 		ServerLevel overworld = server.overworld();
 
