@@ -371,13 +371,17 @@ final class FoundFootage {
 			}
 			Occupant.LOGGER.info("[client-gametest] struck: the leg went in: {}, after {} of the server's ticks", in, now - from);
 			if (!in) return;
-			context.waitTicks(2);
-			OccupantClientGameTest.shoot(context, "found-struck-1-in");
+			// Down, pinned, looking up at it; then one of its legs coming down on them; then the same,
+			// from behind them, the way someone with them would have seen it.
 			context.waitTicks(3);
-			OccupantClientGameTest.shoot(context, "found-struck-2-through");
+			OccupantClientGameTest.shoot(context, "found-struck-1-down");
+			context.waitTicks(12);
+			OccupantClientGameTest.shoot(context, "found-struck-2-beat");
 			context.runOnClient(mc -> mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK));
 			context.waitTicks(1);
 			OccupantClientGameTest.shoot(context, "found-struck-3-behind");
+			context.waitTicks(11);
+			OccupantClientGameTest.shoot(context, "found-struck-4-beat-behind");
 			context.runOnClient(mc -> mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON));
 			for (int i = 0; i < 200 && Director.get() != null && server.computeOnServer(s -> Director.get().haunt(Cinematic.player(s)).isBusy()); i++) {
 				context.waitTick();

@@ -37,7 +37,15 @@ public final class Places {
 
 	/** The kinds of place, how often each comes up, and how far each reaches from its middle. */
 	private static final String[] KINDS = {"lair", "lighthouse", "ruin", "camp", "graves", "watchtower", "chapel", "radio"};
-	private static final float[] SHARES = {0.09f, 0.13f, 0.12f, 0.16f, 0.12f, 0.13f, 0.13f, 0.12f};
+	private static final float[] SHARES = {0.09f, 0.14f, 0.12f, 0.14f, 0.11f, 0.15f, 0.12f, 0.12f};
+	/**
+	 * A kind with none of its own within this far is far likelier to be the next one built, so
+	 * every kind turns up as a world is explored, not four of one and none of another.
+	 */
+	private static final int MISSED_WITHIN = 1200;
+	private static final float MISSED_BOOST = 4.0f;
+	/** A lighthouse with no water near: only up on high ground, looking out over nothing. */
+	private static final int HIGH_GROUND = 76;
 
 	private static final List<BlockPos> PLACES = new CopyOnWriteArrayList<>();
 	/** Which kind each place is, where known (worlds from before this was kept have none). */
@@ -194,14 +202,31 @@ public final class Places {
 		return true;
 	}
 
-	/** Which kind of place to try, by its share. */
-	private static int roll(RandomSource random) {
-		float r = random.nextFloat() * 0.999f;
+	/** Which kind of place to try at {@code at}, by its share: kinds not met for a long way, far likelier. */
+	private static int roll(RandomSource random, BlockPos at) {
+		float[] weight = new float[SHARES.length];
+		float total = 0.0f;
 		for (int i = 0; i < SHARES.length; i++) {
-			r -= SHARES[i];
+			weight[i] = SHARES[i] * (kindWithin(KINDS[i], at, MISSED_WITHIN) ? 1.0f : MISSED_BOOST);
+			total += weight[i];
+		}
+		float r = random.nextFloat() * total;
+		for (int i = 0; i < SHARES.length; i++) {
+			r -= weight[i];
 			if (r < 0) return i;
 		}
 		return 3;
+	}
+
+	/** Is there a place of this kind within {@code r} blocks of {@code at}? */
+	private static boolean kindWithin(String kind, BlockPos at, int r) {
+		for (java.util.Map.Entry<BlockPos, String> e : KIND_AT.entrySet()) {
+			if (!e.getValue().equals(kind)) continue;
+			long dx = e.getKey().getX() - at.getX();
+			long dz = e.getKey().getZ() - at.getZ();
+			if (dx * dx + dz * dz < (long) r * r) return true;
+		}
+		return false;
 	}
 
 	/** Is there a place of this kind too near {@code at} already? */
@@ -226,10 +251,11 @@ public final class Places {
 		// A kind that suits the ground, and is not one passed a little way back.
 		int kind = -1;
 		for (int tries = 0; tries < 5 && kind < 0; tries++) {
-			int k = roll(random);
+			int k = roll(random, base);
 			boolean suits = switch (k) {
 				case 0 -> solidBelow(level, base, Lair.DEPTH + 4);
-				case 1 -> nearWater(level, base);
+				// By the water; or, with none, up on high ground (none for a long way, it is still found).
+				case 1 -> nearWater(level, base) || base.getY() >= HIGH_GROUND;
 				default -> true;
 			};
 			if (suits && !sameKindNear(KINDS[k], base)) kind = k;

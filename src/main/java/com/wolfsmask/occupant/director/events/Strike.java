@@ -10,46 +10,45 @@ import com.wolfsmask.occupant.network.ScreenEffectPayload;
 import com.wolfsmask.occupant.registry.ModSounds;
 import com.wolfsmask.occupant.util.Cues;
 import com.wolfsmask.occupant.util.Sight;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.phys.AABB;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
- * It has them. Its leg goes in at their back and out of their chest, and it lifts them off the
- * ground on it, up to its face, and holds them there, close, while they watch (nothing they press
- * does anything). Its other legs go in, one after another. Then it is over: it lets them drop, at
- * their last half heart, to show them it could have. Only at the very end of the story (see
- * {@link TakenEnding#ready}) does it not let them go: it takes them, and the ending begins. It
- * never simply kills them. It saves them from everything else so that it is the only thing that
- * ever gets to do this.
+ * It has them. Their view is pulled round to it, up over them, so they see it coming; then a leg
+ * comes down through them and pins them to the ground, flat (something over their head holds them
+ * down, as low as a crawl), and its other legs come down on them, one after another, while it
+ * watches their face. Then it is over: it lets them up, at their last half heart, to show them it
+ * could have. Only at the very end of the story (see {@link TakenEnding#ready}) does it not let them
+ * go: it takes them, and the ending begins. It never simply kills them. It saves them from
+ * everything else so that it is the only thing that ever gets to do this.
+ * <p>
+ * All of it is in the world: anyone near sees them go down and stay down, and it over them.
  * <p>
  * Run a tick at a time, from a sequence, once it is close enough to reach them.
  */
 public final class Strike {
-	/** The first leg is in them. */
-	private static final int IN = 4;
-	/** Lifted, and held at its face from here. */
-	private static final int UP = 24;
-	/** Its other legs, one after another. */
-	private static final int[] MORE = {32, 40, 47};
+	/** Long enough for their view to come round to it, whichever way they were facing. */
+	private static final int DOWN = 20;
+	/** Its other legs, coming down on them, one after another; each in them this long before it rises. */
+	private static final int[] BEATS = {34, 46, 58};
+	private static final int BEAT_FOR = 5;
 	/** The end of it. */
-	private static final int LAST = 56;
-	private static final int BLACK = 60;
-	private static final int OVER = 70;
+	private static final int LAST = 70;
+	private static final int BLACK = 76;
+	private static final int OVER = 86;
 	/** Kept in the story's cooldowns for good: it has let them go once already. */
 	public static final String SPARED = "spared";
 
-	/** What it says, holding them up: the time it lets them go, and the time it does not. */
+	/** What it says, over them: the time it lets them go, and the time it does not. */
 	private static final String[] NOT_YET = {"Not yet.", "I could have.", "Not yet. Soon.",
 			"You felt that. Good.", "I kept you alive for this."};
 	private static final String[] NOW = {"Mine.", "You're coming with me.", "No one else. Only me.",
@@ -69,8 +68,13 @@ public final class Strike {
 	/** Whom it has, for letting go of however this ends. */
 	@Nullable
 	private ServerPlayer held;
-	private Vec3 start = Vec3.ZERO;
-	private Vec3 hold = Vec3.ZERO;
+	/** Where it holds them down. */
+	private Vec3 pin = Vec3.ZERO;
+	/** What it put over their head to keep them down (nothing anyone can see), to be taken away again. */
+	@Nullable
+	private BlockPos lid;
+	@Nullable
+	private ServerLevel lidLevel;
 
 	public Strike(Haunt haunt, OccupantEntity entity) {
 		this.haunt = haunt;
@@ -127,12 +131,18 @@ public final class Strike {
 			// It is done with them: the rest is only the dark.
 			letGo(p, false);
 			if (t < BLACK) t = BLACK;
-		} else if (t >= IN && t < (taken ? BLACK : LAST)) {
-			// Taken, it does not let go: it is still holding them when the black comes.
-			carry(p);
+		} else if (t < DOWN) {
+			rear(p);
+		} else if (t < (taken ? BLACK : LAST)) {
+			// Taken, it does not let them up: it is still holding them down when the black comes.
+			holdDown(p);
 		}
-		if (t == IN && p.isAlive()) firstLeg(p);
-		for (int k = 0; k < MORE.length; k++) if (t == MORE[k] && p.isAlive()) anotherLeg(p, k);
+		if (t == DOWN && p.isAlive()) down(p);
+		for (int k = 0; k < BEATS.length; k++) {
+			if (t == BEATS[k] && p.isAlive()) beat(p, k);
+			// It rises again for the next.
+			if (t == BEATS[k] + BEAT_FOR && p.isAlive()) entity.setHeld(List.of(p));
+		}
 		if (t == LAST && p.isAlive()) last(p);
 		if (t == BLACK) {
 			Cues.effect(p, ScreenEffectPayload.BLACKOUT, 50, 1f);
@@ -147,13 +157,17 @@ public final class Strike {
 	}
 
 	/**
-	 * However it ends: they are let go of, and their view is theirs again; unless it has taken them
+	 * However it ends: they are let up, and their view is theirs again; unless it has taken them
 	 * and this is the end beginning, which goes on being a scene without a break.
 	 */
 	public void release() {
 		haunt.taking(false);
+		haunt.pinned(false);
 		ServerPlayer p = held;
-		if (p == null) return;
+		if (p == null) {
+			liftLid();
+			return;
+		}
 		letGo(p, !(taken && t >= OVER));
 		held = null;
 	}
@@ -162,110 +176,110 @@ public final class Strike {
 		HauntData d = haunt.data;
 		lethal = lethal(d);
 		haunt.taking(lethal);
+		haunt.pinned(true);
 		entity.halt();
 		entity.setMode(OccupantEntity.Mode.AMBUSH);
 		// From here no one's blow stops it, theirs or a friend's: it is too late for that.
 		entity.setUnmoved(true);
 		entity.setFocus(null);
 		entity.faceTowards(p.getEyePosition());
-		entity.setHeld(List.of(p));
+		entity.setHeld(List.of());
 		// They watch the rest: their view drawn round to it, nothing they press doing anything.
 		Cues.effect(p, ScreenEffectPayload.CUTSCENE, OVER + 40, 1f);
 		Cues.effect(p, ScreenEffectPayload.SILENCE, 0, 1f);
-		// No stinger: a breath, very close, and the leg is already coming.
+		// No stinger: a breath, very close, while they come round to it.
 		Cues.sound(p, ModSounds.BREATH, SoundSource.HOSTILE, entity.getEyePosition(), 0.9f, 0.6f);
-		start = p.position();
-		hold = holdPoint(p);
+		pin = p.position();
 	}
 
-	/**
-	 * Where it holds them: just in front of its face, their eyes level with its own, or as high
-	 * as there is room for them under whatever is overhead.
-	 */
-	private Vec3 holdPoint(ServerPlayer p) {
+	/** While their view comes round: it over them, still, its face on theirs; they cannot get away. */
+	private void rear(ServerPlayer p) {
+		p.setDeltaMovement(0.0, Math.min(p.getDeltaMovement().y, 0.0), 0.0);
+		p.hurtMarked = true;
+		entity.faceTowards(p.getEyePosition());
+		if (t == DOWN - 6) Cues.sound(p, SoundEvents.ZOMBIE_ATTACK_WOODEN_DOOR, SoundSource.HOSTILE, entity.getEyePosition(), 0.5f, 0.35f);
+	}
+
+	/** Down: a leg through them into the ground, and something over their head to keep them there. */
+	private void down(ServerPlayer p) {
+		landed = true;
+		int act = haunt.data.act;
+		haunt.data.encounters++;
 		ServerLevel level = Compat.level(p);
-		Vec3 base = entity.position();
-		Vec3 toThem = new Vec3(p.getX() - base.x, 0.0, p.getZ() - base.z);
-		double flat = toThem.length();
-		Vec3 dir = flat < 1.0e-3 ? Sight.flatLook(p).scale(-1.0) : toThem.scale(1.0 / flat);
-		double face = Sight.drawnBlocks(Math.max(1.0, flat), haunt.data.act) * 0.86;
-		double rise = Math.max(0.0, face - p.getEyeHeight() - (p.getY() - base.y));
-		Vec3 want = new Vec3(base.x + dir.x * 1.5, p.getY(), base.z + dir.z * 1.5);
-		// Not into a wall on the way in to it.
-		if (!level.noCollision(p, p.getBoundingBox().move(want.subtract(p.position())))) want = p.position();
-		// As high as there is room for, a little at a time.
-		double up = 0.0;
-		for (double step = 0.25; step <= rise; step += 0.25) {
-			AABB box = p.getBoundingBox().move(want.x - p.getX(), step, want.z - p.getZ());
-			if (!level.noCollision(p, box)) break;
-			up = step;
+		// On the ground, where they are (or the ground under them, if they were caught off it).
+		BlockPos feet = p.blockPosition();
+		if (!p.onGround()) {
+			BlockPos ground = com.wolfsmask.occupant.util.Spots.groundNear(level, feet.getX(), feet.getY(), feet.getZ(), 4);
+			if (ground != null) feet = ground;
 		}
-		return want.add(0.0, up, 0.0);
+		pin = new Vec3(feet.getX() + 0.5, feet.getY(), feet.getZ() + 0.5);
+		// Flat: with something over them where their head would be, they can only lie there. It is
+		// nothing anyone can see, and it is taken away again the moment it lets them up.
+		BlockPos head = feet.above();
+		if (level.getBlockState(head).isAir() && level.getBlockState(feet).getCollisionShape(level, feet).isEmpty()) {
+			level.setBlock(head, Blocks.BARRIER.defaultBlockState(), 3);
+			lid = head;
+			lidLevel = level;
+		}
+		entity.setHeld(List.of(p));
+		// Standing over them, close.
+		Vec3 away = new Vec3(entity.getX() - pin.x, 0.0, entity.getZ() - pin.z);
+		away = away.lengthSqr() < 1.0e-4 ? Sight.flatLook(p) : away.normalize();
+		Vec3 over = pin.add(away.scale(1.1));
+		if (level.noCollision(entity, entity.getBoundingBox().move(over.x - entity.getX(), 0.0, over.z - entity.getZ()))) {
+			entity.setPos(over.x, entity.getY(), over.z);
+		}
+		entity.faceTowards(p.getEyePosition());
+		hurt(p, amount(act, p.getHealth()));
+		com.wolfsmask.occupant.story.Achievements.grant(p, com.wolfsmask.occupant.story.Achievements.ONLY_ME);
+		Cues.effect(p, ScreenEffectPayload.STATIC, 10, 0.55f);
+		Cues.sound(p, SoundEvents.ZOMBIE_BREAK_WOODEN_DOOR, SoundSource.HOSTILE, pin, 0.9f, 0.4f);
+		Cues.sound(p, SoundEvents.PLAYER_HURT, SoundSource.PLAYERS, p.getEyePosition(), 1.0f, 0.6f);
 	}
 
-	/** Each tick from the first leg on: up off the ground on it, to its face, and held there. */
-	private void carry(ServerPlayer p) {
-		double f = Math.min(1.0, (t - IN) / (double) (UP - IN));
-		double e = f * f * (3.0 - 2.0 * f);
-		Vec3 want = start.lerp(hold, e);
-		// A jolt with each leg that goes in, and the slow sway of hanging on it.
-		boolean jolt = false;
-		for (int m : MORE) jolt |= t >= m && t < m + 3;
-		double sway = Math.sin(t * 0.21) * 0.04;
-		if (jolt) want = want.add((p.getRandom().nextDouble() - 0.5) * 0.25, -0.12, (p.getRandom().nextDouble() - 0.5) * 0.25);
-		Vec3 v = want.subtract(p.position()).add(sway, 0.0, -sway);
-		if (v.length() > 0.9) v = v.normalize().scale(0.9);
-		p.setNoGravity(true);
-		p.setDeltaMovement(v.scale(0.6));
+	/** Each tick it has them down: held where it pinned them, its face on theirs. */
+	private void holdDown(ServerPlayer p) {
+		Vec3 v = new Vec3(pin.x - p.getX(), 0.0, pin.z - p.getZ());
+		if (v.length() > 0.5) v = v.normalize().scale(0.5);
+		p.setDeltaMovement(v.x * 0.6, Math.min(p.getDeltaMovement().y, 0.0), v.z * 0.6);
 		p.hurtMarked = true;
 		p.resetFallDistance();
 		entity.faceTowards(p.getEyePosition());
 	}
 
-	private void firstLeg(ServerPlayer p) {
-		landed = true;
-		int act = haunt.data.act;
-		haunt.data.encounters++;
-		hurt(p, amount(act, p.getHealth()));
-		p.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 160, 0, false, false));
-		com.wolfsmask.occupant.story.Achievements.grant(p, com.wolfsmask.occupant.story.Achievements.ONLY_ME);
-		Cues.effect(p, ScreenEffectPayload.STATIC, 10, 0.55f);
-		Cues.sound(p, SoundEvents.PLAYER_HURT, SoundSource.PLAYERS, p.getEyePosition(), 1.0f, 0.6f);
-	}
-
-	/** Another leg, in at their back: k from 0. */
-	private void anotherLeg(ServerPlayer p, int k) {
-		List<ServerPlayer> legs = new ArrayList<>();
-		for (int n = 0; n < k + 2; n++) legs.add(p);
-		entity.setHeld(legs);
+	/** Another of its legs, down on them: k from 0. */
+	private void beat(ServerPlayer p, int k) {
+		entity.setHeld(List.of(p, p));
 		// Never the end of them yet: that is for the last of it.
 		hurt(p, Math.max(0.0f, Math.min(2.0f, p.getHealth() - 1.0f)));
 		Cues.effect(p, ScreenEffectPayload.STATIC, 6, 0.45f + 0.1f * k);
+		Cues.sound(p, SoundEvents.ZOMBIE_ATTACK_WOODEN_DOOR, SoundSource.HOSTILE, pin, 1.0f, 0.45f + 0.05f * k);
 		Cues.sound(p, SoundEvents.PLAYER_HURT, SoundSource.PLAYERS, p.getEyePosition(), 1.0f, 0.5f + 0.08f * k);
 		if (k == 0) {
 			String[] lines = lethal ? NOW : NOT_YET;
 			Cues.whisper(p, lines[p.getRandom().nextInt(lines.length)], 70);
 		}
-		if (k == MORE.length - 1) Cues.sound(p, ModSounds.STATIC, SoundSource.HOSTILE, entity.getEyePosition(), 0.7f, 0.5f);
+		if (k == BEATS.length - 1) Cues.sound(p, ModSounds.STATIC, SoundSource.HOSTILE, entity.getEyePosition(), 0.7f, 0.5f);
 	}
 
 	private void last(ServerPlayer p) {
 		if (lethal) {
-			// All of them at once, and it does not stop; and it does not let go. It takes them.
+			// All of them at once, and it does not stop; and it does not let them up. It takes them.
+			entity.setHeld(List.of(p, p, p));
 			hurt(p, Math.max(0.0f, p.getHealth() - 1.0f));
 			taken = true;
 			return;
-		} else {
-			// Down to their last half heart, and dropped: it wanted them to know.
-			hurt(p, Math.max(0.0f, p.getHealth() - 1.0f));
-			haunt.data.cooldowns.put(SPARED, Long.MAX_VALUE);
 		}
+		// Down to their last half heart, and let up: it wanted them to know.
+		hurt(p, Math.max(0.0f, p.getHealth() - 1.0f));
+		haunt.data.cooldowns.put(SPARED, Long.MAX_VALUE);
 		letGo(p, false);
 	}
 
-	/** Its legs out of them, and down they go; with {@code scene}, their view is given back too. */
+	/** Its legs out of them, and they can get up; with {@code scene}, their view is given back too. */
 	private void letGo(ServerPlayer p, boolean scene) {
 		entity.setHeld(List.of());
+		liftLid();
 		if (p.isNoGravity()) {
 			p.setNoGravity(false);
 			p.setDeltaMovement(0.0, -0.1, 0.0);
@@ -273,6 +287,15 @@ public final class Strike {
 		}
 		p.resetFallDistance();
 		if (scene) Cues.effect(p, ScreenEffectPayload.CUTSCENE, 0, 0f);
+	}
+
+	/** What it put over their head, gone (if it is still what it put there). */
+	private void liftLid() {
+		BlockPos at = lid;
+		ServerLevel level = lidLevel;
+		lid = null;
+		lidLevel = null;
+		if (at != null && level != null && level.getBlockState(at).is(Blocks.BARRIER)) level.setBlock(at, Blocks.AIR.defaultBlockState(), 3);
 	}
 
 	/** Hurts them by exactly {@code amount}, whatever the difficulty; nothing saves them from it. */

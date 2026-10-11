@@ -95,7 +95,7 @@ public final class Mercy {
 		// them up at all (nothing but its own scenes takes a player's weight away), carried past
 		// whatever they might choke in.
 		if (RESCUE.equals(h.activeId) || BROUGHT.equals(h.activeId) || TakenEnding.ID.equals(h.activeId) || h.taking
-				|| player.isNoGravity()) {
+				|| h.pinned || player.isNoGravity()) {
 			player.setHealth(Math.max(player.getHealth(), 2.0f));
 			return false;
 		}

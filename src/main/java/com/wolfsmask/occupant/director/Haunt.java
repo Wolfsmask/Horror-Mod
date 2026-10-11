@@ -154,6 +154,13 @@ public final class Haunt {
 		this.taking = taking;
 	}
 
+	/** Whether it has them down, pinned to the ground: nothing else gets them while it does. */
+	boolean pinned;
+
+	public void pinned(boolean pinned) {
+		this.pinned = pinned;
+	}
+
 	/** Begins {@code sequence} the moment whatever is running now is over. */
 	public void queue(String id, Sequence sequence) {
 		queued = sequence;

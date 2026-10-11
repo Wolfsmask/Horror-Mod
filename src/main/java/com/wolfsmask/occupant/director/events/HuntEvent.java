@@ -21,8 +21,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -168,8 +166,6 @@ public final class HuntEvent extends HorrorEvent {
 			if (chaseTicks % 18 == 0) {
 				Cues.sound(p, SoundEvents.WARDEN_HEARTBEAT, SoundSource.HOSTILE, p.getEyePosition(), 0.8f, 1.1f);
 			}
-			// The dark comes and goes in waves while it is after them.
-			if (chaseTicks % 100 == 1) p.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 120, 0, false, false));
 
 			if (dist < 1.7) {
 				if (caught != null) {
@@ -261,7 +257,6 @@ public final class HuntEvent extends HorrorEvent {
 			Cues.sound(p, ModSounds.BREATH, SoundSource.HOSTILE, entity.getEyePosition(), 0.6f, 0.7f);
 			Cues.effect(p, ScreenEffectPayload.BLACKOUT, 30, 1f);
 			Cues.whisper(p, 80);
-			p.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 140, 0, false, false));
 		}
 	}
 }

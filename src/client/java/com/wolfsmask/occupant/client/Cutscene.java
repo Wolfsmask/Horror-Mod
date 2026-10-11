@@ -25,8 +25,8 @@ public final class Cutscene {
 	/** How hard the view is pulled towards what it should look at, and how much that is held back. */
 	private static final double PULL = 16.0;
 	private static final double DAMP = 7.2;
-	/** Fastest the view ever turns, in degrees a second. */
-	private static final double MAX_TURN = 200.0;
+	/** Fastest the view ever turns, in degrees a second: round from behind them in well under a second. */
+	private static final double MAX_TURN = 300.0;
 	/** The bands, top and bottom, as a share of the screen's height. */
 	private static final float BAND = 0.11f;
 

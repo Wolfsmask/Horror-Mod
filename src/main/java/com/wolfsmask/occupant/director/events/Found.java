@@ -24,8 +24,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.player.Inventory;
@@ -147,9 +145,7 @@ public final class Found {
 		if (spot == null) return null;
 		OccupantEntity e = h.spawnOccupant(p, spot, OccupantEntity.Mode.CHASE, OccupantEntity.Form.REVEALED);
 		if (e == null) return null;
-		// The dark comes in (where it takes the roof off or digs them out, they are meant to see it).
-		p.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 400, 0, false, false));
-		for (ServerPlayer o : with) o.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 400, 0, false, false));
+		// No dark brought down on them: they are meant to see it coming (the fog is close enough).
 		HuntEvent.Hunt hunt = new HuntEvent.Hunt(h, e, 0, false, (who, it, since) -> caught(h, who, since, others));
 		hunt.runAtOnce();
 		Cues.whisper(p, "Found you.", 60);
