@@ -47,6 +47,8 @@ public final class FollowUps {
 			Map.entry("breath", List.of(new Next("behind_you", 0.15f, 5, 12))),
 			// Someone joined the game. Then they say something.
 			Map.entry("fake_join", List.of(new Next("doppel_chat", 0.5f, 30, 90), new Next("teammate", 0.35f, 30, 90))),
+			// It was behind their friend. A little later, it has something to say about them.
+			Map.entry("behind_friend", List.of(new Next("secret", 0.55f, 15, 45), new Next("breath", 0.25f, 20, 50))),
 			Map.entry("sign", List.of(new Next("watcher", 0.4f, 30, 80))),
 			Map.entry("marker_torch", List.of(new Next("watcher", 0.35f, 30, 80))),
 			Map.entry("hallway", List.of(new Next("footsteps", 0.5f, 10, 30), new Next("door", 0.4f, 20, 45))),

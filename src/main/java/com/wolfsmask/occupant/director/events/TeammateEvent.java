@@ -3,6 +3,7 @@ package com.wolfsmask.occupant.director.events;
 import com.wolfsmask.occupant.OccupantConfig;
 import com.wolfsmask.occupant.director.EventContext;
 import com.wolfsmask.occupant.director.HorrorEvent;
+import com.wolfsmask.occupant.director.Party;
 import com.wolfsmask.occupant.director.Sequence;
 import com.wolfsmask.occupant.director.Timeline;
 import com.wolfsmask.occupant.util.Cues;
@@ -53,7 +54,7 @@ public final class TeammateEvent extends HorrorEvent {
 	private static List<ServerPlayer> others(ServerPlayer player) {
 		List<ServerPlayer> out = new ArrayList<>();
 		for (ServerPlayer p : player.level().getServer().getPlayerList().getPlayers()) {
-			if (p != player && !p.isSpectator()) out.add(p);
+			if (p != player && !p.isSpectator() && Party.couldMeet(player.getUUID(), p.getUUID())) out.add(p);
 		}
 		return out;
 	}
