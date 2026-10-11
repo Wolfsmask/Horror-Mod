@@ -74,7 +74,7 @@ public final class GraveEvent extends HorrorEvent {
 			// The sign at its head, the earth heaped along one side.
 			BlockPos sign = head.relative(along);
 			Direction side = along.getClockWise();
-			if (!world.getBlockState(sign).isAir() || !WorldBlocks.isNaturalFloor(world.getBlockState(sign.below()))) continue;
+			if (!open(world, sign) || !WorldBlocks.isNaturalFloor(world.getBlockState(sign.below()))) continue;
 			// Not where they, or anyone, could see it being dug.
 			if (!Sight.isHidden(p, foot) || !Sight.isHidden(p, head) || !Spots.awayFromOthers(p, Vec3.atCenterOf(foot), 12)) continue;
 			dig(world, foot, head, side);
@@ -92,7 +92,7 @@ public final class GraveEvent extends HorrorEvent {
 	 */
 	private static boolean diggable(ServerLevel world, BlockPos feet) {
 		if (!Spots.isLoaded(world, feet) || !world.canSeeSky(feet)) return false;
-		if (!world.getBlockState(feet).isAir() || !world.getBlockState(feet.above()).isAir()) return false;
+		if (!open(world, feet) || !open(world, feet.above())) return false;
 		BlockState top = world.getBlockState(feet.below());
 		BlockState under = world.getBlockState(feet.below(2));
 		BlockState floor = world.getBlockState(feet.below(3));
@@ -101,13 +101,21 @@ public final class GraveEvent extends HorrorEvent {
 		return !WorldBlocks.touchesFluid(world, feet.below()) && !WorldBlocks.touchesFluid(world, feet.below(2));
 	}
 
+	/** Nothing there but air, or grass and flowers that would give way: no water. */
+	private static boolean open(ServerLevel world, BlockPos pos) {
+		BlockState s = world.getBlockState(pos);
+		return (s.isAir() || s.canBeReplaced()) && s.getFluidState().isEmpty();
+	}
+
 	private static void dig(ServerLevel world, BlockPos foot, BlockPos head, Direction side) {
 		for (BlockPos pos : new BlockPos[]{foot, head}) {
+			// The grass on it gone with the turf.
+			if (!world.getBlockState(pos).isAir()) world.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
 			world.setBlock(pos.below(), Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
 			world.setBlock(pos.below(2), Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
 			// What came out of it, heaped beside it.
 			BlockPos heap = pos.relative(side);
-			if (world.getBlockState(heap).isAir() && WorldBlocks.isNaturalFloor(world.getBlockState(heap.below()))) {
+			if (open(world, heap) && WorldBlocks.isNaturalFloor(world.getBlockState(heap.below()))) {
 				world.setBlock(heap, Blocks.COARSE_DIRT.defaultBlockState(), Block.UPDATE_ALL);
 			}
 		}
