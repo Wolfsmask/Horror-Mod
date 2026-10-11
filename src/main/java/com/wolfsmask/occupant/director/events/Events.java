@@ -41,6 +41,8 @@ public final class Events {
 			new FootprintsEvent(),
 			new SavingEvent(),
 			new TeammateEvent(),
+			new SleepTalkEvent(),
+			new VisitorEvent(),
 			new SecretEvent(),
 			new CorridorEvent(),
 			new MorningEvent(),

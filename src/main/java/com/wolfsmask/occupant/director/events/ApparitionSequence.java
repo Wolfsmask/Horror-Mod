@@ -189,7 +189,7 @@ public abstract class ApparitionSequence implements Sequence {
 	 * Only the wild ones are moved: nothing of theirs (named, tamed, on a lead, ridden) and nothing
 	 * penned in, which would be let out of its pen.
 	 */
-	private static boolean wild(Mob m) {
+	static boolean wild(Mob m) {
 		if (m.hasCustomName() || m.isLeashed() || m.isPassenger() || m.isVehicle()) return false;
 		if (m instanceof net.minecraft.world.entity.TamableAnimal t && t.isTame()) return false;
 		net.minecraft.core.BlockPos at = m.blockPosition();

@@ -273,9 +273,11 @@ public final class Director {
 		// Something it took from them, back: lying beside them when they wake.
 		boolean gave = com.wolfsmask.occupant.director.events.Found.giveBack(player);
 		float roll = player.getRandom().nextFloat();
-		if (roll < 0.3f) trigger(player, WakeEvent.ID, false);
-		else if (roll < 0.55f) trigger(player, com.wolfsmask.occupant.director.events.MorningEvent.ID, false);
-		else if (!gave && roll < 0.7f) trigger(player, com.wolfsmask.occupant.director.events.GraveEvent.ID, false);
+		if (roll < 0.25f) trigger(player, WakeEvent.ID, false);
+		else if (roll < 0.45f) trigger(player, com.wolfsmask.occupant.director.events.MorningEvent.ID, false);
+		else if (!gave && roll < 0.58f) trigger(player, com.wolfsmask.occupant.director.events.GraveEvent.ID, false);
+		else if (roll < 0.7f) trigger(player, com.wolfsmask.occupant.director.events.SleepTalkEvent.ID, false);
+		else if (!gave && roll < 0.8f) trigger(player, com.wolfsmask.occupant.director.events.VisitorEvent.ID, false);
 	}
 
 	private void tickPlayer(Haunt h, ServerPlayer player, OccupantConfig cfg) {
