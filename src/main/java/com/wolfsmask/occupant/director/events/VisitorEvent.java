@@ -23,9 +23,8 @@ import java.util.List;
  */
 public final class VisitorEvent extends HorrorEvent {
 	public static final String ID = "visitor";
-	private static final java.util.Set<net.minecraft.world.entity.EntityType<?>> FARM = java.util.Set.of(
-			net.minecraft.world.entity.EntityType.SHEEP, net.minecraft.world.entity.EntityType.COW,
-			net.minecraft.world.entity.EntityType.PIG, net.minecraft.world.entity.EntityType.CHICKEN);
+	/** Plain farm animals, by name (their types are not reachable by name on every version). */
+	private static final String[] FARM = {"sheep", "cow", "pig", "chicken"};
 	/** How long it stands there, still, looking at them. */
 	private static final int STILL_FOR = 20 * 9;
 
@@ -56,7 +55,7 @@ public final class VisitorEvent extends HorrorEvent {
 		// One of the animals out there, nobody's: plain farm animals (never a horse or a pet), the
 		// wild ones only, out of their sight.
 		List<Mob> animals = level.getEntitiesOfClass(Mob.class, p.getBoundingBox().inflate(48.0), m -> m.isAlive()
-				&& FARM.contains(m.getType()) && !m.isBaby() && ApparitionSequence.wild(m)
+				&& farm(m) && !m.isBaby() && ApparitionSequence.wild(m)
 				&& m.distanceTo(p) > 8.0 && Sight.isHidden(p, m.blockPosition().above()));
 		if (animals.isEmpty()) return null;
 		Mob animal = animals.get(ctx.random.nextInt(animals.size()));
@@ -70,6 +69,11 @@ public final class VisitorEvent extends HorrorEvent {
 		animal.setYBodyRot(yaw);
 		animal.setNoAi(true);
 		return new Still(animal);
+	}
+
+	private static boolean farm(Mob m) {
+		for (String kind : FARM) if (com.wolfsmask.occupant.util.Kinds.is(m, kind)) return true;
+		return false;
 	}
 
 	/** Somewhere in the room with them, a few steps off, in their sight, with room for it to stand. */
