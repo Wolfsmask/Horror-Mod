@@ -76,6 +76,11 @@ final class ForestGallery {
 			}
 			Occupant.LOGGER.info("[client-gametest] gallery forests at {} and {}", forest, other);
 			BlockPos[] woods = {forest, other};
+			// Footage for a short video instead of the photographs, when that is what was asked for.
+			if (Reel.wanted()) {
+				Reel.run(context, game, woods, spawn);
+				return;
+			}
 
 			// What the real events do, from a spot in the trees: the mod chooses where it stands.
 			event(context, game, woods, 1, "watcher", "sighting-dusk", 12900, 4);

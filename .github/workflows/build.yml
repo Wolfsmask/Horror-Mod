@@ -120,13 +120,38 @@ jobs:
           sudo apt-get install -y -qq xvfb mesa-utils libgl1-mesa-dri mesa-vulkan-drivers > /dev/null
           xvfb-run -a glxinfo -B | grep -E "OpenGL (renderer|core profile version)" || true
 
+      # Footage for a short video, instead of the photographs, for a commit marked [reel].
+      - name: Ask for the reel
+        if: contains(github.event.head_commit.message, '[reel]')
+        run: mkdir -p build/clientGametest && touch build/clientGametest/reel.flag
+
       - name: Run the client game test
         env:
           LIBGL_ALWAYS_SOFTWARE: "1"
         run: |
           chmod +x gradlew
           set -o pipefail
-          xvfb-run -a -s "-screen 0 1920x1080x24" ./gradlew runClientGametest --console=plain 2>&1 | tee client.log
+          # Tall enough for the reel's upright window as well as the photographs' wide one.
+          xvfb-run -a -s "-screen 0 1920x1920x24" ./gradlew runClientGametest --console=plain 2>&1 | tee client.log
+
+      # Each clip of the reel, a frame a tick, made a video.
+      - name: Make the reel's clips
+        if: always()
+        run: |
+          REEL=build/clientGametest/occupant-reel
+          if [ -d "$REEL" ]; then
+            sudo apt-get install -y -qq ffmpeg > /dev/null
+            OUT="$RUNNER_TEMP/reel"
+            mkdir -p "$OUT"
+            for d in "$REEL"/*/; do
+              n=$(basename "$d")
+              ls "$d" | head -n 1 > /dev/null || continue
+              ffmpeg -y -loglevel error -framerate 20 -i "$d/%04d.png" -c:v libx264 -preset slow -crf 10 -pix_fmt yuv420p "$OUT/$n.mp4" \
+                && echo "$n: $(ls "$d" | wc -l) frames" || echo "$n: not made"
+            done
+            ls -la "$OUT"
+            CLEAR=1 bash tools/ci/save-results.sh "Reel" reel "$OUT/."
+          fi
 
       # Also kept with the run, whichever commit is newest by the time it finishes.
       - name: Upload the photographs
