@@ -49,7 +49,7 @@ public final class RadioEvent extends HorrorEvent {
 		String line = LINES[ctx.random.nextInt(LINES.length)].replace("{player}", ctx.player.getName().getString());
 		return new Timeline()
 				.at(0, p -> Cues.sound(p, ModSounds.STATIC, SoundSource.BLOCKS, at, 1.0f, 0.9f))
-				.at(18, p -> Cues.message(p, broken(line, ctx)))
+				.at(18, p -> Cues.messageNear(p, broken(line, ctx)))
 				.at(40, p -> Cues.sound(p, ModSounds.STATIC, SoundSource.BLOCKS, at, 0.8f, 0.7f));
 	}
 

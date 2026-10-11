@@ -35,6 +35,8 @@ public final class Haunt {
 	int actSent = -1;
 	/** Whether the way in (on joining) has been shown, this time they are here. */
 	boolean joinSent;
+	/** Whether what a scene left half done when they last went has been put right, this time they are here. */
+	boolean rejoinChecked;
 	/** Where they last stood in its world, out of any portal: where they are brought back to. */
 	@Nullable
 	net.minecraft.core.BlockPos lastSafe;

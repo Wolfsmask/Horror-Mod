@@ -34,6 +34,7 @@ public final class Events {
 			new TunnelEvent(),
 			new WatcherEvent(),
 			new WindowEvent(),
+			new BehindFriendEvent(),
 			new RoofEvent(),
 			new FireOutEvent(),
 			new TurnedEvent(),

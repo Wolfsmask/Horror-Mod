@@ -189,6 +189,8 @@ public final class Strike {
 		Cues.effect(p, ScreenEffectPayload.SILENCE, 0, 1f);
 		// No stinger: a breath, very close, while they come round to it.
 		Cues.sound(p, ModSounds.BREATH, SoundSource.HOSTILE, entity.getEyePosition(), 0.9f, 0.6f);
+		// Off whatever they were riding: it is them it wants on the ground, not the horse.
+		if (p.isPassenger()) p.stopRiding();
 		pin = p.position();
 	}
 
@@ -255,11 +257,27 @@ public final class Strike {
 		Cues.effect(p, ScreenEffectPayload.STATIC, 6, 0.45f + 0.1f * k);
 		Cues.sound(p, SoundEvents.ZOMBIE_ATTACK_WOODEN_DOOR, SoundSource.HOSTILE, pin, 1.0f, 0.45f + 0.05f * k);
 		Cues.sound(p, SoundEvents.PLAYER_HURT, SoundSource.PLAYERS, p.getEyePosition(), 1.0f, 0.5f + 0.08f * k);
+		scar(p);
 		if (k == 0) {
 			String[] lines = lethal ? NOW : NOT_YET;
 			Cues.whisper(p, lines[p.getRandom().nextInt(lines.length)], 70);
 		}
 		if (k == BEATS.length - 1) Cues.sound(p, ModSounds.STATIC, SoundSource.HOSTILE, entity.getEyePosition(), 0.7f, 0.5f);
+	}
+
+	/**
+	 * Where a leg came down beside them, the ground torn up: grass, dirt, gone to bare earth. It
+	 * stays that way, so they can come back in daylight and see where it held them.
+	 */
+	private void scar(ServerPlayer p) {
+		if (pin == null) return;
+		ServerLevel level = Compat.level(p);
+		int dx = p.getRandom().nextInt(3) - 1, dz = p.getRandom().nextInt(3) - 1;
+		BlockPos at = new BlockPos(net.minecraft.util.Mth.floor(pin.x) + dx, net.minecraft.util.Mth.floor(pin.y) - 1, net.minecraft.util.Mth.floor(pin.z) + dz);
+		var state = level.getBlockState(at);
+		if (state.is(Blocks.GRASS_BLOCK) || state.is(Blocks.DIRT) || state.is(Blocks.PODZOL) || state.is(Blocks.MYCELIUM)) {
+			level.setBlock(at, Blocks.COARSE_DIRT.defaultBlockState(), 3);
+		}
 	}
 
 	private void last(ServerPlayer p) {

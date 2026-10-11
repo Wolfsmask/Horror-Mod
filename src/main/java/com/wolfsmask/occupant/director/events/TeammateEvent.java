@@ -46,7 +46,8 @@ public final class TeammateEvent extends HorrorEvent {
 		if (friend.distanceTo(ctx.player) < 24.0) return null;
 		String name = friend.getName().getString();
 		String line = LINES[ctx.random.nextInt(LINES.length)];
-		return new Timeline().at(0, p -> Cues.message(p, DoppelChatEvent.chat(name, line)));
+		// Theirs alone: the friend it pretends to be never sees it, and never said it.
+		return new Timeline().at(0, p -> Cues.messageOnly(p, DoppelChatEvent.chat(name, line)));
 	}
 
 	private static List<ServerPlayer> others(ServerPlayer player) {

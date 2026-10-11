@@ -163,7 +163,10 @@ public final class Director {
 				// Inside the guard: building a player's story state reads the save file, and a
 				// failure there must not take the server tick down with it.
 				h = haunt(player);
-				if (!h.joinSent) rejoined(h, player);
+				if (!h.rejoinChecked) {
+					h.rejoinChecked = true;
+					rejoined(h, player);
+				}
 				if (woke.remove(player.getUUID())) wakeUp(h, player);
 				tickPlayer(h, player, cfg);
 			} catch (Exception | LinkageError e) {
@@ -312,7 +315,8 @@ public final class Director {
 
 		// Just come into the world: the way in, only where it haunts them (the client never shows
 		// it by itself, so a server without this mod, or with it switched off, has none).
-		if (!h.joinSent) {
+		// (Once their game has said it has the mod: the first few ticks in, it has not said so yet.)
+		if (!h.joinSent && (Party.sameMod(player) || player.tickCount > 200)) {
 			h.joinSent = true;
 			if (eligible) Cues.effect(player, ScreenEffectPayload.JOINED, 0, 1f);
 		}
