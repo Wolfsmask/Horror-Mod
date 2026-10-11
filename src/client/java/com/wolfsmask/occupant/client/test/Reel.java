@@ -239,9 +239,29 @@ final class Reel {
 		if (floor == null) return;
 		server.runOnServer(s -> Cinematic.fellTrees(s.overworld(), floor, 18));
 		BlockPos it = server.computeOnServer(s -> Cinematic.standNear(s.overworld(), floor, 0, 0));
+		// Where you stand: on the side of it with open, level ground to run into, not a hillside.
 		Vec3 eye = server.computeOnServer(s -> {
-			BlockPos e = BlockPos.containing(Vec3.atBottomCenterOf(it).add(3.1, 0, 0.6));
-			return new Vec3(e.getX() + 0.5, Cinematic.ground(s.overworld(), e.getX(), e.getZ()) + Cinematic.EYE, e.getZ() + 0.5);
+			ServerLevel level = s.overworld();
+			Vec3 base = Vec3.atBottomCenterOf(it);
+			Vec3 pick = null;
+			double best = Double.MAX_VALUE;
+			for (int k = 0; k < 16; k++) {
+				double a = k * Math.PI / 8, dx = Math.cos(a), dz = Math.sin(a);
+				BlockPos e = BlockPos.containing(base.add(dx * 3.1, 0, dz * 3.1));
+				int from = Cinematic.ground(level, e.getX(), e.getZ());
+				double rough = Math.abs(from - it.getY()) * 3.0;
+				int last = from;
+				for (int d = 1; d <= 16; d++) {
+					int g = Cinematic.ground(level, Mth.floor(base.x + dx * (3.1 + d)), Mth.floor(base.z + dz * (3.1 + d)));
+					rough += Math.abs(g - last) * 2.0 + Math.max(0, g - from - 1) * 3.0;
+					last = g;
+				}
+				if (rough < best) {
+					best = rough;
+					pick = new Vec3(e.getX() + 0.5, from + Cinematic.EYE, e.getZ() + 0.5);
+				}
+			}
+			return pick;
 		});
 		Vec3 face = head(it, 3.0);
 		Vec3 out = eye.add(eye.subtract(face).multiply(1, 0, 1).normalize().scale(20)).add(0, 0.2, 0);
