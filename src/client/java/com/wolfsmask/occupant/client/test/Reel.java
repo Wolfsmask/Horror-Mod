@@ -16,6 +16,11 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CandleBlock;
+import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.FenceBlock;
+import net.minecraft.world.level.block.SignBlock;
+import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.StandingSignBlock;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -130,7 +135,9 @@ final class Reel {
 			}
 			return floor.getY() + 0.89;
 		});
-		BlockPos far = server.computeOnServer(s -> Cinematic.standNear(s.overworld(), floor, 0, -8));
+		// The trees behind where it stands felled, so it is a shape against the fog, not the dark.
+		server.runOnServer(s -> Cinematic.fellTrees(s.overworld(), floor.offset(0, 0, -13), 8));
+		BlockPos far = server.computeOnServer(s -> Cinematic.standNear(s.overworld(), floor, 0, -6));
 		BlockPos edge = server.computeOnServer(s -> Cinematic.standNear(s.overworld(), floor, 1, -4));
 		Vec3 start = new Vec3(floor.getX() + 0.5, surface + 0.1, floor.getZ() + 6.5);
 		Vec3 farHead = head(far, 3.2), edgeHead = head(edge, 3.0);
@@ -287,6 +294,7 @@ final class Reel {
 		f.lookBack(7, 11, 7, where);
 		f.run(12, SPRINT, 0.0);
 		f.stumble(7);
+		clearPath(server, f);
 		prepare(context, game, eye, head, 13700);
 		Cinematic.place(server, it[0], eye, Cinematic.Look.glancing(-35f, OccupantEntity.Mode.AMBUSH, 0));
 		context.waitTicks(25);
@@ -334,7 +342,7 @@ final class Reel {
 		Vec3 farHead = head(far, 2.6), graveHead = head(atGrave, 2.8);
 		Fear f = new Fear(start).face(sign);
 		f.heading = 180;
-		f.walk(62, 0.13, t -> sign);
+		f.walk(48, 0.13, t -> sign);
 		f.stare(24, sign, 0.2);                      // reading it
 		f.swingTo(14, farHead);                      // up, past it
 		f.stare(12, farHead, 1.2);
@@ -655,6 +663,32 @@ final class Reel {
 	private static double smooth(double x) {
 		double c = Mth.clamp(x, 0.0, 1.0);
 		return c * c * (3 - 2 * c);
+	}
+
+	/**
+	 * Nothing in the way where they run: a person goes round a candle, a headstone or a fence, not
+	 * through it, so whatever stands within a step of their path is taken away first.
+	 */
+	private static void clearPath(TestServerContext server, Fear f) {
+		server.runOnServer(s -> {
+			ServerLevel level = s.overworld();
+			for (int i = 0; i < f.size(); i++) {
+				Vec3 at = f.at(i);
+				int feet = Mth.floor(at.y - Cinematic.EYE);
+				for (int dx = -1; dx <= 1; dx++) {
+					for (int dz = -1; dz <= 1; dz++) {
+						for (int dy = -3; dy <= 3; dy++) {
+							BlockPos pos = new BlockPos(Mth.floor(at.x) + dx, feet + dy, Mth.floor(at.z) + dz);
+							Block block = level.getBlockState(pos).getBlock();
+							if (block instanceof CandleBlock || block instanceof WallBlock || block instanceof FenceBlock
+									|| block instanceof SignBlock || block instanceof ChestBlock) {
+								set(level, pos, Blocks.AIR.defaultBlockState());
+							}
+						}
+					}
+				}
+			}
+		});
 	}
 
 	private static void set(ServerLevel level, BlockPos pos, BlockState state) {
