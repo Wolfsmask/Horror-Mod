@@ -77,6 +77,8 @@ public final class Mercy {
 		Director director = Director.get();
 		if (director == null || !cfg.enabled || !cfg.itSavesYou) return true;
 		if (player.isCreative() && !cfg.hauntCreative || player.isSpectator() || !Haunt.worldAllowed(player)) return true;
+		// Another copy of the mod: it leaves them alone altogether.
+		if (!Party.sameMod(player)) return true;
 		// /kill is their own choice, and always works, even in the middle of it saving them.
 		if (source.is(DamageTypes.GENERIC_KILL)) return true;
 		// Nothing saves them from it: that is what it saved them from everything else for.

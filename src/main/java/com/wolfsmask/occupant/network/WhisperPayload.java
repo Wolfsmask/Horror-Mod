@@ -25,7 +25,7 @@ public record WhisperPayload(String text, int duration, int corner) implements C
 	public static final int SUBTITLE = 6;
 
 	public static final CustomPacketPayload.Type<WhisperPayload> TYPE =
-			new CustomPacketPayload.Type<>(Occupant.id("whisper"));
+			new CustomPacketPayload.Type<>(Occupant.id("whisper_" + Occupant.WIRE));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, WhisperPayload> CODEC = StreamCodec.composite(
 			ByteBufCodecs.stringUtf8(MAX_LENGTH), WhisperPayload::text,

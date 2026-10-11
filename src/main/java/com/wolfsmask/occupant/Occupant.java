@@ -30,6 +30,19 @@ import org.slf4j.LoggerFactory;
 
 public final class Occupant implements ModInitializer {
 	public static final String MOD_ID = "occupant";
+	/**
+	 * What goes between the server and the game (its messages, what is sent of it), as of this
+	 * build. Changed whenever that changes: a game with another copy of the mod then has no channel
+	 * of this name, is sent none of it, and is told to get the same copy, instead of being thrown
+	 * out of the world by something it cannot read.
+	 */
+	public static final int WIRE = 2;
+
+	/** This copy's version, as the jar's name gives it (0.1.8+mc26.3). */
+	public static String version() {
+		return net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(MOD_ID)
+				.map(c -> c.getMetadata().getVersion().getFriendlyString()).orElse("?");
+	}
 	/** Shown by /occupant check, so a report always says which build it came from. */
 	public static final String VERSION_NOTE = "is loaded.";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);

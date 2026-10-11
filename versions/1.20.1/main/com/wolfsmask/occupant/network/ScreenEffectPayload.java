@@ -49,7 +49,7 @@ public record ScreenEffectPayload(int effect, int duration, float intensity) imp
 	/** The scene looks at the Occupant again. */
 	public static final int LOOK_FREE = 14;
 
-	public static final PacketType<ScreenEffectPayload> TYPE = PacketType.create(Occupant.id("screen_effect"),
+	public static final PacketType<ScreenEffectPayload> TYPE = PacketType.create(Occupant.id("screen_effect_" + Occupant.WIRE),
 			buf -> new ScreenEffectPayload(buf.readVarInt(), buf.readVarInt(), buf.readFloat()));
 
 	@Override

@@ -47,8 +47,19 @@ public final class Party {
 		return pa != null && pa.equals(pb);
 	}
 
+	/**
+	 * Whether {@code player}'s game has this same copy of the mod (its channels are this build's):
+	 * only then is it sent anything of it. Another copy is sent none of it, rather than something it
+	 * cannot read, which would throw them out of the world.
+	 */
+	public static boolean sameMod(ServerPlayer player) {
+		return TESTING || net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.canSend(player,
+				com.wolfsmask.occupant.network.ScreenEffectPayload.TYPE);
+	}
+
 	/** Someone who can take part: alive, in the world, not watching as a spectator. */
 	private static boolean present(ServerPlayer p) {
+		if (!sameMod(p)) return false;
 		return p.isAlive() && !p.isSpectator() && !p.isRemoved();
 	}
 

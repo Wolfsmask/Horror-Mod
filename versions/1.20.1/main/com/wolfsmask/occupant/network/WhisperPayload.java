@@ -23,7 +23,7 @@ public record WhisperPayload(String text, int duration, int corner) implements F
 	/** Not a corner: a line under the title. */
 	public static final int SUBTITLE = 6;
 
-	public static final PacketType<WhisperPayload> TYPE = PacketType.create(Occupant.id("whisper"),
+	public static final PacketType<WhisperPayload> TYPE = PacketType.create(Occupant.id("whisper_" + Occupant.WIRE),
 			buf -> new WhisperPayload(buf.readUtf(MAX_LENGTH), buf.readVarInt(), buf.readVarInt()));
 
 	@Override

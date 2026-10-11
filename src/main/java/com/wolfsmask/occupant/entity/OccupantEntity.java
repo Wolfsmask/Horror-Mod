@@ -378,6 +378,21 @@ public class OccupantEntity extends PathfinderMob {
 	@Override
 	public void tick() {
 		super.tick();
+		try {
+			tickOurs();
+		} catch (RuntimeException e) {
+			// Whatever went wrong, it goes: never the server's tick taken down with it.
+			if (!TICK_FAILED) {
+				TICK_FAILED = true;
+				com.wolfsmask.occupant.Occupant.LOGGER.error("The Occupant hit an error and was removed (the game is fine)", e);
+			}
+			if (!this.level().isClientSide()) this.discard();
+		}
+	}
+
+	private static volatile boolean TICK_FAILED;
+
+	private void tickOurs() {
 		if (this.level().isClientSide()) {
 			// Its body never lags behind where it looks, so it is never seen turning to face you:
 			// wherever its head is, the rest of it already is.
@@ -477,6 +492,8 @@ public class OccupantEntity extends PathfinderMob {
 	/** Everyone near is told it is there: it is one thing, in one world (it only shows itself once none of them is looking). */
 	@Override
 	public boolean broadcastToPlayer(ServerPlayer player) {
+		// Never to a game with another copy of the mod: what it would be sent of it, it could not read.
+		if (!com.wolfsmask.occupant.director.Party.sameMod(player)) return false;
 		return isHaunting(player) || targetUuid == null || com.wolfsmask.occupant.director.Party.couldMeet(targetUuid, player.getUUID());
 	}
 

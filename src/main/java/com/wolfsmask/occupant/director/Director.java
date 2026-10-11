@@ -272,6 +272,12 @@ public final class Director {
 	}
 
 	private void tickPlayer(Haunt h, ServerPlayer player, OccupantConfig cfg) {
+		// Their game has another copy of the mod (or none): told once, plainly, a few seconds in.
+		if (player.tickCount == 100 && !Party.sameMod(player)) {
+			Cues.messageOnly(player, net.minecraft.network.chat.Component.literal("[The Occupant] Your copy of the mod is not the same as this world's ("
+					+ Occupant.version() + "). Install the same jar as the host to play it together; until then, it leaves you alone.")
+					.withStyle(net.minecraft.ChatFormatting.GRAY));
+		}
 		Rules.check(player, h, cfg);
 		boolean eligible = isEligible(player, h, cfg);
 
@@ -475,6 +481,8 @@ public final class Director {
 
 	private boolean isEligible(ServerPlayer player, Haunt h, OccupantConfig cfg) {
 		if (!cfg.enabled || h.data.paused) return false;
+		// Another copy of the mod: nothing of it is sent to them (it could throw them out of the world).
+		if (!Party.sameMod(player)) return false;
 		// It let them go: nothing more, but the end of the story.
 		if (h.data.ending == LastNightEnding.FOUND && !Credits.ID.equals(h.activeId)) return false;
 		if (player.isSpectator() || player.isDeadOrDying()) return false;

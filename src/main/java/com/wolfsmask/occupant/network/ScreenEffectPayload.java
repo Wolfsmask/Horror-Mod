@@ -50,7 +50,7 @@ public record ScreenEffectPayload(int effect, int duration, float intensity) imp
 	public static final int LOOK_FREE = 14;
 
 	public static final CustomPacketPayload.Type<ScreenEffectPayload> TYPE =
-			new CustomPacketPayload.Type<>(Occupant.id("screen_effect"));
+			new CustomPacketPayload.Type<>(Occupant.id("screen_effect_" + Occupant.WIRE));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, ScreenEffectPayload> CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_INT, ScreenEffectPayload::effect,
