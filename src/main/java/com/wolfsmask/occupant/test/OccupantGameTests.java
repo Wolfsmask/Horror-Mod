@@ -769,6 +769,58 @@ public final class OccupantGameTests {
 		});
 	}
 
+	@GameTest(maxTicks = 160)
+	public void itStandsBehindTheirFriend(GameTestHelper helper) {
+		Director director = Director.get();
+		ServerLevel level = helper.getLevel();
+		ServerPlayer a = helper.makeMockServerPlayerInLevel();
+		ServerPlayer b = helper.makeMockServerPlayerInLevel();
+		com.wolfsmask.occupant.director.Party.testParty(7004, a, b);
+		OccupantConfig.get().hauntCreative = true;
+		director.data(a).introduced = true;
+		director.data(b).introduced = true;
+		director.data(a).setAct(2);
+		// Facing each other across this test's floor, a little over five blocks apart.
+		BlockPos from = helper.absolutePos(new BlockPos(1, 2, 1));
+		a.snapTo(from.getX() + 0.5, from.getY(), from.getZ() + 0.5, -45.0f, 0.0f);
+		b.snapTo(from.getX() + 4.5, from.getY(), from.getZ() + 4.5, 135.0f, 0.0f);
+		String id = com.wolfsmask.occupant.director.events.BehindFriendEvent.ID;
+		helper.runAfterDelay(5, () -> {
+			Director.TriggerResult result = director.trigger(a, id, true);
+			helper.assertTrue(result == Director.TriggerResult.STARTED, "It should find a place behind the friend, not " + result);
+			OccupantEntity it = behind(level, b);
+			helper.assertTrue(it != null, "It should be there, for the one it came for");
+			net.minecraft.world.phys.Vec3 toIt = it.position().subtract(b.position());
+			helper.assertTrue(toIt.dot(b.getViewVector(1.0f)) < 0.0, "It should stand behind the friend, out of their sight");
+			// The one it came for looks away a moment, so it is there when they look back.
+			a.snapTo(a.getX(), a.getY(), a.getZ(), 135.0f, 0.0f);
+		});
+		helper.runAfterDelay(30, () -> {
+			OccupantEntity it = behind(level, b);
+			helper.assertTrue(it != null && !it.isConcealed(), "It should be standing there by now");
+			helper.assertTrue(id.equals(director.haunt(a).activeEventId()), "It should still be there while the friend has not turned");
+			// The friend turns round, right to its face.
+			net.minecraft.world.phys.Vec3 to = it.getEyePosition().subtract(b.getEyePosition());
+			float yaw = (float) Math.toDegrees(Math.atan2(-to.x, to.z));
+			float pitch = (float) -Math.toDegrees(Math.atan2(to.y, Math.sqrt(to.x * to.x + to.z * to.z)));
+			b.snapTo(b.getX(), b.getY(), b.getZ(), yaw, pitch);
+		});
+		helper.runAfterDelay(45, () -> {
+			String doing = director.haunt(a).activeEventId();
+			helper.assertTrue(!id.equals(doing), "Turned round to, it should be gone, not still " + doing);
+			helper.assertTrue(behind(level, b) == null, "Nothing should be left behind them");
+			helper.succeed();
+		});
+	}
+
+	/** It, near {@code friend}, if it is there (and not already gone). */
+	@org.jetbrains.annotations.Nullable
+	private static OccupantEntity behind(ServerLevel level, ServerPlayer friend) {
+		List<OccupantEntity> near = level.getEntitiesOfClass(OccupantEntity.class, new AABB(friend.blockPosition()).inflate(8.0),
+				e -> !e.isRemoved() && !e.hasVanished());
+		return near.isEmpty() ? null : near.get(0);
+	}
+
 	/**
 	 * Someone else walks up to it while it is saving their friend: a spare leg puts them down (it
 	 * says to wait their turn), and it still finishes saving the friend.
