@@ -128,7 +128,8 @@ public final class GraveEvent extends HorrorEvent {
 		if (!state.canSurvive(world, at) || !world.setBlock(at, state, Block.UPDATE_ALL)) return;
 		if (world.getBlockEntity(at) instanceof SignBlockEntity sign) {
 			long day = Compat.dayTime(world) / 24000L + 1;
-			Compat.writeSign(sign, new String[]{"Here lies", p.getName().getString(), "", "Day " + day});
+			// The words faintly lit, so they are read even in the grey before the sun is up.
+			Compat.writeSign(sign, new String[]{"Here lies", p.getName().getString(), "", "Day " + day}, true);
 			sign.setWaxed(true);
 			sign.setChanged();
 			world.sendBlockUpdated(at, state, state, Block.UPDATE_ALL);

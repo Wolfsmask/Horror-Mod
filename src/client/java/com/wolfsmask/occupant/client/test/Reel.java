@@ -148,34 +148,60 @@ final class Reel {
 	}
 
 	/**
-	 * Dusk, walking through the wood. It is standing between the trunks off to one side; the
-	 * camera only comes round to it at the end, and stops.
+	 * Dusk, walking along a path through the trees. Ahead, braced between the trunks, its legs on
+	 * them and not on the ground, it is standing in the path, facing you. The camera stops.
 	 */
 	private static void trees(ClientGameTestContext context, TestSingleplayerContext game, BlockPos[] woods) {
 		TestServerContext server = game.getServer();
-		BlockPos it = server.computeOnServer(s -> ForestGallery.standSpot(s.overworld(), woods[0], 5));
-		if (it == null) return;
-		Vec3 far = server.computeOnServer(s -> Cinematic.findCamera(s.overworld(), Cinematic.player(s), it, -1.0, 0.4,
-				new double[]{19, 22, 16}, Cinematic.EYE, 0));
-		Vec3 head = Vec3.atBottomCenterOf(it).add(0, 2.9, 0);
-		Vec3 toward = head.subtract(far);
-		Vec3 flat = new Vec3(toward.x, 0, toward.z).normalize();
-		Vec3 side = new Vec3(-flat.z, 0, flat.x);
-		// Walking towards a point well to the left of it.
-		Vec3 away = far.add(flat.scale(10)).add(side.scale(-6)).add(0, -0.4, 0);
-		prepare(context, game, far, away, 12900);
-		Cinematic.place(server, it, far, Cinematic.Look.STARING);
+		BlockPos floor = server.computeOnServer(s -> ForestGallery.clearing(s.overworld(), woods[1].offset(120, 0, 90)));
+		if (floor == null) return;
+		BlockPos o = floor.above();
+		server.runOnServer(s -> {
+			ServerLevel level = s.overworld();
+			Cinematic.fellTrees(level, floor, 16);
+			// Level ground, a worn path down the middle.
+			for (int x = -7; x <= 7; x++) {
+				for (int z = -6; z <= 18; z++) {
+					set(level, floor.offset(x, 0, z), Math.abs(x) <= 1 && (x * 7 + z * 3) % 5 != 0
+							? Blocks.COARSE_DIRT.defaultBlockState() : Blocks.GRASS_BLOCK.defaultBlockState());
+					for (int y = 1; y <= 11; y++) set(level, floor.offset(x, y, z), Blocks.AIR.defaultBlockState());
+				}
+			}
+			// Trunks either side of the path, crowns meeting overhead.
+			int[][] trunks = {{-3, 2}, {3, 4}, {-2, 7}, {2, 9}, {-3, 11}, {3, 13}, {-2, 16}, {2, 17}, {-5, 5}, {5, 10}};
+			for (int[] t : trunks) {
+				for (int dx = -2; dx <= 2; dx++) {
+					for (int dz = -2; dz <= 2; dz++) {
+						for (int y = 6; y <= 8; y++) {
+							if (Math.abs(dx) + Math.abs(dz) + (y == 8 ? 1 : 0) <= 3) {
+								set(level, o.offset(t[0] + dx, y, t[1] + dz), Blocks.DARK_OAK_LEAVES.defaultBlockState()
+										.setValue(net.minecraft.world.level.block.LeavesBlock.PERSISTENT, true));
+							}
+						}
+					}
+				}
+			}
+			for (int[] t : trunks) {
+				for (int y = 0; y <= 7; y++) set(level, o.offset(t[0], y, t[1]), Blocks.DARK_OAK_LOG.defaultBlockState());
+			}
+		});
+		BlockPos it = o.offset(0, 0, 10);
+		Vec3 start = Vec3.atBottomCenterOf(o.offset(0, 0, -4)).add(0.2, Cinematic.EYE, 0);
+		Vec3 head = Vec3.atBottomCenterOf(it).add(0, 3.0, 0);
+		prepare(context, game, start, head.add(-2.5, -0.6, 0), 12900);
+		Cinematic.place(server, it, start, Cinematic.Look.STARING);
 		context.waitTicks(25);
-		int frames = 130;
 		Move move = t -> {
-			double walk = Math.min(t, 95) * 0.042;
-			double step = Math.abs(Math.sin(Math.min(t, 95) * 0.33)) * 0.07;
-			Vec3 eye = far.add(flat.scale(walk)).add(side.scale(Math.sin(t * 0.165) * 0.06)).add(0, step, 0);
-			double turn = smooth((t - 70) / 40.0);
-			Vec3 look = away.scale(1 - turn).add(head.scale(turn)).add(0, Math.sin(t * 0.33) * 0.05, 0);
+			double walk = Math.min(t, 90) * 0.05;
+			double step = Math.abs(Math.sin(Math.min(t, 90) * 0.33)) * 0.07;
+			Vec3 eye = start.add(Math.sin(t * 0.165) * 0.05, step, walk);
+			// Looking about as it walks, at the trunks to one side; only at the last, ahead.
+			double turn = smooth((t - 60) / 35.0);
+			Vec3 about = head.add(-3.5 + Math.sin(t * 0.06) * 1.5, -0.8, -2);
+			Vec3 look = about.scale(1 - turn).add(head.scale(turn)).add(0, Math.sin(t * 0.33) * 0.05, 0);
 			return new Vec3[]{eye, look};
 		};
-		record(context, server, "trees", frames, move, null);
+		record(context, server, "trees", 130, move, null);
 	}
 
 	/**
@@ -227,7 +253,7 @@ final class Reel {
 			Cinematic.light(level, floor, 7, Blocks.CANDLE.defaultBlockState());
 			it[0] = Cinematic.standNear(level, floor, 1, 7);
 			Vec3 middle = Cinematic.rel(floor, 0.5, 2.2, -0.5);
-			return Cinematic.findCamera(level, Cinematic.player(s), it[0], -0.2, -1.0, new double[]{9, 11, 13}, Cinematic.EYE, 0, middle);
+			return Cinematic.findCamera(level, Cinematic.player(s), it[0], -0.2, -1.0, new double[]{7, 9, 11}, Cinematic.EYE, 0, middle);
 		});
 		Vec3 head = Vec3.atBottomCenterOf(it[0]).add(0, 2.6, 0);
 		Vec3 toward = head.subtract(eye);
@@ -267,7 +293,7 @@ final class Reel {
 			BlockState sign = Blocks.DARK_OAK_SIGN.defaultBlockState().setValue(StandingSignBlock.ROTATION, RotationSegment.convertToSegment(0.0f));
 			set(level, at, sign);
 			if (level.getBlockEntity(at) instanceof SignBlockEntity entity) {
-				Compat.writeSign(entity, new String[]{"Here lies", "YOU", "", "Day 12"});
+				Compat.writeSign(entity, new String[]{"Here lies", "YOU", "", "Day 12"}, true);
 				entity.setWaxed(true);
 				entity.setChanged();
 				level.sendBlockUpdated(at, sign, sign, Block.UPDATE_ALL);
@@ -277,19 +303,19 @@ final class Reel {
 		Vec3 start = server.computeOnServer(s -> new Vec3(o.getX() + 0.8, Cinematic.ground(s.overworld(), o.getX(), o.getZ() + 8) + Cinematic.EYE, o.getZ() + 8.5));
 		Vec3 sign = Vec3.atBottomCenterOf(o.offset(0, 0, -1)).add(0, 0.7, 0);
 		Vec3 far = Vec3.atBottomCenterOf(it).add(0, 2.4, 0);
-		prepare(context, game, start, sign, 23400);
+		prepare(context, game, start, sign, 0);
 		Cinematic.place(server, it, start, Cinematic.Look.STARING);
 		context.waitTicks(25);
 		Move move = t -> {
-			double walk = Math.min(t, 80) * 0.068;
-			double step = Math.abs(Math.sin(Math.min(t, 80) * 0.33)) * 0.06;
-			Vec3 eye = start.add(0, step, -walk);
-			// Down at the sign as it comes up to it; then, at the last, up: past it, far off, there.
-			double up = smooth((t - 92) / 22.0);
-			Vec3 look = sign.scale(1 - up).add(far.scale(up));
+			// Up to the foot of it, then still, reading; then, at the last, up: past it, far off, there.
+			double walk = smooth(t / 80.0) * 7.3;
+			double step = t < 80 ? Math.abs(Math.sin(t * 0.33)) * 0.06 : 0.0;
+			Vec3 eye = start.add(-0.3 * smooth(t / 80.0), step, -walk);
+			double up = smooth((t - 112) / 22.0);
+			Vec3 look = sign.add(0, 0.15, 0).scale(1 - up).add(far.scale(up));
 			return new Vec3[]{eye, look};
 		};
-		record(context, server, "grave", 130, move, null);
+		record(context, server, "grave", 150, move, null);
 	}
 
 	/** Time of day, the camera put where the clip begins, the world round it drawn. */
