@@ -813,7 +813,9 @@ public final class Mercy {
 			// Their eyes half way between its face, up over them, and the bottle at their mouth: the
 			// face at the top of what they see, the bottle at the bottom.
 			double face = it.getY() + Sight.drawnBlocks(BOTTLE_FROM, it.getAct()) * 0.86 - eye.y;
-			double up = (Math.atan2(face, BOTTLE_FROM) + Math.atan2(mouth.y - eye.y, 0.55)) / 2.0;
+			double faceUp = Math.atan2(face, BOTTLE_FROM);
+			// Never so low that its face is out of the top of the picture (the bottle can be at the very bottom).
+			double up = Math.max((faceUp + Math.atan2(mouth.y - eye.y, 0.55)) / 2.0, faceUp - 0.42);
 			Cues.lookAt(p, eye.add(way.scale(2.0)).add(0.0, 2.0 * Math.tan(up), 0.0));
 		}
 
@@ -867,8 +869,8 @@ public final class Mercy {
 				float health = Math.min(p.getMaxHealth(), p.getHealth() + p.getMaxHealth() * 0.45f);
 				p.setHealth(health);
 				p.getFoodData().setFoodLevel(Math.min(20, p.getFoodData().getFoodLevel() + 8));
-				// Seen by anyone watching; under where they are looking themselves.
-				Compat.level(p).sendParticles(ParticleTypes.HEART, p.getX(), p.getY() + 0.9, p.getZ(), 3, 0.35, 0.2, 0.35, 0.02);
+				// Over their head, rising: seen by anyone watching, never in their own eyes.
+				Compat.level(p).sendParticles(ParticleTypes.HEART, p.getX(), p.getY() + 2.4, p.getZ(), 3, 0.3, 0.1, 0.3, 0.02);
 			}
 			if (in == SHOT - 1) lookAway(p);
 		}
