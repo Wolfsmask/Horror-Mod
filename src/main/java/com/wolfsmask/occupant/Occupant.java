@@ -112,6 +112,12 @@ public final class Occupant implements ModInitializer {
 			if (server.getTickCount() % 20 == 0) House.tick(server);
 		}));
 
+		// Someone leaves. The ones they were with are told how many of them there are now.
+		net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> guard("a player leaving", () -> {
+			Director director = Director.get();
+			if (director != null) director.left(handler.player);
+		}));
+
 		// It listens.
 		// The dead lose their voice for a while (see Silence): nothing they say goes anywhere.
 		ServerMessageEvents.ALLOW_CHAT_MESSAGE.register((message, sender, params) ->

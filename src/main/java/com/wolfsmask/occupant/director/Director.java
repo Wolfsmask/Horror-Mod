@@ -900,6 +900,16 @@ public final class Director {
 		if (isEligible(player, h, OccupantConfig.get())) Replies.heard(h, player, m);
 	}
 
+	/** Someone left the world (still in it, just): the ones who were near them notice. */
+	public void left(ServerPlayer gone) {
+		if (!Party.sameMod(gone)) return;
+		List<ServerPlayer> stayed = Party.others(gone, Party.NEAR);
+		for (ServerPlayer o : stayed) {
+			Haunt h = haunts.get(o.getUUID());
+			if (h != null) Replies.oneLess(h, o, stayed.size() + 1);
+		}
+	}
+
 	/** Start an event right now (used by hooks and /occupant trigger). */
 	public TriggerResult trigger(ServerPlayer player, String eventId, boolean forced) {
 		HorrorEvent e = Events.byId(eventId);

@@ -15,6 +15,7 @@ import java.util.Locale;
  */
 final class Replies {
 	private static final String ID = "reply";
+	private static final String LEFT = "one_less";
 	/** Not every time: something that always answers is a game, not something in the dark with you. */
 	private static final float CHANCE = 0.6f;
 	private static final long AGAIN_AFTER = 20L * 60 * 12;
@@ -42,6 +43,29 @@ final class Replies {
 		// Long enough that it is not a reply to a message; short enough that they know it is.
 		h.replyAt = d.playTicks + 50 + random.nextInt(90);
 		d.cooldowns.put(ID, d.playTicks + AGAIN_AFTER);
+	}
+
+	/**
+	 * Someone they were with has left the world: a little later, perhaps, it counts for them.
+	 * {@code were}: how many of them there were, the one who left included.
+	 */
+	static void oneLess(Haunt h, ServerPlayer player, int were) {
+		HauntData d = h.data;
+		if (d.act < 2 || h.reply != null || d.isOnCooldown(LEFT) || !OccupantConfig.get().screenWhispers) return;
+		RandomSource random = player.getRandom();
+		if (random.nextFloat() >= 0.5f) return;
+		int now = were - 1;
+		String[] lines = now == 1
+				? new String[]{"Just you now.", "Just us now.", "There were " + count(were) + " of you."}
+				: new String[]{"One less.", "Just " + count(now) + " now.", "There were " + count(were) + " of you."};
+		h.reply = lines[random.nextInt(lines.length)];
+		h.replyAt = d.playTicks + 100 + random.nextInt(100);
+		d.cooldowns.put(LEFT, d.playTicks + 20L * 60 * 20);
+	}
+
+	private static String count(int n) {
+		String[] words = {"no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"};
+		return n >= 0 && n < words.length ? words[n] : Integer.toString(n);
 	}
 
 	/** Each tick they are being haunted: the answer, when it is time. */
