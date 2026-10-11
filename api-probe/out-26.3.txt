@@ -1,0 +1,48 @@
+=== net.minecraft.world.entity.Entity (-public)
+public abstract class world.entity.Entity implements world.Nameable, world.level.entity.EntityAccess, world.scores.ScoreHolder, network.syncher.SyncedDataHolder, core.component.DataComponentGetter, world.entity.ItemOwner, world.entity.SlotProvider, util.debug.DebugValueSource, core.TypedInstance<world.entity.EntityType<?>>, attachment.v1.AttachmentTarget, event.lifecycle.v1.EntityLoadData, permission.v1.PermissionContextOwner {
+  public boolean needsSync;
+  public boolean syncPosition;
+  public boolean syncVelocity;
+  public void syncPacketPositionCodec(double, double, double);
+  public network.protocol.game.VecDeltaCodec getPositionCodec();
+  public network.syncher.SynchedEntityData getEntityData();
+  public void updateDataBeforeSync();
+  public void lavaHurt();
+  public final void hurt(world.damagesource.DamageSource, float);
+  public final boolean hurtOrSimulate(world.damagesource.DamageSource, float);
+  public abstract boolean hurtServer(server.level.ServerLevel, world.damagesource.DamageSource, float);
+  public boolean hurtClient(world.damagesource.DamageSource);
+  public void lerpMotion(world.phys.Vec3);
+  public void animateHurt(float);
+  public void onSyncedDataUpdated(List<network.syncher.SynchedEntityData$DataValue<?>>);
+  public void onSyncedDataUpdated(network.syncher.EntityDataAccessor<?>);
+  public core.Direction getMotionDirection();
+  public world.phys.Vec3 getDeltaMovement();
+  public void setDeltaMovement(world.phys.Vec3);
+  public void addDeltaMovement(world.phys.Vec3);
+  public void setDeltaMovement(double, double, double);
+=== net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket (-public)
+public final class network.protocol.game.ClientboundSetEntityMotionPacket extends Record implements network.protocol.Packet<network.protocol.game.ClientGamePacketListener> {
+  public static final network.codec.StreamCodec<io.netty.buffer.ByteBuf, network.protocol.game.ClientboundSetEntityMotionPacket> STREAM_CODEC;
+  public network.protocol.game.ClientboundSetEntityMotionPacket(world.entity.Entity);
+  public network.protocol.game.ClientboundSetEntityMotionPacket(int, world.phys.Vec3);
+  public network.protocol.PacketType<network.protocol.game.ClientboundSetEntityMotionPacket> type();
+  public void handle(network.protocol.game.ClientGamePacketListener);
+  public final String toString();
+  public final int hashCode();
+  public final boolean equals(Object);
+  public int id();
+  public world.phys.Vec3 movement();
+  public void handle(network.PacketListener);
+}
+=== net.minecraft.world.entity.LivingEntity (-public)
+public abstract class world.entity.LivingEntity extends world.entity.Entity implements world.entity.Attackable,world.waypoints.WaypointTransmitter {
+  public world.phys.Vec3 currentImpulseImpactPos;
+  public void knockback(double, double, double, world.damagesource.DamageSource, float, boolean);
+  public void knockback(double, double, double, world.damagesource.DamageSource, float);
+  public void setIgnoreFallDamageFromCurrentImpulse(boolean, world.phys.Vec3);
+  public void applyPostImpulseGraceTime(int);
+  public boolean isIgnoringFallDamageFromCurrentImpulse();
+  public void tryResetCurrentImpulseContext();
+  public boolean isInPostImpulseGraceTime();
+  public void resetCurrentImpulseContext();

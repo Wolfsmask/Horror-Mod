@@ -1,0 +1,173 @@
+# 1.21.1 client on d1fcaecfd973258d6b856ed364a1d24736ffbe40: success
+=== client.log
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/ArenaGameTests.java:107: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:65: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:96: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:157: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:183: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:246: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:340: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:374: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:418: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:449: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:554: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:599: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:632: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:661: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:687: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:704: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:705: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:728: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:729: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:780: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:781: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:818: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:861: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:895: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:1021: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:1047: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:1111: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:1254: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+	- occupant 0.1.8+mc1.21.1
+[00:40:03] [Render thread/INFO] (occupant) The Occupant has moved in. Type /occupant check in game to test it.
+[00:40:10] [Render thread/INFO] (occupant) [client] the mode screen has been drawn
+> Task :runClient FAILED
+* What went wrong:
+BUILD FAILED in 1m 22s
+--- the mod's own checks ---
+--- last of the server thread in client.log ---
+[00:40:06] [Worker-Main-2/INFO] (Minecraft) Found unifont_all_no_pua-15.1.05.hex, loading
+[00:40:06] [Worker-Main-1/INFO] (Minecraft) Found unifont_jp_patch-15.1.05.hex, loading
+--- tail of client.log ---
+[00:40:09] [Render thread/INFO] (Minecraft) Created: 256x128x0 minecraft:textures/atlas/mob_effects.png-atlas
+[00:40:09] [Render thread/INFO] (Minecraft) Created: 64x64x0 minecraft:textures/atlas/map_decorations.png-atlas
+[00:40:09] [Render thread/INFO] (Minecraft) Created: 1024x512x0 minecraft:textures/atlas/gui.png-atlas
+[00:40:09] [Render thread/WARN] (Minecraft) Shader rendertype_entity_translucent_emissive could not find sampler named Sampler2 in the specified shader program.
+[00:40:10] [Render thread/INFO] (occupant) [client] the mode screen has been drawn
+
+> Task :runClient FAILED
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/client-1791679167151.json
+
+[Incubating] Problems report is available at: file:///home/runner/work/Horror-Mod/Horror-Mod/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':runClient' (registered by plugin 'fabric-loom').
+> Process 'command 'xvfb-run'' finished with non-zero exit value 143 (this value may indicate that the process was terminated with the SIGTERM signal)
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 1m 22s
+10 actionable tasks: 10 executed
+=== server.log
+	- occupant 0.1.8+mc1.21.1
+[00:40:58] [main/INFO] (occupant) The Occupant has moved in. Type /occupant check in game to test it.
+[00:41:01] [Server thread/INFO] (occupant) This world tells the story as a slow burn
+[00:41:12] [Server thread/INFO] (Minecraft) Done (10.731s)! For help, type "help"
+[00:41:14] [Server thread/INFO] (Minecraft) [Rcon: Stopping the server]
+[00:41:14] [Server thread/INFO] (Minecraft) Stopping server
+--- the mod's own checks ---
+--- last of the server thread in server.log ---
+[00:41:11] [Worker-Main-3/INFO] (Minecraft) Preparing spawn area: 51%
+[00:41:11] [Worker-Main-1/INFO] (Minecraft) Preparing spawn area: 51%
+[00:41:12] [Worker-Main-3/INFO] (Minecraft) Preparing spawn area: 51%
+[00:41:12] [Server thread/INFO] (Minecraft) Time elapsed: 5303 ms
+[00:41:12] [Server thread/INFO] (Minecraft) Done (10.731s)! For help, type "help"
+[00:41:12] [Server thread/INFO] (Minecraft) Starting remote control listener
+[00:41:12] [Server thread/INFO] (Minecraft) Thread RCON Listener started
+[00:41:12] [Server thread/INFO] (Minecraft) RCON running on 0.0.0.0:25575
+[00:41:14] [Server thread/INFO] (Minecraft) [Rcon: Stopping the server]
+[00:41:14] [Server thread/INFO] (Minecraft) Stopping server
+[00:41:14] [Server thread/INFO] (Minecraft) Saving players
+[00:41:14] [Server thread/INFO] (Minecraft) Saving worlds
+[00:41:15] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[world]'/minecraft:overworld
+[00:41:15] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[world]'/minecraft:the_end
+[00:41:15] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[world]'/minecraft:the_nether
+[00:41:15] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (world): All chunks are saved
+[00:41:15] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[00:41:15] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[00:41:15] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage: All dimensions are saved
+[00:41:15] [Server thread/INFO] (Minecraft) Thread RCON Listener stopped
+--- tail of server.log ---
+[00:41:11] [Worker-Main-1/INFO] (Minecraft) Preparing spawn area: 51%
+[00:41:12] [Worker-Main-3/INFO] (Minecraft) Preparing spawn area: 51%
+[00:41:12] [Server thread/INFO] (Minecraft) Time elapsed: 5303 ms
+[00:41:12] [Server thread/INFO] (Minecraft) Done (10.731s)! For help, type "help"
+[00:41:12] [Server thread/INFO] (Minecraft) Starting remote control listener
+[00:41:12] [Server thread/INFO] (Minecraft) Thread RCON Listener started
+[00:41:12] [Server thread/INFO] (Minecraft) RCON running on 0.0.0.0:25575
+[00:41:14] [RCON Listener #1/INFO] (Minecraft) Thread RCON Client /127.0.0.1 started
+[00:41:14] [Server thread/INFO] (Minecraft) [Rcon: Stopping the server]
+[00:41:14] [RCON Client /127.0.0.1 #2/INFO] (Minecraft) Thread RCON Client /127.0.0.1 shutting down
+[00:41:14] [Server thread/INFO] (Minecraft) Stopping server
+[00:41:14] [Server thread/INFO] (Minecraft) Saving players
+[00:41:14] [Server thread/INFO] (Minecraft) Saving worlds
+[00:41:15] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[world]'/minecraft:overworld
+[00:41:15] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[world]'/minecraft:the_end
+[00:41:15] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[world]'/minecraft:the_nether
+[00:41:15] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (world): All chunks are saved
+[00:41:15] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[00:41:15] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[00:41:15] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage: All dimensions are saved
+[00:41:15] [Server thread/INFO] (Minecraft) Thread RCON Listener stopped
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/client-1791679250109.json
+
+BUILD SUCCESSFUL in 26s
+7 actionable tasks: 1 executed, 6 up-to-date
+=== world.log
+Picked up JAVA_TOOL_OPTIONS:  -Doccupant.smoke=true
+Picked up JAVA_TOOL_OPTIONS:  -Doccupant.smoke=true
+	- occupant 0.1.8+mc1.21.1
+[00:41:32] [Render thread/INFO] (occupant) The Occupant has moved in. Type /occupant check in game to test it.
+[00:41:49] [Server thread/INFO] (occupant) [smoke] putting it in front of Player255
+[00:41:50] [Render thread/INFO] (occupant) [client] the Occupant has been drawn
+[00:41:58] [IO-Worker-7/INFO] (occupant) [client] photograph: Saved screenshot as 2026-10-11_00.41.58.png
+> Task :runClient FAILED
+* What went wrong:
+BUILD FAILED in 1m 2s
+--- the mod's own checks ---
+--- last of the server thread in world.log ---
+[00:41:34] [Worker-Main-3/INFO] (Minecraft) Found unifont_all_no_pua-15.1.05.hex, loading
+[00:41:34] [Worker-Main-1/INFO] (Minecraft) Found unifont_jp_patch-15.1.05.hex, loading
+[00:41:39] [Server thread/INFO] (Minecraft) Starting integrated minecraft server version 1.21.1
+[00:41:39] [Server thread/INFO] (Minecraft) Generating keypair
+[00:41:43] [Server thread/INFO] (Minecraft) Preparing start region for dimension minecraft:overworld
+[00:41:43] [Render thread/INFO] (Minecraft) Preparing spawn area: 0%
+[00:41:43] [Render thread/INFO] (Minecraft) Preparing spawn area: 0%
+[00:41:44] [Server thread/INFO] (Minecraft) Changing view distance to 12, from 10
+[00:41:44] [Server thread/INFO] (Minecraft) Changing simulation distance to 12, from 0
+[00:41:45] [Server thread/INFO] (Minecraft) Player255[local:E:4c6ea490] logged in with entity id 7 at (-6.5, 112.0, -5.5)
+[00:41:45] [Server thread/INFO] (Minecraft) Player255 joined the game
+[00:41:49] [Server thread/INFO] (occupant) [smoke] putting it in front of Player255
+[00:41:49] [Server thread/INFO] (Minecraft) It is standing behind you... no, in front of you.
+--- tail of world.log ---
+[00:41:45] [Server thread/INFO] (Minecraft) Player255 joined the game
+[00:41:45] [Render thread/INFO] (Minecraft) Loaded 2 advancements
+[00:41:49] [Server thread/INFO] (occupant) [smoke] putting it in front of Player255
+[00:41:49] [Server thread/INFO] (Minecraft) It is standing behind you... no, in front of you.
+[00:41:50] [Render thread/INFO] (occupant) [client] the Occupant has been drawn
+[00:41:58] [IO-Worker-7/INFO] (occupant) [client] photograph: Saved screenshot as 2026-10-11_00.41.58.png
+WARN StatusConsoleListener Unable to register Log4j shutdown hook because JVM is shutting down. Using SimpleLogger
+
+> Task :runClient FAILED
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/client-1791679282294.json
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':runClient' (registered by plugin 'fabric-loom').
+> Process 'command 'xvfb-run'' finished with non-zero exit value 143 (this value may indicate that the process was terminated with the SIGTERM signal)
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 1m 2s
+10 actionable tasks: 1 executed, 9 up-to-date

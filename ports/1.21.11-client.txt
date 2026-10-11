@@ -1,0 +1,113 @@
+# 1.21.11 client on d1fcaecfd973258d6b856ed364a1d24736ffbe40: success
+=== client.log
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/ArenaGameTests.java:107: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:65: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:96: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:157: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:183: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:246: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:340: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:374: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:418: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:449: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:554: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:599: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:632: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:661: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:687: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:704: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:705: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:728: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:729: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:780: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:781: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:818: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:861: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:895: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:1021: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:1047: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:1111: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+/home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/test/OccupantGameTests.java:1254: warning: [removal] makeMockServerPlayerInLevel() in GameTestHelper has been deprecated and marked for removal
+Note: /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/main/com/wolfsmask/occupant/world/Bleak.java uses or overrides a deprecated API.
+Note: /home/runner/work/Horror-Mod/Horror-Mod/build/versioned/client/com/wolfsmask/occupant/client/OccupantClient.java uses or overrides a deprecated API.
+	- fabric-client-gametest-api-v1 4.3.5+bfe9fcf43e
+	- occupant 0.1.8+mc1.21.11
+[00:40:16] [Render thread/INFO] (occupant) The Occupant has moved in. Type /occupant check in game to test it.
+	at knot//net.minecraft.client.Minecraft.wrapMethod$zzp000$fabric-client-gametest-api-v1$onRun(Minecraft.java:4164)
+[00:40:24] [Render thread/INFO] (occupant) [client] the mode screen has been drawn
+[00:40:29] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-mode -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0000_occupant-mode.png
+[00:40:29] [Render thread/INFO] (occupant) [client] mode clicked at 213, 162: recording
+[00:40:29] [Render thread/INFO] (occupant) [client] the gate screen has been drawn
+[00:40:31] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-gate -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0001_occupant-gate.png
+[00:40:45] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-gate-later -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0002_occupant-gate-later.png
+[00:40:45] [Render thread/INFO] (occupant) [client] gate clicked at 213, 223: leave it alone
+[00:40:47] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-left-alone -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0003_occupant-left-alone.png
+[00:40:48] [Render thread/INFO] (occupant) [client] gate clicked at 213, 129: create world
+[00:40:50] [Render thread/INFO] (occupant) [client] creating the world straight away
+[00:40:50] [Server thread/INFO] (occupant) This world tells the story as the Creator Cut
+[00:41:16] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-quick-world -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0004_occupant-quick-world.png
+[00:41:18] [Server thread/INFO] (Minecraft) Stopping singleplayer server as player logged out
+[00:41:18] [Server thread/INFO] (Minecraft) Stopping server
+[00:41:24] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-title -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0005_occupant-title.png
+[00:41:25] [Server thread/INFO] (occupant) This world tells the story as a slow burn
+[00:41:36] [Test thread/INFO] (occupant) [client-gametest] the story has begun: true
+[00:41:36] [Server thread/INFO] (occupant) Player852 tried to leave survival; put back
+[00:41:38] [Test thread/INFO] (occupant) [client-gametest] creative refused: true
+[00:41:40] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-stare -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0006_occupant-stare.png
+[00:41:42] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-veiled -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0007_occupant-veiled.png
+[00:41:44] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-loom -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0008_occupant-loom.png
+[00:41:45] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-chase -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0009_occupant-chase.png
+[00:41:48] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-three-quarter -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0010_occupant-three-quarter.png
+[00:41:50] [Test thread/INFO] (occupant) [client-gametest] screenshot occupant-face -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0011_occupant-face.png
+[00:41:50] [Test thread/INFO] (occupant) [client-gametest] pale face pixels in the close-up: 2808
+--- the mod's own checks ---
+[00:41:36] [Test thread/INFO] (occupant) [client-gametest] the story has begun: true
+[00:43:57] [Test thread/INFO] (occupant) [client-gametest] over the network: not on this version (no network synchroniser)
+[00:43:57] [Test thread/INFO] (occupant) [client-gametest] all client checks passed
+--- last of the server thread in client.log ---
+[00:53:14] [Server thread/INFO] (Minecraft) No blocks were filled
+[00:53:14] [Server thread/INFO] (Minecraft) No blocks were filled
+[00:53:14] [Server thread/INFO] (Minecraft) No blocks were filled
+[00:53:18] [Server thread/INFO] (Minecraft) Target has no effects to remove
+[00:53:38] [Server thread/INFO] (occupant) Player852 would have died falling; it caught them
+[00:53:39] [Server thread/WARN] (Minecraft) Can't keep up! Is the server overloaded? Running 15752ms or 315 ticks behind
+[00:53:41] [Server thread/INFO] (Minecraft) No entity was found
+[00:53:41] [Server thread/INFO] (Minecraft) Player852 lost connection: Disconnected
+[00:53:41] [Server thread/INFO] (Minecraft) Player852 left the game
+[00:53:41] [Server thread/INFO] (Minecraft) Stopping singleplayer server as player logged out
+[00:53:42] [Server thread/INFO] (Minecraft) Stopping server
+[00:53:42] [Server thread/INFO] (Minecraft) Saving players
+[00:53:42] [Server thread/INFO] (Minecraft) Saving worlds
+[00:53:42] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[New World]'/minecraft:overworld
+[00:53:42] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[New World]'/minecraft:the_nether
+[00:53:42] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[New World]'/minecraft:the_end
+[00:53:42] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (New World (1)): All chunks are saved
+[00:53:42] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[00:53:42] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[00:53:42] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage: All dimensions are saved
+--- tail of client.log ---
+[00:53:38] [Server thread/INFO] (occupant) Player852 would have died falling; it caught them
+[00:53:39] [Server thread/WARN] (Minecraft) Can't keep up! Is the server overloaded? Running 15752ms or 315 ticks behind
+[00:53:41] [Test thread/INFO] (occupant) [client-gametest] brought awake: health 20.0, 0 in sight
+[00:53:41] [Test thread/INFO] (occupant) [client-gametest] screenshot brought-8-awake -> /home/runner/work/Horror-Mod/Horror-Mod/build/clientGametest/screenshots/0190_brought-8-awake.png
+[00:53:41] [Server thread/INFO] (Minecraft) No entity was found
+[00:53:41] [Server thread/INFO] (Minecraft) Player852 lost connection: Disconnected
+[00:53:41] [Server thread/INFO] (Minecraft) Player852 left the game
+[00:53:41] [Server thread/INFO] (Minecraft) Stopping singleplayer server as player logged out
+[00:53:42] [Server thread/INFO] (Minecraft) Stopping server
+[00:53:42] [Server thread/INFO] (Minecraft) Saving players
+[00:53:42] [Server thread/INFO] (Minecraft) Saving worlds
+[00:53:42] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[New World]'/minecraft:overworld
+[00:53:42] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[New World]'/minecraft:the_nether
+[00:53:42] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[New World]'/minecraft:the_end
+[00:53:42] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (New World (1)): All chunks are saved
+[00:53:42] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[00:53:42] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[00:53:42] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage: All dimensions are saved
+[00:53:42] [Render thread/INFO] (Minecraft) Stopping!
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/client-1791679174770.json
+
+[Incubating] Problems report is available at: file:///home/runner/work/Horror-Mod/Horror-Mod/build/reports/problems/problems-report.html
+
+BUILD SUCCESSFUL in 14m 13s
+10 actionable tasks: 10 executed
