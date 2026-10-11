@@ -10,7 +10,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -24,6 +23,9 @@ import java.util.List;
  */
 public final class VisitorEvent extends HorrorEvent {
 	public static final String ID = "visitor";
+	private static final java.util.Set<net.minecraft.world.entity.EntityType<?>> FARM = java.util.Set.of(
+			net.minecraft.world.entity.EntityType.SHEEP, net.minecraft.world.entity.EntityType.COW,
+			net.minecraft.world.entity.EntityType.PIG, net.minecraft.world.entity.EntityType.CHICKEN);
 	/** How long it stands there, still, looking at them. */
 	private static final int STILL_FOR = 20 * 9;
 
@@ -51,9 +53,10 @@ public final class VisitorEvent extends HorrorEvent {
 	public Sequence begin(EventContext ctx) {
 		ServerPlayer p = ctx.player;
 		ServerLevel level = ctx.world;
-		// One of the animals out there, nobody's: the wild ones only, out of their sight.
+		// One of the animals out there, nobody's: plain farm animals (never a horse or a pet), the
+		// wild ones only, out of their sight.
 		List<Mob> animals = level.getEntitiesOfClass(Mob.class, p.getBoundingBox().inflate(48.0), m -> m.isAlive()
-				&& m.getType().getCategory() == MobCategory.CREATURE && !m.isBaby() && ApparitionSequence.wild(m)
+				&& FARM.contains(m.getType()) && !m.isBaby() && ApparitionSequence.wild(m)
 				&& m.distanceTo(p) > 8.0 && Sight.isHidden(p, m.blockPosition().above()));
 		if (animals.isEmpty()) return null;
 		Mob animal = animals.get(ctx.random.nextInt(animals.size()));
