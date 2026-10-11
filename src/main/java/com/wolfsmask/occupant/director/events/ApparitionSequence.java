@@ -27,6 +27,8 @@ public abstract class ApparitionSequence implements Sequence {
 	private int watchedUnaware;
 	@org.jetbrains.annotations.Nullable
 	private ServerPlayer watching;
+	/** It was there, at some point, to be seen (not only waiting, unseen, to arrive). */
+	private boolean shown;
 	/** The monsters near it, who want nothing to do with it. */
 	private List<Mob> monsters = List.of();
 
@@ -43,6 +45,7 @@ public abstract class ApparitionSequence implements Sequence {
 		animalsNotice(player);
 
 		// Nothing is there to see until it has been revealed.
+		if (!entity.isConcealed()) shown = true;
 		boolean looking = !entity.isConcealed() && Sight.isLookingAt(player, entity);
 		watching = player;
 		if (age % 5 == 0 && !entity.isConcealed() && (looking || Sight.isOnScreen(player, entity))) {
@@ -151,6 +154,10 @@ public abstract class ApparitionSequence implements Sequence {
 				placed++;
 			}
 		}
+		// Where it stood a while, the marks of its legs in the ground, made out of sight: there in the
+		// morning, under the window, behind where their friend was standing. It was really there.
+		if (viewer != null && shown && age > 60 && viewer.getRandom().nextFloat() < 0.6f) legMarks(viewer, stood);
+
 		// Gone without their ever noticing, after watching them a good while: now and then, they
 		// are told, afterwards, when there is nothing left to look at.
 		ServerPlayer p = watching;
@@ -159,6 +166,22 @@ public abstract class ApparitionSequence implements Sequence {
 			String[] lines = {"It watched you for " + seconds + " seconds.", "You didn't see it. It saw you.",
 					"It was there the whole time.", "It stood there for " + seconds + " seconds. You never looked."};
 			Cues.whisper(p, lines[p.getRandom().nextInt(lines.length)], 100);
+		}
+	}
+
+	/** Three or four torn patches of ground in a ring round where it stood, each out of {@code viewer}'s sight. */
+	private void legMarks(ServerPlayer viewer, Vec3 stood) {
+		if (!(entity.level() instanceof net.minecraft.server.level.ServerLevel level)) return;
+		int legs = 3 + viewer.getRandom().nextInt(2);
+		double turn = viewer.getRandom().nextDouble() * Math.PI * 2;
+		for (int k = 0; k < legs; k++) {
+			double angle = turn + Math.PI * 2 * k / legs + (viewer.getRandom().nextDouble() - 0.5) * 0.6;
+			double r = 1.6 + viewer.getRandom().nextDouble() * 0.9;
+			net.minecraft.core.BlockPos feet = com.wolfsmask.occupant.util.Spots.groundNear(level,
+					net.minecraft.util.Mth.floor(stood.x + Math.cos(angle) * r), net.minecraft.util.Mth.floor(stood.y),
+					net.minecraft.util.Mth.floor(stood.z + Math.sin(angle) * r), 2);
+			if (feet == null || !Sight.isHidden(viewer, feet)) continue;
+			WorldBlocks.scar(level, feet.below());
 		}
 	}
 

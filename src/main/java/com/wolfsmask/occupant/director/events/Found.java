@@ -201,13 +201,48 @@ public final class Found {
 		return taken;
 	}
 
-	/** {@code least} or one more of whatever they carry, gone. */
+	/** What it has taken from each of them, while this world is open: it may give one thing back. */
+	private static final Map<UUID, List<ItemStack>> KEPT = new java.util.concurrent.ConcurrentHashMap<>();
+
+	/** {@code least} or one more of whatever they carry, gone (kept). */
 	private static void takeThings(ServerPlayer p, int least) {
 		Inventory inv = p.getInventory();
 		List<Integer> full = new ArrayList<>();
 		for (int i = 0; i < inv.getContainerSize(); i++) if (!inv.getItem(i).isEmpty()) full.add(i);
 		int n = Math.min(full.size(), least + p.getRandom().nextInt(2));
-		for (int k = 0; k < n; k++) inv.setItem(full.remove(p.getRandom().nextInt(full.size())), ItemStack.EMPTY);
+		List<ItemStack> kept = KEPT.computeIfAbsent(p.getUUID(), u -> new ArrayList<>());
+		for (int k = 0; k < n; k++) {
+			int slot = full.remove(p.getRandom().nextInt(full.size()));
+			kept.add(inv.getItem(slot).copy());
+			inv.setItem(slot, ItemStack.EMPTY);
+		}
+	}
+
+	/**
+	 * On waking, now and then: one of the things it took from them, back, lying on the bed beside
+	 * them. Only one; it keeps the rest. True if it gave them something.
+	 */
+	public static boolean giveBack(ServerPlayer p) {
+		List<ItemStack> kept = KEPT.get(p.getUUID());
+		if (kept == null || kept.isEmpty() || p.getRandom().nextFloat() >= 0.5f) return false;
+		ItemStack thing = kept.remove(p.getRandom().nextInt(kept.size()));
+		ServerLevel level = Compat.level(p);
+		BlockPos bed = Spots.respawnPos(p);
+		Vec3 at = bed != null && bed.distSqr(p.blockPosition()) < 6 * 6
+				? Vec3.atCenterOf(bed).add(0.0, 0.6, 0.0)
+				: p.position().add(Sight.flatLook(p).scale(1.2)).add(0.0, 0.3, 0.0);
+		net.minecraft.world.entity.item.ItemEntity item = new net.minecraft.world.entity.item.ItemEntity(level, at.x, at.y, at.z, thing);
+		item.setDeltaMovement(Vec3.ZERO);
+		item.setPickUpDelay(40);
+		if (!level.addFreshEntity(item)) return false;
+		String[] lines = {"It kept this for you.", "You left this behind.", "It brought this back.", "It doesn't need this."};
+		Cues.whisperOnly(p, lines[p.getRandom().nextInt(lines.length)], 120);
+		return true;
+	}
+
+	/** The world closing: what it kept goes with it (nothing carries over into another world). */
+	public static void forgetKept() {
+		KEPT.clear();
 	}
 
 	/** Whether anything is in the way of a block being torn out (bedrock, a portal frame, the like). */

@@ -274,10 +274,7 @@ public final class Strike {
 		ServerLevel level = Compat.level(p);
 		int dx = p.getRandom().nextInt(3) - 1, dz = p.getRandom().nextInt(3) - 1;
 		BlockPos at = new BlockPos(net.minecraft.util.Mth.floor(pin.x) + dx, net.minecraft.util.Mth.floor(pin.y) - 1, net.minecraft.util.Mth.floor(pin.z) + dz);
-		var state = level.getBlockState(at);
-		if (state.is(Blocks.GRASS_BLOCK) || state.is(Blocks.DIRT) || state.is(Blocks.PODZOL) || state.is(Blocks.MYCELIUM)) {
-			level.setBlock(at, Blocks.COARSE_DIRT.defaultBlockState(), 3);
-		}
+		WorldBlocks.scar(level, at);
 	}
 
 	private void last(ServerPlayer p) {

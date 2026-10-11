@@ -76,6 +76,7 @@ public final class Director {
 	}
 
 	public static void stop() {
+		com.wolfsmask.occupant.director.events.Found.forgetKept();
 		if (instance != null) {
 			for (Haunt h : instance.haunts.values()) instance.endSequence(h);
 			instance.haunts.clear();
@@ -269,9 +270,12 @@ public final class Director {
 	/** Waking up is not always a relief. Run a tick later, once the player is really in the world. */
 	private void wakeUp(Haunt h, ServerPlayer player) {
 		if (h.isBusy()) return;
+		// Something it took from them, back: lying beside them when they wake.
+		boolean gave = com.wolfsmask.occupant.director.events.Found.giveBack(player);
 		float roll = player.getRandom().nextFloat();
 		if (roll < 0.3f) trigger(player, WakeEvent.ID, false);
 		else if (roll < 0.55f) trigger(player, com.wolfsmask.occupant.director.events.MorningEvent.ID, false);
+		else if (!gave && roll < 0.7f) trigger(player, com.wolfsmask.occupant.director.events.GraveEvent.ID, false);
 	}
 
 	private void tickPlayer(Haunt h, ServerPlayer player, OccupantConfig cfg) {
@@ -924,7 +928,8 @@ public final class Director {
 		}
 		Situation s = h.capture(player);
 		EventContext ctx = new EventContext(player, h, s, forced);
-		if (!forced && (!e.allowedBy(ctx.config) || !e.fits(ctx))) return TriggerResult.NO_SPOT;
+		// Not before its act, whatever brought it on (waking, a house): it is only what it is that far into the story.
+		if (!forced && (h.data.act < e.minAct() || !e.allowedBy(ctx.config) || !e.fits(ctx))) return TriggerResult.NO_SPOT;
 		return tryBegin(h, e, ctx) ? TriggerResult.STARTED : TriggerResult.NO_SPOT;
 	}
 

@@ -57,6 +57,7 @@ public final class Events {
 			new IntruderEvent(),
 			new BehindYouEvent(),
 			new WakeEvent(),
+			new GraveEvent(),
 			// Act 4: it hunts, and once, the last night
 			new HuntEvent(),
 			new LastNightEvent()

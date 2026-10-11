@@ -38,6 +38,21 @@ public final class WorldBlocks {
 				|| s.is(BlockTags.DIRT) || s.is(BlockTags.BASE_STONE_OVERWORLD) || s.is(BlockTags.SAND);
 	}
 
+	/** Soft ground a weight can tear up: grass, dirt, podzol, mycelium. */
+	static boolean isSoftGround(BlockState s) {
+		return s.is(Blocks.GRASS_BLOCK) || s.is(Blocks.DIRT) || s.is(Blocks.PODZOL) || s.is(Blocks.MYCELIUM);
+	}
+
+	/**
+	 * The ground at {@code floor} torn to bare earth, where something heavy stood on it (if it is
+	 * soft ground, and the world may be changed). It stays that way.
+	 */
+	static boolean scar(ServerLevel world, BlockPos floor) {
+		if (!com.wolfsmask.occupant.OccupantConfig.get().worldChanges) return false;
+		if (!isSoftGround(world.getBlockState(floor))) return false;
+		return world.setBlock(floor, Blocks.COARSE_DIRT.defaultBlockState(), 3);
+	}
+
 	static boolean touchesFluid(ServerLevel world, BlockPos pos) {
 		for (Direction d : Direction.values()) {
 			if (!world.getFluidState(pos.relative(d)).isEmpty()) return true;
