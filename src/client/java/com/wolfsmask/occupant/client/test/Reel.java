@@ -297,8 +297,14 @@ final class Reel {
 		// It comes round to stand over them on the open side, away from the rock, under the shelf of it.
 		Vec3 toIt = new Vec3(-1.2, 0, 2.4).normalize();
 		Vec3 stands = person.add(toIt.scale(2.4));
-		Vec3 lens = person.subtract(toIt.scale(2.3));
-		Vec3 aim = person.add(toIt.scale(1.0)).add(0, 0.9, 0);
+		// They will try to crawl back the way they came; the camera lands off to one side of that,
+		// so it sees the whole length of them, not just the top of their head.
+		Vec3 flee = horizontal(local(o, 0.3, 0, 21.5).subtract(person)).normalize();
+		double side = Math.toRadians(25);
+		Vec3 offAngle = new Vec3(flee.x * Math.cos(side) - flee.z * Math.sin(side), 0, flee.x * Math.sin(side) + flee.z * Math.cos(side));
+		Vec3 lens = person.add(offAngle.scale(2.5));
+		// Looking between where they will crawl to and where it stands over them.
+		Vec3 aim = person.add(flee.scale(0.7)).add(stands).scale(0.5).add(0, 0.8, 0);
 		f.thrown(8, lens, aim, 0.18, 16.0);
 		int land = f.size();
 		// What happens, in ticks from the blow: its legs going in; them crawling for the camera;
@@ -328,22 +334,22 @@ final class Reel {
 		};
 		// Where they are each tick (their body, face down, head towards the camera).
 		IntFunction<Vec3> body = t -> {
-			if (t < yank) return person.subtract(toIt.scale(crawled.applyAsDouble(t)));
-			Vec3 near = person.subtract(toIt.scale(1.35));
-			if (t < yank + 5) return near.add(toIt.scale(2.0 * (1 - Math.pow(1 - (t - yank) / 5.0, 2))));
-			Vec3 back = near.add(toIt.scale(2.0));
-			// Writhing, twisting against what holds them.
-			Vec3 side = new Vec3(toIt.z, 0, -toIt.x).scale(0.08 * Math.sin(t * 0.9));
-			return back.add(toIt.scale(dragged.applyAsDouble(t))).add(side);
+			// Writhing under it as its legs go in, twisting against what holds them.
+			Vec3 writhe = new Vec3(toIt.z, 0, -toIt.x).scale((t >= hit + 12 && t < crawl ? 0.07 : 0.04) * Math.sin(t * 1.3));
+			if (t < yank) return person.add(flee.scale(crawled.applyAsDouble(t))).add(writhe);
+			Vec3 near = person.add(flee.scale(1.35));
+			Vec3 back = stands.subtract(toIt.scale(1.9));
+			if (t < yank + 5) return near.add(back.subtract(near).scale(1 - Math.pow(1 - (t - yank) / 5.0, 2)));
+			return back.add(toIt.scale(dragged.applyAsDouble(t))).add(writhe);
 		};
 		// Where it is each tick: round the corner; lunging; over them; after them; dragging them off.
 		IntFunction<Vec3> it = t -> {
 			if (t < hit) return feet;
 			if (t < hit + 4) return feet.add(lunge.subtract(feet).scale(smooth((t - hit) / 4.0)));
 			if (t < hit + 12) return lunge.add(horizontal(stands.subtract(lunge)).scale(smooth((t - hit - 4) / 8.0)));
-			Vec3 after = stands.subtract(toIt.scale(0.4 * crawled.applyAsDouble(t)));
-			if (t < yank) return after;
-			return after.add(toIt.scale(0.5 * Math.min(1.0, (t - yank) / 5.0) + dragged.applyAsDouble(t)));
+			Vec3 after = stands;
+			if (t < yank) return after.add(flee.scale(0.4 * crawled.applyAsDouble(t)));
+			return stands.add(toIt.scale(0.5 * Math.min(1.0, (t - yank) / 5.0) + dragged.applyAsDouble(t)));
 		};
 		prepare(context, game, start, local(o, 0, 1.4, 9), 14200);
 		// Their body, out of sight under the ground until it is needed, lying as it will lie.
@@ -364,7 +370,11 @@ final class Reel {
 				Vec3 watch = t < hit ? eye : t >= stop ? eye : them.add(0, 0.3, 0);
 				float yaw = (float) Fear.yawBetween(at, watch);
 				float pitch = (float) -Math.toDegrees(Math.atan2(watch.y - (at.y + 2.4), Math.hypot(watch.x - at.x, watch.z - at.z)));
-				float bodyYaw = (float) Fear.yawBetween(them, lens);
+				// Their head the way they are trying to go; once it has them back, away from it; and
+				// jerking about as the legs go in.
+				double twitch = t >= hit + 12 && t < crawl ? 14 * Math.sin(t * 1.7) : 0;
+				float bodyYaw = (float) (t < yank ? Fear.yawBetween(them, them.add(flee)) + twitch
+						: Fear.yawBetween(at, them) + 6 * Math.sin(t * 0.8));
 				if (t >= hit + 2) {
 					server.runCommand(String.format(Locale.ROOT, "tp %s %.3f %.3f %.3f %.1f 0", SELF, them.x, them.y, them.z, bodyYaw));
 				}
@@ -475,7 +485,7 @@ final class Reel {
 			Cabin c = new Cabin(o);
 			server.runOnServer(s -> {
 				ServerLevel level = s.overworld();
-				wood(level, o, -17, 17, -28, 38, List.of(c.approach, c.out), 7L, new double[][]{{0, 3, 7.5}, {-8, 3, 4.0}, {-4, 27, 2.2}, {0.3, 27.5, 3.2}, {1.0, 23.3, 2.2}, {-2, 30.5, 2.6}}, ROCK);
+				wood(level, o, -17, 17, -28, 38, List.of(c.approach, c.out), 7L, new double[][]{{0, 3, 7.5}, {-8, 3, 4.0}, {-4, 27, 2.2}, {0.3, 27.5, 3.2}, {1.0, 23.3, 2.2}, {1.4, 23.3, 2.2}, {-2, 30.5, 2.6}}, ROCK);
 				RandomSource r = RandomSource.create(9L);
 				for (int x = LEDGE[0]; x <= LEDGE[1]; x++) {
 					for (int z = LEDGE[2]; z <= LEDGE[3]; z++) {
