@@ -148,8 +148,9 @@ jobs:
               ls "$d" | head -n 1 > /dev/null || continue
               ffmpeg -y -loglevel error -framerate 20 -i "$d/%04d.png" -c:v libx264 -preset slow -crf 10 -pix_fmt yuv420p "$OUT/$n.mp4" \
                 && echo "$n: $(ls "$d" | wc -l) frames" || echo "$n: not made"
-              # When the feet come down, for the sound.
-              cp "$d/steps.txt" "$OUT/$n.txt" 2>/dev/null || true
+              # What is heard when, and how far the camera tips, for the edit.
+              cp "$d/marks.txt" "$OUT/$n.txt" 2>/dev/null || true
+              cp "$d/roll.txt" "$OUT/$n.roll" 2>/dev/null || true
             done
             ls -la "$OUT"
             CLEAR=1 bash tools/ci/save-results.sh "Reel" reel "$OUT/."

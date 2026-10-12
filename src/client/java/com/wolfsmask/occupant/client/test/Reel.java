@@ -2,29 +2,27 @@ package com.wolfsmask.occupant.client.test;
 
 import com.wolfsmask.occupant.Occupant;
 import com.wolfsmask.occupant.client.ScreenEffects;
-import com.wolfsmask.occupant.compat.Compat;
 import com.wolfsmask.occupant.director.Director;
 import com.wolfsmask.occupant.entity.OccupantEntity;
 import com.wolfsmask.occupant.network.ScreenEffectPayload;
-import com.wolfsmask.occupant.world.House;
+import com.wolfsmask.occupant.util.Kinds;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.CandleBlock;
-import net.minecraft.world.level.block.ChestBlock;
-import net.minecraft.world.level.block.FenceBlock;
-import net.minecraft.world.level.block.SignBlock;
-import net.minecraft.world.level.block.WallBlock;
-import net.minecraft.world.level.block.StandingSignBlock;
-import net.minecraft.world.level.block.entity.SignBlockEntity;
+import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.RotationSegment;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 import java.io.IOException;
@@ -40,13 +38,15 @@ import java.util.function.IntFunction;
 
 /**
  * Footage, not photographs: a few seconds of each moment, recorded a frame every tick, upright,
- * the shape of a phone screen, for a short video of the mod. The camera is someone frightened:
- * they see it, they freeze, they turn and run, and look back over their shoulder as they go, and
- * every time they look back it is nearer. It is never seen moving.
+ * the shape of a phone screen, for a short video of the mod. The camera is someone frightened, in
+ * a dark wood, and it is one night: they see it between the trees; they run, and find a house;
+ * it is at the window; they run again, out into the trees, and it is behind them, and then it is
+ * in front of them, round the corner, and it has them. It is never seen moving until then.
  * <p>
  * Only when asked for (a {@code reel.flag} in the game directory, which CI puts there for a commit
- * marked [reel]); the frames go to {@code occupant-reel/<clip>/0000.png}, with the ticks the feet
- * land on in {@code steps.txt} for the sound, and CI makes each clip a video.
+ * marked [reel]); the frames go to {@code occupant-reel/<clip>/0000.png}, with what is heard when
+ * in {@code marks.txt} ("tick kind" a line: a foot coming down, a knock, it seen) and how far the
+ * camera is tipped each frame in {@code roll.txt}, for the edit; CI makes each clip a video.
  * <p>
  * Everything is the real game and the real mod, only arranged, as with the photographs.
  */
@@ -54,10 +54,18 @@ final class Reel {
 	private static final Path GAME = FabricLoader.getInstance().getGameDir();
 	private static final Path DIR = GAME.resolve("occupant-reel");
 	private static final String ALL = "@e[type=occupant:occupant]";
+	/** What its leg goes through: nothing anyone can see, where the one on the ground is. */
+	private static final String BODY = "@e[type=armor_stand,tag=occupant_reel]";
 	/** Held as it is put, in the pose it has when it is after you. */
 	private static final Cinematic.Look CHASING = new Cinematic.Look(false, 0.01f, OccupantEntity.Mode.CHASE, 0);
+	/** Held as it is put, bent right down to you, the mouth open. */
+	private static final Cinematic.Look LOOMING = new Cinematic.Look(false, 0.01f, OccupantEntity.Mode.AMBUSH, 0);
 	/** A sprint, in blocks a tick. */
 	private static final double SPRINT = 0.27;
+	/** On their back on the ground: how far below a standing person's their eyes are. */
+	private static final double LYING = 0.32 - Cinematic.EYE;
+	/** How far the fog lets you see in the wood. */
+	private static final float FOG = 38.0f;
 
 	private Reel() {
 	}
@@ -68,6 +76,7 @@ final class Reel {
 
 	static void run(ClientGameTestContext context, TestSingleplayerContext game, BlockPos[] woods, BlockPos spawn) {
 		TestServerContext server = game.getServer();
+		double gamma = context.computeOnClient(mc -> mc.options.gamma().get());
 		try {
 			server.runCommand("gamemode spectator @p");
 			server.runCommand("weather clear");
@@ -75,25 +84,35 @@ final class Reel {
 			context.runOnClient(mc -> {
 				com.wolfsmask.occupant.client.ClientScares.breath = false;
 				ScreenEffects.trigger(new ScreenEffectPayload(ScreenEffectPayload.ACT, 0, 3), mc);
-				com.wolfsmask.occupant.client.ClientFog.set(64.0f, 1);
+				com.wolfsmask.occupant.client.ClientFog.set(FOG, 1);
 				mc.options.fov().set(80);
+				// The night as a camera sees it, which the grading then takes down again.
+				mc.options.gamma().set(1.0);
 			});
 			Cinematic.hud(context, false);
 			// Upright, the shape of a phone.
 			context.getInput().resizeWindow(1080, 1920);
 			context.waitTicks(20);
 
-			clip("shore", () -> shore(context, game, woods));
-			clip("trees", () -> trees(context, game, woods));
-			clip("behind", () -> behind(context, game, woods));
-			clip("graves", () -> graves(context, game, woods));
-			clip("grave", () -> grave(context, game, spawn));
+			clip("woods", () -> woods(context, game, woods));
+			// The wood with the house in it, built once: the same house all night.
+			BlockPos floor = server.computeOnServer(s -> ForestGallery.clearing(s.overworld(), woods[0].offset(60, 0, -60)));
+			if (floor != null) {
+				Cabin cabin = Cabin.build(server, floor.above());
+				clip("house", () -> house(context, game, cabin));
+				clip("window", () -> window(context, game, cabin));
+				clip("taken", () -> taken(context, game, cabin));
+			}
 		} catch (RuntimeException | AssertionError e) {
 			Occupant.LOGGER.warn("[client-gametest] reel stopped early", e);
 		} finally {
 			server.runCommand("kill " + ALL);
+			server.runCommand("kill " + BODY);
 			server.runOnServer(s -> Director.get().data(Cinematic.player(s)).paused = false);
-			context.runOnClient(mc -> com.wolfsmask.occupant.client.ClientScares.breath = true);
+			context.runOnClient(mc -> {
+				com.wolfsmask.occupant.client.ClientScares.breath = true;
+				mc.options.gamma().set(gamma);
+			});
 			Cinematic.hud(context, true);
 			server.runCommand("gamemode survival @p");
 			context.getInput().resizeWindow(854, 480);
@@ -112,286 +131,513 @@ final class Reel {
 	// ------------------------------------------------------------------ the clips
 
 	/**
-	 * Dusk, in the water off the shore. On the bank, between the trees, it is standing, facing
-	 * you. You turn and swim for the far side, ducking under with every stroke; over your shoulder,
-	 * it is at the water's edge now. You go under.
+	 * Dusk, deep in a dark wood, walking, looking about. Off to one side, between the trunks, it is
+	 * standing, facing you. You freeze; you back off, turn, and run back the way you came; over
+	 * your shoulder, there is nothing there any more.
 	 */
-	private static void shore(ClientGameTestContext context, TestSingleplayerContext game, BlockPos[] woods) {
-		TestServerContext server = game.getServer();
-		BlockPos floor = server.computeOnServer(s -> ForestGallery.clearing(s.overworld(), woods[1].offset(-150, 0, -60)));
-		if (floor == null) return;
-		// A long pond, dug where you swim; the bank where it stands left as it was.
-		double surface = server.computeOnServer(s -> {
-			ServerLevel level = s.overworld();
-			for (int x = -9; x <= 9; x++) {
-				for (int z = -3; z <= 30; z++) {
-					for (int y = -1; y <= 14; y++) {
-						boolean edge = Math.abs(x) == 9 || z == 30;
-						set(level, floor.offset(x, y, z), y <= 0 ? (edge ? Blocks.DIRT.defaultBlockState() : Blocks.WATER.defaultBlockState())
-								: Blocks.AIR.defaultBlockState());
-					}
-					set(level, floor.offset(x, -2, z), Blocks.MUD.defaultBlockState());
-				}
-			}
-			return floor.getY() + 0.89;
-		});
-		// The trees behind where it stands felled, so it is a shape against the fog, not the dark.
-		server.runOnServer(s -> Cinematic.fellTrees(s.overworld(), floor.offset(0, 0, -13), 8));
-		BlockPos far = server.computeOnServer(s -> Cinematic.standNear(s.overworld(), floor, 0, -6));
-		BlockPos edge = server.computeOnServer(s -> Cinematic.standNear(s.overworld(), floor, 1, -4));
-		Vec3 start = new Vec3(floor.getX() + 0.5, surface + 0.1, floor.getZ() + 6.5);
-		Vec3 farHead = head(far, 3.2), edgeHead = head(edge, 3.0);
-		Fear f = new Fear(start).face(farHead);
-		f.stare(44, farHead, 0.5);
-		f.swing(10, 2.0, 6, 0.05);                 // round, away, and go
-		f.run(54, 0.10, 0.25);
-		int closer = f.size() - 30;                 // it moves while your back is turned
-		f.lookBack(8, 13, 8, edgeHead);
-		f.run(10, 0.10, 0.0);
-		f.dive(14);
-		prepare(context, game, start, farHead, 12650);
-		Cinematic.place(server, far, start, Cinematic.Look.STARING);
-		context.waitTicks(25);
-		record(context, server, "shore", f.water(surface), f.steps(), t -> {
-			if (t == closer) Cinematic.place(server, edge, start, CHASING);
-		});
-	}
-
-	/**
-	 * Dusk, walking along a path through the trees. Ahead, braced across the path between the
-	 * trunks, it is standing, facing you. You freeze; you turn and run back the way you came, and
-	 * when you look over your shoulder it is on the path behind you, where you were standing.
-	 */
-	private static void trees(ClientGameTestContext context, TestSingleplayerContext game, BlockPos[] woods) {
+	private static void woods(ClientGameTestContext context, TestSingleplayerContext game, BlockPos[] woods) {
 		TestServerContext server = game.getServer();
 		BlockPos floor = server.computeOnServer(s -> ForestGallery.clearing(s.overworld(), woods[1].offset(120, 0, 90)));
 		if (floor == null) return;
 		BlockPos o = floor.above();
-		server.runOnServer(s -> {
-			ServerLevel level = s.overworld();
-			Cinematic.fellTrees(level, floor.offset(0, 0, -8), 26);
-			// Level ground, a worn path down the middle, long enough to run.
-			for (int x = -7; x <= 7; x++) {
-				for (int z = -40; z <= 18; z++) {
-					set(level, floor.offset(x, 0, z), Math.abs(x) <= 1 && (x * 7 + z * 3) % 5 != 0
-							? Blocks.COARSE_DIRT.defaultBlockState() : Blocks.GRASS_BLOCK.defaultBlockState());
-					for (int y = 1; y <= 11; y++) set(level, floor.offset(x, y, z), Blocks.AIR.defaultBlockState());
+		Way in = Way.local(o, new double[][]{{0, -3}, {0.4, 4}, {-0.4, 10}, {0.3, 16}, {0, 23}});
+		Way back = Way.local(o, new double[][]{{0, 6}, {0, -2}, {0.8, -8}, {-0.6, -14}, {0.4, -20}, {0, -26}});
+		BlockPos spot = o.offset(-5, 0, 11);
+		server.runOnServer(s -> wood(s.overworld(), o, -13, 13, -28, 26, List.of(in, back), 41L, new double[][]{{-5, 11, 1.6}}, null));
+		Vec3 start = local(o, 0, Cinematic.EYE, -3);
+		Vec3 face = head(spot, 3.0);
+		Fear f = new Fear(start);
+		f.follow(in);
+		// Walking, looking about: off to the right, ahead; then, off to the left, it is there.
+		Vec3 right = local(o, 5, 1.9, 6), ahead = local(o, 0.5, 1.5, 12);
+		f.face(right);
+		f.walk(18, 0.075, t -> right);
+		f.walk(12, 0.075, t -> ahead);
+		f.swingTo(6, face);                          // the head snapped round to it
+		f.mark("seen");
+		f.stare(24, face, 1.3);                      // frozen
+		f.backAway(10, face, 0.08);
+		f.swing(9, 180.0, 6, 0.15);                  // round, and run
+		int gone = f.size();                          // out of sight: and then simply not there
+		f.follow(back.from(f.x, f.z));
+		f.run(28, SPRINT, 0);
+		f.mark("look");
+		f.lookBack(7, 11, 7, face);
+		f.run(10, SPRINT, 0);
+		prepare(context, game, start, right, 12800);
+		Cinematic.place(server, spot, start, Cinematic.Look.STARING);
+		context.waitTicks(25);
+		record(context, server, "woods", f.flat(o.getY()), f, t -> {
+			if (t == gone) server.runCommand("kill " + ALL);
+		});
+	}
+
+	/**
+	 * Dusk, later, running through the wood, and a house in the trees ahead. Over your shoulder it
+	 * is on the way behind you. To the door, in, round, and it is shut.
+	 */
+	private static void house(ClientGameTestContext context, TestSingleplayerContext game, Cabin cabin) {
+		TestServerContext server = game.getServer();
+		BlockPos o = cabin.o;
+		cabin.door(server, cabin.front, true);
+		cabin.door(server, cabin.back, false);
+		Vec3 start = local(o, 1, Cinematic.EYE, -17);
+		Fear f = new Fear(start);
+		f.follow(cabin.approach.from(start.x, start.z));
+		f.face(local(o, 0, 2.2, -1));
+		f.speed = 0.18;
+		f.run(20, SPRINT, 0);
+		int look = f.size();
+		// On the way behind, where they were a few seconds ago.
+		double[] b = cabin.approach.point(cabin.approach.along(f.at(look)) - 6.5);
+		BlockPos behind = BlockPos.containing(b[0], o.getY(), b[1]);
+		f.lookBack(7, 12, 7, head(behind, 2.8));
+		f.markAt(look + 6, "seen");
+		f.runTo(1.2, SPRINT);
+		Vec3 doorway = local(o, 0, 1.4, -1);
+		f.stopAndTurn(10, doorway);                  // in, and round to the door
+		int shut = f.size();
+		f.mark("door");
+		f.backAway(12, doorway, 0.05);
+		f.mark("pant");
+		f.stare(16, doorway, 1.0);
+		prepare(context, game, start, local(o, 0, 2.2, -1), 13050);
+		context.waitTicks(25);
+		record(context, server, "house", f.flat(o.getY()), f, t -> {
+			if (t == look) Cinematic.place(server, behind, f.at(look + 9), CHASING);
+			if (t == shut) cabin.door(server, cabin.front, false);
+		});
+	}
+
+	/**
+	 * Night, in the house, by the lamp. You go to the window and look out: the trees, nothing. A
+	 * knock at the door. You look round at it; when you look back at the window, its face is at
+	 * the glass.
+	 */
+	private static void window(ClientGameTestContext context, TestSingleplayerContext game, Cabin cabin) {
+		TestServerContext server = game.getServer();
+		BlockPos o = cabin.o;
+		cabin.door(server, cabin.front, false);
+		cabin.door(server, cabin.back, false);
+		Vec3 start = local(o, 1.6, Cinematic.EYE, 4.6);
+		Vec3 door = local(o, 0, 1.2, -1);
+		Vec3 glass = local(o, -4, 2.0, 3);
+		Vec3 trees = local(o, -12, 1.2, 3);
+		BlockPos outside = o.offset(-6, 0, 3);
+		Fear f = new Fear(start).face(door);
+		f.stare(18, door, 0.6);
+		f.turnTo(16, glass);
+		f.heading = Fear.yawBetween(start, glass);
+		f.walk(34, 0.08, t -> glass);
+		// Looking out: the dark, the trees, one way and the other.
+		f.walk(22, 0.0, t -> trees.add(0, Math.sin(t * 0.12) * 0.3, Math.sin(t * 0.17) * 5.0));
+		f.mark("knock");
+		f.stare(6, trees, 0.9);
+		f.swingTo(10, door);
+		int there = f.size() + 3;                     // the window out of sight behind them
+		f.stare(22, door, 1.1);
+		f.turnTo(13, glass);
+		f.markAt(f.size() - 4, "seen");
+		f.backAway(9, glass, 0.15);
+		f.stare(22, glass, 1.8);
+		prepare(context, game, start, door, 15500);
+		context.waitTicks(25);
+		record(context, server, "window", f.flat(o.getY()), f, t -> {
+			if (t == there) Cinematic.place(server, outside, glass.add(4.0, -0.4, 0), Cinematic.Look.looming(0));
+		});
+	}
+
+	/**
+	 * Night: out of the back of the house and into the trees, running. Over your shoulder, it is
+	 * there, behind you. You turn back and run on, round the rock, and it is standing there in
+	 * front of you instead. It strikes: you are down, its leg through you, and it drags you off into
+	 * the trees.
+	 */
+	private static void taken(ClientGameTestContext context, TestSingleplayerContext game, Cabin cabin) {
+		TestServerContext server = game.getServer();
+		BlockPos o = cabin.o;
+		cabin.door(server, cabin.front, false);
+		cabin.door(server, cabin.back, true);
+		Vec3 start = local(o, 0, Cinematic.EYE, 4.6);
+		Way way = cabin.out.from(start.x, start.z);
+		Fear f = new Fear(start);
+		f.follow(way);
+		f.face(local(o, 0, 1.4, 9));
+		f.speed = 0.12;
+		f.run(40, SPRINT, 0);
+		int look = f.size();
+		// Behind, by the house they ran from.
+		double[] b = way.point(way.along(f.at(look)) - 7.0);
+		BlockPos behind = BlockPos.containing(b[0], o.getY(), b[1]);
+		f.lookBack(7, 12, 7, head(behind, 2.8));
+		f.markAt(look + 6, "seen");
+		int corner = f.size() + 2;                    // facing on again: it is no longer behind
+		f.run(8, SPRINT, 0);
+		// Round the rock, until it is there in front of them, just past it; a moment to take it in.
+		BlockPos spot = o.offset(-4, 0, 27);
+		Vec3 feet = Vec3.atBottomCenterOf(spot);
+		Vec3 face = feet.add(0, 2.2, 0);
+		for (int i = 0; i < 80 && !f.sees(feet, o, Cabin.ROCK); i++) f.run(1, SPRINT, 0);
+		f.mark("seen");
+		f.run(5, SPRINT, 0);
+		f.halt(6, face);
+		int hit = f.size();
+		// It comes at them as it strikes.
+		Vec3 struck = f.at(hit);
+		Vec3 lunge = feet.add(new Vec3(struck.x - feet.x, 0, struck.z - feet.z).normalize().scale(0.8));
+		f.knocked(10, feet);
+		int down = f.size();
+		// On the ground, on their back; it over them, nearer, its legs coming down on them.
+		Vec3 lying = new Vec3(f.x, 0, f.z);
+		Vec3 toward = new Vec3(feet.x - lying.x, 0, feet.z - lying.z).normalize();
+		Vec3 over = new Vec3(lying.x + toward.x * 2.0, o.getY() + 2.0, lying.z + toward.z * 2.0);
+		f.markAt(hit + 14, "beat");
+		f.markAt(hit + 27, "beat");
+		f.down(30, t -> over, 14.0);
+		int drag = f.size();
+		f.dragged(56, Fear.yawBetween(lying, feet));
+		f.mark("end");
+		double[][] poses = f.flat(o.getY());
+		prepare(context, game, start, local(o, 0, 1.4, 9), 14200);
+		context.waitTicks(25);
+		try {
+			record(context, server, "taken", poses, f, t -> {
+				if (t == look) Cinematic.place(server, behind, f.at(look + 9), CHASING);
+				if (t == corner) Cinematic.place(server, spot, f.at(hit), LOOMING);
+				if (t < hit) return;
+				// Where it is: where it stood, until it strikes; then over them; then, dragging them, a
+				// little ahead of them, always facing them.
+				Vec3 eye = new Vec3(poses[t][0], poses[t][1], poses[t][2]);
+				Vec3 at;
+				if (t < down) {
+					at = feet.add(lunge.subtract(feet).scale(smooth((t - hit) / 5.0)));
+				} else if (t < drag) {
+					double u = smooth((t - down) / 12.0);
+					at = lunge.add(new Vec3(over.x - lunge.x, 0, over.z - lunge.z).scale(u));
+				} else {
+					at = new Vec3(eye.x + toward.x * 2.0, feet.y, eye.z + toward.z * 2.0);
 				}
-			}
-			// Trunks either side of the path all the way, crowns meeting overhead.
-			List<int[]> trunks = new ArrayList<>();
-			for (int z = -38; z <= 17; z += 3) {
-				trunks.add(new int[]{(z / 3) % 2 == 0 ? -3 : 3, z});
-				if (z % 9 == 0) trunks.add(new int[]{(z / 3) % 2 == 0 ? 5 : -5, z + 1});
-			}
-			trunks.add(new int[]{-2, 9});
-			trunks.add(new int[]{2, 11});
-			for (int[] t : trunks) {
-				for (int dx = -2; dx <= 2; dx++) {
-					for (int dz = -2; dz <= 2; dz++) {
-						for (int y = 6; y <= 8; y++) {
-							if (Math.abs(dx) + Math.abs(dz) + (y == 8 ? 1 : 0) <= 3) {
-								set(level, o.offset(t[0] + dx, y, t[1] + dz), Blocks.DARK_OAK_LEAVES.defaultBlockState()
-										.setValue(net.minecraft.world.level.block.LeavesBlock.PERSISTENT, true));
-							}
-						}
+				Vec3 dir = new Vec3(at.x - eye.x, 0, at.z - eye.z).normalize();
+				// Its leg goes in here: their chest, just below what they see.
+				Vec3 chest = new Vec3(eye.x + dir.x * 0.55, Math.max(o.getY() + 0.15, eye.y - 0.5), eye.z + dir.z * 0.55);
+				if (t == hit) {
+					server.runCommand(String.format(Locale.ROOT, "summon armor_stand %.3f %.3f %.3f {Marker:1b,Invisible:1b,NoGravity:1b,Tags:[\"occupant_reel\"]}",
+							chest.x, chest.y, chest.z));
+				} else {
+					server.runCommand(String.format(Locale.ROOT, "tp %s %.3f %.3f %.3f", BODY, chest.x, chest.y, chest.z));
+				}
+				int legs = (t >= hit + 14 && t < hit + 19) || (t >= hit + 27 && t < hit + 32) ? 2 : 1;
+				float yaw = (float) Fear.yawBetween(at, eye);
+				server.runOnServer(s -> {
+					ServerLevel level = s.overworld();
+					List<OccupantEntity> its = level.getEntitiesOfClass(OccupantEntity.class, AABB.ofSize(at, 16, 16, 16));
+					if (its.isEmpty()) return;
+					OccupantEntity it = its.get(0);
+					it.setPos(at.x, at.y, at.z);
+					it.setYRot(yaw);
+					it.setYHeadRot(yaw);
+					it.setYBodyRot(yaw);
+					List<Entity> body = level.getEntities((Entity) null, AABB.ofSize(chest, 3, 3, 3), e -> Kinds.is(e, "armor_stand"));
+					if (body.isEmpty()) return;
+					List<Entity> held = new ArrayList<>();
+					for (int i = 0; i < legs; i++) held.add(body.get(0));
+					it.setHeld(held);
+				});
+			});
+		} finally {
+			server.runCommand("kill " + BODY);
+		}
+	}
+
+	// ------------------------------------------------------------------ the places
+
+	/** The house in the wood, and the ways to it and away from it. */
+	private static final class Cabin {
+		/** The rock the way goes round (x0, x1, z0, z1 from the house): big enough to hide what is on the other side of it. */
+		static final int[] ROCK = {-9, -2, 14, 25};
+		final BlockPos o;
+		final BlockPos front, back;
+		/** From the south, up to the door and in. */
+		final Way approach;
+		/** Out of the back door, along the rock, and round it. */
+		final Way out;
+
+		private Cabin(BlockPos o) {
+			this.o = o;
+			this.front = o.offset(0, 0, -1);
+			this.back = o.offset(0, 0, 7);
+			this.approach = Way.local(o, new double[][]{{1, -24}, {1, -17}, {-1, -13}, {1.5, -8}, {0, -4}, {0, -1}, {0, 3}});
+			this.out = Way.local(o, new double[][]{{0, 4}, {0, 9}, {-0.5, 13.5}, {0.6, 18}, {0.2, 22.5}, {-0.3, 25.6},
+					{-2.2, 27.6}, {-6, 28.5}, {-11, 29.3}, {-17, 30}});
+		}
+
+		static Cabin build(TestServerContext server, BlockPos o) {
+			Cabin c = new Cabin(o);
+			server.runOnServer(s -> {
+				ServerLevel level = s.overworld();
+				wood(level, o, -17, 17, -28, 38, List.of(c.approach, c.out), 7L, new double[][]{{0, 3, 7.5}}, ROCK);
+				c.house(level);
+			});
+			return c;
+		}
+
+		/** One room: plank walls on a stone footing, a stepped roof, a door each end, a window each side, a lamp. */
+		private void house(ServerLevel level) {
+			BlockState planks = Blocks.SPRUCE_PLANKS.defaultBlockState();
+			BlockState roof = Blocks.DARK_OAK_PLANKS.defaultBlockState();
+			BlockState air = Blocks.AIR.defaultBlockState();
+			for (int x = -4; x <= 4; x++) {
+				for (int z = -1; z <= 7; z++) {
+					boolean wall = Math.abs(x) == 4 || z == -1 || z == 7;
+					boolean corner = Math.abs(x) == 4 && (z == -1 || z == 7);
+					set(level, o.offset(x, -1, z), wall ? Blocks.COBBLESTONE.defaultBlockState() : planks);
+					for (int y = 0; y <= 3; y++) {
+						set(level, o.offset(x, y, z), !wall ? air : corner ? Blocks.DARK_OAK_LOG.defaultBlockState() : planks);
 					}
 				}
 			}
-			for (int[] t : trunks) {
-				for (int y = 0; y <= 7; y++) set(level, o.offset(t[0], y, t[1]), Blocks.DARK_OAK_LOG.defaultBlockState());
-			}
-		});
-		BlockPos ahead = o.offset(0, 0, 10);
-		BlockPos behind = o.offset(0, 0, -2);
-		Vec3 start = Vec3.atBottomCenterOf(o.offset(0, 0, -4)).add(0.2, Cinematic.EYE, 0);
-		Vec3 aheadHead = head(ahead, 3.0), behindHead = head(behind, 2.6);
-		IntFunction<Vec3> about = t -> aheadHead.add(-4.0 + Math.sin(t * 0.07) * 2.0, -0.8, -3.0 + t * 0.05);
-		Fear f = new Fear(start).face(about.apply(0));
-		f.heading = 0;
-		// Walking, looking about at the trunks; then it is there.
-		f.walk(42, 0.045, about);
-		f.stare(12, aheadHead, 0.2);
-		f.stare(12, aheadHead, 1.2);                 // frozen
-		f.swing(9, 180.0, 5, 0.12);                  // round, and run
-		int follow = f.size() + 4;
-		f.run(30, SPRINT, 0.0);
-		f.lookBack(7, 10, 7, behindHead);
-		f.run(12, SPRINT, 0.2);
-		f.stumble(8);
-		f.run(12, 0.22, 0.0);
-		prepare(context, game, start, aheadHead, 12900);
-		Cinematic.place(server, ahead, start, Cinematic.Look.STARING);
-		context.waitTicks(25);
-		record(context, server, "trees", f.ground(server), f.steps(), t -> {
-			if (t == follow) Cinematic.place(server, behind, start, CHASING);
-		});
-	}
-
-	/**
-	 * Night, out in the open, looking at nothing. You turn round: it has bent right down to you,
-	 * its face just above. You stumble back, turn, and run into the dark; over your shoulder it is
-	 * still standing there, bent, watching you go.
-	 */
-	private static void behind(ClientGameTestContext context, TestSingleplayerContext game, BlockPos[] woods) {
-		TestServerContext server = game.getServer();
-		BlockPos floor = server.computeOnServer(s -> ForestGallery.clearing(s.overworld(), woods[0].offset(60, 0, -60)));
-		if (floor == null) return;
-		server.runOnServer(s -> Cinematic.fellTrees(s.overworld(), floor, 18));
-		BlockPos it = server.computeOnServer(s -> Cinematic.standNear(s.overworld(), floor, 0, 0));
-		// Where you stand: on the side of it with open, level ground to run into, not a hillside.
-		Vec3 eye = server.computeOnServer(s -> {
-			ServerLevel level = s.overworld();
-			Vec3 base = Vec3.atBottomCenterOf(it);
-			Vec3 pick = null;
-			double best = Double.MAX_VALUE;
-			for (int k = 0; k < 16; k++) {
-				double a = k * Math.PI / 8, dx = Math.cos(a), dz = Math.sin(a);
-				BlockPos e = BlockPos.containing(base.add(dx * 3.1, 0, dz * 3.1));
-				int from = Cinematic.ground(level, e.getX(), e.getZ());
-				double rough = Math.abs(from - it.getY()) * 3.0;
-				int last = from;
-				for (int d = 1; d <= 16; d++) {
-					int g = Cinematic.ground(level, Mth.floor(base.x + dx * (3.1 + d)), Mth.floor(base.z + dz * (3.1 + d)));
-					rough += Math.abs(g - last) * 2.0 + Math.max(0, g - from - 1) * 3.0;
-					last = g;
-				}
-				if (rough < best) {
-					best = rough;
-					pick = new Vec3(e.getX() + 0.5, from + Cinematic.EYE, e.getZ() + 0.5);
+			for (int x = -5; x <= 5; x++) {
+				for (int z = -2; z <= 8; z++) {
+					set(level, o.offset(x, 4, z), roof);
+					for (int k = 1; k <= 4; k++) if (Math.abs(x) <= 5 - k) set(level, o.offset(x, 4 + k, z), roof);
 				}
 			}
-			return pick;
-		});
-		Vec3 face = head(it, 3.0);
-		Vec3 out = eye.add(eye.subtract(face).multiply(1, 0, 1).normalize().scale(20)).add(0, 0.2, 0);
-		Fear f = new Fear(eye);
-		f.yaw = Fear.yawBetween(eye, out);
-		f.heading = f.yaw;
-		f.stare(26, out, 0.3);
-		f.swingTo(9, face);                          // round
-		f.stare(16, face, 1.4);                      // frozen
-		f.backAway(7, face, 0.13);
-		f.swing(8, Fear.yawBetween(eye, out), 6, 0.14);
-		f.run(22, SPRINT, -0.3);
-		f.lookBack(6, 9, 6, head(it, 2.4));
-		f.run(10, SPRINT, 0.0);
-		prepare(context, game, eye, out, 18000);
-		Cinematic.place(server, it, eye, Cinematic.Look.looming(0));
-		context.waitTicks(25);
-		record(context, server, "behind", f.ground(server), f.steps(), null);
+			for (int z = 2; z <= 4; z++) {
+				for (int y = 1; y <= 2; y++) {
+					set(level, o.offset(-4, y, z), Blocks.GLASS.defaultBlockState());
+					set(level, o.offset(4, y, z), Blocks.GLASS.defaultBlockState());
+				}
+			}
+			// A barrel for a table with the lamp on it, a bench, shelves, cobwebs in the corners.
+			set(level, o.offset(-2, 0, 5), Blocks.BARREL.defaultBlockState());
+			set(level, o.offset(-2, 1, 5), Blocks.LANTERN.defaultBlockState());
+			set(level, o.offset(-3, 0, 5), Blocks.CRAFTING_TABLE.defaultBlockState());
+			set(level, o.offset(-3, 0, 6), Blocks.SPRUCE_STAIRS.defaultBlockState());
+			set(level, o.offset(3, 0, 6), Blocks.BOOKSHELF.defaultBlockState());
+			set(level, o.offset(3, 1, 6), Blocks.BOOKSHELF.defaultBlockState());
+			set(level, o.offset(3, 0, 0), Blocks.CHEST.defaultBlockState());
+			set(level, o.offset(-3, 3, 6), Blocks.COBWEB.defaultBlockState());
+			set(level, o.offset(3, 3, 0), Blocks.COBWEB.defaultBlockState());
+		}
+
+		/** A door, open or shut: the way out of here, each end. */
+		void door(TestServerContext server, BlockPos at, boolean open) {
+			server.runOnServer(s -> {
+				ServerLevel level = s.overworld();
+				BlockState door = Blocks.SPRUCE_DOOR.defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.SOUTH)
+						.setValue(BlockStateProperties.OPEN, open);
+				set(level, at, door.setValue(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.LOWER));
+				set(level, at.above(), door.setValue(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.UPPER));
+			});
+		}
 	}
 
 	/**
-	 * Dusk, the old graves, a few candles. It is bent over them, towards you. You back away; you
-	 * turn and run; when you look back it is standing where you were.
+	 * A dark wood, built for a clip: level ground, the trunks close together and a roof of leaves
+	 * over them, ferns and stones between, and worn ways through it ({@code ways}, kept clear).
+	 * {@code open} are places kept clear of trees (x, z, how far); {@code rock} (x0, x1, z0, z1) a
+	 * great mossy rock.
 	 */
-	private static void graves(ClientGameTestContext context, TestSingleplayerContext game, BlockPos[] woods) {
-		TestServerContext server = game.getServer();
-		BlockPos floor = server.computeOnServer(s -> ForestGallery.clearing(s.overworld(), woods[1].offset(-40, 0, 200)));
-		if (floor == null) return;
-		BlockPos[] it = new BlockPos[2];
-		Vec3 eye = server.computeOnServer(s -> {
-			ServerLevel level = s.overworld();
-			Cinematic.fellTrees(level, floor, 34);
-			House.buildPlaceForTest("graves", level, floor, level.getRandom());
-			Cinematic.light(level, floor, 7, Blocks.CANDLE.defaultBlockState());
-			it[0] = Cinematic.standNear(level, floor, 1, 7);
-			Vec3 middle = Cinematic.rel(floor, 0.5, 2.2, -0.5);
-			return Cinematic.findCamera(level, Cinematic.player(s), it[0], -0.2, -1.0, new double[]{8, 10, 12}, Cinematic.EYE, 0, middle);
-		});
-		// Where you were standing, for it to be standing there when you look back.
-		it[1] = server.computeOnServer(s -> Cinematic.standNear(s.overworld(), BlockPos.containing(eye).below(2), 0, 0));
-		Vec3 head = head(it[0], 2.6), where = head(it[1], 2.7);
-		double away = Fear.yawBetween(head, eye);
-		Fear f = new Fear(eye).face(head);
-		f.heading = f.yaw;
-		f.stare(20, head, 0.7);
-		f.backAway(18, head, 0.035);
-		f.swing(9, away, 6, 0.13);
-		int follow = f.size() + 6;
-		f.run(26, SPRINT, 0.4);
-		f.lookBack(7, 11, 7, where);
-		f.run(12, SPRINT, 0.0);
-		f.stumble(7);
-		clearPath(server, f);
-		prepare(context, game, eye, head, 13700);
-		Cinematic.place(server, it[0], eye, Cinematic.Look.glancing(-35f, OccupantEntity.Mode.AMBUSH, 0));
-		context.waitTicks(25);
-		Vec3 runner = f.at(follow + 26);
-		record(context, server, "graves", f.ground(server), f.steps(), t -> {
-			if (t == follow) Cinematic.place(server, it[1], runner, CHASING);
-		});
+	private static void wood(ServerLevel level, BlockPos o, int x0, int x1, int z0, int z1, List<Way> ways, long seed,
+							 double[][] open, int[] rock) {
+		RandomSource r = RandomSource.create(seed);
+		BlockState air = Blocks.AIR.defaultBlockState();
+		for (int x = x0; x <= x1; x++) {
+			for (int z = z0; z <= z1; z++) {
+				double d = nearest(ways, o, x, z);
+				int n = r.nextInt(10);
+				BlockState top = d < 0.8 ? (n < 6 ? Blocks.COARSE_DIRT : Blocks.PODZOL).defaultBlockState()
+						: n == 0 ? Blocks.MOSS_BLOCK.defaultBlockState() : n < 3 ? Blocks.PODZOL.defaultBlockState()
+						: Blocks.GRASS_BLOCK.defaultBlockState();
+				set(level, o.offset(x, -1, z), top);
+				// Filled under, where the ground fell away.
+				for (int y = -2; y >= -12; y--) {
+					BlockPos p = o.offset(x, y, z);
+					BlockState s = level.getBlockState(p);
+					if (!s.isAir() && !s.canBeReplaced() && s.getFluidState().isEmpty()) break;
+					set(level, p, Blocks.DIRT.defaultBlockState());
+				}
+				for (int y = 0; y <= 18; y++) set(level, o.offset(x, y, z), air);
+			}
+		}
+		if (rock != null) {
+			for (int x = rock[0]; x <= rock[1]; x++) {
+				for (int z = rock[2]; z <= rock[3]; z++) {
+					int in = Math.min(Math.min(x - rock[0], rock[1] - x), Math.min(z - rock[2], rock[3] - z));
+					int h = 4 + Math.min(2, in) + r.nextInt(2);
+					for (int y = 0; y < h; y++) {
+						int n = r.nextInt(10);
+						set(level, o.offset(x, y, z), (n < 4 ? Blocks.MOSSY_COBBLESTONE : n < 7 ? Blocks.STONE : n < 9 ? Blocks.ANDESITE
+								: Blocks.COBBLESTONE).defaultBlockState());
+					}
+					set(level, o.offset(x, h, z), r.nextInt(3) == 0 ? Blocks.DARK_OAK_LEAVES.defaultBlockState()
+							.setValue(LeavesBlock.PERSISTENT, true) : Blocks.MOSS_BLOCK.defaultBlockState());
+				}
+			}
+		}
+		// The trees: close, a step or two apart, never on the way.
+		List<int[]> trunks = new ArrayList<>();
+		for (int gx = x0; gx <= x1; gx += 3) {
+			for (int gz = z0; gz <= z1; gz += 3) {
+				int tx = gx + r.nextInt(2), tz = gz + r.nextInt(2);
+				int kind = r.nextInt(10);
+				if (tx > x1 || tz > z1 || kind == 9) continue;
+				if (nearest(ways, o, tx, tz) < 1.8 || inside(open, tx, tz) || inRock(rock, tx, tz)) continue;
+				boolean thick = kind == 8 && tx + 1 <= x1 && tz + 1 <= z1 && nearest(ways, o, tx + 1, tz + 1) >= 1.8
+						&& nearest(ways, o, tx + 1, tz) >= 1.8 && nearest(ways, o, tx, tz + 1) >= 1.8
+						&& !inside(open, tx + 1, tz + 1) && !inRock(rock, tx + 1, tz + 1);
+				trunks.add(new int[]{tx, tz, 7 + r.nextInt(5), kind < 2 ? 1 : 0, thick ? 1 : 0});
+			}
+		}
+		for (int[] t : trunks) {
+			BlockState leaves = (t[3] == 1 ? Blocks.SPRUCE_LEAVES : Blocks.DARK_OAK_LEAVES).defaultBlockState()
+					.setValue(LeavesBlock.PERSISTENT, true);
+			int h = t[2];
+			for (int dx = -3; dx <= 3; dx++) {
+				for (int dz = -3; dz <= 3; dz++) {
+					for (int y = h - 3; y <= h + 1; y++) {
+						int reach = y >= h ? 1 : y == h - 3 ? 2 : 3;
+						if (Math.abs(dx) + Math.abs(dz) > reach + r.nextInt(2)) continue;
+						BlockPos p = o.offset(t[0] + dx, y, t[1] + dz);
+						if (level.getBlockState(p).isAir()) set(level, p, leaves);
+					}
+				}
+			}
+		}
+		for (int[] t : trunks) {
+			BlockState log = (t[3] == 1 ? Blocks.SPRUCE_LOG : Blocks.DARK_OAK_LOG).defaultBlockState();
+			for (int y = 0; y <= t[2]; y++) {
+				set(level, o.offset(t[0], y, t[1]), log);
+				if (t[4] == 1) {
+					set(level, o.offset(t[0] + 1, y, t[1]), log);
+					set(level, o.offset(t[0], y, t[1] + 1), log);
+					set(level, o.offset(t[0] + 1, y, t[1] + 1), log);
+				}
+			}
+		}
+		// Between them: ferns, dead bushes, a few mushrooms and stones.
+		for (int x = x0; x <= x1; x++) {
+			for (int z = z0; z <= z1; z++) {
+				double d = nearest(ways, o, x, z);
+				if (d < 1.3 || inside(open, x, z) || inRock(rock, x, z)) continue;
+				BlockPos p = o.offset(x, 0, z);
+				if (!level.getBlockState(p).isAir()) continue;
+				int n = r.nextInt(100);
+				if (n < 18) set(level, p, Blocks.FERN.defaultBlockState());
+				else if (n < 21) set(level, p, Blocks.DEAD_BUSH.defaultBlockState());
+				else if (n < 23) set(level, p, Blocks.BROWN_MUSHROOM.defaultBlockState());
+				else if (n < 25 && d > 2.4) {
+					set(level, p, Blocks.MOSSY_COBBLESTONE.defaultBlockState());
+					if (r.nextBoolean()) set(level, p.above(), Blocks.MOSSY_COBBLESTONE.defaultBlockState());
+				}
+			}
+		}
 	}
 
-	/**
-	 * Morning, grey. Out of the door: a fresh grave, the earth heaped beside it, a sign at its head
-	 * with your name on it. You look up from it: far off in the fog, it is standing there. You run;
-	 * over your shoulder, it is at the grave.
-	 */
-	private static void grave(ClientGameTestContext context, TestSingleplayerContext game, BlockPos spawn) {
-		TestServerContext server = game.getServer();
-		BlockPos floor = server.computeOnServer(s -> ForestGallery.clearing(s.overworld(), spawn.offset(160, 0, 40)));
-		if (floor == null) return;
-		BlockPos o = floor.above();
-		server.runOnServer(s -> {
-			ServerLevel level = s.overworld();
-			Cinematic.fellTrees(level, floor.offset(0, 0, 8), 24);
-			// The grave: a body's length, two deep, the earth heaped beside it.
-			for (int z = 0; z <= 1; z++) {
-				set(level, o.offset(0, 0, z), Blocks.AIR.defaultBlockState());
-				set(level, floor.offset(0, 0, z), Blocks.AIR.defaultBlockState());
-				set(level, floor.offset(0, -1, z), Blocks.AIR.defaultBlockState());
-				set(level, o.offset(1, 0, z), Blocks.COARSE_DIRT.defaultBlockState());
+	private static double nearest(List<Way> ways, BlockPos o, int x, int z) {
+		double best = Double.MAX_VALUE;
+		for (Way w : ways) best = Math.min(best, w.distance(o.getX() + x + 0.5, o.getZ() + z + 0.5));
+		return best;
+	}
+
+	private static boolean inside(double[][] open, int x, int z) {
+		if (open == null) return false;
+		for (double[] c : open) if (Math.hypot(x - c[0], z - c[1]) < c[2]) return true;
+		return false;
+	}
+
+	private static boolean inRock(int[] rock, int x, int z) {
+		return rock != null && x >= rock[0] - 1 && x <= rock[1] + 1 && z >= rock[2] - 1 && z <= rock[3] + 1;
+	}
+
+	/** A way through the trees: points in order, in the world; where along it a place is, and how far off it. */
+	static final class Way {
+		private final double[] xs, zs, at;
+
+		Way(double[] xs, double[] zs) {
+			this.xs = xs;
+			this.zs = zs;
+			this.at = new double[xs.length];
+			for (int i = 1; i < xs.length; i++) at[i] = at[i - 1] + Math.hypot(xs[i] - xs[i - 1], zs[i] - zs[i - 1]);
+		}
+
+		/** Points as (x, z) from the middle of {@code o}'s block. */
+		static Way local(BlockPos o, double[][] pts) {
+			double[] xs = new double[pts.length], zs = new double[pts.length];
+			for (int i = 0; i < pts.length; i++) {
+				xs[i] = o.getX() + 0.5 + pts[i][0];
+				zs[i] = o.getZ() + 0.5 + pts[i][1];
 			}
-			// The sign at its head, its words towards where you come from.
-			BlockPos at = o.offset(0, 0, -1);
-			BlockState sign = Blocks.DARK_OAK_SIGN.defaultBlockState().setValue(StandingSignBlock.ROTATION, RotationSegment.convertToSegment(0.0f));
-			set(level, at, sign);
-			if (level.getBlockEntity(at) instanceof SignBlockEntity entity) {
-				Compat.writeSign(entity, new String[]{"Here lies", "YOU", "", "Day 12"}, true);
-				entity.setWaxed(true);
-				entity.setChanged();
-				level.sendBlockUpdated(at, sign, sign, Block.UPDATE_ALL);
+			return new Way(xs, zs);
+		}
+
+		/** The way on from {@code (x, z)}: from there to the next point along, and on. */
+		Way from(double x, double z) {
+			double s = along(x, z);
+			int k = 1;
+			while (k < at.length - 1 && at[k] <= s + 0.5) k++;
+			double[] nx = new double[xs.length - k + 1], nz = new double[xs.length - k + 1];
+			nx[0] = x;
+			nz[0] = z;
+			System.arraycopy(xs, k, nx, 1, xs.length - k);
+			System.arraycopy(zs, k, nz, 1, zs.length - k);
+			return new Way(nx, nz);
+		}
+
+		double length() {
+			return at[at.length - 1];
+		}
+
+		/** The point {@code s} along it (past the end, on the way it was going). */
+		double[] point(double s) {
+			int i = 1;
+			while (i < at.length - 1 && at[i] < s) i++;
+			double u = s < 0 ? 0 : (s - at[i - 1]) / Math.max(1e-6, at[i] - at[i - 1]);
+			return new double[]{xs[i - 1] + (xs[i] - xs[i - 1]) * u, zs[i - 1] + (zs[i] - zs[i - 1]) * u};
+		}
+
+		/** How far along it the nearest point to {@code (x, z)} is. */
+		double along(double x, double z) {
+			double best = Double.MAX_VALUE, s = 0;
+			for (int i = 1; i < xs.length; i++) {
+				double dx = xs[i] - xs[i - 1], dz = zs[i] - zs[i - 1], len2 = dx * dx + dz * dz;
+				double u = len2 == 0 ? 0 : Mth.clamp(((x - xs[i - 1]) * dx + (z - zs[i - 1]) * dz) / len2, 0, 1);
+				double d = Math.hypot(xs[i - 1] + dx * u - x, zs[i - 1] + dz * u - z);
+				if (d < best) {
+					best = d;
+					s = at[i - 1] + u * (at[i] - at[i - 1]);
+				}
 			}
-		});
-		BlockPos far = server.computeOnServer(s -> Cinematic.standNear(s.overworld(), floor, 0, -22));
-		BlockPos atGrave = server.computeOnServer(s -> Cinematic.standNear(s.overworld(), floor, -2, -2));
-		Vec3 start = server.computeOnServer(s -> new Vec3(o.getX() + 0.8, Cinematic.ground(s.overworld(), o.getX(), o.getZ() + 9) + Cinematic.EYE, o.getZ() + 9.5));
-		Vec3 sign = Vec3.atBottomCenterOf(o.offset(0, 0, -1)).add(0, 0.85, 0);
-		Vec3 farHead = head(far, 2.6), graveHead = head(atGrave, 2.8);
-		Fear f = new Fear(start).face(sign);
-		f.heading = 180;
-		f.walk(48, 0.13, t -> sign);
-		f.stare(24, sign, 0.2);                      // reading it
-		f.swingTo(14, farHead);                      // up, past it
-		f.stare(12, farHead, 1.2);
-		f.swing(8, 0.0, 6, 0.14);                    // round, and run
-		int follow = f.size() + 6;
-		f.run(20, SPRINT, -0.3);
-		f.lookBack(7, 11, 7, graveHead);
-		f.run(10, SPRINT, 0.0);
-		prepare(context, game, start, sign, 0);
-		Cinematic.place(server, far, start, Cinematic.Look.STARING);
-		context.waitTicks(25);
-		record(context, server, "grave", f.ground(server), f.steps(), t -> {
-			if (t == follow) Cinematic.place(server, atGrave, start, CHASING);
-		});
+			return s;
+		}
+
+		double along(Vec3 p) {
+			return along(p.x, p.z);
+		}
+
+		double distance(double x, double z) {
+			double[] p = point(along(x, z));
+			return Math.hypot(p[0] - x, p[1] - z);
+		}
 	}
 
 	// ------------------------------------------------------------------ a frightened person
 
 	/**
 	 * How a frightened person carries a camera, a tick at a time: where they are, which way they
-	 * are going and which way they look, how fast, and how hard their running shakes it. Turns are
-	 * a head's (fast, a little past and back); a run has a stride, three steps a second, the eye
-	 * rising and dropping with each, leaning into it; standing, they breathe and their hands shake.
+	 * are going and which way they look, how fast, how hard their running shakes it, and how far
+	 * it tips. Turns are a head's (fast, a little past and back); a run has a stride, three steps a
+	 * second, the eye rising and dropping with each, the shoulders rocking, leaning into the bends
+	 * of the way, the head looking round them before the body gets there; standing, they breathe
+	 * and their hands shake.
 	 */
 	static final class Fear {
-		/** x, z, yaw, pitch, lift (the eye dropped or raised), speed, tremble, stride phase. */
+		/** x, z, yaw, pitch, lift (the eye dropped or raised), speed, tremble, stride phase, roll, on their feet. */
 		private final List<double[]> poses = new ArrayList<>();
-		private final List<Integer> steps = new ArrayList<>();
-		double x, z, heading, yaw, pitch, speed, phase, lift, tremble;
+		private final List<String> marks = new ArrayList<>();
+		double x, z, heading, yaw, pitch, speed, phase, lift, tremble, roll;
+		private boolean feet = true;
+		private Way way;
 		private final double eyeY;
 
 		Fear(Vec3 eye) {
@@ -408,12 +654,28 @@ final class Reel {
 		Fear face(Vec3 at) {
 			yaw = yawTo(at);
 			pitch = pitchTo(at);
+			heading = way != null ? ahead(2.4) : yaw;
 			return this;
+		}
+
+		/** From now on, going along {@code w}. */
+		void follow(Way w) {
+			way = w;
+			heading = ahead(2.4);
+		}
+
+		/** Something heard here, for the edit. */
+		void mark(String kind) {
+			markAt(poses.size(), kind);
+		}
+
+		void markAt(int tick, String kind) {
+			marks.add(tick + " " + kind);
 		}
 
 		/** Where they are at tick {@code i} (at the height they started at). */
 		Vec3 at(int i) {
-			double[] p = poses.get(Math.min(i, poses.size() - 1));
+			double[] p = poses.get(Mth.clamp(i, 0, poses.size() - 1));
 			return new Vec3(p[0], eyeY, p[1]);
 		}
 
@@ -426,11 +688,37 @@ final class Reel {
 		}
 
 		private double pitchTo(Vec3 p) {
-			return -Math.toDegrees(Math.atan2(p.y - eyeY, Math.hypot(p.x - x, p.z - z)));
+			return -Math.toDegrees(Math.atan2(p.y - (eyeY + lift), Math.hypot(p.x - x, p.z - z)));
 		}
 
 		private static double toward(double from, double to, double rate) {
 			return from + Mth.wrapDegrees(to - from) * rate;
+		}
+
+		/**
+		 * Whether {@code at} is in front of them now (inside what the upright frame shows across)
+		 * and not behind {@code rock} (x0, x1, z0, z1 from {@code o}).
+		 */
+		boolean sees(Vec3 at, BlockPos o, int[] rock) {
+			if (Math.abs(Mth.wrapDegrees(yawTo(at) - yaw)) > 24.0) return false;
+			for (int i = 1; i < 40; i++) {
+				double u = i / 40.0;
+				int bx = Mth.floor(x + (at.x - x) * u) - o.getX(), bz = Mth.floor(z + (at.z - z) * u) - o.getZ();
+				if (bx >= rock[0] && bx <= rock[1] && bz >= rock[2] && bz <= rock[3]) return false;
+			}
+			return true;
+		}
+
+		/** Which way the way goes from here, {@code by} blocks on. */
+		private double ahead(double by) {
+			double[] p = way.point(way.along(x, z) + by);
+			return Math.toDegrees(Math.atan2(-(p[0] - x), p[1] - z));
+		}
+
+		/** Bent along the way, as a runner cuts a bend: no faster than {@code rate} degrees a tick. */
+		private void steer(double rate) {
+			if (way == null) return;
+			heading += Mth.clamp(Mth.wrapDegrees(ahead(2.4) - heading), -rate, rate);
 		}
 
 		/** One tick on: speed eased towards {@code to}, a step taken whenever a foot comes down. */
@@ -442,11 +730,11 @@ final class Reel {
 			double before = phase;
 			// A stride (two steps) is about three and a half blocks at a sprint.
 			phase += speed * Math.PI * 2 / 3.6;
-			if (speed > 0.03 && Math.floor(before / Math.PI) != Math.floor(phase / Math.PI)) steps.add(poses.size());
+			if (feet && speed > 0.03 && Math.floor(before / Math.PI) != Math.floor(phase / Math.PI)) mark("step");
 		}
 
 		private void push() {
-			poses.add(new double[]{x, z, yaw, pitch, lift, speed, tremble, phase});
+			poses.add(new double[]{x, z, yaw, pitch, lift, speed, tremble, phase, roll, feet ? 1 : 0});
 		}
 
 		/** Stood (whatever way they were going slowing to nothing), looking at {@code at}, shaking as much as {@code shake}. */
@@ -457,18 +745,33 @@ final class Reel {
 				pitch += (pitchTo(at) - pitch) * 0.3;
 				tremble += (shake - tremble) * 0.2;
 				lift *= 0.85;
+				roll *= 0.9;
 				push();
 			}
 		}
 
-		/** Walking on as they were going, looking about. */
+		/** Walking on as they were going (along the way, if there is one), looking about. */
 		void walk(int n, double pace, IntFunction<Vec3> look) {
 			for (int i = 0; i < n; i++) {
+				steer(6);
 				step(pace, 0.02);
 				Vec3 at = look.apply(i);
 				yaw = toward(yaw, yawTo(at), 0.18);
 				pitch += (pitchTo(at) - pitch) * 0.18;
 				tremble *= 0.9;
+				roll *= 0.9;
+				push();
+			}
+		}
+
+		/** The head turned slowly to {@code at}: not wanting to look, looking. */
+		void turnTo(int n, Vec3 at) {
+			double y0 = yaw, p0 = pitch;
+			for (int i = 1; i <= n; i++) {
+				double u = smooth((double) i / n);
+				step(0, 0.03);
+				yaw = y0 + Mth.wrapDegrees(yawTo(at) - y0) * u;
+				pitch = p0 + (pitchTo(at) - p0) * u;
 				push();
 			}
 		}
@@ -495,46 +798,52 @@ final class Reel {
 				step(pace * i / n, 0.05);
 				yaw = y0 + d * u;
 				pitch = p0 + (lean - p0) * u;
+				roll += (-Math.signum(d) * 9 * Math.sin(u * Math.PI) - roll) * 0.5;
 				tremble *= 0.9;
 				push();
 			}
 			heading = to;
 		}
 
-		/** Running, bending a little as they go ({@code curve} degrees a tick), leaning into it. */
+		/** Running, along the way if there is one (else bending {@code curve} degrees a tick), leaning into it. */
 		void run(int n, double pace, double curve) {
-			for (int i = 0; i < n; i++) {
-				heading += curve;
-				step(pace, 0.05);
-				yaw = toward(yaw, heading, 0.45);
-				pitch += (5.0 + speed * 10 - pitch) * 0.3;
-				lift *= 0.8;
-				tremble *= 0.9;
-				push();
-			}
+			for (int i = 0; i < n; i++) runTick(pace, curve);
+		}
+
+		/** Running on until {@code left} blocks from the end of the way. */
+		void runTo(double left, double pace) {
+			runUntil(way.length() - left, pace);
+		}
+
+		/** Running on until {@code s} along the way. */
+		void runUntil(double s, double pace) {
+			for (int i = 0; i < 120 && way.along(x, z) < s; i++) runTick(pace, 0);
+		}
+
+		private void runTick(double pace, double curve) {
+			if (way != null) steer(10);
+			else heading += curve;
+			step(pace, 0.05);
+			yaw = toward(yaw, way != null ? ahead(5.0) : heading, 0.4);
+			pitch += (5.0 + speed * 10 - pitch) * 0.3;
+			lift *= 0.8;
+			tremble *= 0.9;
+			roll *= 0.8;
+			push();
 		}
 
 		/** Over the shoulder while still running: round to {@code at}, held there, and back again. */
 		void lookBack(int turn, int hold, int back, Vec3 at) {
 			int total = turn + hold + back;
 			for (int i = 0; i < total; i++) {
+				steer(10);
 				step(SPRINT * 0.8, 0.04);
 				double u = i < turn ? overshoot((i + 1.0) / turn) : i < turn + hold ? 1.0 : 1.0 - smooth((i - turn - hold + 1.0) / back);
-				double ahead = heading, there = yawTo(at);
-				yaw = ahead + Mth.wrapDegrees(there - ahead) * u;
+				double forward = way != null ? ahead(4.0) : heading, there = yawTo(at);
+				yaw = forward + Mth.wrapDegrees(there - forward) * u;
 				pitch = (5.0 + speed * 10) * (1 - u) + pitchTo(at) * u;
+				roll += (Math.signum(Mth.wrapDegrees(there - forward)) * 7 * u - roll) * 0.3;
 				tremble += ((i >= turn && i < turn + hold ? 1.3 : 0.4) - tremble) * 0.3;
-				push();
-			}
-		}
-
-		/** A foot caught: down towards the ground, nearly falling, slowed right down. */
-		void stumble(int n) {
-			for (int i = 0; i < n; i++) {
-				step(0.05, 0.09);
-				pitch += (40 - pitch) * 0.4;
-				lift += (-0.6 - lift) * 0.4;
-				tremble += (1.6 - tremble) * 0.4;
 				push();
 			}
 		}
@@ -551,66 +860,111 @@ final class Reel {
 			}
 		}
 
-		/** Under, all the way, and stay there. */
-		void dive(int n) {
-			for (int i = 0; i < n; i++) {
-				step(0.04, 0.03);
-				lift += (-1.1 - lift) * 0.25;
-				pitch += (25 - pitch) * 0.2;
-				tremble += (1.0 - tremble) * 0.3;
+		/** Running, and in through somewhere, and round: slowing hard, the head round to {@code at} first. */
+		void stopAndTurn(int n, Vec3 at) {
+			double y0 = yaw, p0 = pitch;
+			for (int i = 1; i <= n; i++) {
+				double u = overshoot((double) i / n);
+				step(0, 0.06);
+				yaw = y0 + Mth.wrapDegrees(yawTo(at) - y0) * u;
+				pitch = p0 + (pitchTo(at) - p0) * u;
+				roll += (8 * Math.sin(u * Math.PI) - roll) * 0.5;
+				tremble += (0.9 - tremble) * 0.2;
 				push();
 			}
 		}
 
-		List<Integer> steps() {
-			return steps;
+		/** Stopped dead, as if they had run into a wall, the eyes going up to {@code at}. */
+		void halt(int n, Vec3 at) {
+			for (int i = 0; i < n; i++) {
+				step(0, 0.09);
+				yaw = toward(yaw, yawTo(at), 0.45);
+				pitch += (pitchTo(at) - pitch) * 0.45;
+				tremble += (2.0 - tremble) * 0.5;
+				lift += (-0.1 - lift) * 0.4;
+				roll *= 0.7;
+				push();
+			}
 		}
 
-		/** The poses on the ground, the eye at a person's height over it, rising and falling with each step. */
-		double[][] ground(TestServerContext server) {
+		/** Struck: thrown back from {@code from}, off their feet, the world going over, down on the ground. */
+		void knocked(int n, Vec3 from) {
+			mark("hit");
+			heading = yawTo(from) + 180.0;
+			double y0 = yaw, p0 = pitch, r0 = roll;
+			feet = false;
+			for (int i = 1; i <= n; i++) {
+				double u = (double) i / n;
+				speed = 0.24 * (1 - u);
+				step(speed, 0);
+				lift = LYING * u * u;
+				yaw = y0 + 34 * Math.sin(Math.min(1, u * 1.7) * Math.PI / 2) - 10 * u;
+				pitch = p0 + (-52 - p0) * smooth(u * 1.2);
+				roll = r0 + 58 * Math.sin(Math.min(1, u * 1.5) * Math.PI / 2);
+				tremble = 2.4;
+				push();
+			}
+			mark("land");
+		}
+
+		/** Down on the ground on their back, looking up at {@code at}, gasping, shaking; the tilt easing to {@code tilt}. */
+		void down(int n, IntFunction<Vec3> at, double tilt) {
+			for (int i = 0; i < n; i++) {
+				step(0, 0.1);
+				// The bounce of hitting the ground, and then flat.
+				lift = LYING + (i < 4 ? 0.09 * Math.sin(i / 4.0 * Math.PI) : 0);
+				Vec3 a = at.apply(i);
+				yaw = toward(yaw, yawTo(a), 0.22);
+				pitch += (pitchTo(a) - pitch) * 0.22;
+				roll += (tilt - roll) * 0.12;
+				tremble += (1.7 - tremble) * 0.3;
+				push();
+			}
+		}
+
+		/** Dragged along the ground on their back towards {@code toward} (a heading), in tugs, looking up at what has them. */
+		void dragged(int n, double toward) {
+			heading = toward;
+			double r = Math.toRadians(toward);
+			for (int i = 0; i < n; i++) {
+				if (i % 14 == 0) mark("tug");
+				double c = (i % 14) / 14.0;
+				double pull = c < 0.38 ? Math.sin(c / 0.38 * Math.PI) : 0.0;
+				speed = 0.012 + 0.3 * pull;
+				step(speed, 0);
+				// What has them is always just there, a little ahead, over them.
+				Vec3 it = new Vec3(x - Math.sin(r) * 2.0, eyeY + 0.4, z + Math.cos(r) * 2.0);
+				yaw = Fear.toward(yaw, yawTo(it), 0.3) + pull * 3.5 * Math.sin(i * 1.7);
+				pitch += (pitchTo(it) - pitch) * 0.3;
+				pitch += pull * 4.0;
+				lift = LYING + 0.06 * pull * Math.abs(Math.sin(i * 2.3));
+				roll += (14 + 7 * Math.sin(i * 0.37) + pull * 9 - roll) * 0.3;
+				tremble += (1.5 - tremble) * 0.3;
+				push();
+			}
+		}
+
+		List<String> marks() {
+			return marks;
+		}
+
+		/** The poses on level ground at {@code groundY}: the eye at a person's height over it, rising and falling with each step. */
+		double[][] flat(double groundY) {
 			int n = poses.size();
-			double[] xs = new double[n], zs = new double[n];
-			for (int i = 0; i < n; i++) {
-				xs[i] = poses.get(i)[0];
-				zs[i] = poses.get(i)[1];
-			}
-			int[] g = server.computeOnServer(s -> {
-				int[] out = new int[n];
-				for (int i = 0; i < n; i++) out[i] = Cinematic.ground(s.overworld(), Mth.floor(xs[i]), Mth.floor(zs[i]));
-				return out;
-			});
 			double[][] out = new double[n][];
-			double y = g.length > 0 ? g[0] : 0;
-			for (int i = 0; i < n; i++) {
-				// Up a step quickly, down one a little slower, as legs do.
-				y += (g[i] - y) * (g[i] > y ? 0.5 : 0.3);
-				out[i] = finish(i, y + Cinematic.EYE, false);
-			}
+			for (int i = 0; i < n; i++) out[i] = finish(i, groundY + Cinematic.EYE);
 			return out;
 		}
 
-		/** The poses in the water: the eye at the surface, ducking under with each stroke. */
-		double[][] water(double surface) {
-			int n = poses.size();
-			double[][] out = new double[n][];
-			for (int i = 0; i < n; i++) out[i] = finish(i, surface, true);
-			return out;
-		}
-
-		/** x, y, z, yaw, pitch for tick {@code i}: the stride and the shaking hands put in. */
-		private double[] finish(int i, double base, boolean swimming) {
+		/** x, y, z, yaw, pitch, roll for tick {@code i}: the stride and the shaking hands put in. */
+		private double[] finish(int i, double base) {
 			double[] p = poses.get(i);
-			double px = p[0], pz = p[1], yw = p[2], pt = p[3], lf = p[4], sp = p[5], tr = p[6], ph = p[7];
-			double run = Mth.clamp(sp / SPRINT, 0, 1);
-			double bob, sway;
-			if (swimming) {
-				// Treading water, and then the strokes: under a little with every one.
-				bob = 0.07 * Math.sin(i * 0.21) + (sp > 0.03 ? 0.13 * Math.sin(ph) : 0.0);
-				sway = 0.05 * Math.sin(ph * 0.5);
-			} else {
-				bob = (0.03 + 0.11 * run) * (Math.abs(Math.sin(ph)) - 0.55) * (sp > 0.01 ? 1 : 0);
-				sway = (0.02 + 0.06 * run) * Math.sin(ph) * (sp > 0.01 ? 1 : 0);
-			}
+			double px = p[0], pz = p[1], yw = p[2], pt = p[3], lf = p[4], sp = p[5], tr = p[6], ph = p[7], rl = p[8];
+			boolean standing = p[9] > 0;
+			double run = standing ? Mth.clamp(sp / SPRINT, 0, 1) : 0;
+			double moving = standing && sp > 0.01 ? 1 : 0;
+			double bob = (0.03 + 0.11 * run) * (Math.abs(Math.sin(ph)) - 0.55) * moving;
+			double sway = (0.02 + 0.06 * run) * Math.sin(ph) * moving;
 			// Hands that will not keep still: slow drift, faster shaking, both worse with fear.
 			double drift = 0.6 * Math.sin(i * 0.29 + 0.3) + 0.4 * Math.sin(i * 0.71 + 1.1) + 0.25 * Math.sin(i * 1.93 + 2.0);
 			double shake = Math.sin(i * 2.7) * 0.5 + Math.sin(i * 3.9 + 1.0) * 0.4;
@@ -618,10 +972,13 @@ final class Reel {
 			double yawOut = yw + drift * hands * 0.9 + shake * tr * 0.9 + 2.4 * run * Math.sin(ph);
 			// Each footfall jolts the view down a touch.
 			double fall = Math.pow(1 - Math.abs(Math.sin(ph)), 6) * 3.0 * run;
-			double pitchOut = Mth.clamp(pt + drift * hands * 0.5 + shake * tr * 0.7 + fall, -80, 85);
+			double pitchOut = Mth.clamp(pt + drift * hands * 0.5 + shake * tr * 0.7 + fall, -85, 85);
+			// The tilt: the shoulders rocking with the stride, leaning into a turn, the hands.
+			double turned = i > 0 ? Mth.wrapDegrees(yw - poses.get(i - 1)[2]) : 0;
+			double rollOut = rl + 1.8 * run * Math.sin(ph) - Mth.clamp(turned * 0.3, -6, 6) + drift * 0.8 + shake * tr * 0.7;
 			double r = Math.toRadians(yw);
 			double sx = Math.cos(r) * sway, sz = Math.sin(r) * sway;
-			return new double[]{px + sx, base + bob + lf, pz + sz, yawOut, pitchOut};
+			return new double[]{px + sx, base + bob + lf, pz + sz, yawOut, pitchOut, rollOut};
 		}
 
 		private static double overshoot(double u) {
@@ -636,10 +993,16 @@ final class Reel {
 		return Vec3.atBottomCenterOf(feet).add(0, up, 0);
 	}
 
+	/** A point from the middle of {@code o}'s block, at {@code y} above its floor. */
+	private static Vec3 local(BlockPos o, double x, double y, double z) {
+		return new Vec3(o.getX() + 0.5 + x, o.getY() + y, o.getZ() + 0.5 + z);
+	}
+
 	/** Time of day, the camera put where the clip begins, the world round it drawn. */
 	private static void prepare(ClientGameTestContext context, TestSingleplayerContext game, Vec3 eye, Vec3 look, int time) {
 		TestServerContext server = game.getServer();
 		server.runCommand("kill " + ALL);
+		server.runCommand("kill " + BODY);
 		server.runCommand("time set " + time);
 		Vec3 d = look.subtract(eye);
 		server.runCommand(tp(eye, Math.toDegrees(Math.atan2(-d.x, d.z)), -Math.toDegrees(Math.atan2(d.y, Math.sqrt(d.x * d.x + d.z * d.z)))));
@@ -651,13 +1014,14 @@ final class Reel {
 
 	/** A frame every tick, the camera moved first; {@code cue} for anything that happens at a tick. */
 	private static void record(ClientGameTestContext context, TestServerContext server, String name, double[][] poses,
-							   List<Integer> steps, IntConsumer cue) {
+							   Fear f, IntConsumer cue) {
 		Path dir = DIR.resolve(name);
 		try {
 			Files.createDirectories(dir);
-			StringBuilder sb = new StringBuilder();
-			for (int s : steps) sb.append(s).append('\n');
-			Files.writeString(dir.resolve("steps.txt"), sb.toString());
+			Files.writeString(dir.resolve("marks.txt"), String.join("\n", f.marks()) + "\n");
+			StringBuilder roll = new StringBuilder();
+			for (double[] p : poses) roll.append(String.format(Locale.ROOT, "%.2f%n", p[5]));
+			Files.writeString(dir.resolve("roll.txt"), roll.toString());
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
@@ -683,32 +1047,6 @@ final class Reel {
 	private static double smooth(double x) {
 		double c = Mth.clamp(x, 0.0, 1.0);
 		return c * c * (3 - 2 * c);
-	}
-
-	/**
-	 * Nothing in the way where they run: a person goes round a candle, a headstone or a fence, not
-	 * through it, so whatever stands within a step of their path is taken away first.
-	 */
-	private static void clearPath(TestServerContext server, Fear f) {
-		server.runOnServer(s -> {
-			ServerLevel level = s.overworld();
-			for (int i = 0; i < f.size(); i++) {
-				Vec3 at = f.at(i);
-				int feet = Mth.floor(at.y - Cinematic.EYE);
-				for (int dx = -1; dx <= 1; dx++) {
-					for (int dz = -1; dz <= 1; dz++) {
-						for (int dy = -3; dy <= 3; dy++) {
-							BlockPos pos = new BlockPos(Mth.floor(at.x) + dx, feet + dy, Mth.floor(at.z) + dz);
-							Block block = level.getBlockState(pos).getBlock();
-							if (block instanceof CandleBlock || block instanceof WallBlock || block instanceof FenceBlock
-									|| block instanceof SignBlock || block instanceof ChestBlock) {
-								set(level, pos, Blocks.AIR.defaultBlockState());
-							}
-						}
-					}
-				}
-			}
-		});
 	}
 
 	private static void set(ServerLevel level, BlockPos pos, BlockState state) {
