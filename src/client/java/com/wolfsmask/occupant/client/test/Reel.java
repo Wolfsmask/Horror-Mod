@@ -804,8 +804,8 @@ final class Reel {
 			x += -Math.sin(r) * speed;
 			z += Math.cos(r) * speed;
 			double before = phase;
-			// A stride (two steps) is about three and a half blocks at a sprint, give or take.
-			phase += speed * Math.PI * 2 / (3.6 * stride);
+			// A step is longer the faster they go: under a block walking, nearly two at a sprint; give or take.
+			phase += speed * Math.PI / ((0.55 + 4.6 * speed) * stride);
 			if (feet && speed > 0.03 && Math.floor(before / Math.PI) != Math.floor(phase / Math.PI)) {
 				mark("step");
 				stride = 0.9 + uneven.nextDouble() * 0.2;
