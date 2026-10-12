@@ -1027,7 +1027,7 @@ final class Reel {
 				if (round * side < 0) round += 360.0 * side;
 				yaw = forward + round * u;
 				pitch = (5.0 + speed * 10) * (1 - u) + pitchTo(at) * u;
-				roll += (Math.signum(Mth.wrapDegrees(there - forward)) * 7 * u - roll) * 0.3;
+				roll += (side * 7 * u - roll) * 0.3;
 				tremble += ((i >= turn && i < turn + hold ? 1.3 : 0.4) - tremble) * 0.3;
 				push();
 			}
