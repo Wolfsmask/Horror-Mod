@@ -1016,12 +1016,16 @@ final class Reel {
 		/** Over the shoulder while still running: round to {@code at}, held there, and back again. */
 		void lookBack(int turn, int hold, int back, Vec3 at) {
 			int total = turn + hold + back;
+			// Over one shoulder, and that shoulder all the way: never round the other way halfway through.
+			double side = Math.signum(Mth.wrapDegrees(yawTo(at) - (way != null ? ahead(4.0) : heading)));
 			for (int i = 0; i < total; i++) {
 				steer(10);
 				step(SPRINT * 0.8, 0.04);
 				double u = i < turn ? overshoot((i + 1.0) / turn) : i < turn + hold ? 1.0 : 1.0 - smooth((i - turn - hold + 1.0) / back);
 				double forward = way != null ? ahead(4.0) : heading, there = yawTo(at);
-				yaw = forward + Mth.wrapDegrees(there - forward) * u;
+				double round = Mth.wrapDegrees(there - forward);
+				if (round * side < 0) round += 360.0 * side;
+				yaw = forward + round * u;
 				pitch = (5.0 + speed * 10) * (1 - u) + pitchTo(at) * u;
 				roll += (Math.signum(Mth.wrapDegrees(there - forward)) * 7 * u - roll) * 0.3;
 				tremble += ((i >= turn && i < turn + hold ? 1.3 : 0.4) - tremble) * 0.3;
