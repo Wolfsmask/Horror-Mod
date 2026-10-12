@@ -64,6 +64,8 @@ final class Reel {
 	private static final double SPRINT = 0.27;
 	/** On their back on the ground, the head lifted to see: how high their eyes are. */
 	private static final double LIE = 0.45;
+	/** Up on their elbows on their back, to see what is being done to them: how high their eyes are. */
+	private static final double PROPPED = 0.85;
 	/** On their front, crawling, the head up: how high their eyes are. */
 	private static final double CRAWL = 0.52;
 	/** Their body, on the ground under the camera once it has them. */
@@ -103,6 +105,7 @@ final class Reel {
 			BlockPos floor = server.computeOnServer(s -> ForestGallery.clearing(s.overworld(), woods[0].offset(60, 0, -60)));
 			if (floor != null) {
 				Cabin cabin = Cabin.build(server, floor.above());
+				clip("calib", () -> calib(context, game, cabin));
 				clip("house", () -> house(context, game, cabin));
 				clip("window", () -> window(context, game, cabin));
 				clip("taken", () -> taken(context, game, cabin));
@@ -299,14 +302,15 @@ final class Reel {
 		Vec3 toward = new Vec3(-1.2, 0, 2.4).normalize();
 		Vec3 stands = lying.add(toward.scale(2.6));
 		Vec3 over = stands.add(toward.scale(-1.3)).add(0, 2.4, 0);
-		Vec3 along = lying.add(toward.scale(1.4)).add(0, 0.55, 0);
-		// On their back: up at it; then down along themselves, as its legs come down into them.
-		f.lie(6, LIE, t -> over, 12.0, 0.25);
-		f.lie(18, LIE, t -> along, 7.0, 0.2);
-		int[][] stabs = {{down + 7, 2}, {down + 10, 1}, {down + 13, 2}, {down + 16, 1}, {down + 19, 3}, {down + 23, 1}};
-		f.markAt(down + 7, "stab");
+		Vec3 along = lying.add(toward.scale(1.7)).add(0, 0.1, 0);
+		// On their back: up at it; then up on their elbows, looking down at themselves, as its legs
+		// come down into them.
+		f.lie(5, LIE, t -> over, 12.0, 0.3);
+		f.lie(19, PROPPED, t -> along, 6.0, 0.35);
+		int[][] stabs = {{down + 8, 2}, {down + 11, 1}, {down + 13, 2}, {down + 16, 1}, {down + 18, 3}, {down + 22, 1}};
+		f.markAt(down + 8, "stab");
 		f.markAt(down + 13, "stab");
-		f.markAt(down + 19, "stab");
+		f.markAt(down + 18, "stab");
 		// Over onto their front, and away, back the way they came: clawing along the ground.
 		f.rollOver(9, Fear.yawBetween(lying, local(o, 0.3, 0, 21.5)), CRAWL);
 		int crawl = f.size();
@@ -318,9 +322,9 @@ final class Reel {
 		int twist = f.size();
 		double pull = Fear.yawBetween(f.at(twist), held);
 		double reach = horizontal(held.subtract(f.at(twist))).length();
-		f.twistBack(7, held.add(0, 2.3, 0), pull, 0.06, LIE);
+		f.twistBack(7, held.add(0, 1.2, 0), pull, 0.06, PROPPED);
 		int drag = f.size();
-		f.dragged(36, pull, reach, 2.3, ground, LIE);
+		f.dragged(36, pull, reach, 1.2, ground, PROPPED);
 		f.mark("end");
 		double[][] poses = f.flat(ground);
 		Vec3 crawlFrom = cam(poses, crawl), twistFrom = cam(poses, twist);
@@ -350,9 +354,10 @@ final class Reel {
 				Vec3 at = it.apply(t);
 				float yaw = (float) Fear.yawBetween(at, eye);
 				float pitch = (float) -Math.toDegrees(Math.atan2(eye.y - (at.y + 2.4), Math.hypot(eye.x - at.x, eye.z - at.z)));
-				// Their body: from under the camera towards it, its head at the camera.
+				// Their body: from under the camera towards it, its head just behind the camera (a
+				// crawling body's head is about 0.7 ahead of where it stands).
 				Vec3 to = horizontal(at.subtract(eye)).normalize();
-				Vec3 body = new Vec3(eye.x + to.x * 0.95, ground, eye.z + to.z * 0.95);
+				Vec3 body = new Vec3(eye.x + to.x * 0.55, ground, eye.z + to.z * 0.55);
 				float bodyYaw = (float) Fear.yawBetween(body, eye);
 				if (t >= hit + 2) {
 					server.runCommand(String.format(Locale.ROOT, "tp %s %.3f %.3f %.3f %.1f 0", SELF, body.x, body.y, body.z, bodyYaw));
@@ -400,6 +405,40 @@ final class Reel {
 	private static Vec3 cam(double[][] poses, int t) {
 		double[] p = poses[Mth.clamp(t, 0, poses.length - 1)];
 		return new Vec3(p[0], 0, p[2]);
+	}
+
+	/**
+	 * Not part of the film: their body lying each way it can lie, from the side and from above, a
+	 * gold block on its +z side, so where to put it under the camera can be worked out.
+	 */
+	private static void calib(ClientGameTestContext context, TestSingleplayerContext game, Cabin cabin) {
+		TestServerContext server = game.getServer();
+		Vec3 at = local(cabin.o, 0, 0, -6);
+		BlockPos mark = BlockPos.containing(at.x, at.y, at.z + 2);
+		prepare(context, game, at.add(3.5, 0.6, 0), at, 6000);
+		server.runOnServer(s -> set(s.overworld(), mark, Blocks.GOLD_BLOCK.defaultBlockState()));
+		Path dir = DIR.resolve("calib");
+		int k = 0;
+		try {
+			Files.createDirectories(dir);
+			for (String pose : new String[]{"swimming", "sleeping"}) {
+				server.runCommand("kill " + SELF);
+				server.runCommand(String.format(Locale.ROOT, "summon mannequin %.3f %.3f %.3f {pose:\"%s\",Rotation:[0f,0f],immovable:1b,"
+						+ "NoGravity:1b,Invulnerable:1b,hide_description:1b,Tags:[\"occupant_self\"]}", at.x, at.y, at.z, pose));
+				context.waitTicks(30);
+				for (double[] view : new double[][]{{3.5, 0.6, 0, 90, 5}, {0, 4.0, 0, 0, 90}}) {
+					server.runCommand(tp(at.add(view[0], view[1], view[2]), view[3], view[4]));
+					context.waitTicks(4);
+					Path shot = context.takeScreenshot("reel-calib-" + k);
+					Files.move(shot, dir.resolve(String.format(Locale.ROOT, "%04d.png", k++)), StandardCopyOption.REPLACE_EXISTING);
+				}
+			}
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		} finally {
+			server.runCommand("kill " + SELF);
+			server.runOnServer(s -> set(s.overworld(), mark, Blocks.AIR.defaultBlockState()));
+		}
 	}
 
 	// ------------------------------------------------------------------ the places
@@ -1064,7 +1103,7 @@ final class Reel {
 				double u = overshoot((double) i / n);
 				speed = pace;
 				step(pace, 0);
-				lift = height - Cinematic.EYE;
+				lift += (height - Cinematic.EYE - lift) * 0.4;
 				yaw = y0 + Mth.wrapDegrees(yawTo(at) - y0) * u;
 				pitch = p0 + (pitchTo(at) - p0) * u;
 				roll += (-30 - roll) * 0.3;
