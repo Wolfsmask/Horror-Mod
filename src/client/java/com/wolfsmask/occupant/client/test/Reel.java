@@ -224,7 +224,7 @@ final class Reel {
 		cabin.door(server, cabin.back, false);
 		Vec3 start = local(o, 1.6, Cinematic.EYE, 4.6);
 		Vec3 door = local(o, 0, 1.2, -1);
-		Vec3 glass = local(o, -4, 2.0, 3);
+		Vec3 glass = local(o, -4, 2.4, 3);
 		Vec3 trees = local(o, -12, 1.2, 3);
 		// Far enough out that, stooping under the lean-to, its face comes to the glass and not into the wall.
 		BlockPos outside = o.offset(-8, 0, 3);
@@ -523,18 +523,18 @@ final class Reel {
 					for (int k = 1; k <= 4; k++) if (Math.abs(x) <= 5 - k) set(level, o.offset(x, 4 + k, z), roof);
 				}
 			}
+			// The windows: on the west side tall, nearly to the eaves, so that whatever is outside it
+			// is seen whole; on the east an ordinary one.
 			for (int z = 2; z <= 4; z++) {
-				for (int y = 1; y <= 2; y++) {
-					set(level, o.offset(-4, y, z), Blocks.GLASS.defaultBlockState());
-					set(level, o.offset(4, y, z), Blocks.GLASS.defaultBlockState());
-				}
+				for (int y = 1; y <= 3; y++) set(level, o.offset(-4, y, z), Blocks.GLASS.defaultBlockState());
+				for (int y = 1; y <= 2; y++) set(level, o.offset(4, y, z), Blocks.GLASS.defaultBlockState());
 			}
-				// A lean-to along the west wall, for wood: low, so that whatever stands under it stoops.
+				// A lean-to along the west wall, for wood: low enough that whatever stands under it stoops.
 			for (int x = -10; x <= -5; x++) {
-				for (int z = -1; z <= 7; z++) set(level, o.offset(x, 3, z), Blocks.SPRUCE_PLANKS.defaultBlockState());
+				for (int z = -1; z <= 7; z++) set(level, o.offset(x, 4, z), Blocks.SPRUCE_PLANKS.defaultBlockState());
 			}
 			for (int z : new int[]{-1, 7}) {
-				for (int y = 0; y <= 2; y++) set(level, o.offset(-10, y, z), Blocks.SPRUCE_LOG.defaultBlockState());
+				for (int y = 0; y <= 3; y++) set(level, o.offset(-10, y, z), Blocks.SPRUCE_LOG.defaultBlockState());
 			}
 			// A barrel for a table with the lamp on it, a bench, shelves, cobwebs in the corners.
 			set(level, o.offset(-2, 0, 5), Blocks.BARREL.defaultBlockState());
