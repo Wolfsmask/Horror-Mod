@@ -163,7 +163,9 @@ final class Reel {
 		f.swing(9, 180.0, 6, 0.15);                  // round, and run
 		int gone = f.size();                          // out of sight: and then simply not there
 		f.follow(back.from(f.x, f.z));
-		f.run(28, SPRINT, 0);
+		f.run(13, SPRINT, 0);
+		f.trip(7);
+		f.run(10, SPRINT, 0);
 		f.mark("look");
 		f.lookBack(7, 11, 7, face);
 		f.run(10, SPRINT, 0);
@@ -196,6 +198,7 @@ final class Reel {
 		BlockPos behind = BlockPos.containing(b[0], o.getY(), b[1]);
 		f.lookBack(7, 12, 7, head(behind, 2.8));
 		f.markAt(look + 6, "seen");
+		f.glancing = false;
 		f.runTo(1.2, SPRINT);
 		Vec3 doorway = local(o, 0, 1.4, -1);
 		f.stopAndTurn(10, doorway);                  // in, and round to the door
@@ -275,6 +278,7 @@ final class Reel {
 		BlockPos behind = BlockPos.containing(b[0], o.getY(), b[1]);
 		f.lookBack(7, 12, 7, head(behind, 2.8));
 		f.markAt(look + 6, "seen");
+		f.glancing = false;
 		f.run(8, SPRINT, 0);
 		// Round the rock, until it is there in front of them, just past it; a moment to take it in.
 		BlockPos spot = o.offset(-4, 0, 27);
@@ -378,6 +382,18 @@ final class Reel {
 				if (t >= hit + 2) {
 					server.runCommand(String.format(Locale.ROOT, "tp %s %.3f %.3f %.3f %.1f 0", SELF, them.x, them.y, them.z, bodyYaw));
 				}
+				// Its leg coming straight at the lens, the instant before the camera is gone.
+				boolean atLens = t >= hit - 3 && t <= hit;
+				double yr = Math.toRadians(poses[t][3]);
+				Vec3 lensPoint = eye.add(-Math.sin(yr) * 0.45, -0.15, Math.cos(yr) * 0.45);
+				if (t == hit - 3) {
+					server.runCommand(String.format(Locale.ROOT, "summon armor_stand %.3f %.3f %.3f {Marker:1b,Invisible:1b,NoGravity:1b,Tags:[\"occupant_reel\"]}",
+							lensPoint.x, lensPoint.y, lensPoint.z));
+				} else if (atLens) {
+					server.runCommand(String.format(Locale.ROOT, "tp %s %.3f %.3f %.3f", BODY, lensPoint.x, lensPoint.y, lensPoint.z));
+				} else if (t == hit + 1) {
+					server.runCommand("kill " + BODY);
+				}
 				int legs = 0;
 				if (t >= hit + 3) {
 					legs = 1;
@@ -403,7 +419,11 @@ final class Reel {
 					thing.setYBodyRot(yaw);
 					thing.setXRot(pitch);
 					List<Entity> into = new ArrayList<>();
-					if (!self.isEmpty()) for (int i = 0; i < count; i++) into.add(self.get(0));
+					if (atLens) {
+						into.addAll(level.getEntities((Entity) null, AABB.ofSize(lensPoint, 2, 2, 2), e -> Kinds.is(e, "armor_stand")));
+					} else if (!self.isEmpty()) {
+						for (int i = 0; i < count; i++) into.add(self.get(0));
+					}
 					thing.setHeld(into);
 				});
 			});
@@ -770,6 +790,9 @@ final class Reel {
 		/** No two strides alike: this one's length, and how hard it lands. */
 		private double stride = 1.0, landing = 1.0;
 		private final java.util.Random uneven = new java.util.Random(5L);
+		/** Whether they look down at their feet as they run, and how much longer this glance lasts. */
+		boolean glancing = true;
+		private int glance;
 		private Way way;
 		private final double eyeY;
 
@@ -962,11 +985,32 @@ final class Reel {
 			else heading += curve;
 			step(pace, 0.05);
 			yaw = toward(yaw, way != null ? ahead(5.0) : heading, 0.4);
-			pitch += (5.0 + speed * 10 - pitch) * 0.3;
+			// Now and then a glance down at the ground in front of their feet.
+			if (glancing && glance == 0 && speed > 0.2 && uneven.nextDouble() < 0.025) glance = 7;
+			double want = glance > 0 ? 24.0 : 5.0 + speed * 10;
+			if (glance > 0) glance--;
+			pitch += (want - pitch) * 0.3;
 			lift *= 0.8;
 			tremble *= 0.9;
 			roll *= 0.8;
 			push();
+		}
+
+		/** A foot caught on a root: pitched forward, nearly down, and scrambling on. */
+		void trip(int n) {
+			mark("trip");
+			for (int i = 0; i < n; i++) {
+				double u = (double) i / n;
+				double dip = Math.sin(Math.min(1, u * 1.6) * Math.PI);
+				steer(10);
+				step(0.08 + 0.14 * u, 0.12);
+				pitch += (5 + 45 * dip - pitch) * 0.55;
+				lift = -0.65 * dip;
+				roll += (14 * dip - roll) * 0.5;
+				yaw += 3 * Math.sin(i * 1.9) * dip;
+				tremble += (1.8 - tremble) * 0.4;
+				push();
+			}
 		}
 
 		/** Over the shoulder while still running: round to {@code at}, held there, and back again. */
