@@ -66,12 +66,19 @@ final class OccupantFit {
 		net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
 		if (mc.player == null) return;
 		Vec3 eye = mc.player.getEyePosition(partialTick);
-		// Its eyes: about five model pixels below the top of its head, folded or not.
-		float tall = foldedHeight(state.crouch) * OccupantGeometry.HEIGHT;
-		double eyes = state.y + state.occupantScale * (tall - 5.0f) / 16.0f;
-		double dx = eye.x - (state.x + state.offsetX);
-		double dy = eye.y - eyes;
-		double dz = eye.z - (state.z + state.offsetZ);
+		// Its eyes: where the gait worked out they are drawn, bent over as it is; failing that,
+		// about five model pixels below the top of its head, folded or not, over its feet.
+		double dx, dy, dz;
+		if (state.eyes != null) {
+			dx = eye.x - state.eyes.x;
+			dy = eye.y - state.eyes.y;
+			dz = eye.z - state.eyes.z;
+		} else {
+			float tall = foldedHeight(state.crouch) * OccupantGeometry.HEIGHT;
+			dx = eye.x - (state.x + state.offsetX);
+			dy = eye.y - (state.y + state.occupantScale * (tall - 5.0f) / 16.0f);
+			dz = eye.z - (state.z + state.offsetZ);
+		}
 		float yaw = (float) Math.toDegrees(Math.atan2(-dx, dz));
 		state.watchYaw = Mth.wrapDegrees(yaw - state.bodyRot);
 		state.watchPitch = (float) -Math.toDegrees(Math.atan2(dy, Math.sqrt(dx * dx + dz * dz)));

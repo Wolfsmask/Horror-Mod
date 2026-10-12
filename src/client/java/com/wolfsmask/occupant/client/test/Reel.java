@@ -169,6 +169,7 @@ final class Reel {
 		f.mark("look");
 		f.lookBack(9, 10, 8, face);
 		f.run(10, SPRINT, 0);
+		f.watching(t -> t < gone ? Vec3.atBottomCenterOf(spot).add(0, 2.6, 0) : null);
 		prepare(context, game, start, right, 13000);
 		Cinematic.place(server, spot, start, Cinematic.Look.STARING);
 		context.waitTicks(25);
@@ -207,6 +208,7 @@ final class Reel {
 		f.backAway(12, doorway, 0.05);
 		f.mark("pant");
 		f.stare(16, doorway, 1.0);
+		f.watching(t -> t >= look ? Vec3.atBottomCenterOf(behind).add(0, 2.4, 0) : null);
 		prepare(context, game, start, local(o, 0, 2.2, -1), 13050);
 		context.waitTicks(25);
 		record(context, server, "house", f.flat(o.getY()), f, t -> {
@@ -217,8 +219,9 @@ final class Reel {
 
 	/**
 	 * Night, in the house, by the lamp. You go to the window and look out: the trees, nothing. A
-	 * knock at the door. You look round at it; when you look back at the window, its face is at
-	 * the glass.
+	 * knock at the door. You look round at it; when you look back at the window there is something
+	 * out there in the dark under the lean-to, pale, coming slowly up to the glass, until its face
+	 * is there.
 	 */
 	private static void window(ClientGameTestContext context, TestSingleplayerContext game, Cabin cabin) {
 		TestServerContext server = game.getServer();
@@ -229,8 +232,10 @@ final class Reel {
 		Vec3 door = local(o, 0, 1.2, -1);
 		Vec3 glass = local(o, -4, 2.4, 3);
 		Vec3 trees = local(o, -12, 1.2, 3);
-		// Far enough out that, stooping under the lean-to, its face comes to the glass and not into the wall.
+		// Far enough out that, stooping under the lean-to, its face comes to the glass and not into the wall;
+		// and before that, back in the dark at the far end of it, where the lamp does not reach.
 		BlockPos outside = o.offset(-8, 0, 3);
+		Vec3 near = Vec3.atBottomCenterOf(outside), far = Vec3.atBottomCenterOf(o.offset(-13, 0, 3));
 		Fear f = new Fear(start).face(door);
 		f.stare(18, door, 0.6);
 		f.turnTo(16, glass);
@@ -244,13 +249,46 @@ final class Reel {
 		int there = f.size() + 3;                     // the window out of sight behind them
 		f.stare(22, door, 1.1);
 		f.turnTo(13, glass);
-		f.markAt(f.size() - 4, "seen");
+		// Back at the glass: the dark, and in it something paler than the dark, coming. They lean in.
+		int creep = f.size() - 6;
+		f.markAt(creep, "creep");
+		f.peer(46, glass, 1.5, 0.3);
+		int seen = f.size() - 4;                      // its face up to the glass
+		f.markAt(seen, "seen");
 		f.backAway(9, glass, 0.15);
 		f.stare(22, glass, 1.8);
+		Vec3 eyeline = new Vec3(0, 2.2, 0);
+		IntFunction<Vec3> it = t -> t < there ? null
+				: far.lerp(near, Math.pow(smooth((t - creep) / (double) (seen + 2 - creep)), 0.85));
+		f.watching(t -> t < there ? null : it.apply(t).add(eyeline));
+		double[][] poses = f.flat(o.getY());
 		prepare(context, game, start, door, 15500);
 		context.waitTicks(25);
-		record(context, server, "window", f.flat(o.getY()), f, t -> {
-			if (t == there) Cinematic.place(server, outside, glass.add(3.0, -0.4, 0), Cinematic.Look.looming(0));
+		record(context, server, "window", poses, f, t -> {
+			if (t == there) Cinematic.place(server, BlockPos.containing(far), glass.add(3.0, -0.4, 0), LOOMING);
+			if (t < there) return;
+			Vec3 at = it.apply(t);
+			Vec3 eye = new Vec3(poses[t][0], poses[t][1], poses[t][2]);
+			look(server, at, eye, 2.2);
+		});
+	}
+
+	/**
+	 * Puts it at {@code at} this tick, turned to the camera at {@code eye}, its face (about
+	 * {@code face} up) on it.
+	 */
+	private static void look(TestServerContext server, Vec3 at, Vec3 eye, double face) {
+		float yaw = (float) Fear.yawBetween(at, eye);
+		float pitch = (float) -Math.toDegrees(Math.atan2(eye.y - (at.y + face), Math.hypot(eye.x - at.x, eye.z - at.z)));
+		server.runOnServer(s -> {
+			List<OccupantEntity> its = s.overworld().getEntitiesOfClass(OccupantEntity.class, AABB.ofSize(at, 16, 16, 16));
+			if (its.isEmpty()) return;
+			OccupantEntity thing = its.get(0);
+			thing.setPos(at.x, at.y, at.z);
+			thing.setYRot(yaw);
+			thing.setYHeadRot(yaw);
+			thing.setYBodyRot(yaw);
+			thing.setXRot(pitch);
 		});
 	}
 
@@ -287,16 +325,20 @@ final class Reel {
 		for (int i = 0; i < 80 && !f.sees(feet, o, Cabin.ROCK); i++) f.run(1, SPRINT, 0);
 		int seen = f.size();
 		f.mark("seen");
-		// Round the corner, and it is there; before they can even stop, it has them.
+		// Round the corner, and it is there; they stop dead. It draws itself up and back, a leg lifted
+		// and cocked behind it, and comes.
 		f.run(2, SPRINT, 0);
-		f.halt(3, face);
+		f.halt(9, face);
 		int hit = f.size();
+		int rear = hit - 8, strike = hit - 3;
 		// The blow knocks the camera out of their hands: it lands in the dirt a few steps off, on its
 		// side, still recording, looking back at them. Everything after is seen from there.
 		double ground = o.getY();
 		Vec3 struck = f.at(hit);
 		Vec3 lunge = feet.add(horizontal(struck.subtract(feet)).normalize().scale(0.9));
 		Vec3 away = horizontal(struck.subtract(feet)).normalize();
+		// Rearing back from them, half a block, before it comes.
+		Vec3 reared = feet.subtract(away.scale(0.5));
 		Vec3 person = new Vec3(struck.x + away.x, ground, struck.z + away.z);
 		// It comes round to stand over them on the open side, away from the rock, under the shelf of it.
 		Vec3 toIt = new Vec3(-1.2, 0, 2.4).normalize();
@@ -322,7 +364,6 @@ final class Reel {
 		f.markAt(stop + 2, "stare");
 		f.still(end - land, aim, 16.0);
 		f.mark("end");
-		double[][] poses = f.flat(ground);
 		IntToDoubleFunction crawled = t -> {
 			if (t < crawl) return 0;
 			double k = Math.min(3.0, (t - crawl) / 9.0);
@@ -346,15 +387,26 @@ final class Reel {
 			if (t < yank + 5) return near.add(back.subtract(near).scale(1 - Math.pow(1 - (t - yank) / 5.0, 2)));
 			return back.add(toIt.scale(dragged.applyAsDouble(t))).add(writhe);
 		};
-		// Where it is each tick: round the corner; lunging; over them; after them; dragging them off.
+		// Where it is each tick: round the corner; rearing back; lunging, faster and faster; over them;
+		// after them; dragging them off.
 		IntFunction<Vec3> it = t -> {
-			if (t < hit) return feet;
-			if (t < hit + 4) return feet.add(lunge.subtract(feet).scale(smooth((t - hit) / 4.0)));
-			if (t < hit + 12) return lunge.add(horizontal(stands.subtract(lunge)).scale(smooth((t - hit - 4) / 8.0)));
-			Vec3 after = stands;
-			if (t < yank) return after.add(flee.scale(0.4 * crawled.applyAsDouble(t)));
+			if (t < rear) return feet;
+			if (t < strike) return feet.lerp(reared, smooth((t - rear) / (double) (strike - 1 - rear)));
+			if (t < hit + 2) {
+				double u = (t - strike) / (double) (hit + 2 - strike);
+				return reared.lerp(lunge, u * u);
+			}
+			if (t < hit + 10) return lunge.add(horizontal(stands.subtract(lunge)).scale(smooth((t - hit - 2) / 8.0)));
+			if (t < yank) return stands.add(flee.scale(0.4 * crawled.applyAsDouble(t)));
 			return stands.add(toIt.scale(0.5 * Math.min(1.0, (t - yank) / 5.0) + dragged.applyAsDouble(t)));
 		};
+		// The leg it strikes with: drawn up and back to one side as it rears, held there, and then
+		// driven at the lens, faster and faster. Under the shelf of rock: no higher than its underside.
+		Vec3 aside = new Vec3(-away.z, 0, away.x);
+		IntFunction<Vec3> cocked = t -> it.apply(Math.min(t, strike)).add(0, 2.5, 0).subtract(away.scale(0.8)).add(aside.scale(1.1));
+		f.watching(t -> t >= look && t < seen - 2 ? Vec3.atBottomCenterOf(behind).add(0, 2.4, 0)
+				: t >= seen - 2 ? it.apply(t).add(0, 2.0, 0) : null);
+		double[][] poses = f.flat(ground);
 		prepare(context, game, start, local(o, 0, 1.4, 9), 14200);
 		// Their body, out of sight under the ground until it is needed, lying as it will lie.
 		Vec3 hidden = person.add(0, -8, 0);
@@ -370,8 +422,8 @@ final class Reel {
 				Vec3 at = it.apply(t);
 				Vec3 them = body.apply(t);
 				Vec3 eye = new Vec3(poses[t][0], poses[t][1], poses[t][2]);
-				// Its eyes on them while it has them; at the end, on the camera.
-				Vec3 watch = t < hit ? eye : t >= stop ? eye : them.add(0, 0.3, 0);
+				// Its eyes on the camera all the while, even with them under it.
+				Vec3 watch = eye;
 				float yaw = (float) Fear.yawBetween(at, watch);
 				float pitch = (float) -Math.toDegrees(Math.atan2(watch.y - (at.y + 2.4), Math.hypot(watch.x - at.x, watch.z - at.z)));
 				// Their head the way they are trying to go; once it has them back, away from it; and
@@ -382,15 +434,19 @@ final class Reel {
 				if (t >= hit + 2) {
 					server.runCommand(String.format(Locale.ROOT, "tp %s %.3f %.3f %.3f %.1f 0", SELF, them.x, them.y, them.z, bodyYaw));
 				}
-				// Its leg coming straight at the lens, the instant before the camera is gone.
-				boolean atLens = t >= hit - 3 && t <= hit;
-				double yr = Math.toRadians(poses[t][3]);
-				Vec3 lensPoint = eye.add(-Math.sin(yr) * 0.45, -0.15, Math.cos(yr) * 0.45);
-				if (t == hit - 3) {
+				// Its leg: cocked, and then coming straight at the lens, the instant before the camera is gone.
+				boolean atLens = t >= rear && t <= hit;
+				double[] held = poses[Math.min(t, hit - 1)];
+				double yr = Math.toRadians(held[3]);
+				Vec3 lensPoint = new Vec3(held[0], held[1], held[2]).add(-Math.sin(yr) * 0.45, -0.15, Math.cos(yr) * 0.45);
+				double u = Mth.clamp((t - strike + 1.0) / (hit - strike), 0.0, 1.0);
+				Vec3 legAt = t < strike ? cocked.apply(t)
+						: cocked.apply(strike).lerp(lensPoint, u * u).add(0, 0.35 * Math.sin(u * Math.PI), 0);
+				if (t == rear) {
 					server.runCommand(String.format(Locale.ROOT, "summon armor_stand %.3f %.3f %.3f {Marker:1b,Invisible:1b,NoGravity:1b,Tags:[\"occupant_reel\"]}",
-							lensPoint.x, lensPoint.y, lensPoint.z));
+							legAt.x, legAt.y, legAt.z));
 				} else if (atLens) {
-					server.runCommand(String.format(Locale.ROOT, "tp %s %.3f %.3f %.3f", BODY, lensPoint.x, lensPoint.y, lensPoint.z));
+					server.runCommand(String.format(Locale.ROOT, "tp %s %.3f %.3f %.3f", BODY, legAt.x, legAt.y, legAt.z));
 				} else if (t == hit + 1) {
 					server.runCommand("kill " + BODY);
 				}
@@ -420,7 +476,7 @@ final class Reel {
 					thing.setXRot(pitch);
 					List<Entity> into = new ArrayList<>();
 					if (atLens) {
-						into.addAll(level.getEntities((Entity) null, AABB.ofSize(lensPoint, 2, 2, 2), e -> Kinds.is(e, "armor_stand")));
+						into.addAll(level.getEntities((Entity) null, AABB.ofSize(legAt, 4, 4, 4), e -> Kinds.is(e, "armor_stand")));
 					} else if (!self.isEmpty()) {
 						for (int i = 0; i < count; i++) into.add(self.get(0));
 					}
@@ -505,7 +561,7 @@ final class Reel {
 			Cabin c = new Cabin(o);
 			server.runOnServer(s -> {
 				ServerLevel level = s.overworld();
-				wood(level, o, -17, 17, -28, 38, List.of(c.approach, c.out), 7L, new double[][]{{0, 3, 7.5}, {-8, 3, 4.0}, {-4, 27, 2.2}, {0.3, 27.5, 3.2}, {1.0, 23.3, 2.2}, {1.4, 23.3, 2.2}, {-2, 30.5, 2.6}}, ROCK);
+				wood(level, o, -17, 17, -28, 38, List.of(c.approach, c.out), 7L, new double[][]{{0, 3, 7.5}, {-8, 3, 4.0}, {-12, 3, 4.0}, {-4, 27, 2.2}, {0.3, 27.5, 3.2}, {1.0, 23.3, 2.2}, {1.4, 23.3, 2.2}, {-2, 30.5, 2.6}}, ROCK);
 				RandomSource r = RandomSource.create(9L);
 				for (int x = LEDGE[0]; x <= LEDGE[1]; x++) {
 					for (int z = LEDGE[2]; z <= LEDGE[3]; z++) {
@@ -549,12 +605,13 @@ final class Reel {
 				for (int y = 1; y <= 3; y++) set(level, o.offset(-4, y, z), Blocks.GLASS.defaultBlockState());
 				for (int y = 1; y <= 2; y++) set(level, o.offset(4, y, z), Blocks.GLASS.defaultBlockState());
 			}
-				// A lean-to along the west wall, for wood: low enough that whatever stands under it stoops.
-			for (int x = -10; x <= -5; x++) {
+			// A long lean-to along the west wall, for wood: low enough that whatever stands under it
+			// stoops, and long enough that its far end is out of the lamp's reach.
+			for (int x = -14; x <= -5; x++) {
 				for (int z = -1; z <= 7; z++) set(level, o.offset(x, 4, z), Blocks.SPRUCE_PLANKS.defaultBlockState());
 			}
 			for (int z : new int[]{-1, 7}) {
-				for (int y = 0; y <= 3; y++) set(level, o.offset(-10, y, z), Blocks.SPRUCE_LOG.defaultBlockState());
+				for (int y = 0; y <= 3; y++) set(level, o.offset(-14, y, z), Blocks.SPRUCE_LOG.defaultBlockState());
 			}
 			// A barrel for a table with the lamp on it, a bench, shelves, cobwebs in the corners.
 			set(level, o.offset(-2, 0, 5), Blocks.BARREL.defaultBlockState());
@@ -795,6 +852,8 @@ final class Reel {
 		private int glance;
 		private Way way;
 		private final double eyeY;
+		/** Where it is at each tick, the middle of it, or null while it is nowhere: see {@link #calm}. */
+		private IntFunction<Vec3> it = t -> null;
 
 		Fear(Vec3 eye) {
 			this.x = eye.x;
@@ -812,6 +871,39 @@ final class Reel {
 			pitch = pitchTo(at);
 			heading = way != null ? ahead(2.4) : yaw;
 			return this;
+		}
+
+		/** Where it is at each tick (the middle of it), or null while it is not there. */
+		void watching(IntFunction<Vec3> where) {
+			it = where;
+		}
+
+		/**
+		 * How steady the hands are at each tick, 1 for not at all: while it is in the picture they
+		 * shake a fifth less (they are holding still, staring at it), easing in and out over a few
+		 * ticks either side, so the shaking never changes all at once.
+		 */
+		private double[] calm(double groundY) {
+			int n = poses.size();
+			double[] in = new double[n];
+			for (int i = 0; i < n; i++) {
+				Vec3 at = it.apply(i);
+				if (at == null) continue;
+				double[] p = poses.get(i);
+				double dx = at.x - p[0], dz = at.z - p[1], dy = at.y - (groundY + Cinematic.EYE + p[4]);
+				double across = Math.abs(Mth.wrapDegrees(Math.toDegrees(Math.atan2(-dx, dz)) - p[2]));
+				double up = Math.abs(-Math.toDegrees(Math.atan2(dy, Math.hypot(dx, dz))) - p[3]);
+				// Inside the upright frame (about 25 degrees either side, 40 up and down), and a margin for its size.
+				if (across < 30.0 && up < 44.0) in[i] = 1.0;
+			}
+			double[] out = new double[n];
+			for (int i = 0; i < n; i++) {
+				double sum = 0;
+				int k = 0;
+				for (int j = Math.max(0, i - 4); j <= Math.min(n - 1, i + 4); j++, k++) sum += in[j];
+				out[i] = 1.0 - 0.18 * sum / k;
+			}
+			return out;
 		}
 
 		/** From now on, going along {@code w}. */
@@ -905,6 +997,26 @@ final class Reel {
 				pitch += (pitchTo(at) - pitch) * 0.3;
 				tremble += (shake - tremble) * 0.2;
 				lift *= 0.85;
+				roll *= 0.9;
+				push();
+			}
+		}
+
+		/**
+		 * Looking hard at {@code at}, not moving, leaning in to it by {@code lean} over the whole of
+		 * it, the hands shaking up towards {@code shake}: trying to make out what is there.
+		 */
+		void peer(int n, Vec3 at, double shake, double lean) {
+			double r = Math.toRadians(yawTo(at));
+			for (int i = 0; i < n; i++) {
+				double u = smooth((i + 1.0) / n) - smooth((double) i / n);
+				x += -Math.sin(r) * lean * u;
+				z += Math.cos(r) * lean * u;
+				step(0, 0.03);
+				yaw = toward(yaw, yawTo(at), 0.25);
+				pitch += (pitchTo(at) - pitch) * 0.25;
+				tremble += (shake - tremble) * 0.08;
+				lift += (-0.05 - lift) * 0.08;
 				roll *= 0.9;
 				push();
 			}
@@ -1120,13 +1232,17 @@ final class Reel {
 		/** The poses on level ground at {@code groundY}: the eye at a person's height over it, rising and falling with each step. */
 		double[][] flat(double groundY) {
 			int n = poses.size();
+			double[] calm = calm(groundY);
 			double[][] out = new double[n][];
-			for (int i = 0; i < n; i++) out[i] = finish(i, groundY + Cinematic.EYE);
+			for (int i = 0; i < n; i++) out[i] = finish(i, groundY + Cinematic.EYE, calm[i]);
 			return out;
 		}
 
-		/** x, y, z, yaw, pitch, roll for tick {@code i}: the stride and the shaking hands put in. */
-		private double[] finish(int i, double base) {
+		/**
+		 * x, y, z, yaw, pitch, roll for tick {@code i}: the stride and the shaking hands put in, the
+		 * quick shaking of them scaled by {@code calm}.
+		 */
+		private double[] finish(int i, double base, double calm) {
 			double[] p = poses.get(i);
 			double px = p[0], pz = p[1], yw = p[2], pt = p[3], lf = p[4], sp = p[5], tr = p[6], ph = p[7], rl = p[8];
 			// Lying on the ground, the camera is only where it fell.
@@ -1135,25 +1251,26 @@ final class Reel {
 			double hard = p[10];
 			double run = standing ? Mth.clamp(sp / SPRINT, 0, 1) : 0;
 			double moving = standing && sp > 0.01 ? 1 : 0;
-			double bob = (0.03 + 0.11 * run) * (Math.abs(Math.sin(ph)) - 0.55) * moving * (0.6 + 0.4 * hard);
+			// Everything the hands and the stride do to the picture, a fifth less while it is in it.
+			double bob = (0.03 + 0.11 * run) * (Math.abs(Math.sin(ph)) - 0.55) * moving * (0.6 + 0.4 * hard) * calm;
 			// Breathing: standing, the camera rises and falls with it; on the ground, heaving.
 			double breath = Math.sin(i * 0.3) * (standing ? 0.012 * (1 - run) : 0.03);
-			double sway = (0.02 + 0.06 * run) * Math.sin(ph) * moving;
+			double sway = (0.02 + 0.06 * run) * Math.sin(ph) * moving * calm;
 			// Hands that will not keep still: slow drift, faster shaking, both worse with fear.
-			double drift = 0.6 * Math.sin(i * 0.29 + 0.3) + 0.4 * Math.sin(i * 0.71 + 1.1) + 0.25 * Math.sin(i * 1.93 + 2.0);
-			double shake = Math.sin(i * 2.7) * 0.5 + Math.sin(i * 3.9 + 1.0) * 0.4;
+			double drift = (0.6 * Math.sin(i * 0.29 + 0.3) + 0.4 * Math.sin(i * 0.71 + 1.1) + 0.25 * Math.sin(i * 1.93 + 2.0)) * calm;
+			double shake = (Math.sin(i * 2.7) * 0.5 + Math.sin(i * 3.9 + 1.0) * 0.4) * calm;
 			double hands = 0.7 + 1.6 * run;
-			double yawOut = yw + drift * hands * 0.9 + shake * tr * 0.9 + 2.4 * run * Math.sin(ph);
+			double yawOut = yw + drift * hands * 0.9 + shake * tr * 0.9 + 2.4 * run * Math.sin(ph) * calm;
 			// Each footfall jolts the view down a touch, harder for a heavier step.
-			double fall = Math.pow(1 - Math.abs(Math.sin(ph)), 6) * 3.0 * run * hard;
+			double fall = Math.pow(1 - Math.abs(Math.sin(ph)), 6) * 3.0 * run * hard * calm;
 			double pitchOut = pt + drift * hands * 0.5 + shake * tr * 0.7 + fall + breath * 9.0;
 			// The tilt: the shoulders rocking with the stride, leaning into a turn, the hands.
 			double turned = i > 0 ? Mth.wrapDegrees(yw - poses.get(i - 1)[2]) : 0;
-			double rollOut = rl + 1.8 * run * Math.sin(ph) - Mth.clamp(turned * 0.3, -6, 6) + drift * 0.8 + shake * tr * 0.7;
+			double rollOut = rl + 1.8 * run * Math.sin(ph) * calm - Mth.clamp(turned * 0.3, -6, 6) + drift * 0.8 + shake * tr * 0.7;
 			// And under everything, the faint unsteadiness of a hand holding a camera: never still.
-			yawOut += 0.2 * (0.6 * Math.sin(i * 1.71 + 0.4) + 0.4 * Math.sin(i * 2.37 + 1.9));
-			pitchOut += 0.16 * (0.6 * Math.sin(i * 1.37 + 2.2) + 0.4 * Math.sin(i * 2.53 + 0.7));
-			rollOut += 0.25 * (0.6 * Math.sin(i * 1.19 + 1.3) + 0.4 * Math.sin(i * 2.11 + 2.6));
+			yawOut += 0.2 * calm * (0.6 * Math.sin(i * 1.71 + 0.4) + 0.4 * Math.sin(i * 2.37 + 1.9));
+			pitchOut += 0.16 * calm * (0.6 * Math.sin(i * 1.37 + 2.2) + 0.4 * Math.sin(i * 2.53 + 0.7));
+			rollOut += 0.25 * calm * (0.6 * Math.sin(i * 1.19 + 1.3) + 0.4 * Math.sin(i * 2.11 + 2.6));
 			double r = Math.toRadians(yw);
 			double sx = Math.cos(r) * sway, sz = Math.sin(r) * sway;
 			return new double[]{px + sx, base + bob + lf + breath, pz + sz, yawOut, Mth.clamp(pitchOut, -85, 85), rollOut};

@@ -6,7 +6,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
@@ -54,6 +53,11 @@ public final class LegGait {
 	private static final float REACH_IN = 3.5f;
 	/** How many of its legs it will put through things: it has ten, and stands on two. */
 	private static final int LEGS_FREE = LEGS - 2;
+	/**
+	 * How far out a leg is put down, at most, as a share of its length: never at full stretch, so
+	 * the knee is always bent and the leg looks like it carries something.
+	 */
+	private static final double COMFORT = 0.86;
 
 	/** Where the body is drawn: behind the entity, catching up in shoves. */
 	private Vec3 body;
@@ -119,6 +123,22 @@ public final class LegGait {
 	private double neckX;
 	/** How far the hips are dropped, in model pixels, as last drawn. */
 	private float drawnDrop;
+	/**
+	 * Its weight: how far the body has settled down onto its legs, in model pixels, and how fast it
+	 * is going down (or coming back up). Each leg that comes down takes the body down onto it a
+	 * little, and it rises again; the more of its legs are off the ground at once, the lower it rides.
+	 */
+	private float sag;
+	private float sagRate;
+	/** Whether each leg, as last drawn, went into something whichever way its knee bent. */
+	private final boolean[] stuck = new boolean[LEGS];
+	/** Each leg's knee as last worked out, and the hip and point it was worked out for. */
+	private final Vec3[] bendFor = new Vec3[LEGS];
+	private final Vec3[] bendHip = new Vec3[LEGS];
+	private final Vec3[] bendAt = new Vec3[LEGS];
+	private final int[] bendHits = new int[LEGS];
+	/** How many points of the leg last tried by {@link #kneeBend} were in something, its knee bent the best way there was. */
+	private int lastHits;
 
 	/**
 	 * Where the middle of its mouth is drawn, in the world, as of the last frame it was drawn: as
@@ -179,7 +199,13 @@ public final class LegGait {
 		state.crouch = fitCrouch;
 		state.occupantScale = fitScale;
 		scale = fitScale;
-		dropPx = OccupantFit.CROUCH_DROP * fitCrouch;
+		if (fresh) {
+			sag = 0.0f;
+			sagRate = 0.0f;
+		}
+		// Its weight on its legs takes the hips down with the rest of the fold.
+		dropPx = OccupantFit.CROUCH_DROP * fitCrouch + sag;
+		state.sag = sag;
 
 		double px = scale / 16.0;                             // model pixels to blocks
 		double yaw = Math.toRadians(state.bodyRot);
@@ -196,6 +222,8 @@ public final class LegGait {
 				swingStart[i] = -1.0f;
 				drawn[i] = null;
 				bendNow[i] = null;
+				bendFor[i] = null;
+				stuck[i] = false;
 			}
 			nextFidget = now + 60.0f + rand(3, (int) now) * 120.0f;
 			tilt = rand(21, (int) now) * 2.0f - 1.0f;
@@ -282,12 +310,17 @@ public final class LegGait {
 		// Which legs are worst off, and so are first to let go.
 		double[] score = new double[LEGS];
 		boolean anyHeld = held(entity, level, now, yaw, px, dropPx);
+		int landed = 0;
 		for (int i = 0; i < LEGS; i++) {
 			score[i] = 0.0;
 			if (holdAt[i] != null || now < lingerUntil[i]) continue;
 			if (swingStart[i] >= 0.0f) {
-				if (now - swingStart[i] >= swingTime[i]) swingStart[i] = -1.0f;
-				else continue;
+				if (now - swingStart[i] >= swingTime[i]) {
+					swingStart[i] = -1.0f;
+					if (foot[i] != null) landed++;
+				} else {
+					continue;
+				}
 			}
 			double reach = OccupantGeometry.LEG_LENGTH[i] * px;
 			Vec3 hip = root(i, px, dropPx);
@@ -308,6 +341,9 @@ public final class LegGait {
 				score[i] = Math.max((stretch - 0.9) * 10.0, drift - 0.55);
 			}
 			if (recheck && !heldBy(level, foot[i])) score[i] = 2.0;   // what it held is gone
+			// The body has moved so that the leg, however its knee goes, would be through something:
+			// it takes a new hold rather than be drawn through it.
+			if (stuck[i]) score[i] = Math.max(score[i], moving ? 10.0 : 3.0);
 		}
 		boolean stepped = false;
 		if (moving) {
@@ -341,6 +377,7 @@ public final class LegGait {
 			replant(i, level, yaw, px, root(i, px, dropPx), 9.0f, Vec3.ZERO);
 			nextFidget = now + 90.0f + rand(9, (int) now) * 220.0f;
 		}
+		settle(landed, moving, speed, dt);
 
 		// Write each leg's point into the state, in model space.
 		double theta = Math.toRadians(180.0f - state.bodyRot);
@@ -352,9 +389,15 @@ public final class LegGait {
 		for (int i = 0; i < LEGS; i++) {
 			Vec3 at = foot[i];
 			if (at != null && swingStart[i] >= 0.0f && from[i] != null) {
+				// Picked up quickly, carried over, and put down: over where it lands before it is
+				// down, and then straight down onto it, faster and faster, so it lands with weight
+				// and does not drift on to its hold.
 				float f = Mth.clamp((now - swingStart[i]) / swingTime[i], 0.0f, 1.0f);
-				float e = f * f * (3.0f - 2.0f * f);
-				double lift = Math.sin(Math.PI * f) * Math.min(0.6, from[i].distanceTo(at) * 0.4);
+				float g = Math.min(1.0f, f / 0.8f);
+				float e = g * g * (3.0f - 2.0f * g);
+				double high = Math.min(0.9, 0.12 + from[i].distanceTo(at) * 0.45);
+				double lift = f < 0.3f ? high * Math.sin(f / 0.3 * Math.PI * 0.5)
+						: high * (1.0 - Math.pow((f - 0.3) / 0.7, 2.0));
 				at = new Vec3(Mth.lerp(e, from[i].x, at.x), Mth.lerp(e, from[i].y, at.y) + lift, Mth.lerp(e, from[i].z, at.z));
 			}
 			double reach = OccupantGeometry.LEG_LENGTH[i] * px;
@@ -386,7 +429,8 @@ public final class LegGait {
 			at = drawn[i];
 			// Which way the knee goes: the first way that keeps the whole leg out of the blocks,
 			// eased round to it, so a knee never flips from one side to the other in a frame.
-			Vec3 want = kneeBend(i, level, yaw, px, hip, at);
+			Vec3 want = bendOf(i, level, yaw, px, hip, at);
+			stuck[i] = !holding && swingStart[i] < 0.0f && foot[i] != null && bendHits[i] > 0;
 			if (want == null) want = bendNow[i] != null ? bendNow[i] : outward(i, yaw).add(0.0, 0.3, 0.0);
 			if (bendNow[i] == null || arrived) {
 				bendNow[i] = want;
@@ -420,11 +464,13 @@ public final class LegGait {
 		// Which way round it looks stays the game's; how far down is worked out again from its eyes:
 		// at what the game's aim points at, as far off as whoever is watching.
 		state.facePitch = Float.NaN;
+		state.eyes = null;
 		Entity viewer = net.minecraft.client.Minecraft.getInstance().player;
 		if (viewer != null) {
 			float[] n = OccupantGeometry.NECK_TO_EYES, sp = OccupantGeometry.SPINE_TO_NECK;
 			double nc = Math.cos(neckX), ns = Math.sin(neckX);
 			Vec3 eyes = fromSpine(sp[0] + n[0], sp[1] + n[1] * nc - n[2] * ns, sp[2] + n[1] * ns + n[2] * nc, px, dropPx);
+			state.eyes = eyes;
 			double away = Math.max(0.5, Math.hypot(viewer.getX() - real.x, viewer.getZ() - real.z));
 			double aimedAt = real.y + entity.getEyeHeight() - Math.tan(Math.toRadians(entity.getXRot())) * away;
 			double fromEyes = Math.max(0.5, Math.hypot(viewer.getX() - eyes.x, viewer.getZ() - eyes.z));
@@ -503,11 +549,21 @@ public final class LegGait {
 			// of the same place.
 			double at = 0.55 + (rand(i, 31) - 0.5) * 0.3;
 			Vec3 centre = held.getPosition(partial).add(0.0, held.getBbHeight() * at, 0.0);
-			// In at the back and out through the front, well past it, so the point is seen.
+			// In at the back and out through the front, well past it, so the point is seen; but
+			// never on into the ground under it or a wall behind it: the point stops in the first
+			// thing past it, pinning it there.
 			Vec3 hip = root(i, px, dropPx);
 			Vec3 through = centre.subtract(hip);
-			holdAt[i] = through.lengthSqr() < 1.0e-4 ? centre
-					: centre.add(through.normalize().scale(held.getBbWidth() * 0.5 + 0.55));
+			Vec3 point = centre;
+			if (through.lengthSqr() >= 1.0e-4) {
+				Vec3 on = through.normalize();
+				double past = held.getBbWidth() * 0.5 + 0.55;
+				for (double s = 0.1; s <= past + 1.0e-6; s += 0.1) {
+					if (solidAt(level, centre.add(on.scale(s)))) break;
+					point = centre.add(on.scale(s));
+				}
+			}
+			holdAt[i] = point;
 			any = true;
 		}
 		return any;
@@ -633,12 +689,14 @@ public final class LegGait {
 		boolean high = high(i);
 		double height = (high ? 0.9 + 0.9 * rand(i, 11) : 0.15 + 0.6 * rand(i, 13)) * (hip.y - body.y);
 
-		// Something beside it.
+		double px = reach / OccupantGeometry.LEG_LENGTH[i];
+
+		// Something beside it, near enough to brace on with the knee still bent.
 		for (double t = 0.3; t <= reach * 0.95; t += 0.2) {
 			Vec3 p = new Vec3(hip.x + d.x * t, body.y + height, hip.z + d.z * t);
 			if (solidAt(level, p)) {
 				Vec3 face = new Vec3(p.x - d.x * 0.06, p.y, p.z - d.z * 0.06);
-				if (face.distanceTo(hip) <= reach * 0.97 && lineClear(level, hip, face)) return face;
+				if (fits(i, level, yaw, px, reach, hip, face)) return face;
 				break;
 			}
 		}
@@ -648,31 +706,90 @@ public final class LegGait {
 				Vec3 p = new Vec3(hip.x + d.x * 0.6, hip.y + up, hip.z + d.z * 0.6);
 				if (solidAt(level, p)) {
 					Vec3 face = new Vec3(p.x, Math.floor(p.y) - 0.04, p.z);
-					return face.distanceTo(hip) <= reach * 0.97 && lineClear(level, hip, face) ? face : null;
+					if (fits(i, level, yaw, px, reach, hip, face)) return face;
+					break;
 				}
 			}
-			return null;
 		}
 
-		// The ground.
+		// The ground: where it would rest, or failing that a little nearer, further, or round to
+		// either side, wherever the whole leg can be put down without going through anything. The
+		// legs that reach high, with nothing beside or over them, come down too, wide of the body.
 		Vec3 g = ideal(i, yaw, reach, hip);
 		if (g == null) return null;
-		g = g.add(lead.x, 0.0, lead.z);
-		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
-		int top = Mth.floor(body.y + 1.0);
-		for (int y = top; y >= top - 3; y--) {
-			pos.set(Mth.floor(g.x), y, Mth.floor(g.z));
-			BlockState bs = level.getBlockState(pos);
-			VoxelShape shape = bs.getCollisionShape(level, pos);
-			if (!shape.isEmpty()) {
-				// Solid right at the top of the search means the spot is inside a wall or a hill,
-				// not on top of anything: no hold there.
-				if (y == top) return null;
-				Vec3 at = new Vec3(g.x, y + shape.max(Direction.Axis.Y), g.z);
-				return at.distanceTo(hip) <= reach * 0.97 && lineClear(level, hip, at) ? at : null;
+		double r = Math.hypot(g.x - hip.x, g.z - hip.z) * (high ? 1.25 : 1.0);
+		for (double near : new double[]{1.0, 0.8, 1.15, 0.6}) {
+			for (double turn : new double[]{0.0, 0.35, -0.35}) {
+				double c = Math.cos(turn), sn = Math.sin(turn);
+				double dx = d.x * c - d.z * sn, dz = d.x * sn + d.z * c;
+				Vec3 at = ground(level, hip.x + dx * r * near + lead.x, hip.z + dz * r * near + lead.z);
+				if (at != null && fits(i, level, yaw, px, reach, hip, at)) return at;
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * The top of whatever is underfoot at (x, z), from a step up to three down from where it
+	 * stands, or null if there is nothing, or the spot is inside a wall or a hill.
+	 */
+	@Nullable
+	private Vec3 ground(Level level, double x, double z) {
+		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+		int top = Mth.floor(body.y + 1.0);
+		for (int y = top; y >= top - 3; y--) {
+			pos.set(Mth.floor(x), y, Mth.floor(z));
+			VoxelShape shape = level.getBlockState(pos).getCollisionShape(level, pos);
+			if (!shape.isEmpty()) {
+				if (y == top) return null;
+				// Just on it, not in it: the point rests on the surface.
+				return new Vec3(x, y + shape.max(Direction.Axis.Y) + 0.02, z);
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Whether leg i can be put on {@code at}: near enough that its knee is still bent, not so near
+	 * it is folded up, and some way for its knee to go with no part of the leg inside anything.
+	 */
+	private boolean fits(int i, Level level, double yaw, double px, double reach, Vec3 hip, Vec3 at) {
+		double dist = at.distanceTo(hip);
+		if (dist > reach * COMFORT || dist < reach * 0.3) return false;
+		return kneeBend(i, level, yaw, px, hip, at) != null && lastHits == 0;
+	}
+
+	/**
+	 * {@link #kneeBend}, but only worked out again once the hip or the point has moved: most of the
+	 * time neither has, and every leg is drawn every frame.
+	 */
+	@Nullable
+	private Vec3 bendOf(int i, Level level, double yaw, double px, Vec3 hip, Vec3 at) {
+		if (bendFor[i] != null && bendHip[i].distanceToSqr(hip) < 0.0025 && bendAt[i].distanceToSqr(at) < 0.0025) return bendFor[i];
+		Vec3 k = kneeBend(i, level, yaw, px, hip, at);
+		bendFor[i] = k;
+		bendHip[i] = hip;
+		bendAt[i] = at;
+		bendHits[i] = k == null ? 0 : lastHits;
+		return k;
+	}
+
+	/**
+	 * Its weight, one frame on: a spring that each leg coming down presses down, the body riding
+	 * lower the more of its legs are off the ground and the faster it goes, and coming back up,
+	 * just past, and settling.
+	 */
+	private void settle(int landed, boolean moving, double speed, float dt) {
+		int up = 0;
+		for (int i = 0; i < LEGS; i++) if (swingStart[i] >= 0.0f) up++;
+		float rest = (moving ? 0.8f + (float) Math.min(1.2, speed * 6.0) : 0.0f) + 1.6f * up / LEGS;
+		sagRate += 0.55f * landed;
+		for (float left = dt; left > 1.0e-4f; left -= 1.0f) {
+			float h = Math.min(1.0f, left);
+			sagRate += (0.25f * (rest - sag) - 0.7f * sagRate) * h;
+			sag += sagRate * h;
+		}
+		sag = Mth.clamp(sag, -1.5f, 4.0f);
 	}
 
 	/**
@@ -705,7 +822,8 @@ public final class LegGait {
 					break;
 				}
 			}
-			if (!solidAt(level, p) && lineClear(level, hip, p)) return p;
+			if (!solidAt(level, p) && lineClear(level, hip, p)
+					&& kneeBend(i, level, yaw, reach / OccupantGeometry.LEG_LENGTH[i], hip, p) != null && lastHits == 0) return p;
 			out *= 0.6;                                   // tuck it in closer to the body
 			down *= 0.8;
 		}
@@ -724,25 +842,42 @@ public final class LegGait {
 		Vec3 d = outward(i, yaw);
 		Vec3 side = new Vec3(-d.z, 0.0, d.x);
 		Vec3[] tries = {
-				d.add(0.0, 0.3, 0.0), new Vec3(d.x * 0.25, 1.0, d.z * 0.25), d.scale(-1.0).add(0.0, 0.6, 0.0),
-				side.add(0.0, 0.3, 0.0), side.scale(-1.0).add(0.0, 0.3, 0.0), new Vec3(d.x * 0.3, -1.0, d.z * 0.3)};
+				d.add(0.0, 0.3, 0.0), d.add(0.0, 0.9, 0.0), new Vec3(d.x * 0.25, 1.0, d.z * 0.25),
+				side.add(d).add(0.0, 0.5, 0.0), side.scale(-1.0).add(d).add(0.0, 0.5, 0.0),
+				side.add(0.0, 0.3, 0.0), side.scale(-1.0).add(0.0, 0.3, 0.0),
+				d.scale(-1.0).add(0.0, 0.6, 0.0), new Vec3(d.x * 0.3, -1.0, d.z * 0.3)};
 		Vec3 best = null;
 		int bestHits = Integer.MAX_VALUE;
+		lastHits = 0;
 		for (Vec3 k : tries) {
 			Vec3 knee = knee(hip, foot, l1, l2, k);
 			if (knee == null) return null;
-			int hits = 0;
-			for (double t = 0.1; t < 0.95; t += 0.1) {
-				if (solidAt(level, hip.lerp(knee, t))) hits++;
-				if (t < 0.85 && solidAt(level, knee.lerp(foot, t))) hits++;
-			}
+			int hits = hits(level, hip, knee, foot);
 			if (hits == 0) return k;
 			if (hits < bestHits) {
 				bestHits = hits;
 				best = k;
 			}
 		}
+		lastHits = bestHits;
 		return best;
+	}
+
+	/**
+	 * How many points along a leg from {@code hip} through {@code knee} to {@code foot} are inside
+	 * something, a fifth of a block apart, short of the last bit of it, where it rests on its hold.
+	 */
+	private static int hits(Level level, Vec3 hip, Vec3 knee, Vec3 foot) {
+		int hits = solidAt(level, knee) ? 1 : 0;
+		double a = hip.distanceTo(knee), b = knee.distanceTo(foot);
+		int na = Math.max(3, (int) Math.ceil(a / 0.2)), nb = Math.max(3, (int) Math.ceil(b / 0.2));
+		for (int s = 1; s < na; s++) if (solidAt(level, hip.lerp(knee, (double) s / na))) hits++;
+		for (int s = 1; s < nb; s++) {
+			double t = (double) s / nb;
+			if (b * (1.0 - t) < 0.22) break;
+			if (solidAt(level, knee.lerp(foot, t))) hits++;
+		}
+		return hits;
 	}
 
 	/** Where the knee of a two-bone leg from {@code hip} to {@code foot} sits, bent towards {@code k}. */

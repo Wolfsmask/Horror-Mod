@@ -102,7 +102,7 @@ final class OccupantPose {
 
 		// Folded down into a space too small for it: hips low, body bent over, head held up.
 		float crouch = state.crouch;
-		hips.y += OccupantFit.CROUCH_DROP * crouch;
+		hips.y += OccupantFit.CROUCH_DROP * crouch + state.sag;
 		spine.xRot += OccupantFit.CROUCH_BEND * crouch;
 		neck.xRot -= OccupantFit.CROUCH_BEND * 0.75f * crouch;
 
@@ -115,10 +115,10 @@ final class OccupantPose {
 		neck.xRot += neckBend(state.mode, veiled);
 
 		switch (state.mode) {
-			case CHASE -> chase(t, lookX, lookY);
-			case AMBUSH -> loom(lookX, lookY);
+			case CHASE -> chase(state, t, lookY);
+			case AMBUSH -> loom(state, lookY);
 			// Standing, it looks at them from its own face (see LegGait); bent to them, or coming for
-			// them, its face is already brought down to them, and the game's aim is what it was made for.
+			// them, its face is turned square on to whoever is watching, however far it is bent over.
 			default -> stand(state.tilt, Float.isNaN(state.facePitch) ? lookX : state.facePitch, lookY, state.act);
 		}
 		legs(state, t);
@@ -193,19 +193,35 @@ final class OccupantPose {
 		skull.zRot = lean * 0.65f;
 	}
 
-	/** Close enough to touch you. It bends down to your height, and the mouth opens. */
-	private void loom(float lookX, float lookY) {
+	/**
+	 * Close enough to touch you. It bends down to your height, the mouth opens, and the face is
+	 * square on to yours: it looks at you, not down past you.
+	 */
+	private void loom(OccupantRenderState state, float lookY) {
 		jaw.yScale = 1.3f;                          // the face pulls longer, around the mouth
-		neck.xRot += lookX * 0.3f;
-		skull.xRot = 0.45f + lookX * 0.4f;
-		skull.yRot = lookY * 0.5f;
+		faceYou(state, lookY, 0.5f);
 	}
 
-	/** Coming for you. Bent forward into it, face first, mouth working. */
-	private void chase(float t, float lookX, float lookY) {
+	/** Coming for you. Bent forward into it, mouth working, and its face on you the whole way. */
+	private void chase(OccupantRenderState state, float t, float lookY) {
 		jaw.yScale = 1.25f + 0.08f * Mth.sin(t * 0.9f);
-		skull.xRot = 0.3f + lookX * 0.3f;
-		skull.yRot = lookY * 0.3f;
+		faceYou(state, lookY, 0.3f);
+	}
+
+	/**
+	 * Its face turned on whoever is watching it, however the body under it is bent: the neck takes
+	 * some of the way, the head the rest. Round to them as far as {@code turn} of the way the game
+	 * aimed it ({@code lookY}), or straight at them if they are known.
+	 */
+	private void faceYou(OccupantRenderState state, float lookY, float turn) {
+		float yaw = Float.isFinite(state.watchYaw) && Float.isFinite(state.watchPitch)
+				? Mth.clamp((float) Math.toRadians(Mth.wrapDegrees(state.watchYaw)), -1.3f, 1.3f) : lookY * turn;
+		neck.yRot = yaw * 0.4f;
+		skull.yRot = yaw * 0.6f;
+		if (!Float.isFinite(state.watchPitch)) return;
+		float need = Mth.clamp((float) Math.toRadians(state.watchPitch) - (spine.xRot + neck.xRot), -1.1f, 1.1f);
+		neck.xRot += need * 0.35f;
+		skull.xRot = need * 0.65f;
 	}
 
 	/**

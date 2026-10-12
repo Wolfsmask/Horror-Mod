@@ -22,6 +22,8 @@ public class OccupantRenderState {
 	public float headroom = 4.0f;
 	/** 0 standing up, 1 folded as low as it goes, for cramped spaces. */
 	public float crouch;
+	/** How far its weight has settled its hips down onto its legs, in model pixels. */
+	public float sag;
 	/** Which way its last shove carried it, in its own frame, roughly -0.5 to 0.5. */
 	public float leanForward;
 	public float leanSide;
@@ -48,6 +50,9 @@ public class OccupantRenderState {
 	 * Where the one watching is, from its face: the turn (relative to its body) and tilt, in
 	 * degrees, its head would need to look straight at them. Its pupils make up the difference.
 	 */
+	/** Where its eyes are drawn, in the world, as its body is bent this frame; null if not worked out. */
+	@org.jetbrains.annotations.Nullable
+	public net.minecraft.world.phys.Vec3 eyes;
 	public float watchYaw;
 	public float watchPitch;
 	/** Model pixels to blocks, worked out once per frame. */
