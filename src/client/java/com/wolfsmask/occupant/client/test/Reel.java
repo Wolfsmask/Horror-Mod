@@ -62,8 +62,12 @@ final class Reel {
 	private static final Cinematic.Look LOOMING = new Cinematic.Look(false, 0.01f, OccupantEntity.Mode.AMBUSH, 0);
 	/** A sprint, in blocks a tick. */
 	private static final double SPRINT = 0.27;
-	/** On their back on the ground: how far below a standing person's their eyes are. */
-	private static final double LYING = 0.32 - Cinematic.EYE;
+	/** On their back on the ground, the head lifted to see: how high their eyes are. */
+	private static final double LIE = 0.45;
+	/** On their front, crawling, the head up: how high their eyes are. */
+	private static final double CRAWL = 0.52;
+	/** Their body, on the ground under the camera once it has them. */
+	private static final String SELF = "@e[type=mannequin,tag=occupant_self]";
 	/** How far the fog lets you see in the wood. */
 	private static final float FOG = 38.0f;
 
@@ -273,100 +277,129 @@ final class Reel {
 		BlockPos behind = BlockPos.containing(b[0], o.getY(), b[1]);
 		f.lookBack(7, 12, 7, head(behind, 2.8));
 		f.markAt(look + 6, "seen");
-		int corner = f.size() + 2;                    // facing on again: it is no longer behind
 		f.run(8, SPRINT, 0);
 		// Round the rock, until it is there in front of them, just past it; a moment to take it in.
 		BlockPos spot = o.offset(-4, 0, 27);
 		Vec3 feet = Vec3.atBottomCenterOf(spot);
 		Vec3 face = feet.add(0, 2.4, 0);
 		for (int i = 0; i < 80 && !f.sees(feet, o, Cabin.ROCK); i++) f.run(1, SPRINT, 0);
+		int seen = f.size();
 		f.mark("seen");
-		f.run(5, SPRINT, 0);
-		f.halt(6, face);
+		// Round the corner, and it is there; before they can even stop, it has them.
+		f.run(2, SPRINT, 0);
+		f.halt(3, face);
 		int hit = f.size();
-		// It comes at them as it strikes.
 		Vec3 struck = f.at(hit);
-		Vec3 lunge = feet.add(new Vec3(struck.x - feet.x, 0, struck.z - feet.z).normalize().scale(0.8));
-		f.knocked(10, feet);
+		Vec3 lunge = feet.add(new Vec3(struck.x - feet.x, 0, struck.z - feet.z).normalize().scale(0.9));
+		f.knocked(9, feet, LIE);
 		int down = f.size();
-		// On the ground, on their back; it over them, nearer, its legs coming down on them.
-		Vec3 lying = new Vec3(f.x, 0, f.z);
-		Vec3 toward = new Vec3(feet.x - lying.x, 0, feet.z - lying.z).normalize();
-		// It stands over them a little way off, bent under the rock: its face just above them.
-		Vec3 over = new Vec3(lying.x + toward.x * 1.3, o.getY() + 2.4, lying.z + toward.z * 1.3);
-		Vec3 stands = new Vec3(lying.x + toward.x * 2.6, feet.y, lying.z + toward.z * 2.6);
-		f.markAt(hit + 14, "beat");
-		f.markAt(hit + 27, "beat");
-		f.down(30, t -> over, 14.0);
+		double ground = o.getY();
+		Vec3 lying = new Vec3(f.x, ground, f.z);
+		// It comes round to stand over them on the open side, away from the rock, under the shelf of it.
+		Vec3 toward = new Vec3(-1.2, 0, 2.4).normalize();
+		Vec3 stands = lying.add(toward.scale(2.6));
+		Vec3 over = stands.add(toward.scale(-1.3)).add(0, 2.4, 0);
+		Vec3 along = lying.add(toward.scale(1.4)).add(0, 0.55, 0);
+		// On their back: up at it; then down along themselves, as its legs come down into them.
+		f.lie(6, LIE, t -> over, 12.0, 0.25);
+		f.lie(18, LIE, t -> along, 7.0, 0.2);
+		int[][] stabs = {{down + 7, 2}, {down + 10, 1}, {down + 13, 2}, {down + 16, 1}, {down + 19, 3}, {down + 23, 1}};
+		f.markAt(down + 7, "stab");
+		f.markAt(down + 13, "stab");
+		f.markAt(down + 19, "stab");
+		// Over onto their front, and away, back the way they came: clawing along the ground.
+		f.rollOver(9, Fear.yawBetween(lying, local(o, 0.3, 0, 21.5)), CRAWL);
+		int crawl = f.size();
+		f.crawl(3, 9, CRAWL);
+		// And pulled back: it never let go.
+		int yank = f.size();
+		Vec3 held = stands.add(horizontal(f.at(yank).subtract(f.at(crawl))).scale(0.4));
+		f.yanked(5, Fear.yawBetween(f.at(yank), held), LIE);
+		int twist = f.size();
+		double pull = Fear.yawBetween(f.at(twist), held);
+		double reach = horizontal(held.subtract(f.at(twist))).length();
+		f.twistBack(7, held.add(0, 2.3, 0), pull, 0.06, LIE);
 		int drag = f.size();
-		f.dragged(56, Fear.yawBetween(lying, feet));
+		f.dragged(36, pull, reach, 2.3, ground, LIE);
 		f.mark("end");
-		double[][] poses = f.flat(o.getY());
+		double[][] poses = f.flat(ground);
+		Vec3 crawlFrom = cam(poses, crawl), twistFrom = cam(poses, twist);
+		// Where it is, each tick: round the corner; lunging; over them; creeping after them as they
+		// crawl; holding; then going backwards, dragging them, always as far ahead of them.
+		IntFunction<Vec3> it = t -> {
+			if (t < hit) return feet;
+			if (t < down) return feet.add(lunge.subtract(feet).scale(smooth((t - hit) / 4.0)));
+			if (t < crawl) return lunge.add(horizontal(stands.subtract(lunge)).scale(smooth((t - down) / 8.0)));
+			if (t < yank) return stands.add(horizontal(cam(poses, t).subtract(crawlFrom)).scale(0.4));
+			if (t < twist) return held;
+			return held.add(horizontal(cam(poses, t).subtract(twistFrom)));
+		};
 		prepare(context, game, start, local(o, 0, 1.4, 9), 14200);
+		// Their body, out of sight under the ground until it is needed, lying as it will lie.
+		Vec3 hidden = lying.add(0, -8, 0);
+		server.runCommand(String.format(Locale.ROOT, "summon mannequin %.3f %.3f %.3f {pose:\"swimming\",immovable:1b,NoGravity:1b,"
+				+ "Invulnerable:1b,Silent:1b,hide_description:1b,Tags:[\"occupant_self\"]}", hidden.x, hidden.y, hidden.z));
 		context.waitTicks(25);
 		try {
 			record(context, server, "taken", poses, f, t -> {
 				if (t == look) Cinematic.place(server, behind, f.at(look + 9), CHASING);
-				if (t == corner) Cinematic.place(server, spot, f.at(hit), LOOMING);
-				if (t < corner) return;
-				// Where it is: where it stood, until it strikes; then over them; then, dragging them, a
-				// little ahead of them, always facing them.
+				// Not there until the moment before it is seen: nothing of it showing round the rock.
+				if (t == seen - 2) Cinematic.place(server, spot, f.at(hit), LOOMING);
+				if (t < seen - 2) return;
 				Vec3 eye = new Vec3(poses[t][0], poses[t][1], poses[t][2]);
-				Vec3 at;
-				if (t < hit) {
-					at = feet;
-				} else if (t < down) {
-					at = feet.add(lunge.subtract(feet).scale(smooth((t - hit) / 5.0)));
-				} else if (t < drag) {
-					double u = smooth((t - down) / 12.0);
-					at = lunge.add(new Vec3(stands.x - lunge.x, 0, stands.z - lunge.z).scale(u));
-				} else {
-					at = new Vec3(eye.x + toward.x * 2.6, feet.y, eye.z + toward.z * 2.6);
-				}
+				Vec3 at = it.apply(t);
 				float yaw = (float) Fear.yawBetween(at, eye);
 				float pitch = (float) -Math.toDegrees(Math.atan2(eye.y - (at.y + 2.4), Math.hypot(eye.x - at.x, eye.z - at.z)));
-				if (t < hit) {
-					// Waiting round the corner, its eyes already on them.
-					server.runOnServer(s -> {
-						List<OccupantEntity> its = s.overworld().getEntitiesOfClass(OccupantEntity.class, AABB.ofSize(at, 16, 16, 16));
-						if (its.isEmpty()) return;
-						its.get(0).setYRot(yaw);
-						its.get(0).setYHeadRot(yaw);
-						its.get(0).setYBodyRot(yaw);
-						its.get(0).setXRot(pitch);
-					});
-					return;
+				// Their body: from under the camera towards it, its head at the camera.
+				Vec3 to = horizontal(at.subtract(eye)).normalize();
+				Vec3 body = new Vec3(eye.x + to.x * 0.95, ground, eye.z + to.z * 0.95);
+				float bodyYaw = (float) Fear.yawBetween(body, eye);
+				if (t >= hit + 2) {
+					server.runCommand(String.format(Locale.ROOT, "tp %s %.3f %.3f %.3f %.1f 0", SELF, body.x, body.y, body.z, bodyYaw));
 				}
-				Vec3 dir = new Vec3(at.x - eye.x, 0, at.z - eye.z).normalize();
-				// Its leg goes in here: their chest, just below what they see.
-				Vec3 chest = new Vec3(eye.x + dir.x * 0.55, Math.max(o.getY() + 0.15, eye.y - 0.5), eye.z + dir.z * 0.55);
-				if (t == hit) {
-					server.runCommand(String.format(Locale.ROOT, "summon armor_stand %.3f %.3f %.3f {Marker:1b,Invisible:1b,NoGravity:1b,Tags:[\"occupant_reel\"]}",
-							chest.x, chest.y, chest.z));
-				} else {
-					server.runCommand(String.format(Locale.ROOT, "tp %s %.3f %.3f %.3f", BODY, chest.x, chest.y, chest.z));
+				int legs = 0;
+				if (t >= hit + 2) {
+					legs = 1;
+					for (int[] st : stabs) if (t >= st[0]) legs = st[1];
+					if (t >= yank && t < twist + 3) legs = 2;
 				}
-				int legs = (t >= hit + 14 && t < hit + 19) || (t >= hit + 27 && t < hit + 32) ? 2 : 1;
+				int count = legs;
 				server.runOnServer(s -> {
 					ServerLevel level = s.overworld();
+					List<Entity> self = level.getEntities((Entity) null, AABB.ofSize(body, 6, 20, 6), e -> Kinds.is(e, "mannequin"));
+					for (Entity e : self) {
+						if (e instanceof net.minecraft.world.entity.LivingEntity le) {
+							le.setYBodyRot(bodyYaw);
+							le.setYHeadRot(bodyYaw);
+						}
+					}
 					List<OccupantEntity> its = level.getEntitiesOfClass(OccupantEntity.class, AABB.ofSize(at, 16, 16, 16));
 					if (its.isEmpty()) return;
-					OccupantEntity it = its.get(0);
-					it.setPos(at.x, at.y, at.z);
-					it.setYRot(yaw);
-					it.setYHeadRot(yaw);
-					it.setYBodyRot(yaw);
-					it.setXRot(pitch);
-					List<Entity> body = level.getEntities((Entity) null, AABB.ofSize(chest, 3, 3, 3), e -> Kinds.is(e, "armor_stand"));
-					if (body.isEmpty()) return;
-					List<Entity> held = new ArrayList<>();
-					for (int i = 0; i < legs; i++) held.add(body.get(0));
-					it.setHeld(held);
+					OccupantEntity o2 = its.get(0);
+					o2.setPos(at.x, at.y, at.z);
+					o2.setYRot(yaw);
+					o2.setYHeadRot(yaw);
+					o2.setYBodyRot(yaw);
+					o2.setXRot(pitch);
+					List<Entity> held2 = new ArrayList<>();
+					if (!self.isEmpty()) for (int i = 0; i < count; i++) held2.add(self.get(0));
+					o2.setHeld(held2);
 				});
 			});
 		} finally {
 			server.runCommand("kill " + BODY);
+			server.runCommand("kill " + SELF);
 		}
+	}
+
+	private static Vec3 horizontal(Vec3 v) {
+		return new Vec3(v.x, 0, v.z);
+	}
+
+	/** Where the camera is at tick {@code t}, on the ground. */
+	private static Vec3 cam(double[][] poses, int t) {
+		double[] p = poses[Mth.clamp(t, 0, poses.length - 1)];
+		return new Vec3(p[0], 0, p[2]);
 	}
 
 	// ------------------------------------------------------------------ the places
@@ -376,7 +409,7 @@ final class Reel {
 		/** The rock the way goes round (x0, x1, z0, z1 from the house): big enough to hide what is on the other side of it. */
 		static final int[] ROCK = {-9, -2, 14, 25};
 		/** The shelf of the rock over the way round it (x0, x1, z0, z1), its underside three blocks up. */
-		static final int[] LEDGE = {-11, -1, 26, 30};
+		static final int[] LEDGE = {-11, 2, 26, 32};
 		final BlockPos o;
 		final BlockPos front, back;
 		/** From the south, up to the door and in. */
@@ -397,7 +430,7 @@ final class Reel {
 			Cabin c = new Cabin(o);
 			server.runOnServer(s -> {
 				ServerLevel level = s.overworld();
-				wood(level, o, -17, 17, -28, 38, List.of(c.approach, c.out), 7L, new double[][]{{0, 3, 7.5}, {-8, 3, 4.0}, {-4, 27, 2.2}}, ROCK);
+				wood(level, o, -17, 17, -28, 38, List.of(c.approach, c.out), 7L, new double[][]{{0, 3, 7.5}, {-8, 3, 4.0}, {-4, 27, 2.2}, {0.3, 27.5, 3.2}}, ROCK);
 				RandomSource r = RandomSource.create(9L);
 				for (int x = LEDGE[0]; x <= LEDGE[1]; x++) {
 					for (int z = LEDGE[2]; z <= LEDGE[3]; z++) {
@@ -677,6 +710,9 @@ final class Reel {
 		private final List<String> marks = new ArrayList<>();
 		double x, z, heading, yaw, pitch, speed, phase, lift, tremble, roll;
 		private boolean feet = true;
+		/** No two strides alike: this one's length, and how hard it lands. */
+		private double stride = 1.0, landing = 1.0;
+		private final java.util.Random uneven = new java.util.Random(5L);
 		private Way way;
 		private final double eyeY;
 
@@ -768,13 +804,17 @@ final class Reel {
 			x += -Math.sin(r) * speed;
 			z += Math.cos(r) * speed;
 			double before = phase;
-			// A stride (two steps) is about three and a half blocks at a sprint.
-			phase += speed * Math.PI * 2 / 3.6;
-			if (feet && speed > 0.03 && Math.floor(before / Math.PI) != Math.floor(phase / Math.PI)) mark("step");
+			// A stride (two steps) is about three and a half blocks at a sprint, give or take.
+			phase += speed * Math.PI * 2 / (3.6 * stride);
+			if (feet && speed > 0.03 && Math.floor(before / Math.PI) != Math.floor(phase / Math.PI)) {
+				mark("step");
+				stride = 0.9 + uneven.nextDouble() * 0.2;
+				landing = 0.75 + uneven.nextDouble() * 0.5;
+			}
 		}
 
 		private void push() {
-			poses.add(new double[]{x, z, yaw, pitch, lift, speed, tremble, phase, roll, feet ? 1 : 0});
+			poses.add(new double[]{x, z, yaw, pitch, lift, speed, tremble, phase, roll, feet ? 1 : 0, landing});
 		}
 
 		/** Stood (whatever way they were going slowing to nothing), looking at {@code at}, shaking as much as {@code shake}. */
@@ -927,8 +967,8 @@ final class Reel {
 			}
 		}
 
-		/** Struck: thrown back from {@code from}, off their feet, the world going over, down on the ground. */
-		void knocked(int n, Vec3 from) {
+		/** Struck: thrown back from {@code from}, off their feet, the world going over, down on the ground, eyes {@code height} up. */
+		void knocked(int n, Vec3 from, double height) {
 			mark("hit");
 			heading = yawTo(from) + 180.0;
 			double y0 = yaw, p0 = pitch, r0 = roll;
@@ -937,7 +977,7 @@ final class Reel {
 				double u = (double) i / n;
 				speed = 0.24 * (1 - u);
 				step(speed, 0);
-				lift = LYING * u * u;
+				lift = (height - Cinematic.EYE) * u * u;
 				yaw = y0 + 34 * Math.sin(Math.min(1, u * 1.7) * Math.PI / 2) - 10 * u;
 				pitch = p0 + (-52 - p0) * smooth(u * 1.2);
 				roll = r0 + 58 * Math.sin(Math.min(1, u * 1.5) * Math.PI / 2);
@@ -947,39 +987,112 @@ final class Reel {
 			mark("land");
 		}
 
-		/** Down on the ground on their back, looking up at {@code at}, gasping, shaking; the tilt easing to {@code tilt}. */
-		void down(int n, IntFunction<Vec3> at, double tilt) {
+		/** On the ground, eyes {@code height} up, looking at {@code at} (turning to it at {@code rate}); gasping, shaking. */
+		void lie(int n, double height, IntFunction<Vec3> at, double tilt, double rate) {
 			for (int i = 0; i < n; i++) {
 				step(0, 0.1);
-				// The bounce of hitting the ground, and then flat.
-				lift = LYING + (i < 4 ? 0.09 * Math.sin(i / 4.0 * Math.PI) : 0);
+				lift += (height - Cinematic.EYE - lift) * 0.4;
 				Vec3 a = at.apply(i);
-				yaw = toward(yaw, yawTo(a), 0.22);
-				pitch += (pitchTo(a) - pitch) * 0.22;
+				yaw = toward(yaw, yawTo(a), rate);
+				pitch += (pitchTo(a) - pitch) * rate;
 				roll += (tilt - roll) * 0.12;
-				tremble += (1.7 - tremble) * 0.3;
+				tremble += (1.6 - tremble) * 0.3;
 				push();
 			}
 		}
 
-		/** Dragged along the ground on their back towards {@code toward} (a heading), in tugs, looking up at what has them. */
-		void dragged(int n, double toward) {
+		/** Over onto their front, to face {@code away} (a heading), the world turning over with them. */
+		void rollOver(int n, double away, double height) {
+			mark("roll");
+			double y0 = yaw, p0 = pitch, r0 = roll, l0 = lift;
+			double d = Mth.wrapDegrees(away - y0);
+			heading = away;
+			for (int i = 1; i <= n; i++) {
+				double u = smooth((double) i / n);
+				step(0.02, 0.05);
+				yaw = y0 + d * u;
+				pitch = p0 + (24 - p0) * u;
+				roll = r0 * (1 - u) + Math.signum(d) * 62 * Math.sin(u * Math.PI) + 8 * u;
+				lift = l0 + (height - Cinematic.EYE - l0) * u - 0.12 * Math.sin(u * Math.PI);
+				tremble = 1.8;
+				push();
+			}
+		}
+
+		/** Clawing along the ground on their front, away, {@code lurches} heaves of {@code each} ticks: an arm, the other arm. */
+		void crawl(int lurches, int each, double height) {
+			for (int k = 0; k < lurches; k++) {
+				mark("crawl");
+				double side = k % 2 == 0 ? 1 : -1;
+				for (int i = 0; i < each; i++) {
+					double c = (double) i / each;
+					double pull = c < 0.45 ? Math.sin(c / 0.45 * Math.PI) : 0.0;
+					speed = 0.01 + 0.17 * pull;
+					step(speed, 0);
+					yaw = toward(yaw, heading, 0.3) + side * 4.0 * pull;
+					pitch += (21 + 9 * pull - pitch) * 0.35;
+					lift = height - Cinematic.EYE + 0.08 * pull;
+					roll += (side * 9 * pull + 5 - roll) * 0.35;
+					tremble += (1.7 - tremble) * 0.3;
+					push();
+				}
+			}
+		}
+
+		/** Pulled back, hard, along the ground towards {@code toward} (a heading): the world jerked away from them. */
+		void yanked(int n, double toward, double height) {
+			mark("yank");
+			heading = toward;
+			for (int i = 0; i < n; i++) {
+				double u = (double) i / n;
+				speed = 0.06 + 0.5 * (1 - u) * (1 - u);
+				step(speed, 0);
+				pitch += ((i < 2 ? -14 : 18) - pitch) * 0.55;
+				roll += (-26 - roll) * 0.5;
+				yaw += (i % 2 == 0 ? 5 : -4) * (1 - u);
+				lift = height - Cinematic.EYE + 0.1 * (1 - u) * Math.abs(Math.sin(i * 1.9));
+				tremble = 2.4;
+				push();
+			}
+		}
+
+		/** The head wrenched round over the shoulder to {@code at}, still being pulled towards {@code toward}. */
+		void twistBack(int n, Vec3 at, double toward, double pace, double height) {
+			heading = toward;
+			double y0 = yaw, p0 = pitch;
+			for (int i = 1; i <= n; i++) {
+				double u = overshoot((double) i / n);
+				speed = pace;
+				step(pace, 0);
+				lift = height - Cinematic.EYE;
+				yaw = y0 + Mth.wrapDegrees(yawTo(at) - y0) * u;
+				pitch = p0 + (pitchTo(at) - p0) * u;
+				roll += (-30 - roll) * 0.3;
+				tremble += (2.0 - tremble) * 0.3;
+				push();
+			}
+		}
+
+		/**
+		 * Dragged along the ground towards {@code toward} (a heading), in tugs, by what is {@code reach}
+		 * ahead of them, its face {@code faceUp} off the ground: looking at it over their shoulder.
+		 */
+		void dragged(int n, double toward, double reach, double faceUp, double groundY, double height) {
 			heading = toward;
 			double r = Math.toRadians(toward);
 			for (int i = 0; i < n; i++) {
-				if (i % 14 == 0) mark("tug");
-				double c = (i % 14) / 14.0;
+				if (i % 13 == 0) mark("tug");
+				double c = (i % 13) / 13.0;
 				double pull = c < 0.38 ? Math.sin(c / 0.38 * Math.PI) : 0.0;
 				speed = 0.012 + 0.3 * pull;
 				step(speed, 0);
-				// What has them is always just there, a little ahead, over them.
-				Vec3 it = new Vec3(x - Math.sin(r) * 1.3, eyeY + 0.78, z + Math.cos(r) * 1.3);
+				Vec3 it = new Vec3(x - Math.sin(r) * reach, groundY + faceUp, z + Math.cos(r) * reach);
 				yaw = Fear.toward(yaw, yawTo(it), 0.3) + pull * 3.5 * Math.sin(i * 1.7);
 				pitch += (pitchTo(it) - pitch) * 0.3;
 				pitch += pull * 4.0;
-				lift = LYING + 0.06 * pull * Math.abs(Math.sin(i * 2.3));
-				roll += (14 + 7 * Math.sin(i * 0.37) + pull * 9 - roll) * 0.3;
-				tremble += (1.5 - tremble) * 0.3;
+				lift = height - Cinematic.EYE + 0.06 * pull * Math.abs(Math.sin(i * 2.3));
+				roll += (-22 + 7 * Math.sin(i * 0.37) - pull * 9 - roll) * 0.3;
+				tremble += (1.6 - tremble) * 0.3;
 				push();
 			}
 		}
@@ -1001,24 +1114,31 @@ final class Reel {
 			double[] p = poses.get(i);
 			double px = p[0], pz = p[1], yw = p[2], pt = p[3], lf = p[4], sp = p[5], tr = p[6], ph = p[7], rl = p[8];
 			boolean standing = p[9] > 0;
+			double hard = p[10];
 			double run = standing ? Mth.clamp(sp / SPRINT, 0, 1) : 0;
 			double moving = standing && sp > 0.01 ? 1 : 0;
-			double bob = (0.03 + 0.11 * run) * (Math.abs(Math.sin(ph)) - 0.55) * moving;
+			double bob = (0.03 + 0.11 * run) * (Math.abs(Math.sin(ph)) - 0.55) * moving * (0.6 + 0.4 * hard);
+			// Breathing: standing, the camera rises and falls with it; on the ground, heaving.
+			double breath = Math.sin(i * 0.3) * (standing ? 0.012 * (1 - run) : 0.03);
 			double sway = (0.02 + 0.06 * run) * Math.sin(ph) * moving;
 			// Hands that will not keep still: slow drift, faster shaking, both worse with fear.
 			double drift = 0.6 * Math.sin(i * 0.29 + 0.3) + 0.4 * Math.sin(i * 0.71 + 1.1) + 0.25 * Math.sin(i * 1.93 + 2.0);
 			double shake = Math.sin(i * 2.7) * 0.5 + Math.sin(i * 3.9 + 1.0) * 0.4;
 			double hands = 0.7 + 1.6 * run;
 			double yawOut = yw + drift * hands * 0.9 + shake * tr * 0.9 + 2.4 * run * Math.sin(ph);
-			// Each footfall jolts the view down a touch.
-			double fall = Math.pow(1 - Math.abs(Math.sin(ph)), 6) * 3.0 * run;
-			double pitchOut = Mth.clamp(pt + drift * hands * 0.5 + shake * tr * 0.7 + fall, -85, 85);
+			// Each footfall jolts the view down a touch, harder for a heavier step.
+			double fall = Math.pow(1 - Math.abs(Math.sin(ph)), 6) * 3.0 * run * hard;
+			double pitchOut = pt + drift * hands * 0.5 + shake * tr * 0.7 + fall + breath * 9.0;
 			// The tilt: the shoulders rocking with the stride, leaning into a turn, the hands.
 			double turned = i > 0 ? Mth.wrapDegrees(yw - poses.get(i - 1)[2]) : 0;
 			double rollOut = rl + 1.8 * run * Math.sin(ph) - Mth.clamp(turned * 0.3, -6, 6) + drift * 0.8 + shake * tr * 0.7;
+			// And under everything, the faint unsteadiness of a hand holding a camera: never still.
+			yawOut += 0.2 * (0.6 * Math.sin(i * 1.71 + 0.4) + 0.4 * Math.sin(i * 2.37 + 1.9));
+			pitchOut += 0.16 * (0.6 * Math.sin(i * 1.37 + 2.2) + 0.4 * Math.sin(i * 2.53 + 0.7));
+			rollOut += 0.25 * (0.6 * Math.sin(i * 1.19 + 1.3) + 0.4 * Math.sin(i * 2.11 + 2.6));
 			double r = Math.toRadians(yw);
 			double sx = Math.cos(r) * sway, sz = Math.sin(r) * sway;
-			return new double[]{px + sx, base + bob + lf, pz + sz, yawOut, pitchOut, rollOut};
+			return new double[]{px + sx, base + bob + lf + breath, pz + sz, yawOut, Mth.clamp(pitchOut, -85, 85), rollOut};
 		}
 
 		private static double overshoot(double u) {
@@ -1060,7 +1180,7 @@ final class Reel {
 			Files.createDirectories(dir);
 			Files.writeString(dir.resolve("marks.txt"), String.join("\n", f.marks()) + "\n");
 			StringBuilder roll = new StringBuilder();
-			for (double[] p : poses) roll.append(String.format(Locale.ROOT, "%.2f%n", p[5]));
+			for (double[] p : poses) roll.append(String.format(Locale.ROOT, "%.2f %.2f %.2f%n", p[3], p[4], p[5]));
 			Files.writeString(dir.resolve("roll.txt"), roll.toString());
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
