@@ -224,7 +224,8 @@ final class Reel {
 		Vec3 door = local(o, 0, 1.2, -1);
 		Vec3 glass = local(o, -4, 2.0, 3);
 		Vec3 trees = local(o, -12, 1.2, 3);
-		BlockPos outside = o.offset(-6, 0, 3);
+		// Far enough out that, stooping under the lean-to, its face comes to the glass and not into the wall.
+		BlockPos outside = o.offset(-8, 0, 3);
 		Fear f = new Fear(start).face(door);
 		f.stare(18, door, 0.6);
 		f.turnTo(16, glass);
@@ -244,7 +245,7 @@ final class Reel {
 		prepare(context, game, start, door, 15500);
 		context.waitTicks(25);
 		record(context, server, "window", f.flat(o.getY()), f, t -> {
-			if (t == there) Cinematic.place(server, outside, glass.add(4.0, -0.4, 0), Cinematic.Look.looming(0));
+			if (t == there) Cinematic.place(server, outside, glass.add(3.0, -0.4, 0), Cinematic.Look.looming(0));
 		});
 	}
 
@@ -396,7 +397,7 @@ final class Reel {
 			Cabin c = new Cabin(o);
 			server.runOnServer(s -> {
 				ServerLevel level = s.overworld();
-				wood(level, o, -17, 17, -28, 38, List.of(c.approach, c.out), 7L, new double[][]{{0, 3, 7.5}, {-4, 27, 2.2}}, ROCK);
+				wood(level, o, -17, 17, -28, 38, List.of(c.approach, c.out), 7L, new double[][]{{0, 3, 7.5}, {-8, 3, 4.0}, {-4, 27, 2.2}}, ROCK);
 				RandomSource r = RandomSource.create(9L);
 				for (int x = LEDGE[0]; x <= LEDGE[1]; x++) {
 					for (int z = LEDGE[2]; z <= LEDGE[3]; z++) {
@@ -441,11 +442,11 @@ final class Reel {
 				}
 			}
 				// A lean-to along the west wall, for wood: low, so that whatever stands under it stoops.
-			for (int x = -8; x <= -5; x++) {
+			for (int x = -10; x <= -5; x++) {
 				for (int z = -1; z <= 7; z++) set(level, o.offset(x, 3, z), Blocks.SPRUCE_PLANKS.defaultBlockState());
 			}
 			for (int z : new int[]{-1, 7}) {
-				for (int y = 0; y <= 2; y++) set(level, o.offset(-8, y, z), Blocks.SPRUCE_LOG.defaultBlockState());
+				for (int y = 0; y <= 2; y++) set(level, o.offset(-10, y, z), Blocks.SPRUCE_LOG.defaultBlockState());
 			}
 			// A barrel for a table with the lamp on it, a bench, shelves, cobwebs in the corners.
 			set(level, o.offset(-2, 0, 5), Blocks.BARREL.defaultBlockState());
