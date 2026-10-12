@@ -141,11 +141,12 @@ final class Reel {
 		if (floor == null) return;
 		BlockPos o = floor.above();
 		Way in = Way.local(o, new double[][]{{0, -3}, {0.4, 4}, {-0.4, 10}, {0.3, 16}, {0, 23}});
-		Way back = Way.local(o, new double[][]{{0, 6}, {0, -2}, {0.8, -8}, {-0.6, -14}, {0.4, -20}, {0, -26}});
-		BlockPos spot = o.offset(-5, 0, 11);
-		server.runOnServer(s -> wood(s.overworld(), o, -13, 13, -28, 26, List.of(in, back), 41L, new double[][]{{-5, 11, 1.6}}, null));
+		Way back = Way.local(o, new double[][]{{0, 6}, {0, -2}, {1.5, -7}, {-1.5, -12}, {1, -17}, {-1, -22}, {0, -30}});
+		// Where it stands: a gap in the trees, nothing over it, so its head is against what is left of the sky.
+		BlockPos spot = o.offset(-4, 0, 8);
+		server.runOnServer(s -> wood(s.overworld(), o, -16, 16, -46, 26, List.of(in, back), 41L, new double[][]{{-4, 8, 3.6}}, null));
 		Vec3 start = local(o, 0, Cinematic.EYE, -3);
-		Vec3 face = head(spot, 3.0);
+		Vec3 face = head(spot, 4.4);
 		Fear f = new Fear(start);
 		f.follow(in);
 		// Walking, looking about: off to the right, ahead; then, off to the left, it is there.
@@ -164,7 +165,7 @@ final class Reel {
 		f.mark("look");
 		f.lookBack(7, 11, 7, face);
 		f.run(10, SPRINT, 0);
-		prepare(context, game, start, right, 12800);
+		prepare(context, game, start, right, 13000);
 		Cinematic.place(server, spot, start, Cinematic.Look.STARING);
 		context.waitTicks(25);
 		record(context, server, "woods", f.flat(o.getY()), f, t -> {
@@ -276,7 +277,7 @@ final class Reel {
 		// Round the rock, until it is there in front of them, just past it; a moment to take it in.
 		BlockPos spot = o.offset(-4, 0, 27);
 		Vec3 feet = Vec3.atBottomCenterOf(spot);
-		Vec3 face = feet.add(0, 2.2, 0);
+		Vec3 face = feet.add(0, 2.4, 0);
 		for (int i = 0; i < 80 && !f.sees(feet, o, Cabin.ROCK); i++) f.run(1, SPRINT, 0);
 		f.mark("seen");
 		f.run(5, SPRINT, 0);
@@ -290,7 +291,9 @@ final class Reel {
 		// On the ground, on their back; it over them, nearer, its legs coming down on them.
 		Vec3 lying = new Vec3(f.x, 0, f.z);
 		Vec3 toward = new Vec3(feet.x - lying.x, 0, feet.z - lying.z).normalize();
-		Vec3 over = new Vec3(lying.x + toward.x * 2.0, o.getY() + 2.0, lying.z + toward.z * 2.0);
+		// It stands over them a little way off, bent under the rock: its face just above them.
+		Vec3 over = new Vec3(lying.x + toward.x * 1.3, o.getY() + 2.4, lying.z + toward.z * 1.3);
+		Vec3 stands = new Vec3(lying.x + toward.x * 2.6, feet.y, lying.z + toward.z * 2.6);
 		f.markAt(hit + 14, "beat");
 		f.markAt(hit + 27, "beat");
 		f.down(30, t -> over, 14.0);
@@ -304,18 +307,34 @@ final class Reel {
 			record(context, server, "taken", poses, f, t -> {
 				if (t == look) Cinematic.place(server, behind, f.at(look + 9), CHASING);
 				if (t == corner) Cinematic.place(server, spot, f.at(hit), LOOMING);
-				if (t < hit) return;
+				if (t < corner) return;
 				// Where it is: where it stood, until it strikes; then over them; then, dragging them, a
 				// little ahead of them, always facing them.
 				Vec3 eye = new Vec3(poses[t][0], poses[t][1], poses[t][2]);
 				Vec3 at;
-				if (t < down) {
+				if (t < hit) {
+					at = feet;
+				} else if (t < down) {
 					at = feet.add(lunge.subtract(feet).scale(smooth((t - hit) / 5.0)));
 				} else if (t < drag) {
 					double u = smooth((t - down) / 12.0);
-					at = lunge.add(new Vec3(over.x - lunge.x, 0, over.z - lunge.z).scale(u));
+					at = lunge.add(new Vec3(stands.x - lunge.x, 0, stands.z - lunge.z).scale(u));
 				} else {
-					at = new Vec3(eye.x + toward.x * 2.0, feet.y, eye.z + toward.z * 2.0);
+					at = new Vec3(eye.x + toward.x * 2.6, feet.y, eye.z + toward.z * 2.6);
+				}
+				float yaw = (float) Fear.yawBetween(at, eye);
+				float pitch = (float) -Math.toDegrees(Math.atan2(eye.y - (at.y + 2.4), Math.hypot(eye.x - at.x, eye.z - at.z)));
+				if (t < hit) {
+					// Waiting round the corner, its eyes already on them.
+					server.runOnServer(s -> {
+						List<OccupantEntity> its = s.overworld().getEntitiesOfClass(OccupantEntity.class, AABB.ofSize(at, 16, 16, 16));
+						if (its.isEmpty()) return;
+						its.get(0).setYRot(yaw);
+						its.get(0).setYHeadRot(yaw);
+						its.get(0).setYBodyRot(yaw);
+						its.get(0).setXRot(pitch);
+					});
+					return;
 				}
 				Vec3 dir = new Vec3(at.x - eye.x, 0, at.z - eye.z).normalize();
 				// Its leg goes in here: their chest, just below what they see.
@@ -327,7 +346,6 @@ final class Reel {
 					server.runCommand(String.format(Locale.ROOT, "tp %s %.3f %.3f %.3f", BODY, chest.x, chest.y, chest.z));
 				}
 				int legs = (t >= hit + 14 && t < hit + 19) || (t >= hit + 27 && t < hit + 32) ? 2 : 1;
-				float yaw = (float) Fear.yawBetween(at, eye);
 				server.runOnServer(s -> {
 					ServerLevel level = s.overworld();
 					List<OccupantEntity> its = level.getEntitiesOfClass(OccupantEntity.class, AABB.ofSize(at, 16, 16, 16));
@@ -337,6 +355,7 @@ final class Reel {
 					it.setYRot(yaw);
 					it.setYHeadRot(yaw);
 					it.setYBodyRot(yaw);
+					it.setXRot(pitch);
 					List<Entity> body = level.getEntities((Entity) null, AABB.ofSize(chest, 3, 3, 3), e -> Kinds.is(e, "armor_stand"));
 					if (body.isEmpty()) return;
 					List<Entity> held = new ArrayList<>();
@@ -355,6 +374,8 @@ final class Reel {
 	private static final class Cabin {
 		/** The rock the way goes round (x0, x1, z0, z1 from the house): big enough to hide what is on the other side of it. */
 		static final int[] ROCK = {-9, -2, 14, 25};
+		/** The shelf of the rock over the way round it (x0, x1, z0, z1), its underside three blocks up. */
+		static final int[] LEDGE = {-11, -1, 26, 30};
 		final BlockPos o;
 		final BlockPos front, back;
 		/** From the south, up to the door and in. */
@@ -375,7 +396,18 @@ final class Reel {
 			Cabin c = new Cabin(o);
 			server.runOnServer(s -> {
 				ServerLevel level = s.overworld();
-				wood(level, o, -17, 17, -28, 38, List.of(c.approach, c.out), 7L, new double[][]{{0, 3, 7.5}}, ROCK);
+				wood(level, o, -17, 17, -28, 38, List.of(c.approach, c.out), 7L, new double[][]{{0, 3, 7.5}, {-4, 27, 2.2}}, ROCK);
+				RandomSource r = RandomSource.create(9L);
+				for (int x = LEDGE[0]; x <= LEDGE[1]; x++) {
+					for (int z = LEDGE[2]; z <= LEDGE[3]; z++) {
+						// Ragged at its edges, thinner the further it reaches.
+						boolean edge = x == LEDGE[0] || x == LEDGE[1] || z == LEDGE[3];
+						if (edge && r.nextInt(3) == 0) continue;
+						set(level, o.offset(x, 3, z), (r.nextInt(3) == 0 ? Blocks.MOSSY_COBBLESTONE : Blocks.STONE).defaultBlockState());
+						if (z < LEDGE[3] - 1) set(level, o.offset(x, 4, z), Blocks.STONE.defaultBlockState());
+						if (r.nextInt(3) == 0) set(level, o.offset(x, 5, z), Blocks.MOSS_BLOCK.defaultBlockState());
+					}
+				}
 				c.house(level);
 			});
 			return c;
@@ -407,6 +439,13 @@ final class Reel {
 					set(level, o.offset(-4, y, z), Blocks.GLASS.defaultBlockState());
 					set(level, o.offset(4, y, z), Blocks.GLASS.defaultBlockState());
 				}
+			}
+				// A lean-to along the west wall, for wood: low, so that whatever stands under it stoops.
+			for (int x = -8; x <= -5; x++) {
+				for (int z = -1; z <= 7; z++) set(level, o.offset(x, 3, z), Blocks.SPRUCE_PLANKS.defaultBlockState());
+			}
+			for (int z : new int[]{-1, 7}) {
+				for (int y = 0; y <= 2; y++) set(level, o.offset(-8, y, z), Blocks.SPRUCE_LOG.defaultBlockState());
 			}
 			// A barrel for a table with the lamp on it, a bench, shelves, cobwebs in the corners.
 			set(level, o.offset(-2, 0, 5), Blocks.BARREL.defaultBlockState());
@@ -933,7 +972,7 @@ final class Reel {
 				speed = 0.012 + 0.3 * pull;
 				step(speed, 0);
 				// What has them is always just there, a little ahead, over them.
-				Vec3 it = new Vec3(x - Math.sin(r) * 2.0, eyeY + 0.4, z + Math.cos(r) * 2.0);
+				Vec3 it = new Vec3(x - Math.sin(r) * 1.3, eyeY + 0.78, z + Math.cos(r) * 1.3);
 				yaw = Fear.toward(yaw, yawTo(it), 0.3) + pull * 3.5 * Math.sin(i * 1.7);
 				pitch += (pitchTo(it) - pitch) * 0.3;
 				pitch += pull * 4.0;
