@@ -167,7 +167,7 @@ final class Reel {
 		f.trip(7);
 		f.run(10, SPRINT, 0);
 		f.mark("look");
-		f.lookBack(7, 11, 7, face);
+		f.lookBack(9, 10, 8, face);
 		f.run(10, SPRINT, 0);
 		prepare(context, game, start, right, 13000);
 		Cinematic.place(server, spot, start, Cinematic.Look.STARING);
@@ -196,8 +196,8 @@ final class Reel {
 		// On the way behind, where they were a few seconds ago.
 		double[] b = cabin.approach.point(cabin.approach.along(f.at(look)) - 6.5);
 		BlockPos behind = BlockPos.containing(b[0], o.getY(), b[1]);
-		f.lookBack(7, 12, 7, head(behind, 2.8));
-		f.markAt(look + 6, "seen");
+		f.lookBack(9, 11, 8, head(behind, 2.8));
+		f.markAt(look + 8, "seen");
 		f.glancing = false;
 		f.runTo(1.2, SPRINT);
 		Vec3 doorway = local(o, 0, 1.4, -1);
@@ -276,8 +276,8 @@ final class Reel {
 		// Behind, by the house they ran from.
 		double[] b = way.point(way.along(f.at(look)) - 7.0);
 		BlockPos behind = BlockPos.containing(b[0], o.getY(), b[1]);
-		f.lookBack(7, 12, 7, head(behind, 2.8));
-		f.markAt(look + 6, "seen");
+		f.lookBack(9, 11, 8, head(behind, 2.8));
+		f.markAt(look + 8, "seen");
 		f.glancing = false;
 		f.run(8, SPRINT, 0);
 		// Round the rock, until it is there in front of them, just past it; a moment to take it in.
