@@ -257,8 +257,9 @@ final class OccupantPose {
 		if (Float.isFinite(state.watchYaw) && Float.isFinite(state.watchPitch)) {
 			float seeYaw = (float) Math.toRadians(Mth.wrapDegrees(state.watchYaw));
 			float seePitch = (float) Math.toRadians(state.watchPitch);
-			// All the way onto them when the game is aiming at them; not at all once it looks elsewhere.
-			float on = Mth.clamp(1.0f - Math.abs(Mth.wrapDegrees((float) Math.toDegrees(seeYaw - lookY))) / 25.0f, 0.0f, 1.0f);
+			// All the way onto them when the game is aiming at them; not at all once it looks elsewhere,
+			// even at something on the way to them, below them, nearer.
+			float on = Mth.clamp(1.0f - (state.aimOff - 6.0f) / 14.0f, 0.0f, 1.0f);
 			yaw = Mth.lerp(on, lookY, seeYaw);
 			pitch = Mth.lerp(on, lookX, seePitch);
 		}

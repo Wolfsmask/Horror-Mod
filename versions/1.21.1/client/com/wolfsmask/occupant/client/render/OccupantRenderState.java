@@ -55,6 +55,11 @@ public class OccupantRenderState {
 	/** Where its eyes are drawn, in the world, as its body is bent this frame; null if not worked out. */
 	@org.jetbrains.annotations.Nullable
 	public net.minecraft.world.phys.Vec3 eyes;
+	/**
+	 * How far, in degrees, where the game aims its head is from whoever is watching, from its own
+	 * eye height: near nothing when it is looking at them, more when it is looking at something else.
+	 */
+	public float aimOff = 180.0f;
 	public float watchYaw;
 	public float watchPitch;
 	/** Model pixels to blocks, worked out once per frame. */

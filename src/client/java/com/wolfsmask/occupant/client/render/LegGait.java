@@ -556,6 +556,14 @@ public final class LegGait {
 			double nc = Math.cos(neckX), ns = Math.sin(neckX);
 			Vec3 eyes = fromSpine(sp[0] + n[0], sp[1] + n[1] * nc - n[2] * ns, sp[2] + n[1] * ns + n[2] * nc, px, dropPx);
 			state.eyes = eyes;
+			// Whether the game is aiming its head at them or at something else: the angle between the
+			// two, both from where the game puts its eyes.
+			Vec3 from = new Vec3(real.x, real.y + entity.getEyeHeight(), real.z);
+			Vec3 to = viewer.getEyePosition().subtract(from);
+			double gy = Math.toRadians(entity.getYHeadRot()), gp = Math.toRadians(entity.getXRot());
+			Vec3 aim = new Vec3(-Math.sin(gy) * Math.cos(gp), -Math.sin(gp), Math.cos(gy) * Math.cos(gp));
+			double len = to.length();
+			state.aimOff = len < 1.0e-4 ? 0.0f : (float) Math.toDegrees(Math.acos(Mth.clamp(aim.dot(to) / len, -1.0, 1.0)));
 			double away = Math.max(0.5, Math.hypot(viewer.getX() - real.x, viewer.getZ() - real.z));
 			double aimedAt = real.y + entity.getEyeHeight() - Math.tan(Math.toRadians(entity.getXRot())) * away;
 			double fromEyes = Math.max(0.5, Math.hypot(viewer.getX() - eyes.x, viewer.getZ() - eyes.z));

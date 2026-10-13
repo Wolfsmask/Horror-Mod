@@ -283,7 +283,6 @@ final class Reel {
 	 */
 	private static void look(TestServerContext server, Vec3 at, Vec3 eye, double face) {
 		float yaw = (float) Fear.yawBetween(at, eye);
-		float pitch = (float) -Math.toDegrees(Math.atan2(eye.y - (at.y + face), Math.hypot(eye.x - at.x, eye.z - at.z)));
 		server.runOnServer(s -> {
 			List<OccupantEntity> its = s.overworld().getEntitiesOfClass(OccupantEntity.class, AABB.ofSize(at, 16, 16, 16));
 			if (its.isEmpty()) return;
@@ -292,7 +291,7 @@ final class Reel {
 			thing.setYRot(yaw);
 			thing.setYHeadRot(yaw);
 			thing.setYBodyRot(yaw);
-			thing.setXRot(pitch);
+			thing.setXRot((float) -Math.toDegrees(Math.atan2(eye.y - (at.y + thing.getEyeHeight()), Math.hypot(eye.x - at.x, eye.z - at.z))));
 		});
 	}
 
@@ -418,7 +417,6 @@ final class Reel {
 				// Its eyes on them while it has them; at the end, on the camera.
 				Vec3 watch = t < hit ? eye : t >= stop ? eye : them.add(0, 0.3, 0);
 				float yaw = (float) Fear.yawBetween(at, watch);
-				float pitch = (float) -Math.toDegrees(Math.atan2(watch.y - (at.y + 2.4), Math.hypot(watch.x - at.x, watch.z - at.z)));
 				// Their head the way they are trying to go; once it has them back, away from it; and
 				// jerking about as the legs go in.
 				double twitch = t >= hit + 12 && t < crawl ? 14 * Math.sin(t * 1.7) : 0;
@@ -463,7 +461,9 @@ final class Reel {
 					thing.setYRot(yaw);
 					thing.setYHeadRot(yaw);
 					thing.setYBodyRot(yaw);
-					thing.setXRot(pitch);
+					// Down at them, or out at the camera, from where the game has its eyes.
+					thing.setXRot((float) -Math.toDegrees(Math.atan2(watch.y - (at.y + thing.getEyeHeight()),
+							Math.hypot(watch.x - at.x, watch.z - at.z))));
 					List<Entity> into = new ArrayList<>();
 					if (atLens) {
 						into.addAll(level.getEntities((Entity) null, AABB.ofSize(legAt, 4, 4, 4), e -> Kinds.is(e, "armor_stand")));
