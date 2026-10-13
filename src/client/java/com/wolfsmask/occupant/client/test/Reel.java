@@ -457,8 +457,11 @@ final class Reel {
 				double[] held = poses[Math.min(t, hit - 1)];
 				double yr = Math.toRadians(held[3]);
 				Vec3 lensPoint = new Vec3(held[0], held[1], held[2]).add(-Math.sin(yr) * 0.45, -0.15, Math.cos(yr) * 0.45);
-				double u = Mth.clamp((t - strike + 1.0) / (hit - strike), 0.0, 1.0);
-				Vec3 legAt = t < strike ? cocked.apply(t)
+				// Sent where it is to be two ticks on: the game draws a thing moved a couple of ticks
+				// behind where it is sent, and the leg is to be in the lens as the blow lands, not after.
+				int ahead = t + 2;
+				double u = Mth.clamp((ahead - strike + 1.0) / (hit - strike), 0.0, 1.0);
+				Vec3 legAt = ahead < strike ? cocked.apply(ahead)
 						: cocked.apply(strike).lerp(lensPoint, u * u).add(0, 0.35 * Math.sin(u * Math.PI), 0);
 				if (t == rear) {
 					server.runCommand(String.format(Locale.ROOT, "summon armor_stand %.3f %.3f %.3f {Marker:1b,Invisible:1b,NoGravity:1b,Tags:[\"occupant_reel\"]}",
