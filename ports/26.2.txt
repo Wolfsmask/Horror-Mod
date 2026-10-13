@@ -1,0 +1,73 @@
+# 26.2 on 776e328a82ff76c5181b3889b8052e5e0f4cd7b0: build success, tests success, jar success
+> Configure project :
+> Task :compileJava
+> Task :processResources
+> Task :classes
+> Task :compileClientJava
+> Task :processClientResources NO-SOURCE
+> Task :processIncludeJars
+> Task :clientClasses
+> Task :compileTestJava NO-SOURCE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+> Task :jar
+> Task :test NO-SOURCE
+> Task :assemble
+> Task :validateAccessWidener NO-SOURCE
+> Task :check UP-TO-DATE
+> Task :build
+=== jar
+jar: build/libs/occupant-0.5.0+mc26.2.jar
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.wolfsmask.occupant.mixin.client",
+  "compatibilityLevel": "JAVA_25",
+  "client": [
+    "CreateWorldAccess",
+    "FogRendererMixin",
+    "HumanoidModelMixin",
+    "LivingEntityRendererMixin",
+    "ModelFeatureRendererMixin",
+    "MouseHandlerMixin",
+    "ScreenAccess",
+    "SkeletonModelMixin",
+    "SkyRendererMixin",
+    "ZombieModelMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
+advancements: data/occupant/advancement/ (21 files)
+unobfuscated version: the game's own names are the real ones
+[18:13:10] [Server thread/INFO] (occupant) [gametest] houses: found before false, first true, too close false, second true, after finding false
+[18:13:10] [Server thread/INFO] (occupant) [gametest] last camp at BlockPos{x=10909067, y=-61, z=2757709}, chest at BlockPos{x=10909070, y=-60, z=2757708}
+[18:13:10] [Server thread/INFO] (occupant) [gametest] lair under BlockPos{x=10909082, y=0, z=2759109}: 22 rungs, going in: STARTED
+[18:13:12] [Server thread/INFO] (occupant) [gametest] blight over 64 chunks: 457 blocks changed, 0 leaves
+[18:13:12] [Server thread/INFO] (occupant) [gametest] void: allowed false, health 3.0 of 20.0, food 3
+[18:13:12] [Server thread/INFO] (occupant) [gametest] fall far from home: home loaded before false, woke at BlockPos{x=10913053, y=-60, z=2762427} (0.0 from the bed), room to stand true
+[18:13:12] [Server thread/INFO] (occupant) [gametest] one of it: second null, seen by the other true
+[18:13:12] [Server thread/INFO] (occupant) [gametest] mercy: fall allowed false, health 3.0, creative true, introduced true
+[18:13:12] [Server thread/INFO] (occupant) [gametest] mercy: zombie allowed false, held true
+[18:13:12] [Server thread/INFO] (occupant) [gametest] advancements of ours loaded: 21
+[18:13:12] [Server thread/INFO] (occupant) [gametest] fog: first act 68.0, last act 38.0
+[18:13:14] [Server thread/INFO] (occupant) [gametest] fog thick at 48.0, begins at 27.839999999999996; it stands 24.20743687382041 away
+[18:13:14] [Server thread/INFO] (occupant) [gametest] places without loot: [], page found: true
+[18:13:15] [Server thread/INFO] (occupant) [gametest] the tree a place was built through: 0 logs and 0 leaves left
+[18:13:16] [Server thread/INFO] (occupant) [gametest] ways of building a place that lost their things: []
+[18:13:17] [Server thread/INFO] (occupant) [gametest] house test player at BlockPos{x=-2, y=1, z=-4} facing 0.0 / (0.0, -0.0, 1.0)
+[18:13:17] [Server thread/INFO] (occupant) [gametest] house hallway spot: peeking BlockPos{x=10909026, y=-55, z=2758729} / any BlockPos{x=10909026, y=-55, z=2758729} (relative to the floor: BlockPos{x=4, y=1, z=0})
+[18:13:17] [Server thread/INFO] (occupant) [gametest] hallway light at the far end: block 0 sky 0, dark true
+[18:13:17] [Server thread/INFO] (occupant) [gametest] that spot: mask 1001001001, block light 0, sky 2, main room middle block light 0 sky 8
+[18:13:17] [Server thread/INFO] (occupant) [gametest] back from the end: 0.0 from home, weightless false, act 1, still under false
+[18:13:18] [Server thread/INFO] (occupant) [gametest] friends: the other is watching
+[18:13:18] [Server thread/INFO] (occupant) [gametest] rescue: creeper alive true, 0.0 above the ground
+[18:13:18] [Server thread/INFO] (occupant) [gametest] rescue: zombie 1.6258988857269259 above the ground, alive true
+[18:13:18] [Server thread/INFO] (occupant) [gametest] rescue: 1 come for them
+[18:13:18] [Server thread/INFO] (occupant) [gametest] behind a friend, at 60:- @1|null none @7|behind_friend [concealed 3.6 from b, b 169 deg, a 175 deg, seen by a false/false b false, a yaw 135 at 0.5 0.5, it at 6.5 5.5] @12|behind_friend [shown 3.6 from b, b 169 deg, a 175 deg, seen by a false/false b false, a yaw 135 at 0.5 0.5, it at 6.5 5.5]
+[18:13:18] [Server thread/INFO] (occupant) [gametest] behind a friend, at 75:- @1|null none @7|behind_friend [concealed 3.6 from b, b 169 deg, a 175 deg, seen by a false/false b false, a yaw 135 at 0.5 0.5, it at 6.5 5.5] @12|behind_friend [shown 3.6 from b, b 169 deg, a 175 deg, seen by a false/false b false, a yaw 135 at 0.5 0.5, it at 6.5 5.5] @62|null none
+[18:13:19] [Server thread/INFO] (occupant) [gametest] field: darkOutside=true skyDarken=7 light=8 skyLight=15 blockLight=0 isDark=true grassInDirtTag=false
+[18:13:19] [Server thread/INFO] (occupant) [gametest] cave: yaw=-90.0 feet=BlockPos{x=10909497, y=60, z=2758580} underground=true skyVisible=false skyLight=0 topY=69 light=0 look=(1.0, 0.0, 1.2246468525851679E-16) | ahead: standable=55 dark=55 visible=55
+[18:13:19] [Server thread/INFO] (occupant) [gametest] arena failures: []
+[18:13:19] [Server thread/INFO] (occupant) [gametest] slowest event to start: torch_gone (cave) in 16 ms
