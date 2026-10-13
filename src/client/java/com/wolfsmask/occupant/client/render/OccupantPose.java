@@ -237,38 +237,42 @@ final class OccupantPose {
 	 */
 	private void loom(OccupantRenderState state, float lookX, float lookY) {
 		jaw.yScale = 1.3f;                          // the face pulls longer, around the mouth
-		face(state, lookX, lookY);
+		// Not looking at whoever is watching: bent right down over what it is looking at.
+		face(state, lookX, lookY, lookX * 0.3f, 0.45f + lookX * 0.4f, lookY * 0.5f);
 	}
 
 	/** Coming for you. Bent forward into it, mouth working, and its face on you the whole way. */
 	private void chase(OccupantRenderState state, float t, float lookX, float lookY) {
 		jaw.yScale = 1.25f + 0.08f * Mth.sin(t * 0.9f);
-		face(state, lookX, lookY);
+		face(state, lookX, lookY, 0.0f, 0.3f + lookX * 0.3f, lookY * 0.3f);
 	}
 
 	/**
-	 * Its face turned where the game aims its head ({@code lookX} down, {@code lookY} round),
-	 * however the body under it is bent: the neck takes some of the way, the head the rest. When
-	 * what it is looking at is whoever is watching, the aim is taken from its own drawn eyes to
-	 * theirs, so that close to, it looks you in the face, not down past you.
+	 * Its face, where the game aims its head ({@code lookX} down, {@code lookY} round). When that is
+	 * at whoever is watching, the aim is taken from its own drawn eyes to theirs, however its body
+	 * is bent, so that close to it looks them in the face and not down past them. When it is at
+	 * something else, it holds its head the way it holds it over what it has: the neck bent by
+	 * {@code neckX}, the head by {@code skullX} and round by {@code skullY}. Between the two, as far
+	 * as its aim is between.
 	 */
-	private void face(OccupantRenderState state, float lookX, float lookY) {
-		float yaw = lookY, pitch = lookX;
+	private void face(OccupantRenderState state, float lookX, float lookY, float neckX, float skullX, float skullY) {
+		float on = 0.0f;
+		float neckYaw = 0.0f, onNeckX = 0.0f, onSkullX = skullX, onSkullY = skullY;
 		if (Float.isFinite(state.watchYaw) && Float.isFinite(state.watchPitch)) {
-			float seeYaw = (float) Math.toRadians(Mth.wrapDegrees(state.watchYaw));
-			float seePitch = (float) Math.toRadians(state.watchPitch);
 			// All the way onto them when the game is aiming at them; not at all once it looks elsewhere,
 			// even at something on the way to them, below them, nearer.
-			float on = Mth.clamp(1.0f - (state.aimOff - 6.0f) / 14.0f, 0.0f, 1.0f);
-			yaw = Mth.lerp(on, lookY, seeYaw);
-			pitch = Mth.lerp(on, lookX, seePitch);
+			on = Mth.clamp(1.0f - (state.aimOff - 6.0f) / 14.0f, 0.0f, 1.0f);
+			float yaw = Mth.clamp((float) Math.toRadians(Mth.wrapDegrees(state.watchYaw)), -1.3f, 1.3f);
+			float need = Mth.clamp((float) Math.toRadians(state.watchPitch) - (spine.xRot + neck.xRot), -1.1f, 1.1f);
+			neckYaw = yaw * 0.4f;
+			onNeckX = need * 0.35f;
+			onSkullX = need * 0.65f;
+			onSkullY = yaw * 0.6f;
 		}
-		yaw = Mth.clamp(yaw, -1.3f, 1.3f);
-		neck.yRot = yaw * 0.4f;
-		skull.yRot = yaw * 0.6f;
-		float need = Mth.clamp(pitch - (spine.xRot + neck.xRot), -1.1f, 1.1f);
-		neck.xRot += need * 0.35f;
-		skull.xRot = need * 0.65f;
+		neck.yRot = Mth.lerp(on, 0.0f, neckYaw);
+		neck.xRot += Mth.lerp(on, neckX, onNeckX);
+		skull.xRot = Mth.lerp(on, skullX, onSkullX);
+		skull.yRot = Mth.lerp(on, skullY, onSkullY);
 	}
 
 	/**
