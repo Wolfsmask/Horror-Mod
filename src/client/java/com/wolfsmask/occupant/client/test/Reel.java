@@ -146,16 +146,10 @@ final class Reel {
 		Way back = Way.local(o, new double[][]{{0, 6}, {0, -2}, {1.5, -7}, {-1.5, -12}, {1, -17}, {-1, -22}, {0, -30}});
 		// Where it stands: a gap in the trees, nothing over it, so its head is against what is left of the sky.
 		BlockPos spot = o.offset(-4, 0, 8);
-		// A bank across the way back, a block up and a couple of strides long.
-		int[][] rises = {{-4, 4, -9, -8, 1}};
-		server.runOnServer(s -> {
-			wood(s.overworld(), o, -16, 16, -46, 26, List.of(in, back), 41L, new double[][]{{-4, 8, 3.6}}, null);
-			raise(s.overworld(), o, rises);
-		});
+		server.runOnServer(s -> wood(s.overworld(), o, -16, 16, -46, 26, List.of(in, back), 41L, new double[][]{{-4, 8, 3.6}}, null));
 		Vec3 start = local(o, 0, Cinematic.EYE, -3);
 		Vec3 face = head(spot, 4.4);
 		Fear f = new Fear(start);
-		f.terrain((gx, gz) -> riseAt(o, rises, gx, gz));
 		f.follow(in);
 		// Walking, looking about: off to the right, ahead; then, off to the left, it is there.
 		Vec3 right = local(o, 5, 1.9, 6), ahead = local(o, 0.5, 1.5, 12);
@@ -196,7 +190,6 @@ final class Reel {
 		cabin.door(server, cabin.back, false);
 		Vec3 start = local(o, 1, Cinematic.EYE, -17);
 		Fear f = new Fear(start);
-		f.terrain((gx, gz) -> riseAt(o, Cabin.RISES, gx, gz));
 		f.follow(cabin.approach.from(start.x, start.z));
 		f.face(local(o, 0, 2.2, -1));
 		f.speed = 0.18;
@@ -317,7 +310,6 @@ final class Reel {
 		Vec3 start = local(o, 0, Cinematic.EYE, 4.6);
 		Way way = cabin.out.from(start.x, start.z);
 		Fear f = new Fear(start);
-		f.terrain((gx, gz) -> riseAt(o, Cabin.RISES, gx, gz));
 		f.follow(way);
 		f.face(local(o, 0, 1.4, 9));
 		f.speed = 0.12;
@@ -339,21 +331,16 @@ final class Reel {
 		int seen = f.size();
 		f.mark("seen");
 		f.flinchAt(seen + 1, face, 1.2);
-		// Round the corner, and it is there; they stop dead. It draws itself up and back, a leg lifted
-		// and cocked behind it, and comes.
+		// Round the corner, and it is there; before they can even stop, it has them.
 		f.run(2, SPRINT, 0);
-		f.halt(9, face);
+		f.halt(3, face);
 		int hit = f.size();
-		int rear = hit - 8, strike = hit - 3;
 		// The blow knocks the camera out of their hands: it lands in the dirt a few steps off, on its
 		// side, still recording, looking back at them. Everything after is seen from there.
 		double ground = o.getY();
 		Vec3 struck = f.at(hit);
 		Vec3 lunge = feet.add(horizontal(struck.subtract(feet)).normalize().scale(0.9));
 		Vec3 away = horizontal(struck.subtract(feet)).normalize();
-		// Rearing back from them, half a block, and down into its legs, before it comes: the spring
-		// wound, it pushes off and straightens into the lunge.
-		Vec3 reared = feet.subtract(away.scale(0.5)).add(0, -0.42, 0);
 		Vec3 person = new Vec3(struck.x + away.x, ground, struck.z + away.z);
 		// It comes round to stand over them on the open side, away from the rock, under the shelf of it.
 		Vec3 toIt = new Vec3(-1.2, 0, 2.4).normalize();
@@ -402,26 +389,14 @@ final class Reel {
 			if (t < yank + 5) return near.add(back.subtract(near).scale(1 - Math.pow(1 - (t - yank) / 5.0, 2)));
 			return back.add(toIt.scale(dragged.applyAsDouble(t))).add(writhe);
 		};
-		// Where it is each tick: round the corner; rearing back; lunging, faster and faster; over them;
-		// after them; dragging them off.
+		// Where it is each tick: round the corner; lunging; over them; after them; dragging them off.
 		IntFunction<Vec3> it = t -> {
-			if (t < rear) return feet;
-			if (t < strike) return feet.lerp(reared, smooth((t - rear) / (double) (strike - 1 - rear)));
-			if (t < hit + 2) {
-				double u = (t - strike) / (double) (hit + 2 - strike);
-				Vec3 going = reared.lerp(lunge, u * u);
-				// Up out of the crouch first, faster than it goes forward: the push off its legs.
-				return new Vec3(going.x, feet.y + (reared.y - feet.y) * Math.pow(1 - Math.min(1, u * 1.6), 2), going.z);
-			}
-			if (t < hit + 10) return lunge.add(horizontal(stands.subtract(lunge)).scale(smooth((t - hit - 2) / 8.0)));
+			if (t < hit) return feet;
+			if (t < hit + 4) return feet.add(lunge.subtract(feet).scale(smooth((t - hit) / 4.0)));
+			if (t < hit + 12) return lunge.add(horizontal(stands.subtract(lunge)).scale(smooth((t - hit - 4) / 8.0)));
 			if (t < yank) return stands.add(flee.scale(0.4 * crawled.applyAsDouble(t)));
 			return stands.add(toIt.scale(0.5 * Math.min(1.0, (t - yank) / 5.0) + dragged.applyAsDouble(t)));
 		};
-		// The leg it strikes with: drawn up and back to one side as it rears, held there, and then
-		// driven at the lens, faster and faster. Under the shelf of rock: no higher than its underside.
-		Vec3 aside = new Vec3(-away.z, 0, away.x);
-		IntFunction<Vec3> cocked = t -> it.apply(Math.min(t, strike)).add(0, 2.5 - 0.6 * (it.apply(Math.min(t, strike)).y - feet.y), 0)
-				.subtract(away.scale(0.8)).add(aside.scale(1.1));
 		f.watching(t -> t >= look && t < seen - 2 ? Vec3.atBottomCenterOf(behind).add(0, 2.4, 0)
 				: t >= seen - 2 ? it.apply(t).add(0, 2.0, 0) : null);
 		double[][] poses = f.flat(ground);
@@ -440,8 +415,8 @@ final class Reel {
 				Vec3 at = it.apply(t);
 				Vec3 them = body.apply(t);
 				Vec3 eye = new Vec3(poses[t][0], poses[t][1], poses[t][2]);
-				// Its eyes on the camera all the while, even with them under it.
-				Vec3 watch = eye;
+				// Its eyes on them while it has them; at the end, on the camera.
+				Vec3 watch = t < hit ? eye : t >= stop ? eye : them.add(0, 0.3, 0);
 				float yaw = (float) Fear.yawBetween(at, watch);
 				float pitch = (float) -Math.toDegrees(Math.atan2(watch.y - (at.y + 2.4), Math.hypot(watch.x - at.x, watch.z - at.z)));
 				// Their head the way they are trying to go; once it has them back, away from it; and
@@ -452,18 +427,12 @@ final class Reel {
 				if (t >= hit + 2) {
 					server.runCommand(String.format(Locale.ROOT, "tp %s %.3f %.3f %.3f %.1f 0", SELF, them.x, them.y, them.z, bodyYaw));
 				}
-				// Its leg: cocked, and then coming straight at the lens, the instant before the camera is gone.
-				boolean atLens = t >= rear && t <= hit;
+				// Its leg coming straight at the lens, the instant before the camera is gone.
+				boolean atLens = t >= hit - 3 && t <= hit;
 				double[] held = poses[Math.min(t, hit - 1)];
 				double yr = Math.toRadians(held[3]);
-				Vec3 lensPoint = new Vec3(held[0], held[1], held[2]).add(-Math.sin(yr) * 0.45, -0.15, Math.cos(yr) * 0.45);
-				// Sent where it is to be two ticks on: the game draws a thing moved a couple of ticks
-				// behind where it is sent, and the leg is to be in the lens as the blow lands, not after.
-				int ahead = t + 2;
-				double u = Mth.clamp((ahead - strike + 1.0) / (hit - strike), 0.0, 1.0);
-				Vec3 legAt = ahead < strike ? cocked.apply(ahead)
-						: cocked.apply(strike).lerp(lensPoint, u * u).add(0, 0.35 * Math.sin(u * Math.PI), 0);
-				if (t == rear) {
+				Vec3 legAt = new Vec3(held[0], held[1], held[2]).add(-Math.sin(yr) * 0.45, -0.15, Math.cos(yr) * 0.45);
+				if (t == hit - 3) {
 					server.runCommand(String.format(Locale.ROOT, "summon armor_stand %.3f %.3f %.3f {Marker:1b,Invisible:1b,NoGravity:1b,Tags:[\"occupant_reel\"]}",
 							legAt.x, legAt.y, legAt.z));
 				} else if (atLens) {
@@ -562,8 +531,6 @@ final class Reel {
 		static final int[] ROCK = {-9, -2, 14, 25};
 		/** The shelf of the rock over the way round it (x0, x1, z0, z1), its underside three blocks up. */
 		static final int[] LEDGE = {-11, 2, 26, 32};
-		/** Banks across the ways (x0, x1, z0, z1, how high): one on the way up to the house, one on the way out. */
-		static final int[][] RISES = {{-3, 4, -15, -14, 1}, {-3, 3, 10, 11, 1}};
 		final BlockPos o;
 		final BlockPos front, back;
 		/** From the south, up to the door and in. */
@@ -597,7 +564,6 @@ final class Reel {
 					}
 				}
 				c.house(level);
-				raise(level, o, RISES);
 			});
 			return c;
 		}
@@ -764,38 +730,6 @@ final class Reel {
 		}
 	}
 
-	/**
-	 * Banks of earth across the ways ({x0, x1, z0, z1, how high} from {@code o}): something to step
-	 * up onto and down off, not a slope to glide over. Trunks and stones already there stay.
-	 */
-	private static void raise(ServerLevel level, BlockPos o, int[][] rises) {
-		RandomSource r = RandomSource.create(17L);
-		for (int[] b : rises) {
-			for (int x = b[0]; x <= b[1]; x++) {
-				for (int z = b[2]; z <= b[3]; z++) {
-					for (int y = 0; y < b[4]; y++) {
-						BlockPos p = o.offset(x, y, z);
-						BlockState was = level.getBlockState(p);
-						if (!was.isAir() && !was.canBeReplaced()) continue;
-						boolean top = y == b[4] - 1;
-						int n = r.nextInt(10);
-						set(level, p, !top ? Blocks.DIRT.defaultBlockState() : n < 5 ? Blocks.COARSE_DIRT.defaultBlockState()
-								: n < 8 ? Blocks.PODZOL.defaultBlockState() : Blocks.MOSS_BLOCK.defaultBlockState());
-					}
-				}
-			}
-		}
-	}
-
-	/** How far the ground has been raised at x, z (world), by {@link #raise}. */
-	private static double riseAt(BlockPos o, int[][] rises, double x, double z) {
-		int bx = Mth.floor(x) - o.getX(), bz = Mth.floor(z) - o.getZ();
-		for (int[] b : rises) {
-			if (bx >= b[0] && bx <= b[1] && bz >= b[2] && bz <= b[3]) return b[4];
-		}
-		return 0.0;
-	}
-
 	private static double nearest(List<Way> ways, BlockPos o, int x, int z) {
 		double best = Double.MAX_VALUE;
 		for (Way w : ways) best = Math.min(best, w.distance(o.getX() + x + 0.5, o.getZ() + z + 0.5));
@@ -911,8 +845,6 @@ final class Reel {
 		private final double eyeY;
 		/** Where it is at each tick, the middle of it, or null while it is nowhere: see {@link #calm}. */
 		private IntFunction<Vec3> it = t -> null;
-		/** How far the ground rises at x, z, over the level it was built at. */
-		private java.util.function.DoubleBinaryOperator rise = (gx, gz) -> 0.0;
 		/** When something came at them (tick, where from, how hard). */
 		private final List<double[]> frights = new ArrayList<>();
 
@@ -951,7 +883,7 @@ final class Reel {
 				Vec3 at = it.apply(i);
 				if (at == null) continue;
 				double[] p = poses.get(i);
-				double dx = at.x - p[0], dz = at.z - p[1], dy = at.y - (groundY + Cinematic.EYE + rise.applyAsDouble(p[0], p[1]) + p[4]);
+				double dx = at.x - p[0], dz = at.z - p[1], dy = at.y - (groundY + Cinematic.EYE + p[4]);
 				double across = Math.abs(Mth.wrapDegrees(Math.toDegrees(Math.atan2(-dx, dz)) - p[2]));
 				double up = Math.abs(-Math.toDegrees(Math.atan2(dy, Math.hypot(dx, dz))) - p[3]);
 				// Inside the upright frame (about 25 degrees either side, 40 up and down), and a margin for its size.
@@ -997,7 +929,7 @@ final class Reel {
 		}
 
 		private double pitchTo(Vec3 p) {
-			return -Math.toDegrees(Math.atan2(p.y - (eyeY + rise.applyAsDouble(x, z) + lift), Math.hypot(p.x - x, p.z - z)));
+			return -Math.toDegrees(Math.atan2(p.y - (eyeY + lift), Math.hypot(p.x - x, p.z - z)));
 		}
 
 		private static double toward(double from, double to, double rate) {
@@ -1291,18 +1223,16 @@ final class Reel {
 		}
 
 		/**
-		 * The poses over the ground at {@code groundY} (and whatever rises from it, see
-		 * {@link #terrain}): the eye at a person's height over it, and everything a body does to a
-		 * camera held in its hand put in. Where they look is followed as a head follows it, with
-		 * weight: it takes a moment to get going and slows before it stops. The body's own momentum
-		 * pitches it, forward as they set off, back as they pull up. A step up onto something is a
-		 * heave and a jolt, not a glide; a step down, a drop and a landing. And when something comes
-		 * at them, they flinch.
+		 * The poses on level ground at {@code groundY}, as a camcorder in someone's hand records them:
+		 * where they look followed as a hand turns a camera, quick, a little past and back; the
+		 * shake of the hand and the body under it never quite repeating, worse with fear and worse
+		 * running; every footfall a jolt of its own, never two the same; setting off and pulling up
+		 * felt in the hand; and when something comes at them, a flinch.
 		 */
 		double[][] flat(double groundY) {
 			int n = poses.size();
 			double[] calm = calm(groundY);
-			// Where they look, as a head and a camera with weight to them follow it.
+			// Where they look, turned as a hand turns a camera: quick to get going, a little past, back.
 			double[] yawF = new double[n], pitchF = new double[n];
 			double y = 0, yv = 0, pv = 0, pp = 0, prev = 0;
 			for (int i = 0; i < n; i++) {
@@ -1316,17 +1246,17 @@ final class Reel {
 					pv = 0;
 				} else {
 					for (int k = 0; k < 4; k++) {
-						yv += (LOOK * LOOK * (target - y) - 2 * 0.85 * LOOK * yv) * 0.25;
+						yv += (LOOK * LOOK * (target - y) - 2 * 0.62 * LOOK * yv) * 0.25;
 						y += yv * 0.25;
-						pv += (LOOK * LOOK * (p[3] - pp) - 2 * 0.85 * LOOK * pv) * 0.25;
+						pv += (LOOK * LOOK * (p[3] - pp) - 2 * 0.62 * LOOK * pv) * 0.25;
 						pp += pv * 0.25;
 					}
 				}
 				yawF[i] = y;
 				pitchF[i] = pp;
 			}
-			// The body's momentum: setting off it leans into it and the camera tips down; pulling up
-			// short, it is thrown back. A spring, so it comes back past upright and settles.
+			// Setting off, the camera dips with the body leaning into it; pulling up short, it is
+			// thrown back; a spring, so it comes back past and settles.
 			double[] lean = new double[n];
 			double l = 0, lv = 0;
 			for (int i = 1; i < n; i++) {
@@ -1338,46 +1268,36 @@ final class Reel {
 				}
 				lean[i] = p[11] == 0 ? 0 : l;
 			}
-			// The ground under them: where it rises a block, a heave up onto it and a jolt as the weight
-			// arrives; where it falls away, a drop and the landing taken in the knees.
-			double[] level = new double[n], jolt = new double[n];
-			double at = rise.applyAsDouble(poses.get(0)[0], poses.get(0)[1]);
+			// The hand: slow wander and quick shake, each a noise that never repeats (yaw, pitch, roll).
+			// Each clip a hand of its own, from where it starts.
+			java.util.Random rng = new java.util.Random(7L + (n == 0 ? 0L : Math.round(poses.get(0)[0] * 13 + poses.get(0)[1] * 7)));
+			double[][] wander = {noise(rng, n, 9.0), noise(rng, n, 9.0), noise(rng, n, 12.0)};
+			double[][] shake = {noise(rng, n, 1.3), noise(rng, n, 1.3), noise(rng, n, 1.6)};
+			// Every footfall a jolt of its own: down, and some way to one side, and over, as hard as the
+			// foot came down, a spring through the arm that dies away in a few ticks.
+			double[][] jolt = new double[n][4];
+			double[] js = new double[4], jv = new double[4];
 			for (int i = 0; i < n; i++) {
 				double[] p = poses.get(i);
-				double ahead = p[5] > 0.02 ? 0.35 : 0.0;
-				double want = rise.applyAsDouble(p[0] - Math.sin(Math.toRadians(heading(i))) * ahead,
-						p[1] + Math.cos(Math.toRadians(heading(i))) * ahead);
-				if (p[11] == 0 || p[9] == 0) want = rise.applyAsDouble(p[0], p[1]);
-				if (want > at + 0.3) {
-					double from = at;
-					for (int k = 0; k < 5 && i + k < n; k++) {
-						double u = (k + 1) / 5.0;
-						// Down a touch as they push off, then up, hard, a little past, and settling.
-						double heave = u < 0.25 ? -0.05 * u / 0.25 : smooth((u - 0.25) / 0.6) + 0.06 * Math.sin(Math.min(1, (u - 0.25) / 0.75) * Math.PI);
-						level[i + k] = from + (want - from) * Math.max(0, heave) + (heave < 0 ? heave : 0);
-						jolt[i + k] = 2.4 * Math.sin(u * Math.PI);
-					}
-					at = want;
-					i += 4;
-					continue;
+				boolean standing = p[9] > 0 && p[11] > 0;
+				double run = standing ? Mth.clamp(p[5] / SPRINT, 0, 1) : 0;
+				if (i > 0 && standing && p[5] > 0.03 && Math.floor(poses.get(i - 1)[7] / Math.PI) != Math.floor(p[7] / Math.PI)) {
+					double hard = p[10] * (0.35 + 0.65 * run) * calm[i];
+					jv[0] += (2.0 + 4.5 * run) * hard * (0.7 + 0.6 * rng.nextDouble());              // pitch, down
+					jv[1] += (rng.nextDouble() - 0.5) * (2.5 + 5.0 * run) * hard;                      // yaw
+					jv[2] += (rng.nextDouble() - 0.5) * (3.0 + 6.0 * run) * hard;                      // roll
+					jv[3] -= (0.03 + 0.07 * run) * hard * (0.7 + 0.6 * rng.nextDouble());              // height
 				}
-				if (want < at - 0.3) {
-					double from = at;
-					for (int k = 0; k < 7 && i + k < n; k++) {
-						// Falling the first ticks, faster and faster; then the landing, taken in the knees.
-						double drop = k < 3 ? from + (want - from) * Math.pow((k + 1) / 3.0, 2) : want - 0.09 * Math.exp(-(k - 3) / 1.5);
-						level[i + k] = drop;
-						jolt[i + k] = k >= 3 ? 2.0 * Math.exp(-(k - 3) / 1.5) : 0;
-					}
-					at = want;
-					i += 6;
-					continue;
+				for (int k = 0; k < 4; k++) {
+					jv[k] += -0.45 * js[k] - 0.55 * jv[k];
+					js[k] += jv[k];
+					jolt[i][k] = js[k];
 				}
-				level[i] = at;
 			}
 			double[][] out = new double[n][];
 			for (int i = 0; i < n; i++) {
-				double[] o = finish(i, groundY + Cinematic.EYE + level[i], calm[i], yawF[i], pitchF[i] + lean[i] + jolt[i]);
+				double[] o = finish(i, groundY + Cinematic.EYE, calm[i], yawF[i], pitchF[i] + lean[i],
+						new double[]{wander[0][i], wander[1][i], wander[2][i]}, new double[]{shake[0][i], shake[1][i], shake[2][i]}, jolt[i]);
 				// Inertia moves the head with the lean: forward over the feet as it tips down.
 				double r = Math.toRadians(o[3]);
 				o[0] += -Math.sin(r) * lean[i] * 0.012;
@@ -1388,15 +1308,27 @@ final class Reel {
 			return out;
 		}
 
-		/** How quickly the head follows where they mean to look, a tick: about a tick and a half behind. */
-		private static final double LOOK = 1.4;
-
-		/** Which way they were going at tick {@code i}. */
-		private double heading(int i) {
-			double[] p = poses.get(i), q = poses.get(Math.max(0, i - 1));
-			double dx = p[0] - q[0], dz = p[1] - q[1];
-			return dx * dx + dz * dz < 1.0e-6 ? p[2] : Math.toDegrees(Math.atan2(-dx, dz));
+		/**
+		 * A noise that never repeats, smoothed over about {@code ticks} ticks, from -1 to 1 or so:
+		 * white noise put through two smoothings, and scaled back up to the size it started.
+		 */
+		private static double[] noise(java.util.Random rng, int n, double ticks) {
+			double[] v = new double[n];
+			double a = 0, b = 0, k = 1.0 / Math.max(1.0, ticks);
+			for (int i = -40; i < n; i++) {
+				a += (rng.nextGaussian() - a) * k;
+				b += (a - b) * k;
+				if (i >= 0) v[i] = b;
+			}
+			double sum = 0;
+			for (double d : v) sum += d * d;
+			double rms = Math.sqrt(sum / Math.max(1, n));
+			if (rms > 1.0e-9) for (int i = 0; i < n; i++) v[i] /= rms;
+			return v;
 		}
+
+		/** How quickly the camera follows where they mean to look, a tick: about a tick behind. */
+		private static final double LOOK = 1.8;
 
 		/**
 		 * The startle: for each fright, a jerk of the head away from it and up, the whole body
@@ -1421,55 +1353,39 @@ final class Reel {
 			frights.add(new double[]{tick, from.x, from.y, from.z, strength});
 		}
 
-		/** The ground: how far it rises (in blocks) at any x, z over the level it was built at. */
-		void terrain(java.util.function.DoubleBinaryOperator r) {
-			rise = r;
-		}
-
 		/**
-		 * x, y, z, yaw, pitch, roll for tick {@code i}: the stride and the shaking hands put in, the
-		 * quick shaking of them scaled by {@code calm}; looking along {@code yw}, {@code pt}.
+		 * x, y, z, yaw, pitch, roll for tick {@code i}, looking along {@code yw}, {@code pt}: the body
+		 * carrying the camera and the hand holding it put in, the hand's own shake scaled by
+		 * {@code calm}; {@code wander}, {@code shake} the hand's noises, {@code jolt} the footfalls'.
 		 */
-		private double[] finish(int i, double base, double calm, double yw, double pt) {
+		private double[] finish(int i, double base, double calm, double yw, double pt, double[] wander, double[] shake, double[] jolt) {
 			double[] p = poses.get(i);
 			double px = p[0], pz = p[1], lf = p[4], sp = p[5], tr = p[6], ph = p[7], rl = p[8];
 			// Lying on the ground, the camera is only where it fell.
 			if (p[11] == 0) return new double[]{px, base + lf, pz, p[2], p[3], rl};
 			boolean standing = p[9] > 0;
-			double hard = p[10];
 			double run = standing ? Mth.clamp(sp / SPRINT, 0, 1) : 0;
 			double moving = standing && sp > 0.01 ? 1 : 0;
-			// The head through a stride: lowest just after the foot comes down, as the knee takes the
-			// weight, with the jolt of the foot striking; highest as the body passes over it. And side
-			// to side over whichever foot is down, one way a step and back the next: the rise and fall
-			// twice to each sway, so the head draws a figure of eight. Everything the hands and the
-			// stride do to the picture, a fifth less while it is in it.
-			double s = (ph % Math.PI) / Math.PI;
-			double rise = -Math.cos(2 * Math.PI * (s - 0.1));
-			double strike = -Math.exp(-s / 0.05) * (0.6 + 0.4 * hard);
-			double bob = ((0.022 + 0.06 * run) * rise * 0.5 + (0.008 + 0.03 * run) * strike) * moving * calm;
-			double over = Math.sin(ph - 0.35);
-			// Breathing: standing, the camera rises and falls with it; on the ground, heaving.
-			double breath = Math.sin(i * 0.3) * (standing ? 0.012 * (1 - run) : 0.03);
-			double sway = (0.02 + 0.05 * run) * over * moving * calm;
-			// Hands that will not keep still: slow drift, faster shaking, both worse with fear.
-			double drift = (0.6 * Math.sin(i * 0.29 + 0.3) + 0.4 * Math.sin(i * 0.71 + 1.1) + 0.25 * Math.sin(i * 1.93 + 2.0)) * calm;
-			double shake = (Math.sin(i * 2.7) * 0.5 + Math.sin(i * 3.9 + 1.0) * 0.4) * calm;
-			double hands = 0.7 + 1.6 * run;
-			double yawOut = yw + drift * hands * 0.9 + shake * tr * 0.9 + 2.4 * run * Math.sin(ph) * calm;
-			// Each footfall jolts the view down a touch, harder for a heavier step.
-			double fall = Math.pow(1 - Math.abs(Math.sin(ph)), 6) * 3.0 * run * hard * calm;
-			double pitchOut = pt + drift * hands * 0.5 + shake * tr * 0.7 + fall + breath * 9.0;
-			// The tilt: the shoulders rocking over the foot that is down, leaning into a turn, the hands.
+			// The body under the camera: up and down a little with the stride, side to side over
+			// whichever foot is down; never exactly the same twice.
+			double rise = (Math.abs(Math.sin(ph)) - 0.55) * (0.02 + 0.06 * run) * moving * (0.75 + 0.25 * wander[1]);
+			double over = Math.sin(ph - 0.35) * (0.015 + 0.04 * run) * moving;
+			// Breathing: standing, the camera rises and falls with it.
+			double breath = Math.sin(i * 0.3 + 0.4 * wander[0]) * (standing ? 0.012 * (1 - run) : 0.03);
+			// The hand: it wanders, slowly, more when they are moving and more when they are afraid,
+			// and it shakes, quickly, with fear; while it is in the picture they hold it a little stiller.
+			double fear = 0.25 + tr;
+			double drift = calm * (0.5 + 1.4 * run + 0.3 * tr);
+			double quick = calm * (0.12 + 0.55 * fear + 0.35 * run);
+			double yawOut = yw + wander[0] * drift * 1.2 + shake[0] * quick + jolt[1] + 1.6 * run * Math.sin(ph) * calm;
+			double pitchOut = pt + wander[1] * drift * 0.8 + shake[1] * quick * 0.8 + jolt[0] + breath * 9.0;
+			// The roll: the hand never keeps the horizon level, leaning into a turn, rocking as they run.
 			double turned = i > 0 ? Mth.wrapDegrees(p[2] - poses.get(i - 1)[2]) : 0;
-			double rollOut = rl + 1.8 * run * over * calm - Mth.clamp(turned * 0.3, -6, 6) + drift * 0.8 + shake * tr * 0.7;
-			// And under everything, the faint unsteadiness of a hand holding a camera: never still.
-			yawOut += 0.2 * calm * (0.6 * Math.sin(i * 1.71 + 0.4) + 0.4 * Math.sin(i * 2.37 + 1.9));
-			pitchOut += 0.16 * calm * (0.6 * Math.sin(i * 1.37 + 2.2) + 0.4 * Math.sin(i * 2.53 + 0.7));
-			rollOut += 0.25 * calm * (0.6 * Math.sin(i * 1.19 + 1.3) + 0.4 * Math.sin(i * 2.11 + 2.6));
+			double rollOut = rl + wander[2] * calm * (0.9 + 2.6 * run) + shake[2] * quick * 0.9 + jolt[2]
+					- Mth.clamp(turned * 0.3, -6, 6);
 			double r = Math.toRadians(yw);
-			double sx = Math.cos(r) * sway, sz = Math.sin(r) * sway;
-			return new double[]{px + sx, base + bob + lf + breath, pz + sz, yawOut, Mth.clamp(pitchOut, -85, 85), rollOut};
+			double sx = Math.cos(r) * over, sz = Math.sin(r) * over;
+			return new double[]{px + sx, base + rise + lf + breath + jolt[3], pz + sz, yawOut, Mth.clamp(pitchOut, -85, 85), rollOut};
 		}
 
 		private static double overshoot(double u) {
