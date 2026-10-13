@@ -162,6 +162,10 @@ public final class LegGait {
 	private float sagRate;
 	/** Whether each leg, as last drawn, went into something whichever way its knee bent. */
 	private final boolean[] stuck = new boolean[LEGS];
+	/** Whether each leg's hold was only the best a tight place had: then it is not stepped off for that. */
+	private final boolean[] loose = new boolean[LEGS];
+	/** Whether the hold {@link #findHold} last found was only one that would do. */
+	private boolean madeDo;
 	/** Each leg's knee as last worked out, and the hip and point it was worked out for. */
 	private final Vec3[] bendFor = new Vec3[LEGS];
 	private final Vec3[] bendHip = new Vec3[LEGS];
@@ -265,6 +269,7 @@ public final class LegGait {
 			trail = real;
 			for (int i = 0; i < LEGS; i++) {
 				foot[i] = findHold(i, level, yaw, OccupantGeometry.LEG_LENGTH[i] * px, root(i, px, dropPx), Vec3.ZERO);
+				loose[i] = madeDo;
 				swingStart[i] = -1.0f;
 				drawn[i] = null;
 				bendNow[i] = null;
@@ -509,7 +514,7 @@ public final class LegGait {
 			// Which way the knee goes: the first way that keeps the whole leg out of the blocks,
 			// eased round to it, so a knee never flips from one side to the other in a frame.
 			Vec3 want = bendOf(i, level, yaw, px, hip, at);
-			stuck[i] = !holding && swingStart[i] < 0.0f && foot[i] != null && bendHits[i] > 0;
+			stuck[i] = !holding && !loose[i] && swingStart[i] < 0.0f && foot[i] != null && bendHits[i] > 0;
 			if (want == null) want = bendNow[i] != null ? bendNow[i] : outward(i, yaw).add(0.0, 0.3, 0.0);
 			if (bendNow[i] == null || arrived) {
 				bendNow[i] = want;
@@ -736,6 +741,7 @@ public final class LegGait {
 		// From wherever the leg is drawn now, so it never starts its reach from somewhere else.
 		from[i] = drawn[i] != null ? drawn[i] : foot[i] != null ? foot[i] : hip.add(0.0, -reach * 0.5, 0.0);
 		foot[i] = hold;
+		loose[i] = madeDo;
 		swingStart[i] = lastTime;
 		swingTime[i] = duration;
 	}
@@ -773,6 +779,10 @@ public final class LegGait {
 		double height = (high ? 0.9 + 0.9 * rand(i, 11) : 0.15 + 0.6 * rand(i, 13)) * (hip.y - body.y);
 
 		double px = reach / OccupantGeometry.LEG_LENGTH[i];
+		// In a tight place nothing may fit as well as that: then the first hold that will do at all,
+		// a leg nearly straight, rather than a leg hanging in the air with nowhere to go.
+		Vec3 makeDo = null;
+		madeDo = false;
 
 		// Something beside it, near enough to brace on with the knee still bent.
 		for (double t = 0.3; t <= reach * 0.95; t += 0.2) {
@@ -780,6 +790,7 @@ public final class LegGait {
 			if (solidAt(level, p)) {
 				Vec3 face = new Vec3(p.x - d.x * 0.06, p.y, p.z - d.z * 0.06);
 				if (fits(i, level, yaw, px, reach, hip, face)) return face;
+				if (doesForNow(level, reach, hip, face)) makeDo = face;
 				break;
 			}
 		}
@@ -790,6 +801,7 @@ public final class LegGait {
 				if (solidAt(level, p)) {
 					Vec3 face = new Vec3(p.x, Math.floor(p.y) - 0.04, p.z);
 					if (fits(i, level, yaw, px, reach, hip, face)) return face;
+					if (makeDo == null && doesForNow(level, reach, hip, face)) makeDo = face;
 					break;
 				}
 			}
@@ -799,17 +811,26 @@ public final class LegGait {
 		// either side, wherever the whole leg can be put down without going through anything. The
 		// legs that reach high, with nothing beside or over them, come down too, wide of the body.
 		Vec3 g = ideal(i, yaw, reach, hip);
-		if (g == null) return null;
+		madeDo = makeDo != null;
+		if (g == null) return makeDo;
 		double r = Math.hypot(g.x - hip.x, g.z - hip.z) * (high ? 1.25 : 1.0);
 		for (double near : new double[]{1.0, 0.8, 1.15, 0.6}) {
 			for (double turn : new double[]{0.0, 0.35, -0.35}) {
 				double c = Math.cos(turn), sn = Math.sin(turn);
 				double dx = d.x * c - d.z * sn, dz = d.x * sn + d.z * c;
 				Vec3 at = ground(level, hip.x + dx * r * near + lead.x, hip.z + dz * r * near + lead.z);
-				if (at != null && fits(i, level, yaw, px, reach, hip, at)) return at;
+				if (at == null) continue;
+				if (fits(i, level, yaw, px, reach, hip, at)) return at;
+				if (makeDo == null && doesForNow(level, reach, hip, at)) makeDo = at;
 			}
 		}
-		return null;
+		madeDo = makeDo != null;
+		return makeDo;
+	}
+
+	/** Whether a hold will do at all: in reach, and nothing in the straight way to it. */
+	private static boolean doesForNow(Level level, double reach, Vec3 hip, Vec3 at) {
+		return at.distanceTo(hip) <= reach * 0.97 && lineClear(level, hip, at);
 	}
 
 	/**
@@ -969,6 +990,7 @@ public final class LegGait {
 		double feel = Math.sin(now * 0.031 + i * 1.7);
 		double out = reach * (0.3 + 0.06 * Math.sin(now * 0.023 + i));
 		double down = reach * (0.8 + 0.08 * feel) * 0.88;
+		Vec3 makeDo = null;
 		for (int tries = 0; tries < 6; tries++) {
 			Vec3 p = new Vec3(hip.x + d.x * out, hip.y - down, hip.z + d.z * out);
 			// Not into the floor: stop just above whatever is under it.
@@ -978,12 +1000,15 @@ public final class LegGait {
 					break;
 				}
 			}
-			if (!solidAt(level, p) && lineClear(level, hip, p)
-					&& kneeBend(i, level, yaw, reach / OccupantGeometry.LEG_LENGTH[i], hip, p) != null && lastHits == 0) return p;
+			if (!solidAt(level, p) && lineClear(level, hip, p)) {
+				// Best with the knee clear of everything too; failing that, the first that is clear at all.
+				if (kneeBend(i, level, yaw, reach / OccupantGeometry.LEG_LENGTH[i], hip, p) != null && lastHits == 0) return p;
+				if (makeDo == null) makeDo = p;
+			}
 			out *= 0.6;                                   // tuck it in closer to the body
 			down *= 0.8;
 		}
-		return null;
+		return makeDo;
 	}
 
 	/**
