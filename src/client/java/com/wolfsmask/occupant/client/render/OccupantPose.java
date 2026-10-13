@@ -15,8 +15,8 @@ import net.minecraft.util.Mth;
  *     and push.</li>
  *     <li>The body is shoved along between them and leans into each shove, then hangs.</li>
  *     <li>What movement there is of its own happens only while you are looking away. Look at it
- *     and it is perfectly still, winding down to nothing rather than stopping dead; look away and
- *     back, and its head is at a different angle, and you never saw it move.</li>
+ *     and it does nothing but breathe, slowly and unevenly, and now and then a leg twitches;
+ *     look away and back, and its head is at a different angle, and you never saw it move.</li>
  *     <li>Nothing ever jumps or stutters: what it does, it does smoothly.</li>
  *     <li>Its mouth is always open. When it is close, it opens further than a mouth goes.</li>
  *     <li>Its eyes do not move with its head. In each black eye is one tiny pale point, and
@@ -30,6 +30,8 @@ final class OccupantPose {
 
 	private final ModelPart hips;
 	private final ModelPart spine;
+	/** The shoulders, where the chest is: it breathes. */
+	private final ModelPart yoke;
 	private final ModelPart neck;
 	private final ModelPart skull;
 	/** Everything below the eyes: the cheeks, the mouth between them, the chin. */
@@ -52,7 +54,7 @@ final class OccupantPose {
 	OccupantPose(ModelPart root) {
 		this.hips = root.getChild("hips");
 		this.spine = hips.getChild("spine");
-		ModelPart yoke = spine.getChild("yoke");
+		this.yoke = spine.getChild("yoke");
 		this.neck = yoke.getChild("neck");
 		this.skull = neck.getChild("skull");
 		this.jaw = skull.getChild("jaw");
@@ -100,10 +102,11 @@ final class OccupantPose {
 		hair.zRot = 0.03f * Mth.sin(t * 0.017f);
 		jaw.yScale = 1.0f;
 
-		// Folded down into a space too small for it: hips low, body bent over, head held up.
+		// Folded down into a space too small for it: hips low, body bent over, head held up. Its
+		// weight settling onto its legs takes the hips lower; drawn down to spring, its core curls in.
 		float crouch = state.crouch;
 		hips.y += OccupantFit.CROUCH_DROP * crouch + state.sag;
-		spine.xRot += OccupantFit.CROUCH_BEND * crouch;
+		spine.xRot += OccupantFit.CROUCH_BEND * crouch + state.coil * COIL_BEND;
 		neck.xRot -= OccupantFit.CROUCH_BEND * 0.75f * crouch;
 
 		// Each shove carries it, and the body goes with it and then comes back upright.
@@ -121,8 +124,41 @@ final class OccupantPose {
 			// them, its face is turned square on to whoever is watching, however far it is bent over.
 			default -> stand(state.tilt, Float.isNaN(state.facePitch) ? lookX : state.facePitch, lookY, state.act);
 		}
+		breathe(state);
 		legs(state, t);
 		stare(state);
+	}
+
+	/**
+	 * Breathing, always, looked at or not: slow and uneven, some breaths deeper than others, now and
+	 * then one held. The chest swells and the shoulders square with each breath in, the body
+	 * straightening a little on it, and the mouth works with it; and now and then the head gives a
+	 * small twitch to one side and back.
+	 */
+	private void breathe(OccupantRenderState state) {
+		float t = state.ageInTicks + (state.seed & 1023);
+		float phase = t * 0.085f + 0.9f * Mth.sin(t * 0.013f) + 0.5f * Mth.sin(t * 0.031f + 1.7f);
+		float depth = 0.7f + 0.3f * Mth.sin(t * 0.021f + 0.4f);
+		float held = Mth.clamp(Mth.sin(t * 0.0071f + 2.0f) * 4.0f - 3.0f, 0.0f, 1.0f);   // now and then it stops
+		float b = Mth.sin(phase) * depth * (1.0f - held);
+		yoke.xScale = 1.0f + 0.04f * b;
+		yoke.yScale = 1.0f;
+		yoke.zScale = 1.0f + 0.07f * b;
+		// Only the chest: the neck and the head on it are not swollen with it.
+		neck.xScale = 1.0f / yoke.xScale;
+		neck.yScale = 1.0f;
+		neck.zScale = 1.0f / yoke.zScale;
+		spine.xRot -= 0.014f * b;
+		jaw.yScale *= 1.0f + 0.035f * b;
+		// The head's twitch: a window every few seconds, and in some of them one quick jerk.
+		int window = (int) Math.floor(t / 47.0f);
+		float u = t - window * 47.0f - 20.0f;
+		int h = (window * 0x2C1B3C6D) ^ (state.seed * 0x9E3779B1);
+		if ((h & 3) == 0 && u >= 0.0f && u < 7.0f) {
+			float pulse = u < 0.8f ? u / 0.8f : (float) Math.exp(-(u - 0.8f) / 1.4f);
+			skull.zRot += ((h & 4) == 0 ? 1.0f : -1.0f) * 0.07f * pulse;
+			skull.yRot += ((h & 8) == 0 ? 1.0f : -1.0f) * 0.04f * pulse;
+		}
 	}
 
 	/**
@@ -145,6 +181,8 @@ final class OccupantPose {
 
 	/** How far its body is bent forward when nothing is bending it. */
 	static final float SPINE_REST = 0.03f;
+	/** How far its core curls forward for each block it has drawn itself down to spring. */
+	static final float COIL_BEND = 0.9f;
 	/** How far a shove leans it, forward and to the side, for each block of the shove. */
 	static final float LEAN_FORWARD = 0.6f;
 	static final float LEAN_SIDE = 0.5f;

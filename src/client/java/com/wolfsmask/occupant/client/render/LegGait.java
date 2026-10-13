@@ -35,7 +35,7 @@ public final class LegGait {
 	private static final int LEGS = OccupantGeometry.LEGS;
 	/** How far the drawn body may lag behind the real one, in blocks. */
 	private static final double MAX_LAG = 0.5;
-	/** Which of the two sets each leg steps with: every other one round the body. */
+	/** Which of the two sets each leg steps with: every other leg down each side, the sides crossed over. */
 	private static final int[] SET = new int[OccupantGeometry.LEGS];
 	/** Moving: how far a planted leg may fall behind where it should be before it steps, as a share of its length. */
 	private static final double STRIDE = 0.28;
@@ -43,8 +43,19 @@ public final class LegGait {
 	private static final double MOVING = 0.012;
 
 	static {
-		// The legs are listed in order round the body, so alternate ones are on alternate sides of each other.
-		for (int i = 0; i < OccupantGeometry.LEGS; i++) SET[i] = i % 2;
+		// As a spider walks: down each side from the front, every other leg in one set, and the other
+		// side starting with the other set, so each set stands on both sides at once and the two take
+		// turns carrying it.
+		for (int i = 0; i < OccupantGeometry.LEGS; i++) {
+			double a = OccupantGeometry.LEG_ANGLE[i];
+			boolean right = Math.sin(a) >= 0.0;
+			int rank = 0;
+			for (int j = 0; j < OccupantGeometry.LEGS; j++) {
+				double b = OccupantGeometry.LEG_ANGLE[j];
+				if (j != i && (Math.sin(b) >= 0.0) == right && Math.cos(b) > Math.cos(a)) rank++;
+			}
+			SET[i] = (rank + (right ? 1 : 0)) % 2;
+		}
 	}
 	/** Further than this from the drawn body and it has moved by other means: start over. */
 	private static final double SNAP = 4.0;
@@ -59,8 +70,20 @@ public final class LegGait {
 	 */
 	private static final double COMFORT = 0.86;
 
-	/** Where the body is drawn: behind the entity, catching up in shoves. */
+	/** Where the body is drawn: behind the entity, catching up in shoves, and carried over its feet. */
 	private Vec3 body;
+	/** Where the body would be drawn without its weight shifting from side to side: just behind the entity. */
+	private Vec3 trail;
+	/** How far its weight is carried to its right (blocks; to its left, less than nothing), and how fast. */
+	private double shift;
+	private double shiftRate;
+	/** How far it has drawn itself in, crouched down into its own legs (blocks below its feet), eased. */
+	private float coil;
+	/** Which turn of the gait it is, and in which turn each leg last stepped: once a turn each. */
+	private int turn;
+	private final int[] steppedIn = new int[LEGS];
+	/** Until when the set whose turn it is all goes together, any of them that has far to go. */
+	private float turnOpen;
 	private final Vec3[] foot = new Vec3[LEGS];
 	/** For a leg that is moving to a new hold: where it let go, and when. */
 	private final Vec3[] from = new Vec3[LEGS];
@@ -186,7 +209,7 @@ public final class LegGait {
 
 		// Folding down into somewhere low happens quickly, so it is never drawn through the ceiling;
 		// getting up again, and growing back to its full height, slowly.
-		boolean fresh = body == null || body.distanceTo(real) > SNAP || Math.abs(body.y - real.y) > 1.5;
+		boolean fresh = trail == null || trail.distanceTo(real) > SNAP || Math.abs(trail.y - real.y) > 1.5;
 		if (fresh || Float.isNaN(fitScale)) {
 			fitScale = state.occupantScale;
 			fitCrouch = state.crouch;
@@ -202,7 +225,15 @@ public final class LegGait {
 		if (fresh) {
 			sag = 0.0f;
 			sagRate = 0.0f;
+			shift = 0.0;
+			shiftRate = 0.0;
+			coil = 0.0f;
 		}
+		// Drawn down into itself: the entity lower than the ground under its feet is it crouched,
+		// coiled to spring; its core curls in with it (see bend()).
+		float wantCoil = (float) Mth.clamp(groundUnder(level, real) - real.y, 0.0, 0.8);
+		coil = fresh ? wantCoil : coil + (wantCoil - coil) * (float) (1.0 - Math.exp(-0.6 * dt));
+		state.coil = coil;
 		// Its weight on its legs takes the hips down with the rest of the fold.
 		dropPx = OccupantFit.CROUCH_DROP * fitCrouch + sag;
 		state.sag = sag;
@@ -217,6 +248,7 @@ public final class LegGait {
 			// Arrived from nowhere: already standing, every leg already braced.
 			arrived = true;
 			body = real;
+			trail = real;
 			for (int i = 0; i < LEGS; i++) {
 				foot[i] = findHold(i, level, yaw, OccupantGeometry.LEG_LENGTH[i] * px, root(i, px, dropPx), Vec3.ZERO);
 				swingStart[i] = -1.0f;
@@ -256,11 +288,11 @@ public final class LegGait {
 		double speed = Math.hypot(velocity.x, velocity.z);
 		boolean moving = speed > MOVING;
 		// The body: close behind where it really is, smoothly. Height always follows exactly, so it never sinks.
-		Vec3 gap = new Vec3(real.x - body.x, 0.0, real.z - body.z);
+		Vec3 gap = new Vec3(real.x - trail.x, 0.0, real.z - trail.z);
 		double lag = gap.length();
 		double k = 1.0 - Math.exp(-0.8 * dt);
-		double bx = body.x + gap.x * k;
-		double bz = body.z + gap.z * k;
+		double bx = trail.x + gap.x * k;
+		double bz = trail.z + gap.z * k;
 		if (lag > MAX_LAG) {
 			double pull = (lag - MAX_LAG) / lag;
 			bx += gap.x * (1.0 - k) * pull;
@@ -281,13 +313,32 @@ public final class LegGait {
 			bx = cx;
 			bz = cz;
 		}
-		body = new Vec3(bx, real.y, bz);
+		trail = new Vec3(bx, real.y, bz);
 
 		// Lean into the way it is going, in its own frame: hardest when it runs.
 		double fx = -Math.sin(yaw), fz = Math.cos(yaw);       // the way it faces
 		double rx = -fz, rz = fx;                             // to its right
+		// Its weight over its feet: going along, the body is carried a little towards the side the
+		// set of legs holding it stands on, and back across as the other set takes it, the top of it
+		// leaning the other way against it; standing, it settles back over the middle.
+		double support = 0.0;
+		int bearing = 0;
+		for (int i = 0; i < LEGS; i++) {
+			if (SET[i] == stepping || foot[i] == null || swingStart[i] >= 0.0f || holds[i] >= 0) continue;
+			support += (foot[i].x - trail.x) * rx + (foot[i].z - trail.z) * rz;
+			bearing++;
+		}
+		double carry = Math.min(3.2, 1.3 + speed * 14.0) * px;
+		double wantShift = moving && bearing > 0 && Math.abs(support / bearing) > 0.03 ? Math.signum(support) * carry : 0.0;
+		for (float left = dt; left > 1.0e-4f; left -= 1.0f) {
+			double h = Math.min(1.0, left);
+			shiftRate += (0.2 * (wantShift - shift) - 0.55 * shiftRate) * h;
+			shift += shiftRate * h;
+		}
+		body = new Vec3(bx + rx * shift, real.y, bz + rz * shift);
 		float wantF = (float) Mth.clamp((velocity.x * fx + velocity.z * fz) * 1.6 + (gap.x * fx + gap.z * fz) * 0.3, -0.5, 0.5);
-		float wantS = (float) Mth.clamp((velocity.x * rx + velocity.z * rz) * 1.2 + (gap.x * rx + gap.z * rz) * 0.3, -0.5, 0.5);
+		float wantS = (float) Mth.clamp((velocity.x * rx + velocity.z * rz) * 1.2 + (gap.x * rx + gap.z * rz) * 0.3
+				- shift / Math.max(px, 1.0e-3) * 0.06, -0.5, 0.5);
 		float ease = (float) (1.0 - Math.exp(-0.2 * dt));
 		leanForward += (wantF - leanForward) * ease;
 		leanSide += (wantS - leanSide) * ease;
@@ -299,11 +350,19 @@ public final class LegGait {
 		boolean recheck = (int) now / 20 != lastCheck;
 		lastCheck = (int) now / 20;
 
-		// Moving, one set of legs steps while the other holds, then the other: quicker the faster it goes.
+		// Moving, one set of legs steps while the other holds, then the other: quicker the faster it
+		// goes. The turn passes only once every leg of the set that stepped is down again, so it is
+		// always standing on one whole set of legs, never on a few.
 		float stepTicks = (float) Mth.clamp(1.1 / Math.max(speed, 1.0e-3) * 0.5, chasing ? 2.5 : 3.5, 7.0);
-		if (moving && now >= setUntil) {
+		boolean setDown = true;
+		for (int i = 0; i < LEGS; i++) {
+			if (SET[i] == stepping && swingStart[i] >= 0.0f && now - swingStart[i] < swingTime[i]) setDown = false;
+		}
+		if (moving && now >= setUntil && setDown) {
 			stepping ^= 1;
 			setUntil = now + stepTicks + 0.5f;
+			turn++;
+			turnOpen = now + stepTicks * 0.4f;
 		}
 		Vec3 heading = moving ? velocity.scale(1.0 / speed) : Vec3.ZERO;
 
@@ -334,7 +393,9 @@ public final class LegGait {
 				// Where it should be by the time it is down again: ahead, the way the body is going.
 				Vec3 want = ideal.add(heading.scale(lead(i, reach, speed, stepTicks)));
 				double drift = Math.hypot(foot[i].x - want.x, foot[i].z - want.z) / reach;
-				score[i] = drift > STRIDE ? drift : 0.0;
+				// At the start of its set's turn, any leg of it with some way to go goes with the rest.
+				boolean together = SET[i] == stepping && now < turnOpen && steppedIn[i] != turn;
+				score[i] = drift > (together ? STRIDE * 0.45 : STRIDE) && steppedIn[i] != turn ? drift : 0.0;
 				if (stretch > 0.95) score[i] = 10.0;          // about to be torn off it: now, whichever set
 			} else {
 				double drift = ideal == null ? 0.0 : Math.hypot(foot[i].x - ideal.x, foot[i].z - ideal.z) / reach;
@@ -359,6 +420,7 @@ public final class LegGait {
 				double reach = OccupantGeometry.LEG_LENGTH[best] * px;
 				replant(best, level, yaw, px, root(best, px, dropPx), stepTicks,
 						heading.scale(lead(best, reach, speed, stepTicks)));
+				steppedIn[best] = turn;
 				score[best] = 0.0;
 				swinging++;
 				stepped = true;
@@ -417,9 +479,10 @@ public final class LegGait {
 				drawn[i] = null;
 				continue;
 			}
-			// Whatever the leg's point is doing, it gets there smoothly: a hold lost, a free leg
-			// finding one, the floor under a hanging leg stepping down. Never a jump.
-			if (drawn[i] == null || arrived || holding) {
+			// A foot that is down is locked where it is, exactly, until it steps; a step is already
+			// smooth along its arc. Anything else the leg's point does it gets to smoothly: a free leg
+			// feeling about, the floor under a hanging leg stepping down. Never a jump, never a slide.
+			if (drawn[i] == null || arrived || holding || foot[i] != null) {
 				drawn[i] = at;
 			} else {
 				// A step is already eased along its arc: followed closely, so the foot comes down where it lands.
@@ -438,7 +501,8 @@ public final class LegGait {
 				Vec3 eased = bendNow[i].lerp(want, 1.0 - Math.exp(-0.5 * dt));
 				bendNow[i] = eased.lengthSqr() > 1.0e-4 ? eased : want;
 			}
-			Vec3 bend = bendNow[i];
+			// And now and then, by itself, a knee jerks: the foot stays exactly where it is.
+			Vec3 bend = bendNow[i].add(twitch(i, yaw, now));
 			state.legBendSet[i] = true;
 			double bx2 = bend.x * c - bend.z * sn;
 			double bz2 = bend.x * sn + bend.z * c;
@@ -598,7 +662,7 @@ public final class LegGait {
 	private void bend(OccupantRenderState state) {
 		boolean veiled = state.form == OccupantEntity.Form.VEILED;
 		spineX = OccupantPose.SPINE_REST + OccupantFit.CROUCH_BEND * fitCrouch + leanForward * OccupantPose.LEAN_FORWARD
-				+ OccupantPose.spineBend(state.mode, veiled);
+				+ OccupantPose.spineBend(state.mode, veiled) + coil * OccupantPose.COIL_BEND;
 		spineZ = -leanSide * OccupantPose.LEAN_SIDE;
 		neckX = -OccupantFit.CROUCH_BEND * 0.75f * fitCrouch + OccupantPose.neckBend(state.mode, veiled);
 	}
@@ -790,6 +854,43 @@ public final class LegGait {
 			sag += sagRate * h;
 		}
 		sag = Mth.clamp(sag, -1.5f, 4.0f);
+	}
+
+	/** The top of whatever it stands on, under {@code at}: from a block above its feet down to two below. */
+	private static double groundUnder(Level level, Vec3 at) {
+		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+		int top = Mth.floor(at.y + 0.99);
+		for (int y = top; y >= top - 2; y--) {
+			pos.set(Mth.floor(at.x), y, Mth.floor(at.z));
+			VoxelShape shape = level.getBlockState(pos).getCollisionShape(level, pos);
+			if (!shape.isEmpty()) return y + shape.max(Direction.Axis.Y);
+		}
+		return at.y;
+	}
+
+	/**
+	 * Leg i's knee, jerked: now and then, at no time you could guess and on its own, a leg gives a
+	 * small quick twitch, up and to one side, and settles; and under that it is never quite still,
+	 * as if something were running along it. Added to the way the knee bends, so a planted foot
+	 * stays exactly where it is.
+	 */
+	private Vec3 twitch(int i, double yaw, float now) {
+		Vec3 d = outward(i, yaw);
+		Vec3 side = new Vec3(-d.z, 0.0, d.x);
+		double tremor = 0.05 * Math.sin(now * 0.43 + i * 2.1) * Math.sin(now * 0.13 + i * 0.7);
+		float period = 34.0f + 26.0f * rand(i, 41);
+		float shifted = now + rand(i, 43) * period;
+		int window = (int) Math.floor(shifted / period);
+		Vec3 out = new Vec3(0.0, tremor, 0.0);
+		if (rand(i * 31 + window, 47) < 0.5f) {
+			float u = shifted - window * period - (4.0f + rand(i * 31 + window, 53) * (period - 14.0f));
+			if (u >= 0.0f && u < 9.0f) {
+				double pulse = u < 1.0f ? u : Math.exp(-(u - 1.0f) / 1.6f);
+				double way = rand(i * 31 + window, 59) < 0.5f ? -1.0 : 1.0;
+				out = out.add(side.scale(way * 0.45 * pulse)).add(0.0, 0.35 * pulse, 0.0);
+			}
+		}
+		return out;
 	}
 
 	/**
