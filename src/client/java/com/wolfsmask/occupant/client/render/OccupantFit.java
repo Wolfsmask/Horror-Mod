@@ -30,6 +30,9 @@ final class OccupantFit {
 
 	/** Works out {@code state.crouch} and {@code state.occupantScale} for it standing at (x, y, z). */
 	static void fit(Level level, OccupantRenderState state, double x, double y, double z) {
+		// From the top of what it stands on: crouched down into its legs, the entity is lower than
+		// that, and measured from inside the ground there would be no room for it at all.
+		y = Math.max(y, LegGait.groundUnder(level, new Vec3(x, y, z)));
 		state.headroom = headroom(level, x, y, z);
 		// Its full height, standing up, from this far off, so far into the story (the same the
 		// server reckons with when it asks whether it could be seen). It does not fit in most of

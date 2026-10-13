@@ -857,7 +857,7 @@ public final class LegGait {
 	}
 
 	/** The top of whatever it stands on, under {@code at}: from a block above its feet down to two below. */
-	private static double groundUnder(Level level, Vec3 at) {
+	static double groundUnder(Level level, Vec3 at) {
 		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 		int top = Mth.floor(at.y + 0.99);
 		for (int y = top; y >= top - 2; y--) {
