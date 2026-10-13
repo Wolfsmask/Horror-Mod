@@ -163,7 +163,13 @@ public final class Cutscene {
 
 	/** Every frame, after the mouse has had its say: the view, drawn round to the scene. */
 	public static void frame(Minecraft mc) {
-		if (!active || mc.player == null) return;
+		Flinch.update();
+		if (mc.player == null) return;
+		if (!active) {
+			Flinch.apply(mc.player);
+			return;
+		}
+		Flinch.absorbed();
 		long now = System.nanoTime();
 		double dt = Mth.clamp((now - lastFrame) / 1.0e9, 0.0, 0.1);
 		lastFrame = now;
@@ -181,10 +187,12 @@ public final class Cutscene {
 			yaw += yawSpeed * dt;
 			pitch = Mth.clamp(pitch + pitchSpeed * dt, -89.0, 89.0);
 		}
-		player.setYRot((float) yaw);
-		player.yRotO = (float) yaw;
-		player.setXRot((float) pitch);
-		player.xRotO = (float) pitch;
+		// And a flinch on top, if they have just had one.
+		float viewYaw = (float) (yaw + Flinch.yaw()), viewPitch = (float) Mth.clamp(pitch + Flinch.pitch(), -89.0, 89.0);
+		player.setYRot(viewYaw);
+		player.yRotO = viewYaw;
+		player.setXRot(viewPitch);
+		player.xRotO = viewPitch;
 	}
 
 	/** The bands, top and bottom, coming in as it starts and going as it ends. */

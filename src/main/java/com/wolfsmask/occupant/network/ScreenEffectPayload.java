@@ -48,6 +48,11 @@ public record ScreenEffectPayload(int effect, int duration, float intensity) imp
 	public static final int LOOK_Z = 13;
 	/** The scene looks at the Occupant again. */
 	public static final int LOOK_FREE = 14;
+	/**
+	 * A startle: their head jerks back from it, away to one side, and they have hold of themselves
+	 * again in a moment; {@code intensity} is how hard.
+	 */
+	public static final int FLINCH = 15;
 
 	public static final CustomPacketPayload.Type<ScreenEffectPayload> TYPE =
 			new CustomPacketPayload.Type<>(Occupant.id("screen_effect_" + Occupant.WIRE));

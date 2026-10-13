@@ -12,6 +12,7 @@
   "occupant.settings.world": "This world",
   "occupant.settings.world_remote": "This world's settings are the server's (config/occupant.json)",
   "occupant.settings.heartbeat": "Heartbeat: %s",
+  "occupant.settings.flinch": "Flinch: %s",
   "occupant.settings.score": "Music: %s",
   "occupant.settings.static": "Screen static: %s",
   "occupant.settings.text": "Words on screen: %s",

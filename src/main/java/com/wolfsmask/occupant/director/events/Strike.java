@@ -161,6 +161,7 @@ public final class Strike {
 	 * and this is the end beginning, which goes on being a scene without a break.
 	 */
 	public void release() {
+		entity.setCoil(0.0f);
 		haunt.taking(false);
 		haunt.pinned(false);
 		ServerPlayer p = held;
@@ -174,6 +175,8 @@ public final class Strike {
 
 	private void begin(ServerPlayer p) {
 		HauntData d = haunt.data;
+		// It is suddenly right there: they flinch.
+		Cues.effect(p, ScreenEffectPayload.FLINCH, 0, 1.0f);
 		lethal = lethal(d);
 		haunt.taking(lethal);
 		haunt.pinned(true);
@@ -194,11 +197,17 @@ public final class Strike {
 		pin = p.position();
 	}
 
-	/** While their view comes round: it over them, still, its face on theirs; they cannot get away. */
+	/**
+	 * While their view comes round: it over them, its face on theirs; they cannot get away. Once
+	 * they are looking at it, it draws itself down into its legs and lifts one, back, and holds it
+	 * there a moment; then it lets it all go at once, and the leg comes down (see {@link #down}).
+	 */
 	private void rear(ServerPlayer p) {
 		p.setDeltaMovement(0.0, Math.min(p.getDeltaMovement().y, 0.0), 0.0);
 		p.hurtMarked = true;
 		entity.faceTowards(p.getEyePosition());
+		float u = Math.max(0.0f, Math.min(1.0f, (t - 6) / 9.0f));
+		entity.setCoil(t >= DOWN - 2 ? 0.0f : u * u * (3.0f - 2.0f * u));
 		if (t == DOWN - 6) Cues.sound(p, SoundEvents.ZOMBIE_ATTACK_WOODEN_DOOR, SoundSource.HOSTILE, entity.getEyePosition(), 0.5f, 0.35f);
 	}
 
@@ -294,6 +303,7 @@ public final class Strike {
 	/** Its legs out of them, and they can get up; with {@code scene}, their view is given back too. */
 	private void letGo(ServerPlayer p, boolean scene) {
 		entity.setHeld(List.of());
+		entity.setCoil(0.0f);
 		liftLid();
 		if (p.isNoGravity()) {
 			p.setNoGravity(false);

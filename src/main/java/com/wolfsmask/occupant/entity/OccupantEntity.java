@@ -70,6 +70,11 @@ public class OccupantEntity extends PathfinderMob {
 	 * everyone who sees it, so whoever it is holding is at its face whoever watches.
 	 */
 	private static final EntityDataAccessor<Byte> ACT = SynchedEntityData.defineId(OccupantEntity.class, EntityDataSerializers.BYTE);
+	/**
+	 * How far it has drawn itself down into its legs to strike, 0 to 1: its hips drop, its core
+	 * curls, and one leg is lifted and drawn back, cocked; at 0 again, it has let go of all that.
+	 */
+	private static final EntityDataAccessor<Float> COIL = SynchedEntityData.defineId(OccupantEntity.class, EntityDataSerializers.FLOAT);
 
 	/** Ticks out of their sight before it is there: long enough for their screen to catch up. */
 	private static final int REVEAL_AFTER = 6;
@@ -141,7 +146,22 @@ public class OccupantEntity extends PathfinderMob {
 		builder.define(HELD, "");
 		builder.define(FOCUS, -1);
 		builder.define(ACT, (byte) 0);
+		builder.define(COIL, 0.0f);
 	}
+
+	/** How far it is drawn down into its legs to strike, 0 to 1 (see {@link #COIL}). */
+	public float getCoil() {
+		return this.entityData.get(COIL);
+	}
+
+	public void setCoil(float coil) {
+		float c = Math.max(0.0f, Math.min(1.0f, coil));
+		coiledAt = this.tickCount;
+		if (Math.abs(c - getCoil()) > 1.0e-3f) this.entityData.set(COIL, c);
+	}
+
+	/** When it was last told how far to coil: told nothing for a while, it lets go of it by itself. */
+	private int coiledAt;
 
 	// ------------------------------------------------------------------ state
 
@@ -401,6 +421,8 @@ public class OccupantEntity extends PathfinderMob {
 			return;
 		}
 		if (this.isRemoved()) return;
+		// Whatever had it coiled has stopped saying so: it does not stay crouched for nothing.
+		if (getCoil() > 0.0f && this.tickCount - coiledAt > 5) this.entityData.set(COIL, 0.0f);
 
 		// Put here by hand, with nothing driving it: it adopts whoever is closest and haunts them
 		// by itself. Without this it would delete itself on its first tick and never be seen.

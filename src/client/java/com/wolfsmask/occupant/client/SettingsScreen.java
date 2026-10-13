@@ -66,6 +66,7 @@ public final class SettingsScreen extends Screen {
 		toggle(right, y, "title_screen", () -> c.titleScreen, v -> c.titleScreen = v);
 		y += 24;
 		toggle(left, y, "ask", () -> c.askHowPlaying, v -> c.askHowPlaying = v);
+		toggle(right, y, "flinch", () -> c.flinch, v -> c.flinch = v);
 
 		y += 44;
 		IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();

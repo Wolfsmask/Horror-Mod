@@ -36,6 +36,9 @@ public final class ClientConfig {
 	/** Your own heartbeat, loud, when it is close and you are not looking at it. */
 	public boolean heartbeat = true;
 
+	/** Your view jerks back from it when it is suddenly right there, and comes back. */
+	public boolean flinch = true;
+
 	/** The mod's own score, rising and falling with the story (under the Music volume). */
 	public boolean score = true;
 

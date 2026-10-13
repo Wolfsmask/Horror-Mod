@@ -79,6 +79,13 @@ public final class LegGait {
 	private double shiftRate;
 	/** How far it has drawn itself in, crouched down into its own legs (blocks below its feet), eased. */
 	private float coil;
+	/** How far it has drawn its hips down to strike, as the server says (blocks), eased. */
+	private float coilDrop;
+	/** The leg it has lifted and drawn back to strike with, or -1; kept a moment after, for the blow. */
+	private int cocked = -1;
+	private float cockedUntil;
+	/** How far down into its legs it draws itself to strike, at the most, in blocks. */
+	private static final float COIL_DEPTH = 0.5f;
 	/** Which turn of the gait it is, and in which turn each leg last stepped: once a turn each. */
 	private int turn;
 	private final int[] steppedIn = new int[LEGS];
@@ -231,14 +238,21 @@ public final class LegGait {
 		}
 		// Drawn down into itself: the entity lower than the ground under its feet is it crouched,
 		// coiled to spring; its core curls in with it (see bend()).
+		// Or drawn down to strike, as the server says: then the hips go down with it here.
+		float coilRate = (float) (1.0 - Math.exp(-0.6 * dt));
+		float wantDrop = entity.getCoil() * COIL_DEPTH;
+		// Letting go of it is all at once: the spring released.
+		float dropEase = wantDrop < coilDrop ? (float) (1.0 - Math.exp(-1.6 * dt)) : coilRate;
+		coilDrop = fresh ? wantDrop : coilDrop + (wantDrop - coilDrop) * dropEase;
 		float wantCoil = (float) Mth.clamp(groundUnder(level, real) - real.y, 0.0, 0.8);
-		coil = fresh ? wantCoil : coil + (wantCoil - coil) * (float) (1.0 - Math.exp(-0.6 * dt));
-		state.coil = coil;
-		// Its weight on its legs takes the hips down with the rest of the fold.
-		dropPx = OccupantFit.CROUCH_DROP * fitCrouch + sag;
-		state.sag = sag;
-
+		coil = fresh ? wantCoil : coil + (wantCoil - coil) * coilRate;
+		state.coil = Math.max(coil, coilDrop);
 		double px = scale / 16.0;                             // model pixels to blocks
+		// Its weight on its legs takes the hips down with the rest of the fold.
+		float coilPx = (float) (coilDrop / Math.max(px, 1.0e-3));
+		dropPx = OccupantFit.CROUCH_DROP * fitCrouch + sag + coilPx;
+		state.sag = sag + coilPx;
+
 		double yaw = Math.toRadians(state.bodyRot);
 		drawnYaw = yaw;
 		drawnDrop = dropPx;
@@ -368,11 +382,12 @@ public final class LegGait {
 
 		// Which legs are worst off, and so are first to let go.
 		double[] score = new double[LEGS];
+		cock(entity, now, yaw);
 		boolean anyHeld = held(entity, level, now, yaw, px, dropPx);
 		int landed = 0;
 		for (int i = 0; i < LEGS; i++) {
 			score[i] = 0.0;
-			if (holdAt[i] != null || now < lingerUntil[i]) continue;
+			if (holdAt[i] != null || now < lingerUntil[i] || i == cocked) continue;
 			if (swingStart[i] >= 0.0f) {
 				if (now - swingStart[i] >= swingTime[i]) {
 					swingStart[i] = -1.0f;
@@ -472,6 +487,7 @@ public final class LegGait {
 				float e = f * f;
 				at = holdFrom[i] == null ? holdAt[i] : holdFrom[i].lerp(holdAt[i], e);
 			}
+			if (i == cocked && !holding) at = cockedAt(i, yaw, reach, hip);
 			if (at == null) at = dangle(i, level, yaw, reach, hip, clock);
 			if (at == null) {
 				state.legPlanted[i] = false;
@@ -596,7 +612,10 @@ public final class LegGait {
 						leg = i;
 					}
 				}
+				// The leg it drew back to strike with is the one that goes in.
+				if (cocked >= 0 && holds[cocked] < 0) leg = cocked;
 				if (leg < 0) break;
+				if (leg == cocked) cocked = -1;
 				holds[leg] = id;
 				holdSince[leg] = now;
 				holdFrom[leg] = drawn[leg] != null ? drawn[leg] : foot[leg];
@@ -854,6 +873,42 @@ public final class LegGait {
 			sag += sagRate * h;
 		}
 		sag = Mth.clamp(sag, -1.5f, 4.0f);
+	}
+
+	/**
+	 * Drawn down to strike, it lifts one leg, the one most in front of it, up off whatever it held
+	 * and back; let go, that leg is held ready a moment longer, for whatever it is about to go into.
+	 */
+	private void cock(OccupantEntity entity, float now, double yaw) {
+		if (entity.getCoil() > 0.25f) {
+			cockedUntil = now + 10.0f;
+			if (cocked >= 0) return;
+			double fx = -Math.sin(yaw), fz = Math.cos(yaw);
+			double best = Double.NEGATIVE_INFINITY;
+			for (int i = 0; i < LEGS; i++) {
+				if (holds[i] >= 0 || high(i)) continue;
+				Vec3 d = outward(i, yaw);
+				double ahead = d.x * fx + d.z * fz;
+				if (ahead > best) {
+					best = ahead;
+					cocked = i;
+				}
+			}
+			if (cocked >= 0) {
+				// Off its hold: from here it is drawn to where it is cocked, not locked to the ground.
+				foot[cocked] = null;
+				swingStart[cocked] = -1.0f;
+			}
+		} else if (cocked >= 0 && now > cockedUntil) {
+			cocked = -1;
+		}
+	}
+
+	/** Where the cocked leg is held: folded up beside the body, high, and drawn back. */
+	private Vec3 cockedAt(int i, double yaw, double reach, Vec3 hip) {
+		Vec3 d = outward(i, yaw);
+		double fx = -Math.sin(yaw), fz = Math.cos(yaw);
+		return hip.add(d.x * reach * 0.25 - fx * reach * 0.2, reach * 0.42, d.z * reach * 0.25 - fz * reach * 0.2);
 	}
 
 	/** The top of whatever it stands on, under {@code at}: from a block above its feet down to two below. */

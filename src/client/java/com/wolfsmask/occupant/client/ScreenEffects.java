@@ -179,6 +179,7 @@ public final class ScreenEffects {
 			case ScreenEffectPayload.LOOK_Y -> Cutscene.look(1, payload.duration());
 			case ScreenEffectPayload.LOOK_Z -> Cutscene.look(2, payload.duration());
 			case ScreenEffectPayload.LOOK_FREE -> Cutscene.look(3, 0);
+			case ScreenEffectPayload.FLINCH -> Flinch.start(client, payload.intensity());
 			default -> {
 			}
 		}

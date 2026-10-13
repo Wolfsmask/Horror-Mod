@@ -187,6 +187,20 @@ public final class OccupantGameTests {
 		helper.succeed();
 	}
 
+	/** Drawn down to strike, and let go of it: never further than all the way, never less than not at all. */
+	@GameTest
+	public void itCoilsToStrike(GameTestHelper helper) {
+		OccupantEntity e = helper.spawn(ModEntities.OCCUPANT, 1, 2, 1);
+		helper.assertTrue(e.getCoil() == 0.0f, "It should start standing, not coiled: " + e.getCoil());
+		e.setCoil(0.4f);
+		helper.assertTrue(Math.abs(e.getCoil() - 0.4f) < 1.0e-4f, "Coiled as far as it is told: " + e.getCoil());
+		e.setCoil(3.0f);
+		helper.assertTrue(e.getCoil() == 1.0f, "Never further than all the way: " + e.getCoil());
+		e.setCoil(-2.0f);
+		helper.assertTrue(e.getCoil() == 0.0f, "Never less than not at all: " + e.getCoil());
+		helper.succeed();
+	}
+
 	/** Story progress survives a save and load exactly. */
 	@GameTest
 	public void storyDataRoundTrips(GameTestHelper helper) {
