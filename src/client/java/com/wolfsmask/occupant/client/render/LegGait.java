@@ -60,8 +60,13 @@ public final class LegGait {
 	/** Further than this from the drawn body and it has moved by other means: start over. */
 	private static final double SNAP = 4.0;
 
-	/** How long a leg takes to go into what it takes hold of, in ticks: a thrust, not a reach. */
-	private static final float REACH_IN = 3.5f;
+	/**
+	 * How long a leg takes to go into what it takes hold of, in ticks: drawn up and back for the
+	 * first part of it, then driven in, a thrust, not a reach.
+	 */
+	private static final float REACH_IN = 6.0f;
+	/** The share of that spent drawing back before it comes. */
+	private static final float DRAW = 0.35f;
 	/** How many of its legs it will put through things: it has ten, and stands on two. */
 	private static final int LEGS_FREE = LEGS - 2;
 	/**
@@ -486,11 +491,22 @@ public final class LegGait {
 			Vec3 hip = root(i, px, dropPx);
 			boolean holding = holdAt[i] != null;
 			if (holding) {
-				// Into it, fast, harder at the end than at the start, and from then on exactly in it,
-				// wherever it is.
+				// Drawn up and back off what it held, the way an arm draws back to strike; then driven
+				// in along an arc, faster and faster; and from then on exactly in it, wherever it is.
 				float f = Mth.clamp((now - holdSince[i]) / REACH_IN, 0.0f, 1.0f);
-				float e = f * f;
-				at = holdFrom[i] == null ? holdAt[i] : holdFrom[i].lerp(holdAt[i], e);
+				if (holdFrom[i] == null || f >= 1.0f) {
+					at = holdAt[i];
+				} else {
+					Vec3 a = holdFrom[i], b = holdAt[i];
+					Vec3 line = b.subtract(a);
+					double len = line.length();
+					Vec3 along = len < 1.0e-4 ? Vec3.ZERO : line.scale(1.0 / len);
+					double back = f < DRAW ? f / DRAW : 1.0 - (f - DRAW) / (1.0 - DRAW);
+					back = back * back * (3.0 - 2.0 * back);
+					double drive = f < DRAW ? 0.0 : Math.pow((f - DRAW) / (1.0 - DRAW), 2.0);
+					double lift = Math.min(0.9, 0.2 + len * 0.3);
+					at = a.lerp(b, drive).add(0.0, lift * back, 0.0).subtract(along.scale(Math.min(0.5, len * 0.2) * back));
+				}
 			}
 			if (i == cocked && !holding) at = cockedAt(i, yaw, reach, hip);
 			if (at == null) at = dangle(i, level, yaw, reach, hip, clock);

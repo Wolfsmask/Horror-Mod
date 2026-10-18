@@ -152,6 +152,24 @@ jobs:
               cp "$d/marks.txt" "$OUT/$n.txt" 2>/dev/null || true
               cp "$d/roll.txt" "$OUT/$n.roll" 2>/dev/null || true
             done
+            # The game's own sounds for the edit (cave ambience, a pick on stone, steps), from the
+            # assets the test downloaded.
+            IDX=$(ls -t $(find ~/.gradle "$GITHUB_WORKSPACE/.gradle" -path '*assets/indexes/*.json' 2>/dev/null) 2>/dev/null | head -n 1)
+            if [ -n "$IDX" ]; then
+              python3 - "$IDX" "$OUT/sounds" <<'PY' || true
+          import json, os, shutil, sys
+          idx, out = sys.argv[1], sys.argv[2]
+          objs = os.path.join(os.path.dirname(os.path.dirname(idx)), "objects")
+          for key, v in json.load(open(idx))["objects"].items():
+              if key.startswith(("minecraft/sounds/ambient/cave/", "minecraft/sounds/dig/", "minecraft/sounds/step/")):
+                  src = os.path.join(objs, v["hash"][:2], v["hash"])
+                  if os.path.exists(src):
+                      dst = os.path.join(out, key[len("minecraft/sounds/"):])
+                      os.makedirs(os.path.dirname(dst), exist_ok=True)
+                      shutil.copy(src, dst)
+          print("sounds:", sum(len(f) for _, _, f in os.walk(out)))
+          PY
+            fi
             ls -la "$OUT"
             CLEAR=1 bash tools/ci/save-results.sh "Reel" reel "$OUT/."
           fi

@@ -38,11 +38,9 @@ import java.util.function.IntFunction;
 import java.util.function.IntToDoubleFunction;
 
 /**
- * Footage, not photographs: a few seconds of each moment, recorded a frame every tick, upright,
- * the shape of a phone screen, for a short video of the mod. The camera is someone frightened, in
- * a dark wood, and it is one night: they see it between the trees; they run, and find a house;
- * it is at the window; they run again, out into the trees, and it is behind them, and then it is
- * in front of them, round the corner, and it has them. It is never seen moving until then.
+ * Footage, not photographs: a tape, recorded a frame every tick, upright, the shape of a phone
+ * screen, for a short video of the mod. Only ever what the camcorder saw: someone walking a path in
+ * a wood at dusk, the sounds the world makes around them, and at the end the thing that made them.
  * <p>
  * Only when asked for (a {@code reel.flag} in the game directory, which CI puts there for a commit
  * marked [reel]); the frames go to {@code occupant-reel/<clip>/0000.png}, with what is heard when
@@ -57,10 +55,8 @@ final class Reel {
 	private static final String ALL = "@e[type=occupant:occupant]";
 	/** What its leg goes through: nothing anyone can see, where the one on the ground is. */
 	private static final String BODY = "@e[type=armor_stand,tag=occupant_reel]";
-	/** Held as it is put, in the pose it has when it is after you. */
-	private static final Cinematic.Look CHASING = new Cinematic.Look(false, 0.01f, OccupantEntity.Mode.CHASE, 0);
-	/** Held as it is put, bent right down to you, the mouth open. */
-	private static final Cinematic.Look LOOMING = new Cinematic.Look(false, 0.01f, OccupantEntity.Mode.AMBUSH, 0);
+	/** Held as it is put, standing at its full height, looking at you. */
+	private static final Cinematic.Look STANDING = new Cinematic.Look(false, 0.01f, OccupantEntity.Mode.STARE, 0);
 	/** A sprint, in blocks a tick. */
 	private static final double SPRINT = 0.27;
 	/** Their body, on the ground under the camera once it has them. */
@@ -95,16 +91,7 @@ final class Reel {
 			context.getInput().resizeWindow(1080, 1920);
 			context.waitTicks(20);
 
-			clip("woods", () -> woods(context, game, woods));
-			// The wood with the house in it, built once: the same house all night.
-			BlockPos floor = server.computeOnServer(s -> ForestGallery.clearing(s.overworld(), woods[0].offset(60, 0, -60)));
-			if (floor != null) {
-				Cabin cabin = Cabin.build(server, floor.above());
-				clip("calib", () -> calib(context, game, cabin));
-				clip("house", () -> house(context, game, cabin));
-				clip("window", () -> window(context, game, cabin));
-				clip("taken", () -> taken(context, game, cabin));
-			}
+			clip("found", () -> found(context, game, woods));
 		} catch (RuntimeException | AssertionError e) {
 			Occupant.LOGGER.warn("[client-gametest] reel stopped early", e);
 		} finally {
@@ -132,150 +119,300 @@ final class Reel {
 
 	// ------------------------------------------------------------------ the clips
 
+	/** The tick being recorded, for whatever is posed by hand to follow. */
+	private static volatile int now;
+
 	/**
-	 * Dusk, deep in a dark wood, walking, looking about. Off to one side, between the trunks, it is
-	 * standing, facing you. You freeze; you back off, turn, and run back the way you came; over
-	 * your shoulder, there is nothing there any more.
+	 * One tape, as it was found: someone with a camcorder walking a path through a wood as night
+	 * comes down, filming nothing much. The things a world like this does to you: a pick on stone,
+	 * far off and down somewhere; steps behind yours that stop when yours do, and then one more;
+	 * the cave sound. They turn round at the steps, and there is nothing. They go on, quicker; at a
+	 * rustle they look back, and far back on the path, in the fog, something pale might be standing.
+	 * They stop. Something breathes behind them. They turn round, and it is there, and it knocks
+	 * them down; the camera in the leaves, still recording, sees them on their back shoving
+	 * themselves away from it, a hand up, and it coming after them; and the tape stops. Recorded in
+	 * one go; the edit cuts it, the way a tape is cut by being stopped and started.
 	 */
-	private static void woods(ClientGameTestContext context, TestSingleplayerContext game, BlockPos[] woods) {
+	private static void found(ClientGameTestContext context, TestSingleplayerContext game, BlockPos[] woods) {
 		TestServerContext server = game.getServer();
 		BlockPos floor = server.computeOnServer(s -> ForestGallery.clearing(s.overworld(), woods[1].offset(120, 0, 90)));
 		if (floor == null) return;
 		BlockPos o = floor.above();
-		Way in = Way.local(o, new double[][]{{0, -3}, {0.4, 4}, {-0.4, 10}, {0.3, 16}, {0, 23}});
-		Way back = Way.local(o, new double[][]{{0, 6}, {0, -2}, {1.5, -7}, {-1.5, -12}, {1, -17}, {-1, -22}, {0, -30}});
-		// Where it stands: a gap in the trees, nothing over it, so its head is against what is left of the sky.
-		BlockPos spot = o.offset(-4, 0, 8);
-		server.runOnServer(s -> wood(s.overworld(), o, -16, 16, -46, 26, List.of(in, back), 41L, new double[][]{{-4, 8, 3.6}}, null));
-		Vec3 start = local(o, 0, Cinematic.EYE, -3);
-		Vec3 face = head(spot, 4.4);
+		Way trail = Way.local(o, new double[][]{{0, -6}, {0.6, 4}, {-0.8, 13}, {0.7, 22}, {-0.6, 31}, {0.8, 40},
+				{-0.5, 49}, {0.6, 58}, {0, 67}, {0, 84}});
+		server.runOnServer(s -> wood(s.overworld(), o, -16, 16, -30, 88, List.of(trail), 63L, new double[0][], null));
+		Vec3 start = local(o, 0, Cinematic.EYE, -6);
 		Fear f = new Fear(start);
-		f.follow(in);
-		// Walking, looking about: off to the right, ahead; then, off to the left, it is there.
-		Vec3 right = local(o, 5, 1.9, 6), ahead = local(o, 0.5, 1.5, 12);
-		f.face(right);
-		f.walk(18, 0.075, t -> right);
-		f.walk(12, 0.075, t -> ahead);
-		f.swingTo(6, face);                          // the head snapped round to it
-		f.mark("seen");
-		f.flinchAt(f.size() - 2, face, 1.0);
-		f.stare(24, face, 1.3);                      // frozen
-		f.backAway(10, face, 0.08);
-		f.swing(9, 180.0, 6, 0.15);                  // round, and run
-		int gone = f.size();                          // out of sight: and then simply not there
-		f.follow(back.from(f.x, f.z));
-		f.run(13, SPRINT, 0);
-		f.trip(7);
-		f.run(10, SPRINT, 0);
-		f.mark("look");
-		f.lookBack(9, 10, 8, face);
-		f.run(10, SPRINT, 0);
-		f.watching(t -> t < gone ? Vec3.atBottomCenterOf(spot).add(0, 2.6, 0) : null);
-		prepare(context, game, start, right, 13000);
-		Cinematic.place(server, spot, start, Cinematic.Look.STARING);
-		context.waitTicks(25);
-		record(context, server, "woods", f.flat(o.getY()), f, t -> {
-			if (t == gone) server.runCommand("kill " + ALL);
-		});
-	}
-
-	/**
-	 * Dusk, later, running through the wood, and a house in the trees ahead. Over your shoulder it
-	 * is on the way behind you. To the door, in, round, and it is shut.
-	 */
-	private static void house(ClientGameTestContext context, TestSingleplayerContext game, Cabin cabin) {
-		TestServerContext server = game.getServer();
-		BlockPos o = cabin.o;
-		cabin.door(server, cabin.front, true);
-		cabin.door(server, cabin.back, false);
-		Vec3 start = local(o, 1, Cinematic.EYE, -17);
-		Fear f = new Fear(start);
-		f.follow(cabin.approach.from(start.x, start.z));
-		f.face(local(o, 0, 2.2, -1));
-		f.speed = 0.18;
-		f.run(20, SPRINT, 0);
-		int look = f.size();
-		// On the way behind, where they were a few seconds ago.
-		double[] b = cabin.approach.point(cabin.approach.along(f.at(look)) - 6.5);
-		BlockPos behind = BlockPos.containing(b[0], o.getY(), b[1]);
-		f.lookBack(9, 11, 8, head(behind, 2.8));
-		f.markAt(look + 8, "seen");
-		f.flinchAt(look + 9, head(behind, 2.8), 0.8);
-		f.glancing = false;
-		f.runTo(1.2, SPRINT);
-		Vec3 doorway = local(o, 0, 1.4, -1);
-		f.stopAndTurn(10, doorway);                  // in, and round to the door
-		int shut = f.size();
-		f.mark("door");
-		f.backAway(12, doorway, 0.05);
-		f.mark("pant");
-		f.stare(16, doorway, 1.0);
-		f.watching(t -> t >= look ? Vec3.atBottomCenterOf(behind).add(0, 2.4, 0) : null);
-		prepare(context, game, start, local(o, 0, 2.2, -1), 13050);
-		context.waitTicks(25);
-		record(context, server, "house", f.flat(o.getY()), f, t -> {
-			if (t == look) Cinematic.place(server, behind, f.at(look + 9), CHASING);
-			if (t == shut) cabin.door(server, cabin.front, false);
-		});
-	}
-
-	/**
-	 * Night, in the house, by the lamp. You go to the window and look out: the trees, nothing. A
-	 * knock at the door. You look round at it; when you look back at the window there is something
-	 * out there in the dark under the lean-to, pale, coming slowly up to the glass, until its face
-	 * is there.
-	 */
-	private static void window(ClientGameTestContext context, TestSingleplayerContext game, Cabin cabin) {
-		TestServerContext server = game.getServer();
-		BlockPos o = cabin.o;
-		cabin.door(server, cabin.front, false);
-		cabin.door(server, cabin.back, false);
-		Vec3 start = local(o, 1.6, Cinematic.EYE, 4.6);
-		Vec3 door = local(o, 0, 1.2, -1);
-		Vec3 glass = local(o, -4, 2.4, 3);
-		Vec3 trees = local(o, -12, 1.2, 3);
-		// Far enough out that, stooping under the lean-to, its face comes to the glass and not into the wall;
-		// and before that, back in the dark at the far end of it, where the lamp does not reach.
-		BlockPos outside = o.offset(-8, 0, 3);
-		Vec3 near = Vec3.atBottomCenterOf(outside.offset(0, 0, -1)), far = Vec3.atBottomCenterOf(o.offset(-13, 0, 2));
-		Fear f = new Fear(start).face(door);
-		f.stare(18, door, 0.6);
-		f.turnTo(16, glass);
-		f.heading = Fear.yawBetween(start, glass);
-		f.walk(34, 0.08, t -> glass);
-		// Looking out: the dark, the trees, one way and the other.
-		f.walk(22, 0.0, t -> trees.add(0, Math.sin(t * 0.12) * 0.3, Math.sin(t * 0.17) * 5.0));
-		f.mark("knock");
-		f.flinchAt(f.size() + 1, door, 0.6);
-		f.stare(6, trees, 0.9);
-		f.swingTo(10, door);
-		int there = f.size() + 3;                     // the window out of sight behind them
-		f.stare(22, door, 1.1);
-		f.turnTo(13, glass);
-		// Back at the glass: the dark, and in it something paler than the dark, coming. They lean in.
-		int creep = f.size() - 6;
-		f.markAt(creep, "creep");
-		f.peer(46, glass, 1.5, 0.3);
-		int seen = f.size() - 4;                      // its face up to the glass
+		f.follow(trail);
+		f.face(f.onWay(5.0, 0, -0.4));
+		// Walking: the path, the trees either side, now and then down at their feet. Nothing much.
+		f.walk(90, 0.085, t -> f.onWay(5.5, 1.3 * Math.sin(t * 0.05), -0.5 + 0.25 * Math.sin(t * 0.08) - (t > 55 && t < 70 ? 1.2 : 0)));
+		f.markAt(6, "in");
+		// Off in the dark, far down somewhere, a pick on stone. They slow, and stop to listen.
+		int mine = f.size() - 18;
+		f.markAt(mine, "mine");
+		f.walk(16, 0.02, t -> f.onWay(5.0, 2.5, -0.3));
+		Vec3 sound = f.onWay(3.0, 14.0, -1.8);
+		f.stare(44, sound, 0.2);
+		f.markAt(f.size() - 2, "cut");
+		f.walk(60, 0.09, t -> f.onWay(5.5, -1.1 * Math.sin(t * 0.04), -0.5));
+		f.markAt(f.size() - 20, "in");
+		// Steps behind theirs, a moment after each, all the way; and when they stop, one more.
+		int behindFrom = f.size();
+		f.walk(56, 0.095, t -> f.onWay(5.5, 0.6 * Math.sin(t * 0.06), -0.6));
+		int stopped = f.size();
+		f.stare(18, f.onWay(5.0, 0, -0.4), 0.5);
+		f.markAt(stopped + 6, "echo");
+		// Round, slowly, back along the path: the dark, the trees, nothing.
+		Vec3 back = f.onWay(-9.0, 0.3, -0.2);
+		f.turnTo(26, back);
+		int nothing = f.size();
+		f.stare(34, back, 0.8);
+		f.markAt(nothing + 14, "what");
+		f.turnTo(16, f.onWay(5.0, 0, -0.3));
+		f.markAt(f.size() - 2, "cut");
+		// On, quicker, breathing; the cave sound.
+		f.walk(48, 0.12, t -> f.onWay(6.0, 0.5 * Math.sin(t * 0.07), -0.5));
+		f.markAt(f.size() - 40, "in");
+		f.markAt(f.size() - 26, "cave");
+		// Something in the leaves behind: a look back over the shoulder, still walking. Far back on the
+		// path, at the edge of what the fog lets them see, something pale is standing; they do not see it.
+		int glance = f.size();
+		f.markAt(glance - 3, "rustle");
+		Vec3 farBack = f.onWay(-24.0, 0.6, 0.8);
+		BlockPos farSpot = BlockPos.containing(farBack.x, o.getY(), farBack.z);
+		f.glanceBack(8, 9, 8, farBack, 0.1);
+		f.walk(52, 0.13, t -> f.onWay(6.0, 0.4 * Math.sin(t * 0.08), -0.5));
+		// They stop. Breathing, right behind them. They do not move.
+		f.stare(8, f.onWay(5.0, 0, -0.4), 0.6);
+		int breath = f.size();
+		f.markAt(breath + 2, "breath");
+		f.stare(32, f.onWay(5.0, 0, -0.4), 1.4);
+		// Round, slowly; up. It is there.
+		Vec3 here = new Vec3(f.x, o.getY(), f.z);
+		Vec3 fwd = f.wayDir();
+		Vec3 right = new Vec3(-fwd.z, 0, fwd.x);
+		Vec3 feet = here.subtract(fwd.scale(2.6));
+		Vec3 itsFace = feet.add(0, 4.3, 0);
+		f.turnTo(28, itsFace);
+		int seen = f.size() - 6;
 		f.markAt(seen, "seen");
-		f.flinchAt(seen + 1, glass, 1.0);
-		f.backAway(9, glass, 0.15);
-		f.stare(22, glass, 1.8);
-		Vec3 eyeline = new Vec3(0, 2.2, 0);
-		IntFunction<Vec3> it = t -> t < there ? null
-				: far.lerp(near, Math.pow(smooth((t - creep) / (double) (seen + 2 - creep)), 0.85));
-		f.watching(t -> t < there ? null : it.apply(t).add(eyeline));
+		f.flinchAt(seen, itsFace, 0.7);
+		// It only looks at them. They cannot move.
+		f.stare(24, itsFace, 1.9);
+		f.backAway(6, itsFace, 0.07);
+		// It knocks them down, backwards, flat on their back, their feet toward it; the camera out of
+		// their hand, over them, onto the path a few steps behind their head, still recording, looking
+		// back along them at it.
+		int hit = f.size();
+		Vec3 person0 = here.add(fwd.scale(1.3));
+		Vec3 lens = here.add(fwd.scale(6.2)).add(right.scale(0.9));
+		Vec3 aim = here.add(fwd.scale(2.2)).subtract(right.scale(0.1)).add(0, 1.5, 0);
+		f.thrown(8, lens, aim, 0.16, -14.0);
+		int land = f.size();
+		// On their back: shoving themselves away from it, a hand up at it; it comes after them; it
+		// bends down to them; its leg comes down; the tape stops.
+		int[] pushes = new int[8];
+		for (int k = 0; k < pushes.length; k++) pushes[k] = hit + 18 + 10 * k;
+		int stab = hit + 112, end = hit + 120;
+		for (int push : pushes) f.markAt(push, "scoot");
+		f.markAt(hit + 26, "no1");
+		f.markAt(hit + 56, "no2");
+		f.markAt(hit + 100, "no3");
+		f.markAt(stab, "stab");
+		f.still(end - land, aim, -14.0);
+		f.mark("end");
+		// The steps behind them: one after each of theirs, a few ticks late.
+		for (String m : new ArrayList<>(f.marks())) {
+			String[] parts = m.split(" ");
+			int t = Integer.parseInt(parts[0]);
+			if (parts[1].equals("step") && t >= behindFrom && t < stopped) f.markAt(t + 7, "echo");
+		}
+		IntToDoubleFunction scooted = t -> {
+			double d = 0;
+			for (int push : pushes) d += 0.16 * smooth((t - push - 2) / 5.0);
+			return d;
+		};
+		// Where they lie (their feet: a body lying down is drawn from its feet to its head), where their
+		// chest is, and where it is, each tick.
+		IntFunction<Vec3> person = t -> person0.add(fwd.scale(scooted.applyAsDouble(t)));
+		IntFunction<Vec3> chest = t -> person.apply(t).add(fwd.scale(1.15)).add(0, 0.3, 0);
+		IntFunction<Vec3> it = t -> {
+			if (t < hit) return feet;
+			if (t < hit + 5) return feet.add(fwd.scale(0.6 * smooth((t - hit) / 5.0)));
+			Vec3 after = feet.add(fwd.scale(0.6 + 1.5 * smooth((t - hit - 20) / 90.0)));
+			if (t < stab - 2) return after;
+			return after.add(fwd.scale(0.5 * smooth((t - stab + 2) / 4.0)));
+		};
+		f.watching(t -> t >= glance && t < glance + 30 ? Vec3.atBottomCenterOf(farSpot).add(0, 2.4, 0)
+				: t >= breath - 8 ? it.apply(t).add(0, 2.4, 0) : null);
 		double[][] poses = f.flat(o.getY());
-		prepare(context, game, start, door, 15500);
-		context.waitTicks(25);
-		record(context, server, "window", poses, f, t -> {
-			if (t == there) Cinematic.place(server, BlockPos.containing(far), glass.add(3.0, -0.4, 0), LOOMING);
-			if (t < there) return;
-			Vec3 at = it.apply(t);
-			Vec3 eye = new Vec3(poses[t][0], poses[t][1], poses[t][2]);
-			look(server, at, eye, 2.2);
+		// They lie on their back, the head away from it: a body asleep lies with its head a quarter turn round from where it faces.
+		float lying = (float) (Fear.yawBetween(Vec3.ZERO, fwd) + 90.0);
+		prepare(context, game, start, f.onWay(5.0, 0, -0.4), 13050);
+		// No leaves low over the path where it stands up to its height.
+		server.runOnServer(s -> {
+			ServerLevel level = s.overworld();
+			for (double a = -4.0; a <= 8.0; a += 0.5) {
+				for (double b = -2.0; b <= 2.0; b += 0.5) {
+					for (int y = 2; y <= 7; y++) {
+						Vec3 q = here.add(fwd.scale(a)).add(right.scale(b));
+						BlockPos p = BlockPos.containing(q.x, o.getY() + y, q.z);
+						if (level.getBlockState(p).getBlock() instanceof LeavesBlock) set(level, p, Blocks.AIR.defaultBlockState());
+					}
+				}
+			}
 		});
+		Vec3 hidden = person0.add(0, -8, 0);
+		server.runCommand(String.format(Locale.ROOT, "summon mannequin %.3f %.3f %.3f {pose:\"sleeping\",immovable:1b,NoGravity:1b,"
+				+ "Invulnerable:1b,Silent:1b,hide_description:1b,Tags:[\"occupant_self\"]}", hidden.x, hidden.y, hidden.z));
+		context.waitTicks(25);
+		int[] puppet = {-1};
+		try {
+			record(context, server, "found", poses, f, t -> {
+				now = t;
+				if (t == glance) Cinematic.place(server, farSpot, new Vec3(poses[t][0], poses[t][1], poses[t][2]), STANDING);
+				if (t == glance + 30) server.runCommand("kill " + ALL);
+				if (t == breath - 8) Cinematic.place(server, BlockPos.containing(feet), here, STANDING);
+				if (t >= breath - 8) {
+					Vec3 at = it.apply(t);
+					Vec3 eye = new Vec3(poses[t][0], poses[t][1], poses[t][2]);
+					// Standing over them to look at them before it strikes; down at them once they are down.
+					Vec3 them = chest.apply(t);
+					Vec3 watch = t < hit ? eye : them;
+					OccupantEntity.Mode mode = t < hit ? OccupantEntity.Mode.STARE : OccupantEntity.Mode.AMBUSH;
+					look(server, at, watch, 0);
+					server.runOnServer(s -> {
+						for (OccupantEntity e : s.overworld().getEntitiesOfClass(OccupantEntity.class, AABB.ofSize(at, 16, 16, 16))) {
+							if (e.getMode() != mode) e.setMode(mode);
+						}
+					});
+				}
+				if (t == hit + 2) {
+					Vec3 p = person.apply(t);
+					server.runCommand(String.format(Locale.ROOT, "tp %s %.3f %.3f %.3f %.1f 0", SELF, p.x, p.y, p.z, lying));
+					server.runOnServer(s -> {
+						for (Entity e : s.overworld().getEntities((Entity) null, AABB.ofSize(p, 6, 6, 6), x -> Kinds.is(x, "mannequin"))) {
+							if (e instanceof net.minecraft.world.entity.LivingEntity le) {
+								le.setYBodyRot(lying);
+								le.setYHeadRot(lying);
+							}
+						}
+					});
+				} else if (t > hit + 2) {
+					Vec3 p = person.apply(t);
+					server.runCommand(String.format(Locale.ROOT, "tp %s %.3f %.3f %.3f %.1f 0", SELF, p.x, p.y, p.z, lying));
+				}
+				if (t == hit + 3) {
+					Vec3 p = person.apply(t);
+					context.runOnClient(mc -> {
+						if (mc.level == null) return;
+						for (Entity e : mc.level.getEntities((Entity) null, AABB.ofSize(p, 6, 6, 6), x -> Kinds.is(x, "mannequin"))) {
+							puppet[0] = e.getId();
+							com.wolfsmask.occupant.client.render.Ragdoll.puppet(e.getId(), () -> onTheirBack(now - hit, pushes, hit, stab));
+						}
+					});
+				}
+				// Its leg at the lens as it knocks them down; its legs into their chest at the end.
+				boolean atLens = t >= hit - 6 && t <= hit;
+				boolean atChest = t >= stab - 6;
+				double[] held = poses[Math.min(t, hit - 1)];
+				double yr = Math.toRadians(held[3]);
+				Vec3 legAt = new Vec3(held[0], held[1], held[2]).add(-Math.sin(yr) * 0.45, -0.15, Math.cos(yr) * 0.45);
+				if (t == hit - 6) {
+					server.runCommand(String.format(Locale.ROOT, "summon armor_stand %.3f %.3f %.3f {Marker:1b,Invisible:1b,NoGravity:1b,Tags:[\"occupant_reel\"]}",
+							legAt.x, legAt.y, legAt.z));
+				} else if (atLens) {
+					server.runCommand(String.format(Locale.ROOT, "tp %s %.3f %.3f %.3f", BODY, legAt.x, legAt.y, legAt.z));
+				} else if (t == hit + 1) {
+					server.runCommand("kill " + BODY);
+				}
+				Vec3 into0 = chest.apply(t);
+				if (t == stab - 6) {
+					server.runCommand(String.format(Locale.ROOT, "summon armor_stand %.3f %.3f %.3f {Marker:1b,Invisible:1b,NoGravity:1b,Tags:[\"occupant_reel\"]}",
+							into0.x, into0.y, into0.z));
+				} else if (atChest) {
+					server.runCommand(String.format(Locale.ROOT, "tp %s %.3f %.3f %.3f", BODY, into0.x, into0.y, into0.z));
+				}
+				Vec3 at = it.apply(t);
+				int legs = t >= stab - 5 ? 2 : 0;
+				server.runOnServer(s -> {
+					ServerLevel level = s.overworld();
+					List<OccupantEntity> its = level.getEntitiesOfClass(OccupantEntity.class, AABB.ofSize(at, 16, 16, 16));
+					if (its.isEmpty()) return;
+					List<Entity> into = new ArrayList<>();
+					if (atLens) {
+						into.addAll(level.getEntities((Entity) null, AABB.ofSize(legAt, 4, 4, 4), e -> Kinds.is(e, "armor_stand")));
+					} else if (legs > 0) {
+						List<Entity> marks = level.getEntities((Entity) null, AABB.ofSize(into0, 4, 4, 4), e -> Kinds.is(e, "armor_stand"));
+						for (int i = 0; i < legs && !marks.isEmpty(); i++) into.add(marks.get(0));
+					}
+					its.get(0).setHeld(into);
+				});
+			});
+		} finally {
+			if (puppet[0] >= 0) com.wolfsmask.occupant.client.render.Ragdoll.puppet(puppet[0], null);
+			server.runCommand("kill " + BODY);
+			server.runCommand("kill " + SELF);
+		}
 	}
+
+	/**
+	 * Them on their back, {@code tau} ticks after it knocked them down (head, arms and legs, as
+	 * Ragdoll lays them out; on their back, forward is up): flat a moment; then the head up to look
+	 * at it, one hand held up at it, shaking, the other arm and the legs shoving them away from it,
+	 * a push at a time; at the end both arms up over their face and the knees pulled up.
+	 */
+	private static float[] onTheirBack(int tau, int[] pushes, int hit, int stab) {
+		float t = Math.max(0, tau);
+		float shake = (float) (Math.sin(t * 1.9) * 0.6 + Math.sin(t * 3.1 + 1.0) * 0.4);
+		float[] p = new float[10];
+		if (tau < 14) {
+			// Down: flat, winded, the head back, the arms out where they fell.
+			float u = (float) smooth(tau / 14.0);
+			p[0] = 0.6f * u;
+			p[2] = 0.15f;
+			p[3] = 0.5f - 0.3f * u;
+			p[4] = 0.2f;
+			p[5] = -0.45f + 0.2f * u;
+			p[6] = -0.1f;
+			p[8] = 0.05f;
+			return p;
+		}
+		if (hit + tau >= stab - 2) {
+			// It is coming down on them: both arms up over the face, the knees up, the head turned away.
+			p[0] = 0.4f;
+			p[1] = 0.35f;
+			p[2] = -1.75f + 0.08f * shake;
+			p[3] = -0.25f;
+			p[4] = -1.7f + 0.08f * shake;
+			p[5] = 0.25f;
+			p[6] = -0.9f;
+			p[8] = -0.75f;
+			return p;
+		}
+		// Looking at it, over their own chest, never away.
+		p[0] = 0.72f + 0.04f * shake;
+		p[1] = 0.05f * shake;
+		// One hand up at it, shaking; more when they cry out at it.
+		boolean crying = (tau >= 26 && tau < 40) || (tau >= 56 && tau < 72) || (tau >= 100);
+		p[2] = -1.0f + 0.07f * shake + (crying ? 0.22f * (float) Math.sin(t * 0.9) : 0.0f);
+		p[3] = 0.12f;
+		// The other arm and the legs: a shove at a time, away from it.
+		int k = -1;
+		for (int i = 0; i < pushes.length; i++) if (hit + tau >= pushes[i]) k = i;
+		float u = k < 0 ? 1.0f : Math.min(1.0f, (hit + tau - pushes[k]) / 10.0f);
+		float shove = (float) Math.sin(Math.PI * u);
+		p[4] = 0.25f + 0.35f * shove;
+		p[5] = -0.4f;
+		boolean right = k % 2 == 0;
+		p[6] = -0.15f - (right ? 0.65f * shove : 0.15f * shove);
+		p[7] = 0.06f;
+		p[8] = -0.15f - (right ? 0.15f * shove : 0.65f * shove);
+		p[9] = -0.06f;
+		return p;
+	}
+
 
 	/**
 	 * Puts it at {@code at} this tick, turned to the camera at {@code eye}, its face (about
@@ -295,338 +432,11 @@ final class Reel {
 		});
 	}
 
-	/**
-	 * Night: out of the back of the house and into the trees, running. Over your shoulder, it is
-	 * there, behind you. You turn back and run on, round the rock, and it is standing there in
-	 * front of you instead. It strikes: you are down, its leg through you, and it drags you off into
-	 * the trees.
-	 */
-	private static void taken(ClientGameTestContext context, TestSingleplayerContext game, Cabin cabin) {
-		TestServerContext server = game.getServer();
-		BlockPos o = cabin.o;
-		cabin.door(server, cabin.front, false);
-		cabin.door(server, cabin.back, true);
-		Vec3 start = local(o, 0, Cinematic.EYE, 4.6);
-		Way way = cabin.out.from(start.x, start.z);
-		Fear f = new Fear(start);
-		f.follow(way);
-		f.face(local(o, 0, 1.4, 9));
-		f.speed = 0.12;
-		f.run(40, SPRINT, 0);
-		int look = f.size();
-		// Behind, by the house they ran from.
-		double[] b = way.point(way.along(f.at(look)) - 7.0);
-		BlockPos behind = BlockPos.containing(b[0], o.getY(), b[1]);
-		f.lookBack(9, 11, 8, head(behind, 2.8));
-		f.markAt(look + 8, "seen");
-		f.flinchAt(look + 9, head(behind, 2.8), 0.8);
-		f.glancing = false;
-		f.run(8, SPRINT, 0);
-		// Round the rock, until it is there in front of them, just past it; a moment to take it in.
-		BlockPos spot = o.offset(-4, 0, 27);
-		Vec3 feet = Vec3.atBottomCenterOf(spot);
-		Vec3 face = feet.add(0, 2.4, 0);
-		for (int i = 0; i < 80 && !f.sees(feet, o, Cabin.ROCK); i++) f.run(1, SPRINT, 0);
-		int seen = f.size();
-		f.mark("seen");
-		f.flinchAt(seen + 1, face, 1.2);
-		// Round the corner, and it is there; before they can even stop, it has them.
-		f.run(2, SPRINT, 0);
-		f.halt(3, face);
-		int hit = f.size();
-		// The blow knocks the camera out of their hands: it lands in the dirt a few steps off, on its
-		// side, still recording, looking back at them. Everything after is seen from there.
-		double ground = o.getY();
-		Vec3 struck = f.at(hit);
-		Vec3 lunge = feet.add(horizontal(struck.subtract(feet)).normalize().scale(0.9));
-		Vec3 away = horizontal(struck.subtract(feet)).normalize();
-		Vec3 person = new Vec3(struck.x + away.x, ground, struck.z + away.z);
-		// It comes round to stand over them on the open side, away from the rock, under the shelf of it.
-		Vec3 toIt = new Vec3(-1.2, 0, 2.4).normalize();
-		Vec3 stands = person.add(toIt.scale(2.4));
-		// They will try to crawl back the way they came; the camera lands off to one side of that,
-		// so it sees the whole length of them, not just the top of their head.
-		Vec3 flee = horizontal(local(o, 0.3, 0, 21.5).subtract(person)).normalize();
-		double side = Math.toRadians(25);
-		Vec3 offAngle = new Vec3(flee.x * Math.cos(side) - flee.z * Math.sin(side), 0, flee.x * Math.sin(side) + flee.z * Math.cos(side));
-		Vec3 lens = person.add(offAngle.scale(2.5));
-		// Looking between where they will crawl to and where it stands over them.
-		Vec3 aim = person.add(flee.scale(0.7)).add(stands).scale(0.5).add(0, 0.8, 0);
-		f.thrown(8, lens, aim, 0.18, 16.0);
-		int land = f.size();
-		// What happens, in ticks from the blow: its legs going in; them crawling for the camera;
-		// pulled back; dragged off into the dark; it looking at the camera.
-		int[][] stabs = {{hit + 14, 2}, {hit + 17, 1}, {hit + 20, 2}, {hit + 23, 1}, {hit + 26, 3}, {hit + 30, 1}};
-		int crawl = hit + 32, yank = hit + 59, drag = hit + 68, stop = hit + 108, end = hit + 120;
-		for (int st : new int[]{hit + 14, hit + 20, hit + 26}) f.markAt(st, "stab");
-		for (int k = 0; k < 3; k++) f.markAt(crawl + 9 * k, "crawl");
-		f.markAt(yank, "yank");
-		for (int t = drag; t < stop; t += 13) f.markAt(t, "tug");
-		f.markAt(stop + 2, "stare");
-		f.still(end - land, aim, 16.0);
-		f.mark("end");
-		IntToDoubleFunction crawled = t -> {
-			if (t < crawl) return 0;
-			double k = Math.min(3.0, (t - crawl) / 9.0);
-			int whole = (int) Math.min(2, Math.floor(k));
-			return 0.45 * (whole + smooth(Math.min(1.0, (k - whole) / 0.45)));
-		};
-		IntToDoubleFunction dragged = t -> {
-			if (t < drag) return 0;
-			int u = Math.min(t, stop) - drag;
-			int whole = u / 13;
-			double c = (u % 13) / 13.0;
-			return 1.1 * (whole + smooth(Math.min(1.0, c / 0.4)));
-		};
-		// Where they are each tick (their body, face down, head towards the camera).
-		IntFunction<Vec3> body = t -> {
-			// Writhing under it as its legs go in, twisting against what holds them.
-			Vec3 writhe = new Vec3(toIt.z, 0, -toIt.x).scale((t >= hit + 12 && t < crawl ? 0.07 : 0.04) * Math.sin(t * 1.3));
-			if (t < yank) return person.add(flee.scale(crawled.applyAsDouble(t))).add(writhe);
-			Vec3 near = person.add(flee.scale(1.35));
-			Vec3 back = stands.subtract(toIt.scale(1.9));
-			if (t < yank + 5) return near.add(back.subtract(near).scale(1 - Math.pow(1 - (t - yank) / 5.0, 2)));
-			return back.add(toIt.scale(dragged.applyAsDouble(t))).add(writhe);
-		};
-		// Where it is each tick: round the corner; lunging; over them; after them; dragging them off.
-		IntFunction<Vec3> it = t -> {
-			if (t < hit) return feet;
-			if (t < hit + 4) return feet.add(lunge.subtract(feet).scale(smooth((t - hit) / 4.0)));
-			if (t < hit + 12) return lunge.add(horizontal(stands.subtract(lunge)).scale(smooth((t - hit - 4) / 8.0)));
-			if (t < yank) return stands.add(flee.scale(0.4 * crawled.applyAsDouble(t)));
-			return stands.add(toIt.scale(0.5 * Math.min(1.0, (t - yank) / 5.0) + dragged.applyAsDouble(t)));
-		};
-		f.watching(t -> t >= look && t < seen - 2 ? Vec3.atBottomCenterOf(behind).add(0, 2.4, 0)
-				: t >= seen - 2 ? it.apply(t).add(0, 2.0, 0) : null);
-		double[][] poses = f.flat(ground);
-		prepare(context, game, start, local(o, 0, 1.4, 9), 14200);
-		// Their body, out of sight under the ground until it is needed, lying as it will lie.
-		Vec3 hidden = person.add(0, -8, 0);
-		server.runCommand(String.format(Locale.ROOT, "summon mannequin %.3f %.3f %.3f {pose:\"swimming\",immovable:1b,NoGravity:1b,"
-				+ "Invulnerable:1b,Silent:1b,hide_description:1b,Tags:[\"occupant_self\"]}", hidden.x, hidden.y, hidden.z));
-		context.waitTicks(25);
-		try {
-			record(context, server, "taken", poses, f, t -> {
-				if (t == look) Cinematic.place(server, behind, f.at(look + 9), CHASING);
-				// Not there until the moment before it is seen: nothing of it showing round the rock.
-				if (t == seen - 2) Cinematic.place(server, spot, f.at(hit), LOOMING);
-				if (t < seen - 2) return;
-				Vec3 at = it.apply(t);
-				Vec3 them = body.apply(t);
-				Vec3 eye = new Vec3(poses[t][0], poses[t][1], poses[t][2]);
-				// Its eyes on them while it has them; at the end, on the camera.
-				Vec3 watch = t < hit ? eye : t >= stop ? eye : them.add(0, 0.3, 0);
-				float yaw = (float) Fear.yawBetween(at, watch);
-				// Their head the way they are trying to go; once it has them back, away from it; and
-				// jerking about as the legs go in.
-				double twitch = t >= hit + 12 && t < crawl ? 14 * Math.sin(t * 1.7) : 0;
-				float bodyYaw = (float) (t < yank ? Fear.yawBetween(them, them.add(flee)) + twitch
-						: Fear.yawBetween(at, them) + 6 * Math.sin(t * 0.8));
-				if (t >= hit + 2) {
-					server.runCommand(String.format(Locale.ROOT, "tp %s %.3f %.3f %.3f %.1f 0", SELF, them.x, them.y, them.z, bodyYaw));
-				}
-				// Its leg coming straight at the lens, the instant before the camera is gone.
-				boolean atLens = t >= hit - 3 && t <= hit;
-				double[] held = poses[Math.min(t, hit - 1)];
-				double yr = Math.toRadians(held[3]);
-				Vec3 legAt = new Vec3(held[0], held[1], held[2]).add(-Math.sin(yr) * 0.45, -0.15, Math.cos(yr) * 0.45);
-				if (t == hit - 3) {
-					server.runCommand(String.format(Locale.ROOT, "summon armor_stand %.3f %.3f %.3f {Marker:1b,Invisible:1b,NoGravity:1b,Tags:[\"occupant_reel\"]}",
-							legAt.x, legAt.y, legAt.z));
-				} else if (atLens) {
-					server.runCommand(String.format(Locale.ROOT, "tp %s %.3f %.3f %.3f", BODY, legAt.x, legAt.y, legAt.z));
-				} else if (t == hit + 1) {
-					server.runCommand("kill " + BODY);
-				}
-				int legs = 0;
-				if (t >= hit + 3) {
-					legs = 1;
-					for (int[] st : stabs) if (t >= st[0]) legs = st[1];
-					if (t >= yank && t < yank + 8) legs = 2;
-				}
-				int count = legs;
-				server.runOnServer(s -> {
-					ServerLevel level = s.overworld();
-					List<Entity> self = level.getEntities((Entity) null, AABB.ofSize(them, 6, 20, 6), e -> Kinds.is(e, "mannequin"));
-					for (Entity e : self) {
-						if (e instanceof net.minecraft.world.entity.LivingEntity le) {
-							le.setYBodyRot(bodyYaw);
-							le.setYHeadRot(bodyYaw);
-						}
-					}
-					List<OccupantEntity> its = level.getEntitiesOfClass(OccupantEntity.class, AABB.ofSize(at, 16, 16, 16));
-					if (its.isEmpty()) return;
-					OccupantEntity thing = its.get(0);
-					thing.setPos(at.x, at.y, at.z);
-					thing.setYRot(yaw);
-					thing.setYHeadRot(yaw);
-					thing.setYBodyRot(yaw);
-					// Down at them, or out at the camera, from where the game has its eyes.
-					thing.setXRot((float) -Math.toDegrees(Math.atan2(watch.y - (at.y + thing.getEyeHeight()),
-							Math.hypot(watch.x - at.x, watch.z - at.z))));
-					List<Entity> into = new ArrayList<>();
-					if (atLens) {
-						into.addAll(level.getEntities((Entity) null, AABB.ofSize(legAt, 4, 4, 4), e -> Kinds.is(e, "armor_stand")));
-					} else if (!self.isEmpty()) {
-						for (int i = 0; i < count; i++) into.add(self.get(0));
-					}
-					thing.setHeld(into);
-				});
-			});
-		} finally {
-			server.runCommand("kill " + BODY);
-			server.runCommand("kill " + SELF);
-		}
-	}
-
 	private static Vec3 horizontal(Vec3 v) {
 		return new Vec3(v.x, 0, v.z);
 	}
 
-	/** Where the camera is at tick {@code t}, on the ground. */
-	private static Vec3 cam(double[][] poses, int t) {
-		double[] p = poses[Mth.clamp(t, 0, poses.length - 1)];
-		return new Vec3(p[0], 0, p[2]);
-	}
-
-	/**
-	 * Not part of the film: their body lying each way it can lie, from the side and from above, a
-	 * gold block on its +z side, so where to put it under the camera can be worked out.
-	 */
-	private static void calib(ClientGameTestContext context, TestSingleplayerContext game, Cabin cabin) {
-		TestServerContext server = game.getServer();
-		Vec3 at = local(cabin.o, 0, 0, -6);
-		BlockPos mark = BlockPos.containing(at.x, at.y, at.z + 2);
-		prepare(context, game, at.add(3.5, 0.6, 0), at, 6000);
-		server.runOnServer(s -> set(s.overworld(), mark, Blocks.GOLD_BLOCK.defaultBlockState()));
-		Path dir = DIR.resolve("calib");
-		int k = 0;
-		try {
-			Files.createDirectories(dir);
-			for (String pose : new String[]{"swimming", "sleeping"}) {
-				server.runCommand("kill " + SELF);
-				server.runCommand(String.format(Locale.ROOT, "summon mannequin %.3f %.3f %.3f {pose:\"%s\",Rotation:[0f,0f],immovable:1b,"
-						+ "NoGravity:1b,Invulnerable:1b,hide_description:1b,Tags:[\"occupant_self\"]}", at.x, at.y, at.z, pose));
-				context.waitTicks(30);
-				for (double[] view : new double[][]{{3.5, 0.6, 0, 90, 5}, {0, 4.0, 0, 0, 90}}) {
-					server.runCommand(tp(at.add(view[0], view[1], view[2]), view[3], view[4]));
-					context.waitTicks(4);
-					Path shot = context.takeScreenshot("reel-calib-" + k);
-					Files.move(shot, dir.resolve(String.format(Locale.ROOT, "%04d.png", k++)), StandardCopyOption.REPLACE_EXISTING);
-				}
-			}
-		} catch (IOException e) {
-			throw new UncheckedIOException(e);
-		} finally {
-			server.runCommand("kill " + SELF);
-			server.runOnServer(s -> set(s.overworld(), mark, Blocks.AIR.defaultBlockState()));
-		}
-	}
-
 	// ------------------------------------------------------------------ the places
-
-	/** The house in the wood, and the ways to it and away from it. */
-	private static final class Cabin {
-		/** The rock the way goes round (x0, x1, z0, z1 from the house): big enough to hide what is on the other side of it. */
-		static final int[] ROCK = {-9, -2, 14, 25};
-		/** The shelf of the rock over the way round it (x0, x1, z0, z1), its underside three blocks up. */
-		static final int[] LEDGE = {-11, 2, 26, 32};
-		final BlockPos o;
-		final BlockPos front, back;
-		/** From the south, up to the door and in. */
-		final Way approach;
-		/** Out of the back door, along the rock, and round it. */
-		final Way out;
-
-		private Cabin(BlockPos o) {
-			this.o = o;
-			this.front = o.offset(0, 0, -1);
-			this.back = o.offset(0, 0, 7);
-			this.approach = Way.local(o, new double[][]{{1, -24}, {1, -17}, {-1, -13}, {1.5, -8}, {0, -4}, {0, -1}, {0, 3}});
-			this.out = Way.local(o, new double[][]{{0, 4}, {0, 9}, {-0.5, 13.5}, {0.6, 18}, {0.2, 22.5}, {-0.3, 25.6},
-					{-2.2, 27.6}, {-6, 28.5}, {-11, 29.3}, {-17, 30}});
-		}
-
-		static Cabin build(TestServerContext server, BlockPos o) {
-			Cabin c = new Cabin(o);
-			server.runOnServer(s -> {
-				ServerLevel level = s.overworld();
-				wood(level, o, -17, 17, -28, 38, List.of(c.approach, c.out), 7L, new double[][]{{0, 3, 7.5}, {-8, 3, 4.0}, {-12, 3, 4.0}, {-4, 27, 2.2}, {0.3, 27.5, 3.2}, {1.0, 23.3, 2.2}, {1.4, 23.3, 2.2}, {-2, 30.5, 2.6}}, ROCK);
-				RandomSource r = RandomSource.create(9L);
-				for (int x = LEDGE[0]; x <= LEDGE[1]; x++) {
-					for (int z = LEDGE[2]; z <= LEDGE[3]; z++) {
-						// Ragged at its edges, thinner the further it reaches.
-						boolean edge = x == LEDGE[0] || x == LEDGE[1] || z == LEDGE[3];
-						if (edge && r.nextInt(3) == 0) continue;
-						set(level, o.offset(x, 3, z), (r.nextInt(3) == 0 ? Blocks.MOSSY_COBBLESTONE : Blocks.STONE).defaultBlockState());
-						if (z < LEDGE[3] - 1) set(level, o.offset(x, 4, z), Blocks.STONE.defaultBlockState());
-						if (r.nextInt(3) == 0) set(level, o.offset(x, 5, z), Blocks.MOSS_BLOCK.defaultBlockState());
-					}
-				}
-				c.house(level);
-			});
-			return c;
-		}
-
-		/** One room: plank walls on a stone footing, a stepped roof, a door each end, a window each side, a lamp. */
-		private void house(ServerLevel level) {
-			BlockState planks = Blocks.SPRUCE_PLANKS.defaultBlockState();
-			BlockState roof = Blocks.DARK_OAK_PLANKS.defaultBlockState();
-			BlockState air = Blocks.AIR.defaultBlockState();
-			for (int x = -4; x <= 4; x++) {
-				for (int z = -1; z <= 7; z++) {
-					boolean wall = Math.abs(x) == 4 || z == -1 || z == 7;
-					boolean corner = Math.abs(x) == 4 && (z == -1 || z == 7);
-					set(level, o.offset(x, -1, z), wall ? Blocks.COBBLESTONE.defaultBlockState() : planks);
-					for (int y = 0; y <= 3; y++) {
-						set(level, o.offset(x, y, z), !wall ? air : corner ? Blocks.DARK_OAK_LOG.defaultBlockState() : planks);
-					}
-				}
-			}
-			for (int x = -5; x <= 5; x++) {
-				for (int z = -2; z <= 8; z++) {
-					set(level, o.offset(x, 4, z), roof);
-					for (int k = 1; k <= 4; k++) if (Math.abs(x) <= 5 - k) set(level, o.offset(x, 4 + k, z), roof);
-				}
-			}
-			// The windows: on the west side tall, nearly to the eaves, so that whatever is outside it
-			// is seen whole; on the east an ordinary one.
-			for (int z = 2; z <= 4; z++) {
-				for (int y = 1; y <= 3; y++) set(level, o.offset(-4, y, z), Blocks.GLASS.defaultBlockState());
-				for (int y = 1; y <= 2; y++) set(level, o.offset(4, y, z), Blocks.GLASS.defaultBlockState());
-			}
-			// A long lean-to along the west wall, for wood, at the eaves: low enough that whatever stands
-			// under it stoops, its face at the glass, and long enough that its far end is out of the
-			// lamp's reach.
-			for (int x = -14; x <= -5; x++) {
-				for (int z = -1; z <= 7; z++) set(level, o.offset(x, 5, z), Blocks.SPRUCE_PLANKS.defaultBlockState());
-			}
-			for (int z : new int[]{-1, 7}) {
-				for (int y = 0; y <= 4; y++) set(level, o.offset(-14, y, z), Blocks.SPRUCE_LOG.defaultBlockState());
-			}
-			// A barrel for a table with the lamp on it, a bench, shelves, cobwebs in the corners.
-			set(level, o.offset(-2, 0, 5), Blocks.BARREL.defaultBlockState());
-			set(level, o.offset(-2, 1, 5), Blocks.LANTERN.defaultBlockState());
-			set(level, o.offset(-3, 0, 5), Blocks.CRAFTING_TABLE.defaultBlockState());
-			set(level, o.offset(-3, 0, 6), Blocks.SPRUCE_STAIRS.defaultBlockState());
-			set(level, o.offset(3, 0, 6), Blocks.BOOKSHELF.defaultBlockState());
-			set(level, o.offset(3, 1, 6), Blocks.BOOKSHELF.defaultBlockState());
-			set(level, o.offset(3, 0, 0), Blocks.CHEST.defaultBlockState());
-			set(level, o.offset(-3, 3, 6), Blocks.COBWEB.defaultBlockState());
-			set(level, o.offset(3, 3, 0), Blocks.COBWEB.defaultBlockState());
-		}
-
-		/** A door, open or shut: the way out of here, each end. */
-		void door(TestServerContext server, BlockPos at, boolean open) {
-			server.runOnServer(s -> {
-				ServerLevel level = s.overworld();
-				BlockState door = Blocks.SPRUCE_DOOR.defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.SOUTH)
-						.setValue(BlockStateProperties.OPEN, open);
-				set(level, at, door.setValue(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.LOWER));
-				set(level, at.above(), door.setValue(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.UPPER));
-			});
-		}
-	}
 
 	/**
 	 * A dark wood, built for a clip: level ground, the trunks close together and a roof of leaves
@@ -950,6 +760,22 @@ final class Reel {
 			return true;
 		}
 
+		/** A point on the way {@code by} blocks on from here, {@code side} to the right of it, {@code up} above the eye. */
+		Vec3 onWay(double by, double side, double up) {
+			double s = way.along(x, z) + by;
+			double[] p = way.point(s), q = way.point(s + 0.5);
+			double dx = q[0] - p[0], dz = q[1] - p[1], l = Math.max(1.0e-6, Math.hypot(dx, dz));
+			return new Vec3(p[0] - dz / l * side, eyeY + up, p[1] + dx / l * side);
+		}
+
+		/** Which way the way runs here, level. */
+		Vec3 wayDir() {
+			double s = way.along(x, z);
+			double[] p = way.point(s), q = way.point(s + 1.0);
+			Vec3 d = new Vec3(q[0] - p[0], 0, q[1] - p[1]);
+			return d.lengthSqr() < 1.0e-9 ? new Vec3(0, 0, 1) : d.normalize();
+		}
+
 		/** Which way the way goes from here, {@code by} blocks on. */
 		private double ahead(double by) {
 			double[] p = way.point(way.along(x, z) + by);
@@ -1011,6 +837,28 @@ final class Reel {
 				tremble += (shake - tremble) * 0.08;
 				lift += (-0.05 - lift) * 0.08;
 				roll *= 0.9;
+				push();
+			}
+		}
+
+		/**
+		 * A look back over one shoulder without stopping: walking on at {@code pace}, round to
+		 * {@code at}, held a moment, and back to the way ahead.
+		 */
+		void glanceBack(int turn, int hold, int back, Vec3 at, double pace) {
+			double side = Math.signum(Mth.wrapDegrees(yawTo(at) - ahead(4.0)));
+			if (side == 0) side = 1;
+			for (int i = 0; i < turn + hold + back; i++) {
+				steer(6);
+				step(pace, 0.03);
+				double u = i < turn ? smooth((i + 1.0) / turn) : i < turn + hold ? 1.0 : 1.0 - smooth((i - turn - hold + 1.0) / back);
+				double forward = ahead(4.0), there = yawTo(at);
+				double round = Mth.wrapDegrees(there - forward);
+				if (round * side < 0) round += 360.0 * side;
+				yaw = forward + round * u;
+				pitch = 6.0 * (1 - u) + pitchTo(at) * u;
+				roll += (side * 5 * u - roll) * 0.3;
+				tremble += ((i >= turn && i < turn + hold ? 0.9 : 0.3) - tremble) * 0.3;
 				push();
 			}
 		}
