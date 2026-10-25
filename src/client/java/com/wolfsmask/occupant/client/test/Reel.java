@@ -53,8 +53,11 @@ final class Reel {
 	private static final Path GAME = FabricLoader.getInstance().getGameDir();
 	private static final Path DIR = GAME.resolve("occupant-reel");
 	private static final String ALL = "@e[type=occupant:occupant]";
-	/** What its leg goes through: nothing anyone can see, where the one on the ground is. */
-	private static final String BODY = "@e[type=armor_stand,tag=occupant_reel]";
+	/**
+	 * What its leg goes through: nothing anyone can see, not even a spectator (an invisible armor
+	 * stand still shows to one, as a ghost).
+	 */
+	private static final String BODY = "@e[type=interaction,tag=occupant_reel]";
 	/** Held as it is put, standing at its full height, looking at you. */
 	private static final Cinematic.Look STANDING = new Cinematic.Look(false, 0.01f, OccupantEntity.Mode.STARE, 0);
 	/** A sprint, in blocks a tick. */
@@ -202,13 +205,13 @@ final class Reel {
 		f.stare(24, itsFace, 1.9);
 		f.backAway(6, itsFace, 0.07);
 		// It knocks them down, backwards, flat on their back, their feet toward it; the camera out of
-		// their hand, over them, onto the path a few steps behind their head, still recording, looking
-		// back along them at it.
+		// their hand, over them, into the dirt off to one side beyond their head, still recording,
+		// looking back at them from over their shoulder, and past them at it.
 		int hit = f.size();
 		Vec3 person0 = here.add(fwd.scale(1.3));
-		Vec3 lens = here.add(fwd.scale(6.2)).add(right.scale(0.9));
-		Vec3 aim = here.add(fwd.scale(2.2)).subtract(right.scale(0.1)).add(0, 1.5, 0);
-		f.thrown(8, lens, aim, 0.16, -14.0);
+		Vec3 lens = here.add(fwd.scale(6.5)).add(right.scale(2.5));
+		Vec3 aim = here.add(fwd.scale(2.97)).add(right.scale(0.42)).add(0, 1.32, 0);
+		f.thrown(8, lens, aim, 0.25, -14.0);
 		int land = f.size();
 		// On their back: shoving themselves away from it, a hand up at it; it comes after them; it
 		// bends down to them; its leg comes down; the tape stops.
@@ -250,22 +253,27 @@ final class Reel {
 		// They lie on their back, the head away from it: a body asleep lies with its head a quarter turn round from where it faces.
 		float lying = (float) (Fear.yawBetween(Vec3.ZERO, fwd) + 90.0);
 		prepare(context, game, start, f.onWay(5.0, 0, -0.4), 13050);
-		// No leaves low over the path where it stands up to its height.
+		// A small glade where it happens: nothing low over the path up to its height, and nothing
+		// between where the camera will land and them; the trunks there gone, the canopy kept.
 		server.runOnServer(s -> {
 			ServerLevel level = s.overworld();
-			for (double a = -4.0; a <= 8.0; a += 0.5) {
-				for (double b = -2.0; b <= 2.0; b += 0.5) {
-					for (int y = 2; y <= 7; y++) {
-						Vec3 q = here.add(fwd.scale(a)).add(right.scale(b));
+			for (double a = -4.0; a <= 8.5; a += 0.5) {
+				for (double b = -2.5; b <= 4.5; b += 0.5) {
+					Vec3 q = here.add(fwd.scale(a)).add(right.scale(b));
+					for (int y = 0; y <= 18; y++) {
 						BlockPos p = BlockPos.containing(q.x, o.getY() + y, q.z);
-						if (level.getBlockState(p).getBlock() instanceof LeavesBlock) set(level, p, Blocks.AIR.defaultBlockState());
+						BlockState was = level.getBlockState(p);
+						if (was.isAir()) continue;
+						if (y <= 7 || was.is(net.minecraft.tags.BlockTags.LOGS)) set(level, p, Blocks.AIR.defaultBlockState());
 					}
 				}
 			}
 		});
 		Vec3 hidden = person0.add(0, -8, 0);
+		// Turned the way it will lie from the start: a body that has never turned is never caught
+		// part way round.
 		server.runCommand(String.format(Locale.ROOT, "summon mannequin %.3f %.3f %.3f {pose:\"sleeping\",immovable:1b,NoGravity:1b,"
-				+ "Invulnerable:1b,Silent:1b,hide_description:1b,Tags:[\"occupant_self\"]}", hidden.x, hidden.y, hidden.z));
+				+ "Invulnerable:1b,Silent:1b,hide_description:1b,Rotation:[%.1ff,0.0f],Tags:[\"occupant_self\"]}", hidden.x, hidden.y, hidden.z, lying));
 		context.waitTicks(25);
 		int[] puppet = {-1};
 		try {
@@ -302,6 +310,15 @@ final class Reel {
 				} else if (t > hit + 2) {
 					Vec3 p = person.apply(t);
 					server.runCommand(String.format(Locale.ROOT, "tp %s %.3f %.3f %.3f %.1f 0", SELF, p.x, p.y, p.z, lying));
+					if (puppet[0] >= 0) {
+						context.runOnClient(mc -> {
+							if (mc.level != null && mc.level.getEntity(puppet[0]) instanceof net.minecraft.world.entity.LivingEntity le) {
+								le.setYRot(lying);
+								le.setYHeadRot(lying);
+								le.setYBodyRot(lying);
+							}
+						});
+					}
 				}
 				if (t == hit + 3) {
 					Vec3 p = person.apply(t);
@@ -320,7 +337,7 @@ final class Reel {
 				double yr = Math.toRadians(held[3]);
 				Vec3 legAt = new Vec3(held[0], held[1], held[2]).add(-Math.sin(yr) * 0.45, -0.15, Math.cos(yr) * 0.45);
 				if (t == hit - 6) {
-					server.runCommand(String.format(Locale.ROOT, "summon armor_stand %.3f %.3f %.3f {Marker:1b,Invisible:1b,NoGravity:1b,Tags:[\"occupant_reel\"]}",
+					server.runCommand(String.format(Locale.ROOT, "summon interaction %.3f %.3f %.3f {width:0.01f,height:0.01f,Tags:[\"occupant_reel\"]}",
 							legAt.x, legAt.y, legAt.z));
 				} else if (atLens) {
 					server.runCommand(String.format(Locale.ROOT, "tp %s %.3f %.3f %.3f", BODY, legAt.x, legAt.y, legAt.z));
@@ -329,7 +346,7 @@ final class Reel {
 				}
 				Vec3 into0 = chest.apply(t);
 				if (t == stab - 6) {
-					server.runCommand(String.format(Locale.ROOT, "summon armor_stand %.3f %.3f %.3f {Marker:1b,Invisible:1b,NoGravity:1b,Tags:[\"occupant_reel\"]}",
+					server.runCommand(String.format(Locale.ROOT, "summon interaction %.3f %.3f %.3f {width:0.01f,height:0.01f,Tags:[\"occupant_reel\"]}",
 							into0.x, into0.y, into0.z));
 				} else if (atChest) {
 					server.runCommand(String.format(Locale.ROOT, "tp %s %.3f %.3f %.3f", BODY, into0.x, into0.y, into0.z));
@@ -342,9 +359,9 @@ final class Reel {
 					if (its.isEmpty()) return;
 					List<Entity> into = new ArrayList<>();
 					if (atLens) {
-						into.addAll(level.getEntities((Entity) null, AABB.ofSize(legAt, 4, 4, 4), e -> Kinds.is(e, "armor_stand")));
+						into.addAll(level.getEntities((Entity) null, AABB.ofSize(legAt, 4, 4, 4), e -> Kinds.is(e, "interaction")));
 					} else if (legs > 0) {
-						List<Entity> marks = level.getEntities((Entity) null, AABB.ofSize(into0, 4, 4, 4), e -> Kinds.is(e, "armor_stand"));
+						List<Entity> marks = level.getEntities((Entity) null, AABB.ofSize(into0, 4, 4, 4), e -> Kinds.is(e, "interaction"));
 						for (int i = 0; i < legs && !marks.isEmpty(); i++) into.add(marks.get(0));
 					}
 					its.get(0).setHeld(into);
