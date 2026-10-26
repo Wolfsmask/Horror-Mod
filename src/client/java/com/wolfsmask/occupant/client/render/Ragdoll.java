@@ -96,11 +96,6 @@ public final class Ragdoll {
 	 * wherever the game poses its models, which need not be the thread that noted it).
 	 */
 	private static final Map<Object, float[]> STATES = java.util.Collections.synchronizedMap(new WeakHashMap<>());
-	/**
-	 * Bodies posed by hand, for a scene, by entity id: each frame, the pose the scene says it is in,
-	 * laid over whatever the game would have done (and over hanging loose, if it is held).
-	 */
-	private static final Map<Integer, java.util.function.Supplier<float[]>> PUPPETS = new java.util.concurrent.ConcurrentHashMap<>();
 
 	private Ragdoll() {
 	}
@@ -125,31 +120,15 @@ public final class Ragdoll {
 		}
 	}
 
-	/**
-	 * For a scene: from now on, {@code id} is posed by {@code pose} (head, arms and legs, as
-	 * {@link #apply} lays them out); null to let it go again.
-	 */
-	public static void puppet(int id, @Nullable java.util.function.Supplier<float[]> pose) {
-		if (pose == null) PUPPETS.remove(id);
-		else PUPPETS.put(id, pose);
-	}
-
 	/** Its pose this frame if something has it on a leg, or null. */
 	@Nullable
 	public static float[] forEntity(LivingEntity e, float ageInTicks) {
-		java.util.function.Supplier<float[]> puppet = PUPPETS.get(e.getId());
-		if (puppet != null) return puppet.get();
 		Body b = HELD.get(e.getId());
 		return b == null ? null : b.pose(Mth.clamp(ageInTicks - e.tickCount, 0.0f, 1.0f));
 	}
 
 	/** For the newer games: noted when the game copies what it needs from the entity to draw it. */
 	public static void mark(LivingEntity e, Object state, float partial) {
-		java.util.function.Supplier<float[]> puppet = PUPPETS.get(e.getId());
-		if (puppet != null) {
-			STATES.put(state, puppet.get());
-			return;
-		}
 		Body b = HELD.get(e.getId());
 		if (b == null) STATES.remove(state);
 		else STATES.put(state, b.pose(partial));

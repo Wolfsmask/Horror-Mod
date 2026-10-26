@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.IntConsumer;
 import java.util.function.IntFunction;
-import java.util.function.IntToDoubleFunction;
 
 /**
  * Footage, not photographs: a tape, recorded a frame every tick, upright, the shape of a phone
@@ -62,8 +61,6 @@ final class Reel {
 	private static final Cinematic.Look STANDING = new Cinematic.Look(false, 0.01f, OccupantEntity.Mode.STARE, 0);
 	/** A sprint, in blocks a tick. */
 	private static final double SPRINT = 0.27;
-	/** Their body, on the ground under the camera once it has them. */
-	private static final String SELF = "@e[type=mannequin,tag=occupant_self]";
 	/** How far the fog lets you see in the wood. */
 	private static final float FOG = 38.0f;
 
@@ -197,21 +194,24 @@ final class Reel {
 		Vec3 right = new Vec3(-fwd.z, 0, fwd.x);
 		Vec3 feet = here.subtract(fwd.scale(2.6));
 		Vec3 itsFace = feet.add(0, 4.3, 0);
-		f.turnTo(28, itsFace);
-		int seen = f.size() - 6;
+		f.turnTo(26, itsFace);
+		int seen = f.size() - 5;
 		f.markAt(seen, "seen");
-		f.flinchAt(seen, itsFace, 0.7);
-		// It only looks at them. They cannot move.
-		f.stare(24, itsFace, 1.9);
-		f.backAway(6, itsFace, 0.07);
+		// It is right there. Their whole body jerks back from it, half a step, the knees going;
+		// and then they cannot move at all. The camera sinks off its face as the arm holding it goes
+		// slack, the hand shaking harder and harder; it moves, and they flinch again.
+		f.flinchAt(seen, itsFace, 1.6);
+		f.stagger(6, itsFace, 0.3);
+		f.freeze(20, itsFace, 2.6, 10.0);
+		f.flinchAt(f.size() - 7, itsFace, 0.6);
+		f.backAway(5, itsFace, 0.05);
 		// It knocks them down, backwards, flat on their back, their feet toward it; the camera out of
-		// their hand, over them, into the dirt off to one side beyond their head, still recording,
-		// looking back at them from over their shoulder, and past them at it.
+		// their hand, over them, onto an old stump off to one side beyond their head, still
+		// recording, looking back at them and past them at it.
 		int hit = f.size();
-		Vec3 person0 = here.add(fwd.scale(1.3));
-		Vec3 lens = here.add(fwd.scale(6.5)).add(right.scale(2.5));
-		Vec3 aim = here.add(fwd.scale(2.97)).add(right.scale(0.42)).add(0, 1.32, 0);
-		f.thrown(8, lens, aim, 0.25, -14.0);
+		Vec3 lens = here.add(fwd.scale(6.6)).add(right.scale(2.5));
+		Vec3 aim = here.add(fwd.scale(1.3)).subtract(right.scale(0.2)).add(0, 1.55, 0);
+		f.thrown(8, lens, aim, 1.12, -14.0);
 		int land = f.size();
 		// On their back: shoving themselves away from it, a hand up at it; it comes after them; it
 		// bends down to them; its leg comes down; the tape stops.
@@ -231,15 +231,10 @@ final class Reel {
 			int t = Integer.parseInt(parts[0]);
 			if (parts[1].equals("step") && t >= behindFrom && t < stopped) f.markAt(t + 7, "echo");
 		}
-		IntToDoubleFunction scooted = t -> {
-			double d = 0;
-			for (int push : pushes) d += 0.16 * smooth((t - push - 2) / 5.0);
-			return d;
-		};
-		// Where they lie (their feet: a body lying down is drawn from its feet to its head), where their
-		// chest is, and where it is, each tick.
-		IntFunction<Vec3> person = t -> person0.add(fwd.scale(scooted.applyAsDouble(t)));
-		IntFunction<Vec3> chest = t -> person.apply(t).add(fwd.scale(1.15)).add(0, 0.3, 0);
+		// Them, on the ground, jointed as a body is; and where it is, each tick.
+		int[] shoves = new int[pushes.length];
+		for (int k = 0; k < pushes.length; k++) shoves[k] = pushes[k] - hit;
+		Person them = new Person(here, fwd, shoves, stab - hit, 0.16);
 		IntFunction<Vec3> it = t -> {
 			if (t < hit) return feet;
 			if (t < hit + 5) return feet.add(fwd.scale(0.6 * smooth((t - hit) / 5.0)));
@@ -250,8 +245,6 @@ final class Reel {
 		f.watching(t -> t >= glance && t < glance + 30 ? Vec3.atBottomCenterOf(farSpot).add(0, 2.4, 0)
 				: t >= breath - 8 ? it.apply(t).add(0, 2.4, 0) : null);
 		double[][] poses = f.flat(o.getY());
-		// They lie on their back, the head away from it: a body asleep lies with its head a quarter turn round from where it faces.
-		float lying = (float) (Fear.yawBetween(Vec3.ZERO, fwd) + 90.0);
 		prepare(context, game, start, f.onWay(5.0, 0, -0.4), 13050);
 		// A small glade where it happens: nothing low over the path up to its height, and nothing
 		// between where the camera will land and them; the trunks there gone, the canopy kept.
@@ -268,14 +261,19 @@ final class Reel {
 					}
 				}
 			}
+			// The stump the camera comes to rest on.
+			set(level, BlockPos.containing(lens.x, o.getY(), lens.z), Blocks.SPRUCE_LOG.defaultBlockState());
 		});
-		Vec3 hidden = person0.add(0, -8, 0);
-		// Turned the way it will lie from the start: a body that has never turned is never caught
-		// part way round.
-		server.runCommand(String.format(Locale.ROOT, "summon mannequin %.3f %.3f %.3f {pose:\"sleeping\",immovable:1b,NoGravity:1b,"
-				+ "Invulnerable:1b,Silent:1b,hide_description:1b,Rotation:[%.1ff,0.0f],Tags:[\"occupant_self\"]}", hidden.x, hidden.y, hidden.z, lying));
+		// Their body: one block display for each part, all from the one point, posed by where each
+		// part's cube is put; nothing to see until they are down.
+		Vec3 anchor = new Vec3(here.x, o.getY(), here.z);
+		for (String[] part : Person.PARTS) {
+			server.runCommand(String.format(Locale.ROOT, "summon block_display %.3f %.3f %.3f {block_state:{Name:\"%s\"},"
+							+ "transformation:[0.001f,0f,0f,0f,0f,0.001f,0f,0f,0f,0f,0.001f,0f,0f,0f,0f,1f],interpolation_duration:0,"
+							+ "Tags:[\"occupant_body\",\"occupant_body_%s\"]}",
+					anchor.x, anchor.y, anchor.z, part[1], part[0]));
+		}
 		context.waitTicks(25);
-		int[] puppet = {-1};
 		try {
 			record(context, server, "found", poses, f, t -> {
 				now = t;
@@ -286,8 +284,7 @@ final class Reel {
 					Vec3 at = it.apply(t);
 					Vec3 eye = new Vec3(poses[t][0], poses[t][1], poses[t][2]);
 					// Standing over them to look at them before it strikes; down at them once they are down.
-					Vec3 them = chest.apply(t);
-					Vec3 watch = t < hit ? eye : them;
+					Vec3 watch = t < hit ? eye : them.chest();
 					OccupantEntity.Mode mode = t < hit ? OccupantEntity.Mode.STARE : OccupantEntity.Mode.AMBUSH;
 					look(server, at, watch, 0);
 					server.runOnServer(s -> {
@@ -296,39 +293,15 @@ final class Reel {
 						}
 					});
 				}
-				if (t == hit + 2) {
-					Vec3 p = person.apply(t);
-					server.runCommand(String.format(Locale.ROOT, "tp %s %.3f %.3f %.3f %.1f 0", SELF, p.x, p.y, p.z, lying));
-					server.runOnServer(s -> {
-						for (Entity e : s.overworld().getEntities((Entity) null, AABB.ofSize(p, 6, 6, 6), x -> Kinds.is(x, "mannequin"))) {
-							if (e instanceof net.minecraft.world.entity.LivingEntity le) {
-								le.setYBodyRot(lying);
-								le.setYHeadRot(lying);
-							}
-						}
-					});
-				} else if (t > hit + 2) {
-					Vec3 p = person.apply(t);
-					server.runCommand(String.format(Locale.ROOT, "tp %s %.3f %.3f %.3f %.1f 0", SELF, p.x, p.y, p.z, lying));
-					if (puppet[0] >= 0) {
-						context.runOnClient(mc -> {
-							if (mc.level != null && mc.level.getEntity(puppet[0]) instanceof net.minecraft.world.entity.LivingEntity le) {
-								le.setYRot(lying);
-								le.setYHeadRot(lying);
-								le.setYBodyRot(lying);
-							}
-						});
+				if (t >= hit + 2) {
+					// Their body this tick, looking up at its face, bent over them as it is.
+					Vec3 face = it.apply(t).add(0, 4.6, 0).add(fwd.scale(0.9));
+					for (Person.Part part : them.pose(t - hit, face, anchor)) {
+						StringBuilder m = new StringBuilder();
+						for (int k = 0; k < 16; k++) m.append(k == 0 ? "" : ",").append(String.format(Locale.ROOT, "%.4ff", part.m()[k]));
+						server.runCommand("data merge entity @e[type=block_display,tag=occupant_body_" + part.name() + ",limit=1] {transformation:["
+								+ m + "],interpolation_duration:0}");
 					}
-				}
-				if (t == hit + 3) {
-					Vec3 p = person.apply(t);
-					context.runOnClient(mc -> {
-						if (mc.level == null) return;
-						for (Entity e : mc.level.getEntities((Entity) null, AABB.ofSize(p, 6, 6, 6), x -> Kinds.is(x, "mannequin"))) {
-							puppet[0] = e.getId();
-							com.wolfsmask.occupant.client.render.Ragdoll.puppet(e.getId(), () -> onTheirBack(now - hit, pushes, hit, stab));
-						}
-					});
 				}
 				// Its leg at the lens as it knocks them down; its legs into their chest at the end.
 				boolean atLens = t >= hit - 6 && t <= hit;
@@ -344,7 +317,7 @@ final class Reel {
 				} else if (t == hit + 1) {
 					server.runCommand("kill " + BODY);
 				}
-				Vec3 into0 = chest.apply(t);
+				Vec3 into0 = them.chest();
 				if (t == stab - 6) {
 					server.runCommand(String.format(Locale.ROOT, "summon interaction %.3f %.3f %.3f {width:0.01f,height:0.01f,Tags:[\"occupant_reel\"]}",
 							into0.x, into0.y, into0.z));
@@ -368,68 +341,10 @@ final class Reel {
 				});
 			});
 		} finally {
-			if (puppet[0] >= 0) com.wolfsmask.occupant.client.render.Ragdoll.puppet(puppet[0], null);
 			server.runCommand("kill " + BODY);
-			server.runCommand("kill " + SELF);
+			server.runCommand("kill @e[type=block_display,tag=occupant_body]");
 		}
 	}
-
-	/**
-	 * Them on their back, {@code tau} ticks after it knocked them down (head, arms and legs, as
-	 * Ragdoll lays them out; on their back, forward is up): flat a moment; then the head up to look
-	 * at it, one hand held up at it, shaking, the other arm and the legs shoving them away from it,
-	 * a push at a time; at the end both arms up over their face and the knees pulled up.
-	 */
-	private static float[] onTheirBack(int tau, int[] pushes, int hit, int stab) {
-		float t = Math.max(0, tau);
-		float shake = (float) (Math.sin(t * 1.9) * 0.6 + Math.sin(t * 3.1 + 1.0) * 0.4);
-		float[] p = new float[10];
-		if (tau < 14) {
-			// Down: flat, winded, the head back, the arms out where they fell.
-			float u = (float) smooth(tau / 14.0);
-			p[0] = 0.6f * u;
-			p[2] = 0.15f;
-			p[3] = 0.5f - 0.3f * u;
-			p[4] = 0.2f;
-			p[5] = -0.45f + 0.2f * u;
-			p[6] = -0.1f;
-			p[8] = 0.05f;
-			return p;
-		}
-		if (hit + tau >= stab - 2) {
-			// It is coming down on them: both arms up over the face, the knees up, the head turned away.
-			p[0] = 0.4f;
-			p[1] = 0.35f;
-			p[2] = -1.75f + 0.08f * shake;
-			p[3] = -0.25f;
-			p[4] = -1.7f + 0.08f * shake;
-			p[5] = 0.25f;
-			p[6] = -0.9f;
-			p[8] = -0.75f;
-			return p;
-		}
-		// Looking at it, over their own chest, never away.
-		p[0] = 0.72f + 0.04f * shake;
-		p[1] = 0.05f * shake;
-		// One hand up at it, shaking; more when they cry out at it.
-		boolean crying = (tau >= 26 && tau < 40) || (tau >= 56 && tau < 72) || (tau >= 100);
-		p[2] = -1.0f + 0.07f * shake + (crying ? 0.22f * (float) Math.sin(t * 0.9) : 0.0f);
-		p[3] = 0.12f;
-		// The other arm and the legs: a shove at a time, away from it.
-		int k = -1;
-		for (int i = 0; i < pushes.length; i++) if (hit + tau >= pushes[i]) k = i;
-		float u = k < 0 ? 1.0f : Math.min(1.0f, (hit + tau - pushes[k]) / 10.0f);
-		float shove = (float) Math.sin(Math.PI * u);
-		p[4] = 0.25f + 0.35f * shove;
-		p[5] = -0.4f;
-		boolean right = k % 2 == 0;
-		p[6] = -0.15f - (right ? 0.65f * shove : 0.15f * shove);
-		p[7] = 0.06f;
-		p[8] = -0.15f - (right ? 0.15f * shove : 0.65f * shove);
-		p[9] = -0.06f;
-		return p;
-	}
-
 
 	/**
 	 * Puts it at {@code at} this tick, turned to the camera at {@code eye}, its face (about
@@ -999,6 +914,42 @@ final class Reel {
 				pitch = (5.0 + speed * 10) * (1 - u) + pitchTo(at) * u;
 				roll += (side * 7 * u - roll) * 0.3;
 				tremble += ((i >= turn && i < turn + hold ? 1.3 : 0.4) - tremble) * 0.3;
+				push();
+			}
+		}
+
+		/**
+		 * Startled back from {@code from}: a half step back, quick, as far as {@code dist}, their
+		 * knees going under them and the camera snatched up at it.
+		 */
+		void stagger(int n, Vec3 from, double dist) {
+			double per = dist / n * 2.0;
+			for (int i = 0; i < n; i++) {
+				heading = yawTo(from) + 180.0;
+				double u = (i + 0.5) / n;
+				step(per * (1.0 - u) * 1.6, 0.25);
+				yaw = toward(yaw, yawTo(from), 0.5);
+				pitch += (pitchTo(from) - 4.0 - pitch) * 0.5;
+				lift += (-0.14 - lift) * 0.35;
+				tremble += (2.2 - tremble) * 0.5;
+				push();
+			}
+		}
+
+		/**
+		 * Unable to move: still looking at {@code at}, but the arm holding the camera going slack, so
+		 * the picture sinks slowly off it by {@code sag} degrees and tips, while the hand shakes,
+		 * harder and harder, up to {@code shake}.
+		 */
+		void freeze(int n, Vec3 at, double shake, double sag) {
+			for (int i = 0; i < n; i++) {
+				step(0, 0.06);
+				double u = smooth((i + 1.0) / n);
+				yaw = toward(yaw, yawTo(at), 0.08);
+				pitch += (pitchTo(at) + sag * u - pitch) * 0.12;
+				tremble += (shake - tremble) * 0.15;
+				lift += (-0.1 - lift) * 0.1;
+				roll += (-4.0 * u - roll) * 0.1;
 				push();
 			}
 		}
