@@ -125,8 +125,22 @@ final class OccupantPose {
 			default -> stand(state.tilt, Float.isNaN(state.facePitch) ? lookX : state.facePitch, lookY, state.act);
 		}
 		breathe(state);
+		steady(state);
 		legs(state, t);
 		stare(state);
+	}
+
+	/**
+	 * Walking upright, its body goes from side to side and dips at every step, and its head does
+	 * not: the neck takes it all back, so the face stays level and still on top of a body that
+	 * moves, which no person's does. A step that comes down wrong jolts it once.
+	 */
+	private void steady(OccupantRenderState state) {
+		if (!state.upright) return;
+		neck.zRot -= spine.zRot * 0.9f;
+		neck.xRot -= state.leanForward * LEAN_FORWARD * 0.7f;
+		skull.zRot += 0.1f * state.jolt;
+		skull.xRot += 0.05f * state.jolt;
 	}
 
 	/**

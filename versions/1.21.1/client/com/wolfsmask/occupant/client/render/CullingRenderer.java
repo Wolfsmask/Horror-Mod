@@ -13,7 +13,7 @@ import net.minecraft.world.phys.AABB;
  */
 abstract class CullingRenderer extends HumanoidMobRenderer<OccupantEntity, OccupantModel> {
 	/** How tall it can be drawn, in blocks, above its feet. */
-	static final float DRAWN_REACH = 7.1f;
+	static final float DRAWN_REACH = 8.1f;
 
 	CullingRenderer(EntityRendererProvider.Context ctx, OccupantModel model, float shadow) {
 		super(ctx, model, shadow);

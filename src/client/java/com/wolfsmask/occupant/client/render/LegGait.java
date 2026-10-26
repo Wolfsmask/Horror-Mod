@@ -16,13 +16,18 @@ import java.util.WeakHashMap;
 /**
  * Where its legs are, and how its body gets from one place to the next.
  * <p>
- * Standing, each of its legs reaches out to the nearest thing it can push against: a wall, a tree,
- * a ceiling, or the ground, and stays planted there, and now and then one lets go and slowly takes
- * a new grip. Moving, it goes in a wave: its legs in two sets, every other one round the body,
- * one set reaching ahead to where the body is going while the other holds, then the other, each
- * leg put down in front of it so the body is carried over its legs, never dragged after them. The
- * body follows where it really is closely and smoothly, leaning into the way it goes; it never
- * falls behind and is never jerked after itself.
+ * In the open it stands up and walks like a person, nearly: on the two legs that leave its body
+ * lowest, one step at a time, its weight going over onto each foot as it comes down and the body
+ * rising over it and settling, one side always a little quicker than the other, and now and then a
+ * step coming down wrong so the knee gives. Its other eight legs hang off it like arms and are
+ * carried along: they swing as it goes, lag behind it when it starts and swing on when it stops,
+ * and now and then one of them jerks by itself. Its head stays level through all of it.
+ * <p>
+ * Folded down into somewhere tight, it goes on all of them instead: each leg reaches out to the
+ * nearest thing it can push against, a wall, a tree, a ceiling or the ground, and holds there, and
+ * moving it goes in a wave, every other leg round the body stepping while the rest hold. The body
+ * follows where it really is closely and smoothly, leaning into the way it goes; it never falls
+ * behind and is never jerked after itself.
  * <p>
  * Nothing it does jumps: every leg's point and every knee is eased to where it is going. And
  * nothing it does by itself is ever seen: while it is being looked at, it is perfectly still.
@@ -146,6 +151,33 @@ public final class LegGait {
 	/** Where each holding leg's point is this frame, or null. */
 	private final Vec3[] holdAt = new Vec3[LEGS];
 
+	/** The two legs it walks on upright: the two that leave the body lowest, its left and its right. */
+	private static final int[] WALKERS = {0, 5};
+	/** How far each foot stands out from under the middle of it, upright, in blocks at full size. */
+	private static final double STANCE = 0.3;
+	/** The legs it does not walk on, hanging: how stiff (per tick, squared) and how damped their swing is. */
+	private static final double ARM_SPRING = 0.045;
+	private static final double ARM_DAMP = 0.15;
+	/** Whether it is standing up and walking on two legs, rather than folded down on all of them. */
+	private boolean upright = true;
+	/** How far its hips are raised for standing up, in model pixels, eased. */
+	private float raise;
+	/** Which of the two walking legs steps next, and when it may. */
+	private int lead;
+	private float nextStep;
+	/** How far through its stride it is: a full turn every two steps, for the swing of what hangs off it. */
+	private double gaitPhase;
+	/** Steps taken, for the odd one that comes down wrong; until when the knee has given under it. */
+	private int stepsTaken;
+	private int lastHitch;
+	private float hitchUntil;
+	/** Standing, which way its weight is (-1 its left, 1 its right, 0 the middle), and until when. */
+	private int idleSide;
+	private float idleUntil;
+	/** Where the point of each hanging leg is, and how fast it is going, as it swings. */
+	private final Vec3[] armTip = new Vec3[LEGS];
+	private final Vec3[] armVel = new Vec3[LEGS];
+
 	/** Which way the body was last drawn facing, in radians. */
 	private double drawnYaw;
 	/**
@@ -257,10 +289,18 @@ public final class LegGait {
 		coil = fresh ? wantCoil : coil + (wantCoil - coil) * coilRate;
 		state.coil = Math.max(coil, coilDrop);
 		double px = scale / 16.0;                             // model pixels to blocks
+		// Upright in the open, its hips raised to stand on two legs; folded into somewhere tight, it
+		// comes down onto all of them (with a margin either way, so it does not keep changing its mind).
+		boolean wasUpright = upright;
+		upright = fitCrouch < (upright ? 0.3f : 0.18f) && entity.getCoil() < 0.25f;
+		float wantRaise = upright ? OccupantFit.raise(fitCrouch) : 0.0f;
+		raise = fresh ? wantRaise : raise + (wantRaise - raise) * (float) (1.0 - Math.exp(-0.15 * dt));
 		// Its weight on its legs takes the hips down with the rest of the fold.
 		float coilPx = (float) (coilDrop / Math.max(px, 1.0e-3));
-		dropPx = OccupantFit.CROUCH_DROP * fitCrouch + sag + coilPx;
-		state.sag = sag + coilPx;
+		dropPx = OccupantFit.CROUCH_DROP * fitCrouch + sag + coilPx - raise;
+		state.sag = sag + coilPx - raise;
+		state.upright = upright;
+		state.jolt = now < hitchUntil ? (hitchUntil - now) / 6.0f : 0.0f;
 
 		double yaw = Math.toRadians(state.bodyRot);
 		drawnYaw = yaw;
@@ -273,8 +313,16 @@ public final class LegGait {
 			body = real;
 			trail = real;
 			for (int i = 0; i < LEGS; i++) {
-				foot[i] = findHold(i, level, yaw, OccupantGeometry.LEG_LENGTH[i] * px, root(i, px, dropPx), Vec3.ZERO);
-				loose[i] = madeDo;
+				if (upright) {
+					// Standing on its two feet; the rest hanging.
+					foot[i] = walker(i) ? home(i, level, yaw, Vec3.ZERO) : null;
+					loose[i] = false;
+				} else {
+					foot[i] = findHold(i, level, yaw, OccupantGeometry.LEG_LENGTH[i] * px, root(i, px, dropPx), Vec3.ZERO);
+					loose[i] = madeDo;
+				}
+				armTip[i] = null;
+				armVel[i] = Vec3.ZERO;
 				swingStart[i] = -1.0f;
 				drawn[i] = null;
 				bendNow[i] = null;
@@ -284,6 +332,20 @@ public final class LegGait {
 			nextFidget = now + 60.0f + rand(3, (int) now) * 120.0f;
 			tilt = rand(21, (int) now) * 2.0f - 1.0f;
 			nextTilt = now + 80.0f + rand(23, (int) now) * 200.0f;
+		} else if (wasUpright != upright) {
+			// Standing up out of somewhere tight, it lets go of what it held and they hang; folding
+			// down into somewhere, they reach out for what is there.
+			for (int i = 0; i < LEGS; i++) {
+				if (holds[i] >= 0 || i == cocked || walker(i)) continue;
+				if (upright) {
+					armTip[i] = drawn[i];
+					armVel[i] = Vec3.ZERO;
+					foot[i] = null;
+					swingStart[i] = -1.0f;
+				} else if (foot[i] == null) {
+					replant(i, level, yaw, px, root(i, px, dropPx), 6.0f, Vec3.ZERO);
+				}
+			}
 		}
 
 		// Whether they are looking at it. Its own movements wind down to nothing while they do,
@@ -354,6 +416,7 @@ public final class LegGait {
 		}
 		double carry = Math.min(3.2, 1.3 + speed * 14.0) * px;
 		double wantShift = moving && bearing > 0 && Math.abs(support / bearing) > 0.03 ? Math.signum(support) * carry : 0.0;
+		if (upright) wantShift = uprightShift(rx, rz, moving, now, watched);
 		for (float left = dt; left > 1.0e-4f; left -= 1.0f) {
 			double h = Math.min(1.0, left);
 			shiftRate += (0.2 * (wantShift - shift) - 0.55 * shiftRate) * h;
@@ -382,7 +445,7 @@ public final class LegGait {
 		for (int i = 0; i < LEGS; i++) {
 			if (SET[i] == stepping && swingStart[i] >= 0.0f && now - swingStart[i] < swingTime[i]) setDown = false;
 		}
-		if (moving && now >= setUntil && setDown) {
+		if (!upright && moving && now >= setUntil && setDown) {
 			stepping ^= 1;
 			setUntil = now + stepTicks + 0.5f;
 			turn++;
@@ -395,7 +458,7 @@ public final class LegGait {
 		cock(entity, now, yaw);
 		boolean anyHeld = held(entity, level, now, yaw, px, dropPx);
 		int landed = 0;
-		for (int i = 0; i < LEGS; i++) {
+		for (int i = 0; i < LEGS && !upright; i++) {
 			score[i] = 0.0;
 			if (holdAt[i] != null || now < lingerUntil[i] || i == cocked) continue;
 			if (swingStart[i] >= 0.0f) {
@@ -432,7 +495,11 @@ public final class LegGait {
 			if (stuck[i]) score[i] = Math.max(score[i], moving ? 10.0 : 3.0);
 		}
 		boolean stepped = false;
-		if (moving) {
+		if (upright) {
+			landed = walk(level, now, dt, yaw, px, dropPx, speed, heading, moving);
+			swingArms(level, now, dt, yaw, px, dropPx, speed, heading, moving, watched, arrived);
+			stepped = true;
+		} else if (moving) {
 			// Every leg of the set that is stepping and wants to, and any leg that has to, worst first.
 			int maxSwinging = LEGS / 2 + 1;
 			for (int n = 0; n < LEGS && swinging < maxSwinging; n++) {
@@ -464,7 +531,7 @@ public final class LegGait {
 			replant(i, level, yaw, px, root(i, px, dropPx), 9.0f, Vec3.ZERO);
 			nextFidget = now + 90.0f + rand(9, (int) now) * 220.0f;
 		}
-		settle(landed, moving, speed, dt);
+		settle(landed, moving, speed, dt, now);
 
 		// Write each leg's point into the state, in model space.
 		double theta = Math.toRadians(180.0f - state.bodyRot);
@@ -475,7 +542,19 @@ public final class LegGait {
 		state.leanSide = leanSide;
 		for (int i = 0; i < LEGS; i++) {
 			Vec3 at = foot[i];
-			if (at != null && swingStart[i] >= 0.0f && from[i] != null) {
+			if (upright && walker(i) && at != null && swingStart[i] >= 0.0f && from[i] != null) {
+				// A step: the foot peels up off the ground, swings through under it with the knee coming
+				// forward, and comes down a little ahead of where it is going and settles, with weight.
+				float f = Mth.clamp((now - swingStart[i]) / swingTime[i], 0.0f, 1.0f);
+				float g = Math.min(1.0f, f / 0.86f);
+				float e = g * g * (3.0f - 2.0f * g);
+				double clear = Math.min(0.32 * fitScale, 0.07 * fitScale + from[i].distanceTo(at) * 0.14);
+				double up = f < 0.86f ? Math.pow(Math.sin(Math.PI * f / 0.86f), 0.75) : 0.0;
+				// Early in the step the foot is still pushing back off the ground before it lifts.
+				double push = f < 0.2f ? -0.06 * Math.sin(Math.PI * f / 0.2f) : 0.0;
+				at = new Vec3(Mth.lerp(e + push, from[i].x, at.x), Mth.lerp(e, from[i].y, at.y) + clear * up,
+						Mth.lerp(e + push, from[i].z, at.z));
+			} else if (at != null && swingStart[i] >= 0.0f && from[i] != null) {
 				// Picked up quickly, carried over, and put down: over where it lands before it is
 				// down, and then straight down onto it, faster and faster, so it lands with weight
 				// and does not drift on to its hold.
@@ -509,7 +588,7 @@ public final class LegGait {
 				}
 			}
 			if (i == cocked && !holding) at = cockedAt(i, yaw, reach, hip);
-			if (at == null) at = dangle(i, level, yaw, reach, hip, clock);
+			if (at == null) at = upright && armTip[i] != null ? armTip[i] : dangle(i, level, yaw, reach, hip, clock);
 			if (at == null) {
 				state.legPlanted[i] = false;
 				state.legBendSet[i] = false;
@@ -519,7 +598,7 @@ public final class LegGait {
 			// A foot that is down is locked where it is, exactly, until it steps; a step is already
 			// smooth along its arc. Anything else the leg's point does it gets to smoothly: a free leg
 			// feeling about, the floor under a hanging leg stepping down. Never a jump, never a slide.
-			if (drawn[i] == null || arrived || holding || foot[i] != null) {
+			if (drawn[i] == null || arrived || holding || foot[i] != null || upright) {
 				drawn[i] = at;
 			} else {
 				// A step is already eased along its arc: followed closely, so the foot comes down where it lands.
@@ -529,7 +608,7 @@ public final class LegGait {
 			at = drawn[i];
 			// Which way the knee goes: the first way that keeps the whole leg out of the blocks,
 			// eased round to it, so a knee never flips from one side to the other in a frame.
-			Vec3 want = bendOf(i, level, yaw, px, hip, at);
+			Vec3 want = upright ? naturalBend(i, level, yaw, px, hip, at) : bendOf(i, level, yaw, px, hip, at);
 			stuck[i] = !holding && !loose[i] && swingStart[i] < 0.0f && foot[i] != null && bendHits[i] > 0;
 			if (want == null) want = bendNow[i] != null ? bendNow[i] : outward(i, yaw).add(0.0, 0.3, 0.0);
 			if (bendNow[i] == null || arrived) {
@@ -630,7 +709,7 @@ public final class LegGait {
 				int leg = -1;
 				double best = Double.NEGATIVE_INFINITY;
 				for (int i = 0; i < LEGS; i++) {
-					if (holds[i] >= 0) continue;
+					if (holds[i] >= 0 || upright && walker(i)) continue;
 					Vec3 hip = root(i, px, dropPx);
 					Vec3 to = centre.subtract(hip);
 					Vec3 flat = new Vec3(to.x, 0.0, to.z);
@@ -907,17 +986,27 @@ public final class LegGait {
 	 * lower the more of its legs are off the ground and the faster it goes, and coming back up,
 	 * just past, and settling.
 	 */
-	private void settle(int landed, boolean moving, double speed, float dt) {
+	private void settle(int landed, boolean moving, double speed, float dt, float now) {
 		int up = 0;
 		for (int i = 0; i < LEGS; i++) if (swingStart[i] >= 0.0f) up++;
 		float rest = (moving ? 0.8f + (float) Math.min(1.2, speed * 6.0) : 0.0f) + 1.6f * up / LEGS;
-		sagRate += 0.55f * landed;
+		if (upright) {
+			// Over its foot: highest as it passes over the leg it stands on, lowest with both feet
+			// down; each foot coming down takes it down onto it, and a step that came down wrong more.
+			float f = -1.0f;
+			for (int w : WALKERS) if (swingStart[w] >= 0.0f) f = Mth.clamp((now - swingStart[w]) / swingTime[w], 0.0f, 1.0f);
+			float amp = moving ? Math.min(4.0f, 1.4f + (float) speed * 26.0f) : 0.0f;
+			rest = (f >= 0.0f ? amp * (1.0f - Mth.sin((float) Math.PI * f)) : amp) + (now < hitchUntil ? 4.5f : 0.0f);
+			sagRate += (0.3f + (float) Math.min(1.4, speed * 8.0)) * landed;
+		} else {
+			sagRate += 0.55f * landed;
+		}
 		for (float left = dt; left > 1.0e-4f; left -= 1.0f) {
 			float h = Math.min(1.0f, left);
 			sagRate += (0.25f * (rest - sag) - 0.7f * sagRate) * h;
 			sag += sagRate * h;
 		}
-		sag = Mth.clamp(sag, -1.5f, 4.0f);
+		sag = Mth.clamp(sag, -1.5f, upright ? 8.0f : 4.0f);
 	}
 
 	/**
@@ -931,7 +1020,7 @@ public final class LegGait {
 			double fx = -Math.sin(yaw), fz = Math.cos(yaw);
 			double best = Double.NEGATIVE_INFINITY;
 			for (int i = 0; i < LEGS; i++) {
-				if (holds[i] >= 0 || high(i)) continue;
+				if (holds[i] >= 0 || high(i) || upright && walker(i)) continue;
 				Vec3 d = outward(i, yaw);
 				double ahead = d.x * fx + d.z * fz;
 				if (ahead > best) {
@@ -954,6 +1043,220 @@ public final class LegGait {
 		Vec3 d = outward(i, yaw);
 		double fx = -Math.sin(yaw), fz = Math.cos(yaw);
 		return hip.add(d.x * reach * 0.25 - fx * reach * 0.2, reach * 0.42, d.z * reach * 0.25 - fz * reach * 0.2);
+	}
+
+	private static boolean walker(int i) {
+		return i == WALKERS[0] || i == WALKERS[1];
+	}
+
+	/**
+	 * Where walking leg i stands, upright: under its side of the body, {@code lead} on from there,
+	 * on whatever is underfoot.
+	 */
+	private Vec3 home(int i, Level level, double yaw, Vec3 lead) {
+		double fx = -Math.sin(yaw), fz = Math.cos(yaw);
+		double side = i == WALKERS[0] ? 1.0 : -1.0;          // its left, its right
+		double half = STANCE * fitScale;
+		double x = trail.x + fz * side * half + lead.x, z = trail.z - fx * side * half + lead.z;
+		Vec3 g = ground(level, x, z);
+		return g != null ? g : new Vec3(x, trail.y + 0.02, z);
+	}
+
+	private void stepTo(int i, Vec3 target, float duration) {
+		from[i] = drawn[i] != null ? drawn[i] : foot[i] != null ? foot[i] : target;
+		foot[i] = target;
+		loose[i] = false;
+		swingStart[i] = lastTime;
+		swingTime[i] = duration;
+	}
+
+	/** How far each step goes, upright, in blocks: further the faster it goes, never beyond its legs. */
+	private double stepLength(double speed, double px) {
+		return Mth.clamp(0.25 * fitScale + speed * 10.0, 0.2, 0.7 * OccupantGeometry.LEG_LENGTH[WALKERS[0]] * px);
+	}
+
+	/** How long from one foot coming down to the next, upright, in ticks. */
+	private float stepTicks(double speed, double px) {
+		return (float) Mth.clamp(stepLength(speed, px) / Math.max(speed, 1.0e-3), 7.0, 30.0);
+	}
+
+	/**
+	 * Upright, its two walking legs: one step at a time, like a person, the other foot always down.
+	 * Going along, each step goes out ahead to where the body will be by the time it lands, and a
+	 * half step on, so the body comes over the foot; one side always a little quicker than the
+	 * other, and now and then a step comes down wrong and the knee gives. Standing, a foot left out
+	 * of place is brought back under it. How many feet came down this frame.
+	 */
+	private int walk(Level level, float now, float dt, double yaw, double px, float dropPx, double speed, Vec3 heading, boolean moving) {
+		int landed = 0;
+		for (int w : WALKERS) {
+			if (swingStart[w] >= 0.0f && now - swingStart[w] >= swingTime[w]) {
+				swingStart[w] = -1.0f;
+				landed++;
+				stepsTaken++;
+				// Now and then, never twice close together, a step comes down wrong.
+				if (moving && stepsTaken - lastHitch > 4 && rand(stepsTaken * 7919, 83) < 0.12f) {
+					hitchUntil = now + 6.0f;
+					lastHitch = stepsTaken;
+				}
+			}
+		}
+		int i = WALKERS[lead], other = WALKERS[1 - lead];
+		boolean bothDown = swingStart[i] < 0.0f && swingStart[other] < 0.0f;
+		float stepTicks = stepTicks(speed, px);
+		if (moving) {
+			float swingFor = Mth.clamp(stepTicks * 0.55f, 4.0f, 14.0f);
+			if (bothDown && now >= nextStep) {
+				stepTo(i, home(i, level, yaw, heading.scale(speed * swingFor + stepLength(speed, px) * 0.5)), swingFor);
+				// A limp: one side always a little quicker than the other; and no two steps quite alike.
+				nextStep = now + stepTicks * (lead == 0 ? 0.9f : 1.1f) * (0.93f + 0.14f * rand(stepsTaken, 89));
+				lead ^= 1;
+			}
+			gaitPhase += Math.PI * dt / stepTicks;
+		} else {
+			nextStep = Math.min(nextStep, now + 3.0f);
+			if (bothDown) {
+				for (int w : WALKERS) {
+					Vec3 h = home(w, level, yaw, Vec3.ZERO);
+					if (foot[w] == null || Math.hypot(foot[w].x - h.x, foot[w].z - h.z) > 0.3 * fitScale) {
+						stepTo(w, h, 10.0f);
+						break;
+					}
+				}
+			}
+		}
+		// A foot about to be torn off the end of its leg goes now, whoever's turn it is.
+		for (int w : WALKERS) {
+			int o = w == WALKERS[0] ? WALKERS[1] : WALKERS[0];
+			if (swingStart[w] >= 0.0f || swingStart[o] >= 0.0f || foot[w] == null) continue;
+			if (foot[w].distanceTo(root(w, px, dropPx)) > OccupantGeometry.LEG_LENGTH[w] * px * 0.97) {
+				stepTo(w, home(w, level, yaw, heading.scale(speed * 6.0)), 6.0f);
+				break;
+			}
+		}
+		return landed;
+	}
+
+	/**
+	 * Upright, which way its weight goes, in blocks to its right: going along, over onto the foot it
+	 * stands on while the other swings; standing, now and then (only while nobody is looking) over
+	 * onto one leg and later back, as someone standing a long time does.
+	 */
+	private double uprightShift(double rx, double rz, boolean moving, float now, boolean watched) {
+		if (moving) {
+			for (int w : WALKERS) {
+				int o = w == WALKERS[0] ? WALKERS[1] : WALKERS[0];
+				if (swingStart[w] < 0.0f && swingStart[o] >= 0.0f && foot[w] != null) {
+					return ((foot[w].x - trail.x) * rx + (foot[w].z - trail.z) * rz) * 0.6;
+				}
+			}
+			return 0.0;
+		}
+		if (!watched && now >= idleUntil) {
+			idleSide = idleSide != 0 ? 0 : rand(7, (int) now) < 0.5f ? -1 : 1;
+			idleUntil = now + 100.0f + rand(9, (int) now) * 240.0f;
+		}
+		return idleSide * STANCE * fitScale * 0.45;
+	}
+
+	/**
+	 * Upright, the legs it is not walking on are carried like arms. The three that leave it up by
+	 * its shoulders hang down its sides, so long their points touch the ground and drag along it,
+	 * and swing with its stride, the two sides against each other, as a person's arms do. The rest,
+	 * from lower down its trunk, are folded up tight against its back, as an insect folds its legs,
+	 * and only stir. Each point is pulled towards where it would be on a spring, so it lags behind
+	 * when the body moves off, swings past when it stops, and settles. Now and then one jerks, by
+	 * itself, and swings back. Never into the ground and never further than it reaches.
+	 */
+	private void swingArms(Level level, float now, float dt, double yaw, double px, float dropPx, double speed, Vec3 heading,
+						   boolean moving, boolean watched, boolean arrived) {
+		double fx = -Math.sin(yaw), fz = Math.cos(yaw);
+		Vec3 ahead = new Vec3(fx, 0.0, fz);
+		for (int i = 0; i < LEGS; i++) {
+			if (walker(i)) continue;
+			if (holds[i] >= 0 || i == cocked) {
+				armTip[i] = drawn[i];
+				armVel[i] = Vec3.ZERO;
+				continue;
+			}
+			if (foot[i] != null) {
+				// Let go of what it held: from where it was, it hangs.
+				if (now < lingerUntil[i]) continue;
+				armTip[i] = foot[i];
+				armVel[i] = Vec3.ZERO;
+				foot[i] = null;
+			}
+			Vec3 hip = root(i, px, dropPx);
+			double reach = OccupantGeometry.LEG_LENGTH[i] * px;
+			Vec3 d = outward(i, yaw);
+			Vec3 rest;
+			if (high(i)) {
+				// Down its side to the ground, a little out from it, swinging against the step on its side.
+				double left = d.x * fz - d.z * fx;
+				double swing = moving ? Math.min(0.5, speed * 4.0) * reach * 0.18
+						* Math.sin(gaitPhase + (left > 0.0 ? 0.0 : Math.PI) + rand(i, 71) * 0.6) : 0.0;
+				Vec3 side = new Vec3(fz, 0.0, -fx).scale(left > 0.0 ? 1.0 : -1.0);
+				rest = new Vec3(hip.x, body.y + 0.05, hip.z).add(side.scale(reach * (0.16 + 0.06 * rand(i, 67))))
+						.add(ahead.scale(swing - Math.min(0.4, speed * 3.0) * reach * 0.1 + reach * 0.04));
+			} else {
+				// Folded up its back: the point up behind its shoulders, the knee down by its hips.
+				rest = hip.add(d.scale(reach * (0.06 + 0.06 * rand(i, 69)))).add(0.0, reach * (0.22 + 0.1 * rand(i, 61)), 0.0)
+						.subtract(ahead.scale(reach * (0.05 + 0.04 * rand(i, 67)) + Math.min(0.3, speed * 2.0) * reach * 0.04));
+			}
+			if (armTip[i] == null || arrived) {
+				armTip[i] = rest;
+				armVel[i] = Vec3.ZERO;
+			}
+			for (float todo = dt; todo > 1.0e-4f; todo -= 1.0f) {
+				double h = Math.min(1.0, todo);
+				Vec3 pull = rest.subtract(armTip[i]).scale(ARM_SPRING).subtract(armVel[i].scale(ARM_DAMP));
+				armVel[i] = armVel[i].add(pull.scale(h));
+				armTip[i] = armTip[i].add(armVel[i].scale(h));
+			}
+			// A jerk, by itself: once in a while, each leg on its own time, harder unseen.
+			float period = 70.0f + 110.0f * rand(i, 73);
+			float shifted = now + rand(i, 75) * period;
+			int window = (int) Math.floor(shifted / period);
+			float at = window * period + 6.0f + rand(i * 31 + window, 77) * (period - 12.0f);
+			if (rand(i * 31 + window, 79) < 0.45f && shifted - dt < at && shifted >= at) {
+				double kick = (0.06 + 0.08 * rand(i * 31 + window, 81)) * fitScale * (watched ? 0.6 : 1.0);
+				Vec3 side = new Vec3(-d.z, 0.0, d.x).scale(rand(i * 31 + window, 85) < 0.5f ? -1.0 : 1.0);
+				armVel[i] = armVel[i].add(side.scale(kick)).add(0.0, kick * 1.2, 0.0).add(d.scale(kick * 0.5));
+			}
+			// Not into the ground: along it, dragging.
+			double floor = groundUnder(level, armTip[i]) + 0.06;
+			if (armTip[i].y < floor) {
+				armTip[i] = new Vec3(armTip[i].x, floor, armTip[i].z);
+				armVel[i] = new Vec3(armVel[i].x * 0.7, Math.max(0.0, armVel[i].y) * 0.2, armVel[i].z * 0.7);
+			}
+			Vec3 off = armTip[i].subtract(hip);
+			double len = off.length();
+			if (len > reach * 0.95) armTip[i] = hip.add(off.scale(reach * 0.95 / len));
+			if (solidAt(level, armTip[i])) armTip[i] = armTip[i].lerp(rest, 0.5);
+		}
+	}
+
+	/**
+	 * Upright, which way a knee goes: a walking leg's forward and a little out, as a person's does;
+	 * an arm's back and a little out, like an elbow; a folded one's down and back, under it. If that would put the leg into something, the
+	 * first way that does not ({@link #bendOf}).
+	 */
+	@Nullable
+	private Vec3 naturalBend(int i, Level level, double yaw, double px, Vec3 hip, Vec3 at) {
+		double fx = -Math.sin(yaw), fz = Math.cos(yaw);
+		Vec3 ahead = new Vec3(fx, 0.0, fz);
+		Vec3 d = outward(i, yaw);
+		Vec3 pref = walker(i) ? ahead.add(d.scale(0.3)).add(0.0, 0.05, 0.0)
+				: high(i) ? d.scale(0.5).subtract(ahead.scale(0.6))
+				: d.scale(0.25).subtract(ahead.scale(0.35)).add(0.0, -1.0, 0.0);
+		double l1 = OccupantGeometry.LEG_UPPER[i] * px;
+		double l2 = (OccupantGeometry.LEG_LENGTH[i] - OccupantGeometry.LEG_UPPER[i]) * px;
+		Vec3 knee = knee(hip, at, l1, l2, pref);
+		if (knee != null && hits(level, hip, knee, at) == 0) {
+			bendHits[i] = 0;
+			return pref;
+		}
+		return bendOf(i, level, yaw, px, hip, at);
 	}
 
 	/** The top of whatever it stands on, under {@code at}: from a block above its feet down to two below. */

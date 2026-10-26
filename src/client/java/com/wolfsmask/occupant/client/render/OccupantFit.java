@@ -87,9 +87,21 @@ final class OccupantFit {
 		state.watchPitch = (float) -Math.toDegrees(Math.atan2(dy, Math.sqrt(dx * dx + dz * dz)));
 	}
 
+	/**
+	 * How far its hips are raised, in model pixels, standing up on two legs to walk (see
+	 * {@link LegGait}): all the way in the open, less and less as it has to fold, none once it is
+	 * folded down onto all its legs.
+	 */
+	static float raise(float crouch) {
+		return UPRIGHT_RAISE * Mth.clamp(1.0f - crouch / 0.25f, 0.0f, 1.0f);
+	}
+
+	/** How far its hips are raised to stand on two legs, at most, in model pixels. */
+	static final float UPRIGHT_RAISE = 15.0f;
+
 	/** Its height when folded by {@code crouch}, as a fraction of its full height. */
 	static float foldedHeight(float crouch) {
-		float hips = OccupantGeometry.HIPS_HEIGHT - CROUCH_DROP * crouch;
+		float hips = OccupantGeometry.HIPS_HEIGHT - CROUCH_DROP * crouch + raise(crouch);
 		float above = OccupantGeometry.HEIGHT - OccupantGeometry.HIPS_HEIGHT;
 		return (hips + above * Mth.cos(CROUCH_BEND * crouch)) / OccupantGeometry.HEIGHT;
 	}

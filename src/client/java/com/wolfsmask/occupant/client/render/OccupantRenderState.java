@@ -15,6 +15,10 @@ public class OccupantRenderState extends HumanoidRenderState {
 	public float crouch;
 	/** How far its weight has settled its hips down onto its legs, in model pixels. */
 	public float sag;
+	/** Standing up and walking on two legs, its other legs hanging; or folded down on all of them. */
+	public boolean upright = true;
+	/** A step that came down wrong, as it jolts through it: 1 at once, nothing a few ticks on. */
+	public float jolt;
 	/** How far it has drawn itself down into its legs to spring, in blocks: its core curls with it. */
 	public float coil;
 	/** Which way its last shove carried it, in its own frame, roughly -0.5 to 0.5. */
