@@ -113,7 +113,7 @@ final class Person {
 	}
 
 	private boolean crying(int t) {
-		return t >= 26 && t < 40 || t >= 56 && t < 72 || t >= 100 && t < strike - 6;
+		return t >= 26 && t < 40 || t >= 56 && t < Math.min(72, strike - 6) || t >= 100 && t < strike - 6;
 	}
 
 	/** Their own shaking, never quite regular. */
