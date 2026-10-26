@@ -273,7 +273,7 @@ final class Reel {
 		}
 		context.waitTicks(25);
 		try {
-			record(context, server, "found", poses, f, t -> {
+			record(context, server, "found", poses, hit + 4, f, t -> {
 				now = t;
 				// Tumbling, the camera goes over onto its side: from here the picture is recorded the
 				// other way up, wide, so the edit can turn it upright without losing anything.
@@ -1259,12 +1259,18 @@ final class Reel {
 		context.waitTicks(20);
 	}
 
-	/** A frame every tick, the camera moved first; {@code cue} for anything that happens at a tick. */
+	/**
+	 * A frame every tick, the camera moved first; {@code cue} for anything that happens at a tick.
+	 * From {@code wide} on, the window is the other way up, so those frames go into a clip of their
+	 * own ({@code name}-wide, from 0), each clip one size throughout.
+	 */
 	private static void record(ClientGameTestContext context, TestServerContext server, String name, double[][] poses,
-							   Fear f, IntConsumer cue) {
+							   int wide, Fear f, IntConsumer cue) {
 		Path dir = DIR.resolve(name);
+		Path wideDir = DIR.resolve(name + "-wide");
 		try {
 			Files.createDirectories(dir);
+			if (wide < poses.length) Files.createDirectories(wideDir);
 			Files.writeString(dir.resolve("marks.txt"), String.join("\n", f.marks()) + "\n");
 			StringBuilder roll = new StringBuilder();
 			for (double[] p : poses) roll.append(String.format(Locale.ROOT, "%.2f %.2f %.2f%n", p[3], p[4], p[5]));
@@ -1279,7 +1285,9 @@ final class Reel {
 			context.waitTick();
 			Path shot = context.takeScreenshot("reel-" + name + "-" + t);
 			try {
-				Files.move(shot, dir.resolve(String.format(Locale.ROOT, "%04d.png", t)), StandardCopyOption.REPLACE_EXISTING);
+				Path to = t >= wide ? wideDir.resolve(String.format(Locale.ROOT, "%04d.png", t - wide))
+						: dir.resolve(String.format(Locale.ROOT, "%04d.png", t));
+				Files.move(shot, to, StandardCopyOption.REPLACE_EXISTING);
 			} catch (IOException e) {
 				throw new UncheckedIOException(e);
 			}
