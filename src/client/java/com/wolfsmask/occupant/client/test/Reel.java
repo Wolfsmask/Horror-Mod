@@ -203,21 +203,26 @@ final class Reel {
 		f.flinchAt(seen, itsFace, 0.6);
 		f.lockOn(32, itsFace, 0.8);
 		// It knocks them down, backwards, flat on their back, their feet toward it. The camera is
-		// wrenched out of their hand and goes end over end to the ground beyond their head, where it
-		// lies on its side, still recording: them in front of it, and past them, it, coming.
+		// wrenched out of their hand and goes end over end to the ground off to one side of them,
+		// where it lies on its side, still recording: all of them, and above them, its legs.
 		int hit = f.size();
-		Vec3 lens = here.add(fwd.scale(4.2)).add(right.scale(1.2));
-		Vec3 aim = here.subtract(fwd.scale(1.2)).add(right.scale(0.2)).add(0, 1.2, 0);
+		Vec3 lens = here.add(fwd.scale(2.4)).add(right.scale(3.9));
+		Vec3 aim = here.add(fwd.scale(1.3)).add(0, 0.8, 0);
 		f.knocked(lens, aim, 0.15, -84.0);
 		int land = f.size();
-		// On their back: shoving themselves away from it, a hand up at it; it comes after them,
-		// stands over them, and its legs come down; and the tape stops dead.
-		int[] shoves = {17, 26, 35, 44, 53, 61};
-		int stab = hit + 74, end = stab + 2;
-		for (int push : shoves) f.markAt(hit + push, "scoot");
+		// Everything they try, one after another (see Person), and it after them; it takes them by
+		// the ankle and drags them back, and its legs come down; and the tape stops dead.
+		int stab = hit + Person.STRIKE, end = stab + 2;
+		for (int push : Person.SHOVES) f.markAt(hit + push, "scoot");
+		for (int kick : Person.KICKS) f.markAt(hit + kick + 1, "kick");
+		f.markAt(hit + Person.ROLL + 2, "roll");
+		f.markAt(hit + Person.SLIP + 1, "slip");
+		f.markAt(hit + Person.SLIP + 4, "fall");
+		for (int pull : Person.PULLS) f.markAt(hit + pull + 3, "claw");
+		f.markAt(hit + Person.DRAG, "grab");
 		f.markAt(hit + 26, "no1");
-		f.markAt(hit + 44, "no2");
-		f.markAt(hit + 60, "no3");
+		f.markAt(hit + Person.KICK + 2, "no2");
+		f.markAt(hit + Person.CRAWL + 4, "no3");
 		f.markAt(stab, "stab");
 		f.lie(end - land, -84.0);
 		f.mark("end");
@@ -228,12 +233,15 @@ final class Reel {
 			if (parts[1].equals("step") && t >= behindFrom && t < stopped) f.markAt(t + 7, "echo");
 		}
 		// Them, on the ground, jointed as a body is; and where it is, each tick: a lunge with the
-		// blow, still while they fall, then after them a slow step at a time, and over them.
-		Person them = new Person(here, fwd, shoves, stab - hit, 0.16);
-		double[][] approach = {{0, 0}, {5, 0.6}, {14, 0.6}, {stab - hit - 8, 2.2}, {stab - hit - 2, 2.5}, {stab - hit + 4, 2.6}};
+		// blow, still while they fall, then after them a slow step at a time; at their feet as they
+		// kick; watching them try to stand; after them as they crawl; a step back as it drags them;
+		// and over them.
+		Person them = new Person(here, fwd);
+		double[][] approach = {{0, 0}, {5, 0.6}, {14, 0.6}, {Person.KICK, 1.9}, {Person.ROLL, 2.3}, {Person.SLIP, 2.5},
+				{Person.DRAG, 3.0}, {Person.DRAG + 6, 2.85}, {Person.STRIKE - 2, 3.6}, {Person.STRIKE + 6, 3.7}};
 		IntFunction<Vec3> it = t -> {
 			if (t < hit) return feet;
-			double k = t - hit, d = 2.6;
+			double k = t - hit, d = 3.7;
 			for (int j = 0; j + 1 < approach.length; j++) {
 				if (k >= approach[j][0] && k <= approach[j + 1][0]) {
 					d = approach[j][1] + (approach[j + 1][1] - approach[j][1]) * smooth((k - approach[j][0]) / (approach[j + 1][0] - approach[j][0]));
@@ -307,8 +315,10 @@ final class Reel {
 								+ m + "],interpolation_duration:0}");
 					}
 				}
-				// Its leg at the lens as it knocks them down; its legs into their chest at the end.
+				// Its leg at the lens as it knocks them down; round their ankle as it drags them; its
+				// legs into their back at the end.
 				boolean atLens = t >= hit - 6 && t <= hit;
+				boolean dragging = t >= hit + Person.DRAG - 2 && t < stab - 6;
 				boolean atChest = t >= stab - 6;
 				double[] held = poses[Math.min(t, hit - 1)];
 				double yr = Math.toRadians(held[3]);
@@ -321,15 +331,15 @@ final class Reel {
 				} else if (t == hit + 1) {
 					server.runCommand("kill " + BODY);
 				}
-				Vec3 into0 = them.chest();
-				if (t == stab - 6) {
+				Vec3 into0 = dragging ? them.ankle() : them.chest();
+				if (t == hit + Person.DRAG - 2) {
 					server.runCommand(String.format(Locale.ROOT, "summon interaction %.3f %.3f %.3f {width:0.01f,height:0.01f,Tags:[\"occupant_reel\"]}",
 							into0.x, into0.y, into0.z));
-				} else if (atChest) {
+				} else if (dragging || atChest) {
 					server.runCommand(String.format(Locale.ROOT, "tp %s %.3f %.3f %.3f", BODY, into0.x, into0.y, into0.z));
 				}
 				Vec3 at = it.apply(t);
-				int legs = t >= stab - 5 ? 2 : 0;
+				int legs = t >= stab - 5 ? 2 : dragging ? 1 : 0;
 				server.runOnServer(s -> {
 					ServerLevel level = s.overworld();
 					List<OccupantEntity> its = level.getEntitiesOfClass(OccupantEntity.class, AABB.ofSize(at, 16, 16, 16));
