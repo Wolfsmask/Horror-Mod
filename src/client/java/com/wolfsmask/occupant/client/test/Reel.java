@@ -184,20 +184,20 @@ final class Reel {
 		f.markAt(glance - 3, "rustle");
 		Vec3 farBack = f.onWay(-24.0, 0.6, 0.8);
 		BlockPos farSpot = BlockPos.containing(farBack.x, o.getY(), farBack.z);
-		f.turnTo(10, farBack);
+		f.turnTo(13, farBack);
 		f.markAt(glance + 9, "seen1");
 		f.flinchAt(glance + 14, farBack, 1.0);
 		f.peer(14, farBack, 1.4, 0.12);
 		f.swing(8, f.ahead(4.0), 6.0, 0.15);
 		f.run(34, 0.19, 0);
-		f.lookBack(5, 5, 6, f.onWay(-12.0, 0.3, 0.4));
+		f.lookBack(8, 6, 8, f.onWay(-8.0, 3.5, 0.3));
 		f.run(14, 0.17, 0);
 		f.winded(18, f.onWay(1.6, 0, -1.6));
-		// Straightening up, still gasping. Breathing, right behind them. They do not move.
-		f.stare(8, f.onWay(5.0, 0, -0.4), 0.6);
+		// Straightening up, slowly, still gasping. Breathing, right behind them. They do not move.
+		f.turnTo(12, f.onWay(5.0, 0, -0.4));
 		int breath = f.size();
 		f.markAt(breath + 2, "breath");
-		f.stare(24, f.onWay(5.0, 0, -0.4), 1.4);
+		f.stare(22, f.onWay(5.0, 0, -0.4), 1.4);
 		// Round; up. It is there.
 		Vec3 stood = new Vec3(f.x, o.getY(), f.z);
 		Vec3 fwd = f.wayDir();
@@ -210,6 +210,7 @@ final class Reel {
 		// It is right there. They jerk back from it, stumbling back a step and another, the camera
 		// jolted, shaking, still on it; and it comes after them, and has them before they can turn.
 		f.flinchAt(seen, itsFace, 1.6);
+		f.markAt(seen + 3, "lunge");
 		f.stagger(7, itsFace, 0.45);
 		f.backAway(9, itsFace, 0.04);
 		// It knocks them down, backwards, flat on their back, their feet toward it. The camera is
@@ -258,7 +259,7 @@ final class Reel {
 		Vec3 down = here.subtract(fwd.scale(2.6));
 		IntFunction<Vec3> it = t -> {
 			if (t < seen) return feet;
-			if (t < hit) return feet.add(fwd.scale(0.65 * smooth((t - seen - 2) / 14.0)));
+			if (t < hit) return feet.lerp(down, smooth((t - seen - 2) / 14.0));
 			return down.add(fwd.scale(Person.itCame(t - hit)));
 		};
 		f.watching(t -> t >= glance && t < glance + 30 ? Vec3.atBottomCenterOf(farSpot).add(0, 2.4, 0)
@@ -764,7 +765,7 @@ final class Reel {
 			// A step is longer the faster they go: under a block walking, nearly two at a sprint; give or take.
 			phase += speed * Math.PI / ((0.55 + 4.6 * speed) * stride);
 			if (feet && speed > 0.03 && Math.floor(before / Math.PI) != Math.floor(phase / Math.PI)) {
-				mark("step");
+				mark(speed > 0.15 ? "stride" : "step");
 				stride = 0.9 + uneven.nextDouble() * 0.2;
 				landing = 0.75 + uneven.nextDouble() * 0.5;
 			}
@@ -1100,10 +1101,24 @@ final class Reel {
 			// Where they look, turned as a hand turns a camera: quick to get going, a little past, back.
 			double[] yawF = new double[n], pitchF = new double[n];
 			double y = 0, yv = 0, pv = 0, pp = 0, prev = 0;
+			// Where they mean to look, as a head and body can actually get there: picking up speed
+			// into a turn and slowing out of it, never all at once, however suddenly they decide.
+			double ly = 0, lyv = 0, lp = 0, lpv = 0;
 			for (int i = 0; i < n; i++) {
 				double[] p = poses.get(i);
 				double target = i == 0 ? p[2] : prev + Mth.wrapDegrees(p[2] - poses.get(i - 1)[2]);
 				prev = target;
+				if (i == 0 || p[11] == 0) {
+					ly = target;
+					lyv = 0;
+					lp = p[3];
+					lpv = 0;
+				} else {
+					lyv += Mth.clamp(Mth.clamp((target - ly) * 0.45, -TURN_FAST, TURN_FAST) - lyv, -TURN_PICKUP, TURN_PICKUP);
+					ly += lyv;
+					lpv += Mth.clamp(Mth.clamp((p[3] - lp) * 0.45, -TURN_FAST / 2, TURN_FAST / 2) - lpv, -TURN_PICKUP * 0.8, TURN_PICKUP * 0.8);
+					lp += lpv;
+				}
 				if (i == 0 || p[11] == 0) {
 					y = target;
 					yv = 0;
@@ -1111,9 +1126,9 @@ final class Reel {
 					pv = 0;
 				} else {
 					for (int k = 0; k < 4; k++) {
-						yv += (LOOK * LOOK * (target - y) - 2 * 0.62 * LOOK * yv) * 0.25;
+						yv += (LOOK * LOOK * (ly - y) - 2 * 0.62 * LOOK * yv) * 0.25;
 						y += yv * 0.25;
-						pv += (LOOK * LOOK * (p[3] - pp) - 2 * 0.62 * LOOK * pv) * 0.25;
+						pv += (LOOK * LOOK * (lp - pp) - 2 * 0.62 * LOOK * pv) * 0.25;
 						pp += pv * 0.25;
 					}
 				}
@@ -1212,6 +1227,8 @@ final class Reel {
 
 		/** How quickly the camera follows where they mean to look, a tick: about a tick behind. */
 		private static final double LOOK = 1.8;
+		/** The fastest a head and body turn, in degrees a tick, and how much faster they can get each tick. */
+		private static final double TURN_FAST = 20.0, TURN_PICKUP = 3.2;
 
 		/**
 		 * The startle: for each fright, a jerk of the head away from it and up, the whole body
