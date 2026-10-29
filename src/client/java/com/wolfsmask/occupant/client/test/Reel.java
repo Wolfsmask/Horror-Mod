@@ -175,37 +175,48 @@ final class Reel {
 		f.walk(48, 0.12, t -> f.onWay(6.0, 0.5 * Math.sin(t * 0.07), -0.5));
 		f.markAt(f.size() - 40, "in");
 		f.markAt(f.size() - 26, "cave");
-		// Something in the leaves behind: a look back over the shoulder, still walking. Far back on the
-		// path, at the edge of what the fog lets them see, something pale is standing; they do not see it.
+		// Something in the leaves behind: a look back over the shoulder. Far back on the path, at the
+		// edge of what the fog lets them see, something pale is standing. They stop dead and stare,
+		// trying to make it out, and it does not move; it jolts through them what it is. Then they
+		// are running: round and away up the path, the camera everywhere, one look back (nothing
+		// there now), on until they have no breath left, and they have to stop, bent over, gulping.
 		int glance = f.size();
 		f.markAt(glance - 3, "rustle");
 		Vec3 farBack = f.onWay(-24.0, 0.6, 0.8);
 		BlockPos farSpot = BlockPos.containing(farBack.x, o.getY(), farBack.z);
-		f.glanceBack(8, 9, 8, farBack, 0.1);
-		f.walk(52, 0.13, t -> f.onWay(6.0, 0.4 * Math.sin(t * 0.08), -0.5));
-		// They stop. Breathing, right behind them. They do not move.
+		f.turnTo(10, farBack);
+		f.markAt(glance + 9, "seen1");
+		f.flinchAt(glance + 14, farBack, 1.0);
+		f.peer(14, farBack, 1.4, 0.12);
+		f.swing(8, f.ahead(4.0), 6.0, 0.15);
+		f.run(34, 0.19, 0);
+		f.lookBack(5, 5, 6, f.onWay(-12.0, 0.3, 0.4));
+		f.run(14, 0.17, 0);
+		f.winded(18, f.onWay(1.6, 0, -1.6));
+		// Straightening up, still gasping. Breathing, right behind them. They do not move.
 		f.stare(8, f.onWay(5.0, 0, -0.4), 0.6);
 		int breath = f.size();
 		f.markAt(breath + 2, "breath");
-		f.stare(32, f.onWay(5.0, 0, -0.4), 1.4);
-		// Round, slowly; up. It is there.
-		Vec3 here = new Vec3(f.x, o.getY(), f.z);
+		f.stare(24, f.onWay(5.0, 0, -0.4), 1.4);
+		// Round; up. It is there.
+		Vec3 stood = new Vec3(f.x, o.getY(), f.z);
 		Vec3 fwd = f.wayDir();
 		Vec3 right = new Vec3(-fwd.z, 0, fwd.x);
-		Vec3 feet = here.subtract(fwd.scale(2.6));
+		Vec3 feet = stood.subtract(fwd.scale(2.6));
 		Vec3 itsFace = feet.add(0, 4.3, 0);
-		f.turnTo(26, itsFace);
-		int seen = f.size() - 5;
+		f.turnTo(20, itsFace);
+		int seen = f.size() - 4;
 		f.markAt(seen, "seen");
-		// It is right there. They do not run; they cannot. A jolt of shock goes through them, and
-		// then they are rooted where they stand: the camera held on it, the hands trembling, gulping
-		// air. It does not move either. For a long second nothing does; then it comes.
-		f.flinchAt(seen, itsFace, 0.6);
-		f.lockOn(32, itsFace, 0.8);
+		// It is right there. They jerk back from it, stumbling back a step and another, the camera
+		// jolted, shaking, still on it; and it comes after them, and has them before they can turn.
+		f.flinchAt(seen, itsFace, 1.6);
+		f.stagger(7, itsFace, 0.45);
+		f.backAway(9, itsFace, 0.04);
 		// It knocks them down, backwards, flat on their back, their feet toward it. The camera is
 		// wrenched out of their hand and goes end over end to the ground off to one side of them,
 		// where it lies on its side, still recording: all of them, and above them, its legs.
 		int hit = f.size();
+		Vec3 here = new Vec3(f.x, o.getY(), f.z);
 		Vec3 lens = here.add(fwd.scale(2.4)).add(right.scale(3.9));
 		Vec3 aim = here.add(fwd.scale(1.3)).add(0, 0.8, 0);
 		f.knocked(lens, aim, 0.15, -84.0);
@@ -224,6 +235,10 @@ final class Reel {
 		f.markAt(hit + Person.KICK + 2, "no2");
 		f.markAt(hit + Person.CRAWL + 4, "no3");
 		f.markAt(stab, "stab");
+		// Its own steps after them, and its breathing.
+		for (int step : new int[]{22, 32, 42, 56, 80, 125, 140, 157, 163, 166}) f.markAt(hit + step, "thump");
+		f.markAt(hit + 40, "growl");
+		f.markAt(hit + 100, "growl");
 		f.lie(end - land, -84.0);
 		f.mark("end");
 		// The steps behind them: one after each of theirs, a few ticks late.
@@ -239,8 +254,10 @@ final class Reel {
 		Person them = new Person(here, fwd);
 		double[][] approach = {{0, 0}, {5, 0.6}, {14, 0.6}, {Person.KICK, 1.9}, {Person.ROLL, 2.3}, {Person.SLIP, 2.5},
 				{Person.DRAG, 3.0}, {Person.DRAG + 6, 2.85}, {Person.STRIKE - 2, 3.6}, {Person.STRIKE + 6, 3.7}};
+		Vec3 down = here.subtract(fwd.scale(2.6));
 		IntFunction<Vec3> it = t -> {
-			if (t < hit) return feet;
+			if (t < seen) return feet;
+			if (t < hit) return feet.add(fwd.scale(0.65 * smooth((t - seen - 2) / 14.0)));
 			double k = t - hit, d = 3.7;
 			for (int j = 0; j + 1 < approach.length; j++) {
 				if (k >= approach[j][0] && k <= approach[j + 1][0]) {
@@ -248,7 +265,7 @@ final class Reel {
 					break;
 				}
 			}
-			return feet.add(fwd.scale(d));
+			return down.add(fwd.scale(d));
 		};
 		f.watching(t -> t >= glance && t < glance + 30 ? Vec3.atBottomCenterOf(farSpot).add(0, 2.4, 0)
 				: t >= breath - 8 ? it.apply(t).add(0, 2.4, 0) : null);
@@ -291,13 +308,14 @@ final class Reel {
 				}
 				if (t == glance) Cinematic.place(server, farSpot, new Vec3(poses[t][0], poses[t][1], poses[t][2]), STANDING);
 				if (t == glance + 30) server.runCommand("kill " + ALL);
-				if (t == breath - 8) Cinematic.place(server, BlockPos.containing(feet), here, STANDING);
+				if (t == breath - 8) Cinematic.place(server, BlockPos.containing(feet), stood, STANDING);
 				if (t >= breath - 8) {
 					Vec3 at = it.apply(t);
 					Vec3 eye = new Vec3(poses[t][0], poses[t][1], poses[t][2]);
 					// Standing over them to look at them before it strikes; down at them once they are down.
 					Vec3 watch = t < hit ? eye : them.chest();
-					OccupantEntity.Mode mode = t < hit ? OccupantEntity.Mode.STARE : OccupantEntity.Mode.AMBUSH;
+					// Still, as it always is while it is looked at, until they see it; then it no longer cares.
+					OccupantEntity.Mode mode = t < seen ? OccupantEntity.Mode.STARE : OccupantEntity.Mode.CHASE;
 					look(server, at, watch, 0);
 					server.runOnServer(s -> {
 						for (OccupantEntity e : s.overworld().getEntitiesOfClass(OccupantEntity.class, AABB.ofSize(at, 16, 16, 16))) {
@@ -937,21 +955,47 @@ final class Reel {
 		}
 
 		/**
-		 * Frozen where they stand, unable to look away from {@code at}: the camera held on it, the
-		 * hands trembling, {@code shake}, the knees gone soft; breathing hard and fast.
+		 * Startled back from {@code from}: a quick half step back and another, as far as {@code dist},
+		 * their knees going under them and the camera snatched up at it.
 		 */
-		void lockOn(int n, Vec3 at, double shake) {
-			rigid = 1;
+		void stagger(int n, Vec3 from, double dist) {
+			double per = dist / n * 2.0;
 			for (int i = 0; i < n; i++) {
-				step(0, 0.08);
-				yaw = toward(yaw, yawTo(at), 0.35);
-				pitch += (pitchTo(at) - pitch) * 0.35;
-				tremble += (shake - tremble) * 0.12;
-				lift += (-0.06 - lift) * 0.1;
-				roll += (-1.5 - roll) * 0.1;
+				heading = yawTo(from) + 180.0;
+				double u = (i + 0.5) / n;
+				step(per * (1.0 - u) * 1.6, 0.25);
+				yaw = toward(yaw, yawTo(from), 0.5);
+				pitch += (pitchTo(from) - 4.0 - pitch) * 0.5;
+				lift += (-0.14 - lift) * 0.35;
+				tremble += (2.2 - tremble) * 0.5;
 				push();
 			}
-			rigid = 0;
+		}
+
+		/** Backing away from {@code at}, facing it, the hands shaking hard. */
+		void backAway(int n, Vec3 at, double pace) {
+			for (int i = 0; i < n; i++) {
+				heading = yawTo(at) + 180.0;
+				step(pace, 0.03);
+				yaw = toward(yaw, yawTo(at), 0.4);
+				pitch += (pitchTo(at) - pitch) * 0.4;
+				lift += (-0.08 - lift) * 0.2;
+				tremble += (1.8 - tremble) * 0.3;
+				push();
+			}
+		}
+
+		/** Out of breath: slowing to a stop, bent over, the head down at {@code at}, gulping air. */
+		void winded(int n, Vec3 at) {
+			for (int i = 0; i < n; i++) {
+				step(0, 0.025);
+				yaw = toward(yaw, yawTo(at), 0.12);
+				pitch += (pitchTo(at) - pitch) * 0.12;
+				lift += (-0.3 * smooth((i + 1.0) / n) - lift) * 0.2;
+				tremble += (0.7 - tremble) * 0.1;
+				roll *= 0.9;
+				push();
+			}
 		}
 
 		/** Running, and in through somewhere, and round: slowing hard, the head round to {@code at} first. */

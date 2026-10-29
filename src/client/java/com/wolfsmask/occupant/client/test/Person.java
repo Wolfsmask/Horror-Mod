@@ -10,17 +10,20 @@ import java.util.List;
  * size and colours of a player's body, but jointed as a body is, at the knees and elbows and the
  * small of the back, so they can do what someone does to get away from something.
  * <p>
- * They try everything, one thing after another, and each fails. Thrown back, they land flat and
- * the breath goes out of them. They come up onto one arm and shove themselves backwards along the
- * ground with their heels. When it is at their feet they kick at it. They roll over onto their
- * front, get up onto their hands and knees and try to stand, one foot under them, and the foot goes
- * out from under them and they go down flat on their face. They claw their way along the ground on
- * their stomach, one arm over the other, looking back at it. It takes them by the ankle and drags
- * them back, their hands raking the dirt; and it comes down on them.
+ * They try everything, one thing after another, each running into the next, and each fails.
+ * Thrown back, they land flat and the breath goes out of them. They come up onto one arm and shove
+ * themselves backwards with their heels. When it is at their feet they kick at it. They turn over
+ * onto their front, the shoulders first and the hips after, over their side; push up onto hands and
+ * knees; bring a foot under them and start to stand, and the foot goes out from under them and
+ * they go down on their face. They claw their way along on their stomach, one arm over the other.
+ * It takes them by the ankle and drags them back, their hands raking the dirt; and it comes down
+ * on them.
  * <p>
- * Everything is worked out a tick at a time, in order: the body has weight and lags behind
- * where it is going, and swings past and settles. Nothing of it is ever below the ground, and
- * whatever is planted on the ground stays exactly where it was put until it is picked up.
+ * The body is worked out a tick at a time, in order. Nothing holds it up but what it rests on:
+ * how high it is comes from the ground under it and the limbs planted on it, and with nothing
+ * under it, it falls, as a weight falls. It never goes into the ground and never floats over it.
+ * Every part of it gets where it is going smoothly, from where it was, with weight; a planted hand
+ * or foot stays exactly where it was put until it is picked up and put down somewhere else.
  */
 final class Person {
 	/** A player's body is 32 of these tall, scaled down as the game scales players. */
@@ -38,42 +41,90 @@ final class Person {
 			{"arm_l", SHIRT}, {"forearm_l", SKIN}, {"arm_r", SHIRT}, {"forearm_r", SKIN},
 			{"thigh_l", PANTS}, {"shin_l", PANTS}, {"shoe_l", SHOES}, {"thigh_r", PANTS}, {"shin_r", PANTS}, {"shoe_r", SHOES}};
 
-	// What they try, in ticks after the blow. Down until SCRAMBLE; each thing until the next.
-	/** On their back, up on one arm, shoving themselves back with their heels at each of SHOVES. */
-	static final int SCRAMBLE = 14;
-	static final int[] SHOVES = {16, 25, 34};
-	/** It is at their feet: kicking at it, one leg and the other, at each of KICKS. */
-	static final int KICK = 46;
-	static final int[] KICKS = {47, 51, 55, 59};
-	/** Over onto their front, up onto hands and knees, one foot under them to stand; it slips. */
-	static final int ROLL = 62, KNEEL = 70, RISE = 78, SLIP = 88;
-	/** Flat on their front, clawing their way along, one arm over the other at each of PULLS. */
-	static final int CRAWL = 94;
-	static final int[] PULLS = {96, 104, 112};
-	/** Taken by the ankle and dragged back. */
-	static final int DRAG = 118;
+	// What they try, in ticks after the blow; each thing until the next.
+	/** Knocked over backwards; flat and winded from LANDED. */
+	static final int LANDED = 9;
+	/** Up on one arm, shoving themselves back with their heels at each of SHOVES. */
+	static final int SCRAMBLE = 16;
+	static final int[] SHOVES = {20, 29, 38};
+	/** It is at their feet: leaning back on their hands, kicking at it, at each of KICKS. */
+	static final int KICK = 48;
+	static final int[] KICKS = {50, 55, 60};
+	/** Over onto their front, over their left side, shoulders first. */
+	static final int ROLL = 66, ROLL_TICKS = 20;
+	/** Hands under the shoulders, chest up, hips up and back onto the knees. */
+	static final int PUSHUP = 86;
+	/** A foot brought up under them, up off the hands, starting to stand. */
+	static final int RISE = 100;
+	/** The foot goes; down on their face. */
+	static final int SLIP = 114;
+	/** On their stomach, clawing along, one arm and then the other, at each of PULLS. */
+	static final int CRAWL = 124;
+	static final int[] PULLS = {126, 135, 144};
+	/** Taken by the right ankle and dragged back. */
+	static final int DRAG = 154;
 	/** It comes down on them. */
-	static final int STRIKE = 134;
+	static final int STRIKE = 170;
 
 	private static final Vec3 UP = new Vec3(0, 1, 0);
-	/** The way along the ground their head points, lying, and (away from it) their left as they lie on their back. */
+	/** How fast a falling thing gains speed, in blocks a tick, each tick. */
+	private static final double G = 0.03;
+
+	/** The way along the ground their head points, lying, and their left as they lie on their back. */
 	private final Vec3 f, left;
 	private final double ground;
-
-	// Where the body is and how it is held, each with how fast it is changing.
-	private Vec3 pelvis, pelvisV = Vec3.ZERO;
-	private double lift, liftV, curl, curlV, roll, rollV, nod, nodV;
-	/** Where each foot and hand is: planted, or on its way somewhere. 0 is their left, 1 their right. */
-	private final Vec3[] feet = new Vec3[2], hands = new Vec3[2];
-	private final Vec3[] footFrom = new Vec3[2], handFrom = new Vec3[2], footTo = new Vec3[2], handTo = new Vec3[2];
-	private final int[] footAt = {-99, -99}, handAt = {-99, -99};
-	/** Which way each knee and elbow bends this tick, if not the usual way. */
-	private final Vec3[] legPole = new Vec3[2], armPole = new Vec3[2];
-	/** Where they are looking: at it, or somewhere of their own. */
-	private Vec3 look;
-	private int tau = -1;
-	private Vec3 chest = Vec3.ZERO;
 	private final double sx, sz;
+
+	// The body: where the hips are, and how the trunk is held, each with how fast it is changing.
+	private Vec3 pelvis;
+	private double vx, vy, vz;
+	private double lift, liftV, curl, curlV, roll, rollV, twist, twistV, nod, nodV;
+	/** How far over to their left turning over has carried them, rolling on their side. */
+	private double aside;
+	/** Where the head is turned: tipped (positive, chin down) and turned (positive, to their left). */
+	private double headP, headPV, headY, headYV;
+	private Vec3 look;
+	private final Limb[] feet = {new Limb(false, 1), new Limb(false, -1)};
+	private final Limb[] hands = {new Limb(true, 1), new Limb(true, -1)};
+	private int tau = -1;
+	/** Where the front foot was when it went. */
+	private Vec3 skid;
+	private Vec3 chest = Vec3.ZERO;
+
+	/** A hand or a foot, and the arm or leg it is on. */
+	private static final class Limb {
+		final boolean arm;
+		/** 1 for their left, -1 for their right. */
+		final double side;
+		/** Where its end is now. */
+		Vec3 at;
+		Vec3 vel = Vec3.ZERO;
+		/** Where it is planted (or going to be), or null while it is held free. */
+		Vec3 plant;
+		/** A move to the plant under way: from where and how fast it was going, since when, how long, how high over. */
+		Vec3 from, fromVel = Vec3.ZERO;
+		/** How far out of the straight way it swings on the way, at the middle: round the shoulder or hip, not through it. */
+		Vec3 bow = Vec3.ZERO;
+		int since, over;
+		double arc;
+		/** Taking the body's weight where it is planted. */
+		boolean weight;
+		/** Which way the elbow or knee points, eased round, never flipped; and the way it is bent now. */
+		Vec3 pole, poleWant, bent;
+
+		Limb(boolean arm, double side) {
+			this.arm = arm;
+			this.side = side;
+		}
+
+		double length() {
+			return (arm ? 10 : 12) * PX;
+		}
+
+		boolean carrying(int t) {
+			return plant != null && from != null && t - since < over;
+		}
+	}
 
 	/**
 	 * @param stood  where they were standing when it hit them (their feet), facing it
@@ -83,10 +134,10 @@ final class Person {
 		this.f = new Vec3(toward.x, 0, toward.z).normalize();
 		this.left = f.cross(UP).normalize();
 		this.ground = stood.y;
-		this.pelvis = stood.add(f.scale(0.2)).add(0, 0.7, 0);
 		this.sx = stood.x;
 		this.sz = stood.z;
-		this.lift = 1.4;
+		this.pelvis = stood.add(f.scale(0.1)).add(0, 0.9, 0);
+		this.lift = Math.PI / 2 - 0.12;
 	}
 
 	/** Where their chest is, as last posed: what its legs go into. */
@@ -94,9 +145,9 @@ final class Person {
 		return chest;
 	}
 
-	/** Their right foot, as last posed: what it takes them by. */
+	/** Their right ankle, as last posed: what it takes them by. */
 	Vec3 ankle() {
-		return feet[1] == null ? pelvis : feet[1];
+		return feet[1].at == null ? pelvis : feet[1].at;
 	}
 
 	/**
@@ -105,14 +156,21 @@ final class Person {
 	 */
 	List<Part> pose(int t, Vec3 it, Vec3 anchor) {
 		while (tau < t) step(++tau, it);
-		return build(anchor);
+		List<Part> out = parts(anchor);
+		chest = point(chestFrame(), 0, 3, 0);
+		return out;
 	}
 
-	// ---------------------------------------------------------------- what they are doing
+	// ---------------------------------------------------------------- easing
 
-	private static double smooth(double x) {
-		double c = Math.max(0.0, Math.min(1.0, x));
-		return c * c * (3 - 2 * c);
+	private static double clamp01(double x) {
+		return Math.max(0.0, Math.min(1.0, x));
+	}
+
+	/** From 0 to 1 and still at both ends, the way a hand moves from one place to another. */
+	private static double ease(double x) {
+		double c = clamp01(x);
+		return c * c * c * (10 - 15 * c + 6 * c * c);
 	}
 
 	private static double bump(double x) {
@@ -125,36 +183,34 @@ final class Person {
 		return -1;
 	}
 
-	/** Their own shaking, never quite regular. */
-	private static double shake(int t, double seed) {
-		return Math.sin(t * 1.31 + seed) * 0.5 + Math.sin(t * 2.17 + seed * 2.3) * 0.3 + Math.sin(t * 0.53 + seed * 0.7) * 0.2;
-	}
-
-	/** A spring a tick on: towards {@code want}, with {@code w} its quickness and {@code z} its damping. */
-	private static double[] spring(double x, double v, double want, double w, double z) {
-		v += (w * w * (want - x) - 2 * z * w * v);
+	/** A critically damped spring a tick on: towards {@code want}, {@code w} its quickness. */
+	private static double[] spring(double x, double v, double want, double w) {
+		v += w * w * (want - x) - 2 * w * v;
 		return new double[]{x + v, v};
 	}
 
+	// ---------------------------------------------------------------- what they mean to do
+
 	/**
 	 * How far along the ground (along {@code f}) their hips mean to be at t: knocked back, shoved
-	 * further at each shove, pushed back by their own kicks, a little on as they get up, thrown
-	 * forward as they fall, pulled on by each pull of their arms, and dragged back.
+	 * further at each shove, pushed back by their own kicks, back onto their knees, on a little as
+	 * they start to stand, thrown forward as they fall, pulled on by each pull, and dragged back.
 	 */
 	private double along(double t) {
-		double d = 1.3;
-		for (int s : SHOVES) d += 0.16 * smooth((t - s) / 5.0);
-		for (int k : KICKS) d += 0.035 * smooth((t - k - 1) / 3.0);
-		d += 0.12 * smooth((t - RISE) / 8.0);
-		d += 0.42 * smooth((t - SLIP - 1) / 5.0);
-		for (int p : PULLS) d += 0.18 * smooth((t - p - 4) / 6.0);
-		d -= 0.45 * smooth((t - DRAG - 1) / 4.0) + 0.42 * smooth((t - DRAG - 8) / 5.0);
+		double d = 0.1 + 1.2 * ease(t / 8.0);
+		for (int s : SHOVES) d += 0.16 * ease((t - s - 2) / 6.0);
+		for (int k : KICKS) d += 0.03 * ease((t - k - 1) / 3.0);
+		d -= 0.12 * ease((t - PUSHUP - 6) / 8.0);
+		d += 0.1 * ease((t - RISE - 4) / 8.0);
+		d += 0.34 * ease((t - SLIP - 1) / 6.0);
+		for (int p : PULLS) d += 0.17 * ease((t - p - 4) / 5.0);
+		d -= 0.45 * ease((t - DRAG - 1) / 5.0) + 0.4 * ease((t - DRAG - 9) / 6.0);
 		return d;
 	}
 
-	/** How far to their left (as they lay first) their hips have gone: rolling over carries them that way. */
-	private double aside(double t) {
-		return 0.3 * smooth((t - ROLL) / 8.0);
+	/** Their hips over onto their front, shoulders a little ahead: how far round each is at t. */
+	private static double rollAt(double t) {
+		return Math.PI * ease((t - ROLL) / ROLL_TICKS);
 	}
 
 	private Vec3 origin() {
@@ -162,387 +218,540 @@ final class Person {
 	}
 
 	private void step(int t, Vec3 it) {
-		boolean down = t >= 7;
-		double wantLift, wantCurl, wantRoll, wantNod = 0, height;
-		int k;
-		double u;
+		double wantLift, wantCurl, wantRoll, wantNod = 0, hip = Double.NaN, quick = 0.3;
 		look = it;
-		if (t < SCRAMBLE) {
-			// Knocked over backwards, flat, winded; the head hits the ground.
-			wantLift = down ? 0.0 : 1.4 * (1 - smooth((t - 1) / 6.0));
-			wantCurl = 0.05;
+		if (t < LANDED) {
+			// Going over backwards, faster and faster, the way anything tips over: nothing to do but fall.
+			double over = Math.min(Math.PI / 2, 0.12 * Math.cosh(t * 0.33));
+			wantLift = Math.PI / 2 - over;
+			lift = wantLift;
+			liftV = 0;
+			wantCurl = 0.1;
+			wantRoll = 0;
+			look = null;
+		} else if (t < SCRAMBLE) {
+			// Flat on their back, winded: the head knocked back on the ground, then up to find it.
+			wantLift = 0.0;
+			wantCurl = 0.05 + 0.08 * bump((t - LANDED) / 5.0);
 			wantRoll = 0.0;
-			wantNod = t < 7 ? -0.3 : -0.45;
-			height = 2 * PX;
+			wantNod = t < LANDED + 4 ? -0.3 : 0.0;
 		} else if (t < KICK) {
-			// Up on one arm, shoving back: each shove throws them back, then they come forward over it.
-			k = which(SHOVES, t, 10);
-			u = k >= 0 ? (t - SHOVES[k]) / 10.0 : 0;
-			wantLift = (t < 20 ? 0.55 * smooth((t - SCRAMBLE) / 6.0) : 0.55) - 0.14 * bump(u / 0.5);
-			wantCurl = 0.18 + 0.03 * Math.sin(t * 0.63);
-			wantRoll = -0.22 + (k >= 0 ? (k % 2 == 0 ? 0.08 : -0.08) * bump(u) : 0);
-			height = 2 * PX + PX * Math.sin(Math.max(0, wantLift));
-		} else if (t < ROLL) {
-			// Leaning back on both hands, kicking: the whole body jolts back with each one.
-			k = which(KICKS, t, 4);
-			u = k >= 0 ? (t - KICKS[k]) / 4.0 : 0;
-			wantLift = 0.42 - 0.1 * bump(u);
-			wantCurl = 0.3;
-			wantRoll = k >= 0 ? (k % 2 == 0 ? 0.12 : -0.12) * bump(u) : 0.0;
-			height = 2 * PX + PX * Math.sin(wantLift);
-		} else if (t < KNEEL) {
-			// Over onto their front, the way of their left side, looking back at it over their shoulder.
-			wantLift = 0.05;
+			// Up on their right arm; each shove throws them back a little, and they come forward over it.
+			int k = which(SHOVES, t, 10);
+			double u = k >= 0 ? (t - SHOVES[k]) / 10.0 : 0;
+			wantLift = 0.55 * ease((t - SCRAMBLE) / 6.0) - 0.1 * bump(u);
 			wantCurl = 0.2;
-			wantRoll = Math.PI;
-			height = 2 * PX + 0.06 * bump((t - ROLL) / 8.0);
+			wantRoll = -0.2 * ease((t - SCRAMBLE) / 6.0);
+		} else if (t < ROLL) {
+			// Back on both hands, kicking; each kick jolts them back.
+			int k = which(KICKS, t, 5);
+			double u = k >= 0 ? (t - KICKS[k]) / 5.0 : 0;
+			wantLift = 0.45 - 0.08 * bump(u);
+			wantCurl = 0.3;
+			wantRoll = k >= 0 ? (k % 2 == 0 ? 0.08 : -0.08) * bump(u) : 0.0;
+		} else if (t < PUSHUP) {
+			// Turning over, away from it: down off the hands, over the left side onto the front.
+			wantLift = 0.04;
+			wantCurl = 0.2 * (1 - ease((t - ROLL) / ROLL_TICKS));
+			wantRoll = rollAt(t);
+			look = pelvis.add(left.scale(1.5)).add(f.scale(1.2));
 		} else if (t < RISE) {
-			// Up onto hands and knees.
-			double g = smooth((t - KNEEL) / 6.0);
-			wantLift = 0.1 * g;
-			wantCurl = 0.05;
+			// Hands under the shoulders: the chest pushed up off the ground, then the hips up and back
+			// onto the knees.
+			double u = t - PUSHUP;
+			wantLift = 0.5 * ease(u / 6.0) - 0.36 * ease((u - 6) / 8.0);
+			wantCurl = -0.15 * ease(u / 6.0) + 0.2 * ease((u - 6) / 8.0);
 			wantRoll = Math.PI;
-			height = 2 * PX + (0.4 - 2 * PX) * g;
+			if (u >= 5) hip = 0.4 * ease((u - 5) / 8.0);
+			look = pelvis.add(f.scale(2.2));
 		} else if (t < SLIP) {
-			// One foot under them, pushing up to stand, the body coming up off the hands.
-			double g = smooth((t - RISE) / 9.0);
-			wantLift = 0.1 + 1.0 * g;
-			wantCurl = 0.1 + 0.35 * g;
+			// A foot up under them, then up off the hands, the body coming up over the front leg.
+			double u = t - RISE;
+			wantLift = 0.14 + 0.95 * ease((u - 4) / 9.0);
+			wantCurl = 0.05 + 0.3 * bump((u - 4) / 10.0);
 			wantRoll = Math.PI;
-			height = 0.4 + 0.24 * g;
-			look = pelvis.add(f.scale(4)).add(0, 1.2, 0);
+			hip = 0.4 + 0.2 * ease((u - 7) / 7.0);
+			look = pelvis.add(f.scale(4)).add(0, 1.0, 0);
 		} else if (t < CRAWL) {
-			// The foot goes: down forwards, flat on their face, hands out to catch themselves.
-			wantLift = 0.02;
-			wantCurl = 0.0;
-			wantRoll = Math.PI;
-			wantNod = t < SLIP + 4 ? 0.3 : 0.0;
-			height = 2 * PX;
-			look = pelvis.add(f.scale(3)).subtract(0, 0.5, 0);
-		} else if (t < DRAG) {
-			// On their stomach, chest up off the ground, clawing their way along; a look back at it.
-			k = which(PULLS, t, 8);
-			u = k >= 0 ? (t - PULLS[k]) / 8.0 : 0;
-			wantLift = 0.16 + 0.06 * bump(u);
-			wantCurl = -0.12;
-			wantRoll = Math.PI + (k >= 0 ? (k % 2 == 0 ? -0.14 : 0.14) * bump(u) : 0);
-			height = 2 * PX;
-			boolean back = t >= PULLS[1] - 2 && t < PULLS[1] + 6;
-			look = back ? it : pelvis.add(f.scale(4)).add(0, 0.6, 0);
-		} else if (t < STRIKE) {
-			// Dragged back by the ankle, flat, the arms out ahead raking the dirt; looking back at it,
-			// then ahead again, at anything.
-			wantLift = 0.06;
-			wantCurl = -0.08;
-			wantRoll = Math.PI + 0.1 * Math.sin(t * 0.7);
-			height = 2 * PX;
-			look = t < DRAG + 5 ? it : pelvis.add(f.scale(4)).add(0, 0.4, 0);
-		} else {
-			// Its legs come down into their back: flattened, the head down.
+			// The foot goes: nothing under them on that side; they pitch forward onto their hands
+			// and down on their front.
 			wantLift = 0.0;
 			wantCurl = 0.0;
 			wantRoll = Math.PI;
-			wantNod = 0.3;
-			height = 2 * PX;
+			wantNod = 0.25 * bump((t - SLIP) / 8.0);
+			quick = 0.45;
+			look = pelvis.add(f.scale(3)).subtract(0, 0.4, 0);
+		} else if (t < DRAG) {
+			// On their stomach, the chest up on the forearms, clawing along; a look back at it.
+			int k = which(PULLS, t, 9);
+			double u = k >= 0 ? (t - PULLS[k]) / 9.0 : 0;
+			wantLift = 0.14 + 0.05 * bump(u);
+			wantCurl = -0.1;
+			wantRoll = Math.PI + (k >= 0 ? (k % 2 == 0 ? -0.1 : 0.1) * bump(u) : 0);
+			boolean back = t >= PULLS[1] - 1 && t < PULLS[1] + 7;
+			look = back ? it : pelvis.add(f.scale(4)).add(0, 0.6, 0);
+		} else if (t < STRIKE) {
+			// Dragged back by the ankle, flat; the pull twists them a little onto that side.
+			wantLift = 0.06;
+			wantCurl = -0.05;
+			wantRoll = Math.PI + 0.12 * ease((t - DRAG) / 4.0);
+			look = t < DRAG + 6 ? it : pelvis.add(f.scale(4)).add(0, 0.4, 0);
+		} else {
+			// Its legs come down into their back: flattened, the head forced down.
+			wantLift = 0.0;
+			wantCurl = 0.15 * bump((t - STRIKE) / 6.0);
+			wantRoll = Math.PI;
+			wantNod = 0.35;
+			quick = 0.5;
 			look = null;
 		}
-		// Where they mean to be.
-		Vec3 want = down ? origin().add(f.scale(along(t))).add(left.scale(aside(t))).add(0, height, 0)
-				: origin().add(f.scale(0.2 + 1.1 * smooth((t - 1) / 6.0))).add(0, 0.7 * (1 - smooth((t - 2) / 5.0)) + height, 0);
-		// The body has weight: it gets there on springs, and goes a little past. Dragged, it does not
-		// lag: it is pulled.
-		double w = t >= DRAG && t < STRIKE ? 0.7 : down ? 0.45 : 0.6;
-		double[] s = spring(pelvis.x, pelvisV.x, want.x, w, 0.55);
-		double px = s[0], pvx = s[1];
-		s = spring(pelvis.y, pelvisV.y, want.y, w, 0.7);
-		double py = s[0], pvy = s[1];
-		s = spring(pelvis.z, pelvisV.z, want.z, w, 0.55);
-		pelvis = new Vec3(px, Math.max(py, ground + 1.5 * PX), s[0]);
-		pelvisV = new Vec3(pvx, pvy, s[1]);
-		s = spring(lift, liftV, wantLift, down ? 0.35 : 0.7, 0.6);
-		lift = s[0];
-		liftV = s[1];
-		s = spring(curl, curlV, wantCurl, 0.3, 0.6);
+
+		// The trunk: each part of it gets where it is going on a spring, with weight, no faster.
+		double[] s;
+		if (t >= SLIP && t < CRAWL && lift > 0.0) {
+			// Nothing holding them up: they tip forward under their own weight, faster and faster,
+			// until the hands take it and the chest comes down.
+			liftV -= 0.035 * Math.cos(lift) + (t >= SLIP + 4 ? 0.2 * liftV : 0);
+			lift = Math.max(0.0, lift + liftV);
+			if (lift <= 0.0) liftV = 0;
+		} else if (t >= LANDED) {
+			s = spring(lift, liftV, wantLift, quick);
+			lift = s[0];
+			liftV = s[1];
+		}
+		s = spring(curl, curlV, wantCurl, 0.3);
 		curl = s[0];
 		curlV = s[1];
-		s = spring(roll, rollV, wantRoll, t >= ROLL && t < KNEEL ? 0.32 : 0.3, 0.6);
-		roll = s[0];
-		rollV = s[1];
-		s = spring(nod, nodV, wantNod, 0.5, 0.5);
+		if (t >= ROLL && t < PUSHUP) {
+			// Turning over: the hips round on their way.
+			double was = roll;
+			roll = wantRoll;
+			rollV = roll - was;
+		} else {
+			s = spring(roll, rollV, wantRoll, 0.3);
+			roll = s[0];
+			rollV = s[1];
+		}
+		// The shoulders go round a few ticks ahead of the hips.
+		s = spring(twist, twistV, rollAt(t + 5) - rollAt(t), 0.45);
+		twist = s[0];
+		twistV = s[1];
+		s = spring(nod, nodV, wantNod, 0.4);
 		nod = s[0];
 		nodV = s[1];
-		// Things that hit the whole body at once.
-		if (t == SLIP + 4) {
-			liftV -= 0.05;
-			pelvisV = pelvisV.add(0, -0.03, 0);
+		// Turning over a body on the ground carries it sideways: it rolls over its edge, and the
+		// middle of it goes along by how high the middle is over where it touches.
+		if (t >= ROLL && t <= PUSHUP) {
+			double a = 4 * PX, b = 2 * PX;
+			double r = roll + twist / 2;
+			aside += (a * Math.abs(Math.sin(r)) + b * Math.abs(Math.cos(r))) * Math.max(0, rollV + twistV / 2);
 		}
-		if (t == STRIKE) {
-			liftV -= 0.06;
-			rollV += 0.12;
-			pelvisV = pelvisV.add(0, -0.03, 0);
+		// Along the ground: where they mean to be, with weight.
+		Vec3 flat = origin().add(f.scale(along(t))).add(left.scale(aside));
+		double w = t >= DRAG && t < STRIKE ? 0.55 : 0.35;
+		s = spring(pelvis.x, vx, flat.x, w);
+		double px = s[0];
+		vx = s[1];
+		s = spring(pelvis.z, vz, flat.z, w);
+		vz = s[1];
+		pelvis = new Vec3(px, pelvis.y, s[0]);
+
+		limbs(t, it);
+		head();
+		settle(hip);
+	}
+
+	/**
+	 * How high the body is: held up only by what it rests on. It rests on its lowest part on the
+	 * ground, unless the legs and arms planted under it are holding it up higher, and they can hold
+	 * it up only as far as they reach. Above what holds it, it falls.
+	 */
+	private void settle(double hip) {
+		double low = lowest();
+		double yMin = pelvis.y + (ground - low);
+		double yMax = Double.MAX_VALUE;
+		for (Limb l : all()) {
+			if (!l.weight || l.plant == null) continue;
+			Vec3 root = root(l);
+			double hz = Math.hypot(root.x - l.plant.x, root.z - l.plant.z), reach = l.length() * 0.985;
+			if (hz >= reach) continue;
+			yMax = Math.min(yMax, pelvis.y + (l.plant.y + Math.sqrt(reach * reach - hz * hz) - root.y));
 		}
-		legPole[0] = legPole[1] = armPole[0] = armPole[1] = null;
-		feet(t, it);
-		hands(t, it);
-	}
-
-	/** The point on the ground under p, a hair above it. */
-	private Vec3 onGround(Vec3 p) {
-		return new Vec3(p.x, ground + 0.5 * PX, p.z);
-	}
-
-	private void plantFoot(int i, Vec3 to, int t) {
-		footFrom[i] = feet[i] != null ? feet[i] : to;
-		footTo[i] = to;
-		footAt[i] = t;
-	}
-
-	private void plantHand(int i, Vec3 to, int t) {
-		handFrom[i] = hands[i] != null ? hands[i] : to;
-		handTo[i] = to;
-		handAt[i] = t;
-	}
-
-	/** Put {@code to} as where foot i is going, unless it is already going about there. */
-	private void footTo(int i, Vec3 to, int t, double slack) {
-		if (footTo[i] == null || footTo[i].distanceTo(to) > slack) plantFoot(i, to, t);
-	}
-
-	private void handTo(int i, Vec3 to, int t, double slack) {
-		if (handTo[i] == null || handTo[i].distanceTo(to) > slack) plantHand(i, to, t);
-	}
-
-	/** On its way from where it was to where it is going: lifted off the ground in between. */
-	private static Vec3 carried(Vec3 from, Vec3 to, int since, int over, double high) {
-		double g = Math.min(1.0, Math.max(0.0, since / (double) over));
-		double e = g * g * (3 - 2 * g);
-		return from.lerp(to, e).add(0, high * Math.sin(Math.PI * g), 0);
-	}
-
-	private void feet(int t, Vec3 it) {
-		Frame pl = pelvisFrame();
-		for (int i = 0; i < 2; i++) {
-			double side = i == 0 ? 1 : -1;
-			Vec3 hip = point(pl, 1.9 * side, 0, 0);
-			Vec3 out = pl.x.scale(side);
-			if (t < 7) {
-				// Going over backwards: the feet come up off the ground.
-				feet[i] = hip.subtract(f.scale(0.45)).add(0, 0.25 + 0.1 * side, 0);
-				footTo[i] = null;
-				continue;
+		double want = Double.isNaN(hip) ? yMin : Math.max(yMin, Math.min(yMax, ground + hip));
+		double y = pelvis.y;
+		if (want < y - 1.0e-3) {
+			// Nothing holding it up here: it falls, faster and faster, until it is stopped.
+			vy -= G;
+			y += vy;
+			if (y <= want) {
+				y = want;
+				vy = 0;
 			}
-			if (t < SCRAMBLE - 2) {
-				// Down flat, legs out straight along the ground.
-				feet[i] = onGround(hip.subtract(f.scale(0.68))).add(out.scale(0.08));
-				footTo[i] = null;
-				continue;
-			}
-			if (t < KICK) {
-				// Heels dug in in front of them, knees up; re-planted after each shove of that leg.
-				int k = which(SHOVES, t, 10);
-				double u = k >= 0 ? (t - SHOVES[k]) / 10.0 : 0;
-				Vec3 spot = onGround(hip.subtract(f.scale(0.44)).add(out.scale(0.06)));
-				boolean mine = k >= 0 && k % 2 == i;
-				if (footTo[i] == null) {
-					plantFoot(i, spot, t);
-				} else if (mine && u >= 0.5 && footAt[i] < SHOVES[k] + 5) {
-					plantFoot(i, onGround(spot.add(f.scale(0.08))), t);
-				} else if (!mine && k >= 0 && u >= 0.7 && footTo[i].distanceTo(spot) > 0.2) {
-					plantFoot(i, spot, t);
-				}
-				feet[i] = carried(footFrom[i], footTo[i], t - footAt[i], 4, 0.07);
-				continue;
-			}
-			if (t < ROLL) {
-				// Kicking at it: the leg driven out straight at it and drawn back, fast; the other
-				// one drawn up ready, its heel on the ground.
-				int k = which(KICKS, t, 4);
-				Vec3 drawn = hip.subtract(f.scale(0.22)).add(0, 0.34, 0).add(out.scale(0.05));
-				Vec3 want = drawn;
-				if (k >= 0 && k % 2 == i) {
-					double u = (t - KICKS[k]) / 4.0;
-					Vec3 kicked = hip.subtract(f.scale(0.62)).add(0, 0.3 + 0.05 * side, 0).add(out.scale(0.03));
-					want = u < 0.4 ? drawn.lerp(kicked, smooth(u / 0.4)) : kicked.lerp(drawn, smooth((u - 0.4) / 0.6));
-				} else if (k < 0 && t >= KICKS[KICKS.length - 1] + 4) {
-					want = onGround(hip.subtract(f.scale(0.5)));
-				}
-				feet[i] = feet[i] == null ? want : feet[i].lerp(want, 0.7);
-				footTo[i] = null;
-				continue;
-			}
-			if (t < KNEEL) {
-				// Turning over: the legs go over with the body, along the ground.
-				Vec3 want = onGround(hip.subtract(f.scale(0.62)));
-				feet[i] = feet[i].lerp(want, 0.4);
-				footTo[i] = null;
-				continue;
-			}
-			if (t < RISE || (t < SLIP && i == 0)) {
-				// Kneeling: knee down under the hip, the shin back along the ground.
-				legPole[i] = pl.z.add(f.scale(0.4));
-				footTo(i, onGround(hip.subtract(f.scale(0.38)).add(out.scale(0.03))), t, 0.12);
-				feet[i] = carried(footFrom[i], footTo[i], t - footAt[i], 4, 0.05);
-				continue;
-			}
-			if (t < SLIP) {
-				// The right foot brought up under them, flat, the knee up in front.
-				legPole[i] = f.add(UP.scale(0.6));
-				footTo(i, onGround(hip.add(f.scale(0.2)).add(out.scale(0.05))), t, 0.3);
-				feet[i] = carried(footFrom[i], footTo[i], t - footAt[i], 5, 0.12);
-				continue;
-			}
-			if (t < CRAWL) {
-				// It slips out backwards from under them; both legs go out straight behind.
-				Vec3 want = onGround(hip.subtract(f.scale(0.66)).add(out.scale(0.06)));
-				feet[i] = feet[i].lerp(want, i == 1 && t < SLIP + 3 ? 0.65 : 0.35);
-				footTo[i] = null;
-				continue;
-			}
-			if (t < DRAG) {
-				// Flat behind them, toes dug in; the knee on the side of the pull drawn up to push.
-				int k = which(PULLS, t, 8);
-				Vec3 trail = onGround(hip.subtract(f.scale(0.66)).add(out.scale(0.07)));
-				Vec3 want = trail;
-				if (k >= 0 && k % 2 != i) {
-					legPole[i] = out.add(pl.z.scale(0.5));
-					want = onGround(hip.subtract(f.scale(0.42)).add(out.scale(0.24))).lerp(trail, smooth(((t - PULLS[k]) / 8.0 - 0.5) / 0.5));
-				}
-				feet[i] = feet[i].lerp(want, 0.45);
-				footTo[i] = null;
-				continue;
-			}
-			if (t < STRIKE) {
-				// Its leg has the right foot: held up off the ground, the leg out straight behind; the
-				// other one dragged along the ground.
-				Vec3 want = i == 1 ? hip.subtract(f.scale(0.68)).add(0, 0.14, 0) : onGround(hip.subtract(f.scale(0.64)).add(out.scale(0.08)));
-				feet[i] = feet[i].lerp(want, 0.6);
-				footTo[i] = null;
-				continue;
-			}
-			// Its legs into their back: the feet jerk up off the ground and drop.
-			Vec3 want = onGround(hip.subtract(f.scale(0.64)).add(out.scale(0.08)));
-			if (t < STRIKE + 2) want = want.add(0, 0.16, 0);
-			feet[i] = feet[i].lerp(want, 0.6);
-			footTo[i] = null;
+		} else {
+			double[] s = spring(y, vy, want, 0.35);
+			y = s[0];
+			vy = s[1];
+		}
+		if (y < yMin) {
+			y = yMin;
+			vy = Math.max(0, vy);
+		}
+		pelvis = new Vec3(pelvis.x, y, pelvis.z);
+		// A bent limb does not rise as far as the hips do; so again, until nothing is in the ground.
+		for (int k = 0; k < 3; k++) {
+			double under = ground - lowest();
+			if (under < 0.002) break;
+			pelvis = pelvis.add(0, under, 0);
+			vy = Math.max(0, vy);
 		}
 	}
 
-	private void hands(int t, Vec3 it) {
+	/** The lowest point of the body: what it rests on. */
+	private double lowest() {
+		double low = Double.MAX_VALUE;
+		for (Part q : parts(Vec3.ZERO)) {
+			for (int k = 0; k < 8; k++) {
+				double y = q.m[7] + ((k & 1) * q.m[4]) + (((k >> 1) & 1) * q.m[5]) + (((k >> 2) & 1) * q.m[6]);
+				low = Math.min(low, y);
+			}
+		}
+		return low;
+	}
+
+	private Limb[] all() {
+		return new Limb[]{feet[0], feet[1], hands[0], hands[1]};
+	}
+
+	/** Where a limb starts: the hip or the shoulder. */
+	private Vec3 root(Limb l) {
+		return l.arm ? point(chestFrame(), 6 * l.side, 4, 0) : point(pelvisFrame(), 1.9 * l.side, 0, 0);
+	}
+
+	/**
+	 * The head turned to look, as near as a neck lets it (tipped back a little, forward more,
+	 * turned either way not quite to the shoulder), the nearest way from how it is held; on
+	 * springs, never snapped round.
+	 */
+	private void head() {
 		Frame c = chestFrame();
+		double wantP = nod, wantY = 0;
+		if (look != null) {
+			Vec3 d = look.subtract(point(c, 0, 6, 0)).normalize();
+			double best = -9;
+			for (int i = 0; i <= 22; i++) {
+				double hp = -1.0 + 2.2 * i / 22;
+				Vec3 z1 = rotate(c.z, c.x, hp), y1 = rotate(c.y, c.x, hp);
+				for (int j = 0; j <= 24; j++) {
+					double hy = -1.2 + 2.4 * j / 24;
+					double score = rotate(z1, y1, hy).dot(d) - 0.03 * (Math.abs(hp - headP) + Math.abs(hy - headY));
+					if (score > best) {
+						best = score;
+						wantP = hp;
+						wantY = hy;
+					}
+				}
+			}
+			wantP += nod;
+		}
+		// A head is heavy: it can only be got going so fast.
+		double aP = Math.max(-0.05, Math.min(0.05, 0.3 * 0.3 * (wantP - headP) - 2 * 0.3 * headPV));
+		headPV += aP;
+		headP += headPV;
+		double aY = Math.max(-0.05, Math.min(0.05, 0.3 * 0.3 * (wantY - headY) - 2 * 0.3 * headYV));
+		headYV += aY;
+		headY += headYV;
+	}
+
+	// ---------------------------------------------------------------- hands and feet
+
+	/** A point on the ground at p, as high as half a limb is thick, so it rests on the ground. */
+	private Vec3 onGround(Vec3 p) {
+		return new Vec3(p.x, ground + 2.08 * PX, p.z);
+	}
+
+	/** Planted at p (moving there first if it is not there, up over the ground and down). */
+	private void plant(Limb l, Vec3 p, int t, double arc, boolean weight, double slack) {
+		if (l.at == null) l.at = p;
+		if (l.plant == null || l.plant.distanceTo(p) > slack) {
+			double d = l.at.distanceTo(p);
+			l.from = l.at;
+			l.fromVel = l.vel;
+			l.plant = p;
+			l.since = t;
+			l.over = (int) Math.max(4, Math.min(10, Math.round(4 + 12 * d)));
+			l.arc = arc * Math.min(1.0, d / 0.2);
+			// The straight way would take it in through its own shoulder or hip: round, instead.
+			Vec3 r = root(l), mid = l.from.lerp(p, 0.5), way = p.subtract(l.from);
+			Vec3 off = mid.subtract(r);
+			if (way.lengthSqr() > 1e-6) off = off.subtract(way.scale(off.dot(way) / way.lengthSqr()));
+			double clear = l.length() * 0.45;
+			l.bow = off.length() < clear && off.lengthSqr() > 1e-8 ? off.normalize().scale(clear - off.length())
+					: off.lengthSqr() <= 1e-8 ? UP.scale(clear) : Vec3.ZERO;
+		}
+		Vec3 was = l.at;
+		if (l.carrying(t)) {
+			// On its way, going on as fast as it was going at first, and slowing to rest there.
+			double g = clamp01((t - l.since + 1.0) / l.over);
+			double g3 = g * g * g, g4 = g3 * g, g5 = g4 * g;
+			double h01 = 10 * g3 - 15 * g4 + 6 * g5, h00 = 1 - h01, h10 = g - 6 * g3 + 8 * g4 - 3 * g5;
+			l.at = l.from.scale(h00).add(l.fromVel.scale(h10 * l.over)).add(l.plant.scale(h01)).add(0, l.arc * Math.sin(Math.PI * g), 0)
+					.add(l.bow.scale(Math.sin(Math.PI * g)));
+			if (l.at.y < ground + 2.08 * PX) l.at = new Vec3(l.at.x, ground + 2.08 * PX, l.at.z);
+			l.weight = false;
+		} else {
+			l.at = l.plant;
+			l.weight = weight;
+		}
+		l.vel = l.at.subtract(was);
+	}
+
+	/** Slid along the ground to p, never lifted: a foot going out from under them, a hand dragged. */
+	private void slide(Limb l, Vec3 p) {
+		l.vel = l.at == null ? Vec3.ZERO : p.subtract(l.at);
+		l.at = p;
+		l.plant = p;
+		l.from = null;
+		l.weight = false;
+	}
+
+	/** Held free, following p on a spring (quickness w): a hand up, a foot kicking. */
+	private void hold(Limb l, Vec3 p, double w) {
+		if (l.at == null) l.at = p;
+		l.plant = null;
+		l.weight = false;
+		Vec3 a = p.subtract(l.at).scale(w * w).subtract(l.vel.scale(2 * w));
+		l.vel = l.vel.add(a);
+		l.at = l.at.add(l.vel);
+		if (l.at.y < ground + 2 * PX) {
+			l.at = new Vec3(l.at.x, ground + 2 * PX, l.at.z);
+			l.vel = new Vec3(l.vel.x * 0.5, Math.max(0, l.vel.y), l.vel.z * 0.5);
+		}
+	}
+
+	private void bend(Limb l, Vec3 pole) {
+		l.poleWant = pole.normalize();
+	}
+
+	private void limbs(int t, Vec3 it) {
+		Frame p = pelvisFrame(), c = chestFrame();
 		Vec3 face = it == null ? pelvis.subtract(f.scale(2)).add(0, 3, 0) : it;
+		for (Limb l : all()) l.poleWant = null;
 		for (int i = 0; i < 2; i++) {
+			Limb foot = feet[i], hand = hands[i];
 			double side = i == 0 ? 1 : -1;
-			Vec3 shoulder = point(c, 6 * side, 4, 0);
-			Vec3 out = c.x.scale(side);
-			if (t < 7) {
-				// Thrown back: the arms fly up and out.
-				hands[i] = shoulder.add(out.scale(0.25)).add(0, 0.35, 0).subtract(f.scale(0.1));
-				handTo[i] = null;
+			Vec3 hip = point(p, 1.9 * side, 0, 0), shoulder = point(c, 6 * side, 4, 0);
+			Vec3 legOut = p.x.scale(side), armOut = c.x.scale(side);
+			if (t < LANDED) {
+				// Falling: the feet coming up off the ground, the arms thrown up and out.
+				hold(foot, hip.subtract(f.scale(0.35)).add(0, 0.1 + 0.25 * ease(t / 6.0), 0).add(legOut.scale(0.06)), 0.5);
+				hold(hand, shoulder.add(armOut.scale(0.3)).add(0, 0.25, 0), 0.45);
 				continue;
 			}
 			if (t < SCRAMBLE) {
-				// Flung out where they landed, and the left one coming up off the ground.
-				Vec3 flung = onGround(shoulder.add(out.scale(0.42)).subtract(f.scale(0.1)));
-				if (i == 0 && t >= 11) flung = flung.add(0, 0.2, 0).subtract(f.scale(0.1));
-				hands[i] = hands[i] == null ? flung : hands[i].lerp(flung, 0.4);
-				handTo[i] = null;
+				// Down: legs out along the ground, arms flung out; the left hand coming up off it.
+				plant(foot, onGround(hip.subtract(f.scale(0.66)).add(legOut.scale(0.07))), t, 0.05, true, 0.15);
+				if (i == 0 && t >= LANDED + 4) hold(hand, shoulder.add(armOut.scale(0.2)).add(0, 0.3, 0).subtract(f.scale(0.15)), 0.3);
+				else plant(hand, onGround(shoulder.add(armOut.scale(0.38)).subtract(f.scale(0.08))), t, 0.06, false, 0.15);
 				continue;
 			}
 			if (t < KICK) {
+				// Heels dug in in front of them, knees up; each shove of that leg straightens it, and
+				// the foot is brought in again nearer.
+				int k = which(SHOVES, t, 10);
+				double u = k >= 0 ? (t - SHOVES[k]) / 10.0 : 0;
+				Vec3 spot = onGround(hip.subtract(f.scale(0.42)).add(legOut.scale(0.06)));
+				boolean pushing = k >= 0 && u < 0.6;
+				plant(foot, pushing ? foot.plant : spot, t, 0.08, true, pushing ? 9 : 0.12);
 				if (i == 0) {
-					// Up at it, shaking, the arm not quite straight; waved at it as they cry out.
+					// Up at it, the arm not quite straight, shaking.
 					Vec3 to = face.subtract(shoulder).normalize();
 					Vec3 across = to.cross(UP).normalize();
-					Vec3 held = shoulder.add(to.scale(10 * PX * 0.86)).add(UP.scale(0.04));
-					if (t >= 26 && t < 40) held = held.add(across.scale(0.1 * Math.sin(t * 0.9))).add(UP.scale(0.04 * Math.sin(t * 1.8)));
-					held = held.add(across.scale(shake(t, 1.7) * 0.025)).add(UP.scale(shake(t, 4.1) * 0.02));
-					armPole[i] = out.add(UP.scale(-0.6));
-					hands[i] = hands[i].lerp(held, 0.55);
-					handTo[i] = null;
+					double shake = Math.sin(t * 1.3) * 0.5 + Math.sin(t * 2.1 + 1) * 0.3;
+					hold(hand, shoulder.add(to.scale(10 * PX * 0.85)).add(UP.scale(0.04)).add(across.scale(0.02 * shake)), 0.35);
+					bend(hand, armOut.add(UP.scale(-0.6)));
 				} else {
-					// Behind them, propped on it; put down again further back when it is left behind.
-					int k = which(SHOVES, t, 10);
-					double u = k >= 0 ? (t - SHOVES[k]) / 10.0 : 0;
-					Vec3 spot = onGround(pelvis.add(f.scale(0.26)).add(out.scale(0.24)));
-					if (handTo[i] == null || (handTo[i].distanceTo(spot) > 0.16 && t - handAt[i] > 5 && (k < 0 || u > 0.55))) plantHand(i, spot, t);
-					hands[i] = carried(handFrom[i], handTo[i], t - handAt[i], 4, 0.06);
+					// Propped on it behind them; put down again when the body has gone back past it.
+					plant(hand, onGround(pelvis.add(f.scale(0.28)).add(armOut.scale(0.26))), t, 0.06, true, 0.15);
 				}
 				continue;
 			}
 			if (t < ROLL) {
-				// Both hands down behind them, leaning back on them to kick.
-				handTo(i, onGround(shoulder.add(out.scale(0.16)).add(f.scale(0.12))), t, 0.18);
-				hands[i] = carried(handFrom[i], handTo[i], t - handAt[i], 3, 0.08);
+				// Both hands down behind, leaning back on them; the leg driven out at it and drawn
+				// back, one and then the other; the other drawn up ready.
+				plant(hand, onGround(shoulder.add(armOut.scale(0.15)).add(f.scale(0.14))), t, 0.08, true, 0.18);
+				int k = which(KICKS, t, 5);
+				Vec3 drawn = hip.subtract(f.scale(0.24)).add(0, 0.32, 0).add(legOut.scale(0.06));
+				Vec3 want = drawn;
+				double w = 0.4;
+				if (k >= 0 && k % 2 == i) {
+					double u = (t - KICKS[k]) / 5.0;
+					Vec3 out = hip.subtract(f.scale(0.62)).add(0, 0.26, 0).add(legOut.scale(0.03));
+					want = u < 0.45 ? out : drawn;
+					w = u < 0.45 ? 0.62 : 0.45;
+				} else if (t >= KICKS[KICKS.length - 1] + 5) {
+					want = onGround(hip.subtract(f.scale(0.5)).add(legOut.scale(0.08)));
+				}
+				hold(foot, want, w);
 				continue;
 			}
-			if (t < KNEEL) {
-				// Over: the right arm reaches across them to the ground on their left and pulls; the
-				// left one tucked under as they go over it.
-				Vec3 spot = i == 1 ? onGround(chestPoint().add(left.scale(0.45)).add(f.scale(0.08)))
-						: onGround(shoulder.add(left.scale(0.12)));
-				handTo(i, spot, t, 0.2);
-				hands[i] = carried(handFrom[i], handTo[i], t - handAt[i], 4, 0.12);
-				continue;
-			}
-			if (t < RISE) {
-				// Hands and knees: hands flat under the shoulders, elbows back.
-				armPole[i] = f.scale(-1).add(out.scale(0.3));
-				handTo(i, onGround(shoulder.add(f.scale(0.04)).add(out.scale(0.03))), t, 0.12);
-				hands[i] = carried(handFrom[i], handTo[i], t - handAt[i], 4, 0.08);
-				continue;
-			}
-			if (t < SLIP) {
-				// Pushing up: the right hand shoves off the raised knee; the left comes up off the
-				// ground and out, for balance.
-				Vec3 want = i == 1 ? point(pelvisFrame(), -1.9, 0, 0).add(f.scale(0.3)).add(0, 0.12, 0)
-						: shoulder.add(f.scale(0.3)).add(out.scale(0.22)).subtract(0, 0.25, 0);
-				hands[i] = hands[i].lerp(want, 0.35);
-				handTo[i] = null;
-				continue;
-			}
-			if (t < CRAWL) {
-				// Falling: both hands thrown out ahead to catch themselves, and slapped down.
-				handTo(i, onGround(shoulder.add(f.scale(0.34)).add(out.scale(0.1))), t, 0.25);
-				hands[i] = carried(handFrom[i], handTo[i], t - handAt[i], 3, 0.06);
-				continue;
-			}
-			if (t < DRAG) {
-				// Clawing along: on its pull, the arm reaches out far ahead and the hand digs in;
-				// the body is pulled up to it. The other hand stays where it dug in.
-				armPole[i] = out.add(UP.scale(0.8)).subtract(f.scale(0.3));
-				int k = which(PULLS, t, 8);
-				if (k >= 0 && k % 2 == i && t == PULLS[k]) plantHand(i, onGround(shoulder.add(f.scale(0.44)).add(out.scale(0.06))), t);
-				if (handTo[i] == null) plantHand(i, onGround(shoulder.add(f.scale(0.2)).add(out.scale(0.08))), t);
-				hands[i] = carried(handFrom[i], handTo[i], t - handAt[i], 4, 0.12);
-				continue;
-			}
-			if (t < STRIKE) {
-				// Raking the dirt as they go: each hand digs in and is dragged out of it when the
-				// arm is pulled straight, and reaches out ahead again.
-				armPole[i] = out.add(UP.scale(0.8)).subtract(f.scale(0.3));
-				boolean reach = t == DRAG + 3 + 5 * i || t == DRAG + 11 + 3 * i;
-				if (handTo[i] == null || reach) plantHand(i, onGround(shoulder.add(f.scale(0.46)).add(out.scale(0.08))), t);
-				hands[i] = carried(handFrom[i], handTo[i], t - handAt[i], 3, 0.1);
-				// Pulled straight: the hand comes with the body, furrowing the ground.
-				double reachOf = 10 * PX * 0.97;
-				if (hands[i].distanceTo(shoulder) > reachOf) {
-					Vec3 d = hands[i].subtract(shoulder).normalize();
-					hands[i] = onGround(shoulder.add(d.scale(reachOf)));
-					handTo[i] = hands[i];
-					handFrom[i] = hands[i];
+			if (t < PUSHUP) {
+				// Turning over: the right arm reaches across them to the ground on their left and
+				// pulls; the left one goes up past their head, out of the way; the right knee comes up
+				// and over, and the legs follow the hips round.
+				double u = (t - ROLL) / (double) ROLL_TICKS;
+				if (i == 1) {
+					if (u < 0.75) {
+						plant(hand, onGround(pelvis.add(f.scale(0.55)).add(left.scale(0.5))), t, 0.18, true, 0.25);
+					} else {
+						plant(hand, onGround(shoulder.add(f.scale(0.06)).add(armOut.scale(0.04))), t, 0.1, true, 0.15);
+					}
+					if (u > 0.15 && u < 0.7) {
+						hold(foot, hip.subtract(f.scale(0.4)).add(left.scale(0.22)).add(0, 0.16, 0), 0.35);
+						bend(foot, UP.add(f.scale(0.4)));
+					} else {
+						plant(foot, onGround(hip.subtract(f.scale(0.64)).add(legOut.scale(0.07))), t, 0.08, false, 0.15);
+					}
+				} else {
+					if (u < 0.75) plant(hand, onGround(shoulder.add(f.scale(0.4)).add(left.scale(0.12))), t, 0.15, false, 0.2);
+					else plant(hand, onGround(shoulder.add(f.scale(0.06)).add(armOut.scale(0.04))), t, 0.1, true, 0.15);
+					plant(foot, onGround(hip.subtract(f.scale(0.64)).add(legOut.scale(0.07))), t, 0.05, false, 0.15);
 				}
 				continue;
 			}
-			// Flung out as its legs come down into them.
-			Vec3 want = onGround(shoulder.add(f.scale(0.3)).add(out.scale(0.35)));
-			if (t < STRIKE + 2) want = want.add(0, 0.12, 0);
-			hands[i] = hands[i].lerp(want, 0.5);
-			handTo[i] = null;
+			if (t < RISE) {
+				// Hands flat under the shoulders, elbows back, pushing; the knees drawn up under the
+				// hips as they come up, the shins back along the ground.
+				double u = t - PUSHUP;
+				plant(hand, onGround(shoulder.add(f.scale(0.04)).add(armOut.scale(0.04))), t, 0.08, true, 0.16);
+				bend(hand, f.scale(-1).add(armOut.scale(0.4)));
+				if (u < 5) {
+					plant(foot, onGround(hip.subtract(f.scale(0.64)).add(legOut.scale(0.07))), t, 0.05, false, 0.15);
+				} else {
+					plant(foot, onGround(hip.subtract(f.scale(0.36)).add(legOut.scale(0.05))), t, 0.06, true, 0.1);
+					bend(foot, p.z.add(f.scale(0.5)));
+				}
+				continue;
+			}
+			if (t < SLIP) {
+				// The right foot brought up under them and set down flat in front; then up off the
+				// hands: the right one pushing on that knee, the left out for balance.
+				double u = t - RISE;
+				if (i == 1) {
+					plant(foot, onGround(hip.add(f.scale(0.26)).add(legOut.scale(0.08))), t, 0.14, u >= 5, 0.2);
+					bend(foot, f.add(UP.scale(0.7)));
+				} else {
+					plant(foot, onGround(hip.subtract(f.scale(0.36)).add(legOut.scale(0.05))), t, 0.06, true, 0.14);
+					bend(foot, p.z.add(f.scale(0.5)));
+				}
+				if (u < 6) {
+					plant(hand, onGround(shoulder.add(f.scale(0.04)).add(armOut.scale(0.04))), t, 0.08, true, 0.18);
+					bend(hand, f.scale(-1).add(armOut.scale(0.4)));
+				} else if (i == 1) {
+					hold(hand, point(p, -1.9, 0, 0).add(f.scale(0.28)).add(0, 0.12, 0), 0.3);
+				} else {
+					hold(hand, shoulder.add(f.scale(0.25)).add(armOut.scale(0.25)).subtract(0, 0.22, 0), 0.3);
+				}
+				continue;
+			}
+			if (t < CRAWL) {
+				// The front foot skids back out from under them; they come down onto their hands,
+				// thrown out ahead to catch them, and the back knee; then the legs slide out behind
+				// and they go down flat.
+				double u = t - SLIP;
+				Vec3 trail = onGround(hip.subtract(f.scale(0.64)).add(legOut.scale(0.07)));
+				if (i == 1) {
+					if (u == 0) skid = foot.at;
+					if (u < 5) slide(foot, skid.lerp(trail, ease((u + 1) / 5.0)));
+					else plant(foot, trail, t, 0.03, false, 0.15);
+				} else if (u < 6) {
+					plant(foot, foot.plant, t, 0.03, true, 9);
+				} else {
+					slide(foot, foot.at.lerp(trail, 0.35));
+				}
+				plant(hand, onGround(shoulder.add(f.scale(0.34)).add(armOut.scale(0.1))), t, 0.06, u >= 3, 0.25);
+				continue;
+			}
+			if (t < DRAG) {
+				// Clawing along: on its pull, the arm reaches out far ahead, the hand digs in, and the
+				// body is pulled up to it; the other hand stays dug in. The knee on the other side
+				// draws up and pushes; otherwise the legs trail, toes in the dirt.
+				int k = which(PULLS, t, 9);
+				Vec3 reach = onGround(shoulder.add(f.scale(0.44)).add(armOut.scale(0.06)));
+				if (k >= 0 && k % 2 == i && t == PULLS[k]) plant(hand, reach, t, 0.12, true, 0.0);
+				else plant(hand, hand.plant != null ? hand.plant : reach, t, 0.12, true, 9);
+				bend(hand, armOut.add(UP.scale(0.8)).subtract(f.scale(0.3)));
+				Vec3 trail = onGround(hip.subtract(f.scale(0.64)).add(legOut.scale(0.07)));
+				if (k >= 0 && k % 2 != i) {
+					double u = (t - PULLS[k]) / 9.0;
+					plant(foot, u < 0.55 ? onGround(hip.subtract(f.scale(0.44)).add(legOut.scale(0.24))) : trail, t, 0.06, u >= 0.55, 0.1);
+					bend(foot, legOut.add(p.z.scale(0.5)));
+				} else {
+					plant(foot, trail, t, 0.03, false, 0.12);
+				}
+				continue;
+			}
+			if (t < STRIKE) {
+				// The right ankle in its grip, the leg pulled out straight behind, off the ground; the
+				// left leg dragged along. The hands rake the dirt: dug in until the arm is pulled
+				// straight, then dragged; and reached out ahead again.
+				if (i == 1) hold(foot, hip.subtract(f.scale(0.68)).add(0, 0.14, 0), 0.6);
+				else slide(foot, onGround(hip.subtract(f.scale(0.64)).add(legOut.scale(0.08))));
+				Vec3 reach = onGround(shoulder.add(f.scale(0.46)).add(armOut.scale(0.08)));
+				boolean again = t == DRAG + 4 + 5 * i || t == DRAG + 11 + 2 * i;
+				if (hand.plant == null || again) plant(hand, reach, t, 0.1, false, 0.0);
+				else plant(hand, hand.plant, t, 0.1, false, 9);
+				double longest = 10 * PX * 0.97;
+				if (!hand.carrying(t) && hand.at.distanceTo(shoulder) > longest) {
+					Vec3 d = hand.at.subtract(shoulder).normalize();
+					slide(hand, onGround(shoulder.add(d.scale(longest))));
+				}
+				bend(hand, armOut.add(UP.scale(0.8)).subtract(f.scale(0.3)));
+				continue;
+			}
+			// Its legs into their back: the hands jerk up off the ground and fall back; the feet too.
+			double u = t - STRIKE;
+			Vec3 flung = onGround(shoulder.add(f.scale(0.3)).add(armOut.scale(0.35)));
+			if (u < 2) hold(hand, flung.add(0, 0.12, 0), 0.6);
+			else plant(hand, flung, t, 0.05, false, 0.2);
+			if (i == 1 && u < 2) hold(foot, hip.subtract(f.scale(0.66)).add(0, 0.16, 0), 0.6);
+			else plant(foot, onGround(hip.subtract(f.scale(0.64)).add(legOut.scale(0.08))), t, 0.04, false, 0.2);
+		}
+		// Elbows and knees eased round to where they are meant to point; and however the limb is
+		// moved, the joint turns about it only so fast, so it never flips over to the other side
+		// as the limb goes straight.
+		for (Limb l : all()) {
+			Vec3 want = l.poleWant != null ? l.poleWant : defaultPole(l);
+			l.pole = l.pole == null ? want : l.pole.lerp(want, 0.3).normalize();
+			Vec3 line = l.at.subtract(root(l));
+			if (line.lengthSqr() < 1e-6) continue;
+			Vec3 u = line.normalize();
+			Vec3 n = l.pole.subtract(u.scale(l.pole.dot(u)));
+			if (n.lengthSqr() < 1e-6) continue;
+			n = n.normalize();
+			if (l.bent != null) {
+				Vec3 prev = l.bent.subtract(u.scale(l.bent.dot(u)));
+				if (prev.lengthSqr() > 1e-6) {
+					prev = prev.normalize();
+					double angle = Math.acos(Math.max(-1, Math.min(1, prev.dot(n))));
+					if (angle > 0.25) {
+						Vec3 side = n.subtract(prev.scale(prev.dot(n)));
+						side = side.lengthSqr() < 1e-6 ? u.cross(prev).normalize() : side.normalize();
+						n = prev.scale(Math.cos(0.25)).add(side.scale(Math.sin(0.25)));
+					}
+				}
+			}
+			l.bent = n;
 		}
 	}
 
-	private Vec3 chestPoint() {
-		return point(chestFrame(), 0, 3, 0);
+	/** Elbows out and to the back of them; knees out of the front of them, and up. */
+	private Vec3 defaultPole(Limb l) {
+		if (l.arm) {
+			Frame c = chestFrame();
+			return c.x.scale(l.side * 0.7).subtract(c.z.scale(0.7)).add(f.scale(0.3)).normalize();
+		}
+		Frame p = pelvisFrame();
+		return p.z.add(p.x.scale(l.side * 0.25)).add(UP.scale(0.3)).normalize();
 	}
 
 	// ---------------------------------------------------------------- the body, built
@@ -573,33 +782,23 @@ final class Person {
 		return new Frame(pelvis, x, y, z);
 	}
 
-	/** Their chest, bent forward from the small of their back by {@code curl}. */
+	/** Their chest, bent forward from the small of their back by {@code curl}, and turned ahead of the hips by {@code twist}. */
 	private Frame chestFrame() {
 		Frame p = pelvisFrame();
 		Vec3 o = point(p, 0, 6, 0);
 		Vec3 y = rotate(p.y, p.x, curl);
 		Vec3 z = rotate(p.z, p.x, curl);
-		return new Frame(o, p.x, y, z);
+		Vec3 x = rotate(p.x, y, twist);
+		z = rotate(z, y, twist);
+		return new Frame(o, x, y, z);
 	}
 
-	/**
-	 * Their head, on their neck, turned to look at {@code look} (as far as a neck goes): tipped
-	 * forward or back first, chin down to see along their body or head back to see ahead of it,
-	 * then turned to one side.
-	 */
+	/** Their head, on their neck: tipped forward or back, then turned. */
 	private Frame headFrame() {
 		Frame c = chestFrame();
 		Vec3 o = point(c, 0, 6, 0);
-		double ly = 0, lp = 0;
-		if (look != null) {
-			Vec3 d = look.subtract(o);
-			double dx = d.dot(c.x), dy = d.dot(c.y), dz = d.dot(c.z);
-			lp = Math.max(-1.0, Math.min(1.2, Math.atan2(-dy, dz)));
-			ly = Math.max(-1.3, Math.min(1.3, Math.atan2(dx, Math.hypot(dy, dz))));
-		}
-		lp += nod;
-		Vec3 z1 = rotate(c.z, c.x, lp), y1 = rotate(c.y, c.x, lp);
-		Vec3 z2 = rotate(z1, y1, ly), x2 = rotate(c.x, y1, ly);
+		Vec3 z1 = rotate(c.z, c.x, headP), y1 = rotate(c.y, c.x, headP);
+		Vec3 z2 = rotate(z1, y1, headY), x2 = rotate(c.x, y1, headY);
 		return new Frame(o, x2, y1, z2);
 	}
 
@@ -627,7 +826,21 @@ final class Person {
 		Vec3 y = from.subtract(to).normalize();
 		Vec3 z = front.subtract(y.scale(front.dot(y)));
 		z = z.lengthSqr() < 1e-9 ? y.cross(new Vec3(1, 0, 0)).normalize() : z.normalize();
-		return new Frame(from, y.cross(z), y, z);
+		return level(new Frame(from, y.cross(z), y, z));
+	}
+
+	/**
+	 * The same bone with its box turned about it (by an eighth of a turn at most) so that one side
+	 * is face down: a limb is square through, so this changes nothing to look at, but a limb lying
+	 * on the ground lies flat on it instead of on an edge sunk into it.
+	 */
+	private static Frame level(Frame fr) {
+		Vec3 up = UP.subtract(fr.y.scale(fr.y.dot(UP)));
+		if (up.lengthSqr() < 0.04) return fr;
+		up = up.normalize();
+		double a = Math.atan2(fr.x.dot(up), fr.z.dot(up));
+		double turn = a - (Math.PI / 2) * Math.round(a / (Math.PI / 2));
+		return new Frame(fr.o, rotate(fr.x, fr.y, turn), fr.y, rotate(fr.z, fr.y, turn));
 	}
 
 	private static Part box(String name, String block, Frame fr, double x0, double x1, double y0, double y1, double z0, double z1, Vec3 anchor) {
@@ -636,9 +849,8 @@ final class Person {
 		return new Part(name, block, new double[]{ex.x, ey.x, ez.x, o.x, ex.y, ey.y, ez.y, o.y, ex.z, ey.z, ez.z, o.z, 0, 0, 0, 1});
 	}
 
-	private List<Part> build(Vec3 anchor) {
+	private List<Part> parts(Vec3 anchor) {
 		Frame p = pelvisFrame(), c = chestFrame(), h = headFrame();
-		chest = point(c, 0, 3, 0);
 		List<Part> out = new ArrayList<>();
 		out.add(box("pelvis", SHIRT, p, -4, 4, -0.5, 6, -2, 2, anchor));
 		out.add(box("chest", SHIRT, c, -4, 4, 0, 6, -2, 2, anchor));
@@ -647,45 +859,25 @@ final class Person {
 		out.add(box("hair_back", HAIR, h, -4.2, 4.2, 2.5, 8.25, -4.25, -3.2, anchor));
 		out.add(box("eye_l", EYES, h, 1.2, 2.7, 3.2, 4.2, 3.95, 4.15, anchor));
 		out.add(box("eye_r", EYES, h, -2.7, -1.2, 3.2, 4.2, 3.95, 4.15, anchor));
-		// Arms: from the shoulder, four pixels to the elbow, six on to the end of the hand; the
-		// elbows out and to the back, unless they are being held some other way.
+		// Arms: from the shoulder, four pixels to the elbow, six on to the end of the hand.
 		for (int i = 0; i < 2; i++) {
-			double side = i == 0 ? 1 : -1;
-			Vec3 shoulder = point(c, 6 * side, 4, 0);
-			Vec3 hand = hands[i] == null ? point(c, 6 * side, -6, 0) : hands[i];
-			Vec3 pole = armPole[i] != null ? armPole[i] : c.x.scale(side * 0.7).subtract(c.z.scale(0.7)).add(f.scale(0.3));
-			Frame[] arm = limb(shoulder, hand, 4, 6, pole);
+			Limb l = hands[i];
+			Vec3 shoulder = point(c, 6 * l.side, 4, 0);
+			Vec3 hand = l.at == null ? point(c, 6 * l.side, -6, 0) : l.at;
+			Frame[] arm = limb(shoulder, hand, 4, 6, l.bent != null ? l.bent : l.pole != null ? l.pole : defaultPole(l));
 			out.add(box("arm_" + (i == 0 ? "l" : "r"), SHIRT, arm[0], -2, 2, -4.3, 2, -2, 2, anchor));
 			out.add(box("forearm_" + (i == 0 ? "l" : "r"), SKIN, arm[1], -2, 2, -6, 0.3, -2, 2, anchor));
 		}
-		// Legs: hip to knee six pixels, knee to sole six; the knees bend out of the front of them.
+		// Legs: hip to knee six pixels, knee to sole six.
 		for (int i = 0; i < 2; i++) {
-			double side = i == 0 ? 1 : -1;
-			Vec3 hip = point(p, 1.9 * side, 0, 0);
-			Vec3 foot = feet[i] == null ? point(p, 1.9 * side, -12, 0) : feet[i];
-			Vec3 pole = legPole[i] != null ? legPole[i] : p.z.add(p.x.scale(side * 0.25)).add(UP.scale(0.3));
-			Frame[] leg = limb(hip, foot, 6, 6, pole);
+			Limb l = feet[i];
+			Vec3 hip = point(p, 1.9 * l.side, 0, 0);
+			Vec3 foot = l.at == null ? point(p, 1.9 * l.side, -12, 0) : l.at;
+			Frame[] leg = limb(hip, foot, 6, 6, l.bent != null ? l.bent : l.pole != null ? l.pole : defaultPole(l));
 			String s = i == 0 ? "l" : "r";
 			out.add(box("thigh_" + s, PANTS, leg[0], -2, 2, -6, 0.3, -2, 2, anchor));
 			out.add(box("shin_" + s, PANTS, leg[1], -2, 2, -4.4, 0.3, -2, 2, anchor));
 			out.add(box("shoe_" + s, SHOES, leg[1], -2.05, 2.05, -6, -4.4, -2.05, 2.05, anchor));
-		}
-		// Nothing below the ground: if any corner is, the whole body comes up by as much.
-		double low = Double.MAX_VALUE;
-		for (Part q : out) for (int n = 0; n < 8; n++) {
-			double y = q.m[7] + anchor.y + ((n & 1) * q.m[4]) + (((n >> 1) & 1) * q.m[5]) + (((n >> 2) & 1) * q.m[6]);
-			low = Math.min(low, y);
-		}
-		if (low < ground) {
-			double up = ground - low;
-			List<Part> lifted = new ArrayList<>();
-			for (Part q : out) {
-				double[] m = q.m.clone();
-				m[7] += up;
-				lifted.add(new Part(q.name, q.block, m));
-			}
-			chest = chest.add(0, up, 0);
-			return lifted;
 		}
 		return out;
 	}
