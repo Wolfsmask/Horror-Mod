@@ -218,27 +218,32 @@ final class Reel {
 		int hit = f.size();
 		Vec3 here = new Vec3(f.x, o.getY(), f.z);
 		Vec3 lens = here.add(fwd.scale(2.4)).add(right.scale(3.9));
-		Vec3 aim = here.add(fwd.scale(1.3)).add(0, 0.8, 0);
+		Vec3 aim = here.add(fwd.scale(1.1)).add(0, 1.45, 0);
 		f.knocked(lens, aim, 0.15, -84.0);
 		int land = f.size();
 		// Everything they try, one after another (see Person), and it after them; it takes them by
 		// the ankle and drags them back, and its legs come down; and the tape stops dead.
 		int stab = hit + Person.STRIKE, end = stab + 2;
-		for (int push : Person.SHOVES) f.markAt(hit + push, "scoot");
+		for (int push : Person.SHOVES) f.markAt(hit + push + 1, push == Person.SHOVES[1] ? "skid" : "scoot");
 		for (int kick : Person.KICKS) f.markAt(hit + kick + 1, "kick");
-		f.markAt(hit + Person.ROLL + 2, "roll");
-		f.markAt(hit + Person.SLIP + 1, "slip");
-		f.markAt(hit + Person.SLIP + 4, "fall");
-		for (int pull : Person.PULLS) f.markAt(hit + pull + 3, "claw");
-		f.markAt(hit + Person.DRAG, "grab");
-		f.markAt(hit + 26, "no1");
-		f.markAt(hit + Person.KICK + 2, "no2");
-		f.markAt(hit + Person.CRAWL + 4, "no3");
+		f.markAt(hit + Person.ROLL + 1, "roll");
+		f.markAt(hit + Person.ROLL + 9, "roll");
+		f.markAt(hit + Person.SLIP, "swept");
+		f.markAt(hit + Person.SLIP + 3, "fall");
+		for (int pull : Person.PULLS) f.markAt(hit + pull + 3, pull == Person.PULLS[1] ? "slipclaw" : "claw");
+		f.markAt(hit + Person.DRAG - 1, "grab");
+		f.markAt(hit + Person.DRAG + 1, "yank");
+		f.markAt(hit + Person.DRAG + 7, "yank");
+		f.markAt(hit + 16, "no1");
+		f.markAt(hit + Person.KICK + 1, "no2");
+		f.markAt(hit + Person.CRAWL + 2, "no3");
 		f.markAt(stab, "stab");
-		// Its own steps after them, and its breathing.
-		for (int step : new int[]{22, 32, 42, 56, 80, 125, 140, 157, 163, 166}) f.markAt(hit + step, "thump");
-		f.markAt(hit + 40, "growl");
-		f.markAt(hit + 100, "growl");
+		// It: a heavy step at each lunge, a leg driven into the dirt beside them, its breathing.
+		for (int step : new int[]{13, 15, 22, 24, 47, 50, 53, 85, 94, 96, Person.STRIKE - 2}) f.markAt(hit + step, "thump");
+		f.markAt(hit + 87, "stomp");
+		f.markAt(hit + 94, "stomp");
+		f.markAt(hit + 60, "growl");
+		f.markAt(hit + Person.DRAG + 3, "growl");
 		f.lie(end - land, -84.0);
 		f.mark("end");
 		// The steps behind them: one after each of theirs, a few ticks late.
@@ -247,25 +252,14 @@ final class Reel {
 			int t = Integer.parseInt(parts[0]);
 			if (parts[1].equals("step") && t >= behindFrom && t < stopped) f.markAt(t + 7, "echo");
 		}
-		// Them, on the ground, jointed as a body is; and where it is, each tick: a lunge with the
-		// blow, still while they fall, then after them a slow step at a time; at their feet as they
-		// kick; watching them try to stand; after them as they crawl; a step back as it drags them;
-		// and over them.
+		// Them, on the ground, jointed as a body is; and where it is, each tick: following them in
+		// lunges and stops, never a walk (see Person.itCame).
 		Person them = new Person(here, fwd);
-		double[][] approach = {{0, 0}, {5, 0.6}, {14, 0.6}, {Person.KICK, 1.9}, {Person.ROLL, 2.3}, {Person.SLIP, 2.5},
-				{Person.DRAG, 3.0}, {Person.DRAG + 6, 2.85}, {Person.STRIKE - 2, 3.6}, {Person.STRIKE + 6, 3.7}};
 		Vec3 down = here.subtract(fwd.scale(2.6));
 		IntFunction<Vec3> it = t -> {
 			if (t < seen) return feet;
 			if (t < hit) return feet.add(fwd.scale(0.65 * smooth((t - seen - 2) / 14.0)));
-			double k = t - hit, d = 3.7;
-			for (int j = 0; j + 1 < approach.length; j++) {
-				if (k >= approach[j][0] && k <= approach[j + 1][0]) {
-					d = approach[j][1] + (approach[j + 1][1] - approach[j][1]) * smooth((k - approach[j][0]) / (approach[j + 1][0] - approach[j][0]));
-					break;
-				}
-			}
-			return down.add(fwd.scale(d));
+			return down.add(fwd.scale(Person.itCame(t - hit)));
 		};
 		f.watching(t -> t >= glance && t < glance + 30 ? Vec3.atBottomCenterOf(farSpot).add(0, 2.4, 0)
 				: t >= breath - 8 ? it.apply(t).add(0, 2.4, 0) : null);
@@ -297,6 +291,7 @@ final class Reel {
 					anchor.x, anchor.y, anchor.z, part[1], part[0]));
 		}
 		context.waitTicks(25);
+		boolean[] made = new boolean[2];
 		try {
 			record(context, server, "found", poses, hit + 4, f, t -> {
 				now = t;
@@ -333,41 +328,44 @@ final class Reel {
 								+ m + "],interpolation_duration:0}");
 					}
 				}
-				// Its leg at the lens as it knocks them down; round their ankle as it drags them; its
-				// legs into their back at the end.
-				boolean atLens = t >= hit - 6 && t <= hit;
-				boolean dragging = t >= hit + Person.DRAG - 2 && t < stab - 6;
-				boolean atChest = t >= stab - 6;
-				double[] held = poses[Math.min(t, hit - 1)];
-				double yr = Math.toRadians(held[3]);
-				Vec3 legAt = new Vec3(held[0], held[1], held[2]).add(-Math.sin(yr) * 0.45, -0.15, Math.cos(yr) * 0.45);
-				if (t == hit - 6) {
-					server.runCommand(String.format(Locale.ROOT, "summon interaction %.3f %.3f %.3f {width:0.01f,height:0.01f,Tags:[\"occupant_reel\"]}",
-							legAt.x, legAt.y, legAt.z));
-				} else if (atLens) {
-					server.runCommand(String.format(Locale.ROOT, "tp %s %.3f %.3f %.3f", BODY, legAt.x, legAt.y, legAt.z));
-				} else if (t == hit + 1) {
-					server.runCommand("kill " + BODY);
+				// Where its legs go this tick: at the lens as it knocks them down; then wherever it is
+				// going for them (see Person.grips). A marker for each leg, made the first time it is
+				// wanted and moved every tick after; nothing draws them.
+				List<Vec3> grips = new ArrayList<>();
+				if (t >= hit - 6 && t <= hit) {
+					double[] held = poses[Math.min(t, hit - 1)];
+					double yr = Math.toRadians(held[3]);
+					grips.add(new Vec3(held[0], held[1], held[2]).add(-Math.sin(yr) * 0.45, -0.15, Math.cos(yr) * 0.45));
+				} else if (t >= hit + 2) {
+					grips.addAll(them.grips(t - hit));
 				}
-				Vec3 into0 = dragging ? them.ankle() : them.chest();
-				if (t == hit + Person.DRAG - 2) {
-					server.runCommand(String.format(Locale.ROOT, "summon interaction %.3f %.3f %.3f {width:0.01f,height:0.01f,Tags:[\"occupant_reel\"]}",
-							into0.x, into0.y, into0.z));
-				} else if (dragging || atChest) {
-					server.runCommand(String.format(Locale.ROOT, "tp %s %.3f %.3f %.3f", BODY, into0.x, into0.y, into0.z));
+				for (int k = 0; k < grips.size() && k < made.length; k++) {
+					Vec3 g = grips.get(k);
+					if (!made[k]) {
+						server.runCommand(String.format(Locale.ROOT, "summon interaction %.3f %.3f %.3f {width:0.01f,height:0.01f,"
+								+ "Tags:[\"occupant_reel\",\"occupant_reel_%d\"]}", g.x, g.y, g.z, k));
+						made[k] = true;
+					} else {
+						server.runCommand(String.format(Locale.ROOT, "tp @e[type=interaction,tag=occupant_reel_%d,limit=1] %.3f %.3f %.3f", k, g.x, g.y, g.z));
+					}
 				}
 				Vec3 at = it.apply(t);
-				int legs = t >= stab - 5 ? 2 : dragging ? 1 : 0;
 				server.runOnServer(s -> {
 					ServerLevel level = s.overworld();
 					List<OccupantEntity> its = level.getEntitiesOfClass(OccupantEntity.class, AABB.ofSize(at, 16, 16, 16));
 					if (its.isEmpty()) return;
 					List<Entity> into = new ArrayList<>();
-					if (atLens) {
-						into.addAll(level.getEntities((Entity) null, AABB.ofSize(legAt, 4, 4, 4), e -> Kinds.is(e, "interaction")));
-					} else if (legs > 0) {
-						List<Entity> marks = level.getEntities((Entity) null, AABB.ofSize(into0, 4, 4, 4), e -> Kinds.is(e, "interaction"));
-						for (int i = 0; i < legs && !marks.isEmpty(); i++) into.add(marks.get(0));
+					for (Vec3 g : grips) {
+						List<Entity> near = level.getEntities((Entity) null, AABB.ofSize(g, 0.5, 0.5, 0.5), e -> Kinds.is(e, "interaction"));
+						Entity pick = null;
+						for (Entity e : near) {
+							if (!into.contains(e)) {
+								pick = e;
+								break;
+							}
+						}
+						if (pick == null && !near.isEmpty()) pick = near.get(0);
+						if (pick != null) into.add(pick);
 					}
 					its.get(0).setHeld(into);
 				});
