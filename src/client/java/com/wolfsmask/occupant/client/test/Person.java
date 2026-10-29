@@ -41,34 +41,34 @@ final class Person {
 			{"arm_l", SHIRT}, {"forearm_l", SKIN}, {"arm_r", SHIRT}, {"forearm_r", SKIN},
 			{"thigh_l", PANTS}, {"shin_l", PANTS}, {"shoe_l", SHOES}, {"thigh_r", PANTS}, {"shin_r", PANTS}, {"shoe_r", SHOES}};
 
-	// What they try, in ticks after the blow; each thing until the next. Nothing is done steadily:
-	// every effort is a burst, flat out, and some of them go wrong.
+	// What they try, in ticks after the blow; each thing until the next. Every effort is a burst,
+	// flat out, and some of them go wrong.
 	/** Knocked over backwards; flat and winded from LANDED. */
 	static final int LANDED = 8;
-	/** Up on one arm, shoving themselves back with their heels at each of SHOVES; the second one slips. */
-	static final int SCRAMBLE = 12;
-	static final int[] SHOVES = {14, 19, 25};
-	static final int SHOVE_TICKS = 5;
+	/** Up on one arm, shoving themselves back with their heels at each of SHOVES; the second one skids. */
+	static final int SCRAMBLE = 11;
+	static final int[] SHOVES = {12, 16, 21};
+	static final int SHOVE_TICKS = 4;
 	/** It is at their feet: leaning back on their hands, kicking at it, at each of KICKS. */
-	static final int KICK = 31;
-	static final int[] KICKS = {32, 35, 39, 42};
+	static final int KICK = 26;
+	static final int[] KICKS = {27, 30, 33};
 	static final int KICK_TICKS = 3;
-	/** Over onto their front, over their left side, shoulders first; halfway, they slip back, and go on over. */
-	static final int ROLL = 46, ROLL_TICKS = 13;
+	/** Over onto their front, rolling over their left side. */
+	static final int ROLL = 37, ROLL_TICKS = 16;
 	/** Hands under the shoulders, chest up, hips up and back onto the knees. */
-	static final int PUSHUP = 59;
+	static final int PUSHUP = 53;
 	/** A foot brought up under them, up off the hands, starting to stand. */
-	static final int RISE = 67;
+	static final int RISE = 60;
 	/** Its leg takes the front foot out from under them; down on their face. */
-	static final int SLIP = 76;
+	static final int SLIP = 68;
 	/** On their stomach, clawing along, one arm and then the other, at each of PULLS; the second hand slips. */
-	static final int CRAWL = 84;
-	static final int[] PULLS = {85, 90, 96};
+	static final int CRAWL = 75;
+	static final int[] PULLS = {76, 82};
 	static final int PULL_TICKS = 6;
 	/** Taken by the right ankle and dragged back, in two hard pulls. */
-	static final int DRAG = 102;
+	static final int DRAG = 88;
 	/** It comes down on them. */
-	static final int STRIKE = 114;
+	static final int STRIKE = 98;
 
 	private static final Vec3 UP = new Vec3(0, 1, 0);
 	/** How fast a falling thing gains speed, in blocks a tick, each tick. */
@@ -163,9 +163,10 @@ final class Person {
 	 * were knocked: never a steady walk, but a lunge and a stop, and another; up over them as they
 	 * turn over; right behind them as they crawl; back a step as it drags them; and over them.
 	 */
-	private static final double[][] CAME = {{0, 0}, {5, 0.6}, {12, 0.6}, {15, 1.1}, {21, 1.1}, {24, 1.6}, {31, 1.6},
-			{38, 1.75}, {46, 1.75}, {50, 2.3}, {54, 2.5}, {66, 2.6}, {72, 2.8}, {76, 2.85}, {84, 2.85}, {87, 3.2},
-			{93, 3.2}, {96, 3.5}, {DRAG - 1, 3.5}, {DRAG + 2, 3.3}, {DRAG + 5, 3.3}, {DRAG + 8, 3.2}, {STRIKE - 1, 3.9},
+	private static final double[][] CAME = {{0, 0}, {5, 0.6}, {10, 0.6}, {13, 1.1}, {SHOVES[1] + 2, 1.1},
+			{SHOVES[2] + 1, 1.6}, {KICK, 1.6}, {KICK + 6, 1.75}, {ROLL + 2, 1.75}, {ROLL + 7, 2.3}, {ROLL + 12, 2.5},
+			{PUSHUP + 4, 2.6}, {RISE + 4, 2.8}, {SLIP, 2.85}, {CRAWL, 2.85}, {CRAWL + 3, 3.2}, {PULLS[1] + 1, 3.2},
+			{PULLS[1] + 4, 3.5}, {DRAG - 1, 3.5}, {DRAG + 2, 3.3}, {DRAG + 4, 3.3}, {DRAG + 7, 3.2}, {STRIKE - 1, 3.9},
 			{STRIKE + 6, 3.9}};
 
 	static double itCame(double t) {
@@ -194,10 +195,10 @@ final class Person {
 			out.add(chest);
 		} else if (t >= DRAG - 3) {
 			out.add(ankle());
-		} else if (t >= 93 && t < 98) {
+		} else if (t >= PULLS[1] + 1 && t < PULLS[1] + 5) {
 			Vec3 c = chest.subtract(left.scale(0.5)).add(f.scale(0.15));
 			out.add(new Vec3(c.x, ground0.y, c.z));
-		} else if (t >= 86 && t < 90) {
+		} else if (t >= CRAWL + 2 && t < CRAWL + 5) {
 			Vec3 c = chest.add(left.scale(0.55)).subtract(f.scale(0.1));
 			out.add(new Vec3(c.x, ground0.y, c.z));
 		} else if (t >= SLIP - 3 && t < SLIP + 4) {
@@ -211,9 +212,9 @@ final class Person {
 			Vec3 foot = feet[i].at;
 			boolean kicked = k >= 0 && t >= KICKS[k] + 1;
 			out.add(kicked ? foot.subtract(f.scale(0.7)).add(0, 0.35, 0) : foot.subtract(f.scale(0.12)));
-		} else if (t >= 24 && t < KICK) {
+		} else if (t >= SHOVES[1] + 3 && t < KICK) {
 			out.add(feet[0].at.subtract(f.scale(0.22)));
-		} else if (t >= 14 && t < 23) {
+		} else if (t >= SHOVES[0] && t < SHOVES[1] + 3) {
 			out.add(feet[1].at.subtract(f.scale(0.25)));
 		}
 		return out;
@@ -276,21 +277,21 @@ final class Person {
 		double[] shoved = {0.2, 0.04, 0.22};
 		for (int k = 0; k < SHOVES.length; k++) d += shoved[k] * burst((t - SHOVES[k] - 1) / 3.0);
 		for (int k : KICKS) d += 0.03 * burst((t - k - 1) / 2.0);
-		d -= 0.1 * ease((t - PUSHUP - 3) / 5.0);
-		d += 0.1 * ease((t - RISE - 3) / 5.0);
+		d -= 0.1 * ease((t - PUSHUP - 2) / 5.0);
+		d += 0.1 * ease((t - RISE - 3) / 4.0);
 		d += 0.3 * ease((t - SLIP - 1) / 5.0);
-		double[] pulled = {0.2, 0.04, 0.22};
+		double[] pulled = {0.22, 0.05};
 		for (int k = 0; k < PULLS.length; k++) d += pulled[k] * burst((t - PULLS[k] - 3) / 3.0);
-		d -= 0.5 * burst((t - DRAG - 1) / 3.0) + 0.45 * burst((t - DRAG - 7) / 3.0);
+		d -= 0.5 * burst((t - DRAG - 1) / 3.0) + 0.45 * burst((t - DRAG - 6) / 3.0);
 		return d;
 	}
 
 	/**
-	 * How far round their hips are at t, turning over: up onto their side all at once, slipping
-	 * back off it, and over onto their front.
+	 * How far round their hips are at t, turning over: a moment getting ready, then over in one go,
+	 * fastest as they go over their side, onto their front.
 	 */
 	private static double rollAt(double t) {
-		return 1.25 * burst((t - ROLL) / 5.0) - 0.3 * ease((t - ROLL - 5) / 3.0) + (Math.PI - 0.95) * ease((t - ROLL - 8) / 5.0);
+		return Math.PI * ease((t - ROLL - 3) / 10.0);
 	}
 
 	private Vec3 origin() {
@@ -321,21 +322,23 @@ final class Person {
 			int k = which(SHOVES, t, SHOVE_TICKS);
 			double u = k >= 0 ? (t - SHOVES[k]) / (double) SHOVE_TICKS : 0;
 			wantLift = 0.55 * burst((t - SCRAMBLE) / 3.0) - 0.14 * bump(u);
-			wantCurl = 0.2 + 0.05 * Math.sin(t * 1.9);
-			wantRoll = -0.2 * burst((t - SCRAMBLE) / 3.0) + (k >= 0 ? (k % 2 == 0 ? 0.08 : -0.08) * bump(u) : 0);
+			wantCurl = 0.2;
+			wantRoll = -0.2 * burst((t - SCRAMBLE) / 3.0) + (k >= 0 ? (k % 2 == 0 ? 0.04 : -0.04) * bump(u) : 0);
 		} else if (t < ROLL) {
 			// Back on both hands, kicking; each kick jolts them back.
 			int k = which(KICKS, t, KICK_TICKS);
 			double u = k >= 0 ? (t - KICKS[k]) / (double) KICK_TICKS : 0;
 			wantLift = 0.45 - 0.12 * bump(u);
 			wantCurl = 0.3 + 0.08 * bump(u);
-			wantRoll = k >= 0 ? (k % 2 == 0 ? 0.12 : -0.12) * bump(u) : 0.0;
+			wantRoll = k >= 0 ? (k % 2 == 0 ? 0.06 : -0.06) * bump(u) : 0.0;
 		} else if (t < PUSHUP) {
-			// Turning over, away from it: down off the hands, over the left side onto the front.
+			// Turning over onto their front, over their left side, away from it: the head turns first,
+			// then the shoulders and hips go over together, rolling on the side that is on the ground.
+			double u = t - ROLL;
 			wantLift = 0.04;
-			wantCurl = 0.2 * (1 - ease((t - ROLL) / ROLL_TICKS));
+			wantCurl = 0.15 * (1 - ease(u / 10.0));
 			wantRoll = rollAt(t);
-			look = pelvis.add(left.scale(1.5)).add(f.scale(1.2));
+			look = u < 9 ? pelvis.add(left.scale(1.6)).add(f.scale(1.0)) : pelvis.add(f.scale(2.5)).subtract(0, 0.3, 0);
 		} else if (t < RISE) {
 			// Hands under the shoulders: the chest pushed up off the ground, then the hips up and back
 			// onto the knees.
@@ -351,7 +354,7 @@ final class Person {
 			wantLift = 0.14 + 0.95 * ease((u - 2) / 6.0);
 			wantCurl = 0.05 + 0.3 * bump((u - 2) / 7.0);
 			wantRoll = Math.PI;
-			hip = 0.4 + 0.2 * ease((u - 4) / 5.0);
+			hip = 0.4 + 0.2 * ease((u - 3) / 4.0);
 			look = pelvis.add(f.scale(4)).add(0, 1.0, 0);
 		} else if (t < CRAWL) {
 			// The foot goes: nothing under them on that side; they pitch forward onto their hands
@@ -368,7 +371,7 @@ final class Person {
 			double u = k >= 0 ? (t - PULLS[k]) / (double) PULL_TICKS : 0;
 			wantLift = 0.14 + 0.07 * bump(u);
 			wantCurl = -0.1;
-			wantRoll = Math.PI + (k >= 0 ? (k % 2 == 0 ? -0.14 : 0.14) * bump(u) : 0);
+			wantRoll = Math.PI + (k >= 0 ? (k % 2 == 0 ? -0.08 : 0.08) * bump(u) : 0);
 			boolean back = t >= PULLS[1] - 1 && t < PULLS[1] + 5;
 			look = back ? it : pelvis.add(f.scale(4)).add(0, 0.6, 0);
 		} else if (t < STRIKE) {
@@ -414,7 +417,7 @@ final class Person {
 			rollV = s[1];
 		}
 		// The shoulders go round a few ticks ahead of the hips.
-		s = spring(twist, twistV, rollAt(t + 3) - rollAt(t), 0.5);
+		s = spring(twist, twistV, 0.22 * bump((t - ROLL - 2) / 10.0), 0.5);
 		twist = s[0];
 		twistV = s[1];
 		s = spring(nod, nodV, wantNod, 0.4);
@@ -424,8 +427,11 @@ final class Person {
 		// middle of it goes along by how high the middle is over where it touches.
 		if (t >= ROLL && t <= PUSHUP) {
 			double a = 4 * PX, b = 2 * PX;
-			double r = roll + twist / 2;
-			aside += (a * Math.abs(Math.sin(r)) + b * Math.abs(Math.cos(r))) * (rollV + twistV / 2);
+			double r = roll - rollV / 2 + twist / 2;
+			double ds = (a * Math.abs(Math.sin(r)) + b * Math.abs(Math.cos(r))) * (rollV + twistV / 2);
+			aside += ds;
+			// At once: it rolls over that edge, it does not turn first and slide after.
+			pelvis = pelvis.add(left.scale(ds));
 		}
 		// Along the ground: where they mean to be, with weight.
 		Vec3 flat = origin().add(f.scale(along(t))).add(left.scale(aside));
@@ -438,7 +444,7 @@ final class Person {
 		pelvis = new Vec3(px, pelvis.y, s[0]);
 
 		// Each pull on the ankle snaps through the whole body: the chest jerked up, the head back.
-		if (t == DRAG + 1 || t == DRAG + 7) {
+		if (t == DRAG + 1 || t == DRAG + 6) {
 			liftV += 0.06;
 			headPV -= 0.12;
 		}
@@ -465,7 +471,11 @@ final class Person {
 		}
 		double want = Double.isNaN(hip) ? yMin : Math.max(yMin, Math.min(yMax, ground + hip));
 		double y = pelvis.y;
-		if (want < y - 1.0e-3) {
+		if (now >= ROLL && now < PUSHUP && want < y) {
+			// Rolling over: it goes down onto its front as it comes over its side, never off the ground.
+			y = want;
+			vy = 0;
+		} else if (want < y - 1.0e-3) {
 			// Nothing holding it up here: it falls, faster and faster, until it is stopped.
 			vy -= G;
 			y += vy;
@@ -510,7 +520,20 @@ final class Person {
 
 	/** Where a limb starts: the hip or the shoulder. */
 	private Vec3 root(Limb l) {
-		return l.arm ? point(chestFrame(), 6 * l.side, 4, 0) : point(pelvisFrame(), 1.9 * l.side, 0, 0);
+		return l.arm ? shoulder(chestFrame(), l) : point(pelvisFrame(), 1.9 * l.side, 0, 0);
+	}
+
+	/**
+	 * Where an arm hangs from: the shoulder, which comes in towards the neck as the arm goes up past
+	 * the head, so an arm stretched out along the ground beyond them lies beside the head, not under it.
+	 */
+	private Vec3 shoulder(Frame c, Limb l) {
+		Vec3 at = point(c, 6 * l.side, 4, 0);
+		if (l.at == null) return at;
+		Vec3 d = l.at.subtract(at);
+		if (d.lengthSqr() < 1e-6) return at;
+		double up = Math.max(0, Math.min(1, d.normalize().dot(c.y)));
+		return point(c, (6 - 3 * up) * l.side, 4, 0);
 	}
 
 	/**
@@ -604,7 +627,7 @@ final class Person {
 	private void hold(Limb l, Vec3 p, double w) {
 		// Shaking: never quite still, never quite where it is meant to be.
 		double ph = (l.arm ? 1.7 : 4.1) + l.side * 0.9;
-		p = p.add(Math.sin(now * 2.3 + ph) * 0.012, Math.sin(now * 3.1 + ph * 1.3) * 0.012, Math.sin(now * 2.7 + ph * 0.7) * 0.012);
+		p = p.add(Math.sin(now * 2.3 + ph) * 0.004, Math.sin(now * 3.1 + ph * 1.3) * 0.004, Math.sin(now * 2.7 + ph * 0.7) * 0.004);
 		if (l.at == null) l.at = p;
 		l.plant = null;
 		l.weight = false;
@@ -658,7 +681,7 @@ final class Person {
 					Vec3 to = face.subtract(shoulder).normalize();
 					Vec3 across = to.cross(UP).normalize();
 					double shake = Math.sin(t * 1.3) * 0.5 + Math.sin(t * 2.1 + 1) * 0.3 + Math.sin(t * 3.7 + 2) * 0.2;
-					hold(hand, shoulder.add(to.scale(10 * PX * 0.85)).add(UP.scale(0.04 + 0.03 * Math.sin(t * 2.9))).add(across.scale(0.05 * shake)), 0.45);
+					hold(hand, shoulder.add(to.scale(10 * PX * 0.85)).add(UP.scale(0.04 + 0.012 * Math.sin(t * 2.9))).add(across.scale(0.02 * shake)), 0.45);
 					bend(hand, armOut.add(UP.scale(-0.6)));
 				} else {
 					// Propped on it behind them; put down again when the body has gone back past it.
@@ -686,26 +709,37 @@ final class Person {
 				continue;
 			}
 			if (t < PUSHUP) {
-				// Turning over: the right arm reaches across them to the ground on their left and
-				// pulls; the left one goes up past their head, out of the way; the right knee comes up
-				// and over, and the legs follow the hips round.
-				double u = (t - ROLL) / (double) ROLL_TICKS;
-				if (i == 1) {
-					if (u < 0.75) {
-						plant(hand, onGround(pelvis.add(f.scale(0.55)).add(left.scale(0.5))), t, 0.18, true, 0.25);
+				// Turning over onto their front, over their left side, everything kept in close, the way
+				// anyone rolls who has to be quick about it: the left arm up past their head along the
+				// ground, in line with them, so they roll over the shoulder and not onto the arm; the
+				// right arm across their chest; the legs together, the right knee only a little bent to
+				// push with. Over they go; the right hand comes down just past them on the far side to
+				// catch them; then both hands in under the shoulders, and the legs out behind.
+				double u = t - ROLL;
+				Vec3 mid = point(c, 0, 3, 0);
+				if (i == 0) {
+					if (u < 12) {
+						plant(hand, onGround(shoulder.add(f.scale(0.52))), t, 0.06, false, 0.3);
+						bend(hand, UP);
 					} else {
-						plant(hand, onGround(shoulder.add(f.scale(0.06)).add(armOut.scale(0.04))), t, 0.1, true, 0.15);
+						plant(hand, onGround(shoulder.add(f.scale(0.05)).add(armOut.scale(0.05))), t, 0.08, true, 0.14);
 					}
-					if (u > 0.15 && u < 0.7) {
-						hold(foot, hip.subtract(f.scale(0.4)).add(left.scale(0.22)).add(0, 0.16, 0), 0.35);
-						bend(foot, UP.add(f.scale(0.4)));
-					} else {
-						plant(foot, onGround(hip.subtract(f.scale(0.64)).add(legOut.scale(0.07))), t, 0.08, false, 0.15);
-					}
+					plant(foot, onGround(hip.subtract(f.scale(0.64)).add(legOut.scale(0.03))), t, 0.03, false, 0.14);
 				} else {
-					if (u < 0.75) plant(hand, onGround(shoulder.add(f.scale(0.4)).add(left.scale(0.12))), t, 0.15, false, 0.2);
-					else plant(hand, onGround(shoulder.add(f.scale(0.06)).add(armOut.scale(0.04))), t, 0.1, true, 0.15);
-					plant(foot, onGround(hip.subtract(f.scale(0.64)).add(legOut.scale(0.07))), t, 0.05, false, 0.15);
+					if (u < 6) {
+						hold(hand, mid.add(left.scale(0.12)).add(mid.subtract(pelvis).normalize().scale(0.02)).add(0, 0.08, 0), 0.35);
+						bend(hand, f.scale(-1).add(UP.scale(0.5)));
+					} else if (u < 12) {
+						plant(hand, onGround(mid.add(left.scale(0.3)).add(f.scale(0.12))), t, 0.06, u >= 8, 0.2);
+					} else {
+						plant(hand, onGround(shoulder.add(f.scale(0.05)).add(armOut.scale(0.05))), t, 0.08, true, 0.14);
+					}
+					if (u >= 1 && u < 9) {
+						plant(foot, onGround(pelvis.subtract(f.scale(0.5)).add(left.scale(0.12))), t, 0.06, true, 0.18);
+						bend(foot, UP.add(f.scale(0.3)));
+					} else {
+						plant(foot, onGround(hip.subtract(f.scale(0.64)).add(legOut.scale(0.03))), t, 0.04, false, 0.14);
+					}
 				}
 				continue;
 			}
@@ -790,7 +824,7 @@ final class Person {
 				if (i == 1) hold(foot, hip.subtract(f.scale(0.68)).add(0, 0.14, 0), 0.6);
 				else slide(foot, onGround(hip.subtract(f.scale(0.64)).add(legOut.scale(0.08))));
 				Vec3 reach = onGround(shoulder.add(f.scale(0.46)).add(armOut.scale(0.08)));
-				boolean again = t == DRAG + 2 + 3 * i || t == DRAG + 8 + 2 * i;
+				boolean again = t == DRAG + 2 + 3 * i || t == DRAG + 7 + i;
 				if (hand.plant == null || again) plant(hand, reach, t, 0.1, false, 0.0);
 				else plant(hand, hand.plant, t, 0.1, false, 9);
 				double longest = 10 * PX * 0.97;
@@ -955,7 +989,7 @@ final class Person {
 		// Arms: from the shoulder, four pixels to the elbow, six on to the end of the hand.
 		for (int i = 0; i < 2; i++) {
 			Limb l = hands[i];
-			Vec3 shoulder = point(c, 6 * l.side, 4, 0);
+			Vec3 shoulder = shoulder(c, l);
 			Vec3 hand = l.at == null ? point(c, 6 * l.side, -6, 0) : l.at;
 			Frame[] arm = limb(shoulder, hand, 4, 6, l.bent != null ? l.bent : l.pole != null ? l.pole : defaultPole(l));
 			out.add(box("arm_" + (i == 0 ? "l" : "r"), SHIRT, arm[0], -2, 2, -4.3, 2, -2, 2, anchor));

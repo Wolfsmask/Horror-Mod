@@ -227,7 +227,7 @@ final class Reel {
 		int stab = hit + Person.STRIKE, end = stab + 2;
 		for (int push : Person.SHOVES) f.markAt(hit + push + 1, push == Person.SHOVES[1] ? "skid" : "scoot");
 		for (int kick : Person.KICKS) f.markAt(hit + kick + 1, "kick");
-		f.markAt(hit + Person.ROLL + 1, "roll");
+		f.markAt(hit + Person.ROLL + 4, "roll");
 		f.markAt(hit + Person.ROLL + 9, "roll");
 		f.markAt(hit + Person.SLIP, "swept");
 		f.markAt(hit + Person.SLIP + 3, "fall");
@@ -235,15 +235,18 @@ final class Reel {
 		f.markAt(hit + Person.DRAG - 1, "grab");
 		f.markAt(hit + Person.DRAG + 1, "yank");
 		f.markAt(hit + Person.DRAG + 7, "yank");
-		f.markAt(hit + 16, "no1");
+		f.markAt(hit + Person.SCRAMBLE + 2, "no1");
 		f.markAt(hit + Person.KICK + 1, "no2");
 		f.markAt(hit + Person.CRAWL + 2, "no3");
 		f.markAt(stab, "stab");
 		// It: a heavy step at each lunge, a leg driven into the dirt beside them, its breathing.
-		for (int step : new int[]{13, 15, 22, 24, 47, 50, 53, 85, 94, 96, Person.STRIKE - 2}) f.markAt(hit + step, "thump");
-		f.markAt(hit + 87, "stomp");
-		f.markAt(hit + 94, "stomp");
-		f.markAt(hit + 60, "growl");
+		for (int step : new int[]{11, 13, Person.SHOVES[2] + 1, Person.ROLL + 3, Person.ROLL + 6, Person.CRAWL + 1,
+				Person.PULLS[1] + 2, Person.PULLS[1] + 3, Person.STRIKE - 3}) {
+			f.markAt(hit + step, "thump");
+		}
+		f.markAt(hit + Person.CRAWL + 2, "stomp");
+		f.markAt(hit + Person.PULLS[1] + 1, "stomp");
+		f.markAt(hit + Person.PUSHUP + 2, "growl");
 		f.markAt(hit + Person.DRAG + 3, "growl");
 		f.lie(end - land, -84.0);
 		f.mark("end");
