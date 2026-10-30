@@ -19,7 +19,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
@@ -304,16 +303,10 @@ final class Tape {
 			pane(level, o.offset(3, 1, 1), true);
 			pane(level, o.offset(-2, 1, -3), false);
 			pane(level, o.offset(2, 1, -3), false);
-			// Inside: the bed, a chest, a table and a furnace, a rug, three torches.
-			BlockState bed = Blocks.RED_BED.defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.SOUTH);
-			Reel.set(level, o.offset(2, 0, 2), bed.setValue(BlockStateProperties.BED_PART, BedPart.FOOT));
-			Reel.set(level, o.offset(2, 0, 3), bed.setValue(BlockStateProperties.BED_PART, BedPart.HEAD));
+			// Inside: a chest, a table and a furnace, three torches (the bed and the rug below).
 			Reel.set(level, o.offset(-2, 0, 3), Blocks.CHEST.defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH));
 			Reel.set(level, o.offset(-1, 0, 3), Blocks.CRAFTING_TABLE.defaultBlockState());
 			Reel.set(level, o.offset(-2, 0, 2), Blocks.FURNACE.defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.EAST));
-			for (int x = -1; x <= 0; x++) {
-				for (int z = 0; z <= 1; z++) Reel.set(level, o.offset(x, 0, z), Blocks.BROWN_CARPET.defaultBlockState());
-			}
 			// The one by the bed is the one that comes back red.
 			Reel.set(level, o.offset(1, 1, 3), (when == MORNING ? Blocks.REDSTONE_WALL_TORCH : Blocks.WALL_TORCH).defaultBlockState()
 					.setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH));
@@ -330,8 +323,19 @@ final class Tape {
 		});
 	}
 
-	/** The stand by the door and the two frames over the chest: turned, in the morning. */
+	private static void setblock(TestServerContext server, BlockPos at, String block) {
+		server.runCommand(String.format(Locale.ROOT, "setblock %d %d %d minecraft:%s", at.getX(), at.getY(), at.getZ(), block));
+	}
+
+	/** The bed, the rug, the stand by the door and the two frames over the chest: turned, in the morning. */
 	private static void cabinThings(TestServerContext server, BlockPos o, int when) {
+		// The bed and the rug by name (the game has changed what it calls its coloured blocks), once
+		// the camera is there and the cabin is loaded.
+		setblock(server, o.offset(2, 0, 2), "red_bed[facing=south,part=foot]");
+		setblock(server, o.offset(2, 0, 3), "red_bed[facing=south,part=head]");
+		for (int x = -1; x <= 0; x++) {
+			for (int z = 0; z <= 1; z++) setblock(server, o.offset(x, 0, z), "brown_carpet");
+		}
 		server.runCommand("kill @e[tag=tape]");
 		Vec3 stand = Reel.local(o, -2, 0, -1);
 		Vec3 bed = Reel.local(o, 2, 0, 2.5);
