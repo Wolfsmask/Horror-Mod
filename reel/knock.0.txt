@@ -1,0 +1,12 @@
+18 roof
+35 roof
+52 roof
+69 roof
+114 roof
+136 knock
+153 knock
+170 knock
+284 tap
+294 seen
+384 what
+410 end

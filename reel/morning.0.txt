@@ -1,0 +1,11 @@
+6 shovel
+118 cut
+132 step
+146 step
+197 step
+213 step
+229 step
+245 step
+263 step
+326 lower
+342 end
