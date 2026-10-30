@@ -158,7 +158,9 @@ jobs:
               ls "$d" | head -n 1 > /dev/null || continue
               # The long video's clips say how small to keep them.
               CRF=$(cat "$d/crf" 2>/dev/null || echo 10)
-              ffmpeg -y -loglevel error -framerate 20 -i "$d/%04d.png" -c:v libx264 -preset slow -crf "$CRF" -pix_fmt yuv420p "$OUT/$n.mp4" \
+              PAT="%04d.png"
+              [ -e "$d/0000.jpg" ] && PAT="%04d.jpg"
+              ffmpeg -y -loglevel error -framerate 20 -i "$d/$PAT" -c:v libx264 -preset slow -crf "$CRF" -pix_fmt yuv420p "$OUT/$n.mp4" \
                 && echo "$n: $(ls "$d" | wc -l) frames" || echo "$n: not made"
               # What is heard when, and how far the camera tips, for the edit.
               cp "$d/marks.txt" "$OUT/$n.txt" 2>/dev/null || true

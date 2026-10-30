@@ -1452,28 +1452,69 @@ final class Reel {
 			throw new UncheckedIOException(e);
 		}
 		int set = lens;
-		for (int t = 0; t < poses.length; t++) {
-			double[] p = poses[t];
-			server.runCommand(tp(new Vec3(p[0], p[1], p[2]), p[3], p[4]));
-			if (fov != null) {
-				int want = fov[Math.min(t, fov.length - 1)];
-				if (want != set) {
-					set = want;
-					context.runOnClient(mc -> mc.options.fov().set(want));
+		// The long video's frames kept as JPEGs, made on the side while the next is drawn: a full-size
+		// PNG of every frame would fill the machine's disk before the run was through.
+		java.util.concurrent.ExecutorService saver = java.util.concurrent.Executors.newSingleThreadExecutor();
+		try {
+			for (int t = 0; t < poses.length; t++) {
+				double[] p = poses[t];
+				server.runCommand(tp(new Vec3(p[0], p[1], p[2]), p[3], p[4]));
+				if (fov != null) {
+					int want = fov[Math.min(t, fov.length - 1)];
+					if (want != set) {
+						set = want;
+						context.runOnClient(mc -> mc.options.fov().set(want));
+					}
+				}
+				if (cue != null) cue.accept(t);
+				context.waitTick();
+				Path shot = context.takeScreenshot("reel-" + name + "-" + t);
+				String file = String.format(Locale.ROOT, "%04d.%s", t >= wide ? t - wide : t % piece, landscape ? "jpg" : "png");
+				Path to = t >= wide ? wideDir.resolve(file) : dirOf.apply(t).resolve(file);
+				if (landscape) {
+					saver.submit(() -> jpeg(shot, to));
+				} else {
+					try {
+						Files.move(shot, to, StandardCopyOption.REPLACE_EXISTING);
+					} catch (IOException e) {
+						throw new UncheckedIOException(e);
+					}
 				}
 			}
-			if (cue != null) cue.accept(t);
-			context.waitTick();
-			Path shot = context.takeScreenshot("reel-" + name + "-" + t);
+		} finally {
+			saver.shutdown();
 			try {
-				Path to = t >= wide ? wideDir.resolve(String.format(Locale.ROOT, "%04d.png", t - wide))
-						: dirOf.apply(t).resolve(String.format(Locale.ROOT, "%04d.png", t % piece));
-				Files.move(shot, to, StandardCopyOption.REPLACE_EXISTING);
-			} catch (IOException e) {
-				throw new UncheckedIOException(e);
+				saver.awaitTermination(10, java.util.concurrent.TimeUnit.MINUTES);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
 			}
 		}
 		if (fov != null && set != lens) context.runOnClient(mc -> mc.options.fov().set(lens));
+	}
+
+	/** A screenshot made a JPEG, near enough lossless, and the PNG thrown away. */
+	private static void jpeg(Path png, Path to) {
+		try {
+			java.awt.image.BufferedImage read = javax.imageio.ImageIO.read(png.toFile());
+			java.awt.image.BufferedImage rgb = new java.awt.image.BufferedImage(read.getWidth(), read.getHeight(),
+					java.awt.image.BufferedImage.TYPE_INT_RGB);
+			java.awt.Graphics2D g = rgb.createGraphics();
+			g.drawImage(read, 0, 0, null);
+			g.dispose();
+			javax.imageio.ImageWriter writer = javax.imageio.ImageIO.getImageWritersByFormatName("jpg").next();
+			javax.imageio.ImageWriteParam param = writer.getDefaultWriteParam();
+			param.setCompressionMode(javax.imageio.ImageWriteParam.MODE_EXPLICIT);
+			param.setCompressionQuality(0.95f);
+			try (javax.imageio.stream.ImageOutputStream out = javax.imageio.ImageIO.createImageOutputStream(to.toFile())) {
+				writer.setOutput(out);
+				writer.write(null, new javax.imageio.IIOImage(rgb, null, null), param);
+			} finally {
+				writer.dispose();
+			}
+			Files.deleteIfExists(png);
+		} catch (IOException | RuntimeException e) {
+			Occupant.LOGGER.warn("[client-gametest] reel: could not keep {}", png, e);
+		}
 	}
 
 	private static String tp(Vec3 eye, double yaw, double pitch) {
