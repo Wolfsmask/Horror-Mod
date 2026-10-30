@@ -179,7 +179,8 @@ jobs:
                                  "minecraft/sounds/random/door", "minecraft/sounds/random/chest", "minecraft/sounds/random/glass",
                                  "minecraft/sounds/block/wooden_door/", "minecraft/sounds/block/chest/",
                                  "minecraft/sounds/block/barrel/", "minecraft/sounds/block/campfire/", "minecraft/sounds/fire/",
-                                 "minecraft/sounds/item/shovel/")):
+                                 "minecraft/sounds/item/shovel/", "minecraft/sounds/mob/cow/", "minecraft/sounds/mob/sheep/",
+                                 "minecraft/sounds/mob/pig/", "minecraft/sounds/mob/chicken/")):
                   src = os.path.join(objs, v["hash"][:2], v["hash"])
                   if os.path.exists(src):
                       dst = os.path.join(out, key[len("minecraft/sounds/"):])
