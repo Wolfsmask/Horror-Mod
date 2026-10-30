@@ -171,12 +171,12 @@ final class Tape {
 		f.hold(110, t -> door, 0.3, 0.9);
 		// Up, slowly, and a step or two towards the door.
 		f.hold(35, t -> door, 0.0, 0.7);
-		f.follow(Reel.Way.local(o, new double[][]{{1.6, 2.0}, {0.9, 0.6}, {0.6, -0.2}}));
+		f.follow(Reel.Way.local(o, new double[][]{{1.6, 2.0}, {1.0, 1.4}, {0.4, 1.0}}));
 		f.walkOn(0.03, t -> door);
 		f.hold(18, t -> door, 0, 0.8);
 		// Behind them, a tap on the glass.
 		Vec3 feet = Reel.local(o, -5, 0, 0.5);
-		Vec3 face = Reel.local(o, -4.6, 1.55, 0.5);
+		Vec3 face = Reel.local(o, -4.4, 2.3, 0.5);
 		int placed = f.size() - 12;
 		int tap = f.size() + 4;
 		f.markAt(tap, "tap");
@@ -203,7 +203,15 @@ final class Tape {
 		Cinematic.Look bent = new Cinematic.Look(false, 0f, OccupantEntity.Mode.AMBUSH, 0);
 		Reel.record(context, server, "knock", poses, Integer.MAX_VALUE, f, t -> {
 			if (t == placed) Cinematic.place(server, BlockPos.containing(feet), eye(poses, t), bent);
-			if (t >= placed && t < gone) Reel.look(server, feet, eye(poses, t), 0);
+			if (t >= placed && t < gone) {
+				Reel.look(server, feet, eye(poses, t), 0);
+				// Crouched down to look in at the glass, as low as it goes.
+				server.runOnServer(s -> {
+					for (OccupantEntity e : s.overworld().getEntitiesOfClass(OccupantEntity.class, net.minecraft.world.phys.AABB.ofSize(feet, 8, 8, 8))) {
+						e.setCoil(0.7f);
+					}
+				});
+			}
 			if (t == gone) server.runCommand("kill " + Reel.ALL);
 		});
 	}
@@ -300,8 +308,10 @@ final class Tape {
 			}
 			// The door, shut at night; the windows.
 			door(level, o.offset(0, 0, -3), Direction.SOUTH, when == MORNING);
-			pane(level, o.offset(-3, 1, 0), true);
-			pane(level, o.offset(-3, 1, 1), true);
+			for (int y = 1; y <= 2; y++) {
+				pane(level, o.offset(-3, y, 0), true);
+				pane(level, o.offset(-3, y, 1), true);
+			}
 			pane(level, o.offset(3, 1, 1), true);
 			pane(level, o.offset(-2, 1, -3), false);
 			pane(level, o.offset(2, 1, -3), false);
@@ -367,7 +377,7 @@ final class Tape {
 		BlockState air = Blocks.AIR.defaultBlockState();
 		for (int z = 1; z <= 2; z++) {
 			for (int y = -2; y <= 0; y++) Reel.set(level, o.offset(7, y, z), air);
-			Reel.set(level, o.offset(6, 0, z), Blocks.COARSE_DIRT.defaultBlockState());
+			Reel.set(level, o.offset(8, 0, z), Blocks.COARSE_DIRT.defaultBlockState());
 		}
 		BlockPos at = o.offset(7, 0, 3);
 		float yaw = (float) Reel.Fear.yawBetween(Vec3.atBottomCenterOf(at), Vec3.atBottomCenterOf(o.offset(2, 0, 2)));
@@ -586,11 +596,12 @@ final class Tape {
 		f.markAt(f.size() - 30, "what");
 		f.mark("end");
 		f.watching(t -> t >= placed && t < gone ? itFace : null);
+		// As far as the game's lens goes (30: below that it puts it back to the default); the edit takes it further.
 		int lens = Reel.WIDE_FOV;
 		int[] fov = new int[f.size()];
 		for (int t = 0; t < fov.length; t++) {
 			double in = Reel.smooth((t - zoomIn) / 30.0) - Reel.smooth((t - zoomOut) / 8.0);
-			fov[t] = (int) Math.round(lens - (lens - 22) * in);
+			fov[t] = (int) Math.round(lens - (lens - 30) * in);
 		}
 
 		double[][] poses = f.flat(o.getY());
