@@ -51,18 +51,18 @@ import java.util.function.IntFunction;
 final class Reel {
 	private static final Path GAME = FabricLoader.getInstance().getGameDir();
 	private static final Path DIR = GAME.resolve("occupant-reel");
-	private static final String ALL = "@e[type=occupant:occupant]";
+	static final String ALL = "@e[type=occupant:occupant]";
 	/**
 	 * What its leg goes through: nothing anyone can see, not even a spectator (an invisible armor
 	 * stand still shows to one, as a ghost).
 	 */
-	private static final String BODY = "@e[type=interaction,tag=occupant_reel]";
+	static final String BODY = "@e[type=interaction,tag=occupant_reel]";
 	/** Held as it is put, standing at its full height, looking at you. */
-	private static final Cinematic.Look STANDING = new Cinematic.Look(false, 0.01f, OccupantEntity.Mode.STARE, 0);
+	static final Cinematic.Look STANDING = new Cinematic.Look(false, 0.01f, OccupantEntity.Mode.STARE, 0);
 	/** A sprint, in blocks a tick. */
 	private static final double SPRINT = 0.27;
 	/** How far the fog lets you see in the wood. */
-	private static final float FOG = 38.0f;
+	static final float FOG = 38.0f;
 
 	private Reel() {
 	}
@@ -70,6 +70,23 @@ final class Reel {
 	static boolean wanted() {
 		return Files.exists(GAME.resolve("reel.flag"));
 	}
+
+	/** What the commit asked for, as CI wrote it into the flag (empty for the short). */
+	private static String asked() {
+		try {
+			return Files.readString(GAME.resolve("reel.flag"));
+		} catch (IOException e) {
+			return "";
+		}
+	}
+
+	/**
+	 * Recorded wide, for the long video, not upright: the window 1920 by 1080, a camcorder's lens
+	 * (55 degrees up and down), and each clip in pieces of {@link #CHUNK} frames, small enough to keep.
+	 */
+	static boolean landscape;
+	static final int CHUNK = 300;
+	static final int WIDE_FOV = 55;
 
 	static void run(ClientGameTestContext context, TestSingleplayerContext game, BlockPos[] woods, BlockPos spawn) {
 		TestServerContext server = game.getServer();
@@ -87,11 +104,19 @@ final class Reel {
 				mc.options.gamma().set(1.0);
 			});
 			Cinematic.hud(context, false);
-			// Upright, the shape of a phone.
-			context.getInput().resizeWindow(1080, 1920);
+			List<String> tape = Tape.scenes(asked());
+			landscape = !tape.isEmpty();
+			// Upright, the shape of a phone; or wide, for the long video.
+			if (landscape) {
+				context.getInput().resizeWindow(1920, 1080);
+				context.runOnClient(mc -> mc.options.fov().set(WIDE_FOV));
+			} else {
+				context.getInput().resizeWindow(1080, 1920);
+			}
 			context.waitTicks(20);
 
-			clip("found", () -> found(context, game, woods));
+			if (landscape) Tape.run(context, game, woods, tape);
+			else clip("found", () -> found(context, game, woods));
 		} catch (RuntimeException | AssertionError e) {
 			Occupant.LOGGER.warn("[client-gametest] reel stopped early", e);
 		} finally {
@@ -108,7 +133,7 @@ final class Reel {
 		}
 	}
 
-	private static void clip(String name, Runnable take) {
+	static void clip(String name, Runnable take) {
 		try {
 			take.run();
 			Occupant.LOGGER.info("[client-gametest] reel: {} recorded", name);
@@ -120,7 +145,7 @@ final class Reel {
 	// ------------------------------------------------------------------ the clips
 
 	/** The tick being recorded, for whatever is posed by hand to follow. */
-	private static volatile int now;
+	static volatile int now;
 
 	/**
 	 * One tape, as it was found: someone with a camcorder walking a path through a wood as night
@@ -133,7 +158,7 @@ final class Reel {
 	 * themselves away from it, a hand up, and it coming after them; and the tape stops. Recorded in
 	 * one go; the edit cuts it, the way a tape is cut by being stopped and started.
 	 */
-	private static void found(ClientGameTestContext context, TestSingleplayerContext game, BlockPos[] woods) {
+	static void found(ClientGameTestContext context, TestSingleplayerContext game, BlockPos[] woods) {
 		TestServerContext server = game.getServer();
 		BlockPos floor = server.computeOnServer(s -> ForestGallery.clearing(s.overworld(), woods[1].offset(120, 0, 90)));
 		if (floor == null) return;
@@ -143,6 +168,7 @@ final class Reel {
 		server.runOnServer(s -> wood(s.overworld(), o, -16, 16, -30, 88, List.of(trail), 63L, new double[0][], null));
 		Vec3 start = local(o, 0, Cinematic.EYE, -6);
 		Fear f = new Fear(start);
+		if (landscape) f.wide();
 		f.follow(trail);
 		f.face(f.onWay(5.0, 0, -0.4));
 		// Walking: the path, the trees either side, now and then down at their feet. Nothing much.
@@ -218,8 +244,10 @@ final class Reel {
 		// where it lies on its side, still recording: all of them, and above them, its legs.
 		int hit = f.size();
 		Vec3 here = new Vec3(f.x, o.getY(), f.z);
-		Vec3 lens = here.add(fwd.scale(2.4)).add(right.scale(3.9));
-		Vec3 aim = here.add(fwd.scale(1.1)).add(0, 1.45, 0);
+		// Wide, it lands further off: lying on its side, the picture is narrow along the ground, and
+		// all of them and all of it have to be in it.
+		Vec3 lens = landscape ? here.add(fwd.scale(3.6)).add(right.scale(5.4)) : here.add(fwd.scale(2.4)).add(right.scale(3.9));
+		Vec3 aim = landscape ? here.add(fwd.scale(1.5)).add(0, 1.3, 0) : here.add(fwd.scale(1.1)).add(0, 1.45, 0);
 		f.knocked(lens, aim, 0.15, -84.0);
 		int land = f.size();
 		// Everything they try, one after another (see Person), and it after them; it takes them by
@@ -274,7 +302,7 @@ final class Reel {
 		server.runOnServer(s -> {
 			ServerLevel level = s.overworld();
 			for (double a = -4.0; a <= 8.5; a += 0.5) {
-				for (double b = -2.5; b <= 4.5; b += 0.5) {
+				for (double b = -2.5; b <= (landscape ? 6.5 : 4.5); b += 0.5) {
 					Vec3 q = here.add(fwd.scale(a)).add(right.scale(b));
 					for (int y = 0; y <= 18; y++) {
 						BlockPos p = BlockPos.containing(q.x, o.getY() + y, q.z);
@@ -302,8 +330,8 @@ final class Reel {
 				// Tumbling, the camera goes over onto its side: from here the picture is recorded the
 				// other way up, wide, so the edit can turn it upright without losing anything.
 				if (t == hit + 4) {
-					context.getInput().resizeWindow(1920, 1080);
-					context.runOnClient(mc -> mc.options.fov().set(60));
+					context.getInput().resizeWindow(landscape ? 1080 : 1920, landscape ? 1920 : 1080);
+					context.runOnClient(mc -> mc.options.fov().set(landscape ? 86 : 60));
 				}
 				if (t == glance) Cinematic.place(server, farSpot, new Vec3(poses[t][0], poses[t][1], poses[t][2]), STANDING);
 				if (t == glance + 30) server.runCommand("kill " + ALL);
@@ -377,8 +405,8 @@ final class Reel {
 		} finally {
 			server.runCommand("kill " + BODY);
 			server.runCommand("kill @e[type=block_display,tag=occupant_body]");
-			context.getInput().resizeWindow(1080, 1920);
-			context.runOnClient(mc -> mc.options.fov().set(80));
+			context.getInput().resizeWindow(landscape ? 1920 : 1080, landscape ? 1080 : 1920);
+			context.runOnClient(mc -> mc.options.fov().set(landscape ? WIDE_FOV : 80));
 		}
 	}
 
@@ -386,7 +414,7 @@ final class Reel {
 	 * Puts it at {@code at} this tick, turned to the camera at {@code eye}, its face (about
 	 * {@code face} up) on it.
 	 */
-	private static void look(TestServerContext server, Vec3 at, Vec3 eye, double face) {
+	static void look(TestServerContext server, Vec3 at, Vec3 eye, double face) {
 		float yaw = (float) Fear.yawBetween(at, eye);
 		server.runOnServer(s -> {
 			List<OccupantEntity> its = s.overworld().getEntitiesOfClass(OccupantEntity.class, AABB.ofSize(at, 16, 16, 16));
@@ -412,7 +440,7 @@ final class Reel {
 	 * {@code open} are places kept clear of trees (x, z, how far); {@code rock} (x0, x1, z0, z1) a
 	 * great mossy rock.
 	 */
-	private static void wood(ServerLevel level, BlockPos o, int x0, int x1, int z0, int z1, List<Way> ways, long seed,
+	static void wood(ServerLevel level, BlockPos o, int x0, int x1, int z0, int z1, List<Way> ways, long seed,
 							 double[][] open, int[] rock) {
 		RandomSource r = RandomSource.create(seed);
 		BlockState air = Blocks.AIR.defaultBlockState();
@@ -627,11 +655,61 @@ final class Reel {
 		private IntFunction<Vec3> it = t -> null;
 		/** When something came at them (tick, where from, how hard). */
 		private final List<double[]> frights = new ArrayList<>();
+		/**
+		 * How much of the hand and body comes through (1 upright, less wide: the wide lens shows a
+		 * bigger piece of the world, so the same shake would look bigger), and how far either side
+		 * and up and down the frame reaches, in degrees.
+		 */
+		private double steady = 1.0, across = 30.0, upDown = 44.0;
 
 		Fear(Vec3 eye) {
 			this.x = eye.x;
 			this.z = eye.z;
 			this.eyeY = eye.y;
+		}
+
+		/** Held for the wide frame of the long video. */
+		Fear wide() {
+			steady = 0.8;
+			across = 46.0;
+			upDown = 32.0;
+			return this;
+		}
+
+		/**
+		 * Stood where they are (whatever way they were going slowing to nothing), looking where
+		 * {@code look} says each tick, the eye eased down to {@code low} under standing (crouching,
+		 * sitting, lying), the hands shaking up to {@code shake}.
+		 */
+		void hold(int n, IntFunction<Vec3> look, double low, double shake) {
+			for (int i = 0; i < n; i++) {
+				step(0, 0.03);
+				Vec3 at = look.apply(i);
+				yaw = toward(yaw, yawTo(at), 0.2);
+				pitch += (pitchTo(at) - pitch) * 0.2;
+				lift += (-low - lift) * 0.1;
+				tremble += (shake - tremble) * 0.1;
+				roll *= 0.9;
+				push();
+			}
+		}
+
+		/** Walking on at {@code pace} to the end of the way, looking where {@code look} says; how many ticks it took. */
+		int walkOn(double pace, IntFunction<Vec3> look) {
+			int i = 0;
+			while (i < 900 && way.along(x, z) < way.length() - 0.12 - speed * speed / 0.04) {
+				steer(6);
+				step(pace, 0.02);
+				Vec3 at = look.apply(i);
+				yaw = toward(yaw, yawTo(at), 0.18);
+				pitch += (pitchTo(at) - pitch) * 0.18;
+				lift *= 0.9;
+				tremble *= 0.9;
+				roll *= 0.9;
+				push();
+				i++;
+			}
+			return i;
 		}
 
 		int size() {
@@ -666,8 +744,8 @@ final class Reel {
 				double dx = at.x - p[0], dz = at.z - p[1], dy = at.y - (groundY + Cinematic.EYE + p[4]);
 				double across = Math.abs(Mth.wrapDegrees(Math.toDegrees(Math.atan2(-dx, dz)) - p[2]));
 				double up = Math.abs(-Math.toDegrees(Math.atan2(dy, Math.hypot(dx, dz))) - p[3]);
-				// Inside the upright frame (about 25 degrees either side, 40 up and down), and a margin for its size.
-				if (across < 30.0 && up < 44.0) in[i] = 1.0;
+				// Inside the frame (upright, about 25 degrees either side, 40 up and down), and a margin for its size.
+				if (across < this.across && up < upDown) in[i] = 1.0;
 			}
 			double[] out = new double[n];
 			for (int i = 0; i < n; i++) {
@@ -1295,6 +1373,8 @@ final class Reel {
 			double turned = i > 0 ? Mth.wrapDegrees(p[2] - poses.get(i - 1)[2]) : 0;
 			double rollOut = rl + wander[2] * calm * (0.9 + 2.6 * run) * (1 - 0.5 * rigid) + shake[2] * quick * 0.9 + jolt[2]
 					- Mth.clamp(turned * 0.3, -6, 6) + 1.1 * sway * heavy + 0.3 * side;
+			yawOut = yw + (yawOut - yw) * steady;
+			pitchOut = pt + (pitchOut - pt) * steady;
 			double r = Math.toRadians(yw);
 			double sx = Math.cos(r) * over, sz = Math.sin(r) * over;
 			return new double[]{px + sx, base + rise + lf + 0.009 * air + jolt[3], pz + sz, yawOut, Mth.clamp(pitchOut, -85, 85), rollOut};
@@ -1313,12 +1393,12 @@ final class Reel {
 	}
 
 	/** A point from the middle of {@code o}'s block, at {@code y} above its floor. */
-	private static Vec3 local(BlockPos o, double x, double y, double z) {
+	static Vec3 local(BlockPos o, double x, double y, double z) {
 		return new Vec3(o.getX() + 0.5 + x, o.getY() + y, o.getZ() + 0.5 + z);
 	}
 
 	/** Time of day, the camera put where the clip begins, the world round it drawn. */
-	private static void prepare(ClientGameTestContext context, TestSingleplayerContext game, Vec3 eye, Vec3 look, int time) {
+	static void prepare(ClientGameTestContext context, TestSingleplayerContext game, Vec3 eye, Vec3 look, int time) {
 		TestServerContext server = game.getServer();
 		server.runCommand("kill " + ALL);
 		server.runCommand("kill " + BODY);
@@ -1336,34 +1416,64 @@ final class Reel {
 	 * From {@code wide} on, the window is the other way up, so those frames go into a clip of their
 	 * own ({@code name}-wide, from 0), each clip one size throughout.
 	 */
-	private static void record(ClientGameTestContext context, TestServerContext server, String name, double[][] poses,
-							   int wide, Fear f, IntConsumer cue) {
-		Path dir = DIR.resolve(name);
+	static void record(ClientGameTestContext context, TestServerContext server, String name, double[][] poses,
+					   int wide, Fear f, IntConsumer cue) {
+		record(context, server, name, poses, wide, f, cue, null);
+	}
+
+	/**
+	 * As above; {@code fov}, if not null, the lens each frame (a camcorder zooming in), else the
+	 * lens it has. In the long video each clip goes in pieces ({@code name.0}, {@code name.1} ...,
+	 * the marks and the camera in the first), each small enough to keep.
+	 */
+	static void record(ClientGameTestContext context, TestServerContext server, String name, double[][] poses,
+					   int wide, Fear f, IntConsumer cue, int[] fov) {
+		int piece = landscape ? CHUNK : Integer.MAX_VALUE;
+		IntFunction<Path> dirOf = t -> DIR.resolve(landscape ? name + "." + (t / piece) : name);
+		Path dir = dirOf.apply(0);
 		Path wideDir = DIR.resolve(name + "-wide");
+		int lens = context.computeOnClient(mc -> mc.options.fov().get());
 		try {
-			Files.createDirectories(dir);
+			for (int t = 0; t < Math.min(wide, poses.length); t += Math.min(piece, poses.length)) {
+				Path d = dirOf.apply(t);
+				Files.createDirectories(d);
+				// Kept a little smaller than the short's: there is a lot more of it.
+				if (landscape) Files.writeString(d.resolve("crf"), "15\n");
+			}
 			if (wide < poses.length) Files.createDirectories(wideDir);
 			Files.writeString(dir.resolve("marks.txt"), String.join("\n", f.marks()) + "\n");
 			StringBuilder roll = new StringBuilder();
-			for (double[] p : poses) roll.append(String.format(Locale.ROOT, "%.2f %.2f %.2f%n", p[3], p[4], p[5]));
+			for (int t = 0; t < poses.length; t++) {
+				double[] p = poses[t];
+				roll.append(String.format(Locale.ROOT, "%.2f %.2f %.2f %d%n", p[3], p[4], p[5], fov != null ? fov[Math.min(t, fov.length - 1)] : lens));
+			}
 			Files.writeString(dir.resolve("roll.txt"), roll.toString());
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
+		int set = lens;
 		for (int t = 0; t < poses.length; t++) {
 			double[] p = poses[t];
 			server.runCommand(tp(new Vec3(p[0], p[1], p[2]), p[3], p[4]));
+			if (fov != null) {
+				int want = fov[Math.min(t, fov.length - 1)];
+				if (want != set) {
+					set = want;
+					context.runOnClient(mc -> mc.options.fov().set(want));
+				}
+			}
 			if (cue != null) cue.accept(t);
 			context.waitTick();
 			Path shot = context.takeScreenshot("reel-" + name + "-" + t);
 			try {
 				Path to = t >= wide ? wideDir.resolve(String.format(Locale.ROOT, "%04d.png", t - wide))
-						: dir.resolve(String.format(Locale.ROOT, "%04d.png", t));
+						: dirOf.apply(t).resolve(String.format(Locale.ROOT, "%04d.png", t % piece));
 				Files.move(shot, to, StandardCopyOption.REPLACE_EXISTING);
 			} catch (IOException e) {
 				throw new UncheckedIOException(e);
 			}
 		}
+		if (fov != null && set != lens) context.runOnClient(mc -> mc.options.fov().set(lens));
 	}
 
 	private static String tp(Vec3 eye, double yaw, double pitch) {
@@ -1371,12 +1481,12 @@ final class Reel {
 				(float) Mth.wrapDegrees(yaw), (float) pitch);
 	}
 
-	private static double smooth(double x) {
+	static double smooth(double x) {
 		double c = Mth.clamp(x, 0.0, 1.0);
 		return c * c * (3 - 2 * c);
 	}
 
-	private static void set(ServerLevel level, BlockPos pos, BlockState state) {
+	static void set(ServerLevel level, BlockPos pos, BlockState state) {
 		level.setBlock(pos, state, Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
 	}
 }

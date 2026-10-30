@@ -7,6 +7,11 @@ on:
       - 'tools/api-probe/**'
   pull_request:
   workflow_dispatch:
+    inputs:
+      tape:
+        description: "Scenes of the long video to record, as [tape:a,b] ([keep] to keep the last run's)"
+        required: false
+        default: ""
 
 jobs:
   build:
@@ -120,10 +125,13 @@ jobs:
           sudo apt-get install -y -qq xvfb mesa-utils libgl1-mesa-dri mesa-vulkan-drivers > /dev/null
           xvfb-run -a glxinfo -B | grep -E "OpenGL (renderer|core profile version)" || true
 
-      # Footage for a short video, instead of the photographs, for a commit marked [reel].
+      # Footage for a short video, instead of the photographs, for a commit marked [reel]; or for
+      # the long one, the scenes a run is asked for ([tape:...]), which the test reads from the flag.
       - name: Ask for the reel
-        if: contains(github.event.head_commit.message, '[reel]')
-        run: mkdir -p build/clientGametest && touch build/clientGametest/reel.flag
+        if: contains(github.event.head_commit.message, '[reel]') || inputs.tape != ''
+        env:
+          ASKED: ${{ inputs.tape || github.event.head_commit.message }}
+        run: mkdir -p build/clientGametest && printf '%s\n' "$ASKED" > build/clientGametest/reel.flag
 
       - name: Run the client game test
         env:
@@ -137,6 +145,8 @@ jobs:
       # Each clip of the reel, a frame a tick, made a video.
       - name: Make the reel's clips
         if: always()
+        env:
+          ASKED: ${{ inputs.tape || github.event.head_commit.message }}
         run: |
           REEL=build/clientGametest/occupant-reel
           if [ -d "$REEL" ]; then
@@ -146,7 +156,9 @@ jobs:
             for d in "$REEL"/*/; do
               n=$(basename "$d")
               ls "$d" | head -n 1 > /dev/null || continue
-              ffmpeg -y -loglevel error -framerate 20 -i "$d/%04d.png" -c:v libx264 -preset slow -crf 10 -pix_fmt yuv420p "$OUT/$n.mp4" \
+              # The long video's clips say how small to keep them.
+              CRF=$(cat "$d/crf" 2>/dev/null || echo 10)
+              ffmpeg -y -loglevel error -framerate 20 -i "$d/%04d.png" -c:v libx264 -preset slow -crf "$CRF" -pix_fmt yuv420p "$OUT/$n.mp4" \
                 && echo "$n: $(ls "$d" | wc -l) frames" || echo "$n: not made"
               # What is heard when, and how far the camera tips, for the edit.
               cp "$d/marks.txt" "$OUT/$n.txt" 2>/dev/null || true
@@ -161,7 +173,11 @@ jobs:
           idx, out = sys.argv[1], sys.argv[2]
           objs = os.path.join(os.path.dirname(os.path.dirname(idx)), "objects")
           for key, v in json.load(open(idx))["objects"].items():
-              if key.startswith(("minecraft/sounds/ambient/cave/", "minecraft/sounds/dig/", "minecraft/sounds/step/")):
+              if key.startswith(("minecraft/sounds/ambient/", "minecraft/sounds/dig/", "minecraft/sounds/step/",
+                                 "minecraft/sounds/random/door", "minecraft/sounds/random/chest", "minecraft/sounds/random/glass",
+                                 "minecraft/sounds/block/wooden_door/", "minecraft/sounds/block/chest/",
+                                 "minecraft/sounds/block/barrel/", "minecraft/sounds/block/campfire/", "minecraft/sounds/fire/",
+                                 "minecraft/sounds/item/shovel/")):
                   src = os.path.join(objs, v["hash"][:2], v["hash"])
                   if os.path.exists(src):
                       dst = os.path.join(out, key[len("minecraft/sounds/"):])
@@ -171,7 +187,10 @@ jobs:
           PY
             fi
             ls -la "$OUT"
-            CLEAR=1 bash tools/ci/save-results.sh "Reel" reel "$OUT/."
+            # Two runs of the long video at once each keep the other's clips.
+            CLEAR=1
+            case "$ASKED" in *"[keep]"*) CLEAR=0 ;; esac
+            CLEAR=$CLEAR bash tools/ci/save-results.sh "Reel" reel "$OUT/."
           fi
 
       # Also kept with the run, whichever commit is newest by the time it finishes.
