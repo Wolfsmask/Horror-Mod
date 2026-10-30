@@ -364,6 +364,7 @@ final class Tape {
 		Vec3 itFace = Reel.local(o, 13, 3.8, 27);
 		// Into the clearing; a look along the far trees, left to right, past it, and on.
 		f.walk(40, 0.075, t -> f.onWay(7.0, 0, -0.1));
+		int arrives = f.size() + 7;
 		f.walk(46, 0.06, t -> {
 			double u = t / 45.0;
 			return u < 0.5 ? Reel.local(o, -12 + 36 * u, 2.2, 30 + 4 * u) : Reel.local(o, 6 + 40 * (u - 0.5), 2.2, 32 - 44 * (u - 0.5));
@@ -389,7 +390,8 @@ final class Tape {
 		// Round, to go back the way they came: it is right there.
 		Vec3 here = f.at(f.size() - 1);
 		Vec3 closeFeet = new Vec3(here.x - 0.3, o.getY(), here.z - 3.0);
-		Vec3 closeFace = closeFeet.add(0, 2.3, 0);
+		// Standing over them, its face high up: they look up at it.
+		Vec3 closeFace = closeFeet.add(0, 4.1, 0);
 		int placed = f.size();
 		f.turnTo(16, closeFace);
 		int close = f.size() - 4;
@@ -401,7 +403,7 @@ final class Tape {
 		int away = f.size() - 4;
 		f.run(34, 0.22, 0);
 		f.mark("end");
-		f.watching(t -> t < gone ? itFace : t >= placed && t < away ? closeFace : null);
+		f.watching(t -> t >= arrives && t < gone ? itFace : t >= placed && t < away ? closeFace : null);
 		int lens = Reel.WIDE_FOV;
 		int[] fov = new int[f.size()];
 		for (int t = 0; t < fov.length; t++) {
@@ -413,8 +415,9 @@ final class Tape {
 		Reel.prepare(context, game, start, f.at(0).add(0, 0, 5), 12550);
 		Cinematic.Look bent = new Cinematic.Look(false, 0f, OccupantEntity.Mode.AMBUSH, 0);
 		Reel.record(context, server, "field", poses, Integer.MAX_VALUE, f, t -> {
-			if (t == 0) Cinematic.place(server, BlockPos.containing(itFeet), eye(poses, t), Reel.STANDING);
-			if (t < gone) Reel.look(server, itFeet, eye(poses, t), 0);
+			// Put there while the camera is turned away from the spot, so it is not in the picture before.
+			if (t == arrives) Cinematic.place(server, BlockPos.containing(itFeet), eye(poses, t), Reel.STANDING);
+			if (t >= arrives && t < gone) Reel.look(server, itFeet, eye(poses, t), 0);
 			if (t == gone) server.runCommand("kill " + Reel.ALL);
 			if (t == placed) Cinematic.place(server, BlockPos.containing(closeFeet), eye(poses, t), bent);
 			if (t >= placed && t < away) {
@@ -464,13 +467,13 @@ final class Tape {
 		f.swingTo(12, door);
 		f.hold(16, t -> door, 0, 0.6);
 		// Creeping up to it, low, the camera on the doorway.
-		f.follow(Reel.Way.local(o, new double[][]{{f.x - o.getX() - 0.5, f.z - o.getZ() - 0.5}, {0.2, -9.5}, {-0.6, -7.6}}));
+		f.follow(Reel.Way.local(o, new double[][]{{f.x - o.getX() - 0.5, f.z - o.getZ() - 0.5}, {0.1, -9.0}, {-0.3, -6.3}}));
 		f.low = 0.35;
 		f.walkOn(0.045, t -> door);
 		f.low = 0;
 		// Through the door, by the bed: someone, its back to them.
-		Vec3 feet = Reel.local(o, 0.9, 0, 2.3);
-		Vec3 face = Reel.local(o, 0.9, 2.3, 2.3);
+		Vec3 feet = Reel.local(o, 0.5, 0, 1.8);
+		Vec3 face = Reel.local(o, 0.5, 1.9, 1.8);
 		f.hold(14, t -> face, 0.35, 0.6);
 		int seen = f.size() - 10;
 		f.markAt(seen, "seen");
@@ -497,15 +500,16 @@ final class Tape {
 		context.waitTicks(10);
 		Vec3 bed = Reel.local(o, 2.0, 1.0, 2.6);
 		int placed = creak - 4;
+		Cinematic.Look bent = new Cinematic.Look(false, 0f, OccupantEntity.Mode.AMBUSH, 0);
 		Reel.record(context, server, "intruder", poses, Integer.MAX_VALUE, f, t -> {
 			if (t == creak) server.runOnServer(s -> door(s.overworld(), o.offset(0, 0, -3), Direction.SOUTH, true));
-			if (t == placed) Cinematic.place(server, BlockPos.containing(feet), bed, Reel.STANDING);
+			if (t == placed) Cinematic.place(server, BlockPos.containing(feet), bed, bent);
 			if (t >= placed) {
 				// Facing the bed; then the head round at them, the rest of it after.
 				double u = Reel.smooth((t - turns) / 14.0);
 				Vec3 look = bed.scale(1 - u).add(eye(poses, t).scale(u));
 				Reel.look(server, feet, look, 0);
-				coil(server, feet, 0.35f);
+				coil(server, feet, 0.5f);
 			}
 		}, fov);
 	}
@@ -865,7 +869,8 @@ final class Tape {
 		f.walkOn(0.03, t -> door);
 		f.hold(12, t -> door, 0, 0.8);
 		// Behind them, a tap on the glass.
-		Vec3 feet = Reel.local(o, -5, 0, 0.5);
+		// Down low outside the window (its feet sunk where the wall hides them), its face at the glass.
+		Vec3 feet = Reel.local(o, -5, -1.4, 0.5);
 		Vec3 face = Reel.local(o, -4.4, 2.0, 0.5);
 		int placed = f.size() - 12;
 		int tap = f.size() + 4;
