@@ -673,7 +673,161 @@ final class Reel {
 			steady = 0.8;
 			across = 46.0;
 			upDown = 32.0;
+			loose = 1.6;
 			return this;
+		}
+
+		/** How much the hand wanders while it holds the camera on something (more, filming as they go about). */
+		private double loose = 1.0;
+
+		/** Where the eye is on what it looks at: never a point, an area, wandering over it. */
+		private double attY, attP;
+		/** The move the hand is making to point the camera somewhere new: how far through it, how long, from, by, past by. */
+		private int moveT = -1, moveLen, moveWait;
+		private double moveY0, moveP0, moveDY, moveDP, moveOver;
+		private final java.util.Random hands = new java.util.Random(11L);
+
+		/**
+		 * The camera pointed at {@code at} a tick on, the way a hand points one: when it has to go
+		 * somewhere new, a moment's delay, then off quickly and slowing, carried a little past and
+		 * back, the camera dipping as it swings; held on something, it never quite stays put (the eye
+		 * wanders over it and the hand follows) and now and then is put right with a small nudge.
+		 * {@code nervous} makes all of it quicker and less steady.
+		 */
+		private void aimAt(Vec3 at, double nervous) {
+			attY += hands.nextGaussian() * 0.32 * (1 + nervous) - attY * 0.05;
+			attP += hands.nextGaussian() * 0.22 * (1 + nervous) - attP * 0.06;
+			double ty = yawTo(at) + attY, tp = pitchTo(at) + attP;
+			if (moveT >= 0) {
+				// What they are looking at has moved on since the hand set off: go for where it is now.
+				double end = moveY0 + moveDY;
+				if (Math.abs(Mth.wrapDegrees(ty - end)) > 10.0 || Math.abs(tp - (moveP0 + moveDP)) > 10.0) moveT = -1;
+			}
+			if (moveT < 0) {
+				double dy = Mth.wrapDegrees(ty - yaw), dp = tp - pitch, far = Math.hypot(dy, dp);
+				if (far > 4.5 + 2.5 * hands.nextDouble()) {
+					moveT = 0;
+					moveWait = hands.nextInt(3);
+					moveY0 = yaw;
+					moveP0 = pitch;
+					moveDY = dy;
+					moveDP = dp;
+					moveLen = (int) Math.round(3 + far / (7.0 + 5.0 * nervous) + hands.nextDouble() * 3);
+					moveOver = 0.03 + 0.07 * hands.nextDouble();
+				} else {
+					// Near enough: crept on to it, a little at a time.
+					yaw += dy * 0.06;
+					pitch += dp * 0.06;
+					return;
+				}
+			}
+			if (moveWait > 0) {
+				moveWait--;
+				return;
+			}
+			moveT++;
+			double u = (double) moveT / moveLen;
+			double w = Math.pow(Math.min(1.0, u), 0.8);
+			double s = w * w * w * (10 - 15 * w + 6 * w * w) + moveOver * Math.exp(-Math.pow((u - 1.05) / 0.22, 2));
+			yaw = moveY0 + moveDY * s;
+			pitch = moveP0 + moveDP * s + Math.abs(moveDY) * 0.035 * Math.sin(Math.PI * Math.min(1.0, u));
+			if (u >= 1.5) moveT = -1;
+		}
+
+		/**
+		 * The camera let down at their side, still recording: tipping down to the ground, swinging a
+		 * little as the arm drops, the horizon going over; slowing to a stop if they were walking.
+		 */
+		/** Ticks where the tape was stopped and started again: the camera somewhere else, nothing carried over. */
+		private final java.util.Set<Integer> cuts = new java.util.HashSet<>();
+
+		/**
+		 * The tape stopped here and started again later, at {@code eye} (its height ignored: on the
+		 * ground they started on) looking at {@code look}, standing still.
+		 */
+		void jump(Vec3 eye, Vec3 look) {
+			mark("cut");
+			cuts.add(poses.size());
+			x = eye.x;
+			z = eye.z;
+			speed = 0;
+			lift = 0;
+			roll = 0;
+			tremble = 0;
+			way = null;
+			moveT = -1;
+			attY = 0;
+			attP = 0;
+			yaw = yawTo(look);
+			pitch = pitchTo(look);
+			heading = yaw;
+		}
+
+		/** How far under standing they keep their head as they walk on (creeping up on something). */
+		double low;
+
+		/**
+		 * A hand put over the lens: it comes at the camera from below and knocks it a little, and
+		 * the picture goes dark (the edit draws the hand) over {@code n} ticks.
+		 */
+		void cover(int n) {
+			mark("cover");
+			for (int i = 0; i < n; i++) {
+				double u = (i + 1.0) / n;
+				step(0, 0.04);
+				pitch += 0.5 + 1.2 * u;
+				yaw += 0.4 * Math.sin(i * 1.3);
+				roll += (6 * u - roll) * 0.3;
+				tremble += (1.2 - tremble) * 0.2;
+				push();
+			}
+		}
+
+		void lower(int n) {
+			mark("lower");
+			double y0 = yaw, p0 = pitch;
+			double side = hands.nextBoolean() ? 1 : -1;
+			for (int i = 0; i < n; i++) {
+				double u = smooth((i + 1.0) / n);
+				step(speed * 0.9, 0.03);
+				yaw = y0 + side * 18 * u + 4 * Math.sin(i * 0.5) * u;
+				pitch = p0 + (72 - p0) * u;
+				roll += (side * 24 * u - roll) * 0.25;
+				lift += (-0.55 * u - lift) * 0.2;
+				tremble *= 0.9;
+				push();
+			}
+		}
+
+		/**
+		 * Dropped as they go over backwards: out of the hand, end over end through a few ticks, and
+		 * down on the floor at {@code to} ({@code height} up), resting tipped by {@code tilt}, its lens
+		 * on {@code at}.
+		 */
+		void dropped(Vec3 to, Vec3 at, double height, double tilt) {
+			mark("drop");
+			feet = false;
+			hand = false;
+			rigid = 0;
+			double x1 = x, z1 = z, y1 = yaw, p1 = pitch, l1 = lift, r1 = roll;
+			double landYaw = yawBetween(to, at);
+			double landPitch = -Math.toDegrees(Math.atan2(at.y - (eyeY - Cinematic.EYE + height), Math.hypot(at.x - to.x, at.z - to.z)));
+			double down = height - Cinematic.EYE;
+			int n = 9;
+			for (int i = 1; i <= n; i++) {
+				double u = (double) i / n;
+				x = x1 + (to.x - x1) * u;
+				z = z1 + (to.z - z1) * u;
+				// Falling: slow off the hand, fast at the floor; a little up as it is flung.
+				lift = l1 + (down - l1) * u * u + 0.25 * Math.sin(Math.PI * u) * (1 - u);
+				yaw = y1 + Mth.wrapDegrees(landYaw - y1) * u + 20 * Math.sin(u * Math.PI);
+				pitch = Mth.clamp(p1 * (1 - u) + landPitch * u - 110 * Math.sin(u * Math.PI) * (1 - 0.3 * u), -89, 89);
+				roll = r1 + (tilt - r1) * u + 35 * Math.sin(u * Math.PI * 1.5);
+				speed = 0;
+				tremble = 0;
+				push();
+			}
+			mark("land");
 		}
 
 		/**
@@ -684,9 +838,7 @@ final class Reel {
 		void hold(int n, IntFunction<Vec3> look, double low, double shake) {
 			for (int i = 0; i < n; i++) {
 				step(0, 0.03);
-				Vec3 at = look.apply(i);
-				yaw = toward(yaw, yawTo(at), 0.2);
-				pitch += (pitchTo(at) - pitch) * 0.2;
+				aimAt(look.apply(i), Math.min(1.0, shake * 0.6));
 				lift += (-low - lift) * 0.1;
 				tremble += (shake - tremble) * 0.1;
 				roll *= 0.9;
@@ -700,10 +852,8 @@ final class Reel {
 			while (i < 900 && way.along(x, z) < way.length() - 0.12 - speed * speed / 0.04) {
 				steer(6);
 				step(pace, 0.02);
-				Vec3 at = look.apply(i);
-				yaw = toward(yaw, yawTo(at), 0.18);
-				pitch += (pitchTo(at) - pitch) * 0.18;
-				lift *= 0.9;
+				aimAt(look.apply(i), 0.2);
+				lift += (-low - lift) * 0.1;
 				tremble *= 0.9;
 				roll *= 0.9;
 				push();
@@ -860,8 +1010,7 @@ final class Reel {
 		void stare(int n, Vec3 at, double shake) {
 			for (int i = 0; i < n; i++) {
 				step(0, 0.03);
-				yaw = toward(yaw, yawTo(at), 0.3);
-				pitch += (pitchTo(at) - pitch) * 0.3;
+				aimAt(at, Math.min(1.0, shake * 0.6));
 				tremble += (shake - tremble) * 0.2;
 				lift *= 0.85;
 				roll *= 0.9;
@@ -880,8 +1029,7 @@ final class Reel {
 				x += -Math.sin(r) * lean * u;
 				z += Math.cos(r) * lean * u;
 				step(0, 0.03);
-				yaw = toward(yaw, yawTo(at), 0.25);
-				pitch += (pitchTo(at) - pitch) * 0.25;
+				aimAt(at, Math.min(1.0, shake * 0.6));
 				tremble += (shake - tremble) * 0.08;
 				lift += (-0.05 - lift) * 0.08;
 				roll *= 0.9;
@@ -916,9 +1064,7 @@ final class Reel {
 			for (int i = 0; i < n; i++) {
 				steer(6);
 				step(pace, 0.02);
-				Vec3 at = look.apply(i);
-				yaw = toward(yaw, yawTo(at), 0.18);
-				pitch += (pitchTo(at) - pitch) * 0.18;
+				aimAt(look.apply(i), 0.2);
 				tremble *= 0.9;
 				roll *= 0.9;
 				push();
@@ -1057,8 +1203,7 @@ final class Reel {
 			for (int i = 0; i < n; i++) {
 				heading = yawTo(at) + 180.0;
 				step(pace, 0.03);
-				yaw = toward(yaw, yawTo(at), 0.4);
-				pitch += (pitchTo(at) - pitch) * 0.4;
+				aimAt(at, 1.0);
 				lift += (-0.08 - lift) * 0.2;
 				tremble += (1.8 - tremble) * 0.3;
 				push();
@@ -1189,7 +1334,8 @@ final class Reel {
 				double[] p = poses.get(i);
 				double target = i == 0 ? p[2] : prev + Mth.wrapDegrees(p[2] - poses.get(i - 1)[2]);
 				prev = target;
-				if (i == 0 || p[11] == 0) {
+				boolean fresh = i == 0 || p[11] == 0 || cuts.contains(i);
+				if (fresh) {
 					ly = target;
 					lyv = 0;
 					lp = p[3];
@@ -1200,7 +1346,7 @@ final class Reel {
 					lpv += Mth.clamp(Mth.clamp((p[3] - lp) * 0.45, -TURN_FAST / 2, TURN_FAST / 2) - lpv, -TURN_PICKUP * 0.8, TURN_PICKUP * 0.8);
 					lp += lpv;
 				}
-				if (i == 0 || p[11] == 0) {
+				if (fresh) {
 					y = target;
 					yv = 0;
 					pp = p[3];
@@ -1222,7 +1368,11 @@ final class Reel {
 			double l = 0, lv = 0;
 			for (int i = 1; i < n; i++) {
 				double[] p = poses.get(i);
-				double a = p[11] == 0 || p[9] == 0 ? 0 : p[5] - poses.get(i - 1)[5];
+				double a = p[11] == 0 || p[9] == 0 || cuts.contains(i) ? 0 : p[5] - poses.get(i - 1)[5];
+				if (cuts.contains(i)) {
+					l = 0;
+					lv = 0;
+				}
 				for (int k = 0; k < 2; k++) {
 					lv += (-0.35 * l - 0.8 * lv + 16.0 * a) * 0.5;
 					l += lv * 0.5;
@@ -1242,7 +1392,7 @@ final class Reel {
 				double[] p = poses.get(i);
 				boolean standing = p[9] > 0 && p[11] > 0;
 				double run = standing ? Mth.clamp(p[5] / SPRINT, 0, 1) : 0;
-				if (i > 0 && standing && p[5] > 0.03 && Math.floor(poses.get(i - 1)[7] / Math.PI) != Math.floor(p[7] / Math.PI)) {
+				if (i > 0 && standing && !cuts.contains(i) && p[5] > 0.03 && Math.floor(poses.get(i - 1)[7] / Math.PI) != Math.floor(p[7] / Math.PI)) {
 					double hard = p[10] * (0.35 + 0.65 * run) * calm[i];
 					jv[0] += (2.0 + 4.5 * run) * hard * (0.7 + 0.6 * rng.nextDouble());              // pitch, down
 					jv[1] += (rng.nextDouble() - 0.5) * (2.5 + 5.0 * run) * hard;                      // yaw
@@ -1364,13 +1514,13 @@ final class Reel {
 			// and it shakes, quickly, with fear; while it is in the picture they hold it a little
 			// stiller, and staring at something they cannot look away from, stiller still.
 			double fear = 0.25 + tr;
-			double drift = calm * (0.5 + 1.4 * run + 0.3 * tr) * (1 - 0.65 * rigid);
+			double drift = calm * (0.5 * loose + 1.4 * run + 0.3 * tr) * (1 - 0.65 * rigid);
 			double quick = calm * (0.12 + 0.55 * fear + 0.35 * run);
 			double yawOut = yw + wander[0] * drift * 1.2 + shake[0] * quick + jolt[1] + 1.6 * run * Math.sin(ph) * calm
 					+ 0.5 * sway + 0.15 * side;
 			double pitchOut = pt + wander[1] * drift * 0.8 + shake[1] * quick * 0.8 + jolt[0] + nod - 0.6 * air;
 			// The roll: the hand never keeps the horizon level, leaning into a turn, rocking with each step.
-			double turned = i > 0 ? Mth.wrapDegrees(p[2] - poses.get(i - 1)[2]) : 0;
+			double turned = i > 0 && !cuts.contains(i) ? Mth.wrapDegrees(p[2] - poses.get(i - 1)[2]) : 0;
 			double rollOut = rl + wander[2] * calm * (0.9 + 2.6 * run) * (1 - 0.5 * rigid) + shake[2] * quick * 0.9 + jolt[2]
 					- Mth.clamp(turned * 0.3, -6, 6) + 1.1 * sway * heavy + 0.3 * side;
 			yawOut = yw + (yawOut - yw) * steady;
@@ -1403,6 +1553,10 @@ final class Reel {
 		server.runCommand("kill " + ALL);
 		server.runCommand("kill " + BODY);
 		server.runCommand("time set " + time);
+		// Nothing alive but what the clip puts there: no cow wandering through the shot.
+		server.runCommand("kill @e[type=!player,tag=!tape,type=!item_frame,type=!armor_stand,type=!block_display,type=!interaction]");
+		server.runCommand("gamerule doMobSpawning false");
+		server.runCommand("gamerule spawn_mobs false");
 		Vec3 d = look.subtract(eye);
 		server.runCommand(tp(eye, Math.toDegrees(Math.atan2(-d.x, d.z)), -Math.toDegrees(Math.atan2(d.y, Math.sqrt(d.x * d.x + d.z * d.z)))));
 		context.waitTicks(30);
@@ -1455,6 +1609,10 @@ final class Reel {
 		// The long video's frames kept as JPEGs, made on the side while the next is drawn: a full-size
 		// PNG of every frame would fill the machine's disk before the run was through.
 		java.util.concurrent.ExecutorService saver = java.util.concurrent.Executors.newSingleThreadExecutor();
+		// A frame takes the game most of a second to draw and keep, and the world would go on at its
+		// own pace meanwhile: a cow would cross a field in a few frames. So the world is stopped, and
+		// let go on one tick at a time, a tick a frame, everything in it at its own speed.
+		if (landscape) server.runCommand("tick freeze");
 		try {
 			for (int t = 0; t < poses.length; t++) {
 				double[] p = poses[t];
@@ -1467,6 +1625,7 @@ final class Reel {
 					}
 				}
 				if (cue != null) cue.accept(t);
+				if (landscape) server.runCommand("tick step 1");
 				context.waitTick();
 				Path shot = context.takeScreenshot("reel-" + name + "-" + t);
 				String file = String.format(Locale.ROOT, "%04d.%s", t >= wide ? t - wide : t % piece, landscape ? "jpg" : "png");
@@ -1482,6 +1641,7 @@ final class Reel {
 				}
 			}
 		} finally {
+			if (landscape) server.runCommand("tick unfreeze");
 			saver.shutdown();
 			try {
 				saver.awaitTermination(10, java.util.concurrent.TimeUnit.MINUTES);
