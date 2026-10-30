@@ -76,6 +76,8 @@ final class Tape {
 					case "knock" -> knock(context, game, woods);
 					case "morning" -> morning(context, game, woods);
 					case "mine" -> mine(context, game, woods);
+					case "radio" -> radio(context, game, woods);
+					case "chapel" -> chapel(context, game, woods);
 					case "found" -> Reel.found(context, game, woods);
 					default -> Occupant.LOGGER.warn("[client-gametest] tape: there is no scene {}", scene);
 				}
@@ -644,6 +646,237 @@ final class Tape {
 			}
 		}
 		sign(level, o.offset(0, 0, z0 - 1), Blocks.OAK_SIGN, 8, new String[]{"IT TOOK", "THE REST", "", ""});
+	}
+
+	/**
+	 * Day three: a ranger's radio shack in the woods, its aerial up over the roof, and a sign out
+	 * front. Inside, the set on the table. It picks something up: static, and in it, a voice.
+	 * Backing out of there.
+	 */
+	private static void radio(ClientGameTestContext context, TestSingleplayerContext game, BlockPos[] woods) {
+		TestServerContext server = game.getServer();
+		BlockPos floor = site(game, woods[1].offset(230, 0, 120));
+		if (floor == null) return;
+		BlockPos o = floor.above();
+		double[][] approach = {{0.8, -34}, {0.6, -22}, {0.4, -12}, {0.6, -6.2}};
+		server.runOnServer(s -> {
+			ServerLevel level = s.overworld();
+			Reel.wood(level, o, -28, 28, -38, 22, List.of(Reel.Way.local(o, approach)), 59L, new double[][]{{0, 0, 7.5}}, null);
+			shack(level, o);
+		});
+
+		Vec3 start = Reel.local(o, 0.6, EYE, -20);
+		Reel.Fear f = new Reel.Fear(start).wide();
+		f.follow(Reel.Way.local(o, new double[][]{{0.6, -20}, {0.4, -12}, {0.6, -6.2}}));
+		Vec3 shack = Reel.local(o, 0, 1.4, -2);
+		Vec3 aerial = Reel.local(o, 2, 8, 3);
+		Vec3 sign = Reel.local(o, 1, 0.6, -4);
+		f.face(shack);
+		f.walkOn(0.08, t -> t < 55 ? shack : t < 95 ? aerial : sign);
+		f.hold(15, t -> sign, 0, 0.15);
+		f.hold(55, t -> sign, 0.25, 0.2);
+		// Up onto the porch and in.
+		f.follow(Reel.Way.local(o, new double[][]{{0.6, -6.2}, {-0.2, -5.0}, {0, -3.5}, {0, -2}, {0, -0.7}}));
+		Vec3 set = Reel.local(o, 0, 0.6, 2);
+		f.walkOn(0.055, t -> f.z > o.getZ() - 3.0 ? set : Reel.local(o, 0, 1.3, -1));
+		// The set: the dials, the lever. Looking it over, leaning in.
+		f.hold(40, t -> Reel.local(o, -0.6, 0.6, 2.2), 0.1, 0.2);
+		f.hold(35, t -> Reel.local(o, 0.8, 0.6, 2.2), 0.25, 0.2);
+		// It comes on by itself: static, and through it, a voice.
+		int hiss = f.size() + 4;
+		f.markAt(hiss, "static");
+		f.flinchAt(hiss + 1, set, 1.0);
+		f.hold(20, t -> set, 0.0, 0.8);
+		f.markAt(f.size() + 2, "radio");
+		f.hold(70, t -> set, 0.0, 1.2);
+		f.markAt(f.size() - 22, "static");
+		// Out, backwards, the camera still on it.
+		f.follow(Reel.Way.local(o, new double[][]{{0, -0.7}, {0, -2}, {0, -3.6}, {-0.3, -6.0}}));
+		int out = f.size();
+		while (f.size() < out + 56) f.backAway(1, set, 0.07);
+		f.hold(30, t -> shack, 0, 1.0);
+		f.mark("end");
+
+		double[][] poses = f.flat(o.getY());
+		Reel.prepare(context, game, start, shack, 10800);
+		Reel.record(context, server, "radio", poses, Integer.MAX_VALUE, f, null);
+	}
+
+	/** The radio shack as the mod builds one (see RadioShack): one room, a porch, the set, the aerial, the sign. */
+	private static void shack(ServerLevel level, BlockPos o) {
+		BlockState air = Blocks.AIR.defaultBlockState();
+		for (int x = -3; x <= 3; x++) {
+			for (int z = -4; z <= 4; z++) {
+				for (int y = 0; y <= 5; y++) Reel.set(level, o.offset(x, y, z), air);
+			}
+		}
+		for (int x = -2; x <= 2; x++) {
+			for (int z = -2; z <= 3; z++) {
+				Reel.set(level, o.offset(x, -1, z), Blocks.SPRUCE_PLANKS.defaultBlockState());
+				boolean edge = x == -2 || x == 2 || z == -2 || z == 3;
+				boolean corner = Math.abs(x) == 2 && (z == -2 || z == 3);
+				if (edge) {
+					for (int y = 0; y <= 2; y++) {
+						Reel.set(level, o.offset(x, y, z), (corner ? Blocks.STRIPPED_SPRUCE_LOG : Blocks.SPRUCE_PLANKS).defaultBlockState());
+					}
+				}
+				Reel.set(level, o.offset(x, 3, z), Blocks.SPRUCE_SLAB.defaultBlockState());
+			}
+		}
+		Reel.set(level, o.offset(0, 0, -2), air);
+		Reel.set(level, o.offset(0, 1, -2), air);
+		pane(level, o.offset(2, 1, 0), true);
+		pane(level, o.offset(-2, 1, 0), true);
+		pane(level, o.offset(1, 1, -2), false);
+		// The porch, its rail posts, its roof.
+		BlockState deck = Blocks.SPRUCE_SLAB.defaultBlockState().setValue(BlockStateProperties.SLAB_TYPE, SlabType.TOP);
+		for (int x = -2; x <= 2; x++) {
+			Reel.set(level, o.offset(x, -1, -3), deck);
+			Reel.set(level, o.offset(x, 3, -3), Blocks.SPRUCE_SLAB.defaultBlockState());
+		}
+		for (int x : new int[]{-2, 2}) {
+			for (int y = 0; y <= 2; y++) Reel.set(level, o.offset(x, y, -3), Blocks.SPRUCE_FENCE.defaultBlockState());
+		}
+		// The set on its table: the radio, the dials, the switch; the aerial over the back corner.
+		Reel.set(level, o.offset(-1, 0, 2), Blocks.JUKEBOX.defaultBlockState());
+		Reel.set(level, o.offset(0, 0, 2), Blocks.NOTE_BLOCK.defaultBlockState());
+		Reel.set(level, o.offset(1, 0, 2), Blocks.LEVER.defaultBlockState());
+		for (int y = 4; y <= 10; y++) Reel.set(level, o.offset(2, y, 3), Blocks.IRON_BARS.defaultBlockState());
+		Reel.set(level, o.offset(1, 0, -1), Blocks.CHEST.defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.WEST));
+		Reel.set(level, o.offset(-1, 0, -1), Blocks.CRAFTING_TABLE.defaultBlockState());
+		BlockState log = Blocks.SPRUCE_LOG.defaultBlockState().setValue(BlockStateProperties.AXIS, Direction.Axis.Z);
+		Reel.set(level, o.offset(3, 0, 0), log);
+		Reel.set(level, o.offset(3, 1, 0), log);
+		Reel.set(level, o.offset(3, 0, 1), log);
+		sign(level, o.offset(1, 0, -4), Blocks.OAK_SIGN, 8, new String[]{"", "I HEARD MY", "OWN VOICE", "ON IT"});
+	}
+
+	/**
+	 * Day three, dusk: a chapel in the woods, long given up. Up the aisle between the pews; every
+	 * pew faces the altar but one, turned round to face the door. The candles on the altar burnt
+	 * out. A look back at the door; and when they look at the altar again, the candles are lit.
+	 */
+	private static void chapel(ClientGameTestContext context, TestSingleplayerContext game, BlockPos[] woods) {
+		TestServerContext server = game.getServer();
+		BlockPos floor = site(game, woods[0].offset(-260, 0, -60));
+		if (floor == null) return;
+		BlockPos o = floor.above();
+		double[][] approach = {{0.8, -36}, {0.5, -26}, {0.2, -14}, {0, -8.5}};
+		server.runOnServer(s -> {
+			ServerLevel level = s.overworld();
+			Reel.wood(level, o, -28, 28, -40, 22, List.of(Reel.Way.local(o, approach)), 131L, new double[][]{{0, 1, 9.5}}, null);
+			nave(level, o);
+		});
+
+		Vec3 start = Reel.local(o, 0.5, EYE, -24);
+		Reel.Fear f = new Reel.Fear(start).wide();
+		f.follow(Reel.Way.local(o, new double[][]{{0.5, -24}, {0.2, -14}, {0, -8.5}}));
+		Vec3 door = Reel.local(o, 0, 1.2, -5);
+		Vec3 gable = Reel.local(o, 0, 7.0, -5);
+		f.face(door);
+		f.walkOn(0.08, t -> t < 60 ? door : t < 110 ? gable : door);
+		f.hold(35, t -> gable, 0, 0.2);
+		f.hold(20, t -> door, 0, 0.25);
+		// In, and slowly up the aisle.
+		Vec3 altar = Reel.local(o, 0, 1.0, 6);
+		f.follow(Reel.Way.local(o, new double[][]{{0, -8.5}, {0, -5}, {0, -0.3}}));
+		f.walkOn(0.05, t -> t < 50 ? altar : t < 80 ? Reel.local(o, -3, 2.4, -3) : t < 110 ? Reel.local(o, 1.5, 0.6, -1) : altar);
+		// The pew in front of them faces the wrong way: it faces them.
+		f.hold(40, t -> Reel.local(o, -1.5, 0.6, 1), 0, 0.4);
+		f.hold(30, t -> Reel.local(o, 1.5, 0.6, 1), 0, 0.5);
+		f.hold(45, t -> altar, 0, 0.5);
+		// A look back at the door.
+		f.hold(48, t -> door, 0, 0.6);
+		int lit = f.size() - 30;
+		f.markAt(lit, "light");
+		// The altar again: the candles are burning.
+		Vec3 candles = Reel.local(o, 0, 1.3, 6);
+		f.hold(16, t -> candles, 0, 0.8);
+		int seen = f.size() - 4;
+		f.markAt(seen, "seen");
+		f.flinchAt(seen, candles, 0.9);
+		f.hold(60, t -> candles, 0, 1.2);
+		f.markAt(f.size() - 30, "what");
+		f.follow(Reel.Way.local(o, new double[][]{{0, -0.3}, {0, -4.5}}));
+		int out = f.size();
+		while (f.size() < out + 30) f.backAway(1, candles, 0.06);
+		f.mark("end");
+
+		double[][] poses = f.flat(o.getY());
+		Reel.prepare(context, game, start, door, 12900);
+		Reel.record(context, server, "chapel", poses, Integer.MAX_VALUE, f, t -> {
+			if (t == lit) server.runOnServer(s -> {
+				for (int x : new int[]{-1, 1}) {
+					Reel.set(s.overworld(), o.offset(x, 1, 6), Blocks.CANDLE.defaultBlockState().setValue(BlockStateProperties.LIT, true));
+				}
+			});
+		});
+	}
+
+	/** The chapel as the mod builds one (see Chapel): stone, pews in rows, one turned, the altar at the back. */
+	private static void nave(ServerLevel level, BlockPos o) {
+		BlockState air = Blocks.AIR.defaultBlockState();
+		for (int x = -4; x <= 4; x++) {
+			for (int z = -6; z <= 8; z++) {
+				for (int y = 0; y <= 10; y++) Reel.set(level, o.offset(x, y, z), air);
+			}
+		}
+		for (int x = -3; x <= 3; x++) {
+			for (int z = -5; z <= 7; z++) {
+				Reel.set(level, o.offset(x, -1, z), ((x * 5 + z * 3) % 4 == 0 ? Blocks.MOSSY_COBBLESTONE : Blocks.STONE_BRICKS).defaultBlockState());
+				boolean edge = x == -3 || x == 3 || z == -5 || z == 7;
+				if (!edge) continue;
+				for (int y = 0; y <= 4; y++) {
+					if (y >= 2 && (x * 7 + z * 11 + y * 5) % 17 == 0) continue;     // fallen out
+					int k = (x * 13 + z * 7 + y * 3) % 6;
+					Reel.set(level, o.offset(x, y, z), (k == 0 ? Blocks.MOSSY_STONE_BRICKS : k == 1 ? Blocks.CRACKED_STONE_BRICKS
+							: Blocks.STONE_BRICKS).defaultBlockState());
+				}
+			}
+		}
+		Reel.set(level, o.offset(0, 0, -5), air);
+		Reel.set(level, o.offset(0, 1, -5), air);
+		// Windows down both sides, what is left of their glass.
+		for (int z = -3; z <= 5; z += 3) {
+			for (int x : new int[]{-3, 3}) {
+				for (int y = 1; y <= 3; y++) {
+					Reel.set(level, o.offset(x, y, z), (x + y + z) % 2 == 0 ? Blocks.GLASS_PANE.defaultBlockState()
+							.setValue(BlockStateProperties.NORTH, true).setValue(BlockStateProperties.SOUTH, true) : air);
+				}
+			}
+		}
+		// The roof: stairs up to a ridge, and the gable ends.
+		for (int k = 0; k <= 4; k++) {
+			for (int z = -6; z <= 8; z++) {
+				Reel.set(level, o.offset(-4 + k, 5 + k, z), Blocks.STONE_BRICK_STAIRS.defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.EAST));
+				Reel.set(level, o.offset(4 - k, 5 + k, z), Blocks.STONE_BRICK_STAIRS.defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.WEST));
+			}
+		}
+		for (int z = -6; z <= 8; z++) Reel.set(level, o.offset(0, 9, z), Blocks.STONE_BRICK_SLAB.defaultBlockState());
+		for (int k = 0; k <= 3; k++) {
+			for (int x = -3 + k + 1; x <= 3 - k - 1; x++) {
+				Reel.set(level, o.offset(x, 5 + k, -5), Blocks.STONE_BRICKS.defaultBlockState());
+				Reel.set(level, o.offset(x, 5 + k, 7), Blocks.STONE_BRICKS.defaultBlockState());
+			}
+		}
+		// Pews facing the altar, their backs to the door; one turned round.
+		for (int z = -3; z <= 3; z += 2) {
+			Direction back = z == 1 ? Direction.SOUTH : Direction.NORTH;
+			for (int x : new int[]{-2, -1, 1, 2}) Reel.set(level, o.offset(x, 0, z), stairs(back));
+		}
+		// The rail, the altar, the candles burnt down.
+		for (int x : new int[]{-2, -1, 1, 2}) {
+			boolean west = x == 2 || x == -1, east = x == -2 || x == 1;
+			Reel.set(level, o.offset(x, 0, 5), Blocks.SPRUCE_FENCE.defaultBlockState()
+					.setValue(BlockStateProperties.WEST, west).setValue(BlockStateProperties.EAST, east));
+		}
+		Reel.set(level, o.offset(-1, 0, 6), Blocks.POLISHED_ANDESITE.defaultBlockState());
+		Reel.set(level, o.offset(1, 0, 6), Blocks.POLISHED_ANDESITE.defaultBlockState());
+		Reel.set(level, o.offset(0, 0, 6), Blocks.CHEST.defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH));
+		Reel.set(level, o.offset(-1, 1, 6), Blocks.CANDLE.defaultBlockState());
+		Reel.set(level, o.offset(1, 1, 6), Blocks.CANDLE.defaultBlockState());
+		for (int[] c : new int[][]{{-2, 3, -4}, {2, 4, 6}, {-2, 4, 5}}) Reel.set(level, o.offset(c[0], c[1], c[2]), Blocks.COBWEB.defaultBlockState());
+		Reel.set(level, o.offset(2, 0, -4), Blocks.SKELETON_SKULL.defaultBlockState().setValue(BlockStateProperties.ROTATION_16, 11));
 	}
 
 	// ------------------------------------------------------------------ underground
