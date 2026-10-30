@@ -645,19 +645,21 @@ final class Tape {
 			int k = f.size() - placedAt[0];
 			return k < 24 ? window : k < 44 ? back : table;
 		});
-		int placed = placedAt[0] + 4;
-		// Round to the right: the gap in the wall, close, and it is in it.
+		// Round to the right: the gap in the wall, close, and it is in it (there only from when they
+		// start to turn: its legs reach a long way, and nothing of it is to be seen before).
 		Vec3 feet = Reel.local(o, 2.8, 0, -2.5);
 		Vec3 face = Reel.local(o, 2.6, 1.9, -2.5);
+		int placed = f.size() + 1;
 		f.hold(22, t -> face, 0, 0.3);
 		int seen = f.size() - 9;
 		f.markAt(seen, "seen");
 		f.flinchAt(seen, face, 1.6);
 		f.hold(6, t -> face, 0, 1.6);
-		// Over backwards: the camera out of their hand, onto the floor behind them.
+		// Over backwards: the camera out of their hand, onto the floor behind them and off to their
+		// right, so that from where it lies they are at one side and the gap, empty, past them.
 		Vec3 seat = Reel.local(o, -0.35, 0, -2.6);
-		Vec3 lens = Reel.local(o, -2.25, 0.12, -2.35);
-		Vec3 gap = Reel.local(o, 2.4, 1.1, -2.5);
+		Vec3 lens = Reel.local(o, -1.95, 0.12, -1.5);
+		Vec3 gap = Reel.local(o, 2.05, 1.45, -2.4);
 		int drop = f.size();
 		f.dropped(lens, gap, 0.12, -12);
 		int land = f.size();
@@ -864,7 +866,7 @@ final class Tape {
 		f.hold(12, t -> door, 0, 0.8);
 		// Behind them, a tap on the glass.
 		Vec3 feet = Reel.local(o, -5, 0, 0.5);
-		Vec3 face = Reel.local(o, -4.4, 2.3, 0.5);
+		Vec3 face = Reel.local(o, -4.4, 2.0, 0.5);
 		int placed = f.size() - 12;
 		int tap = f.size() + 4;
 		f.markAt(tap, "tap");
@@ -893,8 +895,8 @@ final class Tape {
 			if (t == placed) Cinematic.place(server, BlockPos.containing(feet), eye(poses, t), bent);
 			if (t >= placed && t < gone) {
 				Reel.look(server, feet, eye(poses, t), 0);
-				// Crouched down to look in at the glass, as low as it goes.
-				coil(server, feet, 0.7f);
+				// Crouched down to look in at the glass, its face at the middle of it.
+				coil(server, feet, 0.5f);
 			}
 			if (t == gone) server.runCommand("kill " + Reel.ALL);
 		});
@@ -1362,7 +1364,7 @@ final class Tape {
 					int k = r.nextInt(1000);
 					Block b = k < 40 ? Blocks.COAL_ORE : k < 55 ? Blocks.IRON_ORE : k < 63 ? Blocks.COPPER_ORE
 							: k < 110 ? Blocks.ANDESITE : k < 140 ? Blocks.GRANITE : k < 160 ? Blocks.DIORITE
-							: k < 175 ? Blocks.GRAVEL : Blocks.STONE;
+							: k < 175 ? Blocks.TUFF : Blocks.STONE;
 					Reel.set(level, o.offset(x, y, z), b.defaultBlockState());
 				}
 			}
