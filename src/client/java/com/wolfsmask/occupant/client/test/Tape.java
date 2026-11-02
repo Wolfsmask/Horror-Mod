@@ -75,9 +75,11 @@ final class Tape {
 					case "home" -> home(context, game, woods);
 					case "camp" -> camp(context, game, woods);
 					case "pasture" -> pasture(context, game, woods);
+					case "well" -> well(context, game, woods);
 					case "field" -> field(context, game, woods);
 					case "intruder" -> intruder(context, game, woods);
 					case "visitor" -> visitor(context, game, woods);
+					case "doorway" -> doorway(context, game, woods);
 					case "house" -> house(context, game, woods);
 					case "graves" -> graves(context, game, woods);
 					case "knock" -> knock(context, game, woods);
@@ -350,102 +352,148 @@ final class Tape {
 	}
 
 	/**
-	 * Day two, sundown: across a clearing in the woods. A look along the far trees, past something
-	 * standing at the edge of them; back to it. The camcorder zoomed in on it: watching. Down at
-	 * the ground a moment, and up: gone. Round to go back the way they came, and it is right there.
+	 * Day two, late afternoon: an old well in a clearing, its wall fallen in on one side. Leaning out
+	 * over it, the camera down the shaft, into the dark. A stone dropped: it goes, and nothing comes
+	 * back up, no splash, nothing. Listening. Then the stone does come back: up out of the dark, past
+	 * them, and down on the far side of the wall. Away from there, quickly.
+	 */
+	private static void well(ClientGameTestContext context, TestSingleplayerContext game, BlockPos[] woods) {
+		TestServerContext server = game.getServer();
+		BlockPos floor = site(game, woods[0].offset(120, 0, 60), woods[1].offset(-200, 0, 120), woods[0].offset(40, 0, -200));
+		if (floor == null) return;
+		BlockPos o = floor.above();
+		double[][] approach = {{0.5, -36}, {0.4, -20}, {0.5, -9}, {0.5, -1.4}};
+		server.runOnServer(s -> {
+			ServerLevel level = s.overworld();
+			Reel.wood(level, o, -26, 28, -40, 24, List.of(Reel.Way.local(o, approach)), 43L, new double[][]{{0.5, 0.5, 7.5}}, null);
+			wellBuild(level, o);
+		});
+
+		Vec3 start = Reel.local(o, 0.5, EYE, -9);
+		Reel.Fear f = new Reel.Fear(start).wide();
+		f.follow(Reel.Way.local(o, new double[][]{{0.5, -9}, {0.5, -5}, {0.5, -1.4}}));
+		Vec3 well = Reel.local(o, 0.5, 1.0, 0.5);
+		Vec3 roof = Reel.local(o, 0.5, 4.2, 0.5);
+		f.face(well);
+		f.walkOn(0.07, t -> t < 34 ? well : t < 58 ? roof : well);
+		// Out over it, and down the shaft.
+		Vec3 down = Reel.local(o, 0.5, -16, 1.0);
+		f.peer(16, down, 0.3, 1.15);
+		f.hold(28, t -> down, 0.18, 0.3);
+		f.markAt(f.size() - 16, "hello");
+		// A stone, dropped. Gone into the dark; nothing.
+		int pebble = f.size();
+		f.markAt(pebble, "pebble");
+		f.markAt(pebble + 17, "clink");
+		f.markAt(pebble + 26, "clink");
+		f.hold(58, t -> down, 0.18, 0.45);
+		f.markAt(f.size() - 22, "nothing");
+		// Back up out of the dark, past them, onto the wall on the far side.
+		int up = f.size();
+		f.markAt(up, "up");
+		Vec3 rim = Reel.local(o, 0.55, 1.1, 1.95);
+		Vec3 over = Reel.local(o, 0.55, 2.0, 1.6);
+		f.hold(4, t -> down, 0.18, 0.6);
+		f.backAway(16, over, 0.09);
+		f.markAt(up + 28, "clack");
+		f.hold(30, t -> t < 6 ? over : rim, 0, 1.2);
+		f.markAt(f.size() - 14, "what");
+		// Round, and away, fast, the camera let down at their feet.
+		f.follow(Reel.Way.local(o, new double[][]{{f.x - o.getX() - 0.5, f.z - o.getZ() - 0.5}, {0.5, -5}, {0.5, -9}, {0.4, -20}}));
+		f.swing(10, Reel.Fear.yawBetween(f.at(f.size() - 1), Reel.local(o, 0.5, EYE, -9)), 8.0, 0.09);
+		f.walk(6, 0.11, t -> f.onWay(5.0, 0, -0.3));
+		f.lower(22, 0.12);
+		f.mark("end");
+
+		double[][] poses = f.flat(o.getY());
+		Reel.prepare(context, game, start, well, 11300);
+		Body body = new Body(server, f, poses, o.getY());
+		context.waitTicks(10);
+		Reel.record(context, server, "well", poses, Integer.MAX_VALUE, f, t -> {
+			body.at(t);
+			if (t == pebble) {
+				Vec3 e = eye(poses, t);
+				server.runCommand(String.format(Locale.ROOT,
+						"summon item %.3f %.3f %.3f {Item:{id:\"minecraft:cobblestone\",count:1},PickupDelay:32767,Tags:[\"tape\",\"tape_stone\"],Motion:[0.0d,-0.02d,0.03d]}",
+						o.getX() + 1.0, e.y - 0.3, Math.max(e.z + 0.25, o.getZ() + 0.4)));
+			}
+			if (t == up) {
+				server.runCommand("kill @e[type=item,tag=tape_stone]");
+				Vec3 from = Reel.local(o, 0.5, -7, 0.5);
+				server.runCommand(String.format(Locale.ROOT,
+						"summon item %.3f %.3f %.3f {Item:{id:\"minecraft:cobblestone\",count:1},PickupDelay:32767,Tags:[\"tape\",\"tape_stone\"],Motion:[0.0d,1.06d,0.06d]}",
+						from.x, from.y, from.z));
+			}
+		});
+	}
+
+	/**
+	 * Day two, sundown: across a clearing in the woods, filming the trees going dark. Far off at the
+	 * edge of them, small, something standing that they never see (nor will most who watch). A call
+	 * from the trees to the left, their name; round to it: nothing. Back the way they were looking,
+	 * and where it stood there is nobody. On, quickly.
 	 */
 	private static void field(ClientGameTestContext context, TestSingleplayerContext game, BlockPos[] woods) {
 		TestServerContext server = game.getServer();
 		BlockPos floor = site(game, woods[1].offset(-260, 0, -60), woods[0].offset(250, 0, 120), woods[1].offset(120, 0, 260));
 		if (floor == null) return;
 		BlockPos o = floor.above();
-		double[][] way = {{0.5, -30}, {0.5, -4}, {0.4, 6}, {0.2, 16}, {0.4, 30}, {0.6, 40}};
+		double[][] way = {{0.5, -22}, {0.5, -4}, {0.4, 6}, {0.2, 16}, {0.4, 28}};
 		server.runOnServer(s -> {
 			ServerLevel level = s.overworld();
-			Reel.wood(level, o, -32, 32, -34, 44, List.of(Reel.Way.local(o, way)), 167L, new double[][]{{0, 14, 19.5}}, null);
+			Reel.wood(level, o, -40, 40, -40, 56, List.of(Reel.Way.local(o, way)), 167L, new double[][]{{0, 14, 19.5}}, null);
 		});
 
 		Vec3 start = Reel.local(o, 0.5, EYE, -3);
 		Reel.Fear f = new Reel.Fear(start).wide();
-		f.follow(Reel.Way.local(o, new double[][]{{0.5, -3}, {0.4, 6}, {0.2, 16}, {0.4, 30}, {0.6, 40}}));
+		f.follow(Reel.Way.local(o, new double[][]{{0.5, -3}, {0.4, 6}, {0.2, 16}, {0.4, 28}}));
 		f.face(f.onWay(8.0, 0, -0.2));
-		Vec3 itFeet = Reel.local(o, 13, 0, 27);
-		Vec3 itFace = Reel.local(o, 13, 3.8, 27);
-		// Into the clearing; a look along the far trees, left to right, past it, and on.
+		// Far off, between two trunks at the edge of the clearing, in the last of the light.
+		Vec3 itFeet = Reel.local(o, 15, 0, 30);
+		Vec3 itFace = Reel.local(o, 15, 3.8, 30);
+		// Into the clearing, filming as they go: the way ahead, along the far trees and back.
 		f.walk(40, 0.075, t -> f.onWay(7.0, 0, -0.1));
 		int arrives = f.size() + 7;
-		f.walk(46, 0.06, t -> {
-			double u = t / 45.0;
-			return u < 0.5 ? Reel.local(o, -12 + 36 * u, 2.2, 30 + 4 * u) : Reel.local(o, 6 + 40 * (u - 0.5), 2.2, 32 - 44 * (u - 0.5));
+		f.walk(50, 0.06, t -> {
+			double u = t / 49.0;
+			return u < 0.5 ? Reel.local(o, -14 + 34 * u, 2.4, 30 + 4 * u) : Reel.local(o, 3 + 36 * (u - 0.5), 2.4, 32 - 40 * (u - 0.5));
 		});
-		// Back to it: someone at the edge of the trees.
-		f.hold(12, t -> Reel.local(o, 26, 2.2, 10), 0, 0.2);
-		f.swingTo(10, itFace);
-		int seen = f.size() - 2;
-		f.markAt(seen, "seen");
-		f.flinchAt(seen, itFace, 0.6);
-		int zoomIn = f.size() + 6;
-		f.markAt(zoomIn, "zoomin");
-		f.hold(52, t -> itFace, 0, 1.0);
-		// The tape drops out a moment; when it comes back, there is nobody there.
-		f.blink();
-		int gone = f.size() + 1;
-		f.hold(24, t -> itFace, 0, 1.0);
-		int zoomOut = f.size();
-		f.markAt(zoomOut, "zoomout");
-		f.hold(14, t -> itFace, 0, 0.9);
-		f.markAt(f.size() - 12, "what");
-		f.hold(16, t -> Reel.local(o, 7, 2.5, 30), 0, 0.8);
-		// Round, to go back the way they came: it is right there.
-		Vec3 here = f.at(f.size() - 1);
-		Vec3 closeFeet = new Vec3(here.x - 0.3, o.getY(), here.z - 3.0);
-		// Standing over them, its face high up: they look up at it.
-		Vec3 closeFace = closeFeet.add(0, 4.1, 0);
-		int placed = f.size();
-		f.turnTo(16, closeFace);
-		int close = f.size() - 4;
-		f.markAt(close, "seen");
-		f.flinchAt(close, closeFace, 1.8);
-		f.hold(5, t -> closeFace, 0, 1.6);
-		f.stagger(6, closeFace, 0.5);
-		f.swing(9, f.yaw + 180.0, 10.0, 0.16);
-		int away = f.size() - 4;
-		f.run(24, 0.22, 0);
-		f.cover(12);
+		f.walk(30, 0.065, t -> f.onWay(7.0, 0, -0.1));
+		// Their name, from the trees to the left. Stopped dead; round to it.
+		int call = f.size() + 2;
+		f.markAt(call, "name");
+		Vec3 left = Reel.local(o, -16, 1.8, f.z - o.getZ() + 4);
+		f.hold(6, t -> f.onWay(7.0, 0, -0.1), 0, 0.4);
+		f.swingTo(14, left);
+		int gone = f.size() - 6;
+		f.hold(34, t -> left, 0, 1.0);
+		f.hold(22, t -> Reel.local(o, -12, 2.0, f.z - o.getZ() + 12), 0, 1.0);
+		// Back to the far trees: nobody.
+		f.turnTo(16, itFace);
+		f.hold(24, t -> itFace, 0, 0.9);
+		f.markAt(f.size() - 14, "what");
+		// On, quickly, the camera let down at their feet.
+		f.walk(10, 0.1, t -> f.onWay(5.0, 0, -0.3));
+		f.lower(22, 0.12);
 		f.mark("end");
-		f.watching(t -> t >= arrives && t < gone ? itFace : t >= placed && t < away ? closeFace : null);
-		int lens = Reel.WIDE_FOV;
-		int[] fov = new int[f.size()];
-		for (int t = 0; t < fov.length; t++) {
-			double in = Reel.smooth((t - zoomIn) / 24.0) - Reel.smooth((t - zoomOut) / 8.0);
-			fov[t] = (int) Math.round(lens - (lens - 30) * in);
-		}
+		f.watching(t -> null);
 
 		double[][] poses = f.flat(o.getY());
 		Reel.prepare(context, game, start, f.at(0).add(0, 0, 5), 12550);
-		Cinematic.Look bent = new Cinematic.Look(false, 0f, OccupantEntity.Mode.AMBUSH, 0);
 		Body body = new Body(server, f, poses, o.getY());
-		// Nothing of it anywhere in the picture until its face is: it is there from then.
-		int shows = firstInView(poses, closeFace, placed, away);
 		Reel.record(context, server, "field", poses, Integer.MAX_VALUE, f, t -> {
 			body.at(t);
-			// Put there while the camera is turned away from the spot, so it is not in the picture before.
+			// Put there while the camera is turned away from the spot; gone while it is turned away again.
 			if (t == arrives) Cinematic.place(server, BlockPos.containing(itFeet), eye(poses, t), Reel.STANDING);
 			if (t >= arrives && t < gone) Reel.look(server, itFeet, steady(poses, t), 0);
 			if (t == gone) server.runCommand("kill " + Reel.ALL);
-			if (t == shows) Cinematic.place(server, BlockPos.containing(closeFeet), eye(poses, t), bent);
-			if (t >= shows && t < away) {
-				Reel.look(server, closeFeet, steady(poses, t), 0);
-				coil(server, closeFeet, 0.6f);
-			}
-			if (t == away) server.runCommand("kill " + Reel.ALL);
-		}, fov);
+		});
 	}
 
 	/**
 	 * Night two, walking home. Steps behind them; round: nobody, but on the way, where they have
-	 * just walked, a sign (the mod's): "go to sleep". A door, behind them. Their door is standing
-	 * open, the light on; creeping up to it, and through it, by the bed, someone. It looks round.
+	 * just walked, a sign (the mod's): "go to sleep". A door, behind them: their door is standing
+	 * open, the light on. Creeping up to it; nobody in the room. Then it slams shut, from inside.
 	 */
 	private static void intruder(ClientGameTestContext context, TestSingleplayerContext game, BlockPos[] woods) {
 		TestServerContext server = game.getServer();
@@ -477,56 +525,38 @@ final class Tape {
 		f.markAt(creak, "door");
 		f.hold(12, t -> sign, 0, 0.6);
 		Vec3 door = Reel.local(o, 0, 1.2, -3);
-		f.flinchAt(creak + 1, door, 0.7);
 		f.swingTo(12, door);
 		f.hold(16, t -> door, 0, 0.6);
-		// Creeping up to it, low, the camera on the doorway.
-		f.follow(Reel.Way.local(o, new double[][]{{f.x - o.getX() - 0.5, f.z - o.getZ() - 0.5}, {0.1, -9.0}, {-0.3, -6.3}}));
-		f.low = 0.35;
+		// Creeping up to it, low, the camera on the doorway: the room, lit, and nobody in it.
+		f.follow(Reel.Way.local(o, new double[][]{{f.x - o.getX() - 0.5, f.z - o.getZ() - 0.5}, {0.1, -9.0}, {-0.2, -5.6}}));
+		f.low = 0.3;
 		f.walkOn(0.045, t -> door);
 		f.low = 0;
-		// Through the door, by the bed: someone, its back to them.
-		Vec3 feet = Reel.local(o, 0.5, 0, 1.8);
-		Vec3 face = Reel.local(o, 0.5, 1.9, 1.8);
-		f.hold(14, t -> face, 0.35, 0.6);
-		int seen = f.size() - 10;
-		f.markAt(seen, "seen");
-		int zoom2 = f.size();
-		f.markAt(zoom2, "zoomin");
-		f.hold(44, t -> face, 0.35, 0.9);
-		int turns = f.size() - 26;
-		// It has turned round. Back, back; a hand over the lens.
-		f.backAway(8, face, 0.04);
+		f.hold(30, t -> Reel.local(o, 0.6, 1.0, 1.5), 0.3, 0.6);
+		f.hold(20, t -> Reel.local(o, -0.4, 1.0, 1.0), 0.3, 0.7);
+		// Slammed shut, from inside, in their face. Back, fast; a hand over the lens.
+		int slam = f.size() + 6;
+		f.markAt(slam, "slam");
+		f.hold(10, t -> door, 0.2, 1.4);
+		f.backAway(10, door, 0.07);
 		f.cover(12);
 		f.mark("end");
-		f.watching(t -> t >= seen ? face : null);
 		int lens = Reel.WIDE_FOV;
 		int[] fov = new int[f.size()];
 		for (int t = 0; t < fov.length; t++) {
 			double in = Reel.smooth((t - zoomIn) / 20.0) - Reel.smooth((t - zoomOut) / 8.0);
-			double in2 = Reel.smooth((t - zoom2) / 20.0);
-			fov[t] = (int) Math.round(lens - (lens - 32) * in - (lens - 36) * in2);
+			fov[t] = (int) Math.round(lens - (lens - 32) * in);
 		}
 
 		double[][] poses = f.flat(o.getY());
 		Reel.prepare(context, game, start, front, 15500);
 		cabinThings(server, o, NIGHT);
-		context.waitTicks(10);
-		Vec3 bed = Reel.local(o, 2.0, 1.0, 2.6);
-		int placed = creak - 4;
-		Cinematic.Look bent = new Cinematic.Look(false, 0f, OccupantEntity.Mode.AMBUSH, 0);
 		Body body = new Body(server, f, poses, o.getY());
+		context.waitTicks(10);
 		Reel.record(context, server, "intruder", poses, Integer.MAX_VALUE, f, t -> {
 			body.at(t);
 			if (t == creak) server.runOnServer(s -> door(s.overworld(), o.offset(0, 0, -3), Direction.SOUTH, true));
-			if (t == placed) Cinematic.place(server, BlockPos.containing(feet), bed, bent);
-			if (t >= placed) {
-				// Facing the bed; then the head round at them, the rest of it after.
-				double u = Reel.smooth((t - turns) / 14.0);
-				Vec3 look = bed.scale(1 - u).add(steady(poses, t).scale(u));
-				Reel.look(server, feet, look, 0);
-				coil(server, feet, 0.5f);
-			}
+			if (t == slam) server.runOnServer(s -> door(s.overworld(), o.offset(0, 0, -3), Direction.SOUTH, false));
 		}, fov);
 	}
 
@@ -575,6 +605,68 @@ final class Tape {
 			server.runOnServer(s -> {
 				for (Mob m : s.overworld().getEntitiesOfClass(Mob.class, room, e -> !(e instanceof OccupantEntity))) turnTo(m, eye);
 			});
+		});
+	}
+
+	/**
+	 * Day three, the morning: in a clearing, a door. Only a door, in its frame, standing on its own
+	 * with nothing behind it. Round the side of it: nothing. A knock on it, for a joke; and from the
+	 * other side of it, where there is nothing, a knock back. It comes open, onto the trees.
+	 */
+	private static void doorway(ClientGameTestContext context, TestSingleplayerContext game, BlockPos[] woods) {
+		TestServerContext server = game.getServer();
+		BlockPos floor = site(game, woods[1].offset(40, 0, -100), woods[0].offset(-120, 0, -150), woods[1].offset(-40, 0, 200));
+		if (floor == null) return;
+		BlockPos o = floor.above();
+		double[][] approach = {{0.3, -36}, {0.6, -20}, {0.2, -10}, {0.2, -3.0}};
+		server.runOnServer(s -> {
+			ServerLevel level = s.overworld();
+			Reel.wood(level, o, -26, 26, -40, 24, List.of(Reel.Way.local(o, approach)), 61L, new double[][]{{0, 0.5, 7.5}}, null);
+			doorBuild(level, o);
+		});
+
+		Vec3 start = Reel.local(o, 0.2, EYE, -10);
+		Reel.Fear f = new Reel.Fear(start).wide();
+		f.follow(Reel.Way.local(o, new double[][]{{0.2, -10}, {0.2, -6}, {0.2, -3.0}}));
+		Vec3 door = Reel.local(o, 0, 1.2, 0);
+		Vec3 top = Reel.local(o, 0, 2.6, 0);
+		f.face(door);
+		f.walkOn(0.065, t -> t < 36 ? door : t < 56 ? top : door);
+		// Round the side of it, to see what is behind it: the trees.
+		Vec3 past = Reel.local(o, 1.5, 1.3, 5);
+		f.follow(Reel.Way.local(o, new double[][]{{0.2, -3.0}, {-1.0, -2.4}, {-2.2, -1.2}}));
+		f.walkOn(0.05, t -> t < 22 ? door : past);
+		f.hold(18, t -> past, 0, 0.3);
+		f.follow(Reel.Way.local(o, new double[][]{{-2.2, -1.2}, {-1.3, -2.3}, {0.1, -2.3}}));
+		f.walkOn(0.05, t -> door);
+		// A knock, for a joke. Nothing. Then from the other side of it, three back.
+		int rap = f.size() + 6;
+		f.markAt(rap, "rap");
+		f.markAt(rap + 6, "rap");
+		f.hold(44, t -> door, 0, 0.2);
+		f.markAt(rap + 14, "joke");
+		int knock = f.size();
+		f.markAt(knock, "knock");
+		f.hold(14, t -> door, 0, 0.9);
+		f.backAway(8, door, 0.04);
+		f.hold(24, t -> door, 0, 1.1);
+		// It comes open: onto the trees, and nobody.
+		int opens = f.size();
+		f.markAt(opens, "door");
+		Vec3 through = Reel.local(o, 0, 1.3, 6);
+		f.hold(38, t -> t < 8 ? door : through, 0, 1.2);
+		f.markAt(f.size() - 16, "what");
+		f.follow(Reel.Way.local(o, new double[][]{{f.x - o.getX() - 0.5, f.z - o.getZ() - 0.5}, {0.2, -6}}));
+		f.backAway(12, through, 0.08);
+		f.cover(12);
+		f.mark("end");
+
+		double[][] poses = f.flat(o.getY());
+		Reel.prepare(context, game, start, door, 3800);
+		Body body = new Body(server, f, poses, o.getY());
+		Reel.record(context, server, "doorway", poses, Integer.MAX_VALUE, f, t -> {
+			body.at(t);
+			if (t == opens) server.runOnServer(s -> door(s.overworld(), o, Direction.SOUTH, true));
 		});
 	}
 
@@ -671,14 +763,20 @@ final class Tape {
 		});
 		// Round to the right: the gap in the wall, close, and it is in it (there only from when they
 		// start to turn: its legs reach a long way, and nothing of it is to be seen before).
+		// Under the ceiling it is bent nearly double: its face is low, about at their chest.
 		Vec3 feet = Reel.local(o, 2.8, 0, -2.5);
-		Vec3 face = Reel.local(o, 2.6, 1.9, -2.5);
+		Vec3 face = Reel.local(o, 2.4, 0.95, -2.5);
 		int placed = f.size() + 1;
-		f.hold(22, t -> face, 0, 0.3);
-		int seen = f.size() - 9;
+		// Turning until its face comes into the picture, and a breath later they are going over.
+		int turning = 0;
+		while (turning++ < 40) {
+			f.hold(1, t -> face, 0, 0.3);
+			double off = Mth.wrapDegrees(f.raw(f.size() - 1)[2] - Reel.Fear.yawBetween(f.at(f.size() - 1), face));
+			if (Math.abs(off) < 34) break;
+		}
+		int seen = f.size() - 1;
 		f.markAt(seen, "seen");
-		f.flinchAt(seen, face, 1.6);
-		f.hold(6, t -> face, 0, 1.6);
+		f.hold(7, t -> face, 0, 1.6);
 		// Over backwards: the camera out of their hand, onto the floor behind them and off to their
 		// right, so that from where it lies they are at one side and the gap, empty, past them.
 		Vec3 seat = Reel.local(o, -0.35, 0, -2.6);
@@ -700,7 +798,7 @@ final class Tape {
 		Vec3 anchor = body.anchor;
 		context.waitTicks(10);
 		Sitter them = new Sitter(seat, new Vec3(1, 0, 0), Reel.local(o, 2.6, 1.6, -2.5), new Vec3(lens.x, o.getY() + 0.12, lens.z));
-		Cinematic.Look bent = new Cinematic.Look(false, 0f, OccupantEntity.Mode.AMBUSH, 0);
+		Cinematic.Look bent = new Cinematic.Look(false, 0.01f, OccupantEntity.Mode.AMBUSH, 0);
 		// Not there at all, legs and all, until its face is in the picture as they turn.
 		int shows = firstInView(poses, face, placed, drop);
 		Vec3 seated = seat.add(0, 1.0, 0);
@@ -940,7 +1038,7 @@ final class Tape {
 		});
 		Body body = new Body(server, f, poses, o.getY());
 		context.waitTicks(10);
-		Cinematic.Look bent = new Cinematic.Look(false, 0f, OccupantEntity.Mode.AMBUSH, 0);
+		Cinematic.Look bent = new Cinematic.Look(false, 0.01f, OccupantEntity.Mode.AMBUSH, 0);
 		Reel.record(context, server, "knock", poses, Integer.MAX_VALUE, f, t -> {
 			body.at(t);
 			if (t == placed) Cinematic.place(server, BlockPos.containing(feet), eye(poses, t), bent);
@@ -1391,6 +1489,62 @@ final class Tape {
 			}
 		}
 		sign(level, o.offset(0, 0, z0 - 1), Blocks.OAK_SIGN, 8, new String[]{"IT TOOK", "THE REST", "", ""});
+	}
+
+	/**
+	 * An old well: a shaft two blocks across, deep, lined with stone; the wall round the top fallen
+	 * in on the near side; posts at the corners and a roof of boards over it, so no light gets far down.
+	 */
+	private static void wellBuild(ServerLevel level, BlockPos o) {
+		RandomSource r = RandomSource.create(41L);
+		BlockState air = Blocks.AIR.defaultBlockState();
+		for (int x = -1; x <= 2; x++) {
+			for (int z = -1; z <= 2; z++) {
+				boolean hole = x >= 0 && x <= 1 && z >= 0 && z <= 1;
+				for (int y = -22; y <= -1; y++) {
+					int n = r.nextInt(10);
+					BlockState lining = (n < 4 ? Blocks.MOSSY_COBBLESTONE : n < 7 ? Blocks.COBBLESTONE : n < 9 ? Blocks.MOSSY_STONE_BRICKS
+							: Blocks.CRACKED_STONE_BRICKS).defaultBlockState();
+					Reel.set(level, o.offset(x, y, z), hole ? (y == -22 ? Blocks.COARSE_DIRT.defaultBlockState() : air) : lining);
+				}
+				if (!hole && z > -1) {
+					int n = r.nextInt(10);
+					Reel.set(level, o.offset(x, 0, z), (n < 5 ? Blocks.MOSSY_COBBLESTONE : n < 8 ? Blocks.COBBLESTONE
+							: Blocks.MOSSY_STONE_BRICKS).defaultBlockState());
+				}
+			}
+		}
+		// What fell: a block or two of the wall, lying in the grass.
+		Reel.set(level, o.offset(-2, 0, -2), Blocks.MOSSY_COBBLESTONE.defaultBlockState());
+		Reel.set(level, o.offset(3, 0, -1), Blocks.COBBLESTONE_SLAB.defaultBlockState());
+		BlockState post = Blocks.DARK_OAK_FENCE.defaultBlockState();
+		for (int[] c : new int[][]{{-1, -1}, {2, -1}, {-1, 2}, {2, 2}}) {
+			for (int y = c[1] < 0 ? 0 : 1; y <= 3; y++) Reel.set(level, o.offset(c[0], y, c[1]), post);
+		}
+		BlockState board = Blocks.SPRUCE_SLAB.defaultBlockState();
+		for (int x = -2; x <= 3; x++) {
+			for (int z = -2; z <= 3; z++) {
+				if ((x == -2 || x == 3) && (z == -2 || z == 3)) continue;
+				boolean rim = x == -2 || x == 3 || z == -2 || z == 3;
+				if (rim && r.nextInt(5) == 0) continue;
+				Reel.set(level, o.offset(x, 4, z), board);
+			}
+		}
+	}
+
+	/** A door, in a frame of logs, standing on its own: nothing round it, nothing behind it. */
+	private static void doorBuild(ServerLevel level, BlockPos o) {
+		BlockState up = Blocks.DARK_OAK_LOG.defaultBlockState();
+		BlockState across = Blocks.DARK_OAK_LOG.defaultBlockState().setValue(BlockStateProperties.AXIS, Direction.Axis.X);
+		for (int y = 0; y <= 2; y++) {
+			Reel.set(level, o.offset(-1, y, 0), up);
+			Reel.set(level, o.offset(1, y, 0), up);
+		}
+		Reel.set(level, o.offset(0, 2, 0), across);
+		door(level, o, Direction.SOUTH, false);
+		// The step up to it, worn.
+		Reel.set(level, o.offset(0, -1, -1), Blocks.COBBLESTONE.defaultBlockState());
+		Reel.set(level, o.offset(0, -1, 1), Blocks.MOSSY_COBBLESTONE.defaultBlockState());
 	}
 
 	/** The radio shack as the mod builds one (see RadioShack): one room, a porch, the set, the aerial, the sign. */

@@ -88,6 +88,9 @@ final class Reel {
 	static final int CHUNK = 300;
 	static final int WIDE_FOV = 55;
 
+	/** The flinch setting as it was before the reel. */
+	private static boolean flinch = true;
+
 	static void run(ClientGameTestContext context, TestSingleplayerContext game, BlockPos[] woods, BlockPos spawn) {
 		TestServerContext server = game.getServer();
 		double gamma = context.computeOnClient(mc -> mc.options.gamma().get());
@@ -102,6 +105,9 @@ final class Reel {
 				mc.options.fov().set(80);
 				// The night as a camera sees it, which the grading then takes down again.
 				mc.options.gamma().set(1.0);
+				// No flinch: it is over in less than one of these frames, and shows as a jump.
+				flinch = com.wolfsmask.occupant.client.ClientConfig.get().flinch;
+				com.wolfsmask.occupant.client.ClientConfig.get().flinch = false;
 			});
 			Cinematic.hud(context, false);
 			List<String> tape = Tape.scenes(asked());
@@ -126,6 +132,7 @@ final class Reel {
 			context.runOnClient(mc -> {
 				com.wolfsmask.occupant.client.ClientScares.breath = true;
 				mc.options.gamma().set(gamma);
+				com.wolfsmask.occupant.client.ClientConfig.get().flinch = flinch;
 			});
 			Cinematic.hud(context, true);
 			server.runCommand("gamemode survival @p");
@@ -484,7 +491,8 @@ final class Reel {
 				int tx = gx + r.nextInt(2), tz = gz + r.nextInt(2);
 				int kind = r.nextInt(10);
 				if (tx > x1 || tz > z1 || kind == 9) continue;
-				if (nearest(ways, o, tx, tz) < 1.8 || inside(open, tx, tz) || inRock(rock, tx, tz)) continue;
+				boolean edge = tx - x0 < 4 || x1 - tx < 4 || tz - z0 < 4 || z1 - tz < 4;
+				if ((nearest(ways, o, tx, tz) < 1.8 && !edge) || inside(open, tx, tz) || inRock(rock, tx, tz)) continue;
 				boolean thick = kind == 8 && tx + 1 <= x1 && tz + 1 <= z1 && nearest(ways, o, tx + 1, tz + 1) >= 1.8
 						&& nearest(ways, o, tx + 1, tz) >= 1.8 && nearest(ways, o, tx, tz + 1) >= 1.8
 						&& !inside(open, tx + 1, tz + 1) && !inRock(rock, tx + 1, tz + 1);
@@ -514,6 +522,18 @@ final class Reel {
 					set(level, o.offset(t[0] + 1, y, t[1]), log);
 					set(level, o.offset(t[0], y, t[1] + 1), log);
 					set(level, o.offset(t[0] + 1, y, t[1] + 1), log);
+				}
+			}
+		}
+		// At the very edge, a thicket up into the leaves: nothing to see past it.
+		BlockState thicket = Blocks.DARK_OAK_LEAVES.defaultBlockState().setValue(LeavesBlock.PERSISTENT, true);
+		for (int x = x0; x <= x1; x++) {
+			for (int z = z0; z <= z1; z++) {
+				int in = Math.min(Math.min(x - x0, x1 - x), Math.min(z - z0, z1 - z));
+				if (in > 1) continue;
+				for (int y = 0; y <= 7 - in * 2; y++) {
+					BlockPos p = o.offset(x, y, z);
+					if (level.getBlockState(p).isAir()) set(level, p, thicket);
 				}
 			}
 		}
@@ -670,6 +690,7 @@ final class Reel {
 
 		/** Held for the wide frame of the long video. */
 		Fear wide() {
+			startles = false;
 			steady = 0.8;
 			across = 46.0;
 			upDown = 32.0;
@@ -765,6 +786,9 @@ final class Reel {
 
 		/** How far under standing they keep their head as they walk on (creeping up on something). */
 		double low;
+
+		/** Whether a fright jerks the head (the short); never in the long video, where it reads as a cut. */
+		private boolean startles = true;
 
 		/**
 		 * A hand put over the lens, in a hurry: the camera tipped a little down, jolted as the hand
@@ -1485,6 +1509,7 @@ final class Reel {
 		 * dropping a little, in a tick or two, and then they have hold of themselves again.
 		 */
 		private void startle(int i, double[] o) {
+			if (!startles) return;
 			for (double[] fl : frights) {
 				double k = i - fl[0];
 				if (k < 0 || k > 14) continue;
