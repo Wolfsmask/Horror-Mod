@@ -787,6 +787,9 @@ final class Reel {
 		/** How far under standing they keep their head as they walk on (creeping up on something). */
 		double low;
 
+		/** Going backwards, facing what they are backing from: their body faces it too. */
+		private boolean backing;
+
 		/** Whether a fright jerks the head (the short); never in the long video, where it reads as a cut. */
 		private boolean startles = true;
 
@@ -1046,7 +1049,8 @@ final class Reel {
 		}
 
 		private void push() {
-			poses.add(new double[]{x, z, yaw, pitch, lift, speed, tremble, phase, roll, feet ? 1 : 0, landing, hand ? 1 : 0, rigid});
+			poses.add(new double[]{x, z, yaw, pitch, lift, speed, tremble, phase, roll, feet ? 1 : 0, landing, hand ? 1 : 0, rigid,
+					backing ? 1 : 0});
 		}
 
 		/** Stood (whatever way they were going slowing to nothing), looking at {@code at}, shaking as much as {@code shake}. */
@@ -1229,6 +1233,7 @@ final class Reel {
 		 */
 		void stagger(int n, Vec3 from, double dist) {
 			double per = dist / n * 2.0;
+			backing = true;
 			for (int i = 0; i < n; i++) {
 				heading = yawTo(from) + 180.0;
 				double u = (i + 0.5) / n;
@@ -1239,10 +1244,12 @@ final class Reel {
 				tremble += (2.2 - tremble) * 0.5;
 				push();
 			}
+			backing = false;
 		}
 
 		/** Backing away from {@code at}, facing it, the hands shaking hard. */
 		void backAway(int n, Vec3 at, double pace) {
+			backing = true;
 			for (int i = 0; i < n; i++) {
 				heading = yawTo(at) + 180.0;
 				step(pace, 0.03);
@@ -1251,6 +1258,7 @@ final class Reel {
 				tremble += (1.8 - tremble) * 0.3;
 				push();
 			}
+			backing = false;
 		}
 
 		/** Out of breath: slowing to a stop, bent over, the head down at {@code at}, gulping air. */

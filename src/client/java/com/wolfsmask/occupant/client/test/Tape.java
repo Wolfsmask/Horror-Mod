@@ -1229,12 +1229,25 @@ final class Tape {
 			end = e;
 			// Which way the body faces: the way they are going; standing, round after the camera when it has gone far enough.
 			yaw = new double[poses.length];
+			// Backing away (and slowing after it), they face what they are backing from, not where they
+			// are going; at a cut, wherever the camera points; and never turned further from the camera
+			// than a head turns on a body.
 			double by = f.raw(0)[2];
+			int backed = -100, cut = -100;
 			for (int t = 0; t < poses.length; t++) {
-				double[] r = f.raw(t), q = f.raw(t - 4);
+				double[] r = f.raw(t), q = f.raw(t - 4), b = f.raw(t - 1);
+				if (r.length > 13 && r[13] > 0) backed = t;
+				if (t > 0 && Math.hypot(r[0] - b[0], r[1] - b[1]) > 0.6) {
+					cut = t;
+					by = r[2];
+				}
 				double dx = r[0] - q[0], dz = r[1] - q[1];
-				if (Math.hypot(dx, dz) > 0.12) by += Mth.wrapDegrees(Math.toDegrees(Math.atan2(-dx, dz)) - by) * 0.2;
+				boolean backing = t - backed < 16;
+				if (Math.hypot(dx, dz) > 0.12 && !backing && t - cut >= 4) by += Mth.wrapDegrees(Math.toDegrees(Math.atan2(-dx, dz)) - by) * 0.2;
+				else if (backing) by += Mth.wrapDegrees(r[2] - by) * 0.3;
 				else if (Math.abs(Mth.wrapDegrees(r[2] - by)) > 35) by += Mth.wrapDegrees(r[2] - by) * 0.1;
+				double off = Mth.wrapDegrees(by - r[2]);
+				if (Math.abs(off) > 60) by = r[2] + Math.signum(off) * 60;
 				yaw[t] = by;
 			}
 		}
@@ -1501,11 +1514,11 @@ final class Tape {
 		for (int x = -1; x <= 2; x++) {
 			for (int z = -1; z <= 2; z++) {
 				boolean hole = x >= 0 && x <= 1 && z >= 0 && z <= 1;
-				for (int y = -22; y <= -1; y++) {
+				for (int y = -40; y <= -1; y++) {
 					int n = r.nextInt(10);
 					BlockState lining = (n < 4 ? Blocks.MOSSY_COBBLESTONE : n < 7 ? Blocks.COBBLESTONE : n < 9 ? Blocks.MOSSY_STONE_BRICKS
 							: Blocks.CRACKED_STONE_BRICKS).defaultBlockState();
-					Reel.set(level, o.offset(x, y, z), hole ? (y == -22 ? Blocks.COARSE_DIRT.defaultBlockState() : air) : lining);
+					Reel.set(level, o.offset(x, y, z), hole ? (y == -40 ? Blocks.COARSE_DIRT.defaultBlockState() : air) : lining);
 				}
 				if (!hole && z > -1) {
 					int n = r.nextInt(10);
@@ -1532,15 +1545,14 @@ final class Tape {
 		}
 	}
 
-	/** A door, in a frame of logs, standing on its own: nothing round it, nothing behind it. */
+	/** A door, in a thin frame, standing on its own: nothing round it, nothing behind it, the trees showing either side. */
 	private static void doorBuild(ServerLevel level, BlockPos o) {
-		BlockState up = Blocks.DARK_OAK_LOG.defaultBlockState();
-		BlockState across = Blocks.DARK_OAK_LOG.defaultBlockState().setValue(BlockStateProperties.AXIS, Direction.Axis.X);
-		for (int y = 0; y <= 2; y++) {
-			Reel.set(level, o.offset(-1, y, 0), up);
-			Reel.set(level, o.offset(1, y, 0), up);
+		BlockState post = Blocks.DARK_OAK_FENCE.defaultBlockState();
+		for (int y = 0; y <= 1; y++) {
+			Reel.set(level, o.offset(-1, y, 0), post);
+			Reel.set(level, o.offset(1, y, 0), post);
 		}
-		Reel.set(level, o.offset(0, 2, 0), across);
+		for (int x = -1; x <= 1; x++) Reel.set(level, o.offset(x, 2, 0), Blocks.DARK_OAK_SLAB.defaultBlockState());
 		door(level, o, Direction.SOUTH, false);
 		// The step up to it, worn.
 		Reel.set(level, o.offset(0, -1, -1), Blocks.COBBLESTONE.defaultBlockState());
