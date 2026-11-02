@@ -1,0 +1,334 @@
+=== net.minecraft.server.level.ServerPlayer (-public)
+public class server.level.ServerPlayer extends world.entity.player.Player {
+  public void teleportTo(double, double, double);
+  public void teleportRelative(double, double, double);
+  public boolean teleportTo(server.level.ServerLevel, double, double, double, Set<world.entity.RelativeMovement>, float, float);
+  public void teleportTo(server.level.ServerLevel, double, double, double, float, float);
+=== net.minecraft.world.entity.Entity (-public)
+public abstract class world.entity.Entity implements network.syncher.SyncedDataHolder,world.Nameable,world.level.entity.EntityAccess,commands.CommandSource,world.scores.ScoreHolder,attachment.v1.AttachmentTarget {
+  public boolean hurtMarked;
+  public void kill();
+  public final void discard();
+  public void setNoGravity(boolean);
+  public boolean teleportTo(server.level.ServerLevel, double, double, double, Set<world.entity.RelativeMovement>, float, float);
+  public void teleportTo(double, double, double);
+=== net.minecraft.server.network.ServerGamePacketListenerImpl (-public)
+public class server.network.ServerGamePacketListenerImpl extends server.network.ServerCommonPacketListenerImpl implements network.protocol.game.ServerGamePacketListener,server.network.ServerPlayerConnection,network.TickablePacketListener {
+  public void teleport(double, double, double, float, float);
+  public void teleport(double, double, double, float, float, Set<world.entity.RelativeMovement>);
+=== net.fabricmc.fabric.api.biome.v1.BiomeModificationContext$EffectsContext (-public)
+public interface biome.v1.BiomeModificationContext$EffectsContext {
+  public abstract void setFogColor(int);
+  public abstract void setWaterColor(int);
+  public abstract void setWaterFogColor(int);
+  public abstract void setSkyColor(int);
+  public abstract void setFoliageColor(Optional<Integer>);
+  public default void setFoliageColor(int);
+  public default void setFoliageColor(OptionalInt);
+  public abstract void setGrassColor(Optional<Integer>);
+  public default void setGrassColor(int);
+  public default void setGrassColor(OptionalInt);
+  public abstract void setGrassColorModifier(world.level.biome.BiomeSpecialEffects$GrassColorModifier);
+  public abstract void setParticleConfig(Optional<world.level.biome.AmbientParticleSettings>);
+  public default void setParticleConfig(world.level.biome.AmbientParticleSettings);
+  public abstract void setAmbientSound(Optional<core.Holder<sounds.SoundEvent>>);
+  public default void setAmbientSound(core.Holder<sounds.SoundEvent>);
+  public abstract void setMoodSound(Optional<world.level.biome.AmbientMoodSettings>);
+  public default void setMoodSound(world.level.biome.AmbientMoodSettings);
+  public abstract void setAdditionsSound(Optional<world.level.biome.AmbientAdditionsSettings>);
+  public default void setAdditionsSound(world.level.biome.AmbientAdditionsSettings);
+  public abstract void setMusic(Optional<sounds.Music>);
+  public default void setMusic(sounds.Music);
+=== net.fabricmc.fabric.api.biome.v1.BiomeModificationContext$GenerationSettingsContext (-public)
+public interface biome.v1.BiomeModificationContext$GenerationSettingsContext {
+  public abstract boolean removeFeature(world.level.levelgen.GenerationStep$Decoration, resources.ResourceKey<world.level.levelgen.placement.PlacedFeature>);
+  public default boolean removeFeature(resources.ResourceKey<world.level.levelgen.placement.PlacedFeature>);
+  public abstract boolean removeCarver(world.level.levelgen.GenerationStep$Carving, resources.ResourceKey<world.level.levelgen.carver.ConfiguredWorldCarver<?>>);
+  public default boolean removeCarver(resources.ResourceKey<world.level.levelgen.carver.ConfiguredWorldCarver<?>>);
+=== net.fabricmc.fabric.api.biome.v1.BiomeModificationContext$AttributesContext (-public)
+Error: class not found: biome.v1.BiomeModificationContext$AttributesContext
+=== net.fabricmc.fabric.api.biome.v1.BiomeModificationContext (-public)
+public interface biome.v1.BiomeModificationContext {
+  public abstract biome.v1.BiomeModificationContext$WeatherContext getWeather();
+  public abstract biome.v1.BiomeModificationContext$EffectsContext getEffects();
+  public abstract biome.v1.BiomeModificationContext$GenerationSettingsContext getGenerationSettings();
+  public abstract biome.v1.BiomeModificationContext$SpawnSettingsContext getSpawnSettings();
+}
+=== net.fabricmc.fabric.api.biome.v1.BiomeModification (-public)
+public class biome.v1.BiomeModification {
+  public biome.v1.BiomeModification add(biome.v1.ModificationPhase, Predicate<biome.v1.BiomeSelectionContext>, Consumer<biome.v1.BiomeModificationContext>);
+  public biome.v1.BiomeModification add(biome.v1.ModificationPhase, Predicate<biome.v1.BiomeSelectionContext>, BiConsumer<biome.v1.BiomeSelectionContext, biome.v1.BiomeModificationContext>);
+=== net.fabricmc.fabric.api.biome.v1.ModificationPhase (-public)
+public final class biome.v1.ModificationPhase extends Enum<biome.v1.ModificationPhase> {
+  public static final biome.v1.ModificationPhase ADDITIONS;
+  public static final biome.v1.ModificationPhase REMOVALS;
+  public static final biome.v1.ModificationPhase REPLACEMENTS;
+  public static final biome.v1.ModificationPhase POST_PROCESSING;
+  public static biome.v1.ModificationPhase[] values();
+  public static biome.v1.ModificationPhase valueOf(String);
+}
+=== net.minecraft.world.level.StructureManager (-public)
+public class world.level.StructureManager {
+  public world.level.levelgen.structure.StructureStart getStructureAt(core.BlockPos, world.level.levelgen.structure.Structure);
+  public world.level.levelgen.structure.StructureStart getStructureWithPieceAt(core.BlockPos, tags.TagKey<world.level.levelgen.structure.Structure>);
+  public world.level.levelgen.structure.StructureStart getStructureWithPieceAt(core.BlockPos, core.HolderSet<world.level.levelgen.structure.Structure>);
+  public world.level.levelgen.structure.StructureStart getStructureWithPieceAt(core.BlockPos, Predicate<core.Holder<world.level.levelgen.structure.Structure>>);
+  public world.level.levelgen.structure.StructureStart getStructureWithPieceAt(core.BlockPos, world.level.levelgen.structure.Structure);
+=== net.minecraft.server.level.ServerLevel (-public)
+public class server.level.ServerLevel extends world.level.Level implements world.level.WorldGenLevel {
+  public world.level.StructureManager structureManager();
+=== net.minecraft.world.entity.item.ItemEntity (-public)
+public class world.entity.item.ItemEntity extends world.entity.Entity implements world.entity.TraceableEntity {
+  public void setNeverPickUp();
+  public void setPickUpDelay(int);
+  public void setUnlimitedLifetime();
+=== net.minecraft.world.entity.ai.navigation.PathNavigation (-public)
+public abstract class world.entity.ai.navigation.PathNavigation {
+  public void setSpeedModifier(double);
+  public boolean moveTo(double, double, double, double);
+  public boolean moveTo(double, double, double, int, double);
+  public boolean moveTo(world.entity.Entity, double);
+  public boolean moveTo(world.level.pathfinder.Path, double);
+  public world.level.pathfinder.Path getPath();
+=== net.minecraft.world.level.pathfinder.Path (-public)
+public class world.level.pathfinder.Path {
+  public boolean isDone();
+  public core.BlockPos getTarget();
+=== net.minecraft.world.level.Level (-public)
+public abstract class world.level.Level implements world.level.LevelAccessor,AutoCloseable,attachment.v1.AttachmentTarget {
+  public boolean destroyBlock(core.BlockPos, boolean, world.entity.Entity, int);
+  public abstract void destroyBlockProgress(int, core.BlockPos, int);
+=== net.minecraft.tags.StructureTags (-public)
+public interface tags.StructureTags {
+  public static final tags.TagKey<world.level.levelgen.structure.Structure> ON_SAVANNA_VILLAGE_MAPS;
+  public static final tags.TagKey<world.level.levelgen.structure.Structure> ON_DESERT_VILLAGE_MAPS;
+  public static final tags.TagKey<world.level.levelgen.structure.Structure> ON_PLAINS_VILLAGE_MAPS;
+  public static final tags.TagKey<world.level.levelgen.structure.Structure> ON_TAIGA_VILLAGE_MAPS;
+  public static final tags.TagKey<world.level.levelgen.structure.Structure> ON_SNOWY_VILLAGE_MAPS;
+  public static final tags.TagKey<world.level.levelgen.structure.Structure> VILLAGE;
+=== net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents (-public)
+public final class event.lifecycle.v1.ServerEntityEvents {
+  public static final event.Event<event.lifecycle.v1.ServerEntityEvents$Load> ENTITY_LOAD;
+=== net.minecraft.data.worldgen.placement.VegetationPlacements (-public)
+public class data.worldgen.placement.VegetationPlacements {
+  public static final resources.ResourceKey<world.level.levelgen.placement.PlacedFeature> PATCH_SUNFLOWER;
+  public static final resources.ResourceKey<world.level.levelgen.placement.PlacedFeature> PATCH_GRASS_FOREST;
+  public static final resources.ResourceKey<world.level.levelgen.placement.PlacedFeature> FLOWER_WARM;
+  public static final resources.ResourceKey<world.level.levelgen.placement.PlacedFeature> FLOWER_DEFAULT;
+  public static final resources.ResourceKey<world.level.levelgen.placement.PlacedFeature> FLOWER_FLOWER_FOREST;
+  public static final resources.ResourceKey<world.level.levelgen.placement.PlacedFeature> FLOWER_SWAMP;
+  public static final resources.ResourceKey<world.level.levelgen.placement.PlacedFeature> FLOWER_PLAINS;
+  public static final resources.ResourceKey<world.level.levelgen.placement.PlacedFeature> FLOWER_MEADOW;
+  public static final resources.ResourceKey<world.level.levelgen.placement.PlacedFeature> FLOWER_CHERRY;
+  public static final resources.ResourceKey<world.level.levelgen.placement.PlacedFeature> DARK_FOREST_VEGETATION;
+  public static final resources.ResourceKey<world.level.levelgen.placement.PlacedFeature> FLOWER_FOREST_FLOWERS;
+  public static final resources.ResourceKey<world.level.levelgen.placement.PlacedFeature> FOREST_FLOWERS;
+  public static final resources.ResourceKey<world.level.levelgen.placement.PlacedFeature> TREES_FLOWER_FOREST;
+  public static final resources.ResourceKey<world.level.levelgen.placement.PlacedFeature> TREES_WINDSWEPT_FOREST;
+=== data files matching worldgen/placed_feature/(flower_default|dark_oak_checked|trees_plains)\.json
+--- data/minecraft/worldgen/placed_feature/flower_default.json
+{
+  "feature": "minecraft:flower_default",
+  "placement": [
+    {
+      "type": "minecraft:rarity_filter",
+      "chance": 32
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "minecraft:heightmap",
+      "heightmap": "MOTION_BLOCKING"
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}
+--- data/minecraft/worldgen/placed_feature/trees_plains.json
+{
+  "feature": "minecraft:trees_plains",
+  "placement": [
+    {
+      "type": "minecraft:count",
+      "count": {
+        "type": "minecraft:weighted_list",
+        "distribution": [
+          {
+            "data": 0,
+            "weight": 19
+          },
+          {
+            "data": 1,
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "minecraft:surface_water_depth_filter",
+      "max_water_depth": 0
+    },
+    {
+      "type": "minecraft:heightmap",
+      "heightmap": "OCEAN_FLOOR"
+    },
+    {
+      "type": "minecraft:block_predicate_filter",
+      "predicate": {
+        "type": "minecraft:would_survive",
+        "state": {
+          "Name": "minecraft:oak_sapling",
+          "Properties": {
+            "stage": "0"
+          }
+        }
+      }
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}
+--- data/minecraft/worldgen/placed_feature/dark_oak_checked.json
+{
+  "feature": "minecraft:dark_oak",
+  "placement": [
+    {
+      "type": "minecraft:block_predicate_filter",
+      "predicate": {
+        "type": "minecraft:would_survive",
+        "state": {
+          "Name": "minecraft:dark_oak_sapling",
+          "Properties": {
+            "stage": "0"
+          }
+        }
+      }
+    }
+  ]
+}
+=== data files matching worldgen/configured_feature/(dark_oak|spruce)\.json
+--- data/minecraft/worldgen/configured_feature/dark_oak.json
+{
+  "type": "minecraft:tree",
+  "config": {
+    "decorators": [],
+    "dirt_provider": {
+      "type": "minecraft:simple_state_provider",
+      "state": {
+        "Name": "minecraft:dirt"
+      }
+    },
+    "foliage_placer": {
+      "type": "minecraft:dark_oak_foliage_placer",
+      "offset": 0,
+      "radius": 0
+    },
+    "foliage_provider": {
+      "type": "minecraft:simple_state_provider",
+      "state": {
+        "Name": "minecraft:dark_oak_leaves",
+        "Properties": {
+          "distance": "7",
+          "persistent": "false",
+          "waterlogged": "false"
+        }
+      }
+    },
+    "force_dirt": false,
+    "ignore_vines": true,
+    "minimum_size": {
+      "type": "minecraft:three_layers_feature_size",
+      "limit": 1,
+      "lower_size": 0,
+      "middle_size": 1,
+      "upper_limit": 1,
+      "upper_size": 2
+    },
+    "trunk_placer": {
+      "type": "minecraft:dark_oak_trunk_placer",
+      "base_height": 6,
+      "height_rand_a": 2,
+      "height_rand_b": 1
+    },
+    "trunk_provider": {
+      "type": "minecraft:simple_state_provider",
+      "state": {
+        "Name": "minecraft:dark_oak_log",
+        "Properties": {
+          "axis": "y"
+        }
+      }
+    }
+  }
+}
+--- data/minecraft/worldgen/configured_feature/spruce.json
+{
+  "type": "minecraft:tree",
+  "config": {
+    "decorators": [],
+    "dirt_provider": {
+      "type": "minecraft:simple_state_provider",
+      "state": {
+        "Name": "minecraft:dirt"
+      }
+    },
+    "foliage_placer": {
+      "type": "minecraft:spruce_foliage_placer",
+      "offset": {
+        "type": "minecraft:uniform",
+        "max_inclusive": 2,
+        "min_inclusive": 0
+      },
+      "radius": {
+        "type": "minecraft:uniform",
+        "max_inclusive": 3,
+        "min_inclusive": 2
+      },
+      "trunk_height": {
+        "type": "minecraft:uniform",
+        "max_inclusive": 2,
+        "min_inclusive": 1
+      }
+    },
+    "foliage_provider": {
+      "type": "minecraft:simple_state_provider",
+      "state": {
+        "Name": "minecraft:spruce_leaves",
+        "Properties": {
+          "distance": "7",
+          "persistent": "false",
+          "waterlogged": "false"
+        }
+      }
+    },
+    "force_dirt": false,
+    "ignore_vines": true,
+    "minimum_size": {
+      "type": "minecraft:two_layers_feature_size",
+      "limit": 2,
+      "lower_size": 0,
+      "upper_size": 2
+    },
+    "trunk_placer": {
+      "type": "minecraft:straight_trunk_placer",
+      "base_height": 5,
+      "height_rand_a": 2,
+      "height_rand_b": 1
+    },
+    "trunk_provider": {
+      "type": "minecraft:simple_state_provider",
+      "state": {
+        "Name": "minecraft:spruce_log",
+        "Properties": {
+          "axis": "y"
+        }
+      }
+    }
+  }
+}
