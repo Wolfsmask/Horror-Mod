@@ -1,0 +1,6 @@
+*.class
+*.csv
+*.marks
+*.raw
+SimTape.java
+SimTrace.java

@@ -1,0 +1,170 @@
+# THE OCCUPANT long video: handoff
+
+Everything a new session needs to keep working on the long found-footage video. Read this file
+first, then only the code a task needs. Work on branch `claude/laughing-hopper-3dtbgq`.
+
+## What it is
+
+A ~5-minute found-footage Minecraft horror video of the mod THE OCCUPANT, filmed by a Fabric client
+game test in CI (no in-game footage from the user, no voice). The user records the voice lines
+themselves from `voice_lines.txt`. Deliverables each round: the video (full quality, sent to the user),
+`voice_lines.txt`, `youtube.txt`, and a copy under 100 MB at `video/the-occupant-long.mp4`.
+
+## The user's standing rules (keep every one)
+
+- **Repo:** only the video download goes in the repo (`video/the-occupant-long.mp4`), plus photos, plus
+  this `video-tools/` folder (the user asked for it so a new chat can carry on). Nothing else.
+- **No birch** trees, except the smallest amount.
+- **No in-game screenshots or recordings** unless the user asks. Everything is filmed by CI.
+- **Nothing that crashes the game or drops the connection.**
+- **Username:** `vR4xxs_` everywhere (never "Wolfsmask").
+- **The body under the camera** is the user's skin, `video-tools/skin/vR4xxs_.png`:
+  - jacket, arms, legs and shoes in smooth black concrete. Never wool or concrete powder: they look fuzzy.
+  - hair in coal block.
+  - face black concrete, one grey eye pixel and two white ones (see `Person.java`).
+- **Pacing:** never linger. The creature is not really seen before the haunted house. Before it, it
+  appears at most as something tiny and unnoticeable (the far figure in the clearing).
+- **No cuts on a fright.** No camera jump when something happens: the startle is off (`Fear.wide()`)
+  and the mod's flinch is off while recording (`Reel.run`).
+- **No looking away.** He never just looks away while the creature is in sight. Use a blink (tape
+  glitch / black flash) or a hand over the lens.
+- **Lowering the camera:** turned down smoothly, never dropped. His legs and feet show at the bottom.
+  In scared or hurried moments he tips it slightly down and puts his hand over the lens (`Fear.cover`).
+- **The haunted house:**
+  - the creature is nowhere in the picture until he turns;
+  - its whole face is in frame;
+  - he goes over backwards within about 0.35 s;
+  - the camera falls behind him; he is propped on his hands, turns, and his hand covers the lens.
+- **Scene order:** the dead-animals pen stays 3rd, and the house comes late.
+- **Animals:** move at natural speed and never clip.
+- **Git:**
+  - commits end with the session's co-author lines and contain no model names;
+  - code and video commits carry `[skip ci]`;
+  - recordings are started by dispatching the workflow (below);
+  - never open a PR unless asked.
+
+## Where things are
+
+- **Game-side code** (all in `src/client/java/com/wolfsmask/occupant/client/test/`):
+  - `Tape.java` holds every scene.
+  - `Reel.java` holds:
+    - `Fear`, the handheld camera: walk, hold, turnTo, swingTo, backAway, peer, lower, cover,
+      blink, jump, dropped, lie;
+    - `wood()`, the forest builder;
+    - `record()`, which freezes the world and steps it 1 tick per frame.
+  - `Walker.java` is the body under the camera; `Sitter.java` is him on the floor in the house;
+    `Person.java` holds the skin's blocks and the ending's body.
+- **Edit and tools** (`video-tools/`):
+  - `edit/make_tape.py`: the editor. It grades, adds VHS cuts, the hand overlay, the blink, sound,
+    titles and chapters. Its reel module is `edit/make_reel9.py`, with fonts in `edit/fonts/`.
+  - `edit/watch.sh` and `edit/link.py`: fetch the recordings and link them.
+  - `edit/deliver.sh`: builds the YouTube text and voice sheet, plus the repo copy.
+  - `edit/qa.py`: contact sheets.
+  - `sim/`: the camera of every scene worked out without the game (`build.py`), and a collision
+    check (`check2.py`).
+  - `harness/`: compiles `Walker`/`Sitter`/`Person` against stand-ins. `BodyScan` ray-casts the body
+    into every frame to catch it covering the lens.
+- **Sounds:**
+  - The mod's own sounds are in `src/main/resources/assets/occupant/sounds`.
+  - Game sounds come with each recording (`reel/sounds` on the `ci-results` branch).
+
+## Scenes, in order (`Tape.run`, and `SCENES` in make_tape.py)
+
+| Scene | Day | What happens |
+|---|---|---|
+| home | 1 | Into the cabin; the chest opens and shuts behind him. |
+| camp | 2 | Abandoned camp; a whisper behind him. |
+| pasture | 2 | The animals stop and stare, then are all dead. |
+| well | 2 | He drops a stone, no splash; it flies back out onto the rim. |
+| field | 2 | A tiny far figure; his name from the trees; it's gone. |
+| intruder | 2, night | A "go to sleep" sign; his door open; it slams from inside. |
+| visitor | 3 | A cow by his bed. |
+| doorway | 3 | A lone door in the woods; he knocks, it knocks back, it opens. |
+| radio | 3 | The set turns on with a voice. |
+| house | 3 | The creature is in the wall gap; he falls, it's gone, hand over the lens. |
+| chapel | 3 | The candles light themselves. |
+| graves | 3 | A dug grave; a figure in the trees; a blink and it's gone. |
+| knock | 3, night | Steps on the roof, knocks, the face at the window, a blink. |
+| morning | 4 | His name on a grave. |
+| mine | 4 | His torch is missing; a dug tunnel; the creature down the tunnel. |
+| found | 4, night | The ending (`Reel.found`). |
+
+## Recording (CI)
+
+1. Commit and push the code with `[skip ci]`.
+2. Dispatch `build.yml` on the branch with input `tape`: `[keep] [tape:a,b,c]`, e.g. with the GitHub
+   MCP tool `actions_run_trigger` (`run_workflow`, owner `wolfsmask`, repo `horror-mod`, ref
+   `claude/laughing-hopper-3dtbgq`).
+   - Group 3–4 scenes per run, about 1,100 frames; a run takes 15–25 min.
+   - Five runs cover all 16 scenes: `home,camp,pasture,well` · `field,intruder,visitor,doorway` ·
+     `radio,house,chapel` · `graves,knock,morning` · `mine,found`.
+   - Always use `[keep]`, or a run wipes the other runs' clips.
+3. Each finished run replaces the `ci-results` branch tip with a "Reel" commit. `reel/` holds:
+   - `name.N.mp4`: 300-frame pieces at 20 fps, 1920×1080;
+   - `name.0.txt`: marks, as frame and kind;
+   - `name.0.roll`: the camera per frame.
+4. Fetch: `bash video-tools/edit/watch.sh WORK 5` (WORK is any folder outside the repo), then
+   `python3 video-tools/edit/link.py WORK`. It links the newest take of each scene into `WORK/clips`.
+   - Check every scene's take is new (compare file hashes with the previous take). A cancelled run
+     can also save clips.
+
+## Checking before recording (cheap)
+
+- `cd video-tools/sim && python3 build.py && javac SimTape.java && java SimTape && python3 check2.py`:
+  frame counts, marks and camera of every scene, and the camera never within 0.15 of a block.
+  - Add new scenes to the `scenes` list in `build.py` and to the boxes in `check2.py`.
+- `bash video-tools/harness/build.sh && java -cp video-tools/harness/out com.wolfsmask.occupant.client.test.BodyScan video-tools/sim <scene>`:
+  frames where the body covers more than 12% of the picture.
+  - Expected: cover frames at the end of a scene, and legs when looking straight down.
+  - Anything else is a bug.
+- After recording, look at contact sheets of the key moments:
+  `python3 video-tools/edit/qa.py WORK/clips <scene> out.jpg t1 t2 …`.
+
+## Edit and deliver
+
+```
+python3 video-tools/edit/make_tape.py WORK/clips src/main/resources/assets/occupant/sounds <empty folder> OUT/the-occupant-long.mp4
+bash video-tools/edit/deliver.sh OUT
+```
+
+- **Grade cache:** graded frames are cached in `WORK/clips/work`. After re-recording scenes, pass
+  `--fresh=scene1,scene2`, or delete the folder.
+- **Grade only:** `--grade-only` grades without rendering.
+- **Output:** the edit writes `chapters.txt` and `voice_sheet.txt` beside the video; `deliver.sh`
+  makes `youtube.txt`, `voice_lines.txt` and the repo copy (about 95 MB, two-pass).
+- **Where scenes are configured** in `make_tape.py`:
+  - `SCENES`: date, clock, exposure, act, day;
+  - `PUNCH`: digital zooms;
+  - `LINES`: voice lines at marks;
+  - per-mark sounds: in `make_audio`;
+  - `names`: chapter titles.
+- **Finishing:** commit `video/the-occupant-long.mp4` with `[skip ci]`, push, and send the user the
+  full-quality video, `voice_lines.txt` and `youtube.txt`.
+- **Requirements:** Python 3 with numpy, pillow and imageio-ffmpeg; ffmpeg/ffprobe; a JDK for the
+  sim and harness. Rendering needs about 15 GB free.
+
+## Things learned the hard way
+
+- **The picture lags the pose by one frame.** The edit shifts the camera data by 1.
+- **Placing the creature (`Cinematic.place`):** it only turns AI off when the look's turn is not 0.
+  Use `0.01f`, or it shakes as its AI moves it and the scene snaps it back.
+- **Keep the creature out of view until it should be seen:** spawn it at
+  `firstInView(poses, face, from, until)`.
+  - Under a low ceiling it crouches (`OccupantFit`). Aim at its face where it actually is: about
+    0.95 up in the house, not 1.9.
+- **The body's facing (`Tape.Body`)**:
+  - it follows the walking direction;
+  - backing away (`backAway`/`stagger` set a flag in the pose), it faces the camera;
+  - at a jump cut it snaps to the camera;
+  - it is never more than 60° from the camera. Without these it walks into the lens as a black slab.
+- **No dirt walls:** `wood()` puts a leaf thicket round the edge of every wood and trees across the
+  ends of its paths.
+- **Items:** natural item physics plays back correctly under tick stepping (the well's stone).
+- **Lighting:** a vertical shaft gets skylight down it unless it is roofed.
+- **Disk:** delete old `WORK/clips/work` caches when the disk fills. Background jobs stop when the
+  machine restarts; just start them again.
+
+## State at handoff
+
+The v4 cut is in progress. All 16 scenes have been re-recorded with the body made smooth like the
+user's skin; next come checking, rendering and delivering. This section is updated when it is delivered.
