@@ -13,6 +13,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -49,7 +50,7 @@ import java.util.Locale;
 final class Tape {
 	private static final double EYE = Cinematic.EYE;
 	/** Who they are: the name on the grave. */
-	private static final String NAME = "Wolfsmask";
+	private static final String NAME = "vR4xxs_";
 
 	private Tape() {
 	}
@@ -144,15 +145,17 @@ final class Tape {
 		int shut = creak + 15;
 		f.markAt(shut, "chestshut");
 		f.hold(30, t -> chest, 0, 0.7);
-		f.lower(18);
+		f.lower(26, 0);
 		f.mark("end");
 
 		double[][] poses = f.flat(o.getY());
 		Reel.prepare(context, game, start, front, 12200);
 		cabinThings(server, o, DUSK);
+		Body body = new Body(server, f, poses, o.getY());
 		context.waitTicks(10);
 		BlockPos lid = o.offset(-2, 0, 3);
 		Reel.record(context, server, "home", poses, Integer.MAX_VALUE, f, t -> {
+			body.at(t);
 			if (t == opens) server.runOnServer(s -> door(s.overworld(), o.offset(0, 0, -3), Direction.SOUTH, true));
 			if (t == creak) server.runOnServer(s -> s.overworld().blockEvent(lid, Blocks.CHEST, 1, 1));
 			if (t == shut) server.runOnServer(s -> s.overworld().blockEvent(lid, Blocks.CHEST, 1, 0));
@@ -197,13 +200,17 @@ final class Tape {
 		f.flinchAt(whisper + 2, behind, 1.0);
 		f.swingTo(9, behind);
 		f.hold(26, t -> behind, 0, 1.0);
-		f.hold(20, t -> Reel.local(o, 6, 1.6, -9), 0, 1.0);
-		f.lower(18);
+		f.hold(16, t -> Reel.local(o, 6, 1.6, -9), 0, 1.0);
+		// Out of there: back the way they came, quickly, the camera let down at their feet as they go.
+		f.follow(Reel.Way.local(o, new double[][]{{f.x - o.getX() - 0.5, f.z - o.getZ() - 0.5}, {0.6, -6.0}, {0.2, -8.5}, {-0.8, -12}, {-1.5, -18}}));
+		f.walk(12, 0.1, t -> f.onWay(5.0, 0, -0.3));
+		f.lower(22, 0.11);
 		f.mark("end");
 
 		double[][] poses = f.flat(o.getY());
 		Reel.prepare(context, game, start, tent, 9500);
-		Reel.record(context, server, "camp", poses, Integer.MAX_VALUE, f, null);
+		Body body = new Body(server, f, poses, o.getY());
+		Reel.record(context, server, "camp", poses, Integer.MAX_VALUE, f, body::at);
 	}
 
 	/** The pen: x from PEN[0] to PEN[1], z from PEN[2] to PEN[3], fence round it. */
@@ -256,7 +263,7 @@ final class Tape {
 		f.hold(44, t -> herd, 0, 1.0);
 		f.markAt(f.size() - 30, "what");
 		f.backAway(10, herd, 0.03);
-		f.lower(18);
+		f.cover(14);
 		f.mark("end");
 
 		double[][] poses = f.flat(o.getY());
@@ -269,7 +276,9 @@ final class Tape {
 		}
 		context.waitTicks(10);
 		AABB inPen = new AABB(o.getX() + PEN[0], o.getY() - 1, o.getZ() + PEN[2], o.getX() + PEN[1] + 1, o.getY() + 4, o.getZ() + PEN[3] + 1);
+		Body body = new Body(server, f, poses, o.getY());
 		Reel.record(context, server, "pasture", poses, Integer.MAX_VALUE, f, t -> {
+			body.at(t);
 			if (t < stare) return;
 			Vec3 eye = eye(poses, t);
 			server.runOnServer(s -> {
@@ -377,14 +386,14 @@ final class Tape {
 		f.flinchAt(seen, itFace, 0.6);
 		int zoomIn = f.size() + 6;
 		f.markAt(zoomIn, "zoomin");
-		f.hold(70, t -> itFace, 0, 1.0);
+		f.hold(52, t -> itFace, 0, 1.0);
+		// The tape drops out a moment; when it comes back, there is nobody there.
+		f.blink();
+		int gone = f.size() + 1;
+		f.hold(24, t -> itFace, 0, 1.0);
 		int zoomOut = f.size();
 		f.markAt(zoomOut, "zoomout");
-		f.hold(6, t -> itFace, 0, 1.0);
-		// Down at the ground a moment; up again: gone. Along the trees after it.
-		f.hold(22, t -> f.onWay(1.2, 0, -1.62), 0, 0.6);
-		int gone = f.size() - 9;
-		f.hold(22, t -> itFace, 0, 0.8);
+		f.hold(14, t -> itFace, 0, 0.9);
 		f.markAt(f.size() - 12, "what");
 		f.hold(16, t -> Reel.local(o, 7, 2.5, 30), 0, 0.8);
 		// Round, to go back the way they came: it is right there.
@@ -401,7 +410,8 @@ final class Tape {
 		f.stagger(6, closeFace, 0.5);
 		f.swing(9, f.yaw + 180.0, 10.0, 0.16);
 		int away = f.size() - 4;
-		f.run(34, 0.22, 0);
+		f.run(24, 0.22, 0);
+		f.cover(12);
 		f.mark("end");
 		f.watching(t -> t >= arrives && t < gone ? itFace : t >= placed && t < away ? closeFace : null);
 		int lens = Reel.WIDE_FOV;
@@ -414,14 +424,18 @@ final class Tape {
 		double[][] poses = f.flat(o.getY());
 		Reel.prepare(context, game, start, f.at(0).add(0, 0, 5), 12550);
 		Cinematic.Look bent = new Cinematic.Look(false, 0f, OccupantEntity.Mode.AMBUSH, 0);
+		Body body = new Body(server, f, poses, o.getY());
+		// Nothing of it anywhere in the picture until its face is: it is there from then.
+		int shows = firstInView(poses, closeFace, placed, away);
 		Reel.record(context, server, "field", poses, Integer.MAX_VALUE, f, t -> {
+			body.at(t);
 			// Put there while the camera is turned away from the spot, so it is not in the picture before.
 			if (t == arrives) Cinematic.place(server, BlockPos.containing(itFeet), eye(poses, t), Reel.STANDING);
-			if (t >= arrives && t < gone) Reel.look(server, itFeet, eye(poses, t), 0);
+			if (t >= arrives && t < gone) Reel.look(server, itFeet, steady(poses, t), 0);
 			if (t == gone) server.runCommand("kill " + Reel.ALL);
-			if (t == placed) Cinematic.place(server, BlockPos.containing(closeFeet), eye(poses, t), bent);
-			if (t >= placed && t < away) {
-				Reel.look(server, closeFeet, eye(poses, t), 0);
+			if (t == shows) Cinematic.place(server, BlockPos.containing(closeFeet), eye(poses, t), bent);
+			if (t >= shows && t < away) {
+				Reel.look(server, closeFeet, steady(poses, t), 0);
 				coil(server, closeFeet, 0.6f);
 			}
 			if (t == away) server.runCommand("kill " + Reel.ALL);
@@ -501,13 +515,15 @@ final class Tape {
 		Vec3 bed = Reel.local(o, 2.0, 1.0, 2.6);
 		int placed = creak - 4;
 		Cinematic.Look bent = new Cinematic.Look(false, 0f, OccupantEntity.Mode.AMBUSH, 0);
+		Body body = new Body(server, f, poses, o.getY());
 		Reel.record(context, server, "intruder", poses, Integer.MAX_VALUE, f, t -> {
+			body.at(t);
 			if (t == creak) server.runOnServer(s -> door(s.overworld(), o.offset(0, 0, -3), Direction.SOUTH, true));
 			if (t == placed) Cinematic.place(server, BlockPos.containing(feet), bed, bent);
 			if (t >= placed) {
 				// Facing the bed; then the head round at them, the rest of it after.
 				double u = Reel.smooth((t - turns) / 14.0);
-				Vec3 look = bed.scale(1 - u).add(eye(poses, t).scale(u));
+				Vec3 look = bed.scale(1 - u).add(steady(poses, t).scale(u));
 				Reel.look(server, feet, look, 0);
 				coil(server, feet, 0.5f);
 			}
@@ -544,8 +560,7 @@ final class Tape {
 		// Up, back against the wall, the camera on it; it watches them come up.
 		f.hold(34, t -> cowHead, 0.42, 0.9);
 		f.markAt(f.size() - 20, "moo");
-		f.hold(24, t -> cowHead, 0.42, 0.9);
-		f.lower(16);
+		f.hold(30, t -> cowHead, 0.42, 0.9);
 		f.mark("end");
 
 		double[][] poses = f.flat(o.getY());
@@ -605,12 +620,17 @@ final class Tape {
 		f.follow(Reel.Way.local(o, new double[][]{{0, -0.7}, {0, -2}, {0, -3.6}, {-0.3, -6.0}}));
 		int out = f.size();
 		while (f.size() < out + 40) f.backAway(1, set, 0.08);
-		f.lower(16);
+		// Round, and away from it, fast, the camera let down at their feet.
+		f.follow(Reel.Way.local(o, new double[][]{{f.x - o.getX() - 0.5, f.z - o.getZ() - 0.5}, {0.5, -9}, {0.4, -14}, {0.6, -22}}));
+		f.swing(10, Reel.Fear.yawBetween(f.at(f.size() - 1), Reel.local(o, 0.4, EYE, -14)), 8.0, 0.09);
+		f.walk(6, 0.11, t -> f.onWay(5.0, 0, -0.3));
+		f.lower(22, 0.12);
 		f.mark("end");
 
 		double[][] poses = f.flat(o.getY());
 		Reel.prepare(context, game, start, shack, 7000);
-		Reel.record(context, server, "radio", poses, Integer.MAX_VALUE, f, null);
+		Body body = new Body(server, f, poses, o.getY());
+		Reel.record(context, server, "radio", poses, Integer.MAX_VALUE, f, body::at);
 	}
 
 	/**
@@ -676,19 +696,23 @@ final class Tape {
 
 		double[][] poses = f.flat(o.getY());
 		Reel.prepare(context, game, start, doorway, 10500);
-		Vec3 anchor = new Vec3(seat.x, o.getY(), seat.z);
-		bodyMade(server, anchor);
+		Body body = new Body(server, f, poses, o.getY());
+		Vec3 anchor = body.anchor;
 		context.waitTicks(10);
 		Sitter them = new Sitter(seat, new Vec3(1, 0, 0), Reel.local(o, 2.6, 1.6, -2.5), new Vec3(lens.x, o.getY() + 0.12, lens.z));
 		Cinematic.Look bent = new Cinematic.Look(false, 0f, OccupantEntity.Mode.AMBUSH, 0);
+		// Not there at all, legs and all, until its face is in the picture as they turn.
+		int shows = firstInView(poses, face, placed, drop);
+		Vec3 seated = seat.add(0, 1.0, 0);
 		Reel.record(context, server, "house", poses, Integer.MAX_VALUE, f, t -> {
-			if (t == placed) Cinematic.place(server, BlockPos.containing(feet), eye(poses, t), bent);
-			if (t >= placed && t < land) {
-				Reel.look(server, feet, eye(poses, t), 0);
+			if (t == shows) Cinematic.place(server, BlockPos.containing(feet), eye(poses, t), bent);
+			if (t >= shows && t < land) {
+				Reel.look(server, feet, steady(poses, t), 0);
 				coil(server, feet, 0.5f);
 			}
 			if (t == land) server.runCommand("kill " + Reel.ALL);
-			if (t >= drop) bodyPosed(server, them.pose(Math.max(0, t - land), anchor));
+			if (t < drop) body.at(t);
+			else bodyPosed(server, them.pose(Math.max(0, t - land), anchor), seated);
 		});
 	}
 
@@ -743,7 +767,9 @@ final class Tape {
 
 		double[][] poses = f.flat(o.getY());
 		Reel.prepare(context, game, start, door, 12700);
+		Body body = new Body(server, f, poses, o.getY());
 		Reel.record(context, server, "chapel", poses, Integer.MAX_VALUE, f, t -> {
+			body.at(t);
 			if (t == lit) server.runOnServer(s -> {
 				for (int x : new int[]{-1, 1}) {
 					Reel.set(s.overworld(), o.offset(x, 1, 6), Blocks.CANDLE.defaultBlockState().setValue(BlockStateProperties.LIT, true));
@@ -795,15 +821,20 @@ final class Tape {
 		f.flinchAt(seen, itFace, 0.8);
 		int zoomIn = f.size() + 6;
 		f.markAt(zoomIn, "zoomin");
-		f.hold(70, t -> itFace, 0, 1.2);
+		f.hold(56, t -> itFace, 0, 1.2);
+		// The tape drops out a moment; when it comes back, the trees are empty.
+		f.blink();
+		int gone = f.size() + 1;
+		f.hold(26, t -> itFace, 0, 1.2);
 		int zoomOut = f.size();
 		f.markAt(zoomOut, "zoomout");
-		// Out again, a look away to the gate, and back: gone.
-		f.hold(22, t -> Reel.local(o, 0, 1.4, -4.5), 0, 1.0);
-		int gone = f.size() - 14;
-		f.hold(36, t -> itFace, 0, 1.0);
-		f.markAt(f.size() - 24, "what");
-		f.lower(16);
+		f.hold(12, t -> itFace, 0, 1.0);
+		f.markAt(f.size() - 22, "what");
+		// Out of there: back between the rows to the gate, quickly, the camera let down at their feet.
+		f.follow(Reel.Way.local(o, new double[][]{{f.x - o.getX() - 0.5, f.z - o.getZ() - 0.5}, {1.5, -1.5}, {1.0, -3.2}, {0, -4},
+				{-0.6, -4.8}, {-0.9, -6.2}, {0.3, -7.3}, {0.4, -13}}));
+		f.swing(10, Reel.Fear.yawBetween(f.at(f.size() - 1), Reel.local(o, 1.0, EYE, -3.2)), 8.0, 0.07);
+		f.lower(22, 0.09);
 		f.mark("end");
 		f.watching(t -> t >= placed && t < gone ? itFace : null);
 		int lens = Reel.WIDE_FOV;
@@ -815,9 +846,11 @@ final class Tape {
 
 		double[][] poses = f.flat(o.getY());
 		Reel.prepare(context, game, start, middle, 13300);
+		Body body = new Body(server, f, poses, o.getY());
 		Reel.record(context, server, "graves", poses, Integer.MAX_VALUE, f, t -> {
+			body.at(t);
 			if (t == placed) Cinematic.place(server, BlockPos.containing(itFeet), eye(poses, t), Reel.STANDING);
-			if (t >= placed && t < gone) Reel.look(server, itFeet, eye(poses, t), 0);
+			if (t >= placed && t < gone) Reel.look(server, itFeet, steady(poses, t), 0);
 			if (t == gone) server.runCommand("kill " + Reel.ALL);
 		}, fov);
 	}
@@ -869,9 +902,9 @@ final class Tape {
 		f.walkOn(0.03, t -> door);
 		f.hold(12, t -> door, 0, 0.8);
 		// Behind them, a tap on the glass.
-		// Down low outside the window (its feet sunk where the wall hides them), its face at the glass.
-		Vec3 feet = Reel.local(o, -5, -1.4, 0.5);
-		Vec3 face = Reel.local(o, -4.4, 2.0, 0.5);
+		// Outside, a little back from the glass, as tall as it is: its face at the top of the window.
+		Vec3 feet = Reel.local(o, -5.6, 0, 0.5);
+		Vec3 face = Reel.local(o, -5.6, 3.5, 0.5);
 		int placed = f.size() - 12;
 		int tap = f.size() + 4;
 		f.markAt(tap, "tap");
@@ -881,28 +914,25 @@ final class Tape {
 		int seen = f.size() - 4;
 		f.markAt(seen, "seen");
 		f.flinchAt(seen, face, 1.3);
-		f.hold(38, t -> face, 0, 1.4);
-		f.backAway(10, face, 0.05);
-		// The door: did it come from there? And back: nothing at the window.
-		f.hold(24, t -> door, 0, 1.0);
-		int gone = f.size() - 16;
-		f.hold(40, t -> window, 0, 1.0);
-		f.markAt(f.size() - 26, "what");
+		f.hold(40, t -> face, 0, 1.4);
+		// The tape drops out a moment; when it comes back, the window is empty.
+		f.blink();
+		int gone = f.size() + 1;
+		f.hold(36, t -> face, 0, 1.2);
+		f.markAt(f.size() - 24, "what");
+		f.backAway(8, face, 0.05);
 		f.mark("end");
 		f.watching(t -> t >= seen - 6 && t < gone ? face : null);
 
 		double[][] poses = f.flat(o.getY());
 		Reel.prepare(context, game, start, door, 18000);
 		cabinThings(server, o, NIGHT);
+		Body body = new Body(server, f, poses, o.getY());
 		context.waitTicks(10);
-		Cinematic.Look bent = new Cinematic.Look(false, 0f, OccupantEntity.Mode.AMBUSH, 0);
 		Reel.record(context, server, "knock", poses, Integer.MAX_VALUE, f, t -> {
-			if (t == placed) Cinematic.place(server, BlockPos.containing(feet), eye(poses, t), bent);
-			if (t >= placed && t < gone) {
-				Reel.look(server, feet, eye(poses, t), 0);
-				// Crouched down to look in at the glass, its face at the middle of it.
-				coil(server, feet, 0.5f);
-			}
+			body.at(t);
+			if (t == placed) Cinematic.place(server, BlockPos.containing(feet), eye(poses, t), Reel.STANDING);
+			if (t >= placed && t < gone) Reel.look(server, feet, steady(poses, t), 0);
 			if (t == gone) server.runCommand("kill " + Reel.ALL);
 		});
 	}
@@ -942,15 +972,18 @@ final class Tape {
 		f.hold(36, t -> hole, 0.1, 0.9);
 		f.follow(Reel.Way.local(o, new double[][]{{4.6, -0.3}, {4.4, 1.5}, {4.3, 2.9}}));
 		f.walkOn(0.045, t -> sign);
-		f.hold(60, t -> sign, 0.45, 1.1);
-		f.lower(16);
+		f.hold(52, t -> sign, 0.45, 1.1);
+		// Up again; and the camera sinks, slowly, to their own feet at the edge of it.
+		f.hold(14, t -> sign, 0, 1.0);
+		f.lower(30, 0);
 		f.mark("end");
 
 		double[][] poses = f.flat(o.getY());
 		Reel.prepare(context, game, start, door, 23400);
 		cabinThings(server, o, MORNING);
+		Body body = new Body(server, f, poses, o.getY());
 		context.waitTicks(10);
-		Reel.record(context, server, "morning", poses, Integer.MAX_VALUE, f, null);
+		Reel.record(context, server, "morning", poses, Integer.MAX_VALUE, f, body::at);
 	}
 
 	/**
@@ -1007,9 +1040,11 @@ final class Tape {
 
 		double[][] poses = f.flat(o.getY());
 		Reel.prepare(context, game, start, Reel.local(o, 0.5, 1.4, 10), 6000);
+		Body body = new Body(server, f, poses, o.getY());
 		Reel.record(context, server, "mine", poses, Integer.MAX_VALUE, f, t -> {
+			body.at(t);
 			if (t == placed) Cinematic.place(server, BlockPos.containing(itFeet), eye(poses, t), Reel.STANDING);
-			if (t >= placed) Reel.look(server, itFeet, eye(poses, t), 0);
+			if (t >= placed) Reel.look(server, itFeet, steady(poses, t), 0);
 		});
 	}
 
@@ -1032,13 +1067,111 @@ final class Tape {
 		}
 	}
 
-	private static void bodyPosed(TestServerContext server, List<Person.Part> parts) {
+	/**
+	 * The body's parts where {@code parts} puts them, lit as the air at {@code lightAt} is (a display
+	 * is otherwise lit as wherever it was made, which is not where it is drawn).
+	 */
+	private static void bodyPosed(TestServerContext server, List<Person.Part> parts, Vec3 lightAt) {
+		int[] light = server.computeOnServer(s -> {
+			BlockPos at = BlockPos.containing(lightAt);
+			ServerLevel level = s.overworld();
+			return new int[]{level.getBrightness(LightLayer.SKY, at), level.getBrightness(LightLayer.BLOCK, at)};
+		});
 		for (Person.Part part : parts) {
 			StringBuilder m = new StringBuilder();
 			for (int k = 0; k < 16; k++) m.append(k == 0 ? "" : ",").append(String.format(Locale.ROOT, "%.4ff", part.m()[k]));
 			server.runCommand("data merge entity @e[type=block_display,tag=occupant_body_" + part.name() + ",limit=1] {transformation:["
-					+ m + "],interpolation_duration:0}");
+					+ m + "],interpolation_duration:0,brightness:{sky:" + light[0] + ",block:" + light[1] + "}}");
 		}
+	}
+
+	/**
+	 * Whoever is holding the camera, under it (see {@link Walker}): posed each tick from where the
+	 * camera is and how they are going; out of sight while they are not on their feet.
+	 */
+	private static final class Body {
+		private final TestServerContext server;
+		private final Reel.Fear f;
+		private final double[][] poses;
+		private final double ground;
+		final Vec3 anchor;
+		private final double[] yaw;
+		private final int cover, end;
+		private boolean hidden;
+
+		Body(TestServerContext server, Reel.Fear f, double[][] poses, double ground) {
+			this.server = server;
+			this.f = f;
+			this.poses = poses;
+			this.ground = ground;
+			this.anchor = new Vec3(poses[0][0], ground, poses[0][2]);
+			bodyMade(server, anchor);
+			int c = -1, e = poses.length;
+			for (String mark : f.marks()) {
+				String[] w = mark.split(" ");
+				if (w[1].equals("cover") && c < 0) c = Integer.parseInt(w[0]);
+				if (w[1].equals("end")) e = Integer.parseInt(w[0]);
+			}
+			cover = c;
+			end = e;
+			// Which way the body faces: the way they are going; standing, round after the camera when it has gone far enough.
+			yaw = new double[poses.length];
+			double by = f.raw(0)[2];
+			for (int t = 0; t < poses.length; t++) {
+				double[] r = f.raw(t), q = f.raw(t - 4);
+				double dx = r[0] - q[0], dz = r[1] - q[1];
+				if (Math.hypot(dx, dz) > 0.12) by += Mth.wrapDegrees(Math.toDegrees(Math.atan2(-dx, dz)) - by) * 0.2;
+				else if (Math.abs(Mth.wrapDegrees(r[2] - by)) > 35) by += Mth.wrapDegrees(r[2] - by) * 0.1;
+				yaw[t] = by;
+			}
+		}
+
+		void at(int t) {
+			if (t >= poses.length) return;
+			double[] r = f.raw(t);
+			boolean standing = r[9] > 0 && r[11] > 0 && r[4] > -0.25;
+			if (!standing) {
+				if (!hidden) bodyPosed(server, Walker.none(anchor, anchor), anchor.add(0, 1, 0));
+				hidden = true;
+				return;
+			}
+			hidden = false;
+			double[] p = poses[t];
+			Vec3 eye = new Vec3(p[0], p[1], p[2]);
+			double yr = Math.toRadians(p[3]), pr = Math.toRadians(p[4]);
+			Vec3 look = new Vec3(-Math.sin(yr) * Math.cos(pr), -Math.sin(pr), Math.cos(yr) * Math.cos(pr));
+			// The hand gets to the lens a little before the tape stops.
+			double u = cover >= 0 && t >= cover ? Math.min(1.0, (t - cover + 1.0) / Math.max(1.0, (end - cover) * 0.75)) : 0;
+			bodyPosed(server, Walker.pose(eye, look, ground, yaw[t], r[7], r[5], u, anchor), eye);
+		}
+	}
+
+	/**
+	 * Where the camera is, about, at tick {@code t}: the hand's shake taken out, for it to look at as
+	 * it would look at someone (following every tremor of the camera, it twitches).
+	 */
+	private static Vec3 steady(double[][] poses, int t) {
+		double x = 0, y = 0, z = 0;
+		int n = 0;
+		for (int i = Math.max(0, t - 9); i <= Math.min(t, poses.length - 1); i++) {
+			x += poses[i][0];
+			y += poses[i][1];
+			z += poses[i][2];
+			n++;
+		}
+		return new Vec3(x / n, y / n, z / n);
+	}
+
+	/** The first tick from {@code from} (before {@code until}) at which {@code at} is in the picture, a little in from its edges. */
+	private static int firstInView(double[][] poses, Vec3 at, int from, int until) {
+		for (int t = Math.max(0, from); t < Math.min(until, poses.length); t++) {
+			double[] p = poses[t];
+			double dx = at.x - p[0], dy = at.y - p[1], dz = at.z - p[2];
+			double yaw = Math.toDegrees(Math.atan2(-dx, dz));
+			double pitch = -Math.toDegrees(Math.atan2(dy, Math.hypot(dx, dz)));
+			if (Math.abs(Mth.wrapDegrees(yaw - p[3])) < 36 && Math.abs(pitch - p[4]) < 24) return t;
+		}
+		return from;
 	}
 
 	// ------------------------------------------------------------------ the places

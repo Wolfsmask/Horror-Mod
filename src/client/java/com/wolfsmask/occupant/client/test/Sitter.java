@@ -79,7 +79,7 @@ final class Sitter {
 		Frame c = frame(point(p, 0, 6, 0), cUp, cFront);
 		// The head: on where it was, jerking about a little; then round at the camera.
 		Vec3 headO = point(c, 0, 6, 0);
-		double jitter = (1 - turn) * 0.04;
+		double jitter = (1 - turn) * 0.02;
 		Vec3 onIt = stare.subtract(headO).normalize().add(new Vec3(Math.sin(t * 1.7) * jitter, Math.sin(t * 2.3) * jitter * 0.6, Math.cos(t * 1.3) * jitter));
 		Vec3 atLens = lens.subtract(headO).normalize();
 		Vec3 look = onIt.scale(1 - turn).add(atLens.scale(turn)).normalize();
@@ -87,11 +87,11 @@ final class Sitter {
 		List<Person.Part> out = new ArrayList<>();
 		out.add(box("pelvis", Person.SHIRT, p, -4, 4, -0.5, 6, -2, 2, anchor));
 		out.add(box("chest", Person.SHIRT, c, -4, 4, 0, 6, -2, 2, anchor));
-		out.add(box("head", Person.SKIN, h, -4, 4, 0, 8, -4, 4, anchor));
+		out.add(box("head", Person.FACE, h, -4, 4, 0, 8, -4, 4, anchor));
 		out.add(box("hair", Person.HAIR, h, -4.2, 4.2, 6, 8.25, -4.2, 4.2, anchor));
 		out.add(box("hair_back", Person.HAIR, h, -4.2, 4.2, 2.5, 8.25, -4.25, -3.2, anchor));
-		out.add(box("eye_l", Person.EYES, h, 1.2, 2.7, 3.2, 4.2, 3.95, 4.15, anchor));
-		out.add(box("eye_r", Person.EYES, h, -2.7, -1.2, 3.2, 4.2, 3.95, 4.15, anchor));
+		out.add(box("eye_l", Person.EYE_WHITE, h, 1, 3, 3, 4, 3.95, 4.15, anchor));
+		out.add(box("eye_r", Person.EYE_GREY, h, -3, -2, 3, 4, 3.95, 4.15, anchor));
 		// Arms: both hands planted behind them on the floor; the right one comes up off it and back to the lens.
 		for (int i = 0; i < 2; i++) {
 			double side = i == 0 ? 1 : -1;

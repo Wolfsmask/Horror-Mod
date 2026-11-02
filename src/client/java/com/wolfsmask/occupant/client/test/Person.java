@@ -33,11 +33,17 @@ final class Person {
 	record Part(String name, String block, double[] m) {
 	}
 
-	static final String SHIRT = "minecraft:cyan_concrete", PANTS = "minecraft:blue_concrete", SHOES = "minecraft:gray_concrete",
-			SKIN = "minecraft:white_terracotta", HAIR = "minecraft:brown_concrete", EYES = "minecraft:black_concrete";
+	/**
+	 * Who they are, as their skin has them: a black hoodie and trousers, black gloves, the face black
+	 * under the hood, and two eyes that do not match (two white pixels on their left, one grey on
+	 * their right).
+	 */
+	static final String SHIRT = "minecraft:black_concrete_powder", PANTS = "minecraft:black_wool", SHOES = "minecraft:black_concrete_powder",
+			SKIN = "minecraft:black_concrete_powder", FACE = "minecraft:black_concrete", HAIR = "minecraft:black_wool",
+			EYE_WHITE = "minecraft:white_concrete", EYE_GREY = "minecraft:light_gray_concrete";
 	/** Every part, in the order {@link #pose} gives them, with what it is made of. */
 	static final String[][] PARTS = {
-			{"pelvis", SHIRT}, {"chest", SHIRT}, {"head", SKIN}, {"hair", HAIR}, {"hair_back", HAIR}, {"eye_l", EYES}, {"eye_r", EYES},
+			{"pelvis", SHIRT}, {"chest", SHIRT}, {"head", FACE}, {"hair", HAIR}, {"hair_back", HAIR}, {"eye_l", EYE_WHITE}, {"eye_r", EYE_GREY},
 			{"arm_l", SHIRT}, {"forearm_l", SKIN}, {"arm_r", SHIRT}, {"forearm_r", SKIN},
 			{"thigh_l", PANTS}, {"shin_l", PANTS}, {"shoe_l", SHOES}, {"thigh_r", PANTS}, {"shin_r", PANTS}, {"shoe_r", SHOES}};
 
@@ -981,11 +987,11 @@ final class Person {
 		List<Part> out = new ArrayList<>();
 		out.add(box("pelvis", SHIRT, p, -4, 4, -0.5, 6, -2, 2, anchor));
 		out.add(box("chest", SHIRT, c, -4, 4, 0, 6, -2, 2, anchor));
-		out.add(box("head", SKIN, h, -4, 4, 0, 8, -4, 4, anchor));
+		out.add(box("head", FACE, h, -4, 4, 0, 8, -4, 4, anchor));
 		out.add(box("hair", HAIR, h, -4.2, 4.2, 6, 8.25, -4.2, 4.2, anchor));
 		out.add(box("hair_back", HAIR, h, -4.2, 4.2, 2.5, 8.25, -4.25, -3.2, anchor));
-		out.add(box("eye_l", EYES, h, 1.2, 2.7, 3.2, 4.2, 3.95, 4.15, anchor));
-		out.add(box("eye_r", EYES, h, -2.7, -1.2, 3.2, 4.2, 3.95, 4.15, anchor));
+		out.add(box("eye_l", EYE_WHITE, h, 1, 3, 3, 4, 3.95, 4.15, anchor));
+		out.add(box("eye_r", EYE_GREY, h, -3, -2, 3, 4, 3.95, 4.15, anchor));
 		// Arms: from the shoulder, four pixels to the elbow, six on to the end of the hand.
 		for (int i = 0; i < 2; i++) {
 			Limb l = hands[i];

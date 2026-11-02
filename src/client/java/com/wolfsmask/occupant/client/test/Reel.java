@@ -767,36 +767,54 @@ final class Reel {
 		double low;
 
 		/**
-		 * A hand put over the lens: it comes at the camera from below and knocks it a little, and
-		 * the picture goes dark (the edit draws the hand) over {@code n} ticks.
+		 * A hand put over the lens, in a hurry: the camera tipped a little down, jolted as the hand
+		 * comes up from below (their own, see {@link Walker}) and over it; still going the way they
+		 * were going. The edit takes the picture to dark as it closes over.
 		 */
 		void cover(int n) {
 			mark("cover");
+			double p0 = pitch;
 			for (int i = 0; i < n; i++) {
 				double u = (i + 1.0) / n;
-				step(0, 0.04);
-				pitch += 0.5 + 1.2 * u;
-				yaw += 0.4 * Math.sin(i * 1.3);
-				roll += (6 * u - roll) * 0.3;
-				tremble += (1.2 - tremble) * 0.2;
+				steer(6);
+				step(speed, 0.02);
+				pitch += (p0 + 16 - pitch) * 0.3;
+				yaw += 0.6 * Math.sin(i * 1.3) * u;
+				roll += (4 * u - roll) * 0.3;
+				tremble += (1.1 - tremble) * 0.2;
 				push();
 			}
 		}
 
-		void lower(int n) {
+		/**
+		 * The tape drops out for a moment, a flash of black, and picks up again (the edit draws it): the
+		 * camera does not move. Whatever was there can be gone when it comes back.
+		 */
+		void blink() {
+			mark("blink");
+		}
+
+		/** The camera turned down to their own feet, slowly, still going at {@code pace}: no drop, no swing. */
+		void lower(int n, double pace) {
 			mark("lower");
-			double y0 = yaw, p0 = pitch;
+			double p0 = pitch;
 			double side = hands.nextBoolean() ? 1 : -1;
 			for (int i = 0; i < n; i++) {
 				double u = smooth((i + 1.0) / n);
-				step(speed * 0.9, 0.03);
-				yaw = y0 + side * 18 * u + 4 * Math.sin(i * 0.5) * u;
-				pitch = p0 + (72 - p0) * u;
-				roll += (side * 24 * u - roll) * 0.25;
-				lift += (-0.55 * u - lift) * 0.2;
-				tremble *= 0.9;
+				steer(6);
+				step(pace, 0.02);
+				pitch = p0 + (62 - p0) * u;
+				yaw += side * 0.25 * Math.sin(Math.PI * (i + 1.0) / n);
+				roll += (side * 4 * u - roll) * 0.2;
+				lift += (-0.06 * u - lift) * 0.2;
+				tremble *= 0.95;
 				push();
 			}
+		}
+
+		/** Where they are at tick {@code i} before the hand is put in: x, z, yaw, pitch, lift, speed, tremble, stride phase, roll, feet, landing, hand, rigid. */
+		double[] raw(int i) {
+			return poses.get(Math.max(0, Math.min(i, poses.size() - 1)));
 		}
 
 		/**
