@@ -902,9 +902,10 @@ final class Tape {
 		f.walkOn(0.03, t -> door);
 		f.hold(12, t -> door, 0, 0.8);
 		// Behind them, a tap on the glass.
-		// Outside, a little back from the glass, as tall as it is: its face at the top of the window.
-		Vec3 feet = Reel.local(o, -5.6, 0, 0.5);
-		Vec3 face = Reel.local(o, -5.6, 3.5, 0.5);
+		// Outside, under the lean-to by the window, bent under its roof as it is under any roof: its
+		// face at the glass.
+		Vec3 feet = Reel.local(o, -5.3, 0, 0.5);
+		Vec3 face = Reel.local(o, -5.3, 1.9, 0.5);
 		int placed = f.size() - 12;
 		int tap = f.size() + 4;
 		f.markAt(tap, "tap");
@@ -927,12 +928,26 @@ final class Tape {
 		double[][] poses = f.flat(o.getY());
 		Reel.prepare(context, game, start, door, 18000);
 		cabinThings(server, o, NIGHT);
+		// A lean-to for the wood against the west wall, over the logs and the window: posts and a roof.
+		server.runOnServer(s -> {
+			ServerLevel level = s.overworld();
+			for (int x = -7; x <= -4; x++) {
+				for (int z = -2; z <= 3; z++) Reel.set(level, o.offset(x, 3, z), Blocks.SPRUCE_PLANKS.defaultBlockState());
+			}
+			for (int[] c : new int[][]{{-7, -2}, {-7, 3}}) {
+				for (int y = 0; y <= 2; y++) Reel.set(level, o.offset(c[0], y, c[1]), Blocks.SPRUCE_FENCE.defaultBlockState());
+			}
+		});
 		Body body = new Body(server, f, poses, o.getY());
 		context.waitTicks(10);
+		Cinematic.Look bent = new Cinematic.Look(false, 0f, OccupantEntity.Mode.AMBUSH, 0);
 		Reel.record(context, server, "knock", poses, Integer.MAX_VALUE, f, t -> {
 			body.at(t);
-			if (t == placed) Cinematic.place(server, BlockPos.containing(feet), eye(poses, t), Reel.STANDING);
-			if (t >= placed && t < gone) Reel.look(server, feet, steady(poses, t), 0);
+			if (t == placed) Cinematic.place(server, BlockPos.containing(feet), eye(poses, t), bent);
+			if (t >= placed && t < gone) {
+				Reel.look(server, feet, steady(poses, t), 0);
+				coil(server, feet, 0.5f);
+			}
 			if (t == gone) server.runCommand("kill " + Reel.ALL);
 		});
 	}

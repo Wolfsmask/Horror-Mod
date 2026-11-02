@@ -803,7 +803,7 @@ final class Reel {
 				double u = smooth((i + 1.0) / n);
 				steer(6);
 				step(pace, 0.02);
-				pitch = p0 + (62 - p0) * u;
+				pitch = p0 + (66 - p0) * u;
 				yaw += side * 0.25 * Math.sin(Math.PI * (i + 1.0) / n);
 				roll += (side * 4 * u - roll) * 0.2;
 				lift += (-0.06 * u - lift) * 0.2;

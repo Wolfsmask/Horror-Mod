@@ -45,11 +45,11 @@ final class Walker {
 		Vec3 f = new Vec3(-Math.sin(r_), 0, Math.cos(r_));
 		Vec3 r = new Vec3(-f.z, 0, f.x);
 		double walking = Math.min(1.0, speed / 0.06);
-		// The hips a little behind the camera (the head is forward of them, looking down), bobbing with each step.
-		double bob = 0.025 * walking * Math.abs(Math.sin(phase));
-		Vec3 hips = new Vec3(eye.x, ground + 12 * PX - 0.02 + bob, eye.z).subtract(f.scale(0.1));
-		// Leaning a little into the walk, and over to look down.
+		// Pointed down, the camera is held out in front of them, at the end of the arm: the body is
+		// behind it and under it, and what it sees is their legs and feet going.
 		double down = Math.max(0, Math.min(1, (Math.toDegrees(Math.asin(-look.y)) - 20) / 50));
+		double bob = 0.025 * walking * Math.abs(Math.sin(phase));
+		Vec3 hips = new Vec3(eye.x, ground + 12 * PX - 0.02 + bob, eye.z).subtract(f.scale(0.12 + 0.24 * down));
 		Vec3 pUp = UP.add(f.scale(0.06 * walking + 0.1 * down)).normalize();
 		Frame p = frame(hips, pUp, f);
 		Frame c = frame(point(p, 0, 6, 0), pUp.add(f.scale(0.08 * down)).normalize(), f);
@@ -87,7 +87,7 @@ final class Walker {
 			double ph = phase + (i == 0 ? 0 : Math.PI);
 			Vec3 hip = point(p, 1.9 * s, 0, 0);
 			Vec3 foot = new Vec3(hips.x, ground + 0.07 + 0.09 * walking * Math.max(0, Math.cos(ph)), hips.z)
-					.add(f.scale(0.05 + 0.24 * walking * Math.sin(ph))).add(r.scale(-s * 0.12));
+					.add(f.scale(0.08 + 0.28 * walking * Math.sin(ph))).add(r.scale(-s * 0.12));
 			Frame[] leg = limb(hip, foot, 6, 6, f.add(UP.scale(0.2)));
 			String n = i == 0 ? "l" : "r";
 			out.add(box("thigh_" + n, Person.PANTS, leg[0], -2, 2, -6, 0.3, -2, 2, anchor));
