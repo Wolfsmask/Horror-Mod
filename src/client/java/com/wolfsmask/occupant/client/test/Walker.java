@@ -49,7 +49,7 @@ final class Walker {
 		// behind it and under it, and what it sees is their legs and feet going.
 		double down = Math.max(0, Math.min(1, (Math.toDegrees(Math.asin(-look.y)) - 20) / 50));
 		double bob = 0.025 * walking * Math.abs(Math.sin(phase));
-		Vec3 hips = new Vec3(eye.x, ground + 12 * PX - 0.02 + bob, eye.z).subtract(f.scale(0.12 + 0.24 * down));
+		Vec3 hips = new Vec3(eye.x, ground + 12 * PX - 0.02 + bob, eye.z).subtract(f.scale(0.12 + 0.1 * down));
 		Vec3 pUp = UP.add(f.scale(0.06 * walking + 0.1 * down)).normalize();
 		Frame p = frame(hips, pUp, f);
 		Frame c = frame(point(p, 0, 6, 0), pUp.add(f.scale(0.08 * down)).normalize(), f);
@@ -60,13 +60,15 @@ final class Walker {
 		// The right hand at the camera, just behind and under the lens; the left swinging, or over the lens.
 		Vec3 side = look.cross(UP);
 		side = side.lengthSqr() < 1e-6 ? r : side.normalize();
+		Vec3 camUp = side.cross(look).normalize();
 		for (int i = 0; i < 2; i++) {
 			double s = i == 0 ? 1 : -1;
 			Vec3 shoulder = point(c, 6 * s, 4, 0);
 			Vec3 hand;
 			Vec3 pole;
 			if (s < 0) {
-				hand = eye.add(side.scale(0.1)).subtract(UP.scale(0.13)).subtract(look.scale(0.02));
+				// Behind the camera, whichever way it points: never in front of the lens.
+				hand = eye.subtract(look.scale(0.12)).add(side.scale(0.07)).subtract(camUp.scale(0.05));
 				pole = r.scale(0.6).subtract(UP.scale(0.8));
 			} else {
 				double swing = Math.sin(phase) * 0.18 * walking;
