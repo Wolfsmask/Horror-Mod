@@ -34,12 +34,13 @@ final class Person {
 	}
 
 	/**
-	 * Who they are, as their skin has them: a black hoodie and trousers, black gloves, the face black
-	 * under the hood, and two eyes that do not match (two white pixels on their left, one grey on
-	 * their right).
+	 * Who they are, as their skin has them: dark charcoal all over, smooth (a hoodie, trousers and
+	 * gloves of one even near-black, so smooth black concrete, never wool or powder, which read as
+	 * fuzzy), the face black under the hood with a speckled fringe of hair, and two eyes that do not
+	 * match (two white pixels on their left, one grey on their right).
 	 */
-	static final String SHIRT = "minecraft:black_concrete_powder", PANTS = "minecraft:black_wool", SHOES = "minecraft:black_concrete_powder",
-			SKIN = "minecraft:black_concrete_powder", FACE = "minecraft:black_concrete", HAIR = "minecraft:black_wool",
+	static final String SHIRT = "minecraft:black_concrete", PANTS = "minecraft:black_concrete", SHOES = "minecraft:black_concrete",
+			SKIN = "minecraft:black_concrete", FACE = "minecraft:black_concrete", HAIR = "minecraft:coal_block",
 			EYE_WHITE = "minecraft:white_concrete", EYE_GREY = "minecraft:light_gray_concrete";
 	/** Every part, in the order {@link #pose} gives them, with what it is made of. */
 	static final String[][] PARTS = {
