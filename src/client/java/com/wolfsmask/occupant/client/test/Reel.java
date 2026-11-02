@@ -807,7 +807,7 @@ final class Reel {
 				yaw += side * 0.25 * Math.sin(Math.PI * (i + 1.0) / n);
 				roll += (side * 4 * u - roll) * 0.2;
 				// Down to chest height as it turns: the camera held out in front, looking at their feet.
-				lift += (-0.2 * u - lift) * 0.2;
+				lift += (-0.12 * u - lift) * 0.2;
 				tremble *= 0.95;
 				push();
 			}
