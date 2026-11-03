@@ -14,6 +14,7 @@ from pathlib import Path
 import numpy as np
 
 LEVEL = 0.12  # the loud part of every line, as RMS
+BASE_DISTANCE = 0.4  # how far the camera's microphone always is from their mouth (0 at it, 1 well away)
 
 
 def decode(path, sr, ff="ffmpeg"):
@@ -67,6 +68,8 @@ def camcorder(y, sr, gain=1.0, ctx=None):
     from scipy import signal
     ctx = ctx or {}
     far = float(np.clip(ctx.get("far", 0.0), 0, 1))
+    # The camera is held out from them, its microphone on the camera: never right at their mouth.
+    dist = float(np.clip(BASE_DISTANCE + far, 0, 1))
     covered = float(np.clip(ctx.get("covered", 0.0), 0, 1))
     indoor = bool(ctx.get("indoor", False))
     frame = max(1, int(sr * 0.05))
@@ -84,8 +87,8 @@ def camcorder(y, sr, gain=1.0, ctx=None):
     d = (0.0007 * np.sin(2 * np.pi * 0.6 * t) + 0.00012 * np.sin(2 * np.pi * 7.1 * t + 1.3)) * sr
     y = np.interp(np.arange(n) - d - 40, np.arange(n), y, left=0, right=0).astype(np.float32)
     # The microphone: thin, boxy, no top.
-    top = 5200 * (1 - 0.45 * far) * (1 - 0.65 * covered)
-    y = signal.sosfilt(signal.butter(4, 180, "high", fs=sr, output="sos"), y)
+    top = 5000 * (1 - 0.42 * dist) * (1 - 0.65 * covered)
+    y = signal.sosfilt(signal.butter(4, 180 + 140 * dist, "high", fs=sr, output="sos"), y)
     y = signal.sosfilt(signal.butter(4, max(900, top), "low", fs=sr, output="sos"), y).astype(np.float32)
     y = _peak(y, sr, 2000, 5.0, 0.9)
     y = _peak(y, sr, 450, 2.5, 1.2)
@@ -105,13 +108,14 @@ def camcorder(y, sr, gain=1.0, ctx=None):
     y = (np.tanh(y * 2.2) / 2.2).astype(np.float32)
     l2 = loudness(y)
     if l2 > 1e-6:
-        y = y * (LEVEL * gain * (1 - 0.45 * far) * (1 - 0.3 * covered) / l2)
+        y = y * (LEVEL * gain * (1 - 0.45 * dist) * (1 - 0.3 * covered) / l2)
     # The space: a small room, or the open air.
-    secs, tone, wet = (0.4, 3500, 0.35) if indoor else (0.18, 2500, 0.1)
-    wet += 0.25 * far
+    # A small room: a short, faint answer; outside, next to none.
+    secs, tone, wet = (0.16, 3000, 0.07) if indoor else (0.1, 2500, 0.03)
+    wet += 0.1 * far
     pad = int(sr * secs)
     yp = np.concatenate([y, np.zeros(pad, np.float32)])
-    out = np.stack([yp, yp]) * (1 - 0.5 * far)
+    out = np.stack([yp, yp]) * (1 - 0.3 * far)
     for c in range(2):
         r = signal.fftconvolve(y, _room(sr, secs, 11 + c, tone)).astype(np.float32)[:len(yp)]
         out[c, :len(r)] += r * wet

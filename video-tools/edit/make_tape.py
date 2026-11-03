@@ -28,7 +28,7 @@ W, H, FPS, SR = R.W, R.H, R.FPS, R.SR
 sys.path.insert(0, str(HERE))
 import voice as V  # noqa: E402
 RECORDED = set()  # (scene, line) of every line there is a recording of
-VOICE_GAIN = 0.7  # the voice over the normalised mix: its loud parts about -21 dBFS
+VOICE_GAIN = 0.55  # the voice over the normalised mix: its loud parts about -25 dBFS, as from a camera held out
 AMBIENCE_GAIN = 1.0  # the air and the tape hiss over the normalised mix (their levels are set in ambience())
 FF = R.FF
 SIM = HERE.parent / "sim"
