@@ -6,9 +6,11 @@ first, then only the code a task needs. Work on branch `claude/laughing-hopper-3
 ## What it is
 
 A ~5-minute found-footage Minecraft horror video of the mod THE OCCUPANT, filmed by a Fabric client
-game test in CI (no in-game footage from the user, no voice). The user records the voice lines
-themselves from `voice_lines.txt`. Deliverables each round: the video (full quality, sent to the user),
-`voice_lines.txt`, `youtube.txt`, and a copy under 100 MB at `video/the-occupant-long.mp4`.
+game test in CI (no in-game footage from the user). The user makes the voice lines (ElevenLabs) from
+`voice_lines.txt` and sends them; they go in `video-tools/voice/` and the edit mixes them in (see
+"Voice lines"). Deliverables each round: the video (full quality, sent to the user), `voice_lines.txt`
+(lines already recorded are marked `[recorded]`), `youtube.txt`, and a copy under 100 MB at
+`video/the-occupant-long.mp4`. There is also a 37-second short (the ending, portrait), sent to the user.
 
 ## The user's standing rules (keep every one)
 
@@ -89,6 +91,31 @@ themselves from `voice_lines.txt`. Deliverables each round: the video (full qual
 | mine | 4 | His torch is missing; a dug tunnel; the creature down the tunnel. |
 | found | 4, night | The ending (`Reel.found`). |
 
+## Voice lines
+
+- **The long video:** `video-tools/voice/` holds the recordings, with readable names, and
+  `voice_map.json`, which says which sheet line each one is: `{"scene", "line", "file", "gain"?}`.
+  - `"line"` must be the line's text exactly as `LINES` in make_tape.py has it.
+  - When a recording fits a line better reworded, change the text in `LINES` and in the map together.
+  - One file can serve several lines; "Hello?" and "What was that?" are also used in the ending.
+  - The edit (`voice.py`, `long_bus`) puts each line where the sheet puts it, through a camcorder-mic
+    sound at an even level.
+  - A line is moved earlier if it would run past the cut that ends its stretch of tape, and later if
+    it would talk over the line before.
+  - Pass the folder as make_tape.py's third argument: `video-tools/voice`.
+- **Sending new lines:** the user sends zips of ElevenLabs mp3s with no useful names. To work out
+  which line each is:
+  - transcribe them with faster-whisper (`pip install faster-whisper`; decode with ffmpeg to 16 kHz
+    mono and pass the array, because its own decoder clashes with the installed PyAV);
+  - match the text to the sheet;
+  - give each a readable name, add it to the map, and render again.
+- **The short:** `masters/the-occupant-short-novoice.mp4` is its voice-free master, and
+  `masters/short_voice_at.json` holds where its lines go:
+  `hello, what, seen1 (breath catches), seen (scream), no1, no2, no3, scream`.
+  - `voice/short_map.json` maps those keys to files.
+  - Run `python3 video-tools/edit/voice_short.py video-tools/masters/the-occupant-short-novoice.mp4 video-tools/masters/short_voice_at.json video-tools/voice OUT.mp4`.
+  - Send OUT to the user. The short is not in the repo, only its master.
+
 ## Recording (CI)
 
 1. Commit and push the code with `[skip ci]`.
@@ -166,8 +193,11 @@ bash video-tools/edit/deliver.sh OUT
 
 ## State at handoff
 
-v4 is delivered: 4:54, 16 scenes, and `video/the-occupant-long.mp4` (95 MB) is the current cut.
-It covers all of the user's feedback so far:
+v5 is delivered: the v4 cut (4:54, 16 scenes) with the first 26 voice recordings mixed in, and the
+short with its two lines ("Hello?", "What was that?"). `video/the-occupant-long.mp4` (about 95 MB) is
+the current cut.
+
+v4 covered all of the user's feedback so far:
 - no jump on a fright;
 - the house creature still, its whole face framed, and he goes over about 0.35 s after it shows;
 - no dirt wall at the ends of the paths;
@@ -176,7 +206,10 @@ It covers all of the user's feedback so far:
 - the body no longer covers the lens when he backs away;
 - the body in the skin's smooth charcoal.
 
-The last takes of every scene are the `Reel` commit `13b72fb4` on `ci-results` (later runs replace it).
-The user records the voice lines from `voice_lines.txt`; the edit has no voice. If they send recorded
-lines, put them in the voice folder passed to make_tape.py (and `radio.wav`, `name.wav` for the voices
-in the radio and the clearing) and render again.
+The rest of the voice lines are still to come: everything in `voice_lines.txt` not marked
+`[recorded]`. Also still to come are `radio.wav` (the garbled voice in the radio) and `name.wav` (the
+whisper of his name in the clearing); until then the mod's whisper stands in for both.
+
+The last takes of every scene are in the `Reel` commit `13b72fb4` on `ci-results` (later runs replace
+it). A render in a new session regrades everything from those clips, which takes about an hour of
+machine time; send OUT after `deliver.sh`.

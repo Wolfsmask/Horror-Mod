@@ -25,6 +25,9 @@ R = types.ModuleType("reel")
 R.__dict__["__file__"] = str(BASE)
 exec(compile(BASE.read_text().replace("W, H = 1080, 1920", "W, H = 1920, 1080"), str(BASE), "exec"), R.__dict__)
 W, H, FPS, SR = R.W, R.H, R.FPS, R.SR
+sys.path.insert(0, str(HERE))
+import voice as V  # noqa: E402
+RECORDED = set()  # (scene, line) of every line there is a recording of
 FF = R.FF
 SIM = HERE.parent / "sim"
 
@@ -770,10 +773,10 @@ LINES = {
              ("what", "It came back up. Something THREW it back up."), ("lower-1.0", "(breathing hard) Nope. Nope.")],
     "field": [(0.8, "Getting dark. Cutting across, back to the cabin."),
               ("name", "WHISPER (optional, record as name.wav, quiet): 'vR4xxs_...' — leave it out and the edit uses a whisper"),
-              ("name+0.9", "(spins) ...who said that?"), ("name+3.4", "Hello? Who's there?"), ("what", "(quietly) ...I'm going home.")],
+              ("name+0.9", "Hold on."), ("name+3.4", "Hey! ...HEY!"), ("what", "(quietly) ...I'm going home.")],
     "intruder": [(0.8, "Night two. Almost home."), ("behind+1.0", "(stops) ...hello?"), ("zoomin+1.4", "(reading) 'Go to sleep... vR4xxs_.'"),
-                 ("door+0.8", "I shut that door. I know I shut it."), ("door+6.0", "(whisper) Hello...?"),
-                 ("slam+0.2", "(jumps, a sharp gasp)"), ("cover-0.6", "(whisper) Someone's in there. Someone's IN there.")],
+                 ("door+0.8", "I shut that door. I know I shut it."), ("door+5.0", "(whisper) There's someone in my house."),
+                 ("door+8.4", "(whisper) Hello...?"), ("slam+0.2", "(jumps, a sharp gasp)")],
     "visitor": [("seen", "(startled) WHOA—"), ("seen+2.2", "How did a cow get in here? The door's shut."),
                 ("moo+1.4", "...why is it just staring at me?")],
     "doorway": [(0.8, "What... is that? A door?"), (7.4, "There's nothing behind it. It's just... a door."),
@@ -786,10 +789,10 @@ LINES = {
               ("turn", "(whisper) ...it's gone. It's gone.")],
     "chapel": [(0.8, "A church. In the middle of the woods."), (8.0, "...why is that one turned around?"),
                ("seen", "...those weren't lit. Those were NOT lit.")],
-    "graves": [(4.2, "(reading) 'It took the rest.'"), ("seen-2.4", "This one's been dug up."), ("seen", "(whisper) There's someone in the trees."),
-               ("zoomin+2.6", "What... is that?"), ("what", "It's gone. Where did it go?")],
+    "graves": [(4.2, "(reading) 'It took the rest.'"), ("seen-2.4", "This one's been dug up."), ("seen", "Hold on, there's someone standing at the trees."),
+               ("zoomin+3.4", "What... is that?"), ("what", "Where'd it go?")],
     "knock": [(0.5, "Night three. I'm not going out there."), ("roof+1.0", "(whisper) ...something's on the roof."), ("knock+3", "(whisper) ...hello?"),
-              ("seen", "(gasp / scream)"), ("what", "It was at the window. It was looking right at me.")],
+              ("seen", "(gasp / scream)"), ("what", "It saw me. It saw me!")],
     "morning": [("shovel+0.8", "...what was that?"), (2.4, "I shut that. I KNOW I shut that."), (4.6, "Who moved that? Who MOVED that?"),
                 ("cut+2.0", "(quietly) ...that wasn't here yesterday."), ("lower-1.5", "That's... that's my name.")],
     "mine": [(1.0, "Mining day."), ("mine+1.5", "You hear that?"), ("cut+2.4", "My torch was right here."), ("dig+1", "I didn't dig this."),
@@ -1041,11 +1044,15 @@ def make_audio(clips, mod_sounds, voice, info, starts, cold, tape_end, total, ou
         env_ = np.minimum(1, np.arange(n) / (SR * 0.4)).astype(np.float32)
         score[:, i0:i0 + n] += (loop(mod["dread_high"], n) * 0.3 + loop(mod["dread_pulse"], n) * 0.3 + loop(mod["dread_low"], n) * 0.2) * env_
         put(fx, R.lowpass(mod["drone"], 900), at0 + 0.2, 0.25)
+    # The voice: every line there is a recording of (voice/voice_map.json), where the sheet puts it.
+    vo, done = V.long_bus(voice, sheet, int(secs * SR) + SR, SR, R.STRETCHES, FF)
+    RECORDED.update(done)
+    print("voice lines in:", len(done))
     buf = fx[:, :int(secs * SR)]
     peak = np.abs(buf).max()
     if peak > 0.89:
         buf = buf * (0.89 / peak)
-    buf = buf + beds[:, :buf.shape[1]] + score[:, :buf.shape[1]] * 0.09
+    buf = buf + beds[:, :buf.shape[1]] + score[:, :buf.shape[1]] * 0.09 + vo[:, :buf.shape[1]]
     # Everything stops with the tape at each cut.
     running = np.zeros(buf.shape[1], np.float32)
     for a_, b_ in R.STRETCHES:
@@ -1067,7 +1074,8 @@ def make_audio(clips, mod_sounds, voice, info, starts, cold, tape_end, total, ou
     for at, name, text in sheet:
         if at is None:
             continue
-        lines.append(f"{int(at // 60)}:{at % 60:05.2f}  [{name}]  {text}")
+        have = "   [recorded]" if (name, text) in RECORDED else ""
+        lines.append(f"{int(at // 60)}:{at % 60:05.2f}  [{name}]  {text}{have}")
     return "\n".join(lines) + "\n"
 
 
