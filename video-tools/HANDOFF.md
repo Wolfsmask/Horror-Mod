@@ -101,6 +101,18 @@ game test in CI (no in-game footage from the user). The user makes the voice lin
   - The edit (`voice.py`, `long_bus`) puts each line where the sheet puts it.
     - **The camcorder voice** (`camcorder`): 180 Hz to about 5 kHz with a lift at 2 kHz, the camera's
       automatic level (fast down, slow up), light distortion, tape wow, and the space they are in.
+    - **Spatial:** the voice comes from their head and is heard at the camera (`voice_context` and
+      `head_held` in make_tape.py, `spatial` in voice.py).
+      - Each frame of a line, from the sim's camera and pose (`.raw`), it works out where the head is:
+        - camera in hand: just behind it at eye level, further back when it points down;
+        - camera dropped: where they are (`HEAD_DOWN`, e.g. sat on the house floor), reached over
+          the fall.
+      - The level follows that distance (`HELD` 0.32 blocks is the set level; at most 12 dB down).
+        Further off is also darker, the room's answer stays the same, and the voice pans to their
+        side.
+      - So a line said while setting the camera down gets quieter as it goes down.
+      - This needs the sim's `.csv`/`.raw` for the scene (run the sim first). A scene without them
+        (the ending) falls back to a fixed distance.
     - **Per-line context** (`voice_context` in make_tape.py, from the sim camera and the marks):
       - indoors gets a small room, outdoors stays almost dry;
       - running, the camera held down, or the camera dropped (after `land`/`hit`) is further away:
@@ -218,7 +230,7 @@ bash video-tools/edit/deliver.sh OUT
 
 ## State at handoff
 
-v8 is delivered: the v4 cut (4:54, 16 scenes) with the voice cut down to the important lines (about
+v9 is delivered: the v4 cut (4:54, 16 scenes) with the voice cut down to the important lines (about
 26 on the sheet). 15 of them are recorded and mixed in with the camcorder voice; none overlap.
 Ambience runs throughout. The short has "Hello?" and
 "What was that?". `video/the-occupant-long.mp4` (about 95 MB) is the current cut.

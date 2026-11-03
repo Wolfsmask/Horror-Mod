@@ -56,22 +56,10 @@ def _room(sr, secs, seed, tone):
     return ir / np.sqrt((ir ** 2).sum())
 
 
-def camcorder(y, sr, gain=1.0, ctx=None):
-    """Stereo, as a camcorder's own little microphone hears it: thin and boxy (180 Hz to about 5 kHz,
-    a lift round 2 kHz), squashed by the camera's automatic level (louder lines pushed down, the
-    quiet ones pulled up), driven a little into distortion, the tape's slight wow; then the space they
-    are in: a small room indoors, almost nothing outside.
-
-    {ctx}: "far" 0..1 (further from the microphone: running with it swinging, holding it down at
-    their feet, the camera dropped on the floor away from them: darker, more of the room, quieter),
-    "covered" 0..1 (a hand over the camera: muffled), "indoor" True/False."""
+def _mic(y, sr, dist, covered):
+    """A line through the camcorder's microphone, {dist} (0..1) off: thin and boxy (darker the
+    further), the camera's automatic level, a little distortion, the tape's wow. Mono, at LEVEL."""
     from scipy import signal
-    ctx = ctx or {}
-    far = float(np.clip(ctx.get("far", 0.0), 0, 1))
-    # The camera is held out from them, its microphone on the camera: never right at their mouth.
-    dist = float(np.clip(BASE_DISTANCE + far, 0, 1))
-    covered = float(np.clip(ctx.get("covered", 0.0), 0, 1))
-    indoor = bool(ctx.get("indoor", False))
     frame = max(1, int(sr * 0.05))
 
     def loudness(x):
@@ -81,12 +69,10 @@ def camcorder(y, sr, gain=1.0, ctx=None):
     l0 = loudness(y)
     if l0 > 1e-6:
         y = y * (LEVEL / l0)
-    # The tape's wow and flutter.
     n = len(y)
     t = np.arange(n) / sr
     d = (0.0007 * np.sin(2 * np.pi * 0.6 * t) + 0.00012 * np.sin(2 * np.pi * 7.1 * t + 1.3)) * sr
     y = np.interp(np.arange(n) - d - 40, np.arange(n), y, left=0, right=0).astype(np.float32)
-    # The microphone: thin, boxy, no top.
     top = 5000 * (1 - 0.42 * dist) * (1 - 0.65 * covered)
     y = signal.sosfilt(signal.butter(4, 180 + 140 * dist, "high", fs=sr, output="sos"), y)
     y = signal.sosfilt(signal.butter(4, max(900, top), "low", fs=sr, output="sos"), y).astype(np.float32)
@@ -104,21 +90,62 @@ def camcorder(y, sr, gain=1.0, ctx=None):
     l1 = loudness(y)
     if l1 > 1e-6:
         y = y * (LEVEL / l1)
-    # Driven a little: the loud parts break up.
     y = (np.tanh(y * 2.2) / 2.2).astype(np.float32)
     l2 = loudness(y)
     if l2 > 1e-6:
-        y = y * (LEVEL * gain * (1 - 0.45 * dist) * (1 - 0.3 * covered) / l2)
-    # The space: a small room, or the open air.
-    # A small room: a short, faint answer; outside, next to none.
+        y = y * (LEVEL * (1 - 0.3 * covered) / l2)
+    return y.astype(np.float32)
+
+
+def _space(y, sr, indoor, extra=0.0):
+    """The room's (or the open air's) answer to {y}, stereo: a small room, short and faint; outside,
+    next to none."""
+    from scipy import signal
     secs, tone, wet = (0.16, 3000, 0.07) if indoor else (0.1, 2500, 0.03)
-    wet += 0.1 * far
+    wet += extra
     pad = int(sr * secs)
-    yp = np.concatenate([y, np.zeros(pad, np.float32)])
-    out = np.stack([yp, yp]) * (1 - 0.3 * far)
+    out = np.zeros((2, len(y) + pad), np.float32)
     for c in range(2):
-        r = signal.fftconvolve(y, _room(sr, secs, 11 + c, tone)).astype(np.float32)[:len(yp)]
+        r = signal.fftconvolve(y, _room(sr, secs, 11 + c, tone)).astype(np.float32)[:out.shape[1]]
         out[c, :len(r)] += r * wet
+    return out
+
+
+def camcorder(y, sr, gain=1.0, ctx=None):
+    """Stereo, as a camcorder's own little microphone hears a line said {ctx["far"]} (0..1) further
+    off than a camera held out from the face, maybe with a hand over it ("covered"), indoors or out."""
+    ctx = ctx or {}
+    far = float(np.clip(ctx.get("far", 0.0), 0, 1))
+    covered = float(np.clip(ctx.get("covered", 0.0), 0, 1))
+    dist = float(np.clip(BASE_DISTANCE + far, 0, 1))
+    y = _mic(y, sr, dist, covered) * gain * (1 - 0.45 * dist)
+    out = _space(y, sr, bool(ctx.get("indoor", False)), 0.1 * far)
+    out[:, :len(y)] += y * (1 - 0.3 * far)
+    return out
+
+
+HELD = 0.32  # how far their mouth is from the camera held out in front of them, in blocks (the level a line is set to)
+
+
+def spatial(y, sr, gain, path, fps, indoor=False, covered=0.0):
+    """A line said by them, heard at the camera: {path} gives, for each frame from the line's start,
+    how far their head is from the camera (blocks) and which side of it (-1 left .. 1 right). The
+    further off, the quieter and darker the voice, the room staying as it is; panned to their side."""
+    near = _mic(y, sr, BASE_DISTANCE, covered)
+    far_ = _mic(y, sr, 1.0, covered)
+    n = min(len(near), len(far_))
+    near, far_ = near[:n], far_[:n]
+    k = np.arange(n) / sr * fps
+    idx = np.arange(len(path))
+    d = np.interp(k, idx, [p[0] for p in path]).astype(np.float32)
+    pan = np.interp(k, idx, [p[1] for p in path]).astype(np.float32)
+    f = np.clip((d - HELD) / 1.4, 0, 1)
+    g = np.clip((HELD / np.maximum(d, 0.15)) ** 0.9, 0.25, 1.3)  # never more than 12 dB down: still heard across the room
+    dry = (near * (1 - f) + far_ * f) * g * gain
+    th = (np.clip(pan, -1, 1) * 0.7 + 1) * np.pi / 4
+    out = _space(near * gain, sr, indoor, 0.0)
+    out[0, :n] += dry * np.cos(th) * np.sqrt(2)
+    out[1, :n] += dry * np.sin(th) * np.sqrt(2)
     return out.astype(np.float32)
 
 
@@ -153,9 +180,6 @@ def long_bus(voice, sheet, n, sr, stretches, ff="ffmpeg", ctx=None):
     free = -1.0
     for want, e in timed:
         raw = trim(decode(Path(voice) / e["file"], sr, ff), sr)
-        c = dict(ctx(want + 0.4)) if ctx else {}
-        c.update(e.get("ctx", {}))
-        snd = camcorder(raw, sr, e.get("gain", 1.0), c)
         secs = len(raw) / sr
         st = [(a, b) for a, b in stretches if a <= want < b]
         a0, b0 = st[0] if st else (want, want + secs + 1)
@@ -165,10 +189,18 @@ def long_bus(voice, sheet, n, sr, stretches, ff="ffmpeg", ctx=None):
         if at < want - EARLY or at < free + GAP or at < a0:
             print(f"voice: LEFT OUT {e['scene']}: {e['line'][:50]} ({secs:.1f}s at {want:.1f}, tape stops {b0:.1f})")
             continue
+        c = dict(ctx(at, secs)) if ctx else {}
+        c.update(e.get("ctx", {}))
+        if c.get("path"):
+            snd = spatial(raw, sr, e.get("gain", 1.0), c["path"], c.get("fps", 20), bool(c.get("indoor")), float(c.get("covered", 0.0)))
+        else:
+            snd = camcorder(raw, sr, e.get("gain", 1.0), c)
         place(bus, snd, at, sr)
         free = at + secs
         done.add((e["scene"], e["line"]))
-        print(f"voice: {e['scene']:9s} {at:7.2f}-{free:7.2f} (moment {want:7.2f})  {e['line'][:44]:44s} {c}")
+        path = c.get("path") or []
+        where = f"head {path[0][0]:.2f} to {path[-1][0]:.2f} blocks, pan {path[0][1]:+.2f} to {path[-1][1]:+.2f}" if path else str(c)
+        print(f"voice: {e['scene']:9s} {at:7.2f}-{free:7.2f} (moment {want:7.2f})  {e['line'][:40]:40s} {where}")
     return bus, done
 
 

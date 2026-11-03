@@ -28,7 +28,7 @@ W, H, FPS, SR = R.W, R.H, R.FPS, R.SR
 sys.path.insert(0, str(HERE))
 import voice as V  # noqa: E402
 RECORDED = set()  # (scene, line) of every line there is a recording of
-VOICE_GAIN = 0.55  # the voice over the normalised mix: its loud parts about -25 dBFS, as from a camera held out
+VOICE_GAIN = 0.45  # the voice over the normalised mix: with the camera held out from their face, its loud parts about -25 dBFS
 AMBIENCE_GAIN = 1.0  # the air and the tape hiss over the normalised mix (their levels are set in ambience())
 FF = R.FF
 SIM = HERE.parent / "sim"
@@ -741,41 +741,77 @@ def frame_at(starts, at):
     return None, None
 
 
+# Where their head is when the camera is out of their hand, by scene (in the sim's world): in the house,
+# sat on the floor where they went over.
+HEAD_DOWN = {"house": (0.15, 64.95, -2.1)}
+
+
 def voice_context(info, starts):
-    """For a line said at a moment: are they indoors, and how far is their mouth from the camera's
-    microphone? Running with it, or holding it down at their feet: further. The camera dropped on
-    the floor, or lying in the leaves: well away from them. A hand over it: muffled."""
+    """For a line said from {at} for {secs}: where their head is, frame by frame, from the camera that
+    hears it (how far, which side), worked out from the sim's camera and pose: held out in front of
+    their face, the head just behind it (a little further back when it points down at their feet);
+    dropped or put down, the head where they are, got to over the fall. Indoors or not; a hand over
+    the camera."""
     cams = {}
 
-    def ctx(at):
+    def ctx(at, secs):
         name, t = frame_at(starts, at)
         if name is None:
             return {}
         if name not in cams:
-            cams[name] = sim_camera(name)
-        P = cams[name]
+            raw = SIM / f"{name}.raw"
+            cams[name] = (sim_camera(name), np.loadtxt(raw, delimiter=",") if raw.exists() else None)
+        P, Rw = cams[name]
         marks = info[name]["marks"]
-        c = {"indoor": name == "mine"}
-        speed, pitch = 0.05, 10.0
-        if P is not None and len(P):
-            t_ = min(t, len(P) - 1)
-            c["indoor"] = c["indoor"] or inside(name, P[t_, 0] - 0.5, P[t_, 2] - 0.5)
-            j0, j1 = max(0, t_ - 4), min(len(P) - 1, t_ + 4)
-            speed = float(np.hypot(P[j1, 0] - P[j0, 0], P[j1, 2] - P[j0, 2]) / max(1, j1 - j0))
-            pitch = float(P[t_, 4])
-        far = 0.5 if speed > 0.15 else 0.2 if speed > 0.09 else 0.0
-        if pitch > 50:
-            far += 0.3
-        for mk in ("land", "hit"):
-            m_ = first(marks, mk)
-            if m_ is not None and t >= m_ - 2:
-                far += 0.7
+        c = {"indoor": name == "mine", "fps": FPS}
         cv = first(marks, "cover")
         if cv is not None and t >= cv:
             c["covered"] = round(min(1.0, (t - cv) / 8), 2)
-        c["far"] = round(min(1.0, far), 2)
+        if P is None or Rw is None or not len(P):
+            hit = first(marks, "hit")
+            far = 1.5 if hit is not None and t >= hit else HELD_DIST
+            c["path"] = [(far, 0.0)] * (int(secs * FPS) + 2)
+            return c
+        t0 = min(t, len(P) - 1)
+        c["indoor"] = c["indoor"] or bool(inside(name, P[t0, 0] - 0.5, P[t0, 2] - 0.5))
+        held_at, held_head = None, None
+        for tt in range(max(0, t0 - 40), t0):
+            if Rw[min(tt, len(Rw) - 1), 11] > 0:
+                held_at, held_head = tt, head_held(P[tt], Rw[min(tt, len(Rw) - 1)])
+        path = []
+        for tt in range(t0, t0 + int(secs * FPS) + 2):
+            q = min(tt, len(P) - 1)
+            cam, r = P[q], Rw[min(q, len(Rw) - 1)]
+            if r[11] > 0:
+                head = head_held(cam, r)
+                held_at, held_head = q, head
+            else:
+                there = np.array(HEAD_DOWN.get(name, (cam[0], 64.5, cam[2] + 1.5)))
+                u = 1.0 if held_at is None else min(1.0, (q - held_at) / 9)
+                head = there if held_head is None else held_head * (1 - u) + there * u
+            v = head - cam[:3]
+            dist = float(np.linalg.norm(v))
+            yr = np.radians(cam[3])
+            right = np.array([-np.cos(yr), 0.0, -np.sin(yr)])
+            pan = float(np.dot(v, right) / max(dist, 1e-6))
+            path.append((max(dist, 0.15), pan))
+        c["path"] = path
         return c
     return ctx
+
+
+HELD_DIST = 0.32
+
+
+def head_held(cam, r):
+    """Their head, with the camera in their hand: just behind it and level with their eyes; further
+    back (the arm out) when it points down."""
+    yr = np.radians(cam[3])
+    fwd = np.array([-np.sin(yr), 0.0, np.cos(yr)])
+    down = float(np.clip((cam[4] - 20) / 50, 0, 1))
+    back = 0.3 + 0.15 * down
+    hy = 64 + 1.6 + min(0.0, float(r[4])) if r[9] > 0 else cam[1] + 0.05
+    return np.array([cam[0], hy, cam[2]]) - fwd * back
 
 
 def ambience(info, starts, n, vo):
