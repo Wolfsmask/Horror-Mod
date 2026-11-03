@@ -166,5 +166,17 @@ bash video-tools/edit/deliver.sh OUT
 
 ## State at handoff
 
-The v4 cut is in progress. All 16 scenes have been re-recorded with the body made smooth like the
-user's skin; next come checking, rendering and delivering. This section is updated when it is delivered.
+v4 is delivered: 4:54, 16 scenes, and `video/the-occupant-long.mp4` (95 MB) is the current cut.
+It covers all of the user's feedback so far:
+- no jump on a fright;
+- the house creature still, its whole face framed, and he goes over about 0.35 s after it shows;
+- no dirt wall at the ends of the paths;
+- the creature unseen before the house, except the tiny far figure in the clearing;
+- two new creature-free scenes (the well, the door);
+- the body no longer covers the lens when he backs away;
+- the body in the skin's smooth charcoal.
+
+The last takes of every scene are the `Reel` commit `13b72fb4` on `ci-results` (later runs replace it).
+The user records the voice lines from `voice_lines.txt`; the edit has no voice. If they send recorded
+lines, put them in the voice folder passed to make_tape.py (and `radio.wav`, `name.wav` for the voices
+in the radio and the clearing) and render again.
