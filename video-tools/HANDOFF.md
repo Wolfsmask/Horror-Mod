@@ -99,9 +99,16 @@ game test in CI (no in-game footage from the user). The user makes the voice lin
   - When a recording fits a line better reworded, change the text in `LINES` and in the map together.
   - One file can serve several lines; "Hello?" and "What was that?" are also used in the ending.
   - The edit (`voice.py`, `long_bus`) puts each line where the sheet puts it, through a camcorder-mic
-    sound at an even level.
-  - A line is moved earlier if it would run past the cut that ends its stretch of tape, and later if
-    it would talk over the line before.
+    sound at an even level. The voice goes on after the rest is brought to -23 LUFS (`VOICE_GAIN`),
+    so the effects keep their level.
+  - **Never two lines at once:** at least 0.8 s between lines (`GAP`).
+  - **A line may start at most 0.4 s early** (`EARLY`) to finish before its tape stretch is cut.
+    Otherwise it is LEFT OUT and the log says so; move its moment in `LINES` instead.
+  - **Check placement cheaply:** add `--audio-only` to the make_tape.py command (no picture render)
+    and read the `voice:` lines in the log.
+  - **Few lines.** The user wants only the important ones: one or two per scene, silence between.
+    The sheet was cut from 83 lines to about 26. Do not add more without being asked.
+  - Recordings no longer in `LINES` stay in the folder, unmapped.
   - Pass the folder as make_tape.py's third argument: `video-tools/voice`.
 - **Sending new lines:** the user sends zips of ElevenLabs mp3s with no useful names. To work out
   which line each is:
@@ -193,11 +200,11 @@ bash video-tools/edit/deliver.sh OUT
 
 ## State at handoff
 
-v5 is delivered: the v4 cut (4:54, 16 scenes) with the first 26 voice recordings mixed in, and the
-short with its two lines ("Hello?", "What was that?"). `video/the-occupant-long.mp4` (about 95 MB) is
-the current cut.
+v6 is delivered: the v4 cut (4:54, 16 scenes) with the voice cut down to the important lines (about
+26 on the sheet). 15 of them are recorded and mixed in; none overlap. The short has "Hello?" and
+"What was that?". `video/the-occupant-long.mp4` (about 95 MB) is the current cut.
 
-v4 covered all of the user's feedback so far:
+v4 covered all of the user's earlier feedback:
 - no jump on a fright;
 - the house creature still, its whole face framed, and he goes over about 0.35 s after it shows;
 - no dirt wall at the ends of the paths;
@@ -206,9 +213,10 @@ v4 covered all of the user's feedback so far:
 - the body no longer covers the lens when he backs away;
 - the body in the skin's smooth charcoal.
 
-The rest of the voice lines are still to come: everything in `voice_lines.txt` not marked
-`[recorded]`. Also still to come are `radio.wav` (the garbled voice in the radio) and `name.wav` (the
-whisper of his name in the clearing); until then the mod's whisper stands in for both.
+Still to come from the user: the lines in `voice_lines.txt` not marked `[recorded]`. Also optional,
+`radio.wav` and `name.wav`; until then the mod's whisper stands in for both. The ending's lines
+("(scream)", "NO!", "(scream, cut off)") go in the short too: map them in `short_map.json` to
+`seen`, `no2` and `scream`.
 
 The last takes of every scene are in the `Reel` commit `13b72fb4` on `ci-results` (later runs replace
 it). A render in a new session regrades everything from those clips, which takes about an hour of

@@ -628,6 +628,8 @@ def main():
     sheet = make_audio(clips, mod_sounds, voice, info, starts, cold, tape_end, total, audio)
     (out_mp4.parent / "voice_sheet.txt").write_text(sheet)
     print(sheet)
+    if "--audio-only" in sys.argv:
+        return
     # Loud enough to hear (about -23 LUFS, room left over it for the voice), the peaks held under -1.5 dB.
     r = subprocess.run([FF, "-i", str(audio), "-af", "loudnorm=I=-23:LRA=18:TP=-1.5:print_format=json", "-f", "null", "-"],
                        capture_output=True, text=True).stderr
@@ -783,44 +785,24 @@ def zoom_motor(rng, secs):
 
 # Suggested lines for the voice, at the moments they belong to (seconds into the video).
 LINES = {
-    "home": [(0.8, "Day one. Cabin's finally done."), ("door", "Home sweet home."), ("chest-1.5", "Bed, furnace... not bad at all."),
-             ("chestshut+1.2", "...did that chest just close by itself?")],
-    "camp": [(0.8, "Somebody was camping out here."), (4.8, "(reading) 'Don't follow the tall one.'"), ("whisper", "(spins) Who's there?"),
-             ("end-1.2", "...I'm leaving.")],
-    "pasture": [(0.8, "Somebody's animals. Out here in the middle of nowhere."), ("hush+0.6", "...why are they all looking at me?"),
-                ("hush+2.6", "Okay. That's... okay. I'm going."), ("weird+0.5", "(stops dead) ...what was that?"),
-                ("what", "(breathing hard) They're dead. They're ALL dead. They were just alive."), ],
-    "well": [(0.8, "Huh. An old well."), ("hello-1.8", "Wonder how deep it goes."), ("hello", "(calling down) Hello-o?"),
-             ("nothing", "...I didn't hear it land. No splash, nothing."), ("up", "(yelp)"),
-             ("what", "It came back up. Something THREW it back up."), ("lower-1.0", "(breathing hard) Nope. Nope.")],
-    "field": [(0.8, "Getting dark. Cutting across, back to the cabin."),
-              ("name", "WHISPER (optional, record as name.wav, quiet): 'vR4xxs_...' — leave it out and the edit uses a whisper"),
-              ("name+0.9", "Hold on."), ("name+3.4", "Hey! ...HEY!"), ("what", "(quietly) ...I'm going home.")],
-    "intruder": [(0.8, "Night two. Almost home."), ("behind+1.0", "(stops) ...hello?"), ("zoomin+1.4", "(reading) 'Go to sleep... vR4xxs_.'"),
-                 ("door+0.8", "I shut that door. I know I shut it."), ("door+5.0", "(whisper) There's someone in my house."),
-                 ("door+8.4", "(whisper) Hello...?"), ("slam+0.2", "(jumps, a sharp gasp)")],
-    "visitor": [("seen", "(startled) WHOA—"), ("seen+2.2", "How did a cow get in here? The door's shut."),
-                ("moo+1.4", "...why is it just staring at me?")],
-    "doorway": [(0.8, "What... is that? A door?"), (7.4, "There's nothing behind it. It's just... a door."),
-                ("rap-1.3", "(nervous laugh) Knock knock."), ("joke", "...see? Nothing."), ("knock+1.0", "(whisper) ...no way."),
-                ("what", "(backing away) Nope. Nope. Nope.")],
-    "radio": [(0.8, "A ranger station?"), (5.0, "(reading) 'I heard my own voice on it.'"), ("static+0.1", "It's... on?"),
-              ("radio", "RADIO VOICE (garbled, record as radio.wav): '...vR4xxs_... I can see you...'"), ("end-2.2", "Nothing's even plugged in. No. No no no.")],
-    "house": [(0.8, "A house? Out here?"), (5.6, "Hello? Anyone home?"), ("seen", "(sharp gasp)"), ("drop", "(a yell as you fall)"),
-              ("land+0.6", "(heavy, panicked breathing — keep it going until the hand covers the camera)"),
-              ("turn", "(whisper) ...it's gone. It's gone.")],
-    "chapel": [(0.8, "A church. In the middle of the woods."), (8.0, "...why is that one turned around?"),
-               ("seen", "...those weren't lit. Those were NOT lit.")],
-    "graves": [(4.2, "(reading) 'It took the rest.'"), ("seen-2.4", "This one's been dug up."), ("seen", "Hold on, there's someone standing at the trees."),
-               ("zoomin+3.4", "What... is that?"), ("what", "Where'd it go?")],
-    "knock": [(0.5, "Night three. I'm not going out there."), ("roof+1.0", "(whisper) ...something's on the roof."), ("knock+3", "(whisper) ...hello?"),
-              ("seen", "(gasp / scream)"), ("what", "It saw me. It saw me!")],
-    "morning": [("shovel+0.8", "...what was that?"), (2.4, "I shut that. I KNOW I shut that."), (4.6, "Who moved that? Who MOVED that?"),
-                ("cut+2.0", "(quietly) ...that wasn't here yesterday."), ("lower-1.5", "That's... that's my name.")],
-    "mine": [(1.0, "Mining day."), ("mine+1.5", "You hear that?"), ("cut+2.4", "My torch was right here."), ("dig+1", "I didn't dig this."),
-             ("seen", "(gasp)")],
-    "found": [("mine", "Hello?"), ("what", "...what was that?"), ("seen1", "(breath catches)"), ("seen", "(scream)"),
-              ("no1", "No—"), ("no2", "NO!"), ("no3", "Please—"), ("stab", "(scream, cut off)")],
+    "home": [(0.8, "Day one. Cabin's finally done."), ("chestshut", "...did that chest just close by itself?")],
+    "camp": [(4.8, "(reading) 'Don't follow the tall one.'")],
+    "pasture": [("hush+0.6", "...why are they all looking at me?"), ("weird+0.5", "(stops dead) ...what was that?")],
+    "well": [("what", "Something threw it back up.")],
+    "field": [("name", "WHISPER (optional, record as name.wav, quiet): 'vR4xxs_...' — leave it out and the edit uses a whisper"),
+              ("name+1.8", "Hey! ...HEY!")],
+    "intruder": [("zoomin+1.4", "(reading) 'Go to sleep... vR4xxs_.'"), ("door+2.6", "I shut that door. I know I shut it.")],
+    "visitor": [("seen+0.5", "...why is it just staring at me?")],
+    "doorway": [("rap-1.3", "(nervous laugh) Knock knock."), ("knock+1.2", "(whisper) ...no way.")],
+    "radio": [("radio", "RADIO VOICE (garbled, record as radio.wav): '...vR4xxs_... I can see you...'"),
+              ("end-3.4", "Nothing's even plugged in. No. No no no.")],
+    "house": [(5.6, "Hello? Anyone home?"), ("drop", "(a yell as you fall)")],
+    "chapel": [("seen", "...those weren't lit. Those were NOT lit.")],
+    "graves": [("seen", "Hold on, there's someone standing at the trees.")],
+    "knock": [("roof+1.0", "(whisper) ...something's on the roof."), ("what", "It saw me. It saw me!")],
+    "morning": [("lower-1.5", "That's... that's my name.")],
+    "mine": [("dig+1", "I didn't dig this.")],
+    "found": [("mine", "Hello?"), ("what", "...what was that?"), ("seen", "(scream)"), ("no2", "NO!"), ("stab", "(scream, cut off)")],
 }
 
 

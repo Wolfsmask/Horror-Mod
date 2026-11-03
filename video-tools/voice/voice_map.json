@@ -6,23 +6,8 @@
  },
  {
   "scene": "home",
-  "line": "Home sweet home.",
-  "file": "home-sweet-home.mp3"
- },
- {
-  "scene": "home",
-  "line": "Bed, furnace... not bad at all.",
-  "file": "home-bed-furnace.mp3"
- },
- {
-  "scene": "home",
   "line": "...did that chest just close by itself?",
   "file": "home-chest.mp3"
- },
- {
-  "scene": "camp",
-  "line": "Somebody was camping out here.",
-  "file": "camp-camping.mp3"
  },
  {
   "scene": "camp",
@@ -31,18 +16,8 @@
  },
  {
   "scene": "pasture",
-  "line": "Somebody's animals. Out here in the middle of nowhere.",
-  "file": "pen-animals.mp3"
- },
- {
-  "scene": "pasture",
   "line": "...why are they all looking at me?",
   "file": "pen-looking.mp3"
- },
- {
-  "scene": "pasture",
-  "line": "Okay. That's... okay. I'm going.",
-  "file": "pen-going.mp3"
  },
  {
   "scene": "pasture",
@@ -57,22 +32,6 @@
   "gain": 0.75
  },
  {
-  "scene": "pasture",
-  "line": "(breathing hard) They're dead. They're ALL dead. They were just alive.",
-  "file": "pen-dead.mp3"
- },
- {
-  "scene": "field",
-  "line": "Getting dark. Cutting across, back to the cabin.",
-  "file": "field-getting-dark.mp3"
- },
- {
-  "scene": "field",
-  "line": "Hold on.",
-  "file": "field-hold-on.mp3",
-  "gain": 0.8
- },
- {
   "scene": "field",
   "line": "Hey! ...HEY!",
   "file": "field-hey.mp3",
@@ -84,25 +43,10 @@
   "file": "graves-someone-at-trees.mp3"
  },
  {
-  "scene": "graves",
-  "line": "Where'd it go?",
-  "file": "graves-where-did-it-go.mp3"
- },
- {
   "scene": "house",
   "line": "(a yell as you fall)",
   "file": "house-scream.mp3",
   "gain": 1.3
- },
- {
-  "scene": "intruder",
-  "line": "Night two. Almost home.",
-  "file": "intruder-night-two.mp3"
- },
- {
-  "scene": "intruder",
-  "line": "(stops) ...hello?",
-  "file": "hello.mp3"
  },
  {
   "scene": "found",
@@ -118,12 +62,6 @@
   "scene": "intruder",
   "line": "I shut that door. I know I shut it.",
   "file": "intruder-shut-that-door.mp3"
- },
- {
-  "scene": "intruder",
-  "line": "(whisper) There's someone in my house.",
-  "file": "intruder-someone-in-my-house.mp3",
-  "gain": 0.75
  },
  {
   "scene": "knock",

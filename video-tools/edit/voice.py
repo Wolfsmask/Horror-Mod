@@ -58,9 +58,14 @@ def place(bus, snd, at, sr):
     bus[:, max(0, i):j] += snd[:, max(0, -i):j - i]
 
 
+GAP = 0.8      # silence between one line and the next, at least
+EARLY = 0.4    # how much earlier than its moment a line may start, to finish before the cut
+
+
 def long_bus(voice, sheet, n, sr, stretches, ff="ffmpeg"):
-    """The long video's voice: each mapped line where the sheet puts it, moved earlier if it would run
-    past the cut that ends its stretch of tape, and later if it would talk over the line before."""
+    """The long video's voice: each mapped line where the sheet puts it. Never over another line (a
+    line waits for the one before, plus a gap), never cut off by the tape stopping (it may start a
+    little early to fit); a line that cannot be fitted at its moment is left out, and said so."""
     bus = np.zeros((2, n), np.float32)
     done = set()
     mp = Path(voice) / "voice_map.json"
@@ -70,24 +75,25 @@ def long_bus(voice, sheet, n, sr, stretches, ff="ffmpeg"):
     timed = []
     for e in entries:
         hits = [at for at, nm, tx in sheet if nm == e["scene"] and tx == e["line"] and at is not None]
-        if not hits:
-            print("voice: not on the sheet:", e["scene"], e["line"])
-            continue
         for at in hits:
             timed.append((at, e))
     timed.sort(key=lambda r: r[0])
-    free = 0.0
-    for at, e in timed:
+    free = -1.0
+    for want, e in timed:
         snd = camcorder(trim(decode(Path(voice) / e["file"], sr, ff), sr), sr, e.get("gain", 1.0))
         secs = snd.shape[1] / sr
-        st = [(a, b) for a, b in stretches if a <= at < b]
-        a0, b0 = st[0] if st else (at, at + secs + 1)
-        at = max(at, free + 0.1)
+        st = [(a, b) for a, b in stretches if a <= want < b]
+        a0, b0 = st[0] if st else (want, want + secs + 1)
+        at = max(want, free + GAP)
         if at + secs > b0 - 0.08:
-            at = max(a0 + 0.05, b0 - 0.08 - secs)
+            at = b0 - 0.08 - secs
+        if at < want - EARLY or at < free + GAP or at < a0:
+            print(f"voice: LEFT OUT {e['scene']}: {e['line'][:50]} ({secs:.1f}s at {want:.1f}, tape stops {b0:.1f})")
+            continue
         place(bus, snd, at, sr)
         free = at + secs
         done.add((e["scene"], e["line"]))
+        print(f"voice: {e['scene']:9s} {at:7.2f}-{free:7.2f} (moment {want:7.2f})  {e['line'][:50]}")
     return bus, done
 
 
