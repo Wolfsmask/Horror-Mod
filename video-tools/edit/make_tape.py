@@ -29,6 +29,7 @@ sys.path.insert(0, str(HERE))
 import voice as V  # noqa: E402
 RECORDED = set()  # (scene, line) of every line there is a recording of
 VOICE_GAIN = 0.7  # the voice over the normalised mix: its loud parts about -21 dBFS
+AMBIENCE_GAIN = 1.0  # the air and the tape hiss over the normalised mix (their levels are set in ambience())
 FF = R.FF
 SIM = HERE.parent / "sim"
 
@@ -569,10 +570,11 @@ def main():
                 print("graded", i, "of", len(jobs), flush=True)
     if "--grade-only" in sys.argv:
         return
+    remux = next((a_.split("=", 1)[1] for a_ in sys.argv if a_.startswith("--remux=")), None)
     import os
-    for f in out.glob("*.jpg"):
+    for f in ([] if remux else out.glob("*.jpg")):
         f.unlink()
-    for k_, src in links.items():
+    for k_, src in ({} if remux else links).items():
         os.link(src, out / f"{k_:05d}.jpg")
     rng = np.random.default_rng(9)
     black = np.zeros((H, W, 3), np.uint8)
@@ -580,20 +582,20 @@ def main():
     def save(at, rgb):
         Image.fromarray(rgb if rgb.dtype == np.uint8 else (rgb * 255).astype(np.uint8)).save(out / f"{at:05d}.jpg", quality=95)
 
-    for at in range(total):
+    for at in range(0 if remux else total):
         if not (out / f"{at:05d}.jpg").exists():
             save(at, black)
-    for j in range(TITLE):
+    for j in range(0 if remux else TITLE):
         save(title_at + j, title_card(rng, j, False))
-    for j in range(HEAD):
+    for j in range(0 if remux else HEAD):
         save(head_at + j, R.snow(rng, j, 1.0 - j / HEAD, dark=0.5 if j < 3 else 0.0))
-    for k0, name, a, b in starts[1:]:
+    for k0, name, a, b in ([] if remux else starts[1:]):
         save(k0 - 2, R.snow(rng, 1, 0.35, dark=0.6))
-    for k0, name, a, b in starts:
+    for k0, name, a, b in ([] if remux else starts):
         if name != "found":
             save(k0 + b - a, stop_frame(rng, 0))
             save(k0 + b - a + 1, stop_frame(rng, 1))
-    for j in range(END):
+    for j in range(0 if remux else END):
         save(tape_end + DEAD + j, title_card(rng, j, True))
 
     # Chapters for the video's description, where each clip starts.
@@ -639,27 +641,34 @@ def main():
                     f"loudnorm=I=-23:LRA=18:TP=-1.5:measured_I={m['input_i']}:measured_TP={m['input_tp']}:measured_LRA={m['input_lra']}"
                     f":measured_thresh={m['input_thresh']}:offset={m['target_offset']}:linear=true", "-ar", "48000", str(norm)], check=True)
     audio = norm
-    # The voice over it, at the same level whatever else is going on, the peaks held under -1 dB.
-    vpath = audio.with_name("voice.npy")
-    if vpath.exists():
-        vo = np.load(str(vpath))
-        if np.abs(vo).max() > 0:
-            with wave.open(str(norm)) as w:
-                sr_ = w.getframerate()
-                a = np.frombuffer(w.readframes(w.getnframes()), np.int16).reshape(-1, 2).T.astype(np.float32) / 32768
+    # The air of each place and the tape's hiss, then the voice, over the rest at its loudness; the
+    # peaks held under -1 dB.
+    vpath, apath = audio.with_name("voice.npy"), audio.with_name("ambience.npy")
+    with wave.open(str(norm)) as w:
+        sr_ = w.getframerate()
+        a = np.frombuffer(w.readframes(w.getnframes()), np.int16).reshape(-1, 2).T.astype(np.float32) / 32768
+    for path, gain in ((apath, AMBIENCE_GAIN), (vpath, VOICE_GAIN)):
+        if path.exists():
+            extra = np.load(str(path))
             if sr_ != SR:
-                vo = np.stack([np.interp(np.arange(0, vo.shape[1], SR / sr_), np.arange(vo.shape[1]), c) for c in vo]).astype(np.float32)
-            n_ = min(a.shape[1], vo.shape[1])
-            a[:, :n_] += vo[:, :n_] * VOICE_GAIN
-            mixed = wdir / "tape_voice.wav"
-            with wave.open(str(mixed), "wb") as w:
-                w.setnchannels(2)
-                w.setsampwidth(2)
-                w.setframerate(sr_)
-                w.writeframes((np.clip(a.T, -1, 1) * 32767).astype(np.int16).tobytes())
-            final = wdir / "tape_final.wav"
-            subprocess.run([FF, "-y", "-loglevel", "error", "-i", str(mixed), "-af", "alimiter=limit=0.89:level=false", str(final)], check=True)
-            audio = final
+                extra = np.stack([np.interp(np.arange(0, extra.shape[1], SR / sr_), np.arange(extra.shape[1]), c) for c in extra]).astype(np.float32)
+            n_ = min(a.shape[1], extra.shape[1])
+            a[:, :n_] += extra[:, :n_] * gain
+    mixed = wdir / "tape_voice.wav"
+    with wave.open(str(mixed), "wb") as w:
+        w.setnchannels(2)
+        w.setsampwidth(2)
+        w.setframerate(sr_)
+        w.writeframes((np.clip(a.T, -1, 1) * 32767).astype(np.int16).tobytes())
+    final = wdir / "tape_final.wav"
+    subprocess.run([FF, "-y", "-loglevel", "error", "-i", str(mixed), "-af", "alimiter=limit=0.89:level=false", str(final)], check=True)
+    audio = final
+    if remux:
+        # Only the sound made again: the picture taken as it is from the video already made.
+        subprocess.run([FF, "-y", "-loglevel", "error", "-i", remux, "-i", str(audio), "-map", "0:v", "-map", "1:a", "-c:v", "copy",
+                        "-c:a", "aac", "-b:a", "192k", "-shortest", "-movflags", "+faststart", str(out_mp4)], check=True)
+        print("made", out_mp4, "(sound only, picture from", remux + ")")
+        return
     secs = total / FPS
     kbps = 6500
     vf = "minterpolate=fps=30:mi_mode=blend,format=yuv420p"
@@ -712,6 +721,148 @@ def ground(name, x, z):
     if name in ("camp", "graves", "chapel", "house", "radio"):
         return "gravel" if z < -6.0 else "grass"
     return "gravel"
+
+
+NIGHT_AIR = ("home", "field", "intruder", "chapel", "graves", "knock", "found")
+
+
+def sim_camera(name):
+    """The camera each frame from the sim: x, y, z, yaw, pitch (or None for a scene the sim lacks)."""
+    p = SIM / f"{name}.csv"
+    return np.loadtxt(p, delimiter=",") if p.exists() else None
+
+
+def frame_at(starts, at):
+    """Which clip and recorded frame are on screen at {at} seconds into the edit."""
+    k = at * FPS
+    for k0, name, a, b in starts:
+        if k0 <= k < k0 + (b - a):
+            return name, int(a + k - k0)
+    return None, None
+
+
+def voice_context(info, starts):
+    """For a line said at a moment: are they indoors, and how far is their mouth from the camera's
+    microphone? Running with it, or holding it down at their feet: further. The camera dropped on
+    the floor, or lying in the leaves: well away from them. A hand over it: muffled."""
+    cams = {}
+
+    def ctx(at):
+        name, t = frame_at(starts, at)
+        if name is None:
+            return {}
+        if name not in cams:
+            cams[name] = sim_camera(name)
+        P = cams[name]
+        marks = info[name]["marks"]
+        c = {"indoor": name == "mine"}
+        speed, pitch = 0.05, 10.0
+        if P is not None and len(P):
+            t_ = min(t, len(P) - 1)
+            c["indoor"] = c["indoor"] or inside(name, P[t_, 0] - 0.5, P[t_, 2] - 0.5)
+            j0, j1 = max(0, t_ - 4), min(len(P) - 1, t_ + 4)
+            speed = float(np.hypot(P[j1, 0] - P[j0, 0], P[j1, 2] - P[j0, 2]) / max(1, j1 - j0))
+            pitch = float(P[t_, 4])
+        far = 0.5 if speed > 0.15 else 0.2 if speed > 0.09 else 0.0
+        if pitch > 50:
+            far += 0.3
+        for mk in ("land", "hit"):
+            m_ = first(marks, mk)
+            if m_ is not None and t >= m_ - 2:
+                far += 0.7
+        cv = first(marks, "cover")
+        if cv is not None and t >= cv:
+            c["covered"] = round(min(1.0, (t - cv) / 8), 2)
+        c["far"] = round(min(1.0, far), 2)
+        return c
+    return ctx
+
+
+def ambience(info, starts, n, vo):
+    """The air round them, so nothing is ever quite silent: wind in the trees outside, crickets after
+    dark; indoors the room's own low hum and the wind through the walls; the tunnel's rumble below
+    ground; the wind on the microphone when they move fast outside; and over everything the tape's
+    own hiss. Down under the voice. Nothing after the pen goes quiet but the hiss."""
+    rng = np.random.default_rng(31)
+    out = np.zeros((2, n), np.float32)
+    first_at = starts[0][0] / FPS
+    for k0, name, a, b in [(0, "title", 0, starts[0][0])] + list(starts):
+        at0 = k0 / FPS
+        m = int((b - a) / FPS * SR)
+        i0 = int(at0 * SR)
+        if m <= 0 or i0 >= n:
+            continue
+        m = min(m, n - i0)
+        if name == "title":
+            # Under the title: the wind, coming up out of nothing.
+            w = wind_in_trees(rng, m) * 0.012 * np.linspace(0, 1, m, dtype=np.float32) ** 1.5
+            out[:, i0:i0 + m] += w
+            continue
+        marks = info[name]["marks"]
+        P = sim_camera(name)
+        ind = np.zeros(m, np.float32)
+        spd = np.zeros(m, np.float32)
+        if P is not None and len(P):
+            for t in range(a, b):
+                t_ = min(t, len(P) - 1)
+                j0, j1 = max(0, t_ - 3), min(len(P) - 1, t_ + 3)
+                s0 = int((t - a) / FPS * SR)
+                s1 = min(m, int((t - a + 1) / FPS * SR))
+                ind[s0:s1] = 1.0 if inside(name, P[t_, 0] - 0.5, P[t_, 2] - 0.5) else 0.0
+                spd[s0:s1] = np.hypot(P[j1, 0] - P[j0, 0], P[j1, 2] - P[j0, 2]) / max(1, j1 - j0)
+            k_ = int(SR * 0.4)
+            ind = np.convolve(ind, np.ones(k_, np.float32) / k_, "same")
+            spd = np.convolve(spd, np.ones(k_, np.float32) / k_, "same")
+        night = name in NIGHT_AIR
+        if name == "mine":
+            bed = bed_for(rng, m, "cave", False) * 5.0
+        else:
+            wind = wind_in_trees(rng, m)
+            outside = wind * (0.011 if night else 0.016)
+            if night:
+                c = R.cricket(rng, m, 4500, 0.72, -0.5) + R.cricket(rng, m, 4150, 1.05, 0.55) * 0.7
+                outside = outside + c / max(1e-9, float(np.sqrt((c ** 2).mean()))) * 0.005
+            room = R.lowpass(R.lowpass(rng.normal(0, 1, m).astype(np.float32), 160), 160)
+            room = room / max(1e-9, float(np.sqrt((room ** 2).mean()))) * 0.004
+            inside_ = np.stack([room, np.roll(room, 900)]) + np.stack([R.lowpass(ch, 350) for ch in wind]) * 0.007
+            bed = outside * (1 - ind) + inside_ * ind
+            # The wind on the microphone, moving fast outside.
+            gust = np.clip((spd - 0.08) / 0.12, 0, 1) * (1 - ind)
+            if gust.max() > 0:
+                buff = R.lowpass(R.lowpass(rng.normal(0, 1, m).astype(np.float32), 170), 170)
+                buff = buff / max(1e-9, float(np.sqrt((buff ** 2).mean())))
+                buff *= R.drift(rng, m, 0.35, 0.3, 1.0)[:m]
+                bed = bed + np.stack([buff, buff * 0.85]) * gust * 0.05
+        if name == "pasture" and first(marks, "hush") is not None:
+            h = int((first(marks, "hush") - a) / FPS * SR)
+            fade = np.ones(m, np.float32)
+            fade[max(0, h):] = 0.12
+            bed = bed * np.convolve(fade, np.ones(int(SR * 0.4), np.float32) / int(SR * 0.4), "same")
+        if name == "found":
+            bed = bed * 0.6
+        out[:, i0:i0 + m] += bed[:, :m]
+    # The tape's hiss, from the first frame to the last.
+    end = int(starts[-1][0] / FPS * SR + (starts[-1][3] - starts[-1][2]) / FPS * SR)
+    hiss = np.stack([R.band(rng.normal(0, 1, n).astype(np.float32), 2500, 11000) for _ in range(2)])
+    hiss = hiss / max(1e-9, float(np.sqrt((hiss ** 2).mean()))) * 0.0016
+    hiss[:, end:] = 0
+    hiss[:, :int(first_at * SR)] *= np.linspace(0, 1, int(first_at * SR), dtype=np.float32)
+    out += hiss
+    # Everything stops with the tape at each cut (but the title's wind).
+    running = np.zeros(n, np.float32)
+    running[:int(first_at * SR)] = 1.0
+    for a_, b_ in R.STRETCHES:
+        running[int(a_ * SR):int(b_ * SR)] = 1.0
+    ramp = int(SR * 0.004)
+    out *= np.convolve(running, np.ones(ramp, np.float32) / ramp, "same")[:n]
+    # Under the voice, the air drops away a little.
+    v = np.abs(vo[:, :n]).mean(axis=0) if vo.shape[1] else np.zeros(n, np.float32)
+    k_ = int(SR * 0.15)
+    v = np.convolve(v, np.ones(k_, np.float32) / k_, "same")
+    vv = np.zeros(n, np.float32)
+    vv[:len(v)] = v[:n]
+    out *= 1 - 0.5 * np.clip(vv / 0.03, 0, 1)
+    return out
 
 
 def wind_in_trees(rng, n):
@@ -1049,7 +1200,7 @@ def make_audio(clips, mod_sounds, voice, info, starts, cold, tape_end, total, ou
         score[:, i0:i0 + n] += (loop(mod["dread_high"], n) * 0.3 + loop(mod["dread_pulse"], n) * 0.3 + loop(mod["dread_low"], n) * 0.2) * env_
         put(fx, R.lowpass(mod["drone"], 900), at0 + 0.2, 0.25)
     # The voice: every line there is a recording of (voice/voice_map.json), where the sheet puts it.
-    vo, done = V.long_bus(voice, sheet, int(secs * SR) + SR, SR, R.STRETCHES, FF)
+    vo, done = V.long_bus(voice, sheet, int(secs * SR) + SR, SR, R.STRETCHES, FF, voice_context(info, starts))
     RECORDED.update(done)
     print("voice lines in:", len(done))
     buf = fx[:, :int(secs * SR)]
@@ -1060,6 +1211,7 @@ def make_audio(clips, mod_sounds, voice, info, starts, cold, tape_end, total, ou
     # (The voice is kept apart, to go on after the rest is brought to its loudness: see main.)
     vo = vo[:, :buf.shape[1]]
     np.save(str(out.with_name("voice.npy")), vo)
+    np.save(str(out.with_name("ambience.npy")), ambience(info, starts, buf.shape[1], vo))
     # Everything stops with the tape at each cut.
     running = np.zeros(buf.shape[1], np.float32)
     for a_, b_ in R.STRETCHES:

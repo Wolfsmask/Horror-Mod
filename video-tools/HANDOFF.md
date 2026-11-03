@@ -98,9 +98,27 @@ game test in CI (no in-game footage from the user). The user makes the voice lin
   - `"line"` must be the line's text exactly as `LINES` in make_tape.py has it.
   - When a recording fits a line better reworded, change the text in `LINES` and in the map together.
   - One file can serve several lines; "Hello?" and "What was that?" are also used in the ending.
-  - The edit (`voice.py`, `long_bus`) puts each line where the sheet puts it, through a camcorder-mic
-    sound at an even level. The voice goes on after the rest is brought to -23 LUFS (`VOICE_GAIN`),
-    so the effects keep their level.
+  - The edit (`voice.py`, `long_bus`) puts each line where the sheet puts it.
+    - **The camcorder voice** (`camcorder`): 180 Hz to about 5 kHz with a lift at 2 kHz, the camera's
+      automatic level (fast down, slow up), light distortion, tape wow, and the space they are in.
+    - **Per-line context** (`voice_context` in make_tape.py, from the sim camera and the marks):
+      - indoors gets a small room, outdoors stays almost dry;
+      - running, the camera held down, or the camera dropped (after `land`/`hit`) is further away:
+        darker, more room, quieter;
+      - after `cover` the voice is muffled.
+      - A map entry can force it with `"ctx": {...}`.
+    - The voice goes on after the rest is brought to -23 LUFS (`VOICE_GAIN`), so the effects keep
+      their level.
+  - **Ambience** (`ambience()` in make_tape.py), also added after the loudness step
+    (`AMBIENCE_GAIN`) and dipping 6 dB under the voice:
+    - wind in the trees (crickets at night); indoors a low room tone with the wind through the walls;
+    - the tunnel's rumble in the mine; wind buffeting the mic when moving fast outside;
+    - tape hiss throughout, and wind fading in under the title;
+    - the pen stays near-silent after the animals stop, on purpose.
+    - Levels: about -35 to -40 dB in the quiet stretches.
+  - **Sound-only changes** (voice, ambience, mix): add `--remux=<previous full-quality mp4>` to the
+    make_tape.py command. It rebuilds only the sound (about 5 min) and copies the picture as is. Then
+    `deliver.sh OUT --remux` gives the repo copy the new sound without re-encoding the picture.
   - **Never two lines at once:** at least 0.8 s between lines (`GAP`).
   - **A line may start at most 0.4 s early** (`EARLY`) to finish before its tape stretch is cut.
     Otherwise it is LEFT OUT and the log says so; move its moment in `LINES` instead.
@@ -200,8 +218,9 @@ bash video-tools/edit/deliver.sh OUT
 
 ## State at handoff
 
-v6 is delivered: the v4 cut (4:54, 16 scenes) with the voice cut down to the important lines (about
-26 on the sheet). 15 of them are recorded and mixed in; none overlap. The short has "Hello?" and
+v7 is delivered: the v4 cut (4:54, 16 scenes) with the voice cut down to the important lines (about
+26 on the sheet). 15 of them are recorded and mixed in with the camcorder voice; none overlap.
+Ambience runs throughout. The short has "Hello?" and
 "What was that?". `video/the-occupant-long.mp4` (about 95 MB) is the current cut.
 
 v4 covered all of the user's earlier feedback:

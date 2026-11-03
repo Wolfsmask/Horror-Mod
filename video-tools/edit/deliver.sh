@@ -26,6 +26,14 @@ PY
   echo
 } > "$OUT/youtube.txt"
 cp "$OUT/voice_sheet.txt" "$OUT/voice_lines.txt"
+# Only the sound changed (make_tape.py --remux): the repository's copy keeps its picture, new sound.
+if [ "${2:-}" = "--remux" ]; then
+  ffmpeg -y -loglevel error -i "$REPO/video/the-occupant-long.mp4" -i "$OUT/the-occupant-long.mp4" -map 0:v -map 1:a -c:v copy \
+    -c:a aac -b:a 160k -movflags +faststart "$OUT/the-occupant-long-repo.mp4"
+  cp "$OUT/the-occupant-long-repo.mp4" "$REPO/video/the-occupant-long.mp4"
+  ls -la "$OUT/youtube.txt" "$OUT/voice_lines.txt" "$REPO/video/the-occupant-long.mp4"
+  exit 0
+fi
 # The repository's copy: two-pass, the bitrate worked out from the length so it lands near 95 MB.
 SECS=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$OUT/the-occupant-long.mp4")
 KBPS=$(python3 -c "print(int(95 * 8000 / $SECS - 160))")
