@@ -28,6 +28,7 @@ W, H, FPS, SR = R.W, R.H, R.FPS, R.SR
 sys.path.insert(0, str(HERE))
 import voice as V  # noqa: E402
 RECORDED = set()  # (scene, line) of every line there is a recording of
+VOICE_GAIN = 0.7  # the voice over the normalised mix: its loud parts about -21 dBFS
 FF = R.FF
 SIM = HERE.parent / "sim"
 
@@ -636,6 +637,27 @@ def main():
                     f"loudnorm=I=-23:LRA=18:TP=-1.5:measured_I={m['input_i']}:measured_TP={m['input_tp']}:measured_LRA={m['input_lra']}"
                     f":measured_thresh={m['input_thresh']}:offset={m['target_offset']}:linear=true", "-ar", "48000", str(norm)], check=True)
     audio = norm
+    # The voice over it, at the same level whatever else is going on, the peaks held under -1 dB.
+    vpath = audio.with_name("voice.npy")
+    if vpath.exists():
+        vo = np.load(str(vpath))
+        if np.abs(vo).max() > 0:
+            with wave.open(str(norm)) as w:
+                sr_ = w.getframerate()
+                a = np.frombuffer(w.readframes(w.getnframes()), np.int16).reshape(-1, 2).T.astype(np.float32) / 32768
+            if sr_ != SR:
+                vo = np.stack([np.interp(np.arange(0, vo.shape[1], SR / sr_), np.arange(vo.shape[1]), c) for c in vo]).astype(np.float32)
+            n_ = min(a.shape[1], vo.shape[1])
+            a[:, :n_] += vo[:, :n_] * VOICE_GAIN
+            mixed = wdir / "tape_voice.wav"
+            with wave.open(str(mixed), "wb") as w:
+                w.setnchannels(2)
+                w.setsampwidth(2)
+                w.setframerate(sr_)
+                w.writeframes((np.clip(a.T, -1, 1) * 32767).astype(np.int16).tobytes())
+            final = wdir / "tape_final.wav"
+            subprocess.run([FF, "-y", "-loglevel", "error", "-i", str(mixed), "-af", "alimiter=limit=0.89:level=false", str(final)], check=True)
+            audio = final
     secs = total / FPS
     kbps = 6500
     vf = "minterpolate=fps=30:mi_mode=blend,format=yuv420p"
@@ -1052,7 +1074,10 @@ def make_audio(clips, mod_sounds, voice, info, starts, cold, tape_end, total, ou
     peak = np.abs(buf).max()
     if peak > 0.89:
         buf = buf * (0.89 / peak)
-    buf = buf + beds[:, :buf.shape[1]] + score[:, :buf.shape[1]] * 0.09 + vo[:, :buf.shape[1]]
+    buf = buf + beds[:, :buf.shape[1]] + score[:, :buf.shape[1]] * 0.09
+    # (The voice is kept apart, to go on after the rest is brought to its loudness: see main.)
+    vo = vo[:, :buf.shape[1]]
+    np.save(str(out.with_name("voice.npy")), vo)
     # Everything stops with the tape at each cut.
     running = np.zeros(buf.shape[1], np.float32)
     for a_, b_ in R.STRETCHES:

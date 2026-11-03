@@ -47,12 +47,14 @@
  {
   "scene": "pasture",
   "line": "(stops dead) ...what was that?",
-  "file": "what-was-that.mp3"
+  "file": "what-was-that.mp3",
+  "gain": 0.75
  },
  {
   "scene": "found",
   "line": "...what was that?",
-  "file": "what-was-that.mp3"
+  "file": "what-was-that.mp3",
+  "gain": 0.75
  },
  {
   "scene": "pasture",
@@ -67,12 +69,14 @@
  {
   "scene": "field",
   "line": "Hold on.",
-  "file": "field-hold-on.mp3"
+  "file": "field-hold-on.mp3",
+  "gain": 0.8
  },
  {
   "scene": "field",
   "line": "Hey! ...HEY!",
-  "file": "field-hey.mp3"
+  "file": "field-hey.mp3",
+  "gain": 1.15
  },
  {
   "scene": "graves",
@@ -87,7 +91,8 @@
  {
   "scene": "house",
   "line": "(a yell as you fall)",
-  "file": "house-scream.mp3"
+  "file": "house-scream.mp3",
+  "gain": 1.3
  },
  {
   "scene": "intruder",
@@ -117,12 +122,14 @@
  {
   "scene": "intruder",
   "line": "(whisper) There's someone in my house.",
-  "file": "intruder-someone-in-my-house.mp3"
+  "file": "intruder-someone-in-my-house.mp3",
+  "gain": 0.75
  },
  {
   "scene": "knock",
   "line": "It saw me. It saw me!",
-  "file": "knock-it-saw-me.mp3"
+  "file": "knock-it-saw-me.mp3",
+  "gain": 1.1
  },
  {
   "scene": "visitor",
