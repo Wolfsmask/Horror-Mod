@@ -230,7 +230,7 @@ bash video-tools/edit/deliver.sh OUT
 
 ## State at handoff
 
-v9 is delivered: the v4 cut (4:54, 16 scenes) with the voice cut down to the important lines (about
+v10 is delivered: the v4 cut (4:54, 16 scenes) with the voice cut down to the important lines (about
 26 on the sheet). 15 of them are recorded and mixed in with the camcorder voice; none overlap.
 Ambience runs throughout. The short has "Hello?" and
 "What was that?". `video/the-occupant-long.mp4` (about 95 MB) is the current cut.
