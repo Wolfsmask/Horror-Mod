@@ -809,8 +809,10 @@ def head_held(cam, r):
     yr = np.radians(cam[3])
     fwd = np.array([-np.sin(yr), 0.0, np.cos(yr)])
     down = float(np.clip((cam[4] - 20) / 50, 0, 1))
-    back = 0.3 + 0.15 * down
-    hy = 64 + 1.6 + min(0.0, float(r[4])) if r[9] > 0 else cam[1] + 0.05
+    # Pointed down at their feet, the camera is held down and out at arm's length, well below and in
+    # front of their mouth (the picture is from higher, but that is where the microphone would be).
+    back = 0.3 + 0.45 * down
+    hy = cam[1] + 0.05 + 0.45 * down if r[9] > 0 else cam[1] + 0.05
     return np.array([cam[0], hy, cam[2]]) - fwd * back
 
 
@@ -983,7 +985,7 @@ LINES = {
     "doorway": [("rap-1.3", "(nervous laugh) Knock knock."), ("knock+1.2", "(whisper) ...no way.")],
     "radio": [("radio", "RADIO VOICE (garbled, record as radio.wav): '...vR4xxs_... I can see you...'"),
               ("end-3.4", "Nothing's even plugged in. No. No no no.")],
-    "house": [(5.6, "Hello? Anyone home?"), ("drop", "(a yell as you fall)")],
+    "house": [(5.6, "Hello? Anyone home?"), ("drop-0.1", "(a yell as you fall)")],
     "chapel": [("seen", "...those weren't lit. Those were NOT lit.")],
     "graves": [("seen", "Hold on, there's someone standing at the trees.")],
     "knock": [("roof+1.0", "(whisper) ...something's on the roof."), ("what", "It saw me. It saw me!")],

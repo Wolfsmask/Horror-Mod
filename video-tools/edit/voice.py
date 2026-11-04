@@ -140,7 +140,7 @@ def spatial(y, sr, gain, path, fps, indoor=False, covered=0.0):
     d = np.interp(k, idx, [p[0] for p in path]).astype(np.float32)
     pan = np.interp(k, idx, [p[1] for p in path]).astype(np.float32)
     f = np.clip((d - HELD) / 1.4, 0, 1)
-    g = np.clip((HELD / np.maximum(d, 0.15)) ** 0.9, 0.25, 1.3)  # never more than 12 dB down: still heard across the room
+    g = np.clip(HELD / np.maximum(d, 0.15), 0.25, 1.3)  # never more than 12 dB down: still heard across the room
     dry = (near * (1 - f) + far_ * f) * g * gain
     th = (np.clip(pan, -1, 1) * 0.7 + 1) * np.pi / 4
     out = _space(near * gain, sr, indoor, 0.0)

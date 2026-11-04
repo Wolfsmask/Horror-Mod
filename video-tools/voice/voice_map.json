@@ -46,7 +46,7 @@
   "scene": "house",
   "line": "(a yell as you fall)",
   "file": "house-scream.mp3",
-  "gain": 1.3
+  "gain": 2.8
  },
  {
   "scene": "found",
