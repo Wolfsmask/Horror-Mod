@@ -29,7 +29,7 @@ sys.path.insert(0, str(HERE))
 import voice as V  # noqa: E402
 RECORDED = set()  # (scene, line) of every line there is a recording of
 VOICE_GAIN = 0.45  # the voice over the normalised mix: with the camera held out from their face, its loud parts about -25 dBFS
-AMBIENCE_GAIN = 1.0  # the air and the tape hiss over the normalised mix (their levels are set in ambience())
+AMBIENCE_GAIN = 0.7  # the air and the tape hiss over the normalised mix (their levels are set in ambience())
 FF = R.FF
 SIM = HERE.parent / "sim"
 
@@ -769,7 +769,7 @@ def voice_context(info, starts):
             c["covered"] = round(min(1.0, (t - cv) / 8), 2)
         if P is None or Rw is None or not len(P):
             hit = first(marks, "hit")
-            far = 1.5 if hit is not None and t >= hit else HELD_DIST
+            far = 0.7 if hit is not None and t >= hit else HELD_DIST  # knocked down, a little way from the camera in the leaves
             c["path"] = [(far, 0.0)] * (int(secs * FPS) + 2)
             return c
         t0 = min(t, len(P) - 1)
@@ -853,7 +853,7 @@ def ambience(info, starts, n, vo):
             spd = np.convolve(spd, np.ones(k_, np.float32) / k_, "same")
         night = name in NIGHT_AIR
         if name == "mine":
-            bed = bed_for(rng, m, "cave", False) * 5.0
+            bed = bed_for(rng, m, "cave", False) * 2.0
         else:
             wind = wind_in_trees(rng, m)
             outside = wind * (0.011 if night else 0.016)
@@ -923,19 +923,6 @@ def bed_for(rng, n, kind, night_):
         rumble = R.lowpass(R.lowpass(R.noise(rng, n / SR + 0.1)[:n], 140), 140)
         rumble /= max(1e-9, np.sqrt((rumble ** 2).mean()))
         out = np.stack([rumble, np.roll(rumble, 2400)]) * 0.0022
-        t = rng.random() * 2
-        while t < n / SR - 1:
-            m = int(SR * 0.05)
-            f0 = 1400 + rng.random() * 1400
-            drip = np.sin(2 * np.pi * f0 * np.arange(m) / SR * (1 + 0.6 * np.arange(m) / m)) * np.exp(-np.arange(m) / (SR * 0.012))
-            drip = R.echo(drip.astype(np.float32), [(0.07, 0.4), (0.16, 0.25), (0.3, 0.12)])
-            i = int(t * SR)
-            pan = rng.uniform(-0.7, 0.7)
-            a = (pan + 1) * np.pi / 4
-            j = min(n, i + len(drip))
-            out[0, i:j] += drip[:j - i] * 0.006 * np.cos(a)
-            out[1, i:j] += drip[:j - i] * 0.006 * np.sin(a)
-            t += 1.6 + rng.random() * 3.5
         return out
     wind = wind_in_trees(rng, n) * 0.0026
     crick = 0
@@ -991,7 +978,8 @@ LINES = {
     "knock": [("roof+1.0", "(whisper) ...something's on the roof."), ("what", "It saw me. It saw me!")],
     "morning": [("lower-1.5", "That's... that's my name.")],
     "mine": [("dig+1", "I didn't dig this.")],
-    "found": [("mine", "Hello?"), ("seen", "(scream)"), ("no2", "NO!"), ("stab", "(scream, cut off)")],
+    "found": [("mine+0.8", "Hello?"), ("land", "No! Get back!"), ("land+1.35", "No, no, no, no!"), ("land+2.7", "Please, please, please!"),
+              ("stab", "AHHH! (one scream, ringing out into the dark after the tape stops)")],
 }
 
 
@@ -1156,7 +1144,7 @@ def make_audio(clips, mod_sounds, voice, info, starts, cold, tape_end, total, ou
                 v = R.wav(voice / "radio.wav")
                 if v is None:
                     v = R.speed(mod["whisper"], 0.92)
-                put(fx, radio_voice(rng, v), at, 0.6, pan=0.05)
+                put(fx, radio_voice(rng, v), at, 0.9, pan=0.05)
             elif kd == "light":
                 x = game.get("fire/ignite.ogg")
                 if x is not None:

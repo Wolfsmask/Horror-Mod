@@ -143,6 +143,19 @@ game test in CI (no in-game footage from the user). The user makes the voice lin
     the file) and shorten its pauses (`"squeeze"`: the longest pause in seconds) so it fits its
     moment. Find where the words fall with faster-whisper `word_timestamps=True`.
   - The user asked to drop the whispered "what was that?" everywhere, the short included.
+  - **Map entry options:**
+    - `"gap"`: seconds before the line, in place of `GAP`. The ending's panicked lines use 0.1.
+    - `"past_end": true`: the line may run on past the tape's end. The voice is not cut with the
+      tape, so the final scream plays into the black.
+    - `"echo"`: thrown back by the dark woods (`voice.echo`): late repeats and a long dim wash;
+      1 is slight. The final scream uses 2.5, so it rings out into the dark after the cut.
+  - **The ending (knocked down, the camera in the leaves):** he is 0.7 blocks from it. Shouted lines
+    need a high `"gain"` (about 5), because the chain levels every take like talking.
+  - **The short:** `short_map.json` entries take the same `from`/`to`/`gain`/`echo`, plus `"ctx"` for
+    distance. Its ending lines are at times taken from the same take's marks (land 28.45 s, stab
+    32.75 s).
+  - **The mine:** no made-up drips (the user found them odd), only the low rumble. Ambience overall
+    is at `AMBIENCE_GAIN` 0.7, and the radio's voice was raised (0.9).
   - Pass the folder as make_tape.py's third argument: `video-tools/voice`.
 - **Sending new lines:** the user sends zips of ElevenLabs mp3s with no useful names. To work out
   which line each is:
@@ -234,7 +247,7 @@ bash video-tools/edit/deliver.sh OUT
 
 ## State at handoff
 
-v11 is delivered: the v4 cut (4:54, 16 scenes) with the voice cut down to the important lines (about
+v12 is delivered: the v4 cut (4:54, 16 scenes) with the voice cut down to the important lines (about
 26 on the sheet). 15 of them are recorded and mixed in with the camcorder voice; none overlap.
 Ambience runs throughout. The short has "Hello?" and
 "What was that?". `video/the-occupant-long.mp4` (about 95 MB) is the current cut.

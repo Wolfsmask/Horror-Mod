@@ -178,6 +178,27 @@ def spatial(y, sr, gain, path, fps, indoor=False, covered=0.0):
     return out.astype(np.float32)
 
 
+def echo(snd, sr, amount=1.0):
+    """{snd} thrown back by the woods in the dark: a few late repeats off the trees, each darker and
+    fainter, wandering side to side, and a long dim wash under them. {amount} 1 is slight."""
+    from scipy import signal
+    mono = snd.mean(axis=0)
+    tail = int(sr * 3.2)
+    out = np.zeros((2, snd.shape[1] + tail), np.float32)
+    out[:, :snd.shape[1]] += snd
+    for k, (d, g, lp, side) in enumerate(((0.33, 0.30, 2600, -0.4), (0.7, 0.22, 1900, 0.45), (1.15, 0.15, 1400, -0.3), (1.7, 0.09, 1000, 0.35),
+                                          (2.4, 0.05, 800, -0.2))):
+        x = signal.sosfilt(signal.butter(2, lp, "low", fs=sr, output="sos"), mono).astype(np.float32) * g * amount
+        i = int(d * sr)
+        th = (side + 1) * np.pi / 4
+        out[0, i:i + len(x)] += x * np.cos(th) * np.sqrt(2)
+        out[1, i:i + len(x)] += x * np.sin(th) * np.sqrt(2)
+    for c in range(2):
+        r = signal.fftconvolve(mono, _room(sr, 2.8, 31 + c, 1100)).astype(np.float32)[:out.shape[1]]
+        out[c, :len(r)] += r * 0.2 * amount
+    return out
+
+
 def place(bus, snd, at, sr):
     i = int(round(at * sr))
     if i >= bus.shape[1]:
@@ -212,10 +233,11 @@ def long_bus(voice, sheet, n, sr, stretches, ff="ffmpeg", ctx=None):
         secs = len(raw) / sr
         st = [(a, b) for a, b in stretches if a <= want < b]
         a0, b0 = st[0] if st else (want, want + secs + 1)
-        at = max(want, free + GAP)
-        if at + secs > b0 - 0.08:
+        gap = e.get("gap", GAP)
+        at = max(want, free + gap)
+        if at + secs > b0 - 0.08 and not e.get("past_end"):
             at = b0 - 0.08 - secs
-        if at < want - EARLY or at < free + GAP or at < a0:
+        if at < want - EARLY or at < free + gap or at < a0:
             print(f"voice: LEFT OUT {e['scene']}: {e['line'][:50]} ({secs:.1f}s at {want:.1f}, tape stops {b0:.1f})")
             continue
         c = dict(ctx(at, secs)) if ctx else {}
@@ -224,6 +246,8 @@ def long_bus(voice, sheet, n, sr, stretches, ff="ffmpeg", ctx=None):
             snd = spatial(raw, sr, e.get("gain", 1.0), c["path"], c.get("fps", 20), bool(c.get("indoor")), float(c.get("covered", 0.0)))
         else:
             snd = camcorder(raw, sr, e.get("gain", 1.0), c)
+        if e.get("echo"):
+            snd = echo(snd, sr, float(e["echo"]))
         place(bus, snd, at, sr)
         free = at + secs
         done.add((e["scene"], e["line"]))

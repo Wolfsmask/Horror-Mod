@@ -13,7 +13,10 @@ times = json.loads(at_file.read_text())
 placements = []
 for e in json.loads((vdir / "short_map.json").read_text()):
     at = e["at"] if isinstance(e["at"], (int, float)) else times[e["at"]]
-    snd = V.camcorder(V.trim(V.decode(vdir / e["file"], SR), SR), SR, e.get("gain", 1.0))
+    raw = V.trim(V.squeeze(V.cut(V.decode(vdir / e["file"], SR), SR, e.get("from"), e.get("to")), SR, e.get("squeeze")), SR)
+    snd = V.camcorder(raw, SR, e.get("gain", 1.0), e.get("ctx"))
+    if e.get("echo"):
+        snd = V.echo(snd, SR, float(e["echo"]))
     placements.append((at, snd))
     print("line", e["file"], "at", at)
 V.mix_into(master, out, placements, SR)

@@ -81,5 +81,40 @@
   "file": "pen-dead.mp3",
   "from": 1.3,
   "to": 4.3
+ },
+ {
+  "scene": "found",
+  "line": "No! Get back!",
+  "file": "ending-no-get-back.mp3",
+  "gap": 0.1,
+  "to": 1.2,
+  "gain": 5.0
+ },
+ {
+  "scene": "found",
+  "line": "No, no, no, no!",
+  "file": "ending-no-no-no.mp3",
+  "gap": 0.1,
+  "to": 1.18,
+  "gain": 5.0
+ },
+ {
+  "scene": "found",
+  "line": "Please, please, please!",
+  "file": "ending-please.mp3",
+  "gap": 0.1,
+  "echo": 0.8,
+  "to": 1.32,
+  "gain": 4.5
+ },
+ {
+  "scene": "found",
+  "line": "AHHH! (one scream, ringing out into the dark after the tape stops)",
+  "file": "ending-scream.mp3",
+  "to": 0.88,
+  "gap": 0.1,
+  "past_end": true,
+  "echo": 2.5,
+  "gain": 5.0
  }
 ]

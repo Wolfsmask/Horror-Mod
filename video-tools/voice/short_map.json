@@ -2,5 +2,43 @@
  {
   "at": "hello",
   "file": "hello.mp3"
+ },
+ {
+  "at": 28.45,
+  "file": "ending-no-get-back.mp3",
+  "ctx": {
+   "far": 0.4
+  },
+  "to": 1.2,
+  "gain": 5.0
+ },
+ {
+  "at": 29.8,
+  "file": "ending-no-no-no.mp3",
+  "ctx": {
+   "far": 0.4
+  },
+  "to": 1.18,
+  "gain": 5.0
+ },
+ {
+  "at": 31.15,
+  "file": "ending-please.mp3",
+  "ctx": {
+   "far": 0.4
+  },
+  "echo": 0.8,
+  "to": 1.32,
+  "gain": 4.5
+ },
+ {
+  "at": 32.75,
+  "file": "ending-scream.mp3",
+  "to": 0.88,
+  "ctx": {
+   "far": 0.4
+  },
+  "echo": 2.5,
+  "gain": 5.0
  }
 ]
