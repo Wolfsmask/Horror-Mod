@@ -20,18 +20,6 @@
   "file": "pen-looking.mp3"
  },
  {
-  "scene": "pasture",
-  "line": "(stops dead) ...what was that?",
-  "file": "what-was-that.mp3",
-  "gain": 0.75
- },
- {
-  "scene": "found",
-  "line": "...what was that?",
-  "file": "what-was-that.mp3",
-  "gain": 0.75
- },
- {
   "scene": "field",
   "line": "Hey! ...HEY!",
   "file": "field-hey.mp3",
@@ -78,5 +66,20 @@
   "scene": "radio",
   "line": "Nothing's even plugged in. No. No no no.",
   "file": "radio-plugged-in.mp3"
+ },
+ {
+  "scene": "camp",
+  "line": "That's... okay. I'm going.",
+  "file": "pen-going.mp3",
+  "from": 0.85,
+  "to": 4.5,
+  "squeeze": 0.3
+ },
+ {
+  "scene": "pasture",
+  "line": "(breathing hard) They're dead. They're ALL dead.",
+  "file": "pen-dead.mp3",
+  "from": 1.3,
+  "to": 4.3
  }
 ]

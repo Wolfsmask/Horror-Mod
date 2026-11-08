@@ -23,6 +23,35 @@ def decode(path, sr, ff="ffmpeg"):
     return np.frombuffer(raw, np.float32).copy()
 
 
+def cut(y, sr, a=None, b=None):
+    """Only part of a recording: from {a} to {b} seconds into it (a map entry's "from" and "to")."""
+    i = int((a or 0) * sr)
+    j = len(y) if b is None else int(b * sr)
+    return y[i:j]
+
+
+def squeeze(y, sr, most=None):
+    """The pauses in a line made no longer than {most} seconds (a map entry's "squeeze"), so it fits."""
+    if not most:
+        return y
+    k = max(1, int(sr * 0.01))
+    env = np.convolve(np.abs(y), np.ones(k, np.float32) / k, "same")
+    quiet = env < 0.05 * env.max()
+    keep = np.ones(len(y), bool)
+    i, n, m = 0, len(y), int(most * sr)
+    while i < n:
+        if quiet[i]:
+            j = i
+            while j < n and quiet[j]:
+                j += 1
+            if j - i > m and i > 0 and j < n:
+                keep[i + m // 2:j - m // 2] = False
+            i = j
+        else:
+            i += 1
+    return y[keep]
+
+
 def trim(y, sr):
     """The line without the silence round it (a breath's worth kept either side)."""
     k = max(1, int(sr * 0.01))
@@ -179,7 +208,7 @@ def long_bus(voice, sheet, n, sr, stretches, ff="ffmpeg", ctx=None):
     timed.sort(key=lambda r: r[0])
     free = -1.0
     for want, e in timed:
-        raw = trim(decode(Path(voice) / e["file"], sr, ff), sr)
+        raw = trim(squeeze(cut(decode(Path(voice) / e["file"], sr, ff), sr, e.get("from"), e.get("to")), sr, e.get("squeeze")), sr)
         secs = len(raw) / sr
         st = [(a, b) for a, b in stretches if a <= want < b]
         a0, b0 = st[0] if st else (want, want + secs + 1)

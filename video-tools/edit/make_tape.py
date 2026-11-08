@@ -975,8 +975,8 @@ def zoom_motor(rng, secs):
 # Suggested lines for the voice, at the moments they belong to (seconds into the video).
 LINES = {
     "home": [(0.8, "Day one. Cabin's finally done."), ("chestshut", "...did that chest just close by itself?")],
-    "camp": [(4.8, "(reading) 'Don't follow the tall one.'")],
-    "pasture": [("hush+0.6", "...why are they all looking at me?"), ("weird+0.5", "(stops dead) ...what was that?")],
+    "camp": [(4.8, "(reading) 'Don't follow the tall one.'"), ("whisper+0.9", "That's... okay. I'm going.")],
+    "pasture": [("hush+0.6", "...why are they all looking at me?"), ("weird+1.0", "(breathing hard) They're dead. They're ALL dead.")],
     "well": [("what", "Something threw it back up.")],
     "field": [("name", "WHISPER (optional, record as name.wav, quiet): 'vR4xxs_...' — leave it out and the edit uses a whisper"),
               ("name+1.8", "Hey! ...HEY!")],
@@ -991,7 +991,7 @@ LINES = {
     "knock": [("roof+1.0", "(whisper) ...something's on the roof."), ("what", "It saw me. It saw me!")],
     "morning": [("lower-1.5", "That's... that's my name.")],
     "mine": [("dig+1", "I didn't dig this.")],
-    "found": [("mine", "Hello?"), ("what", "...what was that?"), ("seen", "(scream)"), ("no2", "NO!"), ("stab", "(scream, cut off)")],
+    "found": [("mine", "Hello?"), ("seen", "(scream)"), ("no2", "NO!"), ("stab", "(scream, cut off)")],
 }
 
 

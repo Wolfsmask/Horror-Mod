@@ -139,6 +139,10 @@ game test in CI (no in-game footage from the user). The user makes the voice lin
   - **Few lines.** The user wants only the important ones: one or two per scene, silence between.
     The sheet was cut from 83 lines to about 26. Do not add more without being asked.
   - Recordings no longer in `LINES` stay in the folder, unmapped.
+  - **Part of a recording:** a map entry can take only part of it (`"from"`/`"to"`, in seconds into
+    the file) and shorten its pauses (`"squeeze"`: the longest pause in seconds) so it fits its
+    moment. Find where the words fall with faster-whisper `word_timestamps=True`.
+  - The user asked to drop the whispered "what was that?" everywhere, the short included.
   - Pass the folder as make_tape.py's third argument: `video-tools/voice`.
 - **Sending new lines:** the user sends zips of ElevenLabs mp3s with no useful names. To work out
   which line each is:
@@ -230,7 +234,7 @@ bash video-tools/edit/deliver.sh OUT
 
 ## State at handoff
 
-v10 is delivered: the v4 cut (4:54, 16 scenes) with the voice cut down to the important lines (about
+v11 is delivered: the v4 cut (4:54, 16 scenes) with the voice cut down to the important lines (about
 26 on the sheet). 15 of them are recorded and mixed in with the camcorder voice; none overlap.
 Ambience runs throughout. The short has "Hello?" and
 "What was that?". `video/the-occupant-long.mp4` (about 95 MB) is the current cut.
