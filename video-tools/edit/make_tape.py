@@ -979,7 +979,7 @@ LINES = {
     "morning": [("lower-1.5", "That's... that's my name.")],
     "mine": [("dig+1", "I didn't dig this.")],
     "found": [("mine+0.8", "Hello?"), ("land", "No! Get back!"), ("land+1.35", "No, no, no, no!"), ("land+2.7", "Please, please, please!"),
-              ("stab", "AHHH! (one scream, ringing out into the dark after the tape stops)")],
+              ("stab", "AHHH! (one scream, trailing off into the dark after the tape stops)")],
 }
 
 

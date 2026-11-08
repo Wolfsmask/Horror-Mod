@@ -179,23 +179,19 @@ def spatial(y, sr, gain, path, fps, indoor=False, covered=0.0):
 
 
 def echo(snd, sr, amount=1.0):
-    """{snd} thrown back by the woods in the dark: a few late repeats off the trees, each darker and
-    fainter, wandering side to side, and a long dim wash under them. {amount} 1 is slight."""
+    """{snd} drawn out at its end: no repeats, only a smooth, dark wash carrying on from it and dying
+    away over a couple of seconds, so a scream trails off ("AHHHhhh...") instead of stopping dead.
+    {amount} 1 is slight."""
     from scipy import signal
     mono = snd.mean(axis=0)
-    tail = int(sr * 3.2)
+    tail = int(sr * 2.8)
     out = np.zeros((2, snd.shape[1] + tail), np.float32)
     out[:, :snd.shape[1]] += snd
-    for k, (d, g, lp, side) in enumerate(((0.33, 0.30, 2600, -0.4), (0.7, 0.22, 1900, 0.45), (1.15, 0.15, 1400, -0.3), (1.7, 0.09, 1000, 0.35),
-                                          (2.4, 0.05, 800, -0.2))):
-        x = signal.sosfilt(signal.butter(2, lp, "low", fs=sr, output="sos"), mono).astype(np.float32) * g * amount
-        i = int(d * sr)
-        th = (side + 1) * np.pi / 4
-        out[0, i:i + len(x)] += x * np.cos(th) * np.sqrt(2)
-        out[1, i:i + len(x)] += x * np.sin(th) * np.sqrt(2)
     for c in range(2):
-        r = signal.fftconvolve(mono, _room(sr, 2.8, 31 + c, 1100)).astype(np.float32)[:out.shape[1]]
-        out[c, :len(r)] += r * 0.2 * amount
+        ir = _room(sr, 2.4, 31 + c, 1500)
+        ir[:int(sr * 0.004)] = ir[int(sr * 0.004)]  # straight on from the voice, no gap before it
+        r = signal.fftconvolve(mono, ir).astype(np.float32)[:out.shape[1]]
+        out[c, :len(r)] += r * 0.22 * amount
     return out
 
 

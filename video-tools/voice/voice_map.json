@@ -103,13 +103,12 @@
   "line": "Please, please, please!",
   "file": "ending-please.mp3",
   "gap": 0.1,
-  "echo": 0.8,
   "to": 1.32,
   "gain": 4.5
  },
  {
   "scene": "found",
-  "line": "AHHH! (one scream, ringing out into the dark after the tape stops)",
+  "line": "AHHH! (one scream, trailing off into the dark after the tape stops)",
   "file": "ending-scream.mp3",
   "to": 0.88,
   "gap": 0.1,
