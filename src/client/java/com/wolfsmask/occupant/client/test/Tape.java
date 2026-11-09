@@ -88,6 +88,7 @@ final class Tape {
 					case "radio" -> radio(context, game, woods);
 					case "chapel" -> chapel(context, game, woods);
 					case "found" -> Reel.found(context, game, woods);
+					case "thumbs" -> thumbs(context, game, woods);
 					default -> Occupant.LOGGER.warn("[client-gametest] tape: there is no scene {}", scene);
 				}
 			});
@@ -1159,6 +1160,104 @@ final class Tape {
 			if (t == placed) Cinematic.place(server, BlockPos.containing(itFeet), eye(poses, t), Reel.STANDING);
 			if (t >= placed) Reel.look(server, itFeet, steady(poses, t), 0);
 		});
+	}
+
+	/**
+	 * Not part of the tape: the two thumbnails, staged as stills (each from a few places, to choose
+	 * from), lit by hidden lights, at night. The long video's: the empty house, them on the floor in
+	 * the foreground from behind, and it bent in the gap in the wall, its face lit from below. The
+	 * short's (the window stood on end): a glade at night, them on their back kicking at it, and it
+	 * over them from their feet, huge, leaning down.
+	 */
+	private static void thumbs(ClientGameTestContext context, TestSingleplayerContext game, BlockPos[] woods) {
+		TestServerContext server = game.getServer();
+		Cinematic.Look bent = new Cinematic.Look(false, 0.01f, OccupantEntity.Mode.AMBUSH, 0);
+		BlockPos floor = site(game, woods[0].offset(170, 0, -130));
+		if (floor != null) {
+			BlockPos o = floor.above();
+			double[][] approach = {{-3.5, -36}, {-3.5, -22}, {-2.6, -15}, {-2.2, -10}, {-2.0, -7.2}};
+			server.runOnServer(s -> {
+				ServerLevel level = s.overworld();
+				Reel.wood(level, o, -32, 30, -42, 20, List.of(Reel.Way.local(o, approach)), 71L, new double[][]{{-0.5, 0, 11.5}}, null);
+				House.build(level, floor, Rotation.NONE, RandomSource.create(9L));
+			});
+			Vec3 feet = Reel.local(o, 2.8, 0, -2.5);
+			Vec3 face = Reel.local(o, 2.4, 0.95, -2.5);
+			Vec3 seat = Reel.local(o, -0.35, 0, -2.6);
+			Vec3 lens = Reel.local(o, -1.95, 0.12, -1.5);
+			Vec3[] eyes = {Reel.local(o, -1.7, 0.7, -3.4), Reel.local(o, -1.9, 0.55, -2.0), Reel.local(o, -2.3, 1.15, -3.1),
+					Reel.local(o, -1.25, 0.45, -3.25)};
+			Reel.prepare(context, game, eyes[0], face, 18000);
+			// Hidden lights: one on the floor before the gap, under its face; a faint one behind them.
+			setblock(server, BlockPos.containing(Reel.local(o, 1.7, 0, -2.5)), "minecraft:light[level=12]");
+			setblock(server, BlockPos.containing(Reel.local(o, -1.0, 1, -3.6)), "minecraft:light[level=4]");
+			bodyMade(server, seat);
+			Sitter them = new Sitter(seat, new Vec3(1, 0, 0), face, new Vec3(lens.x, o.getY() + 0.12, lens.z));
+			context.waitTicks(5);
+			bodyPosed(server, them.pose(0, seat), seat.add(0, 1, 0));
+			Cinematic.place(server, BlockPos.containing(feet), eyes[0], bent);
+			for (int i = 0; i < eyes.length; i++) {
+				Vec3 e = eyes[i];
+				server.runCommand(String.format(Locale.ROOT, "tp @p %.3f %.3f %.3f facing %.3f %.3f %.3f", e.x, e.y - EYE, e.z, face.x, face.y, face.z));
+				for (int k = 0; k < 25; k++) {
+					Reel.look(server, feet, e, 0);
+					coil(server, feet, 0.5f);
+					context.waitTicks(1);
+				}
+				OccupantClientGameTest.shoot(context, "thumb-long-" + i);
+			}
+			server.runCommand("kill " + Reel.ALL);
+			server.runCommand("kill @e[type=block_display,tag=occupant_body]");
+		}
+
+		BlockPos glade = site(game, woods[1].offset(-120, 0, -60), woods[0].offset(-60, 0, 200));
+		if (glade != null) {
+			BlockPos o = glade.above();
+			server.runOnServer(s -> Reel.wood(s.overworld(), o, -24, 24, -26, 26,
+					List.of(Reel.Way.local(o, new double[][]{{0.4, -22}, {0, -8}, {0, 8}, {-0.3, 22}})), 211L, new double[][]{{0, 0, 5.5}}, null));
+			Vec3 here = Reel.local(o, 0, 0, 0);
+			Vec3 fwd = new Vec3(0, 0, 1);
+			Vec3 side = new Vec3(1, 0, 0);
+			int t = Person.KICKS[1] + 1;
+			Vec3 itFeet = here.subtract(fwd.scale(2.6)).add(fwd.scale(Person.itCame(t)));
+			Vec3 itFace = itFeet.add(0, 4.6, 0).add(fwd.scale(0.9));
+			Person them = new Person(here, fwd);
+			List<Person.Part> parts = them.pose(t, itFace, here);
+			Vec3 head = here;
+			for (Person.Part part : parts) {
+				if (part.name().equals("head")) {
+					double[] m = part.m();
+					head = here.add(m[3] + 0.5 * (m[0] + m[1] + m[2]), m[7] + 0.5 * (m[4] + m[5] + m[6]), m[11] + 0.5 * (m[8] + m[9] + m[10]));
+				}
+			}
+			Vec3 aim = itFace.subtract(0, 0.9, 0);
+			Vec3[] eyes = {head.add(fwd.scale(0.85)).add(side.scale(0.35)).add(0, 0.12, 0), head.add(fwd.scale(0.6)).add(side.scale(-0.45)).add(0, 0.3, 0),
+					here.add(side.scale(2.4)).add(fwd.scale(0.4)).add(0, 0.35, 0), itFace.add(fwd.scale(0.5)).add(side.scale(0.4)).add(0, 0.6, 0)};
+			Vec3[] looks = {aim, aim, itFace.subtract(0, 1.4, 0), head};
+			context.getInput().resizeWindow(1080, 1920);
+			context.runOnClient(mc -> mc.options.fov().set(72));
+			Reel.prepare(context, game, eyes[0], aim, 18000);
+			setblock(server, BlockPos.containing(itFace.add(0, 1.2, 0).add(fwd.scale(-0.6))), "minecraft:light[level=11]");
+			setblock(server, BlockPos.containing(here.add(fwd.scale(0.8)).add(0, 1.2, 0)), "minecraft:light[level=6]");
+			bodyMade(server, here);
+			context.waitTicks(5);
+			bodyPosed(server, parts, head.add(0, 0.3, 0));
+			Cinematic.place(server, BlockPos.containing(itFeet), eyes[0], bent);
+			for (int i = 0; i < eyes.length; i++) {
+				Vec3 e = eyes[i], l = looks[i];
+				server.runCommand(String.format(Locale.ROOT, "tp @p %.3f %.3f %.3f facing %.3f %.3f %.3f", e.x, e.y - EYE, e.z, l.x, l.y, l.z));
+				for (int k = 0; k < 25; k++) {
+					Reel.look(server, itFeet, i == 3 ? head : head.add(fwd.scale(-0.2)), 0);
+					coil(server, itFeet, 0.25f);
+					context.waitTicks(1);
+				}
+				OccupantClientGameTest.shoot(context, "thumb-short-" + i);
+			}
+			server.runCommand("kill " + Reel.ALL);
+			server.runCommand("kill @e[type=block_display,tag=occupant_body]");
+			context.getInput().resizeWindow(1920, 1080);
+			context.runOnClient(mc -> mc.options.fov().set(Reel.WIDE_FOV));
+		}
 	}
 
 	// ------------------------------------------------------------------ helpers for the scenes
