@@ -122,12 +122,24 @@ def title(a, lines, cx, y0, size, tracking, red_word=None, credit=None, credit_y
     return np.asarray(img.convert("RGB")).astype(np.float32) / 255
 
 
-def finish(src, out, lines, cx, y0, size, tracking, red_word, credit_y, credit_size, crop=None):
+def spot(a, cx, cy, r, dark, gain=1.0):
+    """Everything but a pool round ({cx}, {cy}) (fractions of the frame) let down into the dark, the
+    pool itself brought up by {gain}."""
+    h, w, _ = a.shape
+    y, x = np.mgrid[0:h, 0:w].astype(np.float32)
+    d = np.sqrt(((x / w - cx) * w / h) ** 2 + (y / h - cy) ** 2)
+    m = dark + (gain - dark) * np.exp(-(d / r) ** 2)
+    return np.clip(a * m[..., None], 0, 1)
+
+
+def finish(src, out, lines, cx, y0, size, tracking, red_word, credit_y, credit_size, crop=None, pool=None):
     im = Image.open(src).convert("RGB")
     if crop:
         im = im.crop(crop)
     a = np.asarray(im).astype(np.float32) / 255
     w = a.shape[1]
+    if pool:
+        a = spot(a, *pool)
     a = grade(a)
     a = bloom(a, w * 0.012)
     a = fringe(a)
@@ -140,9 +152,11 @@ def finish(src, out, lines, cx, y0, size, tracking, red_word, credit_y, credit_s
 if __name__ == "__main__":
     long_src, short_src, outdir = Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3])
     lw, lh = Image.open(long_src).size
-    finish(long_src, outdir / "thumbnail-long.jpg", ["IT WAS IN", "THE WALL"], int(lw * 0.77), int(lh * 0.30), int(lh * 0.115),
-           lh * 0.012, "WALL", int(lh * 0.86), int(lh * 0.03))
+    # The face in the gap, the rest of the room let down into the dark; the words on the dark side.
+    finish(long_src, outdir / "thumbnail-long.jpg", ["IT WAS IN", "THE WALL"], int(lw * 0.235), int(lh * 0.24), int(lh * 0.095),
+           lh * 0.01, "WALL", int(lh * 0.9), int(lh * 0.027), pool=(0.49, 0.7, 0.3, 0.3, 1.45))
     sw, sh = Image.open(short_src).size
-    finish(short_src, outdir / "thumbnail-short.jpg", ["IT WAS", "BEHIND ME"], sw // 2, int(sh * 0.07), int(sw * 0.13),
-           sw * 0.012, "BEHIND", int(sh * 0.93), int(sw * 0.035))
+    # It over them against the sky, the moon behind; the words between the moon and its face.
+    finish(short_src, outdir / "thumbnail-short.jpg", ["IT WAS", "BEHIND ME"], sw // 2, int(sh * 0.17), int(sw * 0.125),
+           sw * 0.012, "BEHIND", int(sh * 0.955), int(sw * 0.035), pool=(0.5, 0.5, 0.3, 0.6, 1.35))
     print("made", outdir / "thumbnail-long.jpg", outdir / "thumbnail-short.jpg")
