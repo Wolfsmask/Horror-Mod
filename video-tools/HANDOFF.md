@@ -222,18 +222,15 @@ bash video-tools/edit/deliver.sh OUT
   - `names`: chapter titles.
 - **Finishing:** commit `video/the-occupant-long.mp4` with `[skip ci]`, push, and send the user the
   full-quality video, `voice_lines.txt` and `youtube.txt`.
-- **Thumbnails** are staged in-game stills, not frames from the video (the user found frame grabs
-  "generic, like a Canva presentation"). Run CI with `[keep] [tape:thumbs]`: `Tape.thumbs()` builds
-  the house at night (their body on the floor, it in the wall, lit by hidden `light` blocks) and the
-  glade (it towering over them, the moon behind, 1080×1920), and saves 4 angles of each as
-  `client-test/thumb-long-0..3.png` and `thumb-short-0..3.png` on `ci-results`. Don't push while it
-  runs or the screenshots aren't saved. Then
-  `python3 edit/make_thumbs.py thumb-long-0.png thumb-short-1.png OUT` does the film-poster finish
-  (a lit pool on the face, warm grade, bloom, lens fringes, vignette, grain, an IM Fell title with
-  one red word, a Cinzel credit) and writes `thumbnail-long.jpg` ("IT WAS IN THE WALL") and
-  `thumbnail-short.jpg` ("IT WAS BEHIND ME"). The chosen ones are copied into `video/`. The `pool=`
-  numbers in `make_thumbs.py` say where the light falls if another angle is used. The short's
-  YouTube text is in `edit/yt_short.txt`; the long's comes from `deliver.sh`.
+- **Thumbnails** are made from the painted nightmare photos in `photos/` (the user wants those:
+  frame grabs looked "like a Canva presentation" and staged in-game stills weren't it either).
+  `python3 edit/make_thumbs.py OUT` writes `thumbnail-long.jpg` (nightmare-01 "too close", the face
+  against the lens, "IT FOUND ME") and `thumbnail-short.jpg` (nightmare-02 "over you" cut to 9:16 and
+  brought 1.35× closer, "IT WAS BEHIND ME"): the photo kept as it is, lifted a little, an IM Fell
+  title with one red word, a Cinzel credit, grain. Copy both into `video/`. The `make(...)` calls at
+  the bottom pick the photo, the words and where they go. (`[tape:thumbs]` in `Tape.java` stages
+  in-game stills for thumbnails; the user didn't want those.) The short's YouTube text is in
+  `edit/yt_short.txt`; the long's comes from `deliver.sh`.
 - **Requirements:** Python 3 with numpy, pillow and imageio-ffmpeg; ffmpeg/ffprobe; a JDK for the
   sim and harness. Rendering needs about 15 GB free.
 
