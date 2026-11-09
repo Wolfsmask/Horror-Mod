@@ -6,9 +6,10 @@ import sys
 OUT = Path(sys.argv[1]) if len(sys.argv) > 1 else HERE  # the folder the edit wrote chapters.txt to
 chapters = (OUT / "chapters.txt").read_text().strip()
 titles = [
+    "Something Followed Me for 4 Days in Minecraft... This Is the Last Tape (Found Footage)",
+    "On Day 4, I Found a Grave With My Name On It... (Minecraft Found Footage)",
+    "Don't Watch This Minecraft Tape Alone... (Found Footage)",
     "I Recorded 4 Days in a Haunted Minecraft World... (Found Footage)",
-    "Something Was Living in My Minecraft World. I Filmed It.",
-    "4 Days With The Occupant | Minecraft Horror Found Footage",
 ]
 hashtags = ["#minecraft", "#minecrafthorror", "#horror", "#foundfootage", "#theoccupant", "#minecraftmods", "#minecraftmod",
             "#fabricmod", "#modrinth", "#minecraftjava", "#horrorgaming", "#psychologicalhorror", "#analoghorror", "#scary",
