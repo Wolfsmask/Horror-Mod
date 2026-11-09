@@ -89,6 +89,7 @@ final class Tape {
 					case "chapel" -> chapel(context, game, woods);
 					case "found" -> Reel.found(context, game, woods);
 					case "thumbs" -> thumbs(context, game, woods);
+					case "plates" -> plates(context, game, woods);
 					default -> Occupant.LOGGER.warn("[client-gametest] tape: there is no scene {}", scene);
 				}
 			});
@@ -1258,6 +1259,80 @@ final class Tape {
 			context.getInput().resizeWindow(1920, 1080);
 			context.runOnClient(mc -> mc.options.fov().set(Reel.WIDE_FOV));
 		}
+	}
+
+	/**
+	 * Not part of the tape: it against flat green, for the thumbnails to be painted round, the way the
+	 * nightmare photos were (only it is taken from the game). A box of emerald high in the sky, seen
+	 * by night vision so there is no light to show and no fog, the window square for the pixels: its
+	 * face close, staring and with the mouth open; it over the camera from below; it stood whole; it
+	 * bent in from one side; it crouched towards the camera.
+	 */
+	private static void plates(ClientGameTestContext context, TestSingleplayerContext game, BlockPos[] woods) {
+		TestServerContext server = game.getServer();
+		BlockPos centre = server.computeOnServer(s -> {
+			ServerLevel level = s.overworld();
+			BlockPos o = new BlockPos(woods[0].getX() + 300, Math.min(level.getMaxY() - 30, 230), woods[0].getZ() + 300);
+			for (int cx = (o.getX() - 18) >> 4; cx <= (o.getX() + 18) >> 4; cx++) {
+				for (int cz = (o.getZ() - 18) >> 4; cz <= (o.getZ() + 18) >> 4; cz++) level.getChunk(cx, cz);
+			}
+			BlockState green = Blocks.EMERALD_BLOCK.defaultBlockState();
+			for (int x = -17; x <= 17; x++) {
+				for (int z = -17; z <= 17; z++) {
+					for (int y = -1; y <= 22; y++) {
+						boolean shell = Math.abs(x) == 17 || Math.abs(z) == 17 || y == -1 || y == 22;
+						level.setBlock(o.offset(x, y, z), shell ? green : Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
+					}
+				}
+			}
+			return o;
+		});
+		Vec3 feet = Vec3.atBottomCenterOf(centre);
+		Cinematic.camera(context, game, feet.add(0, EYE, -7.5), feet.add(0, 2.2, 0), 6000);
+		server.runCommand("gamemode spectator @p");
+		server.runCommand("effect give @p minecraft:night_vision 600 0 true");
+		context.runOnClient(mc -> {
+			com.wolfsmask.occupant.client.ScreenEffects.trigger(new com.wolfsmask.occupant.network.ScreenEffectPayload(
+					com.wolfsmask.occupant.network.ScreenEffectPayload.ACT, 0, 0), mc);
+			com.wolfsmask.occupant.client.ClientFog.set(0.0f, 1);
+		});
+		Cinematic.hud(context, false);
+		context.getInput().resizeWindow(1920, 1920);
+		int fov = context.computeOnClient(mc -> mc.options.fov().get());
+		Cinematic.Look stare = new Cinematic.Look(false, 0.01f, OccupantEntity.Mode.STARE, 0);
+		Cinematic.Look bent = new Cinematic.Look(false, 0.01f, OccupantEntity.Mode.AMBUSH, 0);
+		Cinematic.Look side = new Cinematic.Look(false, 35f, OccupantEntity.Mode.AMBUSH, 0);
+		try {
+			plate(context, server, feet, "plate-face", stare, 0f, new Vec3(0, 2.5, -2.0), new Vec3(0, 2.5, 0), 50);
+			plate(context, server, feet, "plate-face-open", bent, 0f, new Vec3(0, 2.6, -2.2), new Vec3(0, 2.6, 0), 55);
+			plate(context, server, feet, "plate-face-wide", stare, 0f, new Vec3(0, 2.4, -3.2), new Vec3(0, 2.5, 0), 50);
+			plate(context, server, feet, "plate-tower", bent, 0f, new Vec3(0, 0.9, -2.4), new Vec3(0, 3.4, 0), 85);
+			plate(context, server, feet, "plate-tower-far", bent, 0f, new Vec3(0, 0.8, -4.0), new Vec3(0, 2.9, 0), 75);
+			plate(context, server, feet, "plate-stand", stare, 0f, new Vec3(0, EYE, -7.5), new Vec3(0, 2.2, 0), 60);
+			plate(context, server, feet, "plate-side", side, 0f, new Vec3(-2.6, 1.7, -3.2), new Vec3(0, 2.6, 0), 65);
+			plate(context, server, feet, "plate-crouch", bent, 0.6f, new Vec3(0, 1.5, -3.0), new Vec3(0, 2.0, 0), 65);
+		} finally {
+			server.runCommand("kill " + Reel.ALL);
+			server.runCommand("effect clear @p minecraft:night_vision");
+			context.runOnClient(mc -> mc.options.fov().set(fov));
+			context.getInput().resizeWindow(1920, 1080);
+			Cinematic.hud(context, true);
+		}
+	}
+
+	/** One plate: the camera at {@code eye} (from its feet) looking at {@code at}, it posed, held still, taken. */
+	private static void plate(ClientGameTestContext context, TestServerContext server, Vec3 feet, String name,
+							  Cinematic.Look look, float crouch, Vec3 eye, Vec3 at, int fov) {
+		Vec3 e = feet.add(eye), a = feet.add(at);
+		context.runOnClient(mc -> mc.options.fov().set(fov));
+		server.runCommand(String.format(Locale.ROOT, "tp @p %.3f %.3f %.3f facing %.3f %.3f %.3f", e.x, e.y - EYE, e.z, a.x, a.y, a.z));
+		Cinematic.place(server, BlockPos.containing(feet), e, look);
+		for (int k = 0; k < 30; k++) {
+			Reel.look(server, feet, e, 0);
+			coil(server, feet, crouch);
+			context.waitTicks(1);
+		}
+		OccupantClientGameTest.shoot(context, name);
 	}
 
 	// ------------------------------------------------------------------ helpers for the scenes
