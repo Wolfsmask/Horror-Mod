@@ -65,7 +65,8 @@
  {
   "scene": "radio",
   "line": "Nothing's even plugged in. No. No no no.",
-  "file": "radio-plugged-in.mp3"
+  "file": "radio-plugged-in.mp3",
+  "gain": 1.8
  },
  {
   "scene": "camp",

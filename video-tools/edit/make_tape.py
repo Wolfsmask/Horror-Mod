@@ -1139,12 +1139,12 @@ def make_audio(clips, mod_sounds, voice, info, starts, cold, tape_end, total, ou
                 put(fx, mod["whisper"], at, 0.55, pan=-0.45)
             elif kd == "static":
                 st = mod["static"]
-                put(fx, np.concatenate([st, st[::-1], st]) * np.linspace(1, 0.6, len(st) * 3), at, 0.6, pan=0.05)
+                put(fx, np.concatenate([st, st[::-1], st]) * np.linspace(1, 0.6, len(st) * 3), at, 0.35, pan=0.05)
             elif kd == "radio":
                 v = R.wav(voice / "radio.wav")
                 if v is None:
                     v = R.speed(mod["whisper"], 0.92)
-                put(fx, radio_voice(rng, v), at, 0.9, pan=0.05)
+                put(fx, radio_voice(rng, v), at, 0.5, pan=0.05)
             elif kd == "light":
                 x = game.get("fire/ignite.ogg")
                 if x is not None:
