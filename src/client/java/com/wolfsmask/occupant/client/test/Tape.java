@@ -1189,8 +1189,8 @@ final class Tape {
 					Reel.local(o, -1.25, 0.45, -3.25)};
 			Reel.prepare(context, game, eyes[0], face, 18000);
 			// Hidden lights: one on the floor before the gap, under its face; a faint one behind them.
-			setblock(server, BlockPos.containing(Reel.local(o, 1.7, 0, -2.5)), "minecraft:light[level=12]");
-			setblock(server, BlockPos.containing(Reel.local(o, -1.0, 1, -3.6)), "minecraft:light[level=4]");
+			setblock(server, BlockPos.containing(Reel.local(o, 1.7, 0, -2.5)), "light[level=12]");
+			setblock(server, BlockPos.containing(Reel.local(o, -1.0, 1, -3.6)), "light[level=4]");
 			bodyMade(server, seat);
 			Sitter them = new Sitter(seat, new Vec3(1, 0, 0), face, new Vec3(lens.x, o.getY() + 0.12, lens.z));
 			context.waitTicks(5);
@@ -1237,8 +1237,8 @@ final class Tape {
 			context.getInput().resizeWindow(1080, 1920);
 			context.runOnClient(mc -> mc.options.fov().set(72));
 			Reel.prepare(context, game, eyes[0], aim, 18000);
-			setblock(server, BlockPos.containing(itFace.add(0, 1.2, 0).add(fwd.scale(-0.6))), "minecraft:light[level=11]");
-			setblock(server, BlockPos.containing(here.add(fwd.scale(0.8)).add(0, 1.2, 0)), "minecraft:light[level=6]");
+			setblock(server, BlockPos.containing(itFace.add(0, 1.2, 0).add(fwd.scale(-0.6))), "light[level=11]");
+			setblock(server, BlockPos.containing(here.add(fwd.scale(0.8)).add(0, 1.2, 0)), "light[level=6]");
 			bodyMade(server, here);
 			context.waitTicks(5);
 			bodyPosed(server, parts, head.add(0, 0.3, 0));
