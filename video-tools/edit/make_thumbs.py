@@ -6,7 +6,9 @@ blood, under the grain like the rest.
   its face. "IT WAS IN THE WALL".
   Short: in the woods at night, looking up: it bent down over you against the fog and the moon, its
   legs out to the trunks. "IT WAS BEHIND ME".
-Usage: python3 make_thumbs.py FACE_PLATE.png TOWER_PLATE.png OUT_FOLDER"""
+Usage: python3 make_thumbs.py WALL_PLATE.png WOODS_PLATE.png OUT_FOLDER
+  (the ones used: plate-crouch.png for the wall, its face sharpest; plate-face.png for the woods, its
+  legs arched up round it)"""
 import sys
 from pathlib import Path
 
@@ -44,7 +46,7 @@ def snapped(rng, xa, xb, base, sign, W):
     return out
 
 
-def wall(face, seed=11, centre=1210, face_y=500, face_h=360):
+def wall(face, seed=11, centre=1210, face_y=515, face_h=330):
     """An old board wall, close, in the beam of a torch held at the camera; one board gone and the
     two either side broken short, and in the black behind them, it, looking out at you."""
     W, H = P.W, P.H
@@ -102,7 +104,8 @@ def wall(face, seed=11, centre=1210, face_y=500, face_h=360):
     behind = np.zeros_like(c) + np.array([0.004, 0.004, 0.005])
     # It, back in the dark of the wall, the torch on its face.
     box = P.face_box(face)
-    lit = P.glints(P.relight(face, top=0.9, bottom=0.25, gain=1.1, cold=0.22, spot=P.spot_on(box, face, 1.1)), box)
+    lit = P.relight(face, top=0.35, bottom=0.08, gain=0.95, cold=0.3, spot=P.spot_on(box, face, 0.8, 0.55))
+    lit = P.glints(lit, box)
     P.place_face(behind, lit, box, centre, face_y, face_h)
     inner = P.soften(hole, 22) ** 1.4
     c = c * (1 - hole[..., None]) + behind * (hole * inner)[..., None]
@@ -115,16 +118,16 @@ def wall(face, seed=11, centre=1210, face_y=500, face_h=360):
 
 # ---------------------------------------------------------------- the short's: the woods
 
-def woods(it, seed=21, face_at=(540, 640), face_h=210):
+def woods(it, seed=21, face_at=(540, 660), face_h=380):
     """The woods at night, looking up from the ground: fog among the trunks, the moon in the fog, and
     it bent down over you, black against all that, only its face catching any light."""
     W, H = P.W, P.H
     rng = np.random.default_rng(seed)
     yy, xx = P.grid()
     c = np.zeros((H, W, 3), np.float32)
-    mx, my = W * 0.5, H * 0.17
-    dm = np.sqrt((xx - mx) ** 2 + ((yy - my) * 0.8) ** 2)
-    fog = 0.03 + 0.34 * np.exp(-(dm / (W * 0.62)) ** 2) + 0.06 * P.noise(seed, 140) * np.exp(-(dm / W) ** 2)
+    mx, my = face_at[0], face_at[1] - face_h * 0.35
+    dm = np.sqrt((xx - mx) ** 2 + ((yy - my) * 0.75) ** 2)
+    fog = 0.03 + 0.58 * np.exp(-(dm / (W * 0.6)) ** 2) + 0.08 * P.noise(seed, 140) * np.exp(-(dm / W) ** 2)
     c[:] = np.stack([fog * 0.8, fog * 0.88, fog * 1.0], axis=2)
     c += (np.exp(-(dm / 34.0) ** 2) * 0.9 + np.exp(-(dm / 130.0) ** 2) * 0.2)[..., None] * np.array([0.85, 0.9, 1.0])
     # Trunks going up into it, leaning in (we are looking up): the far ones pale in the fog.
@@ -136,13 +139,13 @@ def woods(it, seed=21, face_at=(540, 640), face_h=210):
         P.trunk(c, x, -20, H + 40, rng.uniform(16, 36), 0.05, 0.62, 400 + i, lean=lean)
     # It, black against the fog but for its face, which the last of the light finds.
     box = P.face_box(it)
-    body = P.relight(it, top=0.5, bottom=0.12, gain=0.75, cold=0.45, spot=P.spot_on(box, it, 1.2))
+    body = P.relight(it, top=0.2, bottom=0.04, gain=0.95, cold=0.4, spot=P.spot_on(box, it, 0.7, 1.6))
     body = P.glints(body, box)
     P.place_face(c, body, box, face_at[0], face_at[1], face_h)
-    for x, wdt in ((-10, 170), (W + 10, 190)):
+    for x, wdt in ((-40, 110),):
         lean = (x - W / 2) / H * 0.6
         P.trunk(c, x, -20, H + 40, wdt, 0.022, 0.0, 500 + int(x), lean=lean)
-    c *= (1 - 0.6 * np.clip((yy - H * 0.86) / (H * 0.14), 0, 1))[..., None]
+    c *= (1 - 0.9 * np.clip((yy - H * 0.8) / (H * 0.2), 0, 1) ** 1.3)[..., None]
     c *= (1 - 0.5 * np.clip(1 - yy / (H * 0.1), 0, 1))[..., None]
     return c
 
@@ -204,13 +207,13 @@ def save(a, path):
 
 
 if __name__ == "__main__":
-    face_plate, tower_plate, outdir = Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3])
+    wall_plate, woods_plate, outdir = Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3])
     P.size(1920, 1080)
-    a = P.photograph(wall(P.plate(face_plate)), 1, fringe=5, ghost=0.18, vignette=0.78, grain=0.045, soft=2.4)
+    a = P.photograph(wall(P.plate(wall_plate)), 1, fringe=5, ghost=0.18, vignette=0.78, grain=0.045, soft=2.4)
     a = title(a, ["IT WAS IN", "THE WALL"], 470, 300, 118, 9, "WALL", 840, 30)
     save(grain(a), outdir / "thumbnail-long.jpg")
     P.size(1080, 1920)
-    a = P.photograph(woods(P.plate(tower_plate)), 2, fringe=5, ghost=0.18, vignette=0.8, grain=0.045, soft=2.4)
+    a = P.photograph(woods(P.plate(woods_plate)), 2, fringe=5, ghost=0.18, vignette=0.8, grain=0.045, soft=2.4)
     a = title(a, ["IT WAS", "BEHIND ME"], 540, 90, 124, 10, "BEHIND", 1830, 34)
     save(grain(a), outdir / "thumbnail-short.jpg")
     print("made", outdir / "thumbnail-long.jpg", outdir / "thumbnail-short.jpg")

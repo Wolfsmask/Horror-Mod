@@ -78,11 +78,14 @@ def place(canvas, layer, cx, cy, height, tilt=0.0, opacity=1.0, blur=0.0, under=
     canvas[ya:yb, xa:xb] = canvas[ya:yb, xa:xb] * (1 - al) + part[..., :3] * al
 
 
-def plate(path, crop=None):
+def plate(path, crop=None, clean=5):
     """It, cut out of a frame shot against flat emerald: RGBA, the green keyed away and its spill taken
     off the edges, only the one shape joined to it kept, its own hollows (eyes, mouth) filled back in,
-    cropped tight. {crop} (left, top, right, bottom, fractions of the frame) takes only part of it."""
+    cropped tight. {crop} (left, top, right, bottom, fractions of the frame) takes only part of it;
+    {clean} is the size of the median filter that takes the game's own static off it."""
     img = Image.open(path).convert("RGB")
+    if clean:
+        img = img.filter(ImageFilter.MedianFilter(clean))
     a = np.asarray(img, np.float32) / 255.0
     r, g, b = a[..., 0], a[..., 1], a[..., 2]
     spill = g - np.maximum(r, b)
@@ -117,14 +120,15 @@ def plate(path, crop=None):
 
 def relight(layer, top=0.45, bottom=1.0, gain=1.0, cold=0.15, spot=None):
     """Takes away the flat light it was shot in: a ramp from {top} to {bottom} down it, colder; and
-    {spot} = (x, y, radius, strength) as fractions of the layer: a torch's pool on it, the rest let down."""
+    {spot} = (x, y, radius, strength), x, y and radius as fractions of the layer: a pool of light on it,
+    added to the ramp."""
     a = np.asarray(layer, np.float32) / 255.0
     h, w = a.shape[:2]
     ramp = np.linspace(top, bottom, h, dtype=np.float32)[:, None] * np.ones((1, w), np.float32)
     if spot:
         yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
         d = np.sqrt(((xx / w - spot[0]) * w / h) ** 2 + (yy / h - spot[1]) ** 2)
-        ramp = ramp * (1 - spot[3]) + ramp * spot[3] * 1.6 * np.exp(-(d / spot[2]) ** 2)
+        ramp = ramp + spot[3] * np.exp(-(d / spot[2]) ** 2)
     rgb = a[..., :3] * ramp[..., None] * gain
     lum = rgb.mean(axis=2, keepdims=True)
     rgb = rgb * (1 - cold) + lum * cold * np.array([0.9, 0.95, 1.05], np.float32)
@@ -181,18 +185,22 @@ def photograph(rgb, seed, fringe=6, ghost=0.25, vignette=0.68, grain=0.05, soft=
     return np.clip(a, 0, 1)
 
 
-def face_box(layer, pale=0.55):
-    """Where its face is in a cut-out: the biggest pale patch, its eyes and mouth closed over; as
-    (left, top, right, bottom) pixels of the layer."""
+def face_box(layer, pale=0.33):
+    """Where its face is in a cut-out: of the pale patches (its eyes and mouth closed over), the one
+    that reaches highest, which is its head (its legs, as pale, start lower); as (left, top, right,
+    bottom) pixels of the layer."""
     from scipy import ndimage
     a = np.asarray(layer, np.float32) / 255.0
-    m = (a[..., :3].mean(-1) > pale) & (a[..., 3] > 0.5)
-    joined = ndimage.binary_closing(m, iterations=max(3, layer.height // 120))
+    lum = a[..., :3].mean(-1)
+    m = (ndimage.uniform_filter(lum, 5) > pale) & (a[..., 3] > 0.5)
+    joined = ndimage.binary_closing(m, iterations=max(3, layer.height // 150))
     lab, n = ndimage.label(joined)
     if n == 0:
         return (0, 0, layer.width, layer.height)
     sizes = ndimage.sum(m, lab, range(1, n + 1))
-    k = int(np.argmax(sizes)) + 1
+    big = [i + 1 for i in range(n) if sizes[i] > m.size * 0.002]
+    tops = {k: np.nonzero((lab == k).any(axis=1))[0][0] for k in big}
+    k = min(tops, key=tops.get)
     ys, xs = np.nonzero(lab == k)
     return (int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1)
 

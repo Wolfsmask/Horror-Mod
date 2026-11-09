@@ -230,8 +230,11 @@ bash video-tools/edit/deliver.sh OUT
   1. Run CI with `[keep] [tape:plates]` (`Tape.plates()`): the creature against flat emerald in a
      square window, by night vision, saved as `client-test/plate-*.png` on `ci-results` (face,
      face-open, face-wide, tower, tower-far, stand, side, crouch). Don't push while it runs.
-  2. `python3 edit/make_thumbs.py FACE_PLATE TOWER_PLATE OUT` paints both with `edit/painted.py`
-     (keying, relighting, a glint in each eye, trunks, the "bad photograph" finish):
+  2. `python3 edit/make_thumbs.py plate-crouch.png plate-face.png OUT` paints both with
+     `edit/painted.py` (keying, cleaning off the game's static, relighting, a glint in each eye,
+     trunks, the "bad photograph" finish). The mod's screen effects still show in the plates
+     (static, dark corners) and `plate-tower` came out far off; crouch (sharpest face) and face
+     (legs arched round it) are the good ones:
      the long one is an old board wall in a torch beam, boards snapped out, its face in the dark
      behind ("IT WAS IN THE WALL"); the Short is the woods at night from the ground, it bent over
      you against moonlit fog ("IT WAS BEHIND ME"). Copy both into `video/`.
