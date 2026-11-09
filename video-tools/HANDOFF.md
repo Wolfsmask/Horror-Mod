@@ -222,6 +222,9 @@ bash video-tools/edit/deliver.sh OUT
   - `names`: chapter titles.
 - **Finishing:** commit `video/the-occupant-long.mp4` with `[skip ci]`, push, and send the user the
   full-quality video, `voice_lines.txt` and `youtube.txt`.
+- **Thumbnails** (`edit/make_thumbs.py`): the long video's is the face in the wall (2:31.40) with
+  "IT WAS IN THE WALL"; the short's is it standing over them (27.4 s) with "IT WAS BEHIND ME". Both
+  are in `video/`. The short's YouTube text is in `edit/yt_short.txt`; the long's comes from `deliver.sh`.
 - **Requirements:** Python 3 with numpy, pillow and imageio-ffmpeg; ffmpeg/ffprobe; a JDK for the
   sim and harness. Rendering needs about 15 GB free.
 
@@ -248,7 +251,7 @@ bash video-tools/edit/deliver.sh OUT
 
 ## State at handoff
 
-v13 is delivered: the v4 cut (4:54, 16 scenes) with the voice cut down to the important lines (about
+v14 is delivered: the v4 cut (4:54, 16 scenes) with the voice cut down to the important lines (about
 26 on the sheet). 15 of them are recorded and mixed in with the camcorder voice; none overlap.
 Ambience runs throughout. The short has "Hello?" and
 "What was that?". `video/the-occupant-long.mp4` (about 95 MB) is the current cut.
