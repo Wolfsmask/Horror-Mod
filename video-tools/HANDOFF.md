@@ -230,14 +230,18 @@ bash video-tools/edit/deliver.sh OUT
   1. Run CI with `[keep] [tape:plates]` (`Tape.plates()`): the creature against flat emerald in a
      square window, by night vision, saved as `client-test/plate-*.png` on `ci-results` (face,
      face-open, face-wide, tower, tower-far, stand, side, crouch). Don't push while it runs.
-  2. `python3 edit/make_thumbs.py plate-crouch.png plate-face.png OUT` paints both with
-     `edit/painted.py` (keying, cleaning off the game's static, relighting, a glint in each eye,
-     trunks, the "bad photograph" finish). The mod's screen effects still show in the plates
-     (static, dark corners) and `plate-tower` came out far off; crouch (sharpest face) and face
-     (legs arched round it) are the good ones:
-     the long one is an old board wall in a torch beam, boards snapped out, its face in the dark
-     behind ("IT WAS IN THE WALL"); the Short is the woods at night from the ground, it bent over
-     you against moonlit fog ("IT WAS BEHIND ME"). Copy both into `video/`.
+  2. `python3 edit/make_thumbs.py PLATES_FOLDER OUT [variant ...]` paints every version in
+     `VARIANTS` (or just the ones named) with `edit/painted.py` (keying, cleaning off the game's
+     static, relighting, a glint in each eye, the "bad photograph" finish), plus `long-choices.jpg`
+     and `short-choices.jpg` to compare them. Long: 1 wall ("IT WAS IN THE WALL"), 2 window
+     ("IT WAS WATCHING ME"), 3 doorway ("I LEFT THE DOOR OPEN"), 4 campfire ("IT FOLLOWED ME"),
+     5 well ("IT WAS DOWN THERE"), 6 camcorder with REC/DAY 4 ("THE LAST TAPE"). Short: 1 woods
+     ("IT WAS BEHIND ME"), 2 doorway ("IT WAS IN MY HOUSE"), 3 face too close ("DON'T TURN AROUND"),
+     4 over you in bed ("IT WAS ALREADY THERE"), 5 window, 6 mine tunnel ("IT WAS DIGGING").
+     All twelve are in `video/thumbnail-choices/`; the user picks, and the picked ones are copied to
+     `video/thumbnail-long.jpg` / `thumbnail-short.jpg`. The mod's screen effects still show in the
+     plates (static, dark corners) and `plate-tower` came out far off, which suits the full-figure
+     scenes. Thumbnails must read small: keep the face lit and the scene bright enough to see.
   The short's YouTube text is in `edit/yt_short.txt`; the long's comes from `deliver.sh`.
 - **Requirements:** Python 3 with numpy, pillow and imageio-ffmpeg; ffmpeg/ffprobe; a JDK for the
   sim and harness. Rendering needs about 15 GB free.
