@@ -222,15 +222,20 @@ bash video-tools/edit/deliver.sh OUT
   - `names`: chapter titles.
 - **Finishing:** commit `video/the-occupant-long.mp4` with `[skip ci]`, push, and send the user the
   full-quality video, `voice_lines.txt` and `youtube.txt`.
-- **Thumbnails** are made from the painted nightmare photos in `photos/` (the user wants those:
-  frame grabs looked "like a Canva presentation" and staged in-game stills weren't it either).
-  `python3 edit/make_thumbs.py OUT` writes `thumbnail-long.jpg` (nightmare-01 "too close", the face
-  against the lens, "IT FOUND ME") and `thumbnail-short.jpg` (nightmare-02 "over you" cut to 9:16 and
-  brought 1.35× closer, "IT WAS BEHIND ME"): the photo kept as it is, lifted a little, an IM Fell
-  title with one red word, a Cinzel credit, grain. Copy both into `video/`. The `make(...)` calls at
-  the bottom pick the photo, the words and where they go. (`[tape:thumbs]` in `Tape.java` stages
-  in-game stills for thumbnails; the user didn't want those.) The short's YouTube text is in
-  `edit/yt_short.txt`; the long's comes from `deliver.sh`.
+- **Thumbnails are painted, the way the nightmare photos in `photos/` were made** (the user's
+  difference between those and the regular photos: the regular ones are game frames made to look
+  like bad photographs; the nightmare ones are scenes painted from nothing, with only the creature
+  taken from the game). Not frame grabs ("like a Canva presentation"), not staged in-game stills,
+  and not the nightmare photos themselves. Steps:
+  1. Run CI with `[keep] [tape:plates]` (`Tape.plates()`): the creature against flat emerald in a
+     square window, by night vision, saved as `client-test/plate-*.png` on `ci-results` (face,
+     face-open, face-wide, tower, tower-far, stand, side, crouch). Don't push while it runs.
+  2. `python3 edit/make_thumbs.py FACE_PLATE TOWER_PLATE OUT` paints both with `edit/painted.py`
+     (keying, relighting, a glint in each eye, trunks, the "bad photograph" finish):
+     the long one is an old board wall in a torch beam, boards snapped out, its face in the dark
+     behind ("IT WAS IN THE WALL"); the Short is the woods at night from the ground, it bent over
+     you against moonlit fog ("IT WAS BEHIND ME"). Copy both into `video/`.
+  The short's YouTube text is in `edit/yt_short.txt`; the long's comes from `deliver.sh`.
 - **Requirements:** Python 3 with numpy, pillow and imageio-ffmpeg; ffmpeg/ffprobe; a JDK for the
   sim and harness. Rendering needs about 15 GB free.
 
